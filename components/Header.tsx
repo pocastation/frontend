@@ -12,7 +12,7 @@ const NAV_LINKS = [
 
 export default function Header() {
   const router = useRouter();
-  const { member, logout } = useAuth();
+  const { member, logout, isLoading } = useAuth();
 
   async function handleLogout() {
     await logout();
@@ -49,7 +49,12 @@ export default function Header() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          {member ? (
+          {isLoading ? (
+            // 서버는 항상 비로그인으로 렌더하므로, 클라이언트에서 실제 세션 상태를 확인하기
+            // 전까지는 "로그인"/닉네임 둘 다 아닌 중립 placeholder를 보여준다. 틀린 상태를
+            // 잠깐 보여줬다가 바뀌는 것(하이드레이션 깜빡임)을 막기 위함.
+            <div className="h-8 w-16 animate-pulse rounded-full bg-border-2/50" aria-hidden="true" />
+          ) : member ? (
             <>
               <span className="text-sm font-semibold text-text-2">{member.nickname}</span>
               <button

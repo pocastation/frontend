@@ -1,20 +1,3 @@
-export function KakaoIcon() {
-  return (
-    <svg viewBox="0 0 20 20" width="18" height="18" fill="#191919" aria-hidden="true">
-      <path d="M10 1C4.925 1 1 4.202 1 8.116c0 2.51 1.646 4.71 4.12 5.978-.18.664-.65 2.4-.744 2.77-.117.457.167.451.352.328.145-.096 2.308-1.566 3.244-2.202.664.096 1.345.146 2.028.146 5.075 0 9-3.202 9-7.02C19 4.202 15.075 1 10 1z" />
-    </svg>
-  );
-}
-
-export function NaverIcon() {
-  return (
-    <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true">
-      <rect width="20" height="20" rx="4" fill="#ffffff" />
-      <path d="M12.4 10.6 7.9 4.4H4.4v11.2h3.2V9.4l4.5 6.2h3.5V4.4h-3.2z" fill="#03C75A" />
-    </svg>
-  );
-}
-
 export function GoogleIcon() {
   return (
     <svg viewBox="0 0 18 18" width="18" height="18" aria-hidden="true">

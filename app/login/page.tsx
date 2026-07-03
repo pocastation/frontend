@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
-import { GoogleIcon, KakaoIcon, NaverIcon } from "@/components/SocialIcons";
+import { GoogleIcon } from "@/components/GoogleIcon";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
@@ -57,7 +57,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 rounded-full bg-primary py-2.5 text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60"
+          className="mt-2 flex h-11 items-center justify-center rounded-r3 bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60"
         >
           {isSubmitting ? "로그인 중..." : "로그인"}
         </button>
@@ -69,27 +69,35 @@ export default function LoginPage() {
         <span className="h-px flex-1 bg-border" />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <a
-          href={`${API_URL}/oauth2/authorization/kakao`}
-          className="flex items-center justify-center gap-2 rounded-r3 bg-[#FEE500] py-2.5 text-sm font-bold text-black transition-opacity hover:opacity-90"
-        >
-          <KakaoIcon />
-          카카오로 시작하기
+      <div className="flex justify-center gap-6">
+        {/* 카카오: 심볼 단독 에셋이 없어 완성형 이미지를 원형 안에서 CSS로 윈도잉한다(파일 자체는
+            무수정, 보이는 영역만 제한 — 심볼 색상·모양·비율은 유지). 단, 카카오 가이드는 버튼을
+            심볼+라벨+컨테이너(12px radius) 필수 구성으로 명시하는데 이 아이콘 전용 원형 배지는
+            그 구조와 정확히 일치하진 않는다(라벨이 버튼 밖 캡션으로 분리, radius도 원형).
+            디자인 통일성을 위해 의도적으로 감수한 트레이드오프 — 카카오가 아이콘 전용 공식
+            에셋을 제공하면 교체 권장. */}
+        <a href={`${API_URL}/oauth2/authorization/kakao`} className="flex flex-col items-center gap-1.5">
+          <span className="block h-11 w-11 overflow-hidden rounded-full">
+            {/* eslint-disable-next-line @next/next/no-img-element -- 공식 배포 에셋의 심볼 영역만 노출(파일 수정 없음) */}
+            <img
+              src="/oauth/kakao-login.png"
+              alt=""
+              className="h-full w-full object-cover"
+              style={{ objectPosition: "0% 50%" }}
+            />
+          </span>
+          <span className="text-[11px] text-text-3">카카오</span>
         </a>
-        <a
-          href={`${API_URL}/oauth2/authorization/naver`}
-          className="flex items-center justify-center gap-2 rounded-r3 bg-[#03C75A] py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
-        >
-          <NaverIcon />
-          네이버로 시작하기
+        <a href={`${API_URL}/oauth2/authorization/naver`} className="flex flex-col items-center gap-1.5">
+          {/* eslint-disable-next-line @next/next/no-img-element -- 네이버 공식 아이콘형 에셋 그대로 사용 */}
+          <img src="/oauth/naver-icon.png" alt="" className="h-11 w-11" />
+          <span className="text-[11px] text-text-3">네이버</span>
         </a>
-        <a
-          href={`${API_URL}/oauth2/authorization/google`}
-          className="flex items-center justify-center gap-2 rounded-r3 border border-[#DADCE0] bg-white py-2.5 text-sm font-bold text-[#3C4043] transition-opacity hover:opacity-80"
-        >
-          <GoogleIcon />
-          구글로 시작하기
+        <a href={`${API_URL}/oauth2/authorization/google`} className="flex flex-col items-center gap-1.5">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DADCE0] bg-white">
+            <GoogleIcon />
+          </span>
+          <span className="text-[11px] text-text-3">구글</span>
         </a>
       </div>
 

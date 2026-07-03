@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+/*
+ * 디자인 토큰 — 구버전(GALGALMawang/pocastation) src/styles/global.css의 :root 토큰을
+ * Tailwind v4 @theme로 이식. 값 이름(color-primary 등)이 그대로 유틸리티 클래스가 된다:
+ * bg-primary, text-text-2, rounded-r4, shadow-card, font-display 등.
+ */
+@theme {
+  --color-primary: #5b3fe8;
+  --color-primary-dark: #4a30cc;
+  --color-primary-soft: #eee9fd;
+  --color-accent: #f43f5e;
+  --color-accent-soft: #fff0f2;
+  --color-ok: #15803d;
+  --color-ok-soft: #f0fdf4;
+
+  --color-bg: #f7f7fa;
+  --color-surface: #ffffff;
+  --color-surface-2: #f2f1f8;
+  --color-surface-3: #eceaf6;
+  --color-border: #eaeaef;
+  --color-border-2: #d8d7e8;
+
+  --color-text-1: #111118;
+  --color-text-2: #484560;
+  --color-text-3: #9896b2;
+
+  --radius-r1: 6px;
+  --radius-r2: 10px;
+  --radius-r3: 14px;
+  --radius-r4: 18px;
+  --radius-r5: 22px;
+
+  --shadow-card: 0 1px 3px rgba(17, 17, 24, 0.06), 0 4px 16px rgba(17, 17, 24, 0.04);
+  --shadow-primary: 0 8px 32px rgba(91, 63, 232, 0.18);
+  --shadow-modal: 0 24px 64px rgba(17, 17, 24, 0.16);
+
+  --font-sans: var(--font-noto-sans-kr), -apple-system, sans-serif;
+  --font-display: var(--font-plus-jakarta-sans), sans-serif;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-1);
+  font-family: var(--font-sans);
+}

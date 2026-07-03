@@ -18,6 +18,7 @@ type AuthContextValue = {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<string | null>;
+  updateNickname: (nickname: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -70,8 +71,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMember(null);
   }, []);
 
+  const updateNickname = useCallback(
+    async (nickname: string) => {
+      const updated = await apiFetch<MemberResponse>("/api/members/me/nickname", {
+        method: "PATCH",
+        body: { nickname },
+        accessToken,
+      });
+      setMember(updated);
+    },
+    [accessToken],
+  );
+
   return (
-    <AuthContext.Provider value={{ accessToken, member, isLoading, login, logout, refresh }}>
+    <AuthContext.Provider
+      value={{ accessToken, member, isLoading, login, logout, refresh, updateNickname }}
+    >
       {children}
     </AuthContext.Provider>
   );

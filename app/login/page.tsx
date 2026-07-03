@@ -62,6 +62,12 @@ export default function LoginPage() {
           {isSubmitting ? "로그인 중..." : "로그인"}
         </button>
       </form>
+      <Link
+        href="/signup"
+        className="mt-3 flex h-11 items-center justify-center rounded-r3 border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary"
+      >
+        이메일 회원가입
+      </Link>
 
       <div className="my-5 flex items-center gap-3 text-[11px] text-text-3">
         <span className="h-px flex-1 bg-border" />
@@ -100,13 +106,6 @@ export default function LoginPage() {
           <span className="text-[11px] text-text-3">구글</span>
         </a>
       </div>
-
-      <p className="mt-4 text-center text-xs text-text-3">
-        아직 계정이 없으신가요?{" "}
-        <Link href="/signup" className="font-semibold text-primary">
-          회원가입
-        </Link>
-      </p>
     </div>
   );
 }

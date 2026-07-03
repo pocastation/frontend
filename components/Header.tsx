@@ -60,20 +60,12 @@ export default function Header() {
               </button>
             </>
           ) : (
-            <>
-              <Link
-                href="/login"
-                className="rounded-full border border-border-2 bg-white px-4 py-1.5 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary"
-              >
-                로그인
-              </Link>
-              <Link
-                href="/signup"
-                className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-white transition-colors hover:bg-primary-dark"
-              >
-                회원가입
-              </Link>
-            </>
+            <Link
+              href="/login"
+              className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-white transition-colors hover:bg-primary-dark"
+            >
+              로그인
+            </Link>
           )}
         </div>
       </div>

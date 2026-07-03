@@ -1,4 +1,4 @@
-import type { ApiResponse } from "./types";
+import type { ApiResponse, MediaUploadResponse } from "./types";
 
 // 이 fetch는 서버 컴포넌트(Node)에서도 실행될 수 있는데, 그 환경은 브라우저 쿠키를
 // 실을 수 없어 NEXT_PUBLIC_API_URL 누락을 눈치채기 어렵다 — 프로덕션에서는 로컬호스트로
@@ -12,6 +12,12 @@ function resolveApiUrl(): string {
     throw new Error("NEXT_PUBLIC_API_URL이 설정되지 않았습니다. 프로덕션 배포 시 반드시 지정해야 합니다.");
   }
   return "http://localhost:8080";
+}
+
+// 백엔드가 반환하는 /media/** 등은 상대경로라 프론트(3000)가 아니라 백엔드(8080) 기준으로
+// 절대 URL을 조합해야 <img src>가 실제 파일을 찾는다.
+export function mediaUrl(path: string): string {
+  return `${resolveApiUrl()}${path}`;
 }
 
 export class ApiError extends Error {
@@ -58,4 +64,30 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   }
 
   return json.data as T;
+}
+
+// multipart 업로드는 apiFetch의 JSON 직렬화·Content-Type과 안 맞아 별도 함수로 분리.
+export async function uploadMediaImage(file: File, accessToken: string): Promise<MediaUploadResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch(`${resolveApiUrl()}/api/media/images`, {
+    method: "POST",
+    credentials: "include",
+    headers: { Authorization: `Bearer ${accessToken}` },
+    body: formData,
+  });
+
+  let json: ApiResponse<MediaUploadResponse>;
+  try {
+    json = await response.json();
+  } catch {
+    throw new ApiError("서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.", null, response.status);
+  }
+
+  if (!response.ok || !json.success) {
+    throw new ApiError(json.message ?? "이미지 업로드에 실패했습니다.", json.errorCode, response.status);
+  }
+
+  return json.data as MediaUploadResponse;
 }

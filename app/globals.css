@@ -44,3 +44,33 @@ body {
   color: var(--color-text-1);
   font-family: var(--font-sans);
 }
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes tickerScroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    /* 배열을 2회 반복 렌더링해서 정확히 절반만 이동하면 이음매 없이 반복된다. */
+    transform: translateX(-50%);
+  }
+}
+
+/* prefers-reduced-motion 사용자에게는 트랜지션/애니메이션을 사실상 없앤다(접근성). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

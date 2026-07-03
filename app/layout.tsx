@@ -3,6 +3,7 @@ import { Noto_Sans_KR, Plus_Jakarta_Sans } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/lib/auth-context";
+import { SearchProvider } from "@/lib/search-context";
 import "./globals.css";
 
 const notoSansKr = Noto_Sans_KR({
@@ -34,9 +35,11 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <SearchProvider>
+            <Header />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </SearchProvider>
         </AuthProvider>
       </body>
     </html>

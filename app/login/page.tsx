@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useGuestOnly } from "@/lib/use-guest-only";
 import { ApiError } from "@/lib/api";
+import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import { GoogleIcon } from "@/components/GoogleIcon";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
@@ -14,6 +15,8 @@ export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const { isLoading, isGuest } = useGuestOnly();
+  const emailId = useId();
+  const passwordId = useId();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -49,36 +52,53 @@ export default function LoginPage() {
       <h1 className="mb-6 text-center font-display text-xl font-extrabold text-text-1">
         로그인
       </h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input
-          type="email"
-          required
-          placeholder="이메일"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="rounded-r2 border border-border px-3.5 py-2.5 text-sm outline-none focus:border-primary"
-        />
-        <input
-          type="password"
-          required
-          placeholder="비밀번호"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          className="rounded-r2 border border-border px-3.5 py-2.5 text-sm outline-none focus:border-primary"
-        />
-        {error && <p className="text-xs text-accent">{error}</p>}
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor={emailId} className="sr-only">
+            이메일
+          </label>
+          <input
+            id={emailId}
+            type="email"
+            required
+            autoComplete="email"
+            placeholder="이메일"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            aria-invalid={error ? true : undefined}
+            className={INPUT_CLASS}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor={passwordId} className="sr-only">
+            비밀번호
+          </label>
+          <input
+            id={passwordId}
+            type="password"
+            required
+            autoComplete="current-password"
+            placeholder="비밀번호"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            aria-invalid={error ? true : undefined}
+            className={INPUT_CLASS}
+          />
+        </div>
+        {error && (
+          <p role="alert" aria-live="polite" className="text-xs text-accent">
+            {error}
+          </p>
+        )}
         <button
           type="submit"
           disabled={isSubmitting}
-          className="mt-2 flex h-11 items-center justify-center rounded-r3 bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60"
+          className={`mt-2 flex h-11 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
         >
           {isSubmitting ? "로그인 중..." : "로그인"}
         </button>
       </form>
-      <Link
-        href="/signup"
-        className="mt-3 flex h-11 items-center justify-center rounded-r3 border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary"
-      >
+      <Link href="/signup" className={`mt-3 flex h-11 items-center justify-center ${SECONDARY_BUTTON_CLASS}`}>
         이메일 회원가입
       </Link>
 
@@ -95,7 +115,10 @@ export default function LoginPage() {
             그 구조와 정확히 일치하진 않는다(라벨이 버튼 밖 캡션으로 분리, radius도 원형).
             디자인 통일성을 위해 의도적으로 감수한 트레이드오프 — 카카오가 아이콘 전용 공식
             에셋을 제공하면 교체 권장. */}
-        <a href={`${API_URL}/oauth2/authorization/kakao`} className="flex flex-col items-center gap-1.5">
+        <a
+          href={`${API_URL}/oauth2/authorization/kakao`}
+          className={`flex flex-col items-center gap-1.5 rounded-r2 p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
+        >
           <span className="block h-11 w-11 overflow-hidden rounded-full">
             {/* eslint-disable-next-line @next/next/no-img-element -- 공식 배포 에셋의 심볼 영역만 노출(파일 수정 없음) */}
             <img
@@ -107,12 +130,18 @@ export default function LoginPage() {
           </span>
           <span className="text-[11px] text-text-3">카카오</span>
         </a>
-        <a href={`${API_URL}/oauth2/authorization/naver`} className="flex flex-col items-center gap-1.5">
+        <a
+          href={`${API_URL}/oauth2/authorization/naver`}
+          className={`flex flex-col items-center gap-1.5 rounded-r2 p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element -- 네이버 공식 아이콘형 에셋 그대로 사용 */}
           <img src="/oauth/naver-icon.png" alt="" className="h-11 w-11" />
           <span className="text-[11px] text-text-3">네이버</span>
         </a>
-        <a href={`${API_URL}/oauth2/authorization/google`} className="flex flex-col items-center gap-1.5">
+        <a
+          href={`${API_URL}/oauth2/authorization/google`}
+          className={`flex flex-col items-center gap-1.5 rounded-r2 p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
+        >
           <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DADCE0] bg-white">
             <GoogleIcon />
           </span>

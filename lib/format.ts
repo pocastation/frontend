@@ -1,5 +1,13 @@
 export function formatKRW(amount: number): string {
-  return `${amount.toLocaleString("ko-KR")}원`;
+  return `₩${amount.toLocaleString("ko-KR")}`;
+}
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+// Date.now()를 컴포넌트 본문에 직접 쓰면 react-hooks/purity 린트에 걸린다 — formatTimeLeft와
+// 같은 이유로 헬퍼 뒤에 숨긴다.
+export function isEndingSoon(endAt: string, withinMs: number = ONE_DAY_MS): boolean {
+  return new Date(endAt).getTime() - Date.now() < withinMs;
 }
 
 export function formatTimeLeft(endAt: string): string {

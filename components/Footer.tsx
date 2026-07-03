@@ -25,7 +25,7 @@ const FOOTER_COLUMNS = [
 export default function Footer() {
   return (
     <footer className="bg-text-1 px-4 pb-7 pt-12 text-white/40">
-      <div className="mx-auto grid max-w-5xl grid-cols-2 gap-10 sm:grid-cols-4">
+      <div className="mx-auto grid max-w-[1160px] grid-cols-2 gap-10 sm:grid-cols-4">
         <div>
           <div className="mb-3 flex items-center gap-2 font-display text-sm font-extrabold text-white">
             <span className="flex h-7 w-7 items-center justify-center rounded-r1 bg-primary text-sm">
@@ -46,7 +46,7 @@ export default function Footer() {
               <a
                 key={link.label}
                 href={link.href}
-                className="block py-1 text-xs transition-colors hover:text-white/85"
+                className="block w-fit rounded-r1 py-1 text-xs transition-colors hover:text-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-text-1"
               >
                 {link.label}
               </a>
@@ -54,7 +54,7 @@ export default function Footer() {
           </div>
         ))}
       </div>
-      <div className="mx-auto mt-10 max-w-5xl border-t border-white/10 pt-5 text-[11px]">
+      <div className="mx-auto mt-10 max-w-[1160px] border-t border-white/10 pt-5 text-[11px]">
         © {new Date().getFullYear()} Pocastation. All rights reserved.
       </div>
     </footer>

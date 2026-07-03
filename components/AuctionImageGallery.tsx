@@ -1,0 +1,70 @@
+"use client";
+
+import { useState } from "react";
+import { mediaUrl } from "@/lib/api";
+import { FOCUS_RING } from "@/lib/ui";
+import type { AuctionImageResponse } from "@/lib/types";
+
+export default function AuctionImageGallery({
+  images,
+  title,
+}: {
+  images: AuctionImageResponse[];
+  title: string;
+}) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const active = images[activeIndex];
+
+  return (
+    <div>
+      <div className="aspect-square overflow-hidden rounded-r4 border border-border bg-surface-2">
+        {active ? (
+          // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 물리 파일을 직접 서빙(로컬 디스크/S3), Next 이미지 최적화 대상 아님
+          <img
+            key={active.url}
+            src={mediaUrl(active.url)}
+            alt={`${title} 사진 ${activeIndex + 1}`}
+            className="h-full w-full object-cover animate-[fadeIn_150ms_ease-out]"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-6xl" aria-hidden="true">
+            🎴
+          </div>
+        )}
+      </div>
+
+      {images.length > 1 && (
+        <div role="tablist" aria-label="사진 목록" className="mt-3 grid grid-cols-5 gap-2">
+          {images.map((image, index) => (
+            <button
+              key={image.url}
+              type="button"
+              role="tab"
+              aria-selected={index === activeIndex}
+              aria-label={`${index + 1}번째 사진 보기`}
+              onClick={() => setActiveIndex(index)}
+              className={`aspect-square overflow-hidden rounded-r2 border-2 transition-all ${FOCUS_RING} ${
+                index === activeIndex
+                  ? "border-primary"
+                  : "border-transparent opacity-70 hover:opacity-100"
+              }`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일 */}
+              <img
+                src={mediaUrl(image.thumbnailUrl)}
+                alt=""
+                className="h-full w-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.style.display = "none";
+                }}
+              />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

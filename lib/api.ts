@@ -32,12 +32,12 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
 
-  const contentType = response.headers.get("content-type") ?? "";
-  if (!contentType.includes("application/json")) {
+  let json: ApiResponse<T>;
+  try {
+    json = await response.json();
+  } catch {
     throw new ApiError("서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.", null, response.status);
   }
-
-  const json: ApiResponse<T> = await response.json();
 
   if (!response.ok || !json.success) {
     throw new ApiError(json.message ?? "요청에 실패했습니다.", json.errorCode, response.status);

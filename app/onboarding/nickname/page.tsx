@@ -33,7 +33,7 @@ export default function NicknameOnboardingPage() {
     setIsSubmitting(true);
     try {
       await updateNickname(nickname);
-      router.push("/");
+      router.replace("/");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "닉네임 저장에 실패했습니다.");
     } finally {

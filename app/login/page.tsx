@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { useGuestOnly } from "@/lib/use-guest-only";
 import { ApiError } from "@/lib/api";
 import { GoogleIcon } from "@/components/GoogleIcon";
 
@@ -12,6 +13,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const { isLoading, isGuest } = useGuestOnly();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -23,12 +25,23 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       await login(email, password);
-      router.push("/");
+      router.replace("/");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "로그인에 실패했습니다.");
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">
+        불러오는 중...
+      </div>
+    );
+  }
+  if (!isGuest) {
+    return null;
   }
 
   return (

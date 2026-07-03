@@ -4,9 +4,11 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { apiFetch, ApiError } from "@/lib/api";
+import { useGuestOnly } from "@/lib/use-guest-only";
 
 export default function SignupPage() {
   const router = useRouter();
+  const { isLoading, isGuest } = useGuestOnly();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
@@ -22,12 +24,23 @@ export default function SignupPage() {
         method: "POST",
         body: { email, password, nickname },
       });
-      router.push("/login");
+      router.replace("/login");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "회원가입에 실패했습니다.");
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">
+        불러오는 중...
+      </div>
+    );
+  }
+  if (!isGuest) {
+    return null;
   }
 
   return (

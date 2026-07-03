@@ -13,7 +13,7 @@ export class ApiError extends Error {
   }
 }
 
-type ApiFetchOptions = Omit<RequestInit, "body"> & {
+export type ApiFetchOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
   accessToken?: string | null;
 };

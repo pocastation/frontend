@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { apiFetch } from "./api";
+import { apiFetch, ApiError, type ApiFetchOptions } from "./api";
 import type { MemberResponse, TokenResponse } from "./types";
 
 type AuthContextValue = {
@@ -19,6 +19,7 @@ type AuthContextValue = {
   logout: () => Promise<void>;
   refresh: () => Promise<string | null>;
   updateNickname: (nickname: string) => Promise<void>;
+  fetchWithAuth: <T>(path: string, options?: ApiFetchOptions) => Promise<T>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -71,21 +72,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMember(null);
   }, []);
 
+  // access token 만료(401) 시 refreshToken 쿠키로 한 번 갱신을 시도하고, 성공하면
+  // 원 요청을 새 토큰으로 한 번만 재시도한다. refresh도 실패하면(쿠키 만료/탈취 탐지 등)
+  // 원래 401 에러를 그대로 던져 무한 재시도를 막는다.
+  const fetchWithAuth = useCallback(
+    async <T,>(path: string, options: ApiFetchOptions = {}): Promise<T> => {
+      try {
+        return await apiFetch<T>(path, { ...options, accessToken });
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 401) {
+          const newToken = await refresh();
+          if (newToken) {
+            return await apiFetch<T>(path, { ...options, accessToken: newToken });
+          }
+        }
+        throw err;
+      }
+    },
+    [accessToken, refresh],
+  );
+
   const updateNickname = useCallback(
     async (nickname: string) => {
-      const updated = await apiFetch<MemberResponse>("/api/members/me/nickname", {
+      const updated = await fetchWithAuth<MemberResponse>("/api/members/me/nickname", {
         method: "PATCH",
         body: { nickname },
-        accessToken,
       });
       setMember(updated);
     },
-    [accessToken],
+    [fetchWithAuth],
   );
 
   return (
     <AuthContext.Provider
-      value={{ accessToken, member, isLoading, login, logout, refresh, updateNickname }}
+      value={{ accessToken, member, isLoading, login, logout, refresh, updateNickname, fetchWithAuth }}
     >
       {children}
     </AuthContext.Provider>

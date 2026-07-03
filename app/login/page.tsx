@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
+import { GoogleIcon, KakaoIcon, NaverIcon } from "@/components/SocialIcons";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
@@ -71,15 +72,24 @@ export default function LoginPage() {
       <div className="flex flex-col gap-2">
         <a
           href={`${API_URL}/oauth2/authorization/kakao`}
-          className="rounded-r3 bg-[#FEE500] py-2.5 text-center text-sm font-bold text-black transition-opacity hover:opacity-90"
+          className="flex items-center justify-center gap-2 rounded-r3 bg-[#FEE500] py-2.5 text-sm font-bold text-black transition-opacity hover:opacity-90"
         >
+          <KakaoIcon />
           카카오로 시작하기
         </a>
         <a
           href={`${API_URL}/oauth2/authorization/naver`}
-          className="rounded-r3 bg-[#03C75A] py-2.5 text-center text-sm font-bold text-white transition-opacity hover:opacity-90"
+          className="flex items-center justify-center gap-2 rounded-r3 bg-[#03C75A] py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90"
         >
+          <NaverIcon />
           네이버로 시작하기
+        </a>
+        <a
+          href={`${API_URL}/oauth2/authorization/google`}
+          className="flex items-center justify-center gap-2 rounded-r3 border border-[#DADCE0] bg-white py-2.5 text-sm font-bold text-[#3C4043] transition-opacity hover:opacity-80"
+        >
+          <GoogleIcon />
+          구글로 시작하기
         </a>
       </div>
 

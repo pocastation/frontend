@@ -1,4 +1,8 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/lib/auth-context";
 
 const NAV_LINKS = [
   { href: "/", label: "경매" },
@@ -7,6 +11,14 @@ const NAV_LINKS = [
 ];
 
 export default function Header() {
+  const router = useRouter();
+  const { member, logout } = useAuth();
+
+  async function handleLogout() {
+    await logout();
+    router.push("/");
+  }
+
   return (
     <header className="sticky top-0 z-30 h-16 border-b border-border bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-full max-w-5xl items-center gap-4 px-4">
@@ -37,18 +49,32 @@ export default function Header() {
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
-          <Link
-            href="/login"
-            className="rounded-full border border-border-2 bg-white px-4 py-1.5 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary"
-          >
-            로그인
-          </Link>
-          <Link
-            href="/signup"
-            className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-white transition-colors hover:bg-primary-dark"
-          >
-            회원가입
-          </Link>
+          {member ? (
+            <>
+              <span className="text-sm font-semibold text-text-2">{member.nickname}</span>
+              <button
+                onClick={handleLogout}
+                className="rounded-full border border-border-2 bg-white px-4 py-1.5 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary"
+              >
+                로그아웃
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/login"
+                className="rounded-full border border-border-2 bg-white px-4 py-1.5 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary"
+              >
+                로그인
+              </Link>
+              <Link
+                href="/signup"
+                className="rounded-full bg-primary px-4 py-1.5 text-sm font-bold text-white transition-colors hover:bg-primary-dark"
+              >
+                회원가입
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

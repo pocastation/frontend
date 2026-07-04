@@ -50,6 +50,8 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const searchFieldId = useId();
   const mobileSearchFieldId = useId();
+  const isAdminMember = member?.role === "ADMIN" || member?.role === "ROLE_ADMIN";
+  const navLinks = isAdminMember ? [...NAV_LINKS, { href: "/admin", label: "관리자" }] : NAV_LINKS;
 
   async function handleLogout() {
     setIsMenuOpen(false);
@@ -94,12 +96,12 @@ export default function Header() {
         </label>
 
         <nav aria-label="주요 메뉴" className="gnv">
-          {NAV_LINKS.map((link) => (
+          {navLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}
               onClick={closeMenu}
-              className={link.label === "경매" ? "on" : undefined}
+              className={(link.href === "/" ? pathname === "/" : pathname.startsWith(link.href)) ? "on" : undefined}
             >
               {link.label}
             </Link>
@@ -173,7 +175,7 @@ export default function Header() {
           </div>
 
           <nav aria-label="주요 메뉴" className="flex flex-col">
-            {NAV_LINKS.map((link) => (
+            {navLinks.map((link) => (
               <Link
                 key={link.label}
                 href={link.href}

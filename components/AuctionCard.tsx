@@ -52,11 +52,7 @@ export default function AuctionCard({ auction }: { auction: AuctionResponse }) {
             className="absolute inset-0 h-full w-full object-cover"
             onError={handleImageError}
           />
-        ) : (
-          <span className="absolute inset-0 flex items-center justify-center" aria-hidden="true">
-            🎴
-          </span>
-        )}
+        ) : null}
         <span
           className="pointer-events-none absolute inset-0"
           style={{ background: "linear-gradient(180deg, transparent 55%, rgba(17,17,24,0.4) 100%)" }}

@@ -96,9 +96,6 @@ export default function AuctionExplorer({ auctions }: { auctions: AuctionRespons
 
       {sorted.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-20 text-center">
-          <span className="text-4xl" aria-hidden="true">
-            🎴
-          </span>
           <p className="text-sm text-text-3">
             {query ? "검색 결과가 없습니다." : "진행 중인 경매가 없습니다."}
           </p>

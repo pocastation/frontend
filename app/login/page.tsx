@@ -21,7 +21,11 @@ function LoginForm() {
   const passwordId = useId();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  // OAuth 로그인이 정지 계정이면 백엔드가 여기로 ?error=suspended를 붙여 리다이렉트한다
+  // (oauth2Login엔 별도 에러 화면이 없어, 프론트 로그인 페이지가 메시지를 대신 보여준다).
+  const [error, setError] = useState<string | null>(() =>
+    searchParams.get("error") === "suspended" ? "정지된 계정입니다. 고객센터로 문의해주세요." : null,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(e: FormEvent) {

@@ -8,8 +8,8 @@ import { useSearch } from "@/lib/search-context";
 
 const NAV_LINKS = [
   { href: "/", label: "경매" },
-  { href: "/", label: "아티스트" },
-  { href: "/", label: "종료된 경매" },
+  { href: "/artists", label: "아티스트" },
+  { href: "/auctions/ended", label: "종료된 경매" },
 ];
 
 const FOCUS_RING =
@@ -109,11 +109,9 @@ export default function Header() {
         </nav>
 
         <div className="hdr-r">
-          <span className="user-cr">₩0</span>
-          <button className="ic-btn" type="button" aria-label="알림">
+          <Link href="/notifications" className="ic-btn" aria-label="알림">
             <BellIcon />
-            <span className="ndot" />
-          </button>
+          </Link>
           <Link href={member ? "/auctions/new" : "/login"} className="btn btn-p sell-btn">
             <PlusIcon />
             <span className="btn-txt">판매 등록</span>

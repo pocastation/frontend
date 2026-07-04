@@ -3,21 +3,21 @@ const FOOTER_COLUMNS = [
     title: "서비스",
     links: [
       { label: "경매 둘러보기", href: "/" },
-      { label: "이용 방법", href: "/" },
+      { label: "이용 방법", href: "/guide" },
     ],
   },
   {
     title: "고객지원",
     links: [
-      { label: "공지사항", href: "/" },
-      { label: "자주 묻는 질문", href: "/" },
+      { label: "공지사항", href: "/notices" },
+      { label: "자주 묻는 질문", href: "/faq" },
     ],
   },
   {
     title: "약관",
     links: [
-      { label: "이용약관", href: "/" },
-      { label: "개인정보처리방침", href: "/" },
+      { label: "이용약관", href: "/terms" },
+      { label: "개인정보처리방침", href: "/privacy" },
     ],
   },
 ];

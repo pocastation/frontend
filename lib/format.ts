@@ -32,3 +32,34 @@ export function formatTimeLeft(endAt: string): string {
   }
   return `${minutes}분 남음`;
 }
+
+// 호가창용 라이브 카운트다운 — 1시간 미만이면 mm:ss로 초까지(마감 임박 긴장감), 하루 이상은
+// "N일 N시간"으로 요약. Date.now()는 다른 헬퍼와 같은 이유로 함수 뒤에 숨긴다(purity 린트).
+export function formatCountdown(endAt: string): string {
+  const diffMs = new Date(endAt).getTime() - Date.now();
+  if (diffMs <= 0) return "종료";
+
+  const totalSec = Math.floor(diffMs / 1000);
+  const days = Math.floor(totalSec / 86400);
+  const hours = Math.floor((totalSec % 86400) / 3600);
+  const minutes = Math.floor((totalSec % 3600) / 60);
+  const seconds = totalSec % 60;
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  if (days > 0) return `${days}일 ${hours}시간`;
+  if (hours > 0) return `${hours}:${pad(minutes)}:${pad(seconds)}`;
+  return `${minutes}:${pad(seconds)}`;
+}
+
+// 입찰 테이프용 상대 시각("방금", "N분 전").
+export function formatRelativeTime(iso: string): string {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const sec = Math.floor(diffMs / 1000);
+  if (sec < 10) return "방금";
+  if (sec < 60) return `${sec}초 전`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}분 전`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr}시간 전`;
+  return `${Math.floor(hr / 24)}일 전`;
+}

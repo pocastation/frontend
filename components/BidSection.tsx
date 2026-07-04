@@ -28,6 +28,8 @@ type Props = {
   initialEndAt: string;
   status: AuctionStatus;
   sellerNickname: string;
+  startPrice: number;
+  viewCount: number;
 };
 
 // 마감/유찰 등 종료 상태를 한국어로. LIVE는 카운트다운이 대신 표시된다.
@@ -47,6 +49,8 @@ export default function BidSection({
   initialEndAt,
   status,
   sellerNickname,
+  startPrice,
+  viewCount,
 }: Props) {
   const { member, accessToken, fetchWithAuth } = useAuth();
 
@@ -54,6 +58,8 @@ export default function BidSection({
   const [bidCount, setBidCount] = useState(initialBidCount);
   const [endAt, setEndAt] = useState(initialEndAt);
   const [bids, setBids] = useState<BidHistoryItem[]>([]);
+  const [bidPage, setBidPage] = useState(0);
+  const [bidTotalPages, setBidTotalPages] = useState(1);
   const [amount, setAmount] = useState(() => minNextBid(initialCurrentPrice, initialBidCount));
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
@@ -77,6 +83,7 @@ export default function BidSection({
     return list;
   }, [floor, ceil]);
 
+  // 최신 순으로 첫 페이지를 다시 받아 교체한다(입찰 발생 시 authoritative하게 갱신).
   const fetchBids = useCallback(async () => {
     try {
       const res = await apiFetch<BidListResponse>(
@@ -84,10 +91,29 @@ export default function BidSection({
         { cache: "no-store" },
       );
       setBids(res.content);
+      setBidPage(0);
+      setBidTotalPages(res.totalPages);
     } catch {
       // 내역 조회 실패는 입찰 흐름을 막지 않는다(가격/카운트다운은 SSE로 계속 갱신).
     }
   }, [auctionId]);
+
+  // "더보기" — 다음 페이지를 이어 붙인다. 그 사이 새 입찰이 들어와도 이미 받은 앞쪽 페이지와
+  // 겹치지 않게, 첫 페이지 교체(fetchBids)와는 분리된 흐름으로 둔다.
+  async function loadMoreBids() {
+    const nextPage = bidPage + 1;
+    try {
+      const res = await apiFetch<BidListResponse>(
+        `/api/auctions/${auctionId}/bids?page=${nextPage}&size=20`,
+        { cache: "no-store" },
+      );
+      setBids((prev) => [...prev, ...res.content]);
+      setBidPage(nextPage);
+      setBidTotalPages(res.totalPages);
+    } catch {
+      // 실패해도 이미 보이는 내역은 유지한다.
+    }
+  }
 
   // 초기 입찰 내역 로드.
   useEffect(() => {
@@ -181,6 +207,14 @@ export default function BidSection({
           >
             {isLive ? formatCountdown(endAt) : (STATUS_LABEL[status] ?? "종료")}
             {isLive && <span className="block text-[10px] font-normal text-text-3">마감까지</span>}
+          </span>
+        </div>
+        <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-[11px] text-text-3">
+          <span>
+            시작가 <span className="font-semibold text-text-2 tabular-nums">{formatKRW(startPrice)}</span>
+          </span>
+          <span>
+            조회 <span className="font-semibold text-text-2 tabular-nums">{viewCount.toLocaleString("ko-KR")}</span>
           </span>
         </div>
       </div>
@@ -328,6 +362,15 @@ export default function BidSection({
           </ul>
         ) : (
           <p className="mt-2 text-xs text-text-3">아직 입찰이 없습니다.</p>
+        )}
+        {bidPage + 1 < bidTotalPages && (
+          <button
+            type="button"
+            onClick={loadMoreBids}
+            className={`mt-2 flex h-9 w-full items-center justify-center rounded-r2 border border-border text-xs font-semibold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+          >
+            더보기
+          </button>
         )}
       </section>
     </div>

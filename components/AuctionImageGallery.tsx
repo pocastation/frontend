@@ -14,10 +14,15 @@ export default function AuctionImageGallery({
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const active = images[activeIndex];
+  const hasMultiple = images.length > 1;
+
+  function goTo(delta: number) {
+    setActiveIndex((i) => (i + delta + images.length) % images.length);
+  }
 
   return (
     <div>
-      <div className="aspect-[4/5] overflow-hidden rounded-r4 border border-border bg-surface-2">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-r4 border border-border bg-surface-2">
         {active ? (
           // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 물리 파일을 직접 서빙(로컬 디스크/S3), Next 이미지 최적화 대상 아님
           <img
@@ -33,6 +38,30 @@ export default function AuctionImageGallery({
           <div className="flex h-full items-center justify-center text-6xl" aria-hidden="true">
             🎴
           </div>
+        )}
+
+        {hasMultiple && (
+          <>
+            <button
+              type="button"
+              onClick={() => goTo(-1)}
+              aria-label="이전 사진"
+              className={`absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-text-1/50 text-white transition-colors hover:bg-text-1/70 ${FOCUS_RING}`}
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              onClick={() => goTo(1)}
+              aria-label="다음 사진"
+              className={`absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-text-1/50 text-white transition-colors hover:bg-text-1/70 ${FOCUS_RING}`}
+            >
+              ›
+            </button>
+            <span className="absolute bottom-2 right-2 rounded-full bg-text-1/60 px-2 py-0.5 text-[11px] font-semibold text-white tabular-nums">
+              {activeIndex + 1} / {images.length}
+            </span>
+          </>
         )}
       </div>
 

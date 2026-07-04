@@ -2,6 +2,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import AuctionImageGallery from "@/components/AuctionImageGallery";
 import BidSection from "@/components/BidSection";
+import SearchLink from "@/components/SearchLink";
+import ShareButton from "@/components/ShareButton";
 import { apiFetch, ApiError } from "@/lib/api";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
@@ -18,6 +20,9 @@ async function getAuction(id: string): Promise<AuctionDetailResponse | null> {
   }
 }
 
+const CHIP_CLASS =
+  `rounded-full bg-primary-soft px-2 py-0.5 text-xs font-bold text-primary transition-colors hover:bg-primary hover:text-white ${FOCUS_RING}`;
+
 export default async function AuctionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const auction = await getAuction(id);
@@ -25,29 +30,107 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
 
+  // 표 형태 상품 정보 — 우리가 실제로 수집하는 필드만(발매연도·수량 등은 미보유라 제외).
+  const specRows: { label: string; value: string }[] = [
+    { label: "그룹", value: auction.artistName ?? "-" },
+    ...(auction.idolName ? [{ label: "멤버", value: auction.idolName }] : []),
+    ...(auction.albumName ? [{ label: "앨범", value: auction.albumName }] : []),
+    {
+      label: "출처",
+      value: SOURCE_LABEL[auction.source] ?? auction.source,
+    },
+    { label: "상태 등급", value: GRADE_LABEL[auction.grade] ?? auction.grade },
+    { label: "미개봉", value: auction.unopened ? "예" : "아니오" },
+  ];
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-6 sm:py-8">
-      <Link
-        href="/"
-        className={`mb-4 inline-flex items-center gap-1 rounded-r2 px-1 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
-      >
-        <span aria-hidden="true">←</span> 목록으로
-      </Link>
+    <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+      <div className="mb-4 flex items-center justify-between">
+        <Link
+          href="/"
+          className={`inline-flex items-center gap-1 rounded-r2 px-1 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
+        >
+          <span aria-hidden="true">←</span> 목록으로
+        </Link>
+        <ShareButton title={auction.title} />
+      </div>
 
       <div className="grid gap-8 sm:grid-cols-2">
-        <AuctionImageGallery images={auction.images} title={auction.title} />
-
-        {/* 정보 */}
+        {/* 왼쪽: 사진 + 상품 정보 + 판매자 */}
         <div>
-          <p className="text-xs font-bold tracking-wide text-primary">
-            {auction.artistName}
-            {auction.idolName ? ` · ${auction.idolName}` : ""}
-          </p>
-          <h1 className="mt-1 font-display text-xl font-extrabold text-text-1 sm:text-2xl">
+          <AuctionImageGallery images={auction.images} title={auction.title} />
+
+          {auction.description && (
+            <section className="mt-6">
+              <h2 className="text-sm font-bold text-text-1">상품 설명</h2>
+              <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-text-2">
+                {auction.description}
+              </p>
+            </section>
+          )}
+
+          <section className="mt-6">
+            <h2 className="text-sm font-bold text-text-1">상품 정보</h2>
+            <div className="mt-2 divide-y divide-border rounded-r3 border border-border">
+              {specRows.map((row) => (
+                <div key={row.label} className="flex items-center justify-between px-3.5 py-2 text-sm">
+                  <span className="text-text-3">{row.label}</span>
+                  <span className="font-semibold text-text-1">{row.value}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {auction.conditionNote && (
+            <section className="mt-6">
+              <h2 className="text-sm font-bold text-text-1">하자 안내</h2>
+              <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-text-2">
+                {auction.conditionNote}
+              </p>
+            </section>
+          )}
+
+          <section className="mt-6">
+            <h2 className="text-sm font-bold text-text-1">판매자 정보</h2>
+            <div className="mt-2 flex items-center justify-between rounded-r3 border border-border p-3.5">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-soft text-sm font-bold text-primary">
+                  {auction.sellerNickname.slice(0, 1).toUpperCase()}
+                </span>
+                <span className="text-sm font-bold text-text-1">{auction.sellerNickname}</span>
+              </div>
+              {auction.artistName && (
+                <SearchLink
+                  query={auction.artistName}
+                  className={`text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
+                >
+                  {auction.artistName} 다른 경매 보기 →
+                </SearchLink>
+              )}
+            </div>
+          </section>
+        </div>
+
+        {/* 오른쪽: 제목 · 배지 · 입찰 */}
+        <div>
+          <div className="flex flex-wrap gap-1.5">
+            {auction.artistName && (
+              <SearchLink query={auction.artistName} className={CHIP_CLASS}>
+                #{auction.artistName}
+              </SearchLink>
+            )}
+            {auction.idolName && (
+              <SearchLink query={auction.idolName} className={CHIP_CLASS}>
+                #{auction.idolName}
+              </SearchLink>
+            )}
+          </div>
+
+          <h1 className="mt-2 font-display text-xl font-extrabold text-text-1 sm:text-2xl">
             {auction.title}
           </h1>
 
-          <div className="mt-4 flex flex-wrap gap-1.5">
+          <div className="mt-3 flex flex-wrap gap-1.5">
             <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary">
               {SOURCE_LABEL[auction.source] ?? auction.source}
               {auction.sourceDetail ? ` · ${auction.sourceDetail}` : ""}
@@ -60,8 +143,6 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             )}
           </div>
 
-          {auction.albumName && <p className="mt-3 text-sm text-text-2">앨범: {auction.albumName}</p>}
-
           <BidSection
             auctionId={auction.id}
             initialCurrentPrice={auction.currentPrice}
@@ -69,27 +150,9 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             initialEndAt={auction.endAt}
             status={auction.status}
             sellerNickname={auction.sellerNickname}
+            startPrice={auction.startPrice}
+            viewCount={auction.viewCount}
           />
-
-          <p className="mt-4 text-sm text-text-3">판매자: {auction.sellerNickname}</p>
-
-          {auction.conditionNote && (
-            <section className="mt-6">
-              <h2 className="text-sm font-bold text-text-1">상태 안내</h2>
-              <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-text-2">
-                {auction.conditionNote}
-              </p>
-            </section>
-          )}
-
-          {auction.description && (
-            <section className="mt-6">
-              <h2 className="text-sm font-bold text-text-1">상세 설명</h2>
-              <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-text-2">
-                {auction.description}
-              </p>
-            </section>
-          )}
         </div>
       </div>
     </div>

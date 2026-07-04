@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import AuctionCard from "@/components/AuctionCard";
+import { apiFetch } from "@/lib/api";
 import { useSearch } from "@/lib/search-context";
 import { FOCUS_RING } from "@/lib/ui";
-import type { AuctionResponse } from "@/lib/types";
+import type { AuctionListResponse, AuctionResponse } from "@/lib/types";
 
 type SortKey = "latest" | "popular" | "views" | "price_asc" | "price_desc";
 
@@ -16,35 +17,44 @@ const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: "price_desc", label: "높은 가격" },
 ];
 
-export default function AuctionExplorer({ auctions }: { auctions: AuctionResponse[] }) {
+const DEFAULT_SORT: SortKey = "latest";
+const DEBOUNCE_MS = 300;
+
+// 검색·정렬을 서버가 처리한다(§B1) — 목록 전체를 한 번에 받아 클라이언트에서 거르던 이전
+// 방식은 매물이 늘면 안 맞아 폐기. 초기 진입은 서버컴포넌트(page.tsx)가 이미 기본값(검색어
+// 없음·최신순)으로 SSR해 온 결과를 그대로 쓰고, 이후 상호작용부터 클라이언트가 재요청한다.
+export default function AuctionExplorer({ initialAuctions }: { initialAuctions: AuctionResponse[] }) {
   const { query, setQuery } = useSearch();
-  const [sortBy, setSortBy] = useState<SortKey>("latest");
+  const [sortBy, setSortBy] = useState<SortKey>(DEFAULT_SORT);
+  const [results, setResults] = useState<AuctionResponse[]>(initialAuctions);
+  const [totalElements, setTotalElements] = useState(initialAuctions.length);
+  const [loading, setLoading] = useState(false);
+  const isFirstRun = useRef(true);
 
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) return auctions;
-    return auctions.filter(
-      (a) => a.title.toLowerCase().includes(q) || a.artistName?.toLowerCase().includes(q),
-    );
-  }, [auctions, query]);
-
-  const sorted = useMemo(() => {
-    const list = [...filtered];
-    switch (sortBy) {
-      case "popular":
-        return list.sort((a, b) => b.bidCount - a.bidCount);
-      case "views":
-        return list.sort((a, b) => b.viewCount - a.viewCount);
-      case "price_asc":
-        return list.sort((a, b) => a.currentPrice - b.currentPrice);
-      case "price_desc":
-        return list.sort((a, b) => b.currentPrice - a.currentPrice);
-      case "latest":
-      default:
-        // 목록 응답엔 등록일시가 없어(id는 자동증가라 id 내림차순이 곧 최신순).
-        return list.sort((a, b) => b.id - a.id);
+  useEffect(() => {
+    // 첫 렌더는 SSR 결과(검색어 없음·최신순)와 이미 같은 조건이라 재요청하지 않는다.
+    if (isFirstRun.current) {
+      isFirstRun.current = false;
+      return;
     }
-  }, [filtered, sortBy]);
+
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({ sort: sortBy, size: "60" });
+        if (query.trim()) params.set("q", query.trim());
+        const res = await apiFetch<AuctionListResponse>(`/api/auctions?${params}`, { cache: "no-store" });
+        setResults(res.content);
+        setTotalElements(res.totalElements);
+      } catch {
+        // 검색 실패는 조용히 무시하고 직전 결과를 유지한다(목록 화면이 통째로 깨지지 않게).
+      } finally {
+        setLoading(false);
+      }
+    }, DEBOUNCE_MS);
+
+    return () => clearTimeout(timer);
+  }, [query, sortBy]);
 
   return (
     <section id="auctions" className="mx-auto max-w-[1160px] px-4 py-10">
@@ -59,7 +69,8 @@ export default function AuctionExplorer({ auctions }: { auctions: AuctionRespons
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs text-text-3">
-          <span>{sorted.length}개</span>
+          <span>{totalElements}개</span>
+          {loading && <span className="text-text-3">검색 중...</span>}
           {query && (
             <span className="flex items-center gap-1 font-bold text-primary">
               &quot;{query}&quot; 검색 중
@@ -94,7 +105,7 @@ export default function AuctionExplorer({ auctions }: { auctions: AuctionRespons
         </div>
       </div>
 
-      {sorted.length === 0 ? (
+      {results.length === 0 ? (
         <div className="flex flex-col items-center gap-2 py-20 text-center">
           <p className="text-sm text-text-3">
             {query ? "검색 결과가 없습니다." : "진행 중인 경매가 없습니다."}
@@ -102,7 +113,7 @@ export default function AuctionExplorer({ auctions }: { auctions: AuctionRespons
         </div>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))] gap-3.5">
-          {sorted.map((auction) => (
+          {results.map((auction) => (
             <AuctionCard key={auction.id} auction={auction} />
           ))}
         </div>

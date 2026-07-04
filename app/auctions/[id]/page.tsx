@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import AuctionImageGallery from "@/components/AuctionImageGallery";
+import BidSection from "@/components/BidSection";
 import { apiFetch, ApiError } from "@/lib/api";
-import { formatKRW, formatTimeLeft } from "@/lib/format";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionDetailResponse } from "@/lib/types";
@@ -62,21 +62,13 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
 
           {auction.albumName && <p className="mt-3 text-sm text-text-2">앨범: {auction.albumName}</p>}
 
-          <div className="mt-6 rounded-r3 border border-border bg-surface p-4 shadow-card">
-            <div className="flex items-baseline justify-between">
-              <span className="text-xs font-semibold text-text-3">현재가</span>
-              <span className="font-display text-2xl font-extrabold text-text-1">
-                {formatKRW(auction.currentPrice)}
-              </span>
-            </div>
-            <div className="mt-1 flex items-center justify-between text-xs text-text-3">
-              <span>배송비 {auction.shippingFee > 0 ? formatKRW(auction.shippingFee) : "무료"}</span>
-              <span>입찰 {auction.bidCount}회</span>
-            </div>
-            <p className="mt-2 text-xs font-semibold text-accent">
-              {auction.status === "LIVE" ? formatTimeLeft(auction.endAt) : auction.status}
-            </p>
-          </div>
+          <BidSection
+            auctionId={auction.id}
+            initialCurrentPrice={auction.currentPrice}
+            initialBidCount={auction.bidCount}
+            initialEndAt={auction.endAt}
+            status={auction.status}
+          />
 
           <p className="mt-4 text-sm text-text-3">판매자: {auction.sellerNickname}</p>
 

@@ -85,7 +85,6 @@ export type AuctionDetailResponse = {
   conditionNote: string | null;
   startPrice: number;
   currentPrice: number;
-  shippingFee: number;
   durationDays: number;
   status: AuctionStatus;
   startAt: string | null;
@@ -108,7 +107,6 @@ export type AuctionRegisterRequest = {
   unopened: boolean;
   conditionNote?: string;
   startPrice: number;
-  shippingFee?: number;
   durationDays: number;
   images: { url: string; thumbnailUrl: string }[];
 };
@@ -116,6 +114,41 @@ export type AuctionRegisterRequest = {
 export type MediaUploadResponse = {
   url: string;
   thumbnailUrl: string;
+};
+
+// POST /api/auctions/{id}/bids 응답 — 입찰 직후 갱신된 경매 상태.
+export type BidResponse = {
+  auctionId: number;
+  currentPrice: number;
+  bidCount: number;
+  endAt: string;
+  extended: boolean;
+};
+
+// GET /api/auctions/{id}/bids 항목 — 입찰자 닉네임은 마스킹되어 내려온다.
+export type BidHistoryItem = {
+  id: number;
+  bidderNicknameMasked: string;
+  amount: number;
+  createdAt: string;
+};
+
+export type BidListResponse = {
+  content: BidHistoryItem[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+// SSE(/api/auctions/{id}/bids/stream)로 밀어주는 실시간 호가 이벤트.
+export type BidStreamEvent = {
+  auctionId: number;
+  currentPrice: number;
+  bidCount: number;
+  topBidderNicknameMasked: string;
+  endAt: string;
+  extended: boolean;
 };
 
 export type ArtistType = "GROUP" | "SOLO" | "UNIT";

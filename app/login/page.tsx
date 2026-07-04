@@ -1,20 +1,22 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useId, useState, type FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
-import { useGuestOnly } from "@/lib/use-guest-only";
+import { useGuestOnly, safeRedirectPath } from "@/lib/use-guest-only";
 import { ApiError } from "@/lib/api";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import { GoogleIcon } from "@/components/GoogleIcon";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = safeRedirectPath(searchParams.get("redirect"));
   const { login } = useAuth();
-  const { isLoading, isGuest } = useGuestOnly();
+  const { isLoading, isGuest } = useGuestOnly(redirectTo);
   const emailId = useId();
   const passwordId = useId();
   const [email, setEmail] = useState("");
@@ -28,7 +30,7 @@ export default function LoginPage() {
     setIsSubmitting(true);
     try {
       await login(email, password);
-      router.replace("/");
+      router.replace(redirectTo);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "로그인에 실패했습니다.");
     } finally {
@@ -149,5 +151,18 @@ export default function LoginPage() {
         </a>
       </div>
     </div>
+  );
+}
+
+// useSearchParams()는 Suspense 경계 안에서만 쓸 수 있다(빌드 시 정적 최적화 요구사항).
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">불러오는 중...</div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

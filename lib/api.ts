@@ -20,6 +20,11 @@ export function mediaUrl(path: string): string {
   return `${resolveApiUrl()}${path}`;
 }
 
+// SSE는 EventSource가 fetch 래퍼(apiFetch)를 안 거치므로 절대 URL을 직접 조합해준다.
+export function apiStreamUrl(path: string): string {
+  return `${resolveApiUrl()}${path}`;
+}
+
 export class ApiError extends Error {
   errorCode: string | null;
   status: number;

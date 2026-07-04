@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { apiFetch, ApiError, apiStreamUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { formatKRW, formatTimeLeft, isBeforeEnd } from "@/lib/format";
+import { formatKRW, formatCountdown, formatRelativeTime, isBeforeEnd } from "@/lib/format";
 import {
   BID_MIN_INCREMENT,
   buyerFee,
@@ -27,23 +27,28 @@ type Props = {
   initialBidCount: number;
   initialEndAt: string;
   status: AuctionStatus;
+  sellerNickname: string;
 };
 
-// 마감/유찰 등 종료 상태를 한국어로. LIVE는 남은시간(카운트다운)이 대신 표시된다.
+// 마감/유찰 등 종료 상태를 한국어로. LIVE는 카운트다운이 대신 표시된다.
 const STATUS_LABEL: Partial<Record<AuctionStatus, string>> = {
   ENDED_SOLD: "낙찰 종료",
   ENDED_NO_BIDS: "유찰 종료",
   SCHEDULED: "시작 전",
 };
 
+// 경매 상세의 "호가창" — 영어경매는 양방향 잔량(매도측)이 없으므로 주식 호가창을 그대로 옮기지
+// 않고, ① 입찰 가능 구간을 보여주는 호가 사다리(현재가+1호가 ~ +10호가 상한) ② 체결창처럼 흐르는
+// 실시간 입찰 테이프로 재해석한다(§1 신뢰 — 없는 시장구조를 지어내지 않음).
 export default function BidSection({
   auctionId,
   initialCurrentPrice,
   initialBidCount,
   initialEndAt,
   status,
+  sellerNickname,
 }: Props) {
-  const { accessToken, fetchWithAuth } = useAuth();
+  const { member, accessToken, fetchWithAuth } = useAuth();
 
   const [currentPrice, setCurrentPrice] = useState(initialCurrentPrice);
   const [bidCount, setBidCount] = useState(initialBidCount);
@@ -52,13 +57,25 @@ export default function BidSection({
   const [amount, setAmount] = useState(() => minNextBid(initialCurrentPrice, initialBidCount));
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
-  // 다른 사람 입찰로 현재가가 오르면 입력값 하한도 따라 올려야 한다. 단 사용자가 이미
-  // 하한보다 높게 직접 올려둔 값은 존중한다.
+  // 카운트다운/상대시각을 1초마다 다시 그리기 위한 틱(값은 안 읽고 리렌더 트리거로만 쓴다).
+  const [, setNowTick] = useState(0);
+  // 다른 사람 입찰로 현재가가 오르면 입력값 하한도 따라 올려야 한다. 단 사용자가 사다리에서
+  // 직접 고른 값은 존중한다.
   const amountTouchedRef = useRef(false);
 
   const isLive = status === "LIVE" && isBeforeEnd(endAt);
+  const isOwnAuction = member?.nickname != null && member.nickname === sellerNickname;
   const floor = minNextBid(currentPrice, bidCount);
   const ceil = maxNextBid(currentPrice);
+  const outOfRange = amount < floor || amount > ceil;
+  const total = useMemo(() => estimatedTotal(amount), [amount]);
+
+  // 호가 사다리 = 상한(+10호가)에서 최소 입찰가까지 1호가 간격으로 내려오는 가격들.
+  const rungs = useMemo(() => {
+    const list: number[] = [];
+    for (let p = ceil; p >= floor; p -= BID_MIN_INCREMENT) list.push(p);
+    return list;
+  }, [floor, ceil]);
 
   const fetchBids = useCallback(async () => {
     try {
@@ -72,7 +89,7 @@ export default function BidSection({
     }
   }, [auctionId]);
 
-  // 초기 입찰 내역 로드. 외부(API)에서 읽어와 채우는 정당한 데이터 페치라 setState는 await 뒤에 일어난다.
+  // 초기 입찰 내역 로드.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 마운트 시 서버에서 입찰내역 1회 로드(동기 setState 아님, await 후 갱신)
     fetchBids();
@@ -89,35 +106,32 @@ export default function BidSection({
       setCurrentPrice(data.currentPrice);
       setBidCount(data.bidCount);
       setEndAt(data.endAt);
-      // 새 입찰로 상태가 바뀌면 직전 검증 에러(예: "이미 최고 입찰자")는 더 이상 유효하지 않다.
       setMessage(null);
       fetchBids();
     });
-    // 연결 오류(서버 재시작 등)는 EventSource가 자동 재연결하므로 로깅만 생략하고 둔다.
     source.onerror = () => {};
 
     return () => source.close();
   }, [auctionId, status, fetchBids]);
 
-  // 현재가가 오르면 아직 사용자가 직접 안 건드린 입력값을 새 하한으로 끌어올린다.
+  // 라이브 카운트다운/상대시각을 1초마다 갱신. 종료된 경매는 틱 불필요.
+  useEffect(() => {
+    if (!isLive) return;
+    const timer = setInterval(() => setNowTick((n) => n + 1), 1000);
+    return () => clearInterval(timer);
+  }, [isLive]);
+
+  // 현재가가 오르면 아직 사용자가 직접 안 고른 입력값을 새 하한으로 끌어올린다.
   useEffect(() => {
     if (!amountTouchedRef.current) {
       setAmount(minNextBid(currentPrice, bidCount));
     }
   }, [currentPrice, bidCount]);
 
-  const stepDown = () => {
+  function selectRung(price: number) {
     amountTouchedRef.current = true;
-    setAmount((v) => Math.max(floor, v - BID_MIN_INCREMENT));
-  };
-  const stepUp = () => {
-    amountTouchedRef.current = true;
-    setAmount((v) => Math.min(ceil, v + BID_MIN_INCREMENT));
-  };
-
-  const total = useMemo(() => estimatedTotal(amount), [amount]);
-
-  const outOfRange = amount < floor || amount > ceil;
+    setAmount(price);
+  }
 
   async function handleBid() {
     setMessage(null);
@@ -130,7 +144,11 @@ export default function BidSection({
       setCurrentPrice(res.currentPrice);
       setBidCount(res.bidCount);
       setEndAt(res.endAt);
+      // 내 입찰 성공 시 다음 최소 입찰가로 즉시 올려둔다. rebase 효과에만 맡기면, 서버가 커밋
+      // 직후 쏘는 SSE가 POST 응답보다 먼저 도착해 currentPrice를 갱신할 때 amountTouchedRef가
+      // 아직 true라 스킵되고, 이후 값이 안 바뀌어 재실행도 안 돼 옛 입찰가에 갇히는 레이스가 있다.
       amountTouchedRef.current = false;
+      setAmount(minNextBid(res.currentPrice, res.bidCount));
       setMessage({
         type: "ok",
         text: res.extended ? "입찰 완료! 마감 임박으로 종료 시간이 연장됐어요." : "입찰 완료!",
@@ -148,137 +166,163 @@ export default function BidSection({
 
   return (
     <div className="mt-6">
-      {/* 가격 박스 (실시간 갱신) */}
+      {/* 현재가 헤더 */}
       <div className="rounded-r3 border border-border bg-surface p-4 shadow-card">
-        <div className="flex items-baseline justify-between">
-          <span className="text-xs font-semibold text-text-3">현재가</span>
-          <span className="font-display text-2xl font-extrabold text-text-1" aria-live="polite">
-            {formatKRW(currentPrice)}
-          </span>
-        </div>
-        <div className="mt-1 flex items-center justify-end text-xs text-text-3">
+        <div className="flex items-center justify-between text-xs font-semibold text-text-3">
+          <span>현재가</span>
           <span>입찰 {bidCount}회</span>
         </div>
-        <p className="mt-2 text-xs font-semibold text-accent">
-          {isLive ? formatTimeLeft(endAt) : (STATUS_LABEL[status] ?? "종료")}
-        </p>
+        <div className="mt-1 flex items-baseline justify-between gap-2">
+          <span className="font-display text-3xl font-extrabold text-text-1 tabular-nums" aria-live="polite">
+            {formatKRW(currentPrice)}
+          </span>
+          <span
+            className={`shrink-0 text-right text-sm font-bold tabular-nums ${isLive ? "text-accent" : "text-text-3"}`}
+          >
+            {isLive ? formatCountdown(endAt) : (STATUS_LABEL[status] ?? "종료")}
+            {isLive && <span className="block text-[10px] font-normal text-text-3">마감까지</span>}
+          </span>
+        </div>
       </div>
 
-      {/* 입찰 패널 (진행 중일 때만) */}
-      {isLive && (
-        <div className="mt-4">
-          {accessToken ? (
-            <>
-              <div className="flex items-stretch gap-2">
-                <div className="flex flex-1 items-center rounded-r2 border border-border">
-                  <button
-                    type="button"
-                    onClick={stepDown}
-                    disabled={amount <= floor}
-                    aria-label="1호가 내리기"
-                    className={`h-11 w-11 shrink-0 rounded-l-r2 text-lg font-bold text-text-2 transition-colors hover:bg-surface-2 disabled:opacity-40 ${FOCUS_RING}`}
-                  >
-                    −
-                  </button>
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    step={BID_MIN_INCREMENT}
-                    value={amount}
-                    onChange={(e) => {
-                      amountTouchedRef.current = true;
-                      setAmount(Number(e.target.value) || 0);
-                    }}
-                    aria-label="입찰 금액"
-                    aria-invalid={outOfRange || undefined}
-                    className="h-11 w-full min-w-0 border-x border-border bg-transparent text-center text-sm font-bold text-text-1 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={stepUp}
-                    disabled={amount >= ceil}
-                    aria-label="1호가 올리기"
-                    className={`h-11 w-11 shrink-0 rounded-r-r2 text-lg font-bold text-text-2 transition-colors hover:bg-surface-2 disabled:opacity-40 ${FOCUS_RING}`}
-                  >
-                    +
-                  </button>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleBid}
-                  disabled={submitting || outOfRange}
-                  className={`h-11 shrink-0 px-6 ${PRIMARY_BUTTON_CLASS}`}
-                >
-                  {submitting ? "처리 중..." : "입찰하기"}
-                </button>
+      {/* 입찰 영역 (진행 중일 때만) */}
+      {isLive &&
+        (isOwnAuction ? (
+          <div className="mt-4 rounded-r2 border border-border bg-surface-2 p-4 text-center text-sm font-semibold text-text-2">
+            내 경매입니다. 직접 입찰할 수 없어요.
+          </div>
+        ) : !accessToken ? (
+          <Link
+            href={`/login?redirect=/auctions/${auctionId}`}
+            className={`mt-4 flex h-11 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
+          >
+            로그인하고 입찰하기
+          </Link>
+        ) : (
+          <div className="mt-4">
+            {/* 호가 사다리 */}
+            <div className="rounded-r2 border border-border bg-surface p-2">
+              <div className="mb-1.5 flex items-center justify-between px-1 text-[11px] font-semibold text-text-3">
+                <span>호가 사다리</span>
+                <span>탭해서 입찰가 선택</span>
               </div>
-
-              <p className="mt-1.5 text-[11px] text-text-3">
-                입찰 가능 범위 {formatKRW(floor)} ~ {formatKRW(ceil)} (1호가 {formatKRW(BID_MIN_INCREMENT)})
-              </p>
-
-              {/* 예상 결제 총액 (추정치) */}
-              <div className="mt-3 rounded-r2 bg-surface-2 p-3 text-xs">
-                <div className="flex items-center justify-between text-text-3">
-                  <span>입찰가</span>
-                  <span className="font-semibold text-text-2">{formatKRW(amount)}</span>
-                </div>
-                <div className="mt-1 flex items-center justify-between text-text-3">
-                  <span>구매자 수수료</span>
-                  <span className="font-semibold text-text-2">{formatKRW(buyerFee(amount))}</span>
-                </div>
-                <div className="mt-2 flex items-center justify-between border-t border-border pt-2">
-                  <span className="font-semibold text-text-2">예상 결제 총액</span>
-                  <span className="font-display text-sm font-extrabold text-primary">
-                    {formatKRW(total)}
+              <div className="flex flex-col gap-1" role="group" aria-label="입찰가 선택">
+                {rungs.map((p) => {
+                  const selected = p === amount;
+                  const tag = p === ceil ? "상한 +10호가" : p === floor ? "최소 입찰가" : "";
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => selectRung(p)}
+                      className={`flex items-center justify-between rounded-r1 px-3 py-1.5 text-sm tabular-nums transition-colors ${FOCUS_RING} ${
+                        selected
+                          ? "bg-primary font-bold text-white"
+                          : "bg-surface-2 text-text-2 hover:bg-primary-soft hover:text-primary"
+                      }`}
+                    >
+                      <span>{formatKRW(p)}</span>
+                      <span
+                        className={`text-[10px] font-semibold ${selected ? "text-white/80" : "text-text-3"}`}
+                      >
+                        {tag}
+                      </span>
+                    </button>
+                  );
+                })}
+                {/* 현재가 기준선 */}
+                <div className="mt-0.5 flex items-center justify-between rounded-r1 border border-dashed border-border px-3 py-1.5 text-sm tabular-nums text-text-3">
+                  <span>{formatKRW(currentPrice)}</span>
+                  <span className="text-[10px] font-semibold">
+                    현재가{bids[0] ? ` · ${bids[0].bidderNicknameMasked}` : ""}
                   </span>
                 </div>
-                <p className="mt-1 text-[10px] text-text-3">
-                  낙찰 시 예상 금액이며 실제 청구액과 다를 수 있습니다.
-                </p>
               </div>
+            </div>
 
-              {message && (
-                <p
-                  role="alert"
-                  aria-live="polite"
-                  className={`mt-2 rounded-r2 px-3 py-2 text-xs font-semibold ${
-                    message.type === "ok" ? "bg-ok-soft text-ok" : "bg-accent-soft text-accent"
-                  }`}
-                >
-                  {message.text}
-                </p>
-              )}
-            </>
-          ) : (
-            <Link
-              href={`/login?redirect=/auctions/${auctionId}`}
-              className={`flex h-11 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
+            {/* 선택 요약 + 예상 결제 총액 */}
+            <div className="mt-3 rounded-r2 bg-surface-2 p-3 text-xs">
+              <div className="flex items-center justify-between text-text-3">
+                <span>입찰가</span>
+                <span className="font-semibold text-text-2 tabular-nums">{formatKRW(amount)}</span>
+              </div>
+              <div className="mt-1 flex items-center justify-between text-text-3">
+                <span>구매자 수수료</span>
+                <span className="font-semibold text-text-2 tabular-nums">{formatKRW(buyerFee(amount))}</span>
+              </div>
+              <div className="mt-2 flex items-center justify-between border-t border-border pt-2">
+                <span className="font-semibold text-text-2">예상 결제 총액</span>
+                <span className="font-display text-sm font-extrabold text-primary tabular-nums">
+                  {formatKRW(total)}
+                </span>
+              </div>
+              <p className="mt-1 text-[10px] text-text-3">낙찰 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
+            </div>
+
+            <button
+              type="button"
+              onClick={handleBid}
+              disabled={submitting || outOfRange}
+              className={`mt-2 flex h-11 w-full items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
             >
-              로그인하고 입찰하기
-            </Link>
+              {submitting ? "처리 중..." : `${formatKRW(amount)} 입찰하기`}
+            </button>
+
+            {outOfRange && (
+              <p className="mt-1 text-[11px] font-semibold text-accent">
+                입찰 가능 범위 {formatKRW(floor)} ~ {formatKRW(ceil)}
+              </p>
+            )}
+
+            {message && (
+              <p
+                role="alert"
+                aria-live="polite"
+                className={`mt-2 rounded-r2 px-3 py-2 text-xs font-semibold ${
+                  message.type === "ok" ? "bg-ok-soft text-ok" : "bg-accent-soft text-accent"
+                }`}
+              >
+                {message.text}
+              </p>
+            )}
+          </div>
+        ))}
+
+      {/* 실시간 입찰 테이프 */}
+      <section className="mt-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-bold text-text-1">
+            실시간 입찰 {bidCount > 0 && <span className="text-text-3">({bidCount})</span>}
+          </h2>
+          {isLive && (
+            <span className="flex items-center gap-1 text-[11px] font-semibold text-ok">
+              <span className="inline-block h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true" />
+              LIVE
+            </span>
           )}
         </div>
-      )}
-
-      {/* 입찰 내역 */}
-      <section className="mt-6">
-        <h2 className="text-sm font-bold text-text-1">
-          입찰 내역 {bidCount > 0 && <span className="text-text-3">({bidCount})</span>}
-        </h2>
         {bids.length > 0 ? (
-          <ul className="mt-2 divide-y divide-border rounded-r2 border border-border">
+          <ul className="mt-2 flex flex-col gap-1">
             {bids.map((bid, index) => (
-              <li key={bid.id} className="flex items-center justify-between px-3 py-2 text-xs">
-                <span className="text-text-2">
+              <li
+                key={bid.id}
+                className={`flex items-center justify-between rounded-r1 px-3 py-2 text-xs ${
+                  index === 0 ? "bg-ok-soft" : "bg-surface-2"
+                }`}
+              >
+                <span className={`font-semibold ${index === 0 ? "text-ok" : "text-text-2"}`}>
                   {index === 0 && (
-                    <span className="mr-1.5 rounded-full bg-primary-soft px-1.5 py-0.5 text-[10px] font-bold text-primary">
+                    <span className="mr-1.5 rounded-full bg-ok px-1.5 py-0.5 text-[10px] font-bold text-white">
                       최고가
                     </span>
                   )}
                   {bid.bidderNicknameMasked}
                 </span>
-                <span className="font-semibold text-text-1">{formatKRW(bid.amount)}</span>
+                <span className="flex items-baseline gap-2">
+                  <span className="font-bold text-text-1 tabular-nums">{formatKRW(bid.amount)}</span>
+                  <span className="text-[10px] text-text-3">{formatRelativeTime(bid.createdAt)}</span>
+                </span>
               </li>
             ))}
           </ul>

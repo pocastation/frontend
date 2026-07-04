@@ -68,6 +68,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             initialBidCount={auction.bidCount}
             initialEndAt={auction.endAt}
             status={auction.status}
+            sellerNickname={auction.sellerNickname}
           />
 
           <p className="mt-4 text-sm text-text-3">판매자: {auction.sellerNickname}</p>

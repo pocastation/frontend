@@ -17,14 +17,14 @@ export default function AuctionImageGallery({
 
   return (
     <div>
-      <div className="aspect-square overflow-hidden rounded-r4 border border-border bg-surface-2">
+      <div className="aspect-[4/5] overflow-hidden rounded-r4 border border-border bg-surface-2">
         {active ? (
           // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 물리 파일을 직접 서빙(로컬 디스크/S3), Next 이미지 최적화 대상 아님
           <img
             key={active.url}
             src={mediaUrl(active.url)}
             alt={`${title} 사진 ${activeIndex + 1}`}
-            className="h-full w-full object-cover animate-[fadeIn_150ms_ease-out]"
+            className="h-full w-full object-contain animate-[fadeIn_150ms_ease-out]"
             onError={(e) => {
               e.currentTarget.style.display = "none";
             }}

@@ -10,6 +10,11 @@ export function isEndingSoon(endAt: string, withinMs: number = ONE_DAY_MS): bool
   return new Date(endAt).getTime() - Date.now() < withinMs;
 }
 
+// 마감시각이 아직 미래인지(경매가 시간상 진행 중인지). 위와 같은 이유로 Date.now()를 헬퍼에 숨긴다.
+export function isBeforeEnd(endAt: string): boolean {
+  return new Date(endAt).getTime() > Date.now();
+}
+
 export function formatTimeLeft(endAt: string): string {
   const diffMs = new Date(endAt).getTime() - Date.now();
   if (diffMs <= 0) return "종료";

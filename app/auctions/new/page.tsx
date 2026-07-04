@@ -37,7 +37,6 @@ export default function NewAuctionPage() {
   const unopenedFieldId = useId();
   const conditionNoteFieldId = useId();
   const startPriceFieldId = useId();
-  const shippingFeeFieldId = useId();
 
   const [artists, setArtists] = useState<{ id: number; name: string }[]>([]);
   const [artistId, setArtistId] = useState<number | "">("");
@@ -53,7 +52,6 @@ export default function NewAuctionPage() {
   const [unopened, setUnopened] = useState(false);
   const [conditionNote, setConditionNote] = useState("");
   const [startPrice, setStartPrice] = useState("");
-  const [shippingFee, setShippingFee] = useState("0");
   const [durationDays, setDurationDays] = useState<number>(3);
 
   const [images, setImages] = useState<UploadedImage[]>([]);
@@ -137,7 +135,6 @@ export default function NewAuctionPage() {
           unopened,
           conditionNote: conditionNote || undefined,
           startPrice: Number(startPrice),
-          shippingFee: Number(shippingFee || 0),
           durationDays,
           images,
         },
@@ -332,39 +329,25 @@ export default function NewAuctionPage() {
         <section>
           <SectionHeading>가격 · 경매 기간</SectionHeading>
           <div className="flex flex-col gap-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor={startPriceFieldId} className="text-xs font-bold text-text-2">
-                  시작가(원) <span className="text-accent">*</span>
-                </label>
-                <input
-                  id={startPriceFieldId}
-                  type="number"
-                  required
-                  min={0}
-                  step={1000}
-                  inputMode="numeric"
-                  placeholder="10000"
-                  value={startPrice}
-                  onChange={(e) => setStartPrice(e.target.value)}
-                  className={INPUT_CLASS}
-                />
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor={shippingFeeFieldId} className="text-xs font-bold text-text-2">
-                  배송비(원)
-                </label>
-                <input
-                  id={shippingFeeFieldId}
-                  type="number"
-                  min={0}
-                  step={500}
-                  inputMode="numeric"
-                  value={shippingFee}
-                  onChange={(e) => setShippingFee(e.target.value)}
-                  className={INPUT_CLASS}
-                />
-              </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor={startPriceFieldId} className="text-xs font-bold text-text-2">
+                시작가(원) <span className="text-accent">*</span>
+              </label>
+              <input
+                id={startPriceFieldId}
+                type="number"
+                required
+                min={0}
+                step={1000}
+                inputMode="numeric"
+                placeholder="10000"
+                value={startPrice}
+                onChange={(e) => setStartPrice(e.target.value)}
+                className={INPUT_CLASS}
+              />
+              <p className="text-[11px] text-text-3">
+                배송비는 판매자 부담이에요. 배송비를 감안해 시작가를 정해주세요.
+              </p>
             </div>
 
             <fieldset>

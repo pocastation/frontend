@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import Link from "next/link";
 import AuctionCard from "@/components/AuctionCard";
 import { apiFetch } from "@/lib/api";
 import { useSearch } from "@/lib/search-context";
@@ -8,9 +9,10 @@ import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionListResponse, AuctionResponse } from "@/lib/types";
 
-type SortKey = "latest" | "popular" | "views" | "price_asc" | "price_desc";
+// /auctions 전용 페이지(AuctionBrowser)도 같은 정렬 기준을 쓰므로 여기서 export해 재사용한다.
+export type SortKey = "latest" | "popular" | "views" | "price_asc" | "price_desc";
 
-const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: "latest", label: "최신순" },
   { key: "popular", label: "인기순" },
   { key: "views", label: "조회순" },
@@ -73,6 +75,12 @@ export default function AuctionExplorer({
           </h2>
           <p className="mt-1 text-[13px] text-text-3">실시간 업데이트 · 지금 바로 확인하세요</p>
         </div>
+        <Link
+          href="/auctions"
+          className={`shrink-0 text-xs font-bold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
+        >
+          전체 보기 →
+        </Link>
       </div>
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">

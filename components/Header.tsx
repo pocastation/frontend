@@ -6,9 +6,13 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useSearch } from "@/lib/search-context";
 
-// 상단 메뉴는 리디자인 검토 과정에서 일단 비웠었음(§2026-07-05) — 아티스트 디렉터리가
-// 실제 콘텐츠를 갖추게 돼(§2026-07-06) 다시 되살림. 경매/종료된 경매는 아직 스텁이라 보류.
-const NAV_LINKS: { href: string; label: string }[] = [{ href: "/artists", label: "아티스트" }];
+// 상단 메뉴는 리디자인 검토 과정에서 일단 비웠었음(§2026-07-05) — 콘텐츠를 갖춘 페이지가
+// 하나씩 생길 때마다 되살리는 중(아티스트 §2026-07-06, 경매 목록 §2026-07-07). 종료된 경매는
+// 아직 스텁이라 보류.
+const NAV_LINKS: { href: string; label: string }[] = [
+  { href: "/auctions", label: "경매" },
+  { href: "/artists", label: "아티스트" },
+];
 
 const FOCUS_RING =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2";

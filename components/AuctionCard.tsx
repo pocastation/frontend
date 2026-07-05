@@ -3,6 +3,7 @@
 import { useState, type SyntheticEvent } from "react";
 import Link from "next/link";
 import AuctionCountdown from "@/components/AuctionCountdown";
+import WishlistHeart from "@/components/WishlistHeart";
 import { mediaUrl } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionResponse } from "@/lib/types";
@@ -67,6 +68,10 @@ export default function AuctionCard({ auction }: { auction: AuctionResponse }) {
         </span>
 
         {isLive && <AuctionCountdown endAt={auction.endAt} />}
+
+        <WishlistHeart
+          className={`absolute right-2 top-2 z-[2] flex h-7 w-7 items-center justify-center rounded-full bg-white/85 text-text-2 backdrop-blur-sm transition-colors hover:text-accent ${FOCUS_RING}`}
+        />
       </div>
 
       <div className="px-3.5 py-3">

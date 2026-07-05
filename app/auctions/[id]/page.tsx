@@ -4,6 +4,7 @@ import AuctionImageGallery from "@/components/AuctionImageGallery";
 import BidSection from "@/components/BidSection";
 import SearchLink from "@/components/SearchLink";
 import ShareButton from "@/components/ShareButton";
+import WishlistHeart from "@/components/WishlistHeart";
 import { apiFetch, ApiError } from "@/lib/api";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
@@ -44,7 +45,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
   ];
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 sm:py-8">
+    <div className="mx-auto max-w-[1160px] px-4 py-6 sm:py-8">
       <div className="mb-4 flex items-center justify-between">
         <Link
           href="/"
@@ -52,7 +53,12 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
         >
           <span aria-hidden="true">←</span> 목록으로
         </Link>
-        <ShareButton title={auction.title} />
+        <div className="flex items-center gap-3">
+          <ShareButton title={auction.title} />
+          <WishlistHeart
+            className={`flex items-center gap-1 rounded-r2 px-2 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-accent ${FOCUS_RING}`}
+          />
+        </div>
       </div>
 
       <div className="grid gap-8 sm:grid-cols-2">
@@ -92,21 +98,31 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
 
           <section className="mt-6">
             <h2 className="text-sm font-bold text-text-1">판매자 정보</h2>
-            <div className="mt-2 flex items-center justify-between rounded-r3 border border-border p-3.5">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-soft text-sm font-bold text-primary">
-                  {auction.sellerNickname.slice(0, 1).toUpperCase()}
-                </span>
-                <span className="text-sm font-bold text-text-1">{auction.sellerNickname}</span>
+            <div className="mt-2 rounded-r3 border border-border p-3.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-soft text-sm font-bold text-primary">
+                    {auction.sellerNickname.slice(0, 1).toUpperCase()}
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <span className="text-sm font-bold text-text-1">{auction.sellerNickname}</span>
+                    {/* 판매자 등급·거래 후기 도메인은 아직 없다 — 모두 기본 등급(LV.1)만 노출하고
+                        건수·평점처럼 판매자마다 달라야 할 숫자는 지어내지 않는다. */}
+                    <span className="rounded-full bg-primary-soft px-1.5 py-0.5 text-[10px] font-extrabold text-primary">
+                      LV.1
+                    </span>
+                  </span>
+                </div>
+                {auction.artistName && (
+                  <SearchLink
+                    query={auction.artistName}
+                    className={`text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
+                  >
+                    {auction.artistName} 다른 경매 보기 →
+                  </SearchLink>
+                )}
               </div>
-              {auction.artistName && (
-                <SearchLink
-                  query={auction.artistName}
-                  className={`text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
-                >
-                  {auction.artistName} 다른 경매 보기 →
-                </SearchLink>
-              )}
+              <p className="mt-1.5 text-[11px] text-text-3">거래 후기 기능은 준비 중이에요.</p>
             </div>
           </section>
         </div>
@@ -154,6 +170,13 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             viewCount={auction.viewCount}
           />
         </div>
+      </div>
+
+      <div className="mt-10 flex items-center gap-3 rounded-r3 bg-primary-soft px-5 py-4 text-sm font-semibold text-text-1">
+        안전한 거래를 위해 안내사항을 꼭 확인해주세요.
+        <Link href="/guide" className={`ml-auto shrink-0 font-bold text-primary hover:underline ${FOCUS_RING}`}>
+          자세히 보기 →
+        </Link>
       </div>
     </div>
   );

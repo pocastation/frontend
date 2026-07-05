@@ -17,6 +17,47 @@ export type TokenResponse = {
   expiresInSeconds: number;
 };
 
+// ─── 어드민 콘솔 ───
+
+export type MemberStatus = "ACTIVE" | "SUSPENDED" | "WITHDRAWN";
+
+// GET /api/admin/members 항목 — 가입방식(provider)은 "EMAIL"|"KAKAO"|"NAVER"|"GOOGLE".
+export type AdminMemberSummary = {
+  id: string;
+  email: string | null;
+  nickname: string;
+  provider: string;
+  status: MemberStatus;
+  role: string;
+  createdAt: string;
+  suspensionReason: string | null;
+};
+
+export type AdminMemberListResponse = {
+  content: AdminMemberSummary[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+// GET /api/admin/members/{id} — 기본정보 + 활동 요약(판매/입찰 건수).
+export type AdminMemberDetailResponse = AdminMemberSummary & {
+  sellingCount: number;
+  biddingCount: number;
+};
+
+export type MemberStatusAction = "SUSPEND" | "UNSUSPEND" | "WITHDRAW";
+
+// GET /api/admin/dashboard — 실제로 셀 수 있는 운영 지표만(결제 도메인 전이라 매출·정산 지표 없음).
+export type AdminDashboardResponse = {
+  totalMembers: number;
+  todaySignups: number;
+  liveAuctions: number;
+  recentMembers: AdminMemberSummary[];
+  recentAuctions: AuctionResponse[];
+};
+
 export type AuctionStatus =
   | "DRAFT"
   | "PENDING_REVIEW"

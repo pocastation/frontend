@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { mediaUrl } from "@/lib/api";
 import { formatKRW } from "@/lib/format";
+import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import type { AuctionResponse } from "@/lib/types";
 import WishlistHeart from "@/components/WishlistHeart";
 
@@ -13,6 +14,7 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
   const [index, setIndex] = useState(0);
   const current = featured[index] ?? null;
   const hasMultiple = featured.length > 1;
+  const { wishlisted, toggle } = useWishlistStatus(featured.map((a) => a.id));
 
   function go(delta: number) {
     setIndex((i) => (i + delta + featured.length) % featured.length);
@@ -126,7 +128,12 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
               ) : (
                 <span aria-hidden="true">🃏</span>
               )}
-              <WishlistHeart className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm hover:text-accent" />
+              <WishlistHeart
+                auctionId={current.id}
+                active={wishlisted.has(current.id)}
+                onToggle={(next) => toggle(current.id, next)}
+                className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm hover:text-accent"
+              />
             </div>
             <div className="border-t border-white/10 p-3.5">
               <p className="truncate text-sm font-bold text-white">{current.artistName ?? current.title}</p>

@@ -207,6 +207,21 @@ export type ArtistListResponse = {
   totalPages: number;
 };
 
+// GET /api/artists/{id} — 아티스트 상세(멤버 목록 포함).
+export type ArtistDetailResponse = {
+  id: number;
+  name: string;
+  nameEn: string | null;
+  type: ArtistType;
+  agency: string | null;
+  fandomName: string | null;
+  debutDate: string | null;
+  status: ArtistStatus;
+  parentArtistId: number | null;
+  imageUrl: string | null;
+  members: ArtistMemberResponse[];
+};
+
 export type ArtistMemberResponse = {
   idolId: number;
   stageName: string;

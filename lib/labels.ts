@@ -1,4 +1,4 @@
-import type { PhotocardGrade, PhotocardSource } from "./types";
+import type { ArtistStatus, ArtistType, PhotocardGrade, PhotocardSource } from "./types";
 
 // 등록 폼 select와 상세 페이지 배지 표시가 공유하는 한글 라벨.
 export const SOURCE_LABEL: Record<PhotocardSource, string> = {
@@ -37,3 +37,24 @@ export const GRADE_LABEL: Record<PhotocardGrade, string> = {
 export const GRADE_OPTIONS: PhotocardGrade[] = ["S", "A", "B", "C"];
 
 export const DURATION_OPTIONS = [1, 3, 7] as const;
+
+export const ARTIST_TYPE_LABEL: Record<ArtistType, string> = {
+  GROUP: "그룹",
+  SOLO: "솔로",
+  UNIT: "유닛",
+};
+
+export const ARTIST_TYPE_OPTIONS: ArtistType[] = ["GROUP", "SOLO", "UNIT"];
+
+// 배지 색은 실제 상태를 그대로 반영 — 해체/휴식기를 감추지 않는다.
+export const ARTIST_STATUS_LABEL: Record<ArtistStatus, string> = {
+  ACTIVE: "활동 중",
+  HIATUS: "휴식기",
+  DISBANDED: "해체",
+};
+
+export const ARTIST_STATUS_BADGE_CLASS: Record<ArtistStatus, string> = {
+  ACTIVE: "bg-ok-soft text-ok",
+  HIATUS: "bg-[#fff7ed] text-[#b45309]",
+  DISBANDED: "bg-surface-2 text-text-3",
+};

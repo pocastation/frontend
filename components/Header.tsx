@@ -6,9 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useSearch } from "@/lib/search-context";
 
-// 상단 메뉴(경매/아티스트/종료된 경매)는 리디자인 검토 과정에서 일단 제거하기로 함(§2026-07-05
-// 리디자인 세션) — 페이지 자체는 남아있고 링크만 없앤 것이라, 필요해지면 이 배열을 되살리면 된다.
-const NAV_LINKS: { href: string; label: string }[] = [];
+// 상단 메뉴는 리디자인 검토 과정에서 일단 비웠었음(§2026-07-05) — 아티스트 디렉터리가
+// 실제 콘텐츠를 갖추게 돼(§2026-07-06) 다시 되살림. 경매/종료된 경매는 아직 스텁이라 보류.
+const NAV_LINKS: { href: string; label: string }[] = [{ href: "/artists", label: "아티스트" }];
 
 const FOCUS_RING =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2";

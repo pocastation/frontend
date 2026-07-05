@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { AuthProvider } from "@/lib/auth-context";
 import { SearchProvider } from "@/lib/search-context";
+import { WishlistProvider } from "@/lib/wishlist-context";
 import "./globals.css";
 
 const notoSansKr = Noto_Sans_KR({
@@ -36,11 +37,13 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
-          <SearchProvider>
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </SearchProvider>
+          <WishlistProvider>
+            <SearchProvider>
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </SearchProvider>
+          </WishlistProvider>
         </AuthProvider>
       </body>
     </html>

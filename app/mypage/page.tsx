@@ -7,7 +7,13 @@ import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatKRW, formatTimeLeft } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
-import type { AuctionListResponse, AuctionResponse, MyBiddingListResponse, MyBiddingResponse } from "@/lib/types";
+import type {
+  AuctionListResponse,
+  AuctionResponse,
+  MyBiddingListResponse,
+  MyBiddingResponse,
+  WishlistListResponse,
+} from "@/lib/types";
 
 type Tab =
   | "dashboard"
@@ -151,9 +157,10 @@ const TAB_TITLE: Record<Tab, string> = {
   settings: "계정 설정",
 };
 
-// 도메인이 아직 없는 탭(관심 목록/계정 관리 전반)은 준비 중 안내만 보여준다 — 클릭했을 때
-// 아무 반응 없는 죽은 메뉴보다는, 메뉴는 다 보여주고 상태를 정직하게 알리는 쪽을 택했다.
-const STUB_TABS = new Set<Tab>(["wishlist", "profile", "notifications", "shipping", "settings"]);
+// 도메인이 아직 없는 탭(계정 관리 전반)은 준비 중 안내만 보여준다 — 클릭했을 때 아무 반응
+// 없는 죽은 메뉴보다는, 메뉴는 다 보여주고 상태를 정직하게 알리는 쪽을 택했다.
+// 관심 목록은 wishlist 도메인이 생겨 실제 데이터로 전환됨(더 이상 스텁 아님).
+const STUB_TABS = new Set<Tab>(["profile", "notifications", "shipping", "settings"]);
 
 // 당근식 통합 마이페이지 — 판매자/구매자 계정 구분 없이 "내 활동" = 판매 + 입찰.
 export default function MyPage() {
@@ -163,6 +170,7 @@ export default function MyPage() {
   const [tab, setTab] = useState<Tab>("dashboard");
   const [selling, setSelling] = useState<AuctionResponse[]>([]);
   const [bidding, setBidding] = useState<MyBiddingResponse[]>([]);
+  const [wishlist, setWishlist] = useState<AuctionResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -170,18 +178,30 @@ export default function MyPage() {
     setLoading(true);
     setError(null);
     try {
-      const [sellingRes, biddingRes] = await Promise.all([
+      const [sellingRes, biddingRes, wishlistRes] = await Promise.all([
         fetchWithAuth<AuctionListResponse>("/api/members/me/selling?size=50"),
         fetchWithAuth<MyBiddingListResponse>("/api/members/me/bidding?size=50"),
+        fetchWithAuth<WishlistListResponse>("/api/members/me/wishlist?size=50"),
       ]);
       setSelling(sellingRes.content);
       setBidding(biddingRes.content);
+      setWishlist(wishlistRes.content);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "내 활동을 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
   }, [fetchWithAuth]);
+
+  // 관심목록 해제 — 실패하면(드묾) 전체를 다시 불러와 서버 상태와 어긋나지 않게 한다.
+  async function handleRemoveWishlist(auctionId: number) {
+    setWishlist((prev) => prev.filter((a) => a.id !== auctionId));
+    try {
+      await fetchWithAuth<void>(`/api/auctions/${auctionId}/wishlist`, { method: "DELETE" });
+    } catch {
+      await loadMyActivity();
+    }
+  }
 
   useEffect(() => {
     if (isLoading) return;
@@ -353,6 +373,19 @@ export default function MyPage() {
               </div>
             )}
           </>
+        ) : tab === "wishlist" ? (
+          <>
+            <h1 className="font-display text-xl font-extrabold text-text-1">관심 목록</h1>
+            <p className="mt-1 text-sm text-text-3">찜한 경매 {wishlist.length}건</p>
+            <div className="mt-5">
+              <WishlistTabList
+                items={wishlist}
+                loading={loading}
+                emptyText="아직 찜한 경매가 없어요."
+                onRemove={handleRemoveWishlist}
+              />
+            </div>
+          </>
         ) : (
           <>
             <h1 className="font-display text-xl font-extrabold text-text-1">판매 내역</h1>
@@ -448,6 +481,63 @@ function SellingList({
                 </span>
               </span>
             </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+function WishlistTabList({
+  items,
+  loading,
+  emptyText,
+  onRemove,
+}: {
+  items: AuctionResponse[];
+  loading: boolean;
+  emptyText: string;
+  onRemove: (auctionId: number) => void;
+}) {
+  if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
+  if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
+
+  return (
+    <ul className="flex flex-col gap-2">
+      {items.map((item) => {
+        const isLive = item.status === "LIVE";
+        return (
+          <li key={item.id}>
+            <div className="flex items-center gap-3 rounded-r2 border border-border bg-surface p-2.5">
+              <Link
+                href={`/auctions/${item.id}`}
+                className={`flex min-w-0 flex-1 items-center gap-3 ${FOCUS_RING}`}
+              >
+                <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
+                <span className="min-w-0 flex-1">
+                  {item.artistName && (
+                    <span className="block truncate text-[11px] font-extrabold text-primary">{item.artistName}</span>
+                  )}
+                  <span className="block truncate text-sm font-bold text-text-1">{item.title}</span>
+                </span>
+                <span className="shrink-0 text-right">
+                  <span className="block font-display text-sm font-extrabold text-text-1">
+                    {formatKRW(item.currentPrice)}
+                  </span>
+                  <span className="block text-[10.5px] text-text-3">
+                    {isLive ? formatTimeLeft(item.endAt) : "종료"}
+                  </span>
+                </span>
+              </Link>
+              <button
+                type="button"
+                onClick={() => onRemove(item.id)}
+                aria-label="관심 목록에서 제외"
+                className={`shrink-0 rounded-full p-1.5 text-accent hover:bg-accent-soft ${FOCUS_RING}`}
+              >
+                <HeartIcon />
+              </button>
+            </div>
           </li>
         );
       })}

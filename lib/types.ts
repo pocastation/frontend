@@ -157,6 +157,16 @@ export type MyBiddingListResponse = {
   totalPages: number;
 };
 
+// 마이페이지 "관심목록" 탭 — GET /api/members/me/wishlist. 목록 조회(AuctionResponse)와
+// 동일한 항목 모양을 그대로 재사용한다(찜 여부 자체가 이 목록에 있다는 사실이라 별도 필드 불필요).
+export type WishlistListResponse = {
+  content: AuctionResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
 export type BidListResponse = {
   content: BidHistoryItem[];
   page: number;

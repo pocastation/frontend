@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import AuctionImageGallery from "@/components/AuctionImageGallery";
+import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import BidSection from "@/components/BidSection";
 import SearchLink from "@/components/SearchLink";
 import ShareButton from "@/components/ShareButton";
-import WishlistHeart from "@/components/WishlistHeart";
 import { apiFetch, ApiError } from "@/lib/api";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
@@ -55,7 +55,8 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
         </Link>
         <div className="flex items-center gap-3">
           <ShareButton title={auction.title} />
-          <WishlistHeart
+          <AuctionWishlistButton
+            auctionId={auction.id}
             className={`flex items-center gap-1 rounded-r2 px-2 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-accent ${FOCUS_RING}`}
           />
         </div>

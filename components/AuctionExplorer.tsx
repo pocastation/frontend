@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import AuctionCard from "@/components/AuctionCard";
 import { apiFetch } from "@/lib/api";
 import { useSearch } from "@/lib/search-context";
+import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionListResponse, AuctionResponse } from "@/lib/types";
 
@@ -36,6 +37,7 @@ export default function AuctionExplorer({
   const [totalElements, setTotalElements] = useState(initialAuctions.length);
   const [loading, setLoading] = useState(false);
   const isFirstRun = useRef(true);
+  const { wishlisted, toggle } = useWishlistStatus(results.map((a) => a.id));
 
   useEffect(() => {
     // 첫 렌더는 SSR 결과(검색어 없음·최신순)와 이미 같은 조건이라 재요청하지 않는다.
@@ -121,7 +123,12 @@ export default function AuctionExplorer({
         ) : (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))] gap-3.5">
             {results.map((auction) => (
-              <AuctionCard key={auction.id} auction={auction} />
+              <AuctionCard
+                key={auction.id}
+                auction={auction}
+                wishlisted={wishlisted.has(auction.id)}
+                onToggleWishlist={(next) => toggle(auction.id, next)}
+              />
             ))}
           </div>
         )}

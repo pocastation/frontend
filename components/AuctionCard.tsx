@@ -17,7 +17,15 @@ const STATUS_BADGE: Record<string, { label: string; className: string; pulse?: b
   SCHEDULED: { label: "시작 예정", className: "bg-primary/85" },
 };
 
-export default function AuctionCard({ auction }: { auction: AuctionResponse }) {
+export default function AuctionCard({
+  auction,
+  wishlisted,
+  onToggleWishlist,
+}: {
+  auction: AuctionResponse;
+  wishlisted: boolean;
+  onToggleWishlist: (next: boolean) => void;
+}) {
   const isLive = auction.status === "LIVE";
   const badgeKey = isLive && isEndingSoon(auction.endAt) ? "ENDING" : auction.status;
   const badge = STATUS_BADGE[badgeKey] ?? { label: auction.status, className: "bg-text-2/85" };
@@ -70,6 +78,9 @@ export default function AuctionCard({ auction }: { auction: AuctionResponse }) {
         {isLive && <AuctionCountdown endAt={auction.endAt} />}
 
         <WishlistHeart
+          auctionId={auction.id}
+          active={wishlisted}
+          onToggle={onToggleWishlist}
           className={`absolute right-2 top-2 z-[2] flex h-7 w-7 items-center justify-center rounded-full bg-white/85 text-text-2 backdrop-blur-sm transition-colors hover:text-accent ${FOCUS_RING}`}
         />
       </div>

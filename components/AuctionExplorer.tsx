@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import AuctionCard from "@/components/AuctionCard";
 import { apiFetch } from "@/lib/api";
 import { useSearch } from "@/lib/search-context";
@@ -23,7 +23,13 @@ const DEBOUNCE_MS = 300;
 // 검색·정렬을 서버가 처리한다(§B1) — 목록 전체를 한 번에 받아 클라이언트에서 거르던 이전
 // 방식은 매물이 늘면 안 맞아 폐기. 초기 진입은 서버컴포넌트(page.tsx)가 이미 기본값(검색어
 // 없음·최신순)으로 SSR해 온 결과를 그대로 쓰고, 이후 상호작용부터 클라이언트가 재요청한다.
-export default function AuctionExplorer({ initialAuctions }: { initialAuctions: AuctionResponse[] }) {
+export default function AuctionExplorer({
+  initialAuctions,
+  sidebar,
+}: {
+  initialAuctions: AuctionResponse[];
+  sidebar?: ReactNode;
+}) {
   const { query, setQuery } = useSearch();
   const [sortBy, setSortBy] = useState<SortKey>(DEFAULT_SORT);
   const [results, setResults] = useState<AuctionResponse[]>(initialAuctions);
@@ -105,19 +111,22 @@ export default function AuctionExplorer({ initialAuctions }: { initialAuctions: 
         </div>
       </div>
 
-      {results.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-20 text-center">
-          <p className="text-sm text-text-3">
-            {query ? "검색 결과가 없습니다." : "진행 중인 경매가 없습니다."}
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))] gap-3.5">
-          {results.map((auction) => (
-            <AuctionCard key={auction.id} auction={auction} />
-          ))}
-        </div>
-      )}
+      <div className={sidebar ? "grid items-start gap-6 lg:grid-cols-[1fr_280px]" : undefined}>
+        {results.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-20 text-center">
+            <p className="text-sm text-text-3">
+              {query ? "검색 결과가 없습니다." : "진행 중인 경매가 없습니다."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))] gap-3.5">
+            {results.map((auction) => (
+              <AuctionCard key={auction.id} auction={auction} />
+            ))}
+          </div>
+        )}
+        {sidebar}
+      </div>
     </section>
   );
 }

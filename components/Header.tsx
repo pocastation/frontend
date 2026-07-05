@@ -6,11 +6,9 @@ import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useSearch } from "@/lib/search-context";
 
-const NAV_LINKS = [
-  { href: "/", label: "경매" },
-  { href: "/artists", label: "아티스트" },
-  { href: "/auctions/ended", label: "종료된 경매" },
-];
+// 상단 메뉴(경매/아티스트/종료된 경매)는 리디자인 검토 과정에서 일단 제거하기로 함(§2026-07-05
+// 리디자인 세션) — 페이지 자체는 남아있고 링크만 없앤 것이라, 필요해지면 이 배열을 되살리면 된다.
+const NAV_LINKS: { href: string; label: string }[] = [];
 
 const FOCUS_RING =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2";
@@ -38,6 +36,16 @@ function PlusIcon() {
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
+function LogoutIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
     </svg>
   );
 }
@@ -120,10 +128,15 @@ export default function Header() {
           {isLoading ? (
             <div className="auth-skel" aria-hidden="true" />
           ) : member ? (
-            <button type="button" onClick={handleLogout} className="user-chip" title="로그아웃">
-              <span className="user-av">{member.nickname.slice(0, 1).toUpperCase()}</span>
-              <span className="user-nm">{member.nickname}</span>
-            </button>
+            <>
+              <Link href="/mypage" onClick={closeMenu} className="user-chip" title="마이페이지">
+                <span className="user-av">{member.nickname.slice(0, 1).toUpperCase()}</span>
+                <span className="user-nm">{member.nickname}</span>
+              </Link>
+              <button type="button" onClick={handleLogout} className="ic-btn" aria-label="로그아웃" title="로그아웃">
+                <LogoutIcon />
+              </button>
+            </>
           ) : (
             <Link href="/login" className="btn btn-o">
               로그인
@@ -195,7 +208,9 @@ export default function Header() {
                   판매 등록
                 </Link>
                 <div className="flex items-center justify-between px-1">
-                  <span className="text-sm font-semibold text-text-2">{member.nickname}님</span>
+                  <Link href="/mypage" onClick={closeMenu} className={`text-sm font-semibold text-text-2 ${FOCUS_RING}`}>
+                    {member.nickname}님 마이페이지 →
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className={`rounded-full border border-border-2 bg-white px-4 py-1.5 text-sm font-bold text-text-2 ${FOCUS_RING}`}

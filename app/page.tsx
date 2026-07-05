@@ -1,4 +1,5 @@
 import AuctionExplorer from "@/components/AuctionExplorer";
+import AuctionRankSidebar from "@/components/AuctionRankSidebar";
 import AuctionTicker from "@/components/AuctionTicker";
 import Hero from "@/components/Hero";
 import { apiFetch } from "@/lib/api";
@@ -15,15 +16,28 @@ async function getAuctions(): Promise<AuctionListResponse | null> {
   }
 }
 
+// "실시간 인기 경매" 사이드바 — 새 집계를 만들지 않고 기존 인기순(sort=popular=입찰수 desc) API를
+// 그대로 재사용한다.
+async function getPopularAuctions(): Promise<AuctionListResponse | null> {
+  try {
+    return await apiFetch<AuctionListResponse>("/api/auctions?sort=popular&size=5", { cache: "no-store" });
+  } catch {
+    return null;
+  }
+}
+
 export default async function Home() {
-  const auctions = await getAuctions();
+  const [auctions, popular] = await Promise.all([getAuctions(), getPopularAuctions()]);
   const content = auctions?.content ?? [];
 
   return (
     <div>
-      <Hero liveCount={content.length} featured={content[0] ?? null} />
+      <Hero liveCount={content.length} featured={content.slice(0, 3)} />
       <AuctionTicker />
-      <AuctionExplorer initialAuctions={content} />
+      <AuctionExplorer
+        initialAuctions={content}
+        sidebar={<AuctionRankSidebar auctions={popular?.content ?? []} />}
+      />
     </div>
   );
 }

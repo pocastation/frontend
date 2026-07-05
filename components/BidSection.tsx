@@ -193,7 +193,7 @@ export default function BidSection({
   return (
     <div className="mt-6">
       {/* 현재가 헤더 */}
-      <div className="rounded-r3 border border-border bg-surface p-4 shadow-card">
+      <div className={`rounded-r3 border border-border p-4 shadow-card ${isLive ? "bg-primary-soft" : "bg-surface"}`}>
         <div className="flex items-center justify-between text-xs font-semibold text-text-3">
           <span>현재가</span>
           <span>입찰 {bidCount}회</span>
@@ -209,6 +209,11 @@ export default function BidSection({
             {isLive && <span className="block text-[10px] font-normal text-text-3">마감까지</span>}
           </span>
         </div>
+        {isLive && (
+          <p className="mt-2 text-[10.5px] text-text-3">
+            마감 3분 전 입찰 시 종료 시간이 자동 연장돼요(최대 3회).
+          </p>
+        )}
         <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-[11px] text-text-3">
           <span>
             시작가 <span className="font-semibold text-text-2 tabular-nums">{formatKRW(startPrice)}</span>
@@ -234,44 +239,43 @@ export default function BidSection({
           </Link>
         ) : (
           <div className="mt-4">
-            {/* 호가 사다리 */}
-            <div className="rounded-r2 border border-border bg-surface p-2">
-              <div className="mb-1.5 flex items-center justify-between px-1 text-[11px] font-semibold text-text-3">
-                <span>호가 사다리</span>
-                <span>탭해서 입찰가 선택</span>
+            {/* 입찰 호가 — 현재가가 맨 아래, 위로 갈수록 높은 호가(최대 10호가 상한) */}
+            <div className="overflow-hidden rounded-r2 border border-border bg-surface">
+              <div className="flex items-center justify-between border-b border-border px-3.5 py-2.5 text-sm font-extrabold text-text-1">
+                <span>입찰 호가</span>
+                <span className="text-[11px] font-semibold text-text-3">현재가부터 상위 10호가</span>
               </div>
-              <div className="flex flex-col gap-1" role="group" aria-label="입찰가 선택">
-                {rungs.map((p) => {
+              <div role="group" aria-label="입찰가 선택">
+                {rungs.map((p, i) => {
                   const selected = p === amount;
-                  const tag = p === ceil ? "상한 +10호가" : p === floor ? "최소 입찰가" : "";
+                  const isNextBid = i === rungs.length - 1;
+                  const tag = isNextBid ? "다음 호가" : `${rungs.length - i}호가`;
                   return (
                     <button
                       key={p}
                       type="button"
                       aria-pressed={selected}
                       onClick={() => selectRung(p)}
-                      className={`flex items-center justify-between rounded-r1 px-3 py-1.5 text-sm tabular-nums transition-colors ${FOCUS_RING} ${
-                        selected
-                          ? "bg-primary font-bold text-white"
-                          : "bg-surface-2 text-text-2 hover:bg-primary-soft hover:text-primary"
+                      className={`flex w-full items-center justify-between px-3.5 py-1.5 text-sm tabular-nums transition-colors ${FOCUS_RING} ${
+                        selected ? "bg-accent-soft font-bold text-accent" : "text-text-2 hover:bg-surface-2"
                       }`}
                     >
                       <span>{formatKRW(p)}</span>
-                      <span
-                        className={`text-[10px] font-semibold ${selected ? "text-white/80" : "text-text-3"}`}
-                      >
+                      <span className={`text-[10px] font-semibold ${selected ? "text-accent" : "text-text-3"}`}>
                         {tag}
                       </span>
                     </button>
                   );
                 })}
-                {/* 현재가 기준선 */}
-                <div className="mt-0.5 flex items-center justify-between rounded-r1 border border-dashed border-border px-3 py-1.5 text-sm tabular-nums text-text-3">
-                  <span>{formatKRW(currentPrice)}</span>
-                  <span className="text-[10px] font-semibold">
-                    현재가{bids[0] ? ` · ${bids[0].bidderNicknameMasked}` : ""}
-                  </span>
+                {/* 현재가 행 — 사다리 맨 아래 */}
+                <div className="flex items-center justify-between bg-primary-soft px-3.5 py-2.5 text-[15px] font-extrabold tabular-nums text-primary">
+                  <span>현재가 {formatKRW(currentPrice)}</span>
+                  <span className="text-xs font-bold">{bids[0]?.bidderNicknameMasked ?? "-"}</span>
                 </div>
+              </div>
+              <div className="flex items-center justify-between border-t border-border px-3.5 py-2 text-[11px] text-text-3">
+                <span>입찰 단위 {formatKRW(BID_MIN_INCREMENT)}</span>
+                <span>실시간 갱신 · SSE</span>
               </div>
             </div>
 
@@ -323,11 +327,11 @@ export default function BidSection({
           </div>
         ))}
 
-      {/* 실시간 입찰 테이프 */}
-      <section className="mt-6">
+      {/* 입찰 이력 */}
+      <section className="mt-6 rounded-r3 border border-border bg-surface p-4 shadow-card">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-text-1">
-            실시간 입찰 {bidCount > 0 && <span className="text-text-3">({bidCount})</span>}
+            입찰 이력 {bidCount > 0 && <span className="text-text-3">({bidCount})</span>}
           </h2>
           {isLive && (
             <span className="flex items-center gap-1 text-[11px] font-semibold text-ok">

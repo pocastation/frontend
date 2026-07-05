@@ -133,6 +133,30 @@ export type BidHistoryItem = {
   createdAt: string;
 };
 
+// 마이페이지 "입찰" 탭 항목 — 목록 조회 항목에 내 최고 입찰액·현재 최고가 여부가 더해진다.
+export type MyBiddingResponse = {
+  id: number;
+  title: string;
+  artistName: string | null;
+  representativeThumbnailUrl: string | null;
+  startPrice: number;
+  currentPrice: number;
+  status: AuctionStatus;
+  endAt: string;
+  bidCount: number;
+  viewCount: number;
+  myBidAmount: number;
+  isTopBidder: boolean;
+};
+
+export type MyBiddingListResponse = {
+  content: MyBiddingResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
 export type BidListResponse = {
   content: BidHistoryItem[];
   page: number;

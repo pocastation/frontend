@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import ArtistCombobox from "@/components/ArtistCombobox";
 import { apiFetch, ApiError, mediaUrl, uploadMediaImage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -13,10 +14,12 @@ const MAX_IMAGES = 12;
 
 type UploadedImage = { url: string; thumbnailUrl: string };
 
-function SectionHeading({ children }: { children: React.ReactNode }) {
+function SectionHeading({ step, children }: { step: number; children: React.ReactNode }) {
   return (
-    <h2 className="mb-3 flex items-center gap-2 text-xs font-extrabold tracking-wide text-text-3">
-      <span className="h-3 w-1 rounded-full bg-primary" aria-hidden="true" />
+    <h2 className="mb-4 flex items-center gap-2.5 text-sm font-extrabold text-text-1">
+      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-extrabold text-white">
+        {step}
+      </span>
       {children}
     </h2>
   );
@@ -156,15 +159,27 @@ export default function NewAuctionPage() {
   }
 
   return (
-    <div className="mx-auto max-w-lg px-4 py-8 sm:py-10">
-      <h1 className="mb-1 font-display text-xl font-extrabold text-text-1">경매 등록</h1>
-      <p className="mb-6 text-xs text-text-3">
-        정확한 카탈로그 정보와 실물 사진일수록 거래 신뢰도가 올라가요.
-      </p>
+    <div className="mx-auto max-w-2xl px-4 py-8 sm:py-10">
+      <div className="mb-5 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-display text-xl font-extrabold text-text-1">판매 등록</h1>
+          <p className="mt-1 text-xs text-text-3">정확한 정보와 실물 사진일수록 거래 신뢰도가 올라가요.</p>
+        </div>
+        <Link
+          href="/guide"
+          className={`flex shrink-0 items-center gap-1 rounded-full border border-border-2 px-3 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+        >
+          <span aria-hidden="true">?</span> 판매 가이드
+        </Link>
+      </div>
 
-      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-8">
+      <form
+        onSubmit={handleSubmit}
+        noValidate
+        className="flex flex-col gap-8 rounded-r4 border border-border bg-surface p-5 shadow-card sm:p-7"
+      >
         <section>
-          <SectionHeading>카탈로그 · 소개</SectionHeading>
+          <SectionHeading step={1}>카테고리 · 소개</SectionHeading>
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
               <label htmlFor={artistFieldId} className="text-xs font-bold text-text-2">
@@ -228,8 +243,8 @@ export default function NewAuctionPage() {
           </div>
         </section>
 
-        <section>
-          <SectionHeading>상품 정보</SectionHeading>
+        <section className="border-t border-border pt-8">
+          <SectionHeading step={2}>상품 정보</SectionHeading>
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
@@ -326,8 +341,8 @@ export default function NewAuctionPage() {
           </div>
         </section>
 
-        <section>
-          <SectionHeading>가격 · 경매 기간</SectionHeading>
+        <section className="border-t border-border pt-8">
+          <SectionHeading step={3}>가격 · 경매 기간</SectionHeading>
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
               <label htmlFor={startPriceFieldId} className="text-xs font-bold text-text-2">
@@ -373,8 +388,8 @@ export default function NewAuctionPage() {
           </div>
         </section>
 
-        <section>
-          <SectionHeading>사진</SectionHeading>
+        <section className="border-t border-border pt-8">
+          <SectionHeading step={4}>사진</SectionHeading>
           <p className="mb-2 text-xs text-text-3">1~{MAX_IMAGES}장, 첫 장이 대표사진으로 노출돼요.</p>
 
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">

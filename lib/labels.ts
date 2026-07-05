@@ -1,4 +1,4 @@
-import type { ArtistStatus, ArtistType, PhotocardGrade, PhotocardSource } from "./types";
+import type { ArtistStatus, ArtistType, MemberStatus, PhotocardGrade, PhotocardSource } from "./types";
 
 // 등록 폼 select와 상세 페이지 배지 표시가 공유하는 한글 라벨.
 export const SOURCE_LABEL: Record<PhotocardSource, string> = {
@@ -57,4 +57,25 @@ export const ARTIST_STATUS_BADGE_CLASS: Record<ArtistStatus, string> = {
   ACTIVE: "bg-ok-soft text-ok",
   HIATUS: "bg-[#fff7ed] text-[#b45309]",
   DISBANDED: "bg-surface-2 text-text-3",
+};
+
+// 어드민 회원 상태 — 실제 상태를 그대로 반영(정지/탈퇴를 감추지 않음).
+export const MEMBER_STATUS_LABEL: Record<MemberStatus, string> = {
+  ACTIVE: "활동",
+  SUSPENDED: "정지",
+  WITHDRAWN: "탈퇴",
+};
+
+export const MEMBER_STATUS_BADGE_CLASS: Record<MemberStatus, string> = {
+  ACTIVE: "bg-ok-soft text-ok",
+  SUSPENDED: "bg-accent-soft text-accent",
+  WITHDRAWN: "bg-surface-2 text-text-3",
+};
+
+// 가입 방식 표시 — 소셜은 provider 그대로, 그 외는 이메일.
+export const PROVIDER_LABEL: Record<string, string> = {
+  EMAIL: "이메일",
+  KAKAO: "카카오",
+  NAVER: "네이버",
+  GOOGLE: "구글",
 };

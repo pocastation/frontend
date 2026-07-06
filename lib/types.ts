@@ -58,6 +58,28 @@ export type AdminDashboardResponse = {
   recentAuctions: AuctionResponse[];
 };
 
+// GET /api/admin/auctions 항목 — 공개 목록(AuctionResponse)에 판매자 닉네임·취소사유를 더한 것.
+export type AdminAuctionSummary = {
+  id: number;
+  title: string;
+  sellerNickname: string | null;
+  artistName: string | null;
+  representativeThumbnailUrl: string | null;
+  currentPrice: number;
+  bidCount: number;
+  status: AuctionStatus;
+  endAt: string;
+  cancellationReason: string | null;
+};
+
+export type AdminAuctionListResponse = {
+  content: AdminAuctionSummary[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
 export type AuctionStatus =
   | "DRAFT"
   | "PENDING_REVIEW"
@@ -66,7 +88,8 @@ export type AuctionStatus =
   | "SCHEDULED"
   | "LIVE"
   | "ENDED_SOLD"
-  | "ENDED_NO_BIDS";
+  | "ENDED_NO_BIDS"
+  | "CANCELLED";
 
 export type AuctionResponse = {
   id: number;

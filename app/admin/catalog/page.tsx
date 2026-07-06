@@ -1,11 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { apiFetch, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { formatKRW, formatTimeLeft, isEndingSoon } from "@/lib/format";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import type {
   ArtistListResponse,
@@ -13,9 +10,6 @@ import type {
   ArtistResponse,
   ArtistStatus,
   ArtistType,
-  AuctionListResponse,
-  AuctionResponse,
-  AuctionStatus,
   MemberResponse,
 } from "@/lib/types";
 
@@ -41,17 +35,6 @@ const ARTIST_STATUS_LABEL: Record<ArtistStatus, string> = {
   ACTIVE: "활동",
   HIATUS: "휴식",
   DISBANDED: "해체",
-};
-
-const AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
-  DRAFT: "임시저장",
-  PENDING_REVIEW: "검수 대기",
-  APPROVED: "승인",
-  REJECTED: "반려",
-  SCHEDULED: "시작 예정",
-  LIVE: "진행 중",
-  ENDED_SOLD: "낙찰 종료",
-  ENDED_NO_BIDS: "유찰",
 };
 
 const initialArtistForm = {
@@ -97,33 +80,10 @@ function getErrorMessage(err: unknown, fallback: string): string {
   return err instanceof ApiError ? err.message : fallback;
 }
 
-function AdminStat({
-  label,
-  value,
-  tone = "default",
-}: {
-  label: string;
-  value: string;
-  tone?: "default" | "primary" | "accent";
-}) {
-  const toneClass =
-    tone === "primary" ? "text-primary" : tone === "accent" ? "text-accent" : "text-text-1";
-
-  return (
-    <div className="rounded-r2 border border-border bg-white p-4 shadow-card">
-      <p className="text-xs font-bold text-text-3">{label}</p>
-      <p className={`mt-2 font-display text-2xl font-extrabold ${toneClass}`}>{value}</p>
-    </div>
-  );
-}
-
-export default function AdminPage() {
-  const router = useRouter();
-  const { accessToken, member, isLoading, fetchWithAuth } = useAuth();
+export default function AdminCatalogPage() {
+  const { accessToken, member, fetchWithAuth } = useAuth();
   const canUseAdmin = isAdmin(member);
 
-  const [auctions, setAuctions] = useState<AuctionResponse[]>([]);
-  const [auctionTotal, setAuctionTotal] = useState(0);
   const [artists, setArtists] = useState<ArtistResponse[]>([]);
   const [artistTotal, setArtistTotal] = useState(0);
   const [selectedArtistId, setSelectedArtistId] = useState<number | "">("");
@@ -141,12 +101,7 @@ export default function AdminPage() {
     setIsDataLoading(true);
     setNotice(null);
     try {
-      const [auctionRes, artistRes] = await Promise.all([
-        apiFetch<AuctionListResponse>("/api/auctions?size=80", { cache: "no-store" }),
-        apiFetch<ArtistListResponse>("/api/artists?size=120", { cache: "no-store" }),
-      ]);
-      setAuctions(auctionRes.content);
-      setAuctionTotal(auctionRes.totalElements);
+      const artistRes = await apiFetch<ArtistListResponse>("/api/artists?size=120", { cache: "no-store" });
       setArtists(artistRes.content);
       setArtistTotal(artistRes.totalElements);
     } catch (err) {
@@ -169,35 +124,16 @@ export default function AdminPage() {
   }, []);
 
   useEffect(() => {
-    if (isLoading) return;
-    if (!accessToken) {
-      router.replace("/login?redirect=/admin");
-      return;
-    }
-    if (canUseAdmin) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- 인증 상태가 확정된 뒤 외부 API 데이터를 동기화한다.
-      void loadOverview();
-    }
-  }, [accessToken, canUseAdmin, isLoading, loadOverview, router]);
+    // 인증·관리자 권한 가드는 상위 app/admin/layout.tsx가 이미 보장한다 — 여기선 데이터만 1회 로드.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 마운트 시 카탈로그 데이터 동기화.
+    void loadOverview();
+  }, [loadOverview]);
 
   useEffect(() => {
-    if (!canUseAdmin || selectedArtistId === "") return;
+    if (selectedArtistId === "") return;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 선택된 아티스트가 바뀔 때 서버 멤버 목록을 동기화한다.
     void loadArtistMembers(selectedArtistId);
-  }, [canUseAdmin, loadArtistMembers, selectedArtistId]);
-
-  const dashboard = useMemo(() => {
-    const totalBids = auctions.reduce((sum, auction) => sum + auction.bidCount, 0);
-    const totalViews = auctions.reduce((sum, auction) => sum + auction.viewCount, 0);
-    const highestPrice = auctions.reduce((max, auction) => Math.max(max, auction.currentPrice), 0);
-    const endingSoonCount = auctions.filter((auction) => isEndingSoon(auction.endAt)).length;
-    const statusCounts = auctions.reduce<Record<string, number>>((acc, auction) => {
-      acc[auction.status] = (acc[auction.status] ?? 0) + 1;
-      return acc;
-    }, {});
-
-    return { totalBids, totalViews, highestPrice, endingSoonCount, statusCounts };
-  }, [auctions]);
+  }, [loadArtistMembers, selectedArtistId]);
 
   function handleArtistSelect(value: string) {
     const next = value ? Number(value) : "";
@@ -297,60 +233,21 @@ export default function AdminPage() {
     }
   }
 
-  if (isLoading) {
-    return (
-      <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">
-        관리자 권한을 확인하는 중...
-      </div>
-    );
-  }
-
-  if (!accessToken) {
-    return (
-      <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">
-        로그인 페이지로 이동 중...
-      </div>
-    );
-  }
-
-  if (!canUseAdmin) {
-    return (
-      <main className="mx-auto max-w-lg px-4 py-16 text-center">
-        <p className="text-xs font-extrabold tracking-wide text-accent">ACCESS DENIED</p>
-        <h1 className="mt-2 font-display text-2xl font-extrabold text-text-1">관리자 권한이 필요합니다</h1>
-        <p className="mt-3 text-sm leading-relaxed text-text-3">
-          현재 계정은 {member?.role ?? "알 수 없음"} 권한입니다. 관리자 계정으로 로그인한 뒤 다시 접근해주세요.
-        </p>
-        <Link href="/" className={`mt-6 inline-flex h-11 items-center px-5 ${SECONDARY_BUTTON_CLASS}`}>
-          홈으로 돌아가기
-        </Link>
-      </main>
-    );
-  }
-
   return (
-    <main className="mx-auto max-w-[1160px] px-4 py-8 sm:py-10">
+    <div>
       <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-xs font-extrabold tracking-wide text-primary">POCASTATION ADMIN</p>
-          <h1 className="mt-1 font-display text-2xl font-extrabold text-text-1">관리자 콘솔</h1>
-          <p className="mt-2 text-sm text-text-3">
-            경매 흐름, 카탈로그 데이터, 신규 아티스트/멤버 등록을 한 화면에서 관리합니다.
-          </p>
+          <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">카탈로그 관리</h1>
+          <p className="mt-1.5 text-sm text-text-3">아티스트·멤버 마스터데이터를 등록하고 관리합니다.</p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-primary-soft px-3 py-1.5 text-xs font-extrabold text-primary">
-            {member?.nickname} · ADMIN
-          </span>
-          <button
-            type="button"
-            onClick={() => void loadOverview()}
-            disabled={isDataLoading}
-            className={`h-9 px-4 ${SECONDARY_BUTTON_CLASS}`}
-          >
-            {isDataLoading ? "새로고침 중" : "새로고침"}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => void loadOverview()}
+          disabled={isDataLoading}
+          className={`h-9 px-4 ${SECONDARY_BUTTON_CLASS}`}
+        >
+          {isDataLoading ? "새로고침 중" : "새로고침"}
+        </button>
       </div>
 
       {notice && (
@@ -366,120 +263,47 @@ export default function AdminPage() {
         </div>
       )}
 
-      <section className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <AdminStat label="노출 중 경매" value={`${auctionTotal.toLocaleString("ko-KR")}개`} tone="primary" />
-        <AdminStat label="총 입찰 수" value={`${dashboard.totalBids.toLocaleString("ko-KR")}회`} />
-        <AdminStat label="마감 임박" value={`${dashboard.endingSoonCount.toLocaleString("ko-KR")}개`} tone="accent" />
-        <AdminStat label="최고 현재가" value={formatKRW(dashboard.highestPrice)} />
-      </section>
+      <section className="mt-6 rounded-r2 border border-border bg-white p-4 shadow-card">
+        <h2 className="font-display text-base font-extrabold text-text-1">카탈로그 요약</h2>
+        <p className="mt-1 text-xs text-text-3">등록된 아티스트와 운영 상태입니다.</p>
 
-      <section className="mt-6 grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
-        <div className="rounded-r2 border border-border bg-white p-4 shadow-card">
-          <div className="mb-4 flex items-center justify-between gap-3">
-            <div>
-              <h2 className="font-display text-base font-extrabold text-text-1">경매 운영 현황</h2>
-              <p className="mt-1 text-xs text-text-3">현재 목록 API에 노출되는 경매 기준입니다.</p>
-            </div>
-            <span className="rounded-full bg-surface-2 px-2.5 py-1 text-xs font-bold text-text-2">
-              조회 {dashboard.totalViews.toLocaleString("ko-KR")}
-            </span>
+        <div className="mt-4 grid grid-cols-2 gap-2 sm:max-w-xs">
+          <div className="rounded-r2 bg-surface-2 p-3">
+            <p className="text-xs text-text-3">아티스트</p>
+            <p className="mt-1 font-display text-xl font-extrabold text-text-1">
+              {artistTotal.toLocaleString("ko-KR")}
+            </p>
           </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] text-left text-sm">
-              <thead className="border-b border-border text-xs text-text-3">
-                <tr>
-                  <th className="py-2 pr-3 font-bold">경매</th>
-                  <th className="py-2 pr-3 font-bold">상태</th>
-                  <th className="py-2 pr-3 font-bold">현재가</th>
-                  <th className="py-2 pr-3 font-bold">입찰/조회</th>
-                  <th className="py-2 pr-3 font-bold">마감</th>
-                  <th className="py-2 font-bold">관리</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {auctions.slice(0, 8).map((auction) => (
-                  <tr key={auction.id}>
-                    <td className="py-3 pr-3">
-                      <p className="max-w-[260px] truncate font-bold text-text-1">{auction.title}</p>
-                      <p className="mt-0.5 text-xs text-text-3">{auction.artistName ?? "아티스트 미지정"}</p>
-                    </td>
-                    <td className="py-3 pr-3">
-                      <span className="rounded-full bg-primary-soft px-2 py-1 text-xs font-bold text-primary">
-                        {AUCTION_STATUS_LABEL[auction.status] ?? auction.status}
-                      </span>
-                    </td>
-                    <td className="py-3 pr-3 font-display font-bold text-text-1">{formatKRW(auction.currentPrice)}</td>
-                    <td className="py-3 pr-3 text-xs text-text-2">
-                      {auction.bidCount}회 · {auction.viewCount}뷰
-                    </td>
-                    <td className="py-3 pr-3 text-xs font-semibold text-text-2">{formatTimeLeft(auction.endAt)}</td>
-                    <td className="py-3">
-                      <Link
-                        href={`/auctions/${auction.id}`}
-                        className={`rounded-full text-xs font-bold text-primary hover:underline ${FOCUS_RING}`}
-                      >
-                        상세
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-                {auctions.length === 0 && (
-                  <tr>
-                    <td colSpan={6} className="py-10 text-center text-sm text-text-3">
-                      노출 중인 경매가 없습니다.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+          <div className="rounded-r2 bg-surface-2 p-3">
+            <p className="text-xs text-text-3">활동중</p>
+            <p className="mt-1 font-display text-xl font-extrabold text-primary">
+              {artists.filter((artist) => artist.status === "ACTIVE").length.toLocaleString("ko-KR")}
+            </p>
           </div>
         </div>
 
-        <div className="rounded-r2 border border-border bg-white p-4 shadow-card">
-          <h2 className="font-display text-base font-extrabold text-text-1">카탈로그 요약</h2>
-          <p className="mt-1 text-xs text-text-3">등록된 아티스트와 운영 상태입니다.</p>
-
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <div className="rounded-r2 bg-surface-2 p-3">
-              <p className="text-xs text-text-3">아티스트</p>
-              <p className="mt-1 font-display text-xl font-extrabold text-text-1">
-                {artistTotal.toLocaleString("ko-KR")}
-              </p>
-            </div>
-            <div className="rounded-r2 bg-surface-2 p-3">
-              <p className="text-xs text-text-3">활동중</p>
-              <p className="mt-1 font-display text-xl font-extrabold text-primary">
-                {artists.filter((artist) => artist.status === "ACTIVE").length.toLocaleString("ko-KR")}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-4 max-h-[330px] overflow-y-auto">
-            <div className="divide-y divide-border">
-              {artists.slice(0, 14).map((artist) => (
-                <button
-                  key={artist.id}
-                  type="button"
-                  onClick={() => {
-                    handleArtistSelect(String(artist.id));
-                    setMembershipForm((prev) => ({ ...prev, artistId: String(artist.id) }));
-                  }}
-                  className={`flex w-full items-center justify-between gap-3 py-2.5 text-left ${FOCUS_RING}`}
-                >
-                  <span>
-                    <span className="block text-sm font-bold text-text-1">{artist.name}</span>
-                    <span className="text-xs text-text-3">
-                      {ARTIST_TYPE_LABEL[artist.type]} · {artist.agency ?? "소속사 미입력"}
-                    </span>
+        <div className="mt-4 grid gap-x-4 gap-y-0.5 sm:grid-cols-2 lg:grid-cols-3">
+          {artists.slice(0, 30).map((artist) => (
+              <button
+                key={artist.id}
+                type="button"
+                onClick={() => {
+                  handleArtistSelect(String(artist.id));
+                  setMembershipForm((prev) => ({ ...prev, artistId: String(artist.id) }));
+                }}
+                className={`flex w-full items-center justify-between gap-3 border-b border-border py-2.5 text-left ${FOCUS_RING}`}
+              >
+                <span>
+                  <span className="block text-sm font-bold text-text-1">{artist.name}</span>
+                  <span className="text-xs text-text-3">
+                    {ARTIST_TYPE_LABEL[artist.type]} · {artist.agency ?? "소속사 미입력"}
                   </span>
-                  <span className="shrink-0 rounded-full bg-surface-3 px-2 py-1 text-[11px] font-bold text-text-2">
-                    {ARTIST_STATUS_LABEL[artist.status]}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+                </span>
+                <span className="shrink-0 rounded-full bg-surface-3 px-2 py-1 text-[11px] font-bold text-text-2">
+                  {ARTIST_STATUS_LABEL[artist.status]}
+                </span>
+              </button>
+          ))}
         </div>
       </section>
 
@@ -668,20 +492,6 @@ export default function AdminPage() {
           </div>
         </form>
       </section>
-
-      <section className="mt-6 rounded-r2 border border-border bg-white p-4 shadow-card">
-        <h2 className="font-display text-base font-extrabold text-text-1">상태별 경매 분포</h2>
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          {Object.entries(AUCTION_STATUS_LABEL).map(([status, label]) => (
-            <div key={status} className="flex items-center justify-between rounded-r2 bg-surface-2 px-3 py-2">
-              <span className="text-xs font-bold text-text-2">{label}</span>
-              <span className="font-display text-sm font-extrabold text-text-1">
-                {(dashboard.statusCounts[status] ?? 0).toLocaleString("ko-KR")}
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
-    </main>
+    </div>
   );
 }

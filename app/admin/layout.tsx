@@ -77,6 +77,13 @@ function BellIcon() {
     </svg>
   );
 }
+function ClipboardListIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M9 12h6M9 16h6M9 8h6M6 4h12a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" />
+    </svg>
+  );
+}
 
 // 지금 쓸 수 있는 메뉴 / 준비 중인 메뉴를 구분해 보여준다(어드민 기능 지도 §2026-07-06 기준).
 const OPERATION_NAV: NavItem[] = [
@@ -85,6 +92,7 @@ const OPERATION_NAV: NavItem[] = [
   { href: "/admin/catalog", label: "카탈로그 관리", icon: <CardIcon />, ready: true },
   { href: "/admin/auctions", label: "경매 관리", icon: <GavelIcon />, ready: true },
   { href: "/admin/reports", label: "신고 관리", icon: <FlagIcon />, ready: true },
+  { href: "/admin/audit", label: "감사 로그", icon: <ClipboardListIcon />, ready: true },
   { href: "/admin/notices", label: "공지사항", icon: <MegaphoneIcon />, ready: false },
 ];
 

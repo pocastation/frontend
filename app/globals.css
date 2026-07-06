@@ -78,6 +78,10 @@ body {
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 60px;
+  /* 페이지마다 콘텐츠 높이가 달라 스크롤바가 생겼다 사라졌다 하면서 mx-auto 중앙정렬 콘텐츠가
+     좌우로 흔들리는 걸 방지 — 항상 스크롤바를 표시해 뷰포트 가용폭을 고정한다.
+     (scrollbar-gutter: stable은 뷰포트 루트 요소에 온전히 적용되지 않는 브라우저 한계로 실측 후 폐기) */
+  overflow-y: scroll;
 }
 
 a {

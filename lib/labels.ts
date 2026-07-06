@@ -1,4 +1,4 @@
-import type { ArtistStatus, ArtistType, MemberStatus, PhotocardGrade, PhotocardSource } from "./types";
+import type { ArtistStatus, ArtistType, AuctionStatus, MemberStatus, PhotocardGrade, PhotocardSource } from "./types";
 
 // 등록 폼 select와 상세 페이지 배지 표시가 공유하는 한글 라벨.
 export const SOURCE_LABEL: Record<PhotocardSource, string> = {
@@ -78,4 +78,31 @@ export const PROVIDER_LABEL: Record<string, string> = {
   KAKAO: "카카오",
   NAVER: "네이버",
   GOOGLE: "구글",
+};
+
+// 어드민 화면(카탈로그 관리·경매 관리)이 공유하는 경매 상태 라벨. MVP는 자동승인이라
+// DRAFT/PENDING_REVIEW/APPROVED/REJECTED/SCHEDULED는 실제로는 거의 안 보이지만, 상태기계
+// 자체엔 남아있어 라벨은 준비해둔다.
+export const AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
+  DRAFT: "임시저장",
+  PENDING_REVIEW: "검수 대기",
+  APPROVED: "승인",
+  REJECTED: "반려",
+  SCHEDULED: "시작 예정",
+  LIVE: "진행 중",
+  ENDED_SOLD: "낙찰 종료",
+  ENDED_NO_BIDS: "유찰",
+  CANCELLED: "취소됨",
+};
+
+export const AUCTION_STATUS_BADGE_CLASS: Record<AuctionStatus, string> = {
+  DRAFT: "bg-surface-2 text-text-3",
+  PENDING_REVIEW: "bg-[#fff7ed] text-[#b45309]",
+  APPROVED: "bg-ok-soft text-ok",
+  REJECTED: "bg-accent-soft text-accent",
+  SCHEDULED: "bg-primary-soft text-primary",
+  LIVE: "bg-ok-soft text-ok",
+  ENDED_SOLD: "bg-surface-2 text-text-3",
+  ENDED_NO_BIDS: "bg-surface-2 text-text-3",
+  CANCELLED: "bg-accent-soft text-accent",
 };

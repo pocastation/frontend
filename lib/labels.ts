@@ -1,4 +1,14 @@
-import type { ArtistStatus, ArtistType, AuctionStatus, MemberStatus, PhotocardGrade, PhotocardSource } from "./types";
+import type {
+  ArtistStatus,
+  ArtistType,
+  AuctionStatus,
+  MemberStatus,
+  PhotocardGrade,
+  PhotocardSource,
+  ReportReason,
+  ReportStatus,
+  ResolutionAction,
+} from "./types";
 
 // 등록 폼 select와 상세 페이지 배지 표시가 공유하는 한글 라벨.
 export const SOURCE_LABEL: Record<PhotocardSource, string> = {
@@ -105,4 +115,50 @@ export const AUCTION_STATUS_BADGE_CLASS: Record<AuctionStatus, string> = {
   ENDED_SOLD: "bg-surface-2 text-text-3",
   ENDED_NO_BIDS: "bg-surface-2 text-text-3",
   CANCELLED: "bg-accent-soft text-accent",
+};
+
+// 신고 사유 6종 — 신고 모달의 선택지 순서와 어드민 목록의 배지 순서가 이 배열을 공유한다.
+export const REPORT_REASON_LABEL: Record<ReportReason, string> = {
+  BANNED_ITEM: "금지품목",
+  PHOTO_THEFT: "도용 사진",
+  HARMFUL_CONTENT: "유해물·불법촬영물",
+  FRAUD_SUSPECTED: "사기 의심",
+  ABUSE: "욕설·비방",
+  ETC: "기타",
+};
+
+export const REPORT_REASON_OPTIONS: ReportReason[] = [
+  "BANNED_ITEM",
+  "PHOTO_THEFT",
+  "HARMFUL_CONTENT",
+  "FRAUD_SUSPECTED",
+  "ABUSE",
+  "ETC",
+];
+
+export const REPORT_REASON_BADGE_CLASS: Record<ReportReason, string> = {
+  BANNED_ITEM: "bg-surface-2 text-text-2",
+  PHOTO_THEFT: "bg-[#fbe7f0] text-[#d63a7e]",
+  HARMFUL_CONTENT: "bg-[#fbe7f0] text-[#d63a7e]",
+  FRAUD_SUSPECTED: "bg-[#fdf1de] text-[#e08a1e]",
+  ABUSE: "bg-[#f1ebfe] text-[#8b5cf6]",
+  ETC: "bg-surface-2 text-text-2",
+};
+
+// 접수/처리완료/반려 — 처리완료·반려를 감추지 않고 그대로 보여준다(§1 신뢰 원칙).
+export const REPORT_STATUS_LABEL: Record<ReportStatus, string> = {
+  RECEIVED: "접수",
+  RESOLVED: "처리완료",
+  REJECTED: "반려",
+};
+
+export const REPORT_STATUS_BADGE_CLASS: Record<ReportStatus, string> = {
+  RECEIVED: "bg-[#fff7ed] text-[#b45309]",
+  RESOLVED: "bg-ok-soft text-ok",
+  REJECTED: "bg-accent-soft text-accent",
+};
+
+export const RESOLUTION_ACTION_LABEL: Record<ResolutionAction, string> = {
+  AUCTION_CANCELLED: "매물 취소",
+  NONE: "조치 없음(반려)",
 };

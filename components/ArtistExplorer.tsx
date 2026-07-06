@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import ArtistCard from "@/components/ArtistCard";
+import { CardSkeletonGrid, ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
 import { apiFetch } from "@/lib/api";
 import { ARTIST_TYPE_LABEL, ARTIST_TYPE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
@@ -9,6 +10,7 @@ import type { ArtistListResponse, ArtistResponse, ArtistType } from "@/lib/types
 
 const PAGE_SIZE = 24;
 const DEBOUNCE_MS = 300;
+const GRID_CLASS = "grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3.5";
 
 function buildParams(query: string, type: ArtistType | null, page: number) {
   const params = new URLSearchParams({ size: String(PAGE_SIZE), page: String(page) });
@@ -36,38 +38,42 @@ export default function ArtistExplorer({
   const [totalPages, setTotalPages] = useState(initialTotalPages);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [error, setError] = useState(false);
+  const [moreError, setMoreError] = useState(false);
   const isFirstRun = useRef(true);
 
   // 검색어·타입 필터가 바뀌면 첫 페이지부터 다시 조회(목록 전체 교체).
+  const fetchFirstPage = useCallback(async () => {
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await apiFetch<ArtistListResponse>(`/api/artists?${buildParams(query, type, 0)}`, {
+        cache: "no-store",
+      });
+      setArtists(res.content);
+      setPage(0);
+      setTotalElements(res.totalElements);
+      setTotalPages(res.totalPages);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, [query, type]);
+
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
       return;
     }
-
-    const timer = setTimeout(async () => {
-      setLoading(true);
-      try {
-        const res = await apiFetch<ArtistListResponse>(`/api/artists?${buildParams(query, type, 0)}`, {
-          cache: "no-store",
-        });
-        setArtists(res.content);
-        setPage(0);
-        setTotalElements(res.totalElements);
-        setTotalPages(res.totalPages);
-      } catch {
-        // 검색 실패는 조용히 무시하고 직전 결과를 유지한다.
-      } finally {
-        setLoading(false);
-      }
-    }, DEBOUNCE_MS);
-
+    const timer = setTimeout(fetchFirstPage, DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [query, type]);
+  }, [fetchFirstPage]);
 
   async function loadMore() {
     const nextPage = page + 1;
     setLoadingMore(true);
+    setMoreError(false);
     try {
       const res = await apiFetch<ArtistListResponse>(`/api/artists?${buildParams(query, type, nextPage)}`, {
         cache: "no-store",
@@ -76,13 +82,14 @@ export default function ArtistExplorer({
       setPage(nextPage);
       setTotalPages(res.totalPages);
     } catch {
-      // 더보기 실패는 조용히 무시 — 이미 보이는 목록은 유지.
+      setMoreError(true);
     } finally {
       setLoadingMore(false);
     }
   }
 
   const hasMore = page + 1 < totalPages;
+  const filtered = query.trim() !== "" || type !== null;
 
   return (
     <div>
@@ -129,31 +136,57 @@ export default function ArtistExplorer({
         </div>
       </div>
 
-      <p className="mb-3 text-xs text-text-3">
-        {totalElements}개{loading && " · 검색 중..."}
+      <p className="mb-3 flex items-center gap-2 text-xs text-text-3">
+        <span>{totalElements}개</span>
+        {loading && <InlineSpinner />}
       </p>
 
-      {artists.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 py-20 text-center">
-          <p className="text-sm text-text-3">{query ? "검색 결과가 없습니다." : "등록된 아티스트가 없습니다."}</p>
+      {error && (
+        <div className="mb-4">
+          <ExploreError title="아티스트를 불러오지 못했어요" onRetry={fetchFirstPage} />
         </div>
+      )}
+
+      {loading ? (
+        <div className={GRID_CLASS}>
+          <CardSkeletonGrid count={12} variant="artist" />
+        </div>
+      ) : artists.length === 0 ? (
+        error ? null : (
+          <ExploreEmpty
+            title={filtered ? "조건에 맞는 아티스트가 없어요" : "등록된 아티스트가 없습니다"}
+            hint={filtered ? "다른 키워드로 검색하거나 필터를 바꿔보세요." : undefined}
+            onClear={
+              filtered
+                ? () => {
+                    setQuery("");
+                    setType(null);
+                  }
+                : undefined
+            }
+            clearLabel="필터 초기화"
+          />
+        )
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3.5">
+        <div className={`${GRID_CLASS} ${error ? "opacity-45" : ""}`}>
           {artists.map((artist) => (
             <ArtistCard key={artist.id} artist={artist} />
           ))}
         </div>
       )}
 
-      {hasMore && (
-        <div className="mt-8 flex justify-center">
+      {hasMore && !loading && (
+        <div className="mt-8 flex flex-col items-center gap-2">
+          {moreError && (
+            <p className="text-xs font-semibold text-accent">더 불러오지 못했어요. 다시 시도해 주세요.</p>
+          )}
           <button
             type="button"
             onClick={loadMore}
             disabled={loadingMore}
             className={`flex h-11 items-center gap-2 rounded-full border border-border-2 bg-white px-6 text-[13.5px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
-            {loadingMore ? "불러오는 중..." : "더 보기"}
+            {loadingMore ? "불러오는 중..." : moreError ? "다시 시도" : "더 보기"}
           </button>
         </div>
       )}

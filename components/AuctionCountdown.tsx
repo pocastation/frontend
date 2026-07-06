@@ -21,9 +21,13 @@ function computeLabel(endAt: string): string | null {
 // 참고 디자인의 카드 배지(썸네일 좌하단, 반투명 블랙+블러 필)를 그대로 따르되, 원본은
 // 일(day) 단위를 안 다뤄서 여러 날 남은 경매에 "70시간" 식으로 나오는 문제가 있어 그 부분만 보완.
 export default function AuctionCountdown({ endAt }: { endAt: string }) {
-  const [label, setLabel] = useState(() => computeLabel(endAt));
+  // 서버 시각으로 SSR한 값은 클라이언트 하이드레이션 시점(초가 흐른 뒤)과 어긋나 하이드레이션
+  // 미스매치를 일으킨다 — 초기값을 null로 두어 서버·클라 첫 렌더를 "배지 없음"으로 일치시키고,
+  // 마운트 직후(체감 0ms) effect에서 실제 남은시간을 계산해 표시한다.
+  const [label, setLabel] = useState<string | null>(null);
 
   useEffect(() => {
+    setLabel(computeLabel(endAt));
     const id = setInterval(() => setLabel(computeLabel(endAt)), 1000);
     return () => clearInterval(id);
   }, [endAt]);

@@ -2,6 +2,9 @@ import type {
   ArtistStatus,
   ArtistType,
   AuctionStatus,
+  AuditAction,
+  AuditTargetType,
+  MemberRole,
   MemberStatus,
   PhotocardGrade,
   PhotocardSource,
@@ -161,4 +164,49 @@ export const REPORT_STATUS_BADGE_CLASS: Record<ReportStatus, string> = {
 export const RESOLUTION_ACTION_LABEL: Record<ResolutionAction, string> = {
   AUCTION_CANCELLED: "매물 취소",
   NONE: "조치 없음(반려)",
+};
+
+// 감사 로그 조치 8종 — 색은 계열별로 구분(정지·취소 계열=경고, 해제·처리완료 계열=ok,
+// 탈퇴·반려=중립 회색, 역할변경은 승격/회수를 서로 다른 톤으로).
+export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
+  MEMBER_SUSPENDED: "회원 정지",
+  MEMBER_UNSUSPENDED: "회원 정지해제",
+  MEMBER_WITHDRAWN: "회원 탈퇴처리",
+  AUCTION_CANCELLED: "경매 강제취소",
+  REPORT_RESOLVED: "신고 처리(매물취소)",
+  REPORT_REJECTED: "신고 반려",
+  MEMBER_ROLE_GRANTED: "관리자 승격",
+  MEMBER_ROLE_REVOKED: "관리자 권한회수",
+};
+
+export const AUDIT_ACTION_OPTIONS: AuditAction[] = [
+  "MEMBER_SUSPENDED",
+  "MEMBER_UNSUSPENDED",
+  "MEMBER_WITHDRAWN",
+  "AUCTION_CANCELLED",
+  "REPORT_RESOLVED",
+  "REPORT_REJECTED",
+  "MEMBER_ROLE_GRANTED",
+  "MEMBER_ROLE_REVOKED",
+];
+
+export const AUDIT_ACTION_BADGE_CLASS: Record<AuditAction, string> = {
+  MEMBER_SUSPENDED: "bg-accent-soft text-accent",
+  MEMBER_UNSUSPENDED: "bg-ok-soft text-ok",
+  MEMBER_WITHDRAWN: "bg-surface-2 text-text-2",
+  AUCTION_CANCELLED: "bg-accent-soft text-accent",
+  REPORT_RESOLVED: "bg-ok-soft text-ok",
+  REPORT_REJECTED: "bg-surface-2 text-text-2",
+  MEMBER_ROLE_GRANTED: "bg-primary-soft text-primary",
+  MEMBER_ROLE_REVOKED: "bg-[#fff7ed] text-[#b45309]",
+};
+
+export const AUDIT_TARGET_TYPE_LABEL: Record<AuditTargetType, string> = {
+  MEMBER: "회원",
+  AUCTION: "경매",
+};
+
+export const MEMBER_ROLE_LABEL: Record<MemberRole, string> = {
+  ADMIN: "관리자",
+  USER: "일반",
 };

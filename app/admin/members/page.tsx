@@ -3,12 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { MEMBER_STATUS_BADGE_CLASS, MEMBER_STATUS_LABEL, PROVIDER_LABEL } from "@/lib/labels";
+import { MEMBER_ROLE_LABEL, MEMBER_STATUS_BADGE_CLASS, MEMBER_STATUS_LABEL, PROVIDER_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
   AdminMemberDetailResponse,
   AdminMemberListResponse,
   AdminMemberSummary,
+  MemberRole,
   MemberStatus,
   MemberStatusAction,
 } from "@/lib/types";
@@ -35,7 +36,7 @@ function formatDate(iso: string) {
 }
 
 export default function AdminMembersPage() {
-  const { fetchWithAuth } = useAuth();
+  const { fetchWithAuth, member: me } = useAuth();
 
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<MemberStatus | "ALL">("ALL");
@@ -52,6 +53,12 @@ export default function AdminMembersPage() {
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
+
+  const [roleTarget, setRoleTarget] = useState<MemberRole | null>(null);
+  const [roleReason, setRoleReason] = useState("");
+  const [roleSubmitting, setRoleSubmitting] = useState(false);
+  const [roleError, setRoleError] = useState<string | null>(null);
+  const [roleToast, setRoleToast] = useState<string | null>(null);
 
   const isFirstRun = useRef(true);
 
@@ -105,6 +112,9 @@ export default function AdminMembersPage() {
       setSelectedId(id);
       setReason("");
       setNotice(null);
+      setRoleTarget(null);
+      setRoleReason("");
+      setRoleError(null);
       setDetailLoading(true);
       try {
         setDetail(await fetchWithAuth<AdminMemberDetailResponse>(`/api/admin/members/${id}`));
@@ -143,6 +153,32 @@ export default function AdminMembersPage() {
       setNotice({ kind: "error", text: err instanceof ApiError ? err.message : "상태 변경에 실패했습니다." });
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function confirmRoleChange() {
+    if (!detail || !roleTarget || roleSubmitting) return;
+    if (!roleReason.trim()) {
+      setRoleError("사유를 입력해주세요.");
+      return;
+    }
+    setRoleSubmitting(true);
+    setRoleError(null);
+    try {
+      await fetchWithAuth<void>(`/api/admin/members/${detail.id}/role`, {
+        method: "PATCH",
+        body: { role: roleTarget, reason: roleReason.trim() },
+      });
+      const verb = roleTarget === "ADMIN" ? "관리자로 승격" : "관리자 권한을 회수";
+      setRoleToast(`${detail.nickname}님을 ${verb}했습니다. 대상이 다시 로그인해야 반영됩니다.`);
+      setTimeout(() => setRoleToast(null), 4000);
+      setRoleTarget(null);
+      setRoleReason("");
+      await Promise.all([openDetail(detail.id), fetchList(query, statusFilter)]);
+    } catch (err) {
+      setRoleError(err instanceof ApiError ? err.message : "역할 변경에 실패했습니다.");
+    } finally {
+      setRoleSubmitting(false);
     }
   }
 
@@ -374,10 +410,100 @@ export default function AdminMembersPage() {
                   탈퇴 처리된 계정입니다.
                 </p>
               )}
+
+              {/* 권한 — 본인 계정은 변경 금지(락아웃 방지), 정지된 회원은 승격 불가(백엔드 제약과 정합). */}
+              <div className="mt-4 border-t border-border pt-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <p className="text-[11px] font-extrabold text-text-3">권한</p>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${detail.role === "ADMIN" ? "bg-primary-soft text-primary" : "bg-surface-2 text-text-2"}`}>
+                    {MEMBER_ROLE_LABEL[detail.role as MemberRole]}
+                  </span>
+                </div>
+                {me?.id === detail.id ? (
+                  <p className="rounded-r2 bg-surface-2 px-3 py-2 text-center text-[11.5px] leading-relaxed text-text-3">
+                    본인 계정의 역할은 변경할 수 없어요
+                  </p>
+                ) : detail.role === "ADMIN" ? (
+                  <button
+                    type="button"
+                    onClick={() => { setRoleTarget("USER"); setRoleReason(""); setRoleError(null); }}
+                    className={`h-10 w-full rounded-r2 border border-[#fbdca8] bg-[#fff7ed] text-sm font-bold text-[#b45309] transition-opacity hover:opacity-90 ${FOCUS_RING}`}
+                  >
+                    관리자 권한 회수
+                  </button>
+                ) : detail.status === "ACTIVE" ? (
+                  <button
+                    type="button"
+                    onClick={() => { setRoleTarget("ADMIN"); setRoleReason(""); setRoleError(null); }}
+                    className={`h-10 w-full rounded-r2 bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+                  >
+                    관리자로 승격
+                  </button>
+                ) : (
+                  <p className="rounded-r2 bg-surface-2 px-3 py-2 text-center text-[11.5px] leading-relaxed text-text-3">
+                    활동 상태인 회원만 승격할 수 있어요
+                  </p>
+                )}
+              </div>
             </div>
           )}
         </aside>
       </div>
+
+      {roleTarget && detail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-sm rounded-r3 bg-surface p-5 shadow-modal">
+            <h2 className="font-display text-base font-extrabold text-text-1">
+              {roleTarget === "ADMIN" ? "관리자로 승격" : "관리자 권한 회수"}
+            </h2>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
+              {roleTarget === "ADMIN"
+                ? <>&quot;{detail.nickname}&quot;님을 관리자로 승격합니다. 회원 정지·경매 취소·신고 처리 권한이 부여됩니다.</>
+                : <>&quot;{detail.nickname}&quot;님의 관리자 권한을 회수합니다. 더 이상 관리 기능을 사용할 수 없습니다.</>}
+            </p>
+            <label className="sr-only" htmlFor="role-reason">사유</label>
+            <textarea
+              id="role-reason"
+              value={roleReason}
+              onChange={(e) => setRoleReason(e.target.value)}
+              placeholder={roleTarget === "ADMIN" ? "승격 사유를 입력하세요." : "회수 사유를 입력하세요."}
+              rows={3}
+              autoFocus
+              className={`mt-3 w-full resize-none rounded-r2 border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+            />
+            {roleError && (
+              <p role="alert" className="mt-2 rounded-r2 bg-accent-soft px-3 py-2 text-[12px] font-semibold text-accent">
+                {roleError}
+              </p>
+            )}
+            <div className="mt-3 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setRoleTarget(null)}
+                disabled={roleSubmitting}
+                className={`h-10 flex-1 rounded-r2 border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={confirmRoleChange}
+                disabled={roleSubmitting}
+                className={`h-10 flex-1 rounded-r2 bg-primary text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+              >
+                {roleSubmitting ? "처리 중..." : roleTarget === "ADMIN" ? "승격 확정" : "회수 확정"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {roleToast && (
+        <div className="fixed bottom-6 left-1/2 z-50 flex max-w-sm -translate-x-1/2 items-start gap-2.5 rounded-r3 border border-[#bfe8d2] bg-ok-soft px-4 py-3 shadow-modal">
+          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ok text-[11px] font-bold text-white">✓</span>
+          <p className="text-[12.5px] font-semibold leading-relaxed text-ok">{roleToast}</p>
+        </div>
+      )}
     </div>
   );
 }

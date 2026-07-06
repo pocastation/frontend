@@ -353,3 +353,41 @@ export type ArtistMemberResponse = {
   leftAt: string | null;
   active: boolean;
 };
+
+// ─── 감사 로그 ───
+
+export type AuditAction =
+  | "MEMBER_SUSPENDED"
+  | "MEMBER_UNSUSPENDED"
+  | "MEMBER_WITHDRAWN"
+  | "AUCTION_CANCELLED"
+  | "REPORT_RESOLVED"
+  | "REPORT_REJECTED"
+  | "MEMBER_ROLE_GRANTED"
+  | "MEMBER_ROLE_REVOKED";
+
+export type AuditTargetType = "MEMBER" | "AUCTION";
+
+// GET /api/admin/audit-logs 항목 — targetLabel은 대상이 회원이면 닉네임, 경매면 제목.
+export type AdminAuditLogResponse = {
+  id: number;
+  actorNickname: string | null;
+  action: AuditAction;
+  targetType: AuditTargetType;
+  targetId: string;
+  targetLabel: string | null;
+  reason: string | null;
+  detail: string | null;
+  createdAt: string;
+};
+
+export type AdminAuditLogListResponse = {
+  content: AdminAuditLogResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+// PATCH /api/admin/members/{id}/role 요청 바디의 role 값.
+export type MemberRole = "ADMIN" | "USER";

@@ -195,9 +195,9 @@ export default function AdminMembersPage() {
                 <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
                   <th className="px-4 py-2.5">닉네임</th>
                   <th className="px-4 py-2.5">이메일 / 가입</th>
-                  <th className="px-4 py-2.5">상태</th>
-                  <th className="px-4 py-2.5">역할</th>
-                  <th className="px-4 py-2.5">가입일</th>
+                  <th className="whitespace-nowrap px-4 py-2.5">상태</th>
+                  <th className="whitespace-nowrap px-4 py-2.5">역할</th>
+                  <th className="whitespace-nowrap px-4 py-2.5">가입일</th>
                 </tr>
               </thead>
               <tbody>
@@ -221,13 +221,13 @@ export default function AdminMembersPage() {
                         <span className="block truncate">{m.email ?? "—"}</span>
                         <span className="text-[11px] text-text-3">{PROVIDER_LABEL[m.provider] ?? m.provider}</span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="whitespace-nowrap px-4 py-3">
                         <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${MEMBER_STATUS_BADGE_CLASS[m.status]}`}>
                           {MEMBER_STATUS_LABEL[m.status]}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-text-2">{m.role === "ADMIN" ? "관리자" : "일반"}</td>
-                      <td className="px-4 py-3 tabular-nums text-text-3">{formatDate(m.createdAt)}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-text-2">{m.role === "ADMIN" ? "관리자" : "일반"}</td>
+                      <td className="whitespace-nowrap px-4 py-3 tabular-nums text-text-3">{formatDate(m.createdAt)}</td>
                     </tr>
                   ))
                 )}

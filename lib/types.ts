@@ -54,8 +54,66 @@ export type AdminDashboardResponse = {
   totalMembers: number;
   todaySignups: number;
   liveAuctions: number;
+  pendingReportCount: number;
   recentMembers: AdminMemberSummary[];
   recentAuctions: AuctionResponse[];
+};
+
+// ─── 신고(report) ───
+
+export type ReportReason =
+  | "BANNED_ITEM"
+  | "PHOTO_THEFT"
+  | "HARMFUL_CONTENT"
+  | "FRAUD_SUSPECTED"
+  | "ABUSE"
+  | "ETC";
+
+export type ReportStatus = "RECEIVED" | "RESOLVED" | "REJECTED";
+
+export type ResolutionAction = "AUCTION_CANCELLED" | "NONE";
+
+// GET /api/admin/reports 항목 — 같은 경매(대상)에 대한 신고를 신고자 수로 묶어 보여준다.
+export type AdminReportSummary = {
+  auctionId: number;
+  auctionTitle: string | null;
+  artistName: string | null;
+  representativeThumbnailUrl: string | null;
+  representativeReason: ReportReason;
+  reporterCount: number;
+  latestReportedAt: string;
+  status: ReportStatus;
+};
+
+export type AdminReportListResponse = {
+  content: AdminReportSummary[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+// GET /api/admin/reports/{auctionId} 신고자 항목 — 어드민 화면이라 닉네임은 마스킹하지 않는다.
+export type AdminReportItem = {
+  reportId: number;
+  reporterNickname: string;
+  reasonCode: ReportReason;
+  detail: string | null;
+  status: ReportStatus;
+  createdAt: string;
+};
+
+export type AdminReportDetailResponse = {
+  auctionId: number;
+  auctionTitle: string | null;
+  artistName: string | null;
+  sellerNickname: string;
+  reports: AdminReportItem[];
+  actionable: boolean;
+  resolutionAction: ResolutionAction | null;
+  handledByNickname: string | null;
+  handledAt: string | null;
+  resolutionNote: string | null;
 };
 
 // GET /api/admin/auctions 항목 — 공개 목록(AuctionResponse)에 판매자 닉네임·취소사유를 더한 것.

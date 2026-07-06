@@ -57,10 +57,11 @@ export default function AdminDashboardPage() {
         </p>
       )}
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
+      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatCard label="전체 회원 수" value={loading ? "—" : `${data?.totalMembers ?? 0}명`} tone="bg-primary-soft" />
         <StatCard label="오늘 신규 가입" value={loading ? "—" : `${data?.todaySignups ?? 0}명`} tone="bg-ok-soft" />
-        <StatCard label="진행 중인 경매" value={loading ? "—" : `${data?.liveAuctions ?? 0}건`} tone="bg-accent-soft" />
+        <StatCard label="진행 중인 경매" value={loading ? "—" : `${data?.liveAuctions ?? 0}건`} tone="bg-surface-3" />
+        <StatCard label="처리 대기 신고" value={loading ? "—" : `${data?.pendingReportCount ?? 0}건`} tone="bg-accent-soft" />
       </div>
 
       <div className="mt-8 grid gap-5 lg:grid-cols-2">

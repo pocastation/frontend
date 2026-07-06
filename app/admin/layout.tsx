@@ -84,7 +84,7 @@ const OPERATION_NAV: NavItem[] = [
   { href: "/admin/members", label: "회원 관리", icon: <UsersIcon />, ready: true },
   { href: "/admin/catalog", label: "카탈로그 관리", icon: <CardIcon />, ready: true },
   { href: "/admin/auctions", label: "경매 관리", icon: <GavelIcon />, ready: true },
-  { href: "/admin/reports", label: "신고 관리", icon: <FlagIcon />, ready: false },
+  { href: "/admin/reports", label: "신고 관리", icon: <FlagIcon />, ready: true },
   { href: "/admin/notices", label: "공지사항", icon: <MegaphoneIcon />, ready: false },
 ];
 

@@ -3,6 +3,7 @@ import Link from "next/link";
 import AuctionImageGallery from "@/components/AuctionImageGallery";
 import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import BidSection from "@/components/BidSection";
+import ReportButton from "@/components/ReportButton";
 import SearchLink from "@/components/SearchLink";
 import ShareButton from "@/components/ShareButton";
 import { apiFetch, ApiError } from "@/lib/api";
@@ -59,6 +60,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             auctionId={auction.id}
             className={`flex items-center gap-1 rounded-r2 px-2 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-accent ${FOCUS_RING}`}
           />
+          <ReportButton auctionId={auction.id} />
         </div>
       </div>
 

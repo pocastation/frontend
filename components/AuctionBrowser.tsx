@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import AuctionCard from "@/components/AuctionCard";
 import { SORT_OPTIONS, type SortKey } from "@/components/AuctionExplorer";
-import { CardSkeletonGrid, ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
+import { ExploreEmpty, ExploreError, ExploreLoading, InlineSpinner } from "@/components/explore-states";
 import { apiFetch } from "@/lib/api";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import { FOCUS_RING } from "@/lib/ui";
@@ -154,20 +154,8 @@ export default function AuctionBrowser({
         </div>
       )}
 
-      {loading && auctions.length === 0 ? (
-        // 스켈레톤은 초기 로드(카드가 아직 없을 때)만. 재정렬·재검색 중엔 기존 카드 유지(dim).
-        <div className={GRID_CLASS}>
-          <CardSkeletonGrid count={10} variant="auction" />
-        </div>
-      ) : auctions.length === 0 ? (
-        error ? null : (
-          <ExploreEmpty
-            title={query ? `"${query}" 검색 결과가 없어요` : emptyTitle}
-            hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
-            onClear={query ? () => setQuery("") : undefined}
-          />
-        )
-      ) : (
+      {auctions.length > 0 ? (
+        // 재정렬·재검색 중에도 기존 카드를 유지하고 dim만 준다(스켈레톤으로 통째 교체 X).
         <div className={`${GRID_CLASS} transition-opacity ${loading ? "opacity-60" : error ? "opacity-45" : ""}`}>
           {auctions.map((auction) => (
             <AuctionCard
@@ -178,6 +166,15 @@ export default function AuctionBrowser({
             />
           ))}
         </div>
+      ) : loading ? (
+        // 빈 목록에서 정렬/필터 중 — 가짜 스켈레톤 대신 가벼운 스피너.
+        <ExploreLoading />
+      ) : error ? null : (
+        <ExploreEmpty
+          title={query ? `"${query}" 검색 결과가 없어요` : emptyTitle}
+          hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
+          onClear={query ? () => setQuery("") : undefined}
+        />
       )}
 
       {hasMore && !loading && (

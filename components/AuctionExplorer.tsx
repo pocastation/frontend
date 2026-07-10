@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import AuctionCard from "@/components/AuctionCard";
-import { CardSkeletonGrid, ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
+import { ExploreEmpty, ExploreError, ExploreLoading, InlineSpinner } from "@/components/explore-states";
 import { apiFetch } from "@/lib/api";
 import { useSearch } from "@/lib/search-context";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
@@ -156,21 +156,8 @@ export default function AuctionExplorer({
               <ExploreError onRetry={fetchResults} />
             </div>
           )}
-          {loading && results.length === 0 ? (
-            // 스켈레톤은 보여줄 카드가 아직 하나도 없을 때(초기 로드)만. 재정렬·재검색처럼
-            // 이미 카드가 떠 있는 상태에서는 기존 카드를 유지(dim)해 깜빡임을 없앤다.
-            <div className={GRID_CLASS}>
-              <CardSkeletonGrid count={10} variant="auction" />
-            </div>
-          ) : results.length === 0 ? (
-            error ? null : (
-              <ExploreEmpty
-                title={query ? `"${query}" 검색 결과가 없어요` : emptyTitle}
-                hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
-                onClear={query ? () => setQuery("") : undefined}
-              />
-            )
-          ) : (
+          {results.length > 0 ? (
+            // 재정렬·재검색 중에도 기존 카드를 유지하고 dim만 준다(스켈레톤으로 통째 교체 X).
             <div className={`${GRID_CLASS} transition-opacity ${loading ? "opacity-60" : error ? "opacity-45" : ""}`}>
               {results.map((auction) => (
                 <AuctionCard
@@ -181,6 +168,16 @@ export default function AuctionExplorer({
                 />
               ))}
             </div>
+          ) : loading ? (
+            // 보여줄 카드가 없는데 로딩 중 — 빈 목록에서 정렬/필터를 눌러도 가짜 스켈레톤을
+            // 번쩍이지 않고 가벼운 스피너만.
+            <ExploreLoading />
+          ) : error ? null : (
+            <ExploreEmpty
+              title={query ? `"${query}" 검색 결과가 없어요` : emptyTitle}
+              hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
+              onClear={query ? () => setQuery("") : undefined}
+            />
           )}
         </div>
         {sidebar}

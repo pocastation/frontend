@@ -27,9 +27,13 @@ export default function AuctionCountdown({ endAt }: { endAt: string }) {
   const [label, setLabel] = useState<string | null>(null);
 
   useEffect(() => {
-    setLabel(computeLabel(endAt));
-    const id = setInterval(() => setLabel(computeLabel(endAt)), 1000);
-    return () => clearInterval(id);
+    const update = () => setLabel(computeLabel(endAt));
+    const raf = requestAnimationFrame(update);
+    const id = setInterval(update, 1000);
+    return () => {
+      cancelAnimationFrame(raf);
+      clearInterval(id);
+    };
   }, [endAt]);
 
   if (!label) return null;

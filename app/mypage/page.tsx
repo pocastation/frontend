@@ -459,6 +459,10 @@ function SellingList({
     <ul className="flex flex-col gap-2">
       {items.map((item) => {
         const isLive = item.status === "LIVE";
+        const displayPrice = item.saleType === "INSTANT" ? (item.buyNowPrice ?? item.currentPrice) : item.currentPrice;
+        const timeLabel = isLive
+          ? item.saleType === "INSTANT" ? "즉시판매" : item.endAt ? formatTimeLeft(item.endAt) : "진행 중"
+          : "종료";
         return (
           <li key={item.id}>
             <Link
@@ -474,10 +478,10 @@ function SellingList({
               </span>
               <span className="shrink-0 text-right">
                 <span className="block font-display text-sm font-extrabold text-text-1">
-                  {formatKRW(item.currentPrice)}
+                  {formatKRW(displayPrice)}
                 </span>
                 <span className="block text-[10.5px] text-text-3">
-                  {isLive ? formatTimeLeft(item.endAt) : "종료"}
+                  {timeLabel}
                 </span>
               </span>
             </Link>
@@ -506,6 +510,10 @@ function WishlistTabList({
     <ul className="flex flex-col gap-2">
       {items.map((item) => {
         const isLive = item.status === "LIVE";
+        const displayPrice = item.saleType === "INSTANT" ? (item.buyNowPrice ?? item.currentPrice) : item.currentPrice;
+        const timeLabel = isLive
+          ? item.saleType === "INSTANT" ? "즉시판매" : item.endAt ? formatTimeLeft(item.endAt) : "진행 중"
+          : "종료";
         return (
           <li key={item.id}>
             <div className="flex items-center gap-3 rounded-r2 border border-border bg-surface p-2.5">
@@ -522,10 +530,10 @@ function WishlistTabList({
                 </span>
                 <span className="shrink-0 text-right">
                   <span className="block font-display text-sm font-extrabold text-text-1">
-                    {formatKRW(item.currentPrice)}
+                    {formatKRW(displayPrice)}
                   </span>
                   <span className="block text-[10.5px] text-text-3">
-                    {isLive ? formatTimeLeft(item.endAt) : "종료"}
+                    {timeLabel}
                   </span>
                 </span>
               </Link>

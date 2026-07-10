@@ -27,8 +27,12 @@ export default function AuctionCard({
   onToggleWishlist: (next: boolean) => void;
 }) {
   const isLive = auction.status === "LIVE";
-  const badgeKey = isLive && isEndingSoon(auction.endAt) ? "ENDING" : auction.status;
-  const badge = STATUS_BADGE[badgeKey] ?? { label: auction.status, className: "bg-text-2/85" };
+  const isInstantSale = auction.saleType === "INSTANT";
+  const badgeKey = isLive && !isInstantSale && isEndingSoon(auction.endAt) ? "ENDING" : auction.status;
+  const badge: { label: string; className: string; pulse?: boolean } = isInstantSale && isLive
+    ? { label: "즉시판매", className: "bg-primary/90" }
+    : STATUS_BADGE[badgeKey] ?? { label: auction.status, className: "bg-text-2/85" };
+  const displayPrice = isInstantSale ? (auction.buyNowPrice ?? auction.currentPrice) : auction.currentPrice;
 
   const [imageFailed, setImageFailed] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -90,7 +94,7 @@ export default function AuctionCard({
           {badge.label}
         </span>
 
-        {isLive && <AuctionCountdown endAt={auction.endAt} />}
+        {isLive && !isInstantSale && auction.endAt && <AuctionCountdown endAt={auction.endAt} />}
 
         <WishlistHeart
           auctionId={auction.id}
@@ -112,9 +116,11 @@ export default function AuctionCard({
 
         <div className="flex items-baseline justify-between">
           <span className="font-display text-base font-bold tracking-tight text-text-1">
-            {formatKRW(auction.currentPrice)}
+            {formatKRW(displayPrice)}
           </span>
-          <span className="font-display text-[11px] text-text-3">{auction.bidCount}회 입찰</span>
+          <span className="font-display text-[11px] text-text-3">
+            {isInstantSale ? "즉시구매" : `${auction.bidCount}회 입찰`}
+          </span>
         </div>
       </div>
     </Link>

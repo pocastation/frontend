@@ -8,7 +8,7 @@ import { apiFetch } from "@/lib/api";
 import { useSearch } from "@/lib/search-context";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import { FOCUS_RING } from "@/lib/ui";
-import type { AuctionListResponse, AuctionResponse } from "@/lib/types";
+import type { AuctionListResponse, AuctionResponse, AuctionSaleType } from "@/lib/types";
 
 // /auctions 전용 페이지(AuctionBrowser)도 같은 정렬 기준을 쓰므로 여기서 export해 재사용한다.
 export type SortKey = "latest" | "popular" | "views" | "price_asc" | "price_desc";
@@ -31,9 +31,19 @@ const GRID_CLASS = "grid grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr)
 export default function AuctionExplorer({
   initialAuctions,
   sidebar,
+  saleType = "AUCTION",
+  sectionId = "auctions",
+  title,
+  description,
+  viewAllHref,
 }: {
   initialAuctions: AuctionResponse[];
   sidebar?: ReactNode;
+  saleType?: AuctionSaleType;
+  sectionId?: string;
+  title?: string;
+  description?: string;
+  viewAllHref?: string;
 }) {
   const { query, setQuery } = useSearch();
   const [sortBy, setSortBy] = useState<SortKey>(DEFAULT_SORT);
@@ -48,7 +58,7 @@ export default function AuctionExplorer({
     setLoading(true);
     setError(false);
     try {
-      const params = new URLSearchParams({ sort: sortBy, size: "60" });
+      const params = new URLSearchParams({ saleType, sort: sortBy, size: "60" });
       if (query.trim()) params.set("q", query.trim());
       const res = await apiFetch<AuctionListResponse>(`/api/auctions?${params}`, { cache: "no-store" });
       setResults(res.content);
@@ -59,7 +69,14 @@ export default function AuctionExplorer({
     } finally {
       setLoading(false);
     }
-  }, [query, sortBy]);
+  }, [query, saleType, sortBy]);
+
+  const heading = title ?? (saleType === "INSTANT" ? "즉시판매" : "진행 중인 경매");
+  const subcopy = description ?? (
+    saleType === "INSTANT" ? "기다리지 않고 바로 구매할 수 있는 포토카드" : "실시간 업데이트 · 지금 바로 확인하세요"
+  );
+  const emptyTitle = saleType === "INSTANT" ? "등록된 즉시판매가 없습니다" : "진행 중인 경매가 없습니다";
+  const allHref = viewAllHref ?? (saleType === "INSTANT" ? "/instant-sales" : "/auctions");
 
   useEffect(() => {
     // 첫 렌더는 SSR 결과(검색어 없음·최신순)와 이미 같은 조건이라 재요청하지 않는다.
@@ -72,16 +89,16 @@ export default function AuctionExplorer({
   }, [fetchResults]);
 
   return (
-    <section id="auctions" className="mx-auto max-w-[1160px] px-4 py-10">
+    <section id={sectionId} className="mx-auto max-w-[1160px] px-4 py-10">
       <div className="mb-5 flex items-end justify-between">
         <div>
           <h2 className="font-display text-xl font-extrabold tracking-tight text-text-1">
-            진행 중인 경매
+            {heading}
           </h2>
-          <p className="mt-1 text-[13px] text-text-3">실시간 업데이트 · 지금 바로 확인하세요</p>
+          <p className="mt-1 text-[13px] text-text-3">{subcopy}</p>
         </div>
         <Link
-          href="/auctions"
+          href={allHref}
           className={`shrink-0 text-xs font-bold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
         >
           전체 보기 →
@@ -140,7 +157,7 @@ export default function AuctionExplorer({
           ) : results.length === 0 ? (
             error ? null : (
               <ExploreEmpty
-                title={query ? `"${query}" 검색 결과가 없어요` : "진행 중인 경매가 없습니다"}
+                title={query ? `"${query}" 검색 결과가 없어요` : emptyTitle}
                 hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
                 onClear={query ? () => setQuery("") : undefined}
               />

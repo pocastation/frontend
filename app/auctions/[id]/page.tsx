@@ -3,6 +3,7 @@ import Link from "next/link";
 import AuctionImageGallery from "@/components/AuctionImageGallery";
 import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import BidSection from "@/components/BidSection";
+import InstantPurchaseSection from "@/components/InstantPurchaseSection";
 import ReportButton from "@/components/ReportButton";
 import SearchLink from "@/components/SearchLink";
 import ShareButton from "@/components/ShareButton";
@@ -31,6 +32,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
   if (!auction) {
     notFound();
   }
+  const isInstantSale = auction.saleType === "INSTANT";
 
   // 표 형태 상품 정보 — 우리가 실제로 수집하는 필드만(발매연도·수량 등은 미보유라 제외).
   const specRows: { label: string; value: string }[] = [
@@ -49,10 +51,10 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
     <div className="mx-auto max-w-[1160px] px-4 py-6 sm:py-8">
       <div className="mb-4 flex items-center justify-between">
         <Link
-          href="/"
+          href={isInstantSale ? "/instant-sales" : "/"}
           className={`inline-flex items-center gap-1 rounded-r2 px-1 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
         >
-          <span aria-hidden="true">←</span> 목록으로
+          <span aria-hidden="true">←</span> {isInstantSale ? "즉시판매 목록으로" : "목록으로"}
         </Link>
         <div className="flex items-center gap-3">
           <ShareButton title={auction.title} />
@@ -151,6 +153,9 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
 
           <div className="mt-3 flex flex-wrap gap-1.5">
             <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary">
+              {isInstantSale ? "즉시판매" : "경매"}
+            </span>
+            <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary">
               {SOURCE_LABEL[auction.source] ?? auction.source}
               {auction.sourceDetail ? ` · ${auction.sourceDetail}` : ""}
             </span>
@@ -162,16 +167,26 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             )}
           </div>
 
-          <BidSection
-            auctionId={auction.id}
-            initialCurrentPrice={auction.currentPrice}
-            initialBidCount={auction.bidCount}
-            initialEndAt={auction.endAt}
-            status={auction.status}
-            sellerNickname={auction.sellerNickname}
-            startPrice={auction.startPrice}
-            viewCount={auction.viewCount}
-          />
+          {isInstantSale ? (
+            <InstantPurchaseSection
+              saleId={auction.id}
+              price={auction.buyNowPrice ?? auction.currentPrice}
+              status={auction.status}
+              sellerNickname={auction.sellerNickname}
+              viewCount={auction.viewCount}
+            />
+          ) : auction.endAt ? (
+            <BidSection
+              auctionId={auction.id}
+              initialCurrentPrice={auction.currentPrice}
+              initialBidCount={auction.bidCount}
+              initialEndAt={auction.endAt}
+              status={auction.status}
+              sellerNickname={auction.sellerNickname}
+              startPrice={auction.startPrice}
+              viewCount={auction.viewCount}
+            />
+          ) : null}
         </div>
       </div>
 

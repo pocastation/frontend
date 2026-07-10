@@ -219,7 +219,7 @@ export default function AdminAuctionsPage() {
                       <span className="mt-1 block text-[10.5px] text-text-3">사유: {a.cancellationReason}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-text-3">{a.status === "LIVE" ? formatTimeLeft(a.endAt) : "—"}</td>
+                  <td className="px-4 py-3 text-text-3">{a.status === "LIVE" && a.endAt ? formatTimeLeft(a.endAt) : "—"}</td>
                   <td className="px-4 py-3">
                     {a.status === "LIVE" ? (
                       <button

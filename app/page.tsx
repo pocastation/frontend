@@ -10,7 +10,7 @@ import type { AuctionListResponse } from "@/lib/types";
 // UI는 아직 없어 한 번에 넉넉히(60건) 가져오는 건 유지 — 매물이 더 늘면 그때 추가.
 async function getAuctions(): Promise<AuctionListResponse | null> {
   try {
-    return await apiFetch<AuctionListResponse>("/api/auctions?size=60", { cache: "no-store" });
+    return await apiFetch<AuctionListResponse>("/api/auctions?saleType=AUCTION&size=60", { cache: "no-store" });
   } catch {
     return null;
   }
@@ -20,15 +20,28 @@ async function getAuctions(): Promise<AuctionListResponse | null> {
 // 그대로 재사용한다.
 async function getPopularAuctions(): Promise<AuctionListResponse | null> {
   try {
-    return await apiFetch<AuctionListResponse>("/api/auctions?sort=popular&size=5", { cache: "no-store" });
+    return await apiFetch<AuctionListResponse>("/api/auctions?saleType=AUCTION&sort=popular&size=5", { cache: "no-store" });
+  } catch {
+    return null;
+  }
+}
+
+async function getInstantSales(): Promise<AuctionListResponse | null> {
+  try {
+    return await apiFetch<AuctionListResponse>("/api/auctions?saleType=INSTANT&size=60", { cache: "no-store" });
   } catch {
     return null;
   }
 }
 
 export default async function Home() {
-  const [auctions, popular] = await Promise.all([getAuctions(), getPopularAuctions()]);
+  const [auctions, popular, instantSales] = await Promise.all([
+    getAuctions(),
+    getPopularAuctions(),
+    getInstantSales(),
+  ]);
   const content = auctions?.content ?? [];
+  const instantContent = instantSales?.content ?? [];
 
   return (
     <div>
@@ -37,6 +50,14 @@ export default async function Home() {
       <AuctionExplorer
         initialAuctions={content}
         sidebar={<AuctionRankSidebar auctions={popular?.content ?? []} />}
+      />
+      <AuctionExplorer
+        initialAuctions={instantContent}
+        saleType="INSTANT"
+        sectionId="instant-sales"
+        title="즉시판매"
+        description="마감까지 기다리지 않고 바로 구매할 수 있는 포토카드"
+        viewAllHref="/instant-sales"
       />
     </div>
   );

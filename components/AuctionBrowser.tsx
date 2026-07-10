@@ -7,15 +7,15 @@ import { CardSkeletonGrid, ExploreEmpty, ExploreError, InlineSpinner } from "@/c
 import { apiFetch } from "@/lib/api";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import { FOCUS_RING } from "@/lib/ui";
-import type { AuctionListResponse, AuctionResponse } from "@/lib/types";
+import type { AuctionListResponse, AuctionResponse, AuctionSaleType } from "@/lib/types";
 
 const PAGE_SIZE = 20;
 const DEBOUNCE_MS = 300;
 const DEFAULT_SORT: SortKey = "latest";
 const GRID_CLASS = "grid grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))] gap-3.5";
 
-function buildParams(query: string, sort: SortKey, page: number) {
-  const params = new URLSearchParams({ sort, size: String(PAGE_SIZE), page: String(page) });
+function buildParams(query: string, sort: SortKey, page: number, saleType: AuctionSaleType) {
+  const params = new URLSearchParams({ saleType, sort, size: String(PAGE_SIZE), page: String(page) });
   if (query.trim()) params.set("q", query.trim());
   return params;
 }
@@ -28,10 +28,12 @@ export default function AuctionBrowser({
   initialAuctions,
   initialTotalElements,
   initialTotalPages,
+  saleType = "AUCTION",
 }: {
   initialAuctions: AuctionResponse[];
   initialTotalElements: number;
   initialTotalPages: number;
+  saleType?: AuctionSaleType;
 }) {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>(DEFAULT_SORT);
@@ -51,7 +53,7 @@ export default function AuctionBrowser({
     setLoading(true);
     setError(false);
     try {
-      const res = await apiFetch<AuctionListResponse>(`/api/auctions?${buildParams(query, sort, 0)}`, {
+      const res = await apiFetch<AuctionListResponse>(`/api/auctions?${buildParams(query, sort, 0, saleType)}`, {
         cache: "no-store",
       });
       setAuctions(res.content);
@@ -63,7 +65,7 @@ export default function AuctionBrowser({
     } finally {
       setLoading(false);
     }
-  }, [query, sort]);
+  }, [query, saleType, sort]);
 
   useEffect(() => {
     if (isFirstRun.current) {
@@ -79,7 +81,7 @@ export default function AuctionBrowser({
     setLoadingMore(true);
     setMoreError(false);
     try {
-      const res = await apiFetch<AuctionListResponse>(`/api/auctions?${buildParams(query, sort, nextPage)}`, {
+      const res = await apiFetch<AuctionListResponse>(`/api/auctions?${buildParams(query, sort, nextPage, saleType)}`, {
         cache: "no-store",
       });
       setAuctions((prev) => [...prev, ...res.content]);
@@ -93,6 +95,10 @@ export default function AuctionBrowser({
   }
 
   const hasMore = page + 1 < totalPages;
+  const searchPlaceholder = saleType === "INSTANT"
+    ? "즉시판매 제목, 아티스트명, 멤버명으로 검색"
+    : "경매 제목, 아티스트명, 멤버명으로 검색";
+  const emptyTitle = saleType === "INSTANT" ? "등록된 즉시판매가 없습니다" : "진행 중인 경매가 없습니다";
 
   return (
     <div>
@@ -101,10 +107,10 @@ export default function AuctionBrowser({
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
         </svg>
-        <span className="sr-only">경매 제목, 아티스트명, 멤버명으로 검색</span>
+        <span className="sr-only">{searchPlaceholder}</span>
         <input
           type="search"
-          placeholder="경매 제목, 아티스트명, 멤버명으로 검색"
+          placeholder={searchPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full border-0 bg-transparent text-[13.5px] text-text-1 outline-none placeholder:text-text-3"
@@ -150,7 +156,7 @@ export default function AuctionBrowser({
       ) : auctions.length === 0 ? (
         error ? null : (
           <ExploreEmpty
-            title={query ? `"${query}" 검색 결과가 없어요` : "진행 중인 경매가 없습니다"}
+            title={query ? `"${query}" 검색 결과가 없어요` : emptyTitle}
             hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
             onClear={query ? () => setQuery("") : undefined}
           />

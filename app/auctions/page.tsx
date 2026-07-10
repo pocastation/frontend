@@ -6,7 +6,7 @@ export const metadata = { title: "경매 — Pocastation" };
 
 async function getAuctions(): Promise<AuctionListResponse | null> {
   try {
-    return await apiFetch<AuctionListResponse>("/api/auctions?sort=latest&size=20", { cache: "no-store" });
+    return await apiFetch<AuctionListResponse>("/api/auctions?saleType=AUCTION&sort=latest&size=20", { cache: "no-store" });
   } catch {
     return null;
   }

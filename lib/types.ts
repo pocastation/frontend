@@ -126,7 +126,7 @@ export type AdminAuctionSummary = {
   currentPrice: number;
   bidCount: number;
   status: AuctionStatus;
-  endAt: string;
+  endAt: string | null;
   cancellationReason: string | null;
 };
 
@@ -149,15 +149,19 @@ export type AuctionStatus =
   | "ENDED_NO_BIDS"
   | "CANCELLED";
 
+export type AuctionSaleType = "AUCTION" | "INSTANT";
+
 export type AuctionResponse = {
   id: number;
   title: string;
   artistName: string | null;
   representativeThumbnailUrl: string | null;
+  saleType: AuctionSaleType;
   startPrice: number;
   currentPrice: number;
+  buyNowPrice: number | null;
   status: AuctionStatus;
-  endAt: string;
+  endAt: string | null;
   bidCount: number;
   viewCount: number;
 };
@@ -205,13 +209,15 @@ export type AuctionDetailResponse = {
   grade: PhotocardGrade;
   unopened: boolean;
   conditionNote: string | null;
+  saleType: AuctionSaleType;
   startPrice: number;
   currentPrice: number;
-  durationDays: number;
+  buyNowPrice: number | null;
+  durationDays: number | null;
   status: AuctionStatus;
   startAt: string | null;
-  endAt: string;
-  maxEndAt: string;
+  endAt: string | null;
+  maxEndAt: string | null;
   bidCount: number;
   viewCount: number;
   images: AuctionImageResponse[];
@@ -228,9 +234,17 @@ export type AuctionRegisterRequest = {
   grade: PhotocardGrade;
   unopened: boolean;
   conditionNote?: string;
+  saleType?: AuctionSaleType;
   startPrice: number;
-  durationDays: number;
+  buyNowPrice?: number;
+  durationDays?: number;
   images: { url: string; thumbnailUrl: string }[];
+};
+
+export type AuctionPurchaseResponse = {
+  id: number;
+  finalPrice: number;
+  status: AuctionStatus;
 };
 
 export type MediaUploadResponse = {

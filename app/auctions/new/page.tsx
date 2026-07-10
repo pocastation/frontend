@@ -8,7 +8,13 @@ import { apiFetch, ApiError, mediaUrl, uploadMediaImage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { DURATION_OPTIONS, GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS } from "@/lib/ui";
-import type { ArtistListResponse, ArtistMemberResponse, PhotocardGrade, PhotocardSource } from "@/lib/types";
+import type {
+  ArtistListResponse,
+  ArtistMemberResponse,
+  AuctionSaleType,
+  PhotocardGrade,
+  PhotocardSource,
+} from "@/lib/types";
 
 const MAX_IMAGES = 12;
 
@@ -41,6 +47,7 @@ export default function NewAuctionPage() {
   const conditionNoteFieldId = useId();
   const startPriceFieldId = useId();
 
+  const [saleType, setSaleType] = useState<AuctionSaleType>("AUCTION");
   const [artists, setArtists] = useState<{ id: number; name: string }[]>([]);
   const [artistId, setArtistId] = useState<number | "">("");
   const [idols, setIdols] = useState<ArtistMemberResponse[]>([]);
@@ -121,6 +128,11 @@ export default function NewAuctionPage() {
       setError("사진을 1장 이상 등록해주세요.");
       return;
     }
+    const price = Number(startPrice);
+    if (!Number.isFinite(price) || price < 0) {
+      setError(saleType === "INSTANT" ? "즉시판매가를 입력해주세요." : "시작가를 입력해주세요.");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -137,14 +149,16 @@ export default function NewAuctionPage() {
           grade,
           unopened,
           conditionNote: conditionNote || undefined,
-          startPrice: Number(startPrice),
-          durationDays,
+          saleType,
+          startPrice: price,
+          buyNowPrice: saleType === "INSTANT" ? price : undefined,
+          durationDays: saleType === "AUCTION" ? durationDays : undefined,
           images,
         },
       });
       router.push(`/auctions/${created.id}`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "경매 등록에 실패했습니다.");
+      setError(err instanceof ApiError ? err.message : "판매 등록에 실패했습니다.");
     } finally {
       setIsSubmitting(false);
     }
@@ -179,7 +193,37 @@ export default function NewAuctionPage() {
         className="flex flex-col gap-8 rounded-r4 border border-border bg-surface p-5 shadow-card sm:p-7"
       >
         <section>
-          <SectionHeading step={1}>카테고리 · 소개</SectionHeading>
+          <SectionHeading step={1}>판매 방식</SectionHeading>
+          <div className="grid gap-2 sm:grid-cols-2">
+            {[
+              { type: "AUCTION" as const, title: "경매판매", desc: "정한 기간 동안 입찰을 받아 판매해요." },
+              { type: "INSTANT" as const, title: "즉시판매", desc: "정한 가격으로 바로 구매할 수 있게 올려요." },
+            ].map((option) => {
+              const selected = saleType === option.type;
+              return (
+                <button
+                  key={option.type}
+                  type="button"
+                  aria-pressed={selected}
+                  onClick={() => setSaleType(option.type)}
+                  className={`rounded-r3 border p-4 text-left transition-colors ${FOCUS_RING} ${
+                    selected
+                      ? "border-primary bg-primary-soft text-primary"
+                      : "border-border bg-white text-text-2 hover:border-primary"
+                  }`}
+                >
+                  <span className="block text-sm font-extrabold">{option.title}</span>
+                  <span className={`mt-1 block text-xs ${selected ? "text-primary" : "text-text-3"}`}>
+                    {option.desc}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="border-t border-border pt-8">
+          <SectionHeading step={2}>카테고리 · 소개</SectionHeading>
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
               <label htmlFor={artistFieldId} className="text-xs font-bold text-text-2">
@@ -244,7 +288,7 @@ export default function NewAuctionPage() {
         </section>
 
         <section className="border-t border-border pt-8">
-          <SectionHeading step={2}>상품 정보</SectionHeading>
+          <SectionHeading step={3}>상품 정보</SectionHeading>
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
@@ -342,11 +386,11 @@ export default function NewAuctionPage() {
         </section>
 
         <section className="border-t border-border pt-8">
-          <SectionHeading step={3}>가격 · 경매 기간</SectionHeading>
+          <SectionHeading step={4}>{saleType === "INSTANT" ? "가격" : "가격 · 경매 기간"}</SectionHeading>
           <div className="flex flex-col gap-3">
             <div className="flex flex-col gap-1.5">
               <label htmlFor={startPriceFieldId} className="text-xs font-bold text-text-2">
-                시작가(원) <span className="text-accent">*</span>
+                {saleType === "INSTANT" ? "즉시판매가(원)" : "시작가(원)"} <span className="text-accent">*</span>
               </label>
               <input
                 id={startPriceFieldId}
@@ -361,10 +405,13 @@ export default function NewAuctionPage() {
                 className={INPUT_CLASS}
               />
               <p className="text-[11px] text-text-3">
-                배송비는 판매자 부담이에요. 배송비를 감안해 시작가를 정해주세요.
+                {saleType === "INSTANT"
+                  ? "배송비는 판매자 부담이에요. 배송비를 감안해 판매가를 정해주세요."
+                  : "배송비는 판매자 부담이에요. 배송비를 감안해 시작가를 정해주세요."}
               </p>
             </div>
 
+            {saleType === "AUCTION" && (
             <fieldset>
               <legend className="mb-1.5 text-xs font-bold text-text-2">경매 기간</legend>
               <div className="flex gap-2">
@@ -385,11 +432,12 @@ export default function NewAuctionPage() {
                 ))}
               </div>
             </fieldset>
+            )}
           </div>
         </section>
 
         <section className="border-t border-border pt-8">
-          <SectionHeading step={4}>사진</SectionHeading>
+          <SectionHeading step={5}>사진</SectionHeading>
           <p className="mb-2 text-xs text-text-3">1~{MAX_IMAGES}장, 첫 장이 대표사진으로 노출돼요.</p>
 
           <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
@@ -456,7 +504,7 @@ export default function NewAuctionPage() {
           disabled={isSubmitting || isUploading}
           className={`py-3 ${PRIMARY_BUTTON_CLASS}`}
         >
-          {isSubmitting ? "등록 중..." : "경매 등록"}
+          {isSubmitting ? "등록 중..." : saleType === "INSTANT" ? "즉시판매 등록" : "경매 등록"}
         </button>
       </form>
     </div>

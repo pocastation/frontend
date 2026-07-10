@@ -11,6 +11,7 @@ import { useSearch } from "@/lib/search-context";
 // 아직 스텁이라 보류.
 const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/auctions", label: "경매" },
+  { href: "/instant-sales", label: "즉시판매" },
   { href: "/artists", label: "아티스트" },
 ];
 

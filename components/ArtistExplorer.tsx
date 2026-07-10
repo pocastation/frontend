@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import ArtistCard from "@/components/ArtistCard";
-import { CardSkeletonGrid, ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
+import { ExploreEmpty, ExploreError, ExploreLoading, InlineSpinner } from "@/components/explore-states";
 import { apiFetch } from "@/lib/api";
 import { ARTIST_TYPE_LABEL, ARTIST_TYPE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
@@ -152,33 +152,30 @@ export default function ArtistExplorer({
         </div>
       )}
 
-      {loading && artists.length === 0 ? (
-        // 스켈레톤은 초기 로드(카드가 아직 없을 때)만. 재검색·필터 변경 중엔 기존 카드 유지(dim).
-        <div className={GRID_CLASS}>
-          <CardSkeletonGrid count={12} variant="artist" />
-        </div>
-      ) : artists.length === 0 ? (
-        error ? null : (
-          <ExploreEmpty
-            title={filtered ? "조건에 맞는 아티스트가 없어요" : "등록된 아티스트가 없습니다"}
-            hint={filtered ? "다른 키워드로 검색하거나 필터를 바꿔보세요." : undefined}
-            onClear={
-              filtered
-                ? () => {
-                    setQuery("");
-                    setType(null);
-                  }
-                : undefined
-            }
-            clearLabel="필터 초기화"
-          />
-        )
-      ) : (
+      {artists.length > 0 ? (
+        // 재검색·필터 변경 중에도 기존 카드를 유지하고 dim만 준다(스켈레톤으로 통째 교체 X).
         <div className={`${GRID_CLASS} transition-opacity ${loading ? "opacity-60" : error ? "opacity-45" : ""}`}>
           {artists.map((artist) => (
             <ArtistCard key={artist.id} artist={artist} />
           ))}
         </div>
+      ) : loading ? (
+        // 빈 목록에서 검색/필터 중 — 가짜 스켈레톤 대신 가벼운 스피너.
+        <ExploreLoading />
+      ) : error ? null : (
+        <ExploreEmpty
+          title={filtered ? "조건에 맞는 아티스트가 없어요" : "등록된 아티스트가 없습니다"}
+          hint={filtered ? "다른 키워드로 검색하거나 필터를 바꿔보세요." : undefined}
+          onClear={
+            filtered
+              ? () => {
+                  setQuery("");
+                  setType(null);
+                }
+              : undefined
+          }
+          clearLabel="필터 초기화"
+        />
       )}
 
       {hasMore && !loading && (

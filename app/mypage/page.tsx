@@ -20,6 +20,7 @@ type Tab =
   | "participating"
   | "bidHistory"
   | "won"
+  | "instantPurchases"
   | "selling"
   | "sellHistory"
   | "wishlist"
@@ -131,6 +132,7 @@ const TRADE_NAV: { key: Tab; label: string; icon: () => ReactNode }[] = [
   { key: "participating", label: "참여 중인 경매", icon: TicketIcon },
   { key: "bidHistory", label: "입찰 내역", icon: ReceiptIcon },
   { key: "won", label: "낙찰/구매 내역", icon: BadgeCheckIcon },
+  { key: "instantPurchases", label: "즉시구매 내역", icon: BadgeCheckIcon },
   { key: "selling", label: "판매 중인 경매", icon: TagIcon },
   { key: "sellHistory", label: "판매 내역", icon: ArchiveIcon },
   { key: "wishlist", label: "관심 목록", icon: HeartIcon },
@@ -148,6 +150,7 @@ const TAB_TITLE: Record<Tab, string> = {
   participating: "참여 중인 경매",
   bidHistory: "입찰 내역",
   won: "낙찰/구매 내역",
+  instantPurchases: "즉시구매 내역",
   selling: "판매 중인 경매",
   sellHistory: "판매 내역",
   wishlist: "관심 목록",
@@ -170,6 +173,7 @@ export default function MyPage() {
   const [tab, setTab] = useState<Tab>("dashboard");
   const [selling, setSelling] = useState<AuctionResponse[]>([]);
   const [bidding, setBidding] = useState<MyBiddingResponse[]>([]);
+  const [instantPurchases, setInstantPurchases] = useState<AuctionResponse[]>([]);
   const [wishlist, setWishlist] = useState<AuctionResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -178,13 +182,15 @@ export default function MyPage() {
     setLoading(true);
     setError(null);
     try {
-      const [sellingRes, biddingRes, wishlistRes] = await Promise.all([
+      const [sellingRes, biddingRes, instantPurchasesRes, wishlistRes] = await Promise.all([
         fetchWithAuth<AuctionListResponse>("/api/members/me/selling?size=50"),
         fetchWithAuth<MyBiddingListResponse>("/api/members/me/bidding?size=50"),
+        fetchWithAuth<AuctionListResponse>("/api/members/me/instant-purchases?size=50"),
         fetchWithAuth<WishlistListResponse>("/api/members/me/wishlist?size=50"),
       ]);
       setSelling(sellingRes.content);
       setBidding(biddingRes.content);
+      setInstantPurchases(instantPurchasesRes.content);
       setWishlist(wishlistRes.content);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "내 활동을 불러오지 못했습니다.");
@@ -305,10 +311,11 @@ export default function MyPage() {
             <h1 className="font-display text-xl font-extrabold text-text-1">대시보드</h1>
             <p className="mt-1 text-sm text-text-3">{member?.nickname}님, 좋은 포토카드와의 만남이 가득하길 바라요.</p>
 
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
               <DashboardStat label="참여 중인 경매" value={`${liveBidding.length}건`} swatch="bg-primary-soft" />
               <DashboardStat label="입찰한 경매" value={`${bidding.length}건`} swatch="bg-accent-soft" />
               <DashboardStat label="낙찰 성공" value={`${wonBidding.length}건`} swatch="bg-ok-soft" />
+              <DashboardStat label="즉시구매" value={`${instantPurchases.length}건`} swatch="bg-primary-soft" />
               <DashboardStat label="판매 중인 경매" value={`${liveSelling.length}건`} swatch="bg-surface-3" />
             </div>
 
@@ -323,6 +330,15 @@ export default function MyPage() {
 
               <DashboardPanel title="낙찰/구매 내역" onSeeAll={() => setTab("won")}>
                 <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="낙찰한 경매가 없습니다." />
+              </DashboardPanel>
+
+              <DashboardPanel title="즉시구매 내역" onSeeAll={() => setTab("instantPurchases")}>
+                <SellingList
+                  items={instantPurchases.slice(0, 3)}
+                  loading={loading}
+                  emptyText="구매한 즉시판매가 없습니다."
+                  endedLabel="구매 완료"
+                />
               </DashboardPanel>
 
               <DashboardPanel title="판매 중인 경매" onSeeAll={() => setTab("selling")}>
@@ -352,6 +368,19 @@ export default function MyPage() {
             <p className="mt-1 text-sm text-text-3">낙찰한 경매 {wonBidding.length}건</p>
             <div className="mt-5">
               <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." />
+            </div>
+          </>
+        ) : tab === "instantPurchases" ? (
+          <>
+            <h1 className="font-display text-xl font-extrabold text-text-1">즉시구매 내역</h1>
+            <p className="mt-1 text-sm text-text-3">구매한 즉시판매 {instantPurchases.length}건</p>
+            <div className="mt-5">
+              <SellingList
+                items={instantPurchases}
+                loading={loading}
+                emptyText="구매한 즉시판매가 없습니다."
+                endedLabel="구매 완료"
+              />
             </div>
           </>
         ) : tab === "selling" ? (
@@ -447,10 +476,12 @@ function SellingList({
   items,
   loading,
   emptyText,
+  endedLabel = "종료",
 }: {
   items: AuctionResponse[];
   loading: boolean;
   emptyText: string;
+  endedLabel?: string;
 }) {
   if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
   if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
@@ -462,7 +493,7 @@ function SellingList({
         const displayPrice = item.saleType === "INSTANT" ? (item.buyNowPrice ?? item.currentPrice) : item.currentPrice;
         const timeLabel = isLive
           ? item.saleType === "INSTANT" ? "즉시판매" : item.endAt ? formatTimeLeft(item.endAt) : "진행 중"
-          : "종료";
+          : endedLabel;
         return (
           <li key={item.id}>
             <Link

@@ -5,9 +5,14 @@ import Link from "next/link";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatKRW, formatTimeLeft } from "@/lib/format";
-import { AUCTION_STATUS_BADGE_CLASS, AUCTION_STATUS_LABEL } from "@/lib/labels";
+import {
+  AUCTION_SALE_TYPE_BADGE_CLASS,
+  AUCTION_SALE_TYPE_LABEL,
+  AUCTION_STATUS_BADGE_CLASS,
+  AUCTION_STATUS_LABEL,
+} from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
-import type { AdminAuctionListResponse, AdminAuctionSummary, AuctionStatus } from "@/lib/types";
+import type { AdminAuctionListResponse, AdminAuctionSummary, AuctionSaleType, AuctionStatus } from "@/lib/types";
 
 const PAGE_SIZE = 20;
 const DEBOUNCE_MS = 300;
@@ -20,10 +25,17 @@ const STATUS_FILTERS: { key: AuctionStatus | "ALL"; label: string }[] = [
   { key: "CANCELLED", label: "취소됨" },
 ];
 
-function buildParams(q: string, status: AuctionStatus | "ALL", page: number) {
+const SALE_TYPE_FILTERS: { key: AuctionSaleType | "ALL"; label: string }[] = [
+  { key: "ALL", label: "전체 판매" },
+  { key: "AUCTION", label: "경매판매" },
+  { key: "INSTANT", label: "즉시판매" },
+];
+
+function buildParams(q: string, status: AuctionStatus | "ALL", saleType: AuctionSaleType | "ALL", page: number) {
   const params = new URLSearchParams({ size: String(PAGE_SIZE), page: String(page) });
   if (q.trim()) params.set("q", q.trim());
   if (status !== "ALL") params.set("status", status);
+  if (saleType !== "ALL") params.set("saleType", saleType);
   return params;
 }
 
@@ -32,6 +44,7 @@ export default function AdminAuctionsPage() {
 
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<AuctionStatus | "ALL">("ALL");
+  const [saleTypeFilter, setSaleTypeFilter] = useState<AuctionSaleType | "ALL">("ALL");
   const [auctions, setAuctions] = useState<AdminAuctionSummary[]>([]);
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
@@ -47,10 +60,12 @@ export default function AdminAuctionsPage() {
   const isFirstRun = useRef(true);
 
   const fetchList = useCallback(
-    async (q: string, status: AuctionStatus | "ALL") => {
+    async (q: string, status: AuctionStatus | "ALL", saleType: AuctionSaleType | "ALL") => {
       setLoading(true);
       try {
-        const res = await fetchWithAuth<AdminAuctionListResponse>(`/api/admin/auctions?${buildParams(q, status, 0)}`);
+        const res = await fetchWithAuth<AdminAuctionListResponse>(
+          `/api/admin/auctions?${buildParams(q, status, saleType, 0)}`,
+        );
         setAuctions(res.content);
         setPage(0);
         setTotalElements(res.totalElements);
@@ -67,19 +82,19 @@ export default function AdminAuctionsPage() {
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
-      void fetchList("", "ALL");
+      void fetchList("", "ALL", "ALL");
       return;
     }
-    const timer = setTimeout(() => void fetchList(query, statusFilter), DEBOUNCE_MS);
+    const timer = setTimeout(() => void fetchList(query, statusFilter, saleTypeFilter), DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [query, statusFilter, fetchList]);
+  }, [query, statusFilter, saleTypeFilter, fetchList]);
 
   async function loadMore() {
     const nextPage = page + 1;
     setLoadingMore(true);
     try {
       const res = await fetchWithAuth<AdminAuctionListResponse>(
-        `/api/admin/auctions?${buildParams(query, statusFilter, nextPage)}`,
+        `/api/admin/auctions?${buildParams(query, statusFilter, saleTypeFilter, nextPage)}`,
       );
       setAuctions((prev) => [...prev, ...res.content]);
       setPage(nextPage);
@@ -112,12 +127,19 @@ export default function AdminAuctionsPage() {
       });
       setNotice({ kind: "success", text: `"${cancelTarget.title}"을(를) 취소했습니다.` });
       setCancelTarget(null);
-      await fetchList(query, statusFilter);
+      await fetchList(query, statusFilter, saleTypeFilter);
     } catch (err) {
       setNotice({ kind: "error", text: err instanceof ApiError ? err.message : "취소에 실패했습니다." });
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function getEndLabel(auction: AdminAuctionSummary) {
+    if (auction.saleType === "INSTANT") {
+      return auction.status === "LIVE" ? "판매 중" : "—";
+    }
+    return auction.status === "LIVE" && auction.endAt ? formatTimeLeft(auction.endAt) : "—";
   }
 
   const hasMore = page + 1 < totalPages;
@@ -167,15 +189,31 @@ export default function AdminAuctionsPage() {
             </button>
           ))}
         </div>
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="판매 유형 필터">
+          {SALE_TYPE_FILTERS.map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              aria-pressed={saleTypeFilter === f.key}
+              onClick={() => setSaleTypeFilter(f.key)}
+              className={`h-10 rounded-full border px-3 text-xs font-bold transition-colors ${FOCUS_RING} ${
+                saleTypeFilter === f.key ? "border-text-1 bg-text-1 text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
       <div className="overflow-x-auto rounded-r3 border border-border bg-surface shadow-card">
-        <table className="w-full min-w-[720px] border-collapse">
+        <table className="w-full min-w-[820px] border-collapse">
           <thead>
             <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
               <th className="px-4 py-2.5">경매</th>
+              <th className="px-4 py-2.5">유형</th>
               <th className="px-4 py-2.5">판매자</th>
               <th className="px-4 py-2.5">현재가</th>
               <th className="px-4 py-2.5">입찰</th>
@@ -187,7 +225,7 @@ export default function AdminAuctionsPage() {
           <tbody>
             {auctions.length === 0 && !loading ? (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-sm text-text-3">
+                <td colSpan={8} className="px-4 py-12 text-center text-sm text-text-3">
                   {query ? "검색 결과가 없습니다." : "경매가 없습니다."}
                 </td>
               </tr>
@@ -208,9 +246,14 @@ export default function AdminAuctionsPage() {
                       </span>
                     </Link>
                   </td>
+                  <td className="px-4 py-3">
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${AUCTION_SALE_TYPE_BADGE_CLASS[a.saleType]}`}>
+                      {AUCTION_SALE_TYPE_LABEL[a.saleType]}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-text-2">{a.sellerNickname ?? "—"}</td>
                   <td className="px-4 py-3 font-display font-bold text-text-1">{formatKRW(a.currentPrice)}</td>
-                  <td className="px-4 py-3 text-text-2">{a.bidCount}회</td>
+                  <td className="px-4 py-3 text-text-2">{a.saleType === "INSTANT" ? "즉시구매" : `${a.bidCount}회`}</td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${AUCTION_STATUS_BADGE_CLASS[a.status]}`}>
                       {AUCTION_STATUS_LABEL[a.status]}
@@ -219,7 +262,7 @@ export default function AdminAuctionsPage() {
                       <span className="mt-1 block text-[10.5px] text-text-3">사유: {a.cancellationReason}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-text-3">{a.status === "LIVE" && a.endAt ? formatTimeLeft(a.endAt) : "—"}</td>
+                  <td className="px-4 py-3 text-text-3">{getEndLabel(a)}</td>
                   <td className="px-4 py-3">
                     {a.status === "LIVE" ? (
                       <button

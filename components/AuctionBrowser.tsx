@@ -46,24 +46,29 @@ export default function AuctionBrowser({
   const [error, setError] = useState(false);
   const [moreError, setMoreError] = useState(false);
   const isFirstRun = useRef(true);
+  // 빠른 연속 정렬/검색 시 옛 응답이 최신 결과를 덮어쓰는 걸 막는 요청 시퀀스 가드.
+  const reqIdRef = useRef(0);
   const { wishlisted, toggle } = useWishlistStatus(auctions.map((a) => a.id));
 
   // 검색어·정렬이 바뀌면 첫 페이지부터 다시 조회(목록 전체 교체).
   const fetchFirstPage = useCallback(async () => {
+    const reqId = ++reqIdRef.current;
     setLoading(true);
     setError(false);
     try {
       const res = await apiFetch<AuctionListResponse>(`/api/auctions?${buildParams(query, sort, 0, saleType)}`, {
         cache: "no-store",
       });
+      if (reqId !== reqIdRef.current) return; // 더 최신 요청에 밀렸으면 무시
       setAuctions(res.content);
       setPage(0);
       setTotalElements(res.totalElements);
       setTotalPages(res.totalPages);
     } catch {
+      if (reqId !== reqIdRef.current) return;
       setError(true);
     } finally {
-      setLoading(false);
+      if (reqId === reqIdRef.current) setLoading(false);
     }
   }, [query, saleType, sort]);
 
@@ -149,7 +154,8 @@ export default function AuctionBrowser({
         </div>
       )}
 
-      {loading ? (
+      {loading && auctions.length === 0 ? (
+        // 스켈레톤은 초기 로드(카드가 아직 없을 때)만. 재정렬·재검색 중엔 기존 카드 유지(dim).
         <div className={GRID_CLASS}>
           <CardSkeletonGrid count={10} variant="auction" />
         </div>
@@ -162,7 +168,7 @@ export default function AuctionBrowser({
           />
         )
       ) : (
-        <div className={`${GRID_CLASS} ${error ? "opacity-45" : ""}`}>
+        <div className={`${GRID_CLASS} transition-opacity ${loading ? "opacity-60" : error ? "opacity-45" : ""}`}>
           {auctions.map((auction) => (
             <AuctionCard
               key={auction.id}

@@ -52,22 +52,28 @@ export default function AuctionExplorer({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const isFirstRun = useRef(true);
+  // 빠른 연속 정렬/검색 시 응답이 역순으로 도착해 옛 결과가 최신 결과를 덮어쓰는 걸 막는다.
+  // 매 요청에 시퀀스 번호를 부여하고, 최신 요청의 응답만 상태에 반영한다.
+  const reqIdRef = useRef(0);
   const { wishlisted, toggle } = useWishlistStatus(results.map((a) => a.id));
 
   const fetchResults = useCallback(async () => {
+    const reqId = ++reqIdRef.current;
     setLoading(true);
     setError(false);
     try {
       const params = new URLSearchParams({ saleType, sort: sortBy, size: "60" });
       if (query.trim()) params.set("q", query.trim());
       const res = await apiFetch<AuctionListResponse>(`/api/auctions?${params}`, { cache: "no-store" });
+      if (reqId !== reqIdRef.current) return; // 더 최신 요청에 밀렸으면 무시
       setResults(res.content);
       setTotalElements(res.totalElements);
     } catch {
       // 실패해도 직전 결과는 유지하고, 에러 배너로 재시도를 유도한다(조용히 삼키지 않는다).
+      if (reqId !== reqIdRef.current) return;
       setError(true);
     } finally {
-      setLoading(false);
+      if (reqId === reqIdRef.current) setLoading(false);
     }
   }, [query, saleType, sortBy]);
 
@@ -150,7 +156,9 @@ export default function AuctionExplorer({
               <ExploreError onRetry={fetchResults} />
             </div>
           )}
-          {loading ? (
+          {loading && results.length === 0 ? (
+            // 스켈레톤은 보여줄 카드가 아직 하나도 없을 때(초기 로드)만. 재정렬·재검색처럼
+            // 이미 카드가 떠 있는 상태에서는 기존 카드를 유지(dim)해 깜빡임을 없앤다.
             <div className={GRID_CLASS}>
               <CardSkeletonGrid count={10} variant="auction" />
             </div>
@@ -163,7 +171,7 @@ export default function AuctionExplorer({
               />
             )
           ) : (
-            <div className={`${GRID_CLASS} ${error ? "opacity-45" : ""}`}>
+            <div className={`${GRID_CLASS} transition-opacity ${loading ? "opacity-60" : error ? "opacity-45" : ""}`}>
               {results.map((auction) => (
                 <AuctionCard
                   key={auction.id}

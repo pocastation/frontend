@@ -1,6 +1,7 @@
 import type {
   ArtistStatus,
   ArtistType,
+  AuctionSaleType,
   AuctionStatus,
   AuditAction,
   AuditTargetType,
@@ -118,6 +119,16 @@ export const AUCTION_STATUS_BADGE_CLASS: Record<AuctionStatus, string> = {
   ENDED_SOLD: "bg-surface-2 text-text-3",
   ENDED_NO_BIDS: "bg-surface-2 text-text-3",
   CANCELLED: "bg-accent-soft text-accent",
+};
+
+export const AUCTION_SALE_TYPE_LABEL: Record<AuctionSaleType, string> = {
+  AUCTION: "경매판매",
+  INSTANT: "즉시판매",
+};
+
+export const AUCTION_SALE_TYPE_BADGE_CLASS: Record<AuctionSaleType, string> = {
+  AUCTION: "bg-primary-soft text-primary",
+  INSTANT: "bg-ok-soft text-ok",
 };
 
 // 신고 사유 6종 — 신고 모달의 선택지 순서와 어드민 목록의 배지 순서가 이 배열을 공유한다.

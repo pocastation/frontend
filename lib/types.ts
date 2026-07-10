@@ -123,6 +123,7 @@ export type AdminAuctionSummary = {
   sellerNickname: string | null;
   artistName: string | null;
   representativeThumbnailUrl: string | null;
+  saleType: AuctionSaleType;
   currentPrice: number;
   bidCount: number;
   status: AuctionStatus;

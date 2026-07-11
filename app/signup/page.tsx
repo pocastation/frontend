@@ -1,10 +1,11 @@
 "use client";
 
-import { useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch, ApiError, fetchNicknameSuggestion } from "@/lib/api";
 import { useGuestOnly } from "@/lib/use-guest-only";
+import NicknameSuggestButton from "@/components/NicknameSuggestButton";
 import { INPUT_CLASS, PRIMARY_BUTTON_CLASS } from "@/lib/ui";
 
 export default function SignupPage() {
@@ -18,6 +19,18 @@ export default function SignupPage() {
   const [nickname, setNickname] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 진입 시 서비스가 생성한 닉네임을 기본값으로 채운다("따뜻한북극여우" 류). 사용자가 맘에 안 들면
+  // "다른 닉네임 추천"을 누르거나 직접 수정하면 된다.
+  useEffect(() => {
+    let active = true;
+    void fetchNicknameSuggestion()
+      .then((n) => active && setNickname((prev) => prev || n))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -98,6 +111,7 @@ export default function SignupPage() {
           aria-invalid={error ? true : undefined}
           className={INPUT_CLASS}
         />
+        <NicknameSuggestButton onSuggest={setNickname} />
         {error && (
           <p role="alert" aria-live="polite" className="text-xs text-accent">
             {error}

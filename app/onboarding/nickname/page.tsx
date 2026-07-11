@@ -4,6 +4,7 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
+import NicknameSuggestButton from "@/components/NicknameSuggestButton";
 import { INPUT_CLASS, PRIMARY_BUTTON_CLASS } from "@/lib/ui";
 
 export default function NicknameOnboardingPage() {
@@ -67,6 +68,7 @@ export default function NicknameOnboardingPage() {
           aria-invalid={error ? true : undefined}
           className={INPUT_CLASS}
         />
+        <NicknameSuggestButton onSuggest={setNickname} />
         {error && (
           <p role="alert" aria-live="polite" className="text-xs text-accent">
             {error}

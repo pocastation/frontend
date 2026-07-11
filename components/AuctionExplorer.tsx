@@ -22,7 +22,9 @@ export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
 
 const DEFAULT_SORT: SortKey = "latest";
 const DEBOUNCE_MS = 300;
-const GRID_CLASS = "grid grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))] gap-3.5";
+// 모바일은 2열(카드가 화면폭을 꽉 채우지 않게), sm 이상은 auto-fill로 데스크탑 밀도 유지.
+const GRID_CLASS =
+  "grid grid-cols-2 gap-3 sm:gap-3.5 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
 
 // 검색·정렬을 서버가 처리한다(§B1) — 목록 전체를 한 번에 받아 클라이언트에서 거르던 이전
 // 방식은 매물이 늘면 안 맞아 폐기. 초기 진입은 서버컴포넌트(page.tsx)가 이미 기본값(검색어

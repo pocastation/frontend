@@ -12,7 +12,9 @@ import type { AuctionListResponse, AuctionResponse, AuctionSaleType } from "@/li
 const PAGE_SIZE = 20;
 const DEBOUNCE_MS = 300;
 const DEFAULT_SORT: SortKey = "latest";
-const GRID_CLASS = "grid grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))] gap-3.5";
+// 모바일은 2열(카드가 화면폭을 꽉 채우지 않게), sm 이상은 auto-fill로 데스크탑 밀도 유지.
+const GRID_CLASS =
+  "grid grid-cols-2 gap-3 sm:gap-3.5 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
 
 function buildParams(query: string, sort: SortKey, page: number, saleType: AuctionSaleType) {
   const params = new URLSearchParams({ saleType, sort, size: String(PAGE_SIZE), page: String(page) });

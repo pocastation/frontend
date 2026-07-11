@@ -426,8 +426,7 @@ export type MemberRole = "ADMIN" | "USER";
 
 // ─── 인앱 알림 ───
 
-// 1단계는 OUTBID(입찰 추월)만 — 낙찰/유찰/판매자 알림은 후속 단계.
-export type NotificationType = "OUTBID";
+export type NotificationType = "OUTBID" | "AUCTION_WON" | "AUCTION_ENDED_NO_BIDS";
 
 export type NotificationResponse = {
   id: number;
@@ -445,4 +444,9 @@ export type NotificationListResponse = {
   size: number;
   totalElements: number;
   totalPages: number;
+};
+
+// GET/PATCH /api/members/me/notification-settings — 마이페이지 알림 설정.
+export type NotificationSettings = {
+  outbidEnabled: boolean;
 };

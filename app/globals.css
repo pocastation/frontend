@@ -84,6 +84,18 @@ html {
   overflow-y: scroll;
 }
 
+/* 모바일(sm 미만)에선 스크롤바를 전부 숨긴다 — 스크롤 기능은 유지, 막대만 안 보이게.
+   데스크탑은 위 overflow-y: scroll로 레이아웃 시프트를 막으므로 그대로 둔다.
+   (모바일은 오버레이 스크롤바라 가용폭이 안 바뀌어 시프트 걱정이 없다.) */
+@media (max-width: 639px) {
+  * {
+    scrollbar-width: none; /* Firefox */
+  }
+  *::-webkit-scrollbar {
+    display: none; /* Chromium/Safari */
+  }
+}
+
 a {
   text-decoration: none;
 }

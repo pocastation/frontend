@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import ArtistCard from "@/components/ArtistCard";
-import { ExploreEmpty, ExploreError, ExploreLoading, InlineSpinner } from "@/components/explore-states";
+import { ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
 import { apiFetch } from "@/lib/api";
 import { ARTIST_TYPE_LABEL, ARTIST_TYPE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
@@ -159,23 +159,23 @@ export default function ArtistExplorer({
             <ArtistCard key={artist.id} artist={artist} />
           ))}
         </div>
-      ) : loading ? (
-        // 빈 목록에서 검색/필터 중 — 가짜 스켈레톤 대신 가벼운 스피너.
-        <ExploreLoading />
       ) : error ? null : (
-        <ExploreEmpty
-          title={filtered ? "조건에 맞는 아티스트가 없어요" : "등록된 아티스트가 없습니다"}
-          hint={filtered ? "다른 키워드로 검색하거나 필터를 바꿔보세요." : undefined}
-          onClear={
-            filtered
-              ? () => {
-                  setQuery("");
-                  setType(null);
-                }
-              : undefined
-          }
-          clearLabel="필터 초기화"
-        />
+        // 빈 목록도 로딩 중 높이가 다른 스피너로 교체하지 않고 dim만(레이아웃 시프트 방지).
+        <div className={loading ? "opacity-60 transition-opacity" : undefined}>
+          <ExploreEmpty
+            title={filtered ? "조건에 맞는 아티스트가 없어요" : "등록된 아티스트가 없습니다"}
+            hint={filtered ? "다른 키워드로 검색하거나 필터를 바꿔보세요." : undefined}
+            onClear={
+              filtered
+                ? () => {
+                    setQuery("");
+                    setType(null);
+                  }
+                : undefined
+            }
+            clearLabel="필터 초기화"
+          />
+        </div>
       )}
 
       {hasMore && !loading && (

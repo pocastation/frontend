@@ -3,9 +3,8 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import AuctionCard from "@/components/AuctionCard";
-import { ExploreEmpty, ExploreError, ExploreLoading, InlineSpinner } from "@/components/explore-states";
+import { ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
 import { apiFetch } from "@/lib/api";
-import { useSearch } from "@/lib/search-context";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionListResponse, AuctionResponse, AuctionSaleType } from "@/lib/types";
@@ -45,7 +44,6 @@ export default function AuctionExplorer({
   description?: string;
   viewAllHref?: string;
 }) {
-  const { query, setQuery } = useSearch();
   const [sortBy, setSortBy] = useState<SortKey>(DEFAULT_SORT);
   const [results, setResults] = useState<AuctionResponse[]>(initialAuctions);
   const [totalElements, setTotalElements] = useState(initialAuctions.length);
@@ -63,7 +61,6 @@ export default function AuctionExplorer({
     setError(false);
     try {
       const params = new URLSearchParams({ saleType, sort: sortBy, size: "60" });
-      if (query.trim()) params.set("q", query.trim());
       const res = await apiFetch<AuctionListResponse>(`/api/auctions?${params}`, { cache: "no-store" });
       if (reqId !== reqIdRef.current) return; // 더 최신 요청에 밀렸으면 무시
       setResults(res.content);
@@ -75,7 +72,7 @@ export default function AuctionExplorer({
     } finally {
       if (reqId === reqIdRef.current) setLoading(false);
     }
-  }, [query, saleType, sortBy]);
+  }, [saleType, sortBy]);
 
   const heading = title ?? (saleType === "INSTANT" ? "즉시판매" : "진행 중인 경매");
   const subcopy = description ?? (
@@ -115,19 +112,6 @@ export default function AuctionExplorer({
         <div className="flex items-center gap-2 text-xs text-text-3">
           <span>{totalElements}개</span>
           {loading && <InlineSpinner />}
-          {query && (
-            <span className="flex items-center gap-1 font-bold text-primary">
-              &quot;{query}&quot; 검색 중
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                aria-label="검색어 지우기"
-                className={`rounded-full text-text-3 hover:text-primary ${FOCUS_RING}`}
-              >
-                ×
-              </button>
-            </span>
-          )}
         </div>
 
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="정렬 기준">
@@ -168,16 +152,12 @@ export default function AuctionExplorer({
                 />
               ))}
             </div>
-          ) : loading ? (
-            // 보여줄 카드가 없는데 로딩 중 — 빈 목록에서 정렬/필터를 눌러도 가짜 스켈레톤을
-            // 번쩍이지 않고 가벼운 스피너만.
-            <ExploreLoading />
           ) : error ? null : (
-            <ExploreEmpty
-              title={query ? `"${query}" 검색 결과가 없어요` : emptyTitle}
-              hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
-              onClear={query ? () => setQuery("") : undefined}
-            />
+            // 빈 목록: 로딩 중에도 높이가 다른 스피너/스켈레톤으로 교체하지 않고 빈 상태를
+            // 그대로 dim만 준다(레이아웃 시프트 방지). 진행 표시는 카운트 옆 인라인 스피너.
+            <div className={loading ? "opacity-60 transition-opacity" : undefined}>
+              <ExploreEmpty title={emptyTitle} />
+            </div>
           )}
         </div>
         {sidebar}

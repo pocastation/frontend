@@ -4,7 +4,6 @@ import { useId, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { useSearch } from "@/lib/search-context";
 
 // 상단 메뉴는 리디자인 검토 과정에서 일단 비웠었음(§2026-07-05) — 콘텐츠를 갖춘 페이지가
 // 하나씩 생길 때마다 되살리는 중(아티스트 §2026-07-06, 경매 목록 §2026-07-07). 종료된 경매는
@@ -59,10 +58,19 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { member, logout, isLoading } = useAuth();
-  const { query, setQuery } = useSearch();
+  const [searchInput, setSearchInput] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const searchFieldId = useId();
   const mobileSearchFieldId = useId();
+
+  // 페이지가 바뀌면 검색 입력을 비운다 — 검색어가 다른 화면까지 따라다니지 않게. 이전 pathname을
+  // 렌더 중에 비교해 리셋하는 React 권장 패턴(effect 안 setState 대신).
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
+    setSearchInput("");
+  }
+
   const isAdminMember = member?.role === "ADMIN" || member?.role === "ROLE_ADMIN";
   const navLinks = isAdminMember ? [...NAV_LINKS, { href: "/admin", label: "관리자" }] : NAV_LINKS;
 
@@ -76,12 +84,13 @@ export default function Header() {
     setIsMenuOpen(false);
   }
 
-  // 검색은 홈 화면(경매 목록)에서만 의미가 있다. 다른 페이지에서 입력하면 홈으로 보낸다.
-  function handleSearchChange(value: string) {
-    setQuery(value);
-    if (pathname !== "/") {
-      router.push("/");
-    }
+  // 헤더 검색은 "제출(Enter/돋보기) 시 경매 목록에서 검색". 타이핑 중에는 아무 페이지도
+  // 이동하지 않고, 제출하면 /auctions?q=로 넘겨 그 페이지의 검색으로 이어받는다.
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setIsMenuOpen(false);
+    const q = searchInput.trim();
+    router.push(q ? `/auctions?q=${encodeURIComponent(q)}` : "/auctions");
   }
 
   return (
@@ -95,18 +104,19 @@ export default function Header() {
           </span>
         </Link>
 
-        <label htmlFor={searchFieldId} className="srch">
-          <span className="srch-ic">
+        <form className="srch" role="search" onSubmit={handleSearchSubmit}>
+          <button type="submit" className="srch-ic" aria-label="검색">
             <SearchIcon />
-          </span>
+          </button>
           <input
             id={searchFieldId}
             type="search"
+            aria-label="아티스트, 멤버, 앨범 검색"
             placeholder="아티스트, 멤버, 앨범 검색..."
-            value={query}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
           />
-        </label>
+        </form>
 
         <nav aria-label="주요 메뉴" className="gnv">
           {navLinks.map((link) => (
@@ -173,22 +183,22 @@ export default function Header() {
 
       {isMenuOpen && (
         <div id="mobile-menu" className="border-t border-border bg-white px-4 py-3 sm:hidden">
-          <div className="relative mb-3">
+          <form className="relative mb-3" role="search" onSubmit={handleSearchSubmit}>
             <label htmlFor={mobileSearchFieldId} className="sr-only">
               아티스트, 멤버, 앨범 검색
             </label>
-            <span className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-text-3">
+            <button type="submit" aria-label="검색" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-3">
               <SearchIcon />
-            </span>
+            </button>
             <input
               id={mobileSearchFieldId}
               type="search"
               placeholder="아티스트, 멤버, 앨범 검색..."
-              value={query}
-              onChange={(e) => handleSearchChange(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               className={`w-full rounded-full border border-border bg-bg py-2 pl-9 pr-3.5 text-sm outline-none focus:border-primary ${FOCUS_RING}`}
             />
-          </div>
+          </form>
 
           <nav aria-label="주요 메뉴" className="flex flex-col">
             {navLinks.map((link) => (

@@ -14,20 +14,6 @@ export function InlineSpinner() {
   );
 }
 
-/** 보여줄 목록이 없는 상태에서 재조회 중일 때(빈 목록 정렬/필터) — 스켈레톤으로 가짜
- *  카드를 번쩍이는 대신 가벼운 중앙 스피너만. 카드가 이미 있으면 호출부가 그리드를 dim
- *  처리하므로 이건 "빈 목록 + 로딩" 전용이다. */
-export function ExploreLoading() {
-  return (
-    <div className="flex justify-center py-16" role="status" aria-label="불러오는 중">
-      <span
-        className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-border-2 border-t-primary motion-reduce:animate-none"
-        aria-hidden="true"
-      />
-    </div>
-  );
-}
-
 /** AuctionCard 자리를 채우는 스켈레톤(2:3 썸네일 + 텍스트 라인). */
 export function AuctionCardSkeleton() {
   return (

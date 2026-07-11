@@ -119,7 +119,11 @@ export default function AuctionCard({
             {formatKRW(displayPrice)}
           </span>
           <span className="font-display text-[11px] text-text-3">
-            {isInstantSale ? "즉시구매" : `${auction.bidCount}회 입찰`}
+            {isInstantSale
+              ? "즉시구매"
+              : auction.status === "ENDED_NO_BIDS"
+                ? "입찰 없음"
+                : `${auction.bidCount}회 입찰`}
           </span>
         </div>
       </div>

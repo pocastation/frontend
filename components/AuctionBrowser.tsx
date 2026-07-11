@@ -11,13 +11,21 @@ import type { AuctionListResponse, AuctionResponse, AuctionSaleType } from "@/li
 
 const PAGE_SIZE = 20;
 const DEBOUNCE_MS = 300;
-const DEFAULT_SORT: SortKey = "latest";
 // 모바일은 2열(카드가 화면폭을 꽉 채우지 않게), sm 이상은 auto-fill로 데스크탑 밀도 유지.
 const GRID_CLASS =
   "grid grid-cols-2 gap-3 sm:gap-3.5 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
 
-function buildParams(query: string, sort: SortKey, page: number, saleType: AuctionSaleType) {
-  const params = new URLSearchParams({ saleType, sort, size: String(PAGE_SIZE), page: String(page) });
+// 종료 목록 엔드포인트(/api/auctions/ended)는 saleType 파라미터를 받지 않으므로(항상 AUCTION),
+// 진행중 목록일 때만 saleType을 붙인다.
+function buildParams(
+  query: string,
+  sort: SortKey,
+  page: number,
+  saleType: AuctionSaleType,
+  includeSaleType: boolean,
+) {
+  const params = new URLSearchParams({ sort, size: String(PAGE_SIZE), page: String(page) });
+  if (includeSaleType) params.set("saleType", saleType);
   if (query.trim()) params.set("q", query.trim());
   return params;
 }
@@ -32,15 +40,28 @@ export default function AuctionBrowser({
   initialTotalPages,
   saleType = "AUCTION",
   initialQuery = "",
+  endpoint = "/api/auctions",
+  sortOptions = SORT_OPTIONS,
+  defaultSort = "latest",
+  emptyTitle,
+  searchPlaceholder,
 }: {
   initialAuctions: AuctionResponse[];
   initialTotalElements: number;
   initialTotalPages: number;
   saleType?: AuctionSaleType;
   initialQuery?: string;
+  // 종료 목록(/api/auctions/ended)처럼 다른 엔드포인트·정렬옵션을 쓰는 목록도 이 컴포넌트를 재사용한다.
+  endpoint?: string;
+  sortOptions?: readonly { key: SortKey; label: string }[];
+  defaultSort?: SortKey;
+  emptyTitle?: string;
+  searchPlaceholder?: string;
 }) {
+  // 종료 목록은 saleType 파라미터가 없다(엔드포인트가 AUCTION 고정) — 진행중 목록에서만 붙인다.
+  const includeSaleType = endpoint === "/api/auctions";
   const [query, setQuery] = useState(initialQuery);
-  const [sort, setSort] = useState<SortKey>(DEFAULT_SORT);
+  const [sort, setSort] = useState<SortKey>(defaultSort);
   const [auctions, setAuctions] = useState(initialAuctions);
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(initialTotalElements);
@@ -60,9 +81,10 @@ export default function AuctionBrowser({
     setLoading(true);
     setError(false);
     try {
-      const res = await apiFetch<AuctionListResponse>(`/api/auctions?${buildParams(query, sort, 0, saleType)}`, {
-        cache: "no-store",
-      });
+      const res = await apiFetch<AuctionListResponse>(
+        `${endpoint}?${buildParams(query, sort, 0, saleType, includeSaleType)}`,
+        { cache: "no-store" },
+      );
       if (reqId !== reqIdRef.current) return; // 더 최신 요청에 밀렸으면 무시
       setAuctions(res.content);
       setPage(0);
@@ -74,7 +96,7 @@ export default function AuctionBrowser({
     } finally {
       if (reqId === reqIdRef.current) setLoading(false);
     }
-  }, [query, saleType, sort]);
+  }, [query, saleType, sort, endpoint, includeSaleType]);
 
   useEffect(() => {
     if (isFirstRun.current) {
@@ -90,9 +112,10 @@ export default function AuctionBrowser({
     setLoadingMore(true);
     setMoreError(false);
     try {
-      const res = await apiFetch<AuctionListResponse>(`/api/auctions?${buildParams(query, sort, nextPage, saleType)}`, {
-        cache: "no-store",
-      });
+      const res = await apiFetch<AuctionListResponse>(
+        `${endpoint}?${buildParams(query, sort, nextPage, saleType, includeSaleType)}`,
+        { cache: "no-store" },
+      );
       setAuctions((prev) => [...prev, ...res.content]);
       setPage(nextPage);
       setTotalPages(res.totalPages);
@@ -104,10 +127,10 @@ export default function AuctionBrowser({
   }
 
   const hasMore = page + 1 < totalPages;
-  const searchPlaceholder = saleType === "INSTANT"
+  const resolvedPlaceholder = searchPlaceholder ?? (saleType === "INSTANT"
     ? "즉시판매 제목, 아티스트명, 멤버명으로 검색"
-    : "경매 제목, 아티스트명, 멤버명으로 검색";
-  const emptyTitle = saleType === "INSTANT" ? "등록된 즉시판매가 없습니다" : "진행 중인 경매가 없습니다";
+    : "경매 제목, 아티스트명, 멤버명으로 검색");
+  const resolvedEmptyTitle = emptyTitle ?? (saleType === "INSTANT" ? "등록된 즉시판매가 없습니다" : "진행 중인 경매가 없습니다");
 
   return (
     <div>
@@ -116,10 +139,10 @@ export default function AuctionBrowser({
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
         </svg>
-        <span className="sr-only">{searchPlaceholder}</span>
+        <span className="sr-only">{resolvedPlaceholder}</span>
         <input
           type="search"
-          placeholder={searchPlaceholder}
+          placeholder={resolvedPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full border-0 bg-transparent text-[13.5px] text-text-1 outline-none placeholder:text-text-3"
@@ -134,7 +157,7 @@ export default function AuctionBrowser({
           {loading && <InlineSpinner />}
         </span>
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="정렬 기준">
-          {SORT_OPTIONS.map((option) => (
+          {sortOptions.map((option) => (
             <button
               key={option.key}
               type="button"
@@ -174,7 +197,7 @@ export default function AuctionBrowser({
         // 빈 목록도 로딩 중 높이가 다른 스피너로 교체하지 않고 dim만(레이아웃 시프트 방지).
         <div className={loading ? "opacity-60 transition-opacity" : undefined}>
           <ExploreEmpty
-            title={query ? `"${query}" 검색 결과가 없어요` : emptyTitle}
+            title={query ? `"${query}" 검색 결과가 없어요` : resolvedEmptyTitle}
             hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
             onClear={query ? () => setQuery("") : undefined}
           />

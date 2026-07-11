@@ -8,7 +8,14 @@ import { useAuth } from "@/lib/auth-context";
 import { useNotifications } from "@/lib/notification-context";
 import { formatRelativeTime } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
-import type { NotificationListResponse, NotificationResponse } from "@/lib/types";
+import type { NotificationListResponse, NotificationResponse, NotificationType } from "@/lib/types";
+
+// 타입별 배지 라벨/색. 낙찰=긍정(ok), 유찰=중립(회색), 추월=주의(primary).
+const TYPE_BADGE: Record<NotificationType, { label: string; className: string }> = {
+  OUTBID: { label: "입찰 추월", className: "bg-primary-soft text-primary" },
+  AUCTION_WON: { label: "낙찰", className: "bg-ok-soft text-ok" },
+  AUCTION_ENDED_NO_BIDS: { label: "유찰", className: "bg-surface-3 text-text-2" },
+};
 
 function BellIcon() {
   return (
@@ -116,7 +123,7 @@ export default function NotificationsPage() {
         <div className="flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-20 text-center text-text-3">
           <BellIcon />
           <p className="text-sm font-bold text-text-2">아직 받은 알림이 없어요.</p>
-          <p className="text-xs">입찰에 참여하면 추월 소식을 여기서 받아볼 수 있어요.</p>
+          <p className="text-xs">입찰 추월·낙찰·유찰 소식을 여기서 받아볼 수 있어요.</p>
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
@@ -137,8 +144,8 @@ export default function NotificationsPage() {
                 />
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2">
-                    <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-bold text-primary">
-                      입찰 추월
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${TYPE_BADGE[notification.type].className}`}>
+                      {TYPE_BADGE[notification.type].label}
                     </span>
                     <span className="text-[11px] text-text-3">{formatRelativeTime(notification.createdAt)}</span>
                   </span>

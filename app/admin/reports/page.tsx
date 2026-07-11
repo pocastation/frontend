@@ -145,8 +145,8 @@ export default function AdminReportsPage() {
       <p className="mt-1.5 text-sm text-text-3">접수된 신고 내역을 확인하고 필요한 조치를 취할 수 있습니다.</p>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_340px]">
-        {/* 목록 */}
-        <div>
+        {/* 목록 — min-w-0로 테이블(min-w)이 그리드 컬럼을 늘려 페이지가 넘치는 걸 막는다. */}
+        <div className="min-w-0">
           <div className="mb-3 flex flex-wrap gap-1.5" role="group" aria-label="상태 필터">
             {STATUS_FILTERS.map((f) => (
               <button

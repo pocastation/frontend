@@ -169,26 +169,52 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="mx-auto flex max-w-[1240px] gap-6 px-4 py-6 sm:py-8">
-      <aside className="hidden w-[220px] shrink-0 lg:block">
-        <div className="sticky top-20 rounded-r3 border border-border bg-surface p-2 shadow-card">
-          <p className="px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold tracking-wide text-primary">POCASTATION ADMIN</p>
-          <p className="px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold text-text-3">운영</p>
-          <nav aria-label="운영 메뉴" className="flex flex-col">
-            {OPERATION_NAV.map((item) => (
-              <NavLink key={item.href} item={item} active={isActive(item.href)} />
-            ))}
-          </nav>
-          <p className="mt-2 px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold text-text-3">준비 중</p>
-          <nav aria-label="준비 중 메뉴" className="flex flex-col">
-            {COMING_NAV.map((item) => (
-              <NavLink key={item.href} item={item} active={false} />
-            ))}
-          </nav>
-        </div>
-      </aside>
+    <div className="mx-auto max-w-[1240px] px-4 py-6 sm:py-8">
+      {/* 모바일 내비 — 사이드바가 lg 미만에서 숨겨지므로, 사용 가능한 운영 메뉴를 가로 스크롤
+          탭바로 제공해 모바일에서도 섹션 이동이 되게 한다. */}
+      <nav
+        aria-label="관리자 메뉴"
+        className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden"
+      >
+        {OPERATION_NAV.filter((item) => item.ready).map((item) => {
+          const active = isActive(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold transition-colors ${FOCUS_RING} ${
+                active ? "border-primary bg-primary text-white" : "border-border bg-surface text-text-2"
+              }`}
+            >
+              {item.icon}
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
 
-      <div className="min-w-0 flex-1">{children}</div>
+      <div className="flex gap-6">
+        <aside className="hidden w-[220px] shrink-0 lg:block">
+          <div className="sticky top-20 rounded-r3 border border-border bg-surface p-2 shadow-card">
+            <p className="px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold tracking-wide text-primary">POCASTATION ADMIN</p>
+            <p className="px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold text-text-3">운영</p>
+            <nav aria-label="운영 메뉴" className="flex flex-col">
+              {OPERATION_NAV.map((item) => (
+                <NavLink key={item.href} item={item} active={isActive(item.href)} />
+              ))}
+            </nav>
+            <p className="mt-2 px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold text-text-3">준비 중</p>
+            <nav aria-label="준비 중 메뉴" className="flex flex-col">
+              {COMING_NAV.map((item) => (
+                <NavLink key={item.href} item={item} active={false} />
+              ))}
+            </nav>
+          </div>
+        </aside>
+
+        <div className="min-w-0 flex-1">{children}</div>
+      </div>
     </div>
   );
 }

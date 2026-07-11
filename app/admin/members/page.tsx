@@ -190,8 +190,9 @@ export default function AdminMembersPage() {
       <p className="mt-1.5 text-sm text-text-3">회원 정보를 검색하고 계정 상태를 관리합니다.</p>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_320px]">
-        {/* 목록 */}
-        <div>
+        {/* 목록 — min-w-0로 그리드 컬럼이 테이블(min-w) 너비만큼 늘어나 페이지가 넘치는 걸 막고,
+            테이블은 내부(overflow-x-auto)에서만 가로 스크롤되게 한다. */}
+        <div className="min-w-0">
           <div className="mb-3 flex flex-wrap items-center gap-2.5">
             <label className="flex h-10 min-w-[200px] flex-1 items-center gap-2 rounded-full border border-border px-4">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">

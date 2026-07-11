@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import AuctionCard from "@/components/AuctionCard";
 import { SORT_OPTIONS, type SortKey } from "@/components/AuctionExplorer";
-import { ExploreEmpty, ExploreError, ExploreLoading, InlineSpinner } from "@/components/explore-states";
+import { ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
 import { apiFetch } from "@/lib/api";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import { FOCUS_RING } from "@/lib/ui";
@@ -29,13 +29,15 @@ export default function AuctionBrowser({
   initialTotalElements,
   initialTotalPages,
   saleType = "AUCTION",
+  initialQuery = "",
 }: {
   initialAuctions: AuctionResponse[];
   initialTotalElements: number;
   initialTotalPages: number;
   saleType?: AuctionSaleType;
+  initialQuery?: string;
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [sort, setSort] = useState<SortKey>(DEFAULT_SORT);
   const [auctions, setAuctions] = useState(initialAuctions);
   const [page, setPage] = useState(0);
@@ -166,15 +168,15 @@ export default function AuctionBrowser({
             />
           ))}
         </div>
-      ) : loading ? (
-        // 빈 목록에서 정렬/필터 중 — 가짜 스켈레톤 대신 가벼운 스피너.
-        <ExploreLoading />
       ) : error ? null : (
-        <ExploreEmpty
-          title={query ? `"${query}" 검색 결과가 없어요` : emptyTitle}
-          hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
-          onClear={query ? () => setQuery("") : undefined}
-        />
+        // 빈 목록도 로딩 중 높이가 다른 스피너로 교체하지 않고 dim만(레이아웃 시프트 방지).
+        <div className={loading ? "opacity-60 transition-opacity" : undefined}>
+          <ExploreEmpty
+            title={query ? `"${query}" 검색 결과가 없어요` : emptyTitle}
+            hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
+            onClear={query ? () => setQuery("") : undefined}
+          />
+        </div>
       )}
 
       {hasMore && !loading && (

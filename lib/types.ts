@@ -423,3 +423,26 @@ export type AdminAuditLogListResponse = {
 
 // PATCH /api/admin/members/{id}/role 요청 바디의 role 값.
 export type MemberRole = "ADMIN" | "USER";
+
+// ─── 인앱 알림 ───
+
+// 1단계는 OUTBID(입찰 추월)만 — 낙찰/유찰/판매자 알림은 후속 단계.
+export type NotificationType = "OUTBID";
+
+export type NotificationResponse = {
+  id: number;
+  type: NotificationType;
+  auctionId: number | null;
+  title: string;
+  message: string;
+  isRead: boolean;
+  createdAt: string;
+};
+
+export type NotificationListResponse = {
+  content: NotificationResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};

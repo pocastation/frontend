@@ -48,7 +48,13 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
   ];
 
   return (
-    <div className="mx-auto max-w-[1160px] px-4 py-6 sm:py-8">
+    // 라이브 경매는 모바일 하단 고정 입찰바가 뜨므로, 그 높이만큼 하단 여백을 줘 마지막 콘텐츠가
+    // 바에 가리지 않게 한다(모바일에서만, 즉시판매·종료 건에는 불필요).
+    <div
+      className={`mx-auto max-w-[1160px] px-4 py-6 sm:py-8 ${
+        !isInstantSale && auction.status === "LIVE" ? "max-sm:pb-24" : ""
+      }`}
+    >
       <div className="mb-4 flex items-center justify-between">
         <Link
           href={isInstantSale ? "/instant-sales" : "/"}

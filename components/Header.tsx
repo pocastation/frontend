@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { useNotifications } from "@/lib/notification-context";
 
 // 상단 메뉴는 리디자인 검토 과정에서 일단 비웠었음(§2026-07-05) — 콘텐츠를 갖춘 페이지가
 // 하나씩 생길 때마다 되살리는 중(아티스트 §2026-07-06, 경매 목록 §2026-07-07). 종료된 경매는
@@ -58,6 +59,7 @@ export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
   const { member, logout, isLoading } = useAuth();
+  const { unreadCount } = useNotifications();
   const [searchInput, setSearchInput] = useState("");
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const searchFieldId = useId();
@@ -132,8 +134,17 @@ export default function Header() {
         </nav>
 
         <div className="hdr-r">
-          <Link href="/notifications" className="ic-btn" aria-label="알림">
+          <Link
+            href="/notifications"
+            className="ic-btn relative"
+            aria-label={member && unreadCount > 0 ? `알림 ${unreadCount}개` : "알림"}
+          >
             <BellIcon />
+            {member && unreadCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-extrabold leading-none text-white">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </Link>
           <Link href={member ? "/auctions/new" : "/login"} className="btn btn-p sell-btn">
             <PlusIcon />
@@ -159,13 +170,28 @@ export default function Header() {
           )}
         </div>
 
+        {/* 모바일 전용 알림 벨 — 데스크탑 벨(hdr-r)은 모바일에서 숨겨져 있어 여기에 별도로 둔다. */}
+        <Link
+          href="/notifications"
+          onClick={closeMenu}
+          aria-label={member && unreadCount > 0 ? `알림 ${unreadCount}개` : "알림"}
+          className={`relative ml-auto mr-1 flex h-9 w-9 items-center justify-center rounded-r2 text-text-1 sm:hidden ${FOCUS_RING}`}
+        >
+          <BellIcon />
+          {member && unreadCount > 0 && (
+            <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-extrabold leading-none text-white">
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
+        </Link>
+
         <button
           type="button"
           aria-label={isMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
           aria-expanded={isMenuOpen}
           aria-controls="mobile-menu"
           onClick={() => setIsMenuOpen((open) => !open)}
-          className={`ml-auto flex h-9 w-9 items-center justify-center rounded-r2 text-text-1 sm:hidden ${FOCUS_RING}`}
+          className={`flex h-9 w-9 items-center justify-center rounded-r2 text-text-1 sm:hidden ${FOCUS_RING}`}
         >
           <span className="relative block h-4 w-5" aria-hidden="true">
             <span

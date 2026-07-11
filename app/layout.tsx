@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthProvider } from "@/lib/auth-context";
 import { WishlistProvider } from "@/lib/wishlist-context";
+import { NotificationProvider } from "@/lib/notification-context";
 import "./globals.css";
 
 const notoSansKr = Noto_Sans_KR({
@@ -38,11 +39,13 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
-          <WishlistProvider>
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </WishlistProvider>
+          <NotificationProvider>
+            <WishlistProvider>
+              <Header />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </WishlistProvider>
+          </NotificationProvider>
         </AuthProvider>
         <Analytics />
         <SpeedInsights />

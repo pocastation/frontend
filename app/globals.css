@@ -64,6 +64,16 @@ body {
   }
 }
 
+/* 판매 등록 위저드 스텝 전환 — 다음=오른쪽에서, 이전=왼쪽에서 슬라이드 인. */
+@keyframes wizardInRight {
+  from { opacity: 0; transform: translateX(28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes wizardInLeft {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 /* prefers-reduced-motion 사용자에게는 트랜지션/애니메이션을 사실상 없앤다(접근성). */
 @media (prefers-reduced-motion: reduce) {
   *,

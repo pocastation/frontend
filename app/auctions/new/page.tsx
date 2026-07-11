@@ -290,7 +290,8 @@ export default function NewAuctionPage() {
         <section className="border-t border-border pt-8">
           <SectionHeading step={3}>상품 정보</SectionHeading>
           <div className="flex flex-col gap-3">
-            <div className="grid grid-cols-2 gap-3">
+            {/* 모바일은 1열(긴 등급 옵션이 잘리지 않게), sm 이상은 2열. */}
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="flex flex-col gap-1.5">
                 <label htmlFor={sourceFieldId} className="text-xs font-bold text-text-2">
                   출처

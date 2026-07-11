@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiError, mediaUrl } from "@/lib/api";
@@ -171,12 +171,26 @@ export default function MyPage() {
   const { accessToken, member, isLoading, fetchWithAuth, logout } = useAuth();
 
   const [tab, setTab] = useState<Tab>("dashboard");
+  // 모바일에선 메뉴(aside)가 콘텐츠 위에 쌓여, 탭을 눌러도 콘텐츠가 화면 밖 아래에서 바뀌어
+  // "아무 반응 없어" 보인다. 탭이 바뀌면(초기 진입 제외) 콘텐츠로 스크롤해준다(lg 미만).
+  const contentRef = useRef<HTMLDivElement>(null);
+  const firstTabRender = useRef(true);
   const [selling, setSelling] = useState<AuctionResponse[]>([]);
   const [bidding, setBidding] = useState<MyBiddingResponse[]>([]);
   const [instantPurchases, setInstantPurchases] = useState<AuctionResponse[]>([]);
   const [wishlist, setWishlist] = useState<AuctionResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (firstTabRender.current) {
+      firstTabRender.current = false;
+      return;
+    }
+    if (window.innerWidth < 1024) {
+      contentRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [tab]);
 
   const loadMyActivity = useCallback(async () => {
     setLoading(true);
@@ -292,7 +306,7 @@ export default function MyPage() {
         </button>
       </aside>
 
-      <div>
+      <div ref={contentRef} className="scroll-mt-4">
         {error && (
           <p role="alert" className="mb-4 rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
             {error}

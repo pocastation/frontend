@@ -9,7 +9,7 @@ import SearchLink from "@/components/SearchLink";
 import ShareButton from "@/components/ShareButton";
 import { apiFetch, ApiError } from "@/lib/api";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
-import { FOCUS_RING } from "@/lib/ui";
+import { ACTION_ICON_BUTTON, FOCUS_RING } from "@/lib/ui";
 import type { AuctionDetailResponse } from "@/lib/types";
 
 async function getAuction(id: string): Promise<AuctionDetailResponse | null> {
@@ -62,12 +62,9 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
         >
           <span aria-hidden="true">←</span> {isInstantSale ? "즉시판매 목록으로" : "목록으로"}
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1">
           <ShareButton title={auction.title} />
-          <AuctionWishlistButton
-            auctionId={auction.id}
-            className={`flex items-center gap-1 rounded-r2 px-2 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-accent ${FOCUS_RING}`}
-          />
+          <AuctionWishlistButton auctionId={auction.id} className={ACTION_ICON_BUTTON} />
           <ReportButton auctionId={auction.id} />
         </div>
       </div>

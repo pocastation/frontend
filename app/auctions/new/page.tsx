@@ -183,7 +183,7 @@ export default function NewAuctionPage() {
           href="/guide"
           className={`flex shrink-0 items-center gap-1 rounded-full border border-border-2 px-3 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
         >
-          <span aria-hidden="true">?</span> 판매 가이드
+          판매 가이드
         </Link>
       </div>
 

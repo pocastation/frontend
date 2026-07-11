@@ -21,6 +21,7 @@ export default function AuctionWishlistButton({
       active={wishlisted.has(auctionId)}
       onToggle={(next) => toggle(auctionId, next)}
       className={className}
+      size={18}
     />
   );
 }

@@ -11,3 +11,8 @@ export const PRIMARY_BUTTON_CLASS =
 
 export const SECONDARY_BUTTON_CLASS =
   `rounded-full border border-border-2 bg-white text-sm font-bold text-text-2 transition-all hover:border-primary hover:text-primary active:scale-[0.98] ${FOCUS_RING}`;
+
+// 상세 페이지 상단 액션(공유·찜·신고)이 공유하는 아이콘 버튼 — 라벨 없이 아웃라인 아이콘만,
+// 색 없는(gray) 통일 스타일. 찜의 활성(빨간 하트)만 예외로 자기 상태를 색으로 표시한다.
+export const ACTION_ICON_BUTTON =
+  `flex h-9 w-9 items-center justify-center rounded-r2 text-text-3 transition-colors hover:text-text-1 ${FOCUS_RING}`;

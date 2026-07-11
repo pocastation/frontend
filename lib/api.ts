@@ -71,6 +71,12 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   return json.data as T;
 }
 
+// 가입 폼·온보딩이 기본값으로 채우는 서비스 생성 닉네임(공개, 가입 전).
+export async function fetchNicknameSuggestion(): Promise<string> {
+  const res = await apiFetch<{ nickname: string }>("/api/members/nickname/suggestion");
+  return res.nickname;
+}
+
 // multipart 업로드는 apiFetch의 JSON 직렬화·Content-Type과 안 맞아 별도 함수로 분리.
 export async function uploadMediaImage(file: File, accessToken: string): Promise<MediaUploadResponse> {
   const formData = new FormData();

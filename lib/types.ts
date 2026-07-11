@@ -7,9 +7,26 @@ export type ApiResponse<T> = {
 
 export type MemberResponse = {
   id: string;
-  email: string;
+  // OAuth 가입 회원은 이메일을 저장하지 않는다(§13 최소수집) — null 가능.
+  email: string | null;
   nickname: string;
   role: string;
+  // GET /api/members/me 만 내려주는 프로필 보강 필드(내 정보 탭 표시용) —
+  // 가입/로그인·닉네임 변경 응답에는 없어서 옵션으로 둔다.
+  provider?: string;
+  createdAt?: string;
+};
+
+// GET/POST/PATCH /api/members/me/delivery-addresses — 마이페이지 배송지 관리.
+export type DeliveryAddress = {
+  id: number;
+  label: string | null;
+  recipientName: string;
+  phone: string;
+  postalCode: string;
+  address1: string;
+  address2: string | null;
+  isDefault: boolean;
 };
 
 export type TokenResponse = {

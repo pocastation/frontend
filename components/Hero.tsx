@@ -115,7 +115,7 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
         {current && (
           <Link
             href={`/auctions/${current.id}`}
-            className="w-48 shrink-0 overflow-hidden rounded-r5 border border-white/20 bg-white/10 shadow-modal backdrop-blur-xl transition-transform hover:-translate-y-1.5 hover:rotate-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+            className="hidden w-48 shrink-0 overflow-hidden rounded-r5 border border-white/20 bg-white/10 shadow-modal backdrop-blur-xl transition-transform hover:-translate-y-1.5 hover:rotate-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:block"
           >
             <div className="relative flex aspect-[3/4] items-center justify-center bg-gradient-to-br from-[#1e1065] to-[#4c1d95] text-5xl">
               {current.representativeThumbnailUrl ? (

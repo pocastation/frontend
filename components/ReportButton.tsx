@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { REPORT_REASON_LABEL, REPORT_REASON_OPTIONS } from "@/lib/labels";
-import { FOCUS_RING } from "@/lib/ui";
+import { ACTION_ICON_BUTTON, FOCUS_RING } from "@/lib/ui";
 import type { ReportReason } from "@/lib/types";
 
 // 경매 상세 페이지 상단 액션 줄(공유/찜하기)에 나란히 붙는 신고 진입점 + 모달.
@@ -56,12 +56,28 @@ export default function ReportButton({ auctionId }: { auctionId: number }) {
       <button
         type="button"
         onClick={openModal}
-        className={`flex items-center gap-1 rounded-r2 px-2 py-1 text-xs font-semibold transition-colors ${
-          justSubmitted ? "text-ok" : "text-text-3 hover:text-accent"
-        } ${FOCUS_RING}`}
+        aria-label={justSubmitted ? "신고 접수됨" : "신고하기"}
+        title={justSubmitted ? "접수됨" : "신고"}
+        className={ACTION_ICON_BUTTON}
       >
-        <span aria-hidden="true">{justSubmitted ? "✓" : "🚩"}</span>
-        {justSubmitted ? "접수됨" : "신고"}
+        {justSubmitted ? (
+          // 접수 완료 체크
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        ) : (
+          // 신고(siren) — Lucide
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M7 18v-6a5 5 0 1 1 10 0v6" />
+            <path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z" />
+            <path d="M21 12h1" />
+            <path d="M18.5 4.5 18 5" />
+            <path d="M2 12h1" />
+            <path d="M12 2v1" />
+            <path d="m4.929 4.929.707.707" />
+            <path d="M12 12v6" />
+          </svg>
+        )}
       </button>
 
       {open && (

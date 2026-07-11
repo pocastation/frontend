@@ -68,6 +68,9 @@ export default function BidSection({
   // 다른 사람 입찰로 현재가가 오르면 입력값 하한도 따라 올려야 한다. 단 사용자가 사다리에서
   // 직접 고른 값은 존중한다.
   const amountTouchedRef = useRef(false);
+  // 모바일 하단 고정 입찰바 — 현재가 헤더(입찰 CTA)가 화면 밖일 때만 노출(스크롤로 도달하면 숨김).
+  const priceHeaderRef = useRef<HTMLDivElement>(null);
+  const [priceHeaderInView, setPriceHeaderInView] = useState(false);
 
   const isLive = status === "LIVE" && isBeforeEnd(endAt);
   const isOwnAuction = member?.nickname != null && member.nickname === sellerNickname;
@@ -154,9 +157,26 @@ export default function BidSection({
     }
   }, [currentPrice, bidCount]);
 
+  // 현재가 헤더가 뷰포트에 보이는지 관찰 — 모바일 하단 고정바를 CTA가 화면 밖일 때만 띄우기 위함.
+  // rootMargin 하단 -76px는 고정바 높이만큼 미리 숨겨 겹침을 피한다.
+  useEffect(() => {
+    const el = priceHeaderRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setPriceHeaderInView(entry.isIntersecting),
+      { rootMargin: "0px 0px -76px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   function selectRung(price: number) {
     amountTouchedRef.current = true;
     setAmount(price);
+  }
+
+  function scrollToBid() {
+    priceHeaderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   async function handleBid() {
@@ -193,7 +213,10 @@ export default function BidSection({
   return (
     <div className="mt-6">
       {/* 현재가 헤더 */}
-      <div className={`rounded-r3 border border-border p-4 shadow-card ${isLive ? "bg-primary-soft" : "bg-surface"}`}>
+      <div
+        ref={priceHeaderRef}
+        className={`rounded-r3 border border-border p-4 shadow-card ${isLive ? "bg-primary-soft" : "bg-surface"}`}
+      >
         <div className="flex items-center justify-between text-xs font-semibold text-text-3">
           <span>현재가</span>
           <span>입찰 {bidCount}회</span>
@@ -377,6 +400,44 @@ export default function BidSection({
           </button>
         )}
       </section>
+
+      {/* 모바일 하단 고정 입찰바 — 상세가 세로로 길어 입찰 CTA가 맨 아래라, 라이브일 때 현재가와
+          입찰 버튼을 항상 손닿는 곳에 둔다. 실제 입찰 영역이 보이면(스크롤로 도달) 숨겨 중복을 피한다. */}
+      {isLive && !priceHeaderInView && (
+        <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-border bg-surface px-4 py-3 shadow-[0_-2px_12px_rgba(0,0,0,0.08)] sm:hidden">
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] font-semibold text-text-3">현재가</div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-display text-lg font-extrabold text-text-1 tabular-nums">
+                {formatKRW(currentPrice)}
+              </span>
+              <span className="truncate text-[11px] font-bold text-accent tabular-nums">
+                {formatCountdown(endAt)}
+              </span>
+            </div>
+          </div>
+          {isOwnAuction ? (
+            <span className="shrink-0 rounded-r2 bg-surface-2 px-4 py-2.5 text-sm font-bold text-text-3">
+              내 경매
+            </span>
+          ) : !accessToken ? (
+            <Link
+              href={`/login?redirect=/auctions/${auctionId}`}
+              className={`flex h-11 shrink-0 items-center justify-center px-5 ${PRIMARY_BUTTON_CLASS}`}
+            >
+              로그인하고 입찰
+            </Link>
+          ) : (
+            <button
+              type="button"
+              onClick={scrollToBid}
+              className={`flex h-11 shrink-0 items-center justify-center px-6 ${PRIMARY_BUTTON_CLASS}`}
+            >
+              입찰하기
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

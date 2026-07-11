@@ -115,7 +115,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         method: "PATCH",
         body: { nickname },
       });
-      setMember(updated);
+      // PATCH 응답에는 /me 전용 보강 필드(provider·createdAt)가 없으므로 통째로 교체하면
+      // 내 정보 탭 표시값이 사라진다 — 기존 member 위에 병합한다.
+      setMember((prev) => (prev ? { ...prev, ...updated } : updated));
     },
     [fetchWithAuth],
   );

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import DeliveryAddressBook from "@/components/DeliveryAddressBook";
+import ProfileTab from "@/components/ProfileTab";
 import { formatKRW, formatTimeLeft } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
@@ -160,10 +162,10 @@ const TAB_TITLE: Record<Tab, string> = {
   settings: "계정 설정",
 };
 
-// 도메인이 아직 없는 탭(계정 관리 전반)은 준비 중 안내만 보여준다 — 클릭했을 때 아무 반응
+// 도메인이 아직 없는 탭(알림 설정·계정 설정)은 준비 중 안내만 보여준다 — 클릭했을 때 아무 반응
 // 없는 죽은 메뉴보다는, 메뉴는 다 보여주고 상태를 정직하게 알리는 쪽을 택했다.
-// 관심 목록은 wishlist 도메인이 생겨 실제 데이터로 전환됨(더 이상 스텁 아님).
-const STUB_TABS = new Set<Tab>(["profile", "notifications", "shipping", "settings"]);
+// 관심 목록(wishlist 도메인)·내 정보/배송지 관리(delivery address API)는 실제 데이터로 전환됨.
+const STUB_TABS = new Set<Tab>(["notifications", "settings"]);
 
 // 당근식 통합 마이페이지 — 판매자/구매자 계정 구분 없이 "내 활동" = 판매 + 입찰.
 export default function MyPage() {
@@ -415,6 +417,22 @@ export default function MyPage() {
                 <SellingList items={liveSelling} loading={loading} emptyText="판매 중인 경매가 없습니다." />
               </div>
             )}
+          </>
+        ) : tab === "profile" ? (
+          <>
+            <h1 className="font-display text-xl font-extrabold text-text-1">내 정보</h1>
+            <p className="mt-1 text-sm text-text-3">닉네임과 계정 정보를 확인하고 관리해요.</p>
+            <div className="mt-5">
+              <ProfileTab />
+            </div>
+          </>
+        ) : tab === "shipping" ? (
+          <>
+            <h1 className="font-display text-xl font-extrabold text-text-1">배송지 관리</h1>
+            <p className="mt-1 text-sm text-text-3">낙찰 상품을 받을 배송지를 관리해요.</p>
+            <div className="mt-5">
+              <DeliveryAddressBook />
+            </div>
           </>
         ) : tab === "wishlist" ? (
           <>

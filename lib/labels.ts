@@ -1,4 +1,6 @@
 import type {
+  SuggestionKind,
+  SuggestionStatus,
   ArtistStatus,
   ArtistType,
   AuctionSaleType,
@@ -220,4 +222,26 @@ export const AUDIT_TARGET_TYPE_LABEL: Record<AuditTargetType, string> = {
 export const MEMBER_ROLE_LABEL: Record<MemberRole, string> = {
   ADMIN: "관리자",
   USER: "일반",
+};
+
+// ─── 건의(suggestion) ───
+
+export const SUGGESTION_KIND_LABEL: Record<SuggestionKind, string> = {
+  ARTIST: "아티스트",
+  AGENCY: "기획사",
+  MEMBER: "멤버",
+};
+
+export const SUGGESTION_KIND_OPTIONS: SuggestionKind[] = ["ARTIST", "AGENCY", "MEMBER"];
+
+export const SUGGESTION_STATUS_LABEL: Record<SuggestionStatus, string> = {
+  RECEIVED: "접수",
+  ACCEPTED: "반영",
+  REJECTED: "반려",
+};
+
+export const SUGGESTION_STATUS_BADGE_CLASS: Record<SuggestionStatus, string> = {
+  RECEIVED: "bg-primary-soft text-primary",
+  ACCEPTED: "bg-ok-soft text-ok",
+  REJECTED: "bg-surface-3 text-text-2",
 };

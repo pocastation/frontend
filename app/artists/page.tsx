@@ -1,4 +1,5 @@
 import ArtistExplorer from "@/components/ArtistExplorer";
+import SuggestArtistButton from "@/components/SuggestArtistButton";
 import { apiFetch } from "@/lib/api";
 import type { ArtistListResponse } from "@/lib/types";
 
@@ -27,6 +28,8 @@ export default async function ArtistsPage() {
         initialTotalElements={artists?.totalElements ?? 0}
         initialTotalPages={artists?.totalPages ?? 0}
       />
+
+      <SuggestArtistButton />
     </div>
   );
 }

@@ -450,3 +450,46 @@ export type NotificationListResponse = {
 export type NotificationSettings = {
   outbidEnabled: boolean;
 };
+
+// ─── 건의(catalog suggestion) ───
+
+export type SuggestionKind = "ARTIST" | "AGENCY" | "MEMBER";
+export type SuggestionStatus = "RECEIVED" | "ACCEPTED" | "REJECTED";
+
+// GET /api/members/me/suggestions 항목(제출자 본인용).
+export type SuggestionResponse = {
+  id: number;
+  kind: SuggestionKind;
+  name: string;
+  note: string | null;
+  status: SuggestionStatus;
+  createdAt: string;
+};
+
+export type SuggestionListResponse = {
+  content: SuggestionResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+// GET /api/admin/catalog/suggestions 항목 — 제출자 닉네임 포함.
+export type AdminSuggestionResponse = {
+  id: number;
+  kind: SuggestionKind;
+  name: string;
+  note: string | null;
+  status: SuggestionStatus;
+  submitterNickname: string | null;
+  createdAt: string;
+  handledAt: string | null;
+};
+
+export type AdminSuggestionListResponse = {
+  content: AdminSuggestionResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};

@@ -99,7 +99,7 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
         {current && (
           <Link
             href={`/auctions/${current.id}`}
-            className="hidden w-48 shrink-0 overflow-hidden rounded-r5 border border-white/20 bg-white/10 shadow-modal backdrop-blur-xl transition-transform hover:-translate-y-1.5 hover:rotate-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary sm:block"
+            className="group hidden w-48 shrink-0 overflow-hidden rounded-r5 border border-white/20 bg-white/10 shadow-modal backdrop-blur-xl transition duration-300 ease-out hover:-translate-y-2 hover:border-white/35 hover:shadow-[0_24px_60px_-15px_rgba(91,63,232,0.6)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:block"
           >
             <div className="relative flex aspect-[3/4] items-center justify-center bg-gradient-to-br from-[#1e1065] to-[#4c1d95] text-5xl">
               {current.representativeThumbnailUrl ? (
@@ -107,7 +107,7 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
                 <img
                   src={mediaUrl(current.representativeThumbnailUrl)}
                   alt={current.title}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.07] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                 />
               ) : (
                 <span className="text-white/45" aria-hidden="true">

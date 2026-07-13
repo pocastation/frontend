@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { FOCUS_RING } from "@/lib/ui";
+import ToggleSwitch from "@/components/ToggleSwitch";
 
 type Setting = { outbidEnabled: boolean };
 
@@ -53,24 +53,7 @@ export default function AuctionOutbidToggle({ auctionId }: { auctionId: number }
         <p className="text-xs font-bold text-text-1">이 경매 추월 알림</p>
         <p className="mt-0.5 text-[11px] text-text-3">더 높은 입찰로 밀리면 알려드려요.</p>
       </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={enabled}
-        aria-label="이 경매 추월 알림"
-        disabled={saving}
-        onClick={toggle}
-        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-60 ${FOCUS_RING} ${
-          enabled ? "bg-primary" : "bg-border-2"
-        }`}
-      >
-        <span
-          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-            enabled ? "translate-x-[22px]" : "translate-x-0.5"
-          }`}
-          aria-hidden="true"
-        />
-      </button>
+      <ToggleSwitch checked={enabled} disabled={saving} onChange={toggle} label="이 경매 추월 알림" />
     </div>
   );
 }

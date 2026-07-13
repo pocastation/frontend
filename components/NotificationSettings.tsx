@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { FOCUS_RING } from "@/lib/ui";
+import ToggleSwitch from "@/components/ToggleSwitch";
 import type { NotificationSettings as Settings } from "@/lib/types";
 
 // 마이페이지 "알림 설정" 탭 — 1단계는 추월 알림 on/off만. 낙찰·유찰 같은 거래성(정보성) 알림은
@@ -107,24 +107,7 @@ function ToggleRow({
         <p className="text-sm font-bold text-text-1">{title}</p>
         <p className="mt-0.5 text-xs text-text-3">{description}</p>
       </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        aria-label={title}
-        disabled={disabled}
-        onClick={() => onChange(!checked)}
-        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-60 ${FOCUS_RING} ${
-          checked ? "bg-primary" : "bg-border-2"
-        }`}
-      >
-        <span
-          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform ${
-            checked ? "translate-x-[22px]" : "translate-x-0.5"
-          }`}
-          aria-hidden="true"
-        />
-      </button>
+      <ToggleSwitch checked={checked} disabled={disabled} onChange={onChange} label={title} />
     </div>
   );
 }

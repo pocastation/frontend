@@ -80,23 +80,7 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
             희귀 포카부터 한정판 굿즈까지 — 공정한 경매로 진짜 가치를 찾아드립니다.
           </p>
 
-          <div className="mt-7 flex justify-center gap-7 sm:justify-start" aria-label="서비스 예시 지표">
-            <div>
-              <p className="font-display text-xl font-extrabold text-white">12만+</p>
-              <p className="text-[11px] text-white/50">누적 거래</p>
-            </div>
-            <div>
-              <p className="font-display text-xl font-extrabold text-white">4.9★</p>
-              <p className="text-[11px] text-white/50">만족도</p>
-            </div>
-            <div>
-              <p className="font-display text-xl font-extrabold text-white">98%</p>
-              <p className="text-[11px] text-white/50">안전 거래</p>
-            </div>
-          </div>
-          <p className="mt-1.5 text-[10px] text-white/35">* 예시 지표 — 정식 오픈 후 실제 데이터로 교체됩니다</p>
-
-          <div className="mt-6 flex justify-center gap-2.5 sm:justify-start">
+          <div className="mt-7 flex justify-center gap-2.5 sm:justify-start">
             <Link
               href="#auctions"
               className="inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-primary transition-transform hover:scale-[1.03] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"

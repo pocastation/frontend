@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import DeliveryAddressBook from "@/components/DeliveryAddressBook";
+import PaymentMethodManager from "@/components/PaymentMethodManager";
 import ProfileTab from "@/components/ProfileTab";
 import NotificationSettings from "@/components/NotificationSettings";
 import { formatKRW, formatTimeLeft } from "@/lib/format";
@@ -30,6 +31,7 @@ type Tab =
   | "profile"
   | "notifications"
   | "shipping"
+  | "payment"
   | "settings";
 
 function DashboardIcon() {
@@ -112,6 +114,16 @@ function PinIcon() {
     </svg>
   );
 }
+// Feather Icons credit-card — 아이콘 path는 손으로 그리지 않고 검증된 오픈소스 path를 그대로 사용.
+function CardIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+      <line x1="1" y1="10" x2="23" y2="10" />
+    </svg>
+  );
+}
+
 function GearIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -145,6 +157,7 @@ const ACCOUNT_NAV: { key: Tab; label: string; icon: () => ReactNode }[] = [
   { key: "profile", label: "내 정보", icon: UserIcon },
   { key: "notifications", label: "알림 설정", icon: BellIcon },
   { key: "shipping", label: "배송지 관리", icon: PinIcon },
+  { key: "payment", label: "결제수단", icon: CardIcon },
   { key: "settings", label: "계정 설정", icon: GearIcon },
 ];
 
@@ -160,6 +173,7 @@ const TAB_TITLE: Record<Tab, string> = {
   profile: "내 정보",
   notifications: "알림 설정",
   shipping: "배송지 관리",
+  payment: "결제수단",
   settings: "계정 설정",
 };
 
@@ -433,6 +447,14 @@ export default function MyPage() {
             <p className="mt-1 text-sm text-text-3">낙찰 상품을 받을 배송지를 관리해요.</p>
             <div className="mt-5">
               <DeliveryAddressBook />
+            </div>
+          </>
+        ) : tab === "payment" ? (
+          <>
+            <h1 className="font-display text-xl font-extrabold text-text-1">결제수단</h1>
+            <p className="mt-1 text-sm text-text-3">낙찰 시 자동 결제에 사용할 카드를 관리해요.</p>
+            <div className="mt-5">
+              <PaymentMethodManager />
             </div>
           </>
         ) : tab === "notifications" ? (

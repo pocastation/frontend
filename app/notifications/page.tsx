@@ -20,6 +20,7 @@ const TYPE_STATUS: Record<NotificationType, { label: string; dot: string }> = {
   PAYMENT_COMPLETED: { label: "결제 완료", dot: "bg-ok" },
   PAYMENT_FAILED: { label: "결제 실패", dot: "bg-accent" },
   ORDER_DEFAULTED: { label: "주문 취소", dot: "bg-text-3" },
+  AUCTION_SUCCEEDED: { label: "구매 기회", dot: "bg-primary" },
 };
 
 // 배포 시점 차이로 프론트가 모르는 타입이 와도 렌더가 깨지지 않게 폴백.

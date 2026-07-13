@@ -434,7 +434,16 @@ export type NotificationType =
   | "AUCTION_ENDED_NO_BIDS"
   | "PAYMENT_COMPLETED" // 결제 완료 — 구매자(청구 확인)·판매자(발송 준비)
   | "PAYMENT_FAILED" // 결제 실패 — 결제수단 확인·자동 재시도 안내
-  | "ORDER_DEFAULTED"; // 미결제 확정 — 주문 취소(구매자)·재등록 안내(판매자)
+  | "ORDER_DEFAULTED" // 미결제 확정 — 주문 취소(구매자)·재등록 안내(판매자)
+  | "AUCTION_SUCCEEDED"; // 차순위 승계 — 구매 기회 제안(차순위)·낙찰자 변경(판매자)
+
+// GET /api/members/me/succession-offers/{auctionId} — 제안 대상자 본인에게만 200(타인 404).
+export type SuccessionOfferResponse = {
+  auctionId: number;
+  amount: number;
+  status: "OFFERED" | "ACCEPTED" | "DECLINED" | "EXPIRED";
+  expiresAt: string;
+};
 
 // ─── 주문/결제 상태 ───
 

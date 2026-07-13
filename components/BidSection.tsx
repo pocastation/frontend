@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { apiFetch, ApiError, apiStreamUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { formatKRW, formatCountdown, formatRelativeTime, isBeforeEnd } from "@/lib/format";
+import { formatKRW, formatCountdown, formatRelativeTime, formatDateTimeKST, isBeforeEnd } from "@/lib/format";
 import {
   BID_MIN_INCREMENT,
   buyerFee,
@@ -26,6 +26,7 @@ type Props = {
   initialCurrentPrice: number;
   initialBidCount: number;
   initialEndAt: string;
+  maxEndAt: string | null;
   status: AuctionStatus;
   sellerNickname: string;
   startPrice: number;
@@ -47,6 +48,7 @@ export default function BidSection({
   initialCurrentPrice,
   initialBidCount,
   initialEndAt,
+  maxEndAt,
   status,
   sellerNickname,
   startPrice,
@@ -235,6 +237,12 @@ export default function BidSection({
         {isLive && (
           <p className="mt-2 text-[10.5px] text-text-3">
             마감 3분 전 입찰 시 종료 시간이 자동 연장돼요(최대 3회).
+            {maxEndAt && (
+              <>
+                {" "}
+                최대 <span className="font-semibold text-text-2">{formatDateTimeKST(maxEndAt)}</span>까지 연장될 수 있어요.
+              </>
+            )}
           </p>
         )}
         <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-[11px] text-text-3">

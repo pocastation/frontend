@@ -10,10 +10,11 @@ import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionListResponse, AuctionResponse, AuctionSaleType } from "@/lib/types";
 
 // /auctions 전용 페이지(AuctionBrowser)도 같은 정렬 기준을 쓰므로 여기서 export해 재사용한다.
-export type SortKey = "latest" | "popular" | "views" | "price_asc" | "price_desc";
+export type SortKey = "latest" | "ending_soon" | "popular" | "views" | "price_asc" | "price_desc";
 
 export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: "latest", label: "최신순" },
+  { key: "ending_soon", label: "마감임박" },
   { key: "popular", label: "인기순" },
   { key: "views", label: "조회순" },
   { key: "price_asc", label: "낮은 가격" },

@@ -14,6 +14,7 @@ import type { NotificationListResponse, NotificationResponse, NotificationType }
 const TYPE_BADGE: Record<NotificationType, { label: string; className: string }> = {
   OUTBID: { label: "입찰 추월", className: "bg-primary-soft text-primary" },
   AUCTION_WON: { label: "낙찰", className: "bg-ok-soft text-ok" },
+  AUCTION_LOST: { label: "패찰", className: "bg-accent-soft text-accent" },
   AUCTION_ENDED_NO_BIDS: { label: "유찰", className: "bg-surface-3 text-text-2" },
 };
 

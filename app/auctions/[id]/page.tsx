@@ -8,6 +8,7 @@ import InstantPurchaseSection from "@/components/InstantPurchaseSection";
 import ReportButton from "@/components/ReportButton";
 import SearchLink from "@/components/SearchLink";
 import ShareButton from "@/components/ShareButton";
+import SuccessionOfferBanner from "@/components/SuccessionOfferBanner";
 import { apiFetch, ApiError } from "@/lib/api";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
 import { ACTION_ICON_BUTTON, FOCUS_RING } from "@/lib/ui";
@@ -193,6 +194,8 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
                 viewCount={auction.viewCount}
               />
               {auction.status === "LIVE" && <AuctionOutbidToggle auctionId={auction.id} />}
+              {/* 낙찰(ENDED_SOLD) 후 미결제 확정 시 차순위에게만 승계 제안 배너가 뜬다(대상자 아니면 미노출). */}
+              {auction.status === "ENDED_SOLD" && <SuccessionOfferBanner auctionId={auction.id} />}
             </>
           ) : null}
         </div>

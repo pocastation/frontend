@@ -34,19 +34,49 @@ export default function NotificationsPage() {
 
   const [notifications, setNotifications] = useState<NotificationResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState<string | null>(null);
+
+  const PAGE_SIZE = 20;
 
   const load = useCallback(async () => {
     setError(null);
     try {
-      const res = await fetchWithAuth<NotificationListResponse>("/api/members/me/notifications?size=50");
+      const res = await fetchWithAuth<NotificationListResponse>(
+        `/api/members/me/notifications?page=0&size=${PAGE_SIZE}`,
+      );
       setNotifications(res.content);
+      setPage(0);
+      setTotalPages(res.totalPages);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "알림을 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
   }, [fetchWithAuth]);
+
+  // 다음 페이지를 이어붙인다(기존 목록 유지 — AuctionBrowser와 같은 "더 보기" 패턴).
+  async function handleLoadMore() {
+    const nextPage = page + 1;
+    setLoadingMore(true);
+    setError(null);
+    try {
+      const res = await fetchWithAuth<NotificationListResponse>(
+        `/api/members/me/notifications?page=${nextPage}&size=${PAGE_SIZE}`,
+      );
+      setNotifications((prev) => [...prev, ...res.content]);
+      setPage(nextPage);
+      setTotalPages(res.totalPages);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "알림을 더 불러오지 못했습니다.");
+    } finally {
+      setLoadingMore(false);
+    }
+  }
+
+  const hasMore = page + 1 < totalPages;
 
   useEffect(() => {
     if (isLoading) return;
@@ -157,6 +187,19 @@ export default function NotificationsPage() {
             </li>
           ))}
         </ul>
+      )}
+
+      {hasMore && (
+        <div className="mt-5 flex justify-center">
+          <button
+            type="button"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className={`rounded-full border border-border-2 bg-white px-5 py-2 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-50 ${FOCUS_RING}`}
+          >
+            {loadingMore ? "불러오는 중..." : "더 보기"}
+          </button>
+        </div>
       )}
 
       <p className="mt-6 text-center text-xs text-text-3">

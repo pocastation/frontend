@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import AuctionImageGallery from "@/components/AuctionImageGallery";
+import AuctionOutbidToggle from "@/components/AuctionOutbidToggle";
 import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import BidSection from "@/components/BidSection";
 import InstantPurchaseSection from "@/components/InstantPurchaseSection";
@@ -179,17 +180,20 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
               viewCount={auction.viewCount}
             />
           ) : auction.endAt ? (
-            <BidSection
-              auctionId={auction.id}
-              initialCurrentPrice={auction.currentPrice}
-              initialBidCount={auction.bidCount}
-              initialEndAt={auction.endAt}
-              maxEndAt={auction.maxEndAt}
-              status={auction.status}
-              sellerNickname={auction.sellerNickname}
-              startPrice={auction.startPrice}
-              viewCount={auction.viewCount}
-            />
+            <>
+              <BidSection
+                auctionId={auction.id}
+                initialCurrentPrice={auction.currentPrice}
+                initialBidCount={auction.bidCount}
+                initialEndAt={auction.endAt}
+                maxEndAt={auction.maxEndAt}
+                status={auction.status}
+                sellerNickname={auction.sellerNickname}
+                startPrice={auction.startPrice}
+                viewCount={auction.viewCount}
+              />
+              {auction.status === "LIVE" && <AuctionOutbidToggle auctionId={auction.id} />}
+            </>
           ) : null}
         </div>
       </div>

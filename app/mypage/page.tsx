@@ -9,13 +9,14 @@ import DeliveryAddressBook from "@/components/DeliveryAddressBook";
 import PaymentMethodManager from "@/components/PaymentMethodManager";
 import ProfileTab from "@/components/ProfileTab";
 import NotificationSettings from "@/components/NotificationSettings";
-import { formatKRW, formatTimeLeft } from "@/lib/format";
+import { formatDateTimeKST, formatKRW, formatTimeLeft } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
   AuctionListResponse,
   AuctionResponse,
   MyBiddingListResponse,
   MyBiddingResponse,
+  MyOrderStatusResponse,
   WishlistListResponse,
 } from "@/lib/types";
 
@@ -182,6 +183,9 @@ const TAB_TITLE: Record<Tab, string> = {
 // 관심 목록(wishlist)·내 정보/배송지 관리(delivery address)·알림 설정(notification-settings)은 실구현됨.
 const STUB_TABS = new Set<Tab>(["settings"]);
 
+// /mypage?tab= 쿼리 검증용 — 존재하는 탭 키만 허용.
+const TAB_KEYS = new Set<Tab>([...TRADE_NAV, ...ACCOUNT_NAV].map((item) => item.key));
+
 // 당근식 통합 마이페이지 — 판매자/구매자 계정 구분 없이 "내 활동" = 판매 + 입찰.
 export default function MyPage() {
   const router = useRouter();
@@ -196,8 +200,20 @@ export default function MyPage() {
   const [bidding, setBidding] = useState<MyBiddingResponse[]>([]);
   const [instantPurchases, setInstantPurchases] = useState<AuctionResponse[]>([]);
   const [wishlist, setWishlist] = useState<AuctionResponse[]>([]);
+  // 구매(낙찰·즉시구매) 건의 주문 결제 상태 — auctionId 키(#113, wishlist 하트 배치 채움 패턴).
+  const [orders, setOrders] = useState<Record<number, MyOrderStatusResponse>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 알림·주문 상태 푸터의 CTA가 /mypage?tab=payment 로 진입할 수 있게 쿼리를 1회 반영한다.
+  // (탭이 로컬 state뿐이라 SSR 초기값으로 읽으면 하이드레이션이 어긋난다 — 마운트 후 전환.)
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("tab");
+    if (requested && TAB_KEYS.has(requested as Tab)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- URL 쿼리는 마운트 후에만 읽을 수 있다.
+      setTab(requested as Tab);
+    }
+  }, []);
 
   useEffect(() => {
     if (firstTabRender.current) {
@@ -223,6 +239,25 @@ export default function MyPage() {
       setBidding(biddingRes.content);
       setInstantPurchases(instantPurchasesRes.content);
       setWishlist(wishlistRes.content);
+
+      // 구매 확정 건(낙찰 + 즉시구매)의 주문 상태를 배치로 채운다 — 주문이 없는 경매는 응답에 안 온다.
+      // 배치 채움 실패는 non-fatal: 목록은 그대로 보여주고 상태 푸터만 생략한다(wishlist 하트와 동일 원칙).
+      const purchasedIds = [
+        ...biddingRes.content.filter((b) => b.status === "ENDED_SOLD" && b.isTopBidder).map((b) => b.id),
+        ...instantPurchasesRes.content.map((a) => a.id),
+      ];
+      try {
+        if (purchasedIds.length > 0) {
+          const orderRes = await fetchWithAuth<MyOrderStatusResponse[]>(
+            `/api/members/me/orders/status?auctionIds=${purchasedIds.join(",")}`,
+          );
+          setOrders(Object.fromEntries(orderRes.map((o) => [o.auctionId, o])));
+        } else {
+          setOrders({});
+        }
+      } catch {
+        setOrders({});
+      }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "내 활동을 불러오지 못했습니다.");
     } finally {
@@ -360,7 +395,7 @@ export default function MyPage() {
               </DashboardPanel>
 
               <DashboardPanel title="낙찰/구매 내역" onSeeAll={() => setTab("won")}>
-                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="낙찰한 경매가 없습니다." />
+                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} />
               </DashboardPanel>
 
               <DashboardPanel title="즉시구매 내역" onSeeAll={() => setTab("instantPurchases")}>
@@ -369,6 +404,8 @@ export default function MyPage() {
                   loading={loading}
                   emptyText="구매한 즉시판매가 없습니다."
                   endedLabel="구매 완료"
+                  orders={orders}
+                  onGoPayment={() => setTab("payment")}
                 />
               </DashboardPanel>
 
@@ -398,7 +435,7 @@ export default function MyPage() {
             <h1 className="font-display text-xl font-extrabold text-text-1">낙찰/구매 내역</h1>
             <p className="mt-1 text-sm text-text-3">낙찰한 경매 {wonBidding.length}건</p>
             <div className="mt-5">
-              <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." />
+              <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} />
             </div>
           </>
         ) : tab === "instantPurchases" ? (
@@ -411,6 +448,8 @@ export default function MyPage() {
                 loading={loading}
                 emptyText="구매한 즉시판매가 없습니다."
                 endedLabel="구매 완료"
+                orders={orders}
+                onGoPayment={() => setTab("payment")}
               />
             </div>
           </>
@@ -540,11 +579,16 @@ function SellingList({
   loading,
   emptyText,
   endedLabel = "종료",
+  orders,
+  onGoPayment,
 }: {
   items: AuctionResponse[];
   loading: boolean;
   emptyText: string;
   endedLabel?: string;
+  // 즉시구매 내역처럼 "내가 구매자"인 목록에만 넘긴다 — 카드 하단에 결제 상태 푸터가 붙는다(#113).
+  orders?: Record<number, MyOrderStatusResponse>;
+  onGoPayment?: () => void;
 }) {
   if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
   if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
@@ -557,28 +601,32 @@ function SellingList({
         const timeLabel = isLive
           ? item.saleType === "INSTANT" ? "즉시판매" : item.endAt ? formatTimeLeft(item.endAt) : "진행 중"
           : endedLabel;
+        const order = orders?.[item.id];
         return (
           <li key={item.id}>
-            <Link
-              href={`/auctions/${item.id}`}
-              className={`flex items-center gap-3 rounded-r2 border border-border bg-surface p-2.5 transition-colors hover:border-primary ${FOCUS_RING}`}
-            >
-              <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
-              <span className="min-w-0 flex-1">
-                {item.artistName && (
-                  <span className="block truncate text-[11px] font-extrabold text-primary">{item.artistName}</span>
-                )}
-                <span className="block truncate text-sm font-bold text-text-1">{item.title}</span>
-              </span>
-              <span className="shrink-0 text-right">
-                <span className="block font-display text-sm font-extrabold text-text-1">
-                  {formatKRW(displayPrice)}
+            <div className="overflow-hidden rounded-r2 border border-border bg-surface transition-colors hover:border-primary">
+              <Link
+                href={`/auctions/${item.id}`}
+                className={`flex items-center gap-3 p-2.5 ${FOCUS_RING}`}
+              >
+                <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
+                <span className="min-w-0 flex-1">
+                  {item.artistName && (
+                    <span className="block truncate text-[11px] font-extrabold text-primary">{item.artistName}</span>
+                  )}
+                  <span className="block truncate text-sm font-bold text-text-1">{item.title}</span>
                 </span>
-                <span className="block text-[10.5px] text-text-3">
-                  {timeLabel}
+                <span className="shrink-0 text-right">
+                  <span className="block font-display text-sm font-extrabold text-text-1">
+                    {formatKRW(displayPrice)}
+                  </span>
+                  <span className="block text-[10.5px] text-text-3">
+                    {timeLabel}
+                  </span>
                 </span>
-              </span>
-            </Link>
+              </Link>
+              {order && onGoPayment && <OrderStatusFooter order={order} onGoPayment={onGoPayment} />}
+            </div>
           </li>
         );
       })}
@@ -653,14 +701,105 @@ const BID_STATUS_LABEL: Record<string, string> = {
   SCHEDULED: "시작 예정",
 };
 
+// 주문 결제 상태 푸터(#113, 승인 시안 v2) — 도트 인디케이터 + 안내문 + (필요 시) 액션 버튼.
+// 색은 의미로만: 완료=ok, 조치 필요=accent, 재시도 대기=warn, 진행=primary, 취소=중립.
+function OrderStatusFooter({
+  order,
+  onGoPayment,
+}: {
+  order: MyOrderStatusResponse;
+  onGoPayment: () => void;
+}) {
+  const pill = (dot: string, label: string) => (
+    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-1 text-[11px] font-bold text-text-2">
+      <span className={`h-1.5 w-1.5 rounded-full ${dot}`} aria-hidden="true" />
+      {label}
+    </span>
+  );
+  const body = (() => {
+    switch (order.status) {
+      case "PAID":
+        return {
+          pill: pill("bg-ok", "결제 완료"),
+          message: (
+            <>결제 금액 <b className="font-bold text-text-1">{formatKRW(order.chargeAmount)}</b> · 수수료 포함</>
+          ),
+          action: null,
+        };
+      case "PAYMENT_PENDING":
+        return {
+          pill: pill("bg-primary", "결제 진행 중"),
+          message: (
+            <>등록된 카드로 자동 결제돼요 · 예상 <b className="font-bold text-text-1">{formatKRW(order.chargeAmount)}</b></>
+          ),
+          action: null,
+        };
+      case "PAYMENT_RETRYING":
+        return {
+          pill: pill("bg-warn", "재시도 예정"),
+          message: order.nextActionAt
+            ? <>{formatDateTimeKST(order.nextActionAt)}에 다시 결제를 시도해요</>
+            : <>잠시 후 다시 결제를 시도해요</>,
+          action: { label: "카드 변경", solid: false },
+        };
+      case "SECOND_CHANCE_OFFERED":
+        return {
+          pill: pill("bg-accent", "카드 등록 필요"),
+          message: order.nextActionAt
+            ? <>{formatDateTimeKST(order.nextActionAt)}까지 등록하면 자동 결제돼요</>
+            : <>카드를 등록하면 자동 결제돼요</>,
+          action: { label: "카드 등록", solid: true },
+        };
+      case "PAYMENT_DEFAULTED":
+        return {
+          pill: pill("bg-text-3", "주문 취소"),
+          message: <>기한 내 결제가 완료되지 않았어요</>,
+          action: null,
+        };
+      default:
+        // PAYMENT_FAILED(예약값) 등 — 과거 데이터 호환 폴백.
+        return {
+          pill: pill("bg-text-3", "결제 확인 필요"),
+          message: <>결제 상태를 확인해 주세요</>,
+          action: null,
+        };
+    }
+  })();
+
+  return (
+    <div className="flex flex-wrap items-center gap-2.5 border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
+      {body.pill}
+      <span className="min-w-0 flex-1">{body.message}</span>
+      {body.action && (
+        <button
+          type="button"
+          onClick={onGoPayment}
+          className={`shrink-0 rounded-r2 px-3 py-1.5 text-[11px] font-bold transition-colors ${FOCUS_RING} ${
+            body.action.solid
+              ? "bg-text-1 text-white hover:bg-text-2"
+              : "border border-border-2 bg-surface text-text-2 hover:border-text-3 hover:text-text-1"
+          }`}
+        >
+          {body.action.label}
+        </button>
+      )}
+    </div>
+  );
+}
+
 function MyBiddingList({
   items,
   loading,
   emptyText,
+  orders,
+  onGoPayment,
 }: {
   items: MyBiddingResponse[];
   loading: boolean;
   emptyText: string;
+  // 낙찰 건의 주문 상태(auctionId 키) — 넘기면 카드 하단에 결제 상태 푸터가 붙는다(#113).
+  orders?: Record<number, MyOrderStatusResponse>;
+  onGoPayment?: () => void;
 }) {
   if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
   if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
@@ -669,37 +808,42 @@ function MyBiddingList({
     <ul className="flex flex-col gap-2">
       {items.map((item) => {
         const isLive = item.status === "LIVE";
+        const order = orders?.[item.id];
         return (
           <li key={item.id}>
-            <Link
-              href={`/auctions/${item.id}`}
-              className={`flex items-center gap-3 rounded-r3 border border-border bg-surface p-3 transition-colors hover:border-primary ${FOCUS_RING}`}
-            >
-              <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
-              <span className="min-w-0 flex-1">
-                {item.artistName && (
-                  <span className="block truncate text-[11px] font-extrabold text-primary">{item.artistName}</span>
-                )}
-                <span className="block truncate text-sm font-bold text-text-1">{item.title}</span>
-                <span className="mt-1 flex items-center gap-1.5 text-[11px] text-text-3">
-                  <span>내 입찰가 {formatKRW(item.myBidAmount)}</span>
-                  {item.isTopBidder && item.status === "LIVE" && (
-                    <span className="rounded-full bg-ok-soft px-1.5 py-0.5 font-bold text-ok">최고 입찰가</span>
+            {/* 푸터에 버튼이 들어가므로 카드 전체를 Link로 감싸지 않는다(중첩 인터랙티브 방지). */}
+            <div className="overflow-hidden rounded-r3 border border-border bg-surface transition-colors hover:border-primary">
+              <Link
+                href={`/auctions/${item.id}`}
+                className={`flex items-center gap-3 p-3 ${FOCUS_RING}`}
+              >
+                <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
+                <span className="min-w-0 flex-1">
+                  {item.artistName && (
+                    <span className="block truncate text-[11px] font-extrabold text-primary">{item.artistName}</span>
                   )}
-                  {item.isTopBidder && item.status === "ENDED_SOLD" && (
-                    <span className="rounded-full bg-ok-soft px-1.5 py-0.5 font-bold text-ok">낙찰 완료</span>
-                  )}
+                  <span className="block truncate text-sm font-bold text-text-1">{item.title}</span>
+                  <span className="mt-1 flex items-center gap-1.5 text-[11px] text-text-3">
+                    <span>내 입찰가 {formatKRW(item.myBidAmount)}</span>
+                    {item.isTopBidder && item.status === "LIVE" && (
+                      <span className="rounded-full bg-ok-soft px-1.5 py-0.5 font-bold text-ok">최고 입찰가</span>
+                    )}
+                    {item.isTopBidder && item.status === "ENDED_SOLD" && (
+                      <span className="rounded-full bg-ok-soft px-1.5 py-0.5 font-bold text-ok">낙찰 완료</span>
+                    )}
+                  </span>
                 </span>
-              </span>
-              <span className="shrink-0 text-right">
-                <span className="block font-display text-sm font-extrabold text-text-1">
-                  {formatKRW(item.currentPrice)}
+                <span className="shrink-0 text-right">
+                  <span className="block font-display text-sm font-extrabold text-text-1">
+                    {formatKRW(item.currentPrice)}
+                  </span>
+                  <span className="block text-[10.5px] text-text-3">
+                    {isLive ? formatTimeLeft(item.endAt) : (BID_STATUS_LABEL[item.status] ?? "종료")}
+                  </span>
                 </span>
-                <span className="block text-[10.5px] text-text-3">
-                  {isLive ? formatTimeLeft(item.endAt) : (BID_STATUS_LABEL[item.status] ?? "종료")}
-                </span>
-              </span>
-            </Link>
+              </Link>
+              {order && onGoPayment && <OrderStatusFooter order={order} onGoPayment={onGoPayment} />}
+            </div>
           </li>
         );
       })}

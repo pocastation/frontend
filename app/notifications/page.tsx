@@ -10,13 +10,20 @@ import { formatRelativeTime } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
 import type { NotificationListResponse, NotificationResponse, NotificationType } from "@/lib/types";
 
-// 타입별 배지 라벨/색. 낙찰=긍정(ok), 유찰=중립(회색), 추월=주의(primary).
-const TYPE_BADGE: Record<NotificationType, { label: string; className: string }> = {
-  OUTBID: { label: "입찰 추월", className: "bg-primary-soft text-primary" },
-  AUCTION_WON: { label: "낙찰", className: "bg-ok-soft text-ok" },
-  AUCTION_LOST: { label: "패찰", className: "bg-accent-soft text-accent" },
-  AUCTION_ENDED_NO_BIDS: { label: "유찰", className: "bg-surface-3 text-text-2" },
+// 타입별 상태 표기 — 채움 필 대신 도트 인디케이터(승인 시안 v2, #113 톤 통일).
+// 색은 의미 4가지만: 완료·낙찰=ok(그린), 실패=accent(레드), 종료·취소=중립(그레이), 진행성=primary.
+const TYPE_STATUS: Record<NotificationType, { label: string; dot: string }> = {
+  OUTBID: { label: "입찰 추월", dot: "bg-primary" },
+  AUCTION_WON: { label: "낙찰", dot: "bg-ok" },
+  AUCTION_LOST: { label: "패찰", dot: "bg-text-3" },
+  AUCTION_ENDED_NO_BIDS: { label: "유찰", dot: "bg-text-3" },
+  PAYMENT_COMPLETED: { label: "결제 완료", dot: "bg-ok" },
+  PAYMENT_FAILED: { label: "결제 실패", dot: "bg-accent" },
+  ORDER_DEFAULTED: { label: "주문 취소", dot: "bg-text-3" },
 };
+
+// 배포 시점 차이로 프론트가 모르는 타입이 와도 렌더가 깨지지 않게 폴백.
+const UNKNOWN_STATUS = { label: "알림", dot: "bg-text-3" };
 
 function BellIcon() {
   return (
@@ -157,35 +164,42 @@ export default function NotificationsPage() {
           <p className="text-xs">입찰 추월·낙찰·유찰 소식을 여기서 받아볼 수 있어요.</p>
         </div>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {notifications.map((notification) => (
-            <li key={notification.id}>
-              <button
-                type="button"
-                onClick={() => handleClick(notification)}
-                className={`flex w-full items-start gap-3 rounded-r3 border p-4 text-left transition-colors ${FOCUS_RING} ${
-                  notification.isRead
-                    ? "border-border bg-surface hover:border-border-2"
-                    : "border-primary/30 bg-primary-soft/40 hover:border-primary"
-                }`}
-              >
-                <span
-                  className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${notification.isRead ? "bg-transparent" : "bg-accent"}`}
-                  aria-hidden="true"
-                />
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2">
-                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${TYPE_BADGE[notification.type].className}`}>
-                      {TYPE_BADGE[notification.type].label}
+        // 승인 시안 v2 — 개별 카드 대신 헤어라인으로 구분된 단일 리스트. 읽음 행은 배경만 가라앉힌다.
+        <ul className="overflow-hidden rounded-r3 border border-border">
+          {notifications.map((notification) => {
+            const status = TYPE_STATUS[notification.type] ?? UNKNOWN_STATUS;
+            return (
+              <li key={notification.id} className="border-b border-border/60 last:border-b-0">
+                <button
+                  type="button"
+                  onClick={() => handleClick(notification)}
+                  className={`flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-surface-2/60 ${FOCUS_RING} ${
+                    notification.isRead ? "bg-surface-2/40" : "bg-surface"
+                  }`}
+                >
+                  <span
+                    className={`mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full ${notification.isRead ? "bg-transparent" : "bg-primary"}`}
+                    aria-hidden="true"
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-baseline gap-2">
+                      <span className={`min-w-0 flex-1 truncate text-sm font-bold ${notification.isRead ? "text-text-2" : "text-text-1"}`}>
+                        {notification.title}
+                      </span>
+                      <span className="shrink-0 text-[11px] tabular-nums text-text-3">
+                        {formatRelativeTime(notification.createdAt)}
+                      </span>
                     </span>
-                    <span className="text-[11px] text-text-3">{formatRelativeTime(notification.createdAt)}</span>
+                    <span className="mt-0.5 block text-[13px] leading-relaxed text-text-2">{notification.message}</span>
+                    <span className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-bold text-text-2">
+                      <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} aria-hidden="true" />
+                      {status.label}
+                    </span>
                   </span>
-                  <span className="mt-1.5 block truncate text-sm font-bold text-text-1">{notification.title}</span>
-                  <span className="mt-0.5 block text-sm text-text-2">{notification.message}</span>
-                </span>
-              </button>
-            </li>
-          ))}
+                </button>
+              </li>
+            );
+          })}
         </ul>
       )}
 

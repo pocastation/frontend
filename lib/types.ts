@@ -427,7 +427,34 @@ export type MemberRole = "ADMIN" | "USER";
 
 // ─── 인앱 알림 ───
 
-export type NotificationType = "OUTBID" | "AUCTION_WON" | "AUCTION_LOST" | "AUCTION_ENDED_NO_BIDS";
+export type NotificationType =
+  | "OUTBID"
+  | "AUCTION_WON"
+  | "AUCTION_LOST"
+  | "AUCTION_ENDED_NO_BIDS"
+  | "PAYMENT_COMPLETED" // 결제 완료 — 구매자(청구 확인)·판매자(발송 준비)
+  | "PAYMENT_FAILED" // 결제 실패 — 결제수단 확인·자동 재시도 안내
+  | "ORDER_DEFAULTED"; // 미결제 확정 — 주문 취소(구매자)·재등록 안내(판매자)
+
+// ─── 주문/결제 상태 ───
+
+// backend OrderStatus와 1:1. PAYMENT_FAILED는 예약값(현재 전이 없음)이지만 과거 행 호환으로 포함.
+export type OrderStatus =
+  | "PAYMENT_PENDING"
+  | "PAID"
+  | "PAYMENT_RETRYING"
+  | "PAYMENT_FAILED"
+  | "PAYMENT_DEFAULTED"
+  | "SECOND_CHANCE_OFFERED";
+
+// GET /api/members/me/orders/status?auctionIds= — 구매내역 주문 상태 배치 채움(wishlist 하트 패턴).
+export type MyOrderStatusResponse = {
+  auctionId: number;
+  status: OrderStatus;
+  chargeAmount: number;
+  nextActionAt: string | null;
+  paidAt: string | null;
+};
 
 export type NotificationResponse = {
   id: number;

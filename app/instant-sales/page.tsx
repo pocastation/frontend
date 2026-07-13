@@ -1,8 +1,19 @@
 import AuctionBrowser from "@/components/AuctionBrowser";
+import type { SortKey } from "@/components/AuctionExplorer";
 import { apiFetch } from "@/lib/api";
 import type { AuctionListResponse } from "@/lib/types";
 
 export const metadata = { title: "즉시판매 — Pocastation" };
+
+// 즉시판매는 카운트다운이 없어 "마감임박" 정렬을 제외한다. 서버 컴포넌트라 SORT_OPTIONS를 값으로
+// import하면 크래시("use client" 모듈)라 리터럴로 둔다(종료 페이지와 같은 이유).
+const INSTANT_SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: "latest", label: "최신순" },
+  { key: "popular", label: "인기순" },
+  { key: "views", label: "조회순" },
+  { key: "price_asc", label: "낮은 가격" },
+  { key: "price_desc", label: "높은 가격" },
+];
 
 async function getInstantSales(): Promise<AuctionListResponse | null> {
   try {
@@ -29,6 +40,7 @@ export default async function InstantSalesPage() {
         initialTotalElements={sales?.totalElements ?? 0}
         initialTotalPages={sales?.totalPages ?? 0}
         saleType="INSTANT"
+        sortOptions={INSTANT_SORT_OPTIONS}
       />
     </div>
   );

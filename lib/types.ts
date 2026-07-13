@@ -427,7 +427,7 @@ export type MemberRole = "ADMIN" | "USER";
 
 // ─── 인앱 알림 ───
 
-export type NotificationType = "OUTBID" | "AUCTION_WON" | "AUCTION_ENDED_NO_BIDS";
+export type NotificationType = "OUTBID" | "AUCTION_WON" | "AUCTION_LOST" | "AUCTION_ENDED_NO_BIDS";
 
 export type NotificationResponse = {
   id: number;

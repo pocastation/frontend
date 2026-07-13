@@ -65,3 +65,15 @@ export function formatRelativeTime(iso: string): string {
   if (hr < 24) return `${hr}시간 전`;
   return `${Math.floor(hr / 24)}일 전`;
 }
+
+// 절대 시각을 한국시간으로 포맷. timeZone을 명시해 SSR·클라이언트 타임존과 무관하게 동일 문자열이
+// 나오도록 한다(하이드레이션 미스매치 방지 — 예: "7월 14일 오후 9:52").
+export function formatDateTimeKST(iso: string): string {
+  return new Date(iso).toLocaleString("ko-KR", {
+    timeZone: "Asia/Seoul",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}

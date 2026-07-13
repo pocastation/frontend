@@ -184,6 +184,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
               initialCurrentPrice={auction.currentPrice}
               initialBidCount={auction.bidCount}
               initialEndAt={auction.endAt}
+              maxEndAt={auction.maxEndAt}
               status={auction.status}
               sellerNickname={auction.sellerNickname}
               startPrice={auction.startPrice}

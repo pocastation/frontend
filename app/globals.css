@@ -13,6 +13,8 @@
   --color-accent-soft: #fff0f2;
   --color-ok: #15803d;
   --color-ok-soft: #f0fdf4;
+  /* 대기·재시도 상태 표시용(주문 결제 상태 도트, #113) */
+  --color-warn: #d97706;
 
   --color-bg: #ffffff;
   --color-surface: #ffffff;

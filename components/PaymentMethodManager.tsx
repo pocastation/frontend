@@ -53,6 +53,8 @@ export default function PaymentMethodManager() {
     try {
       // issueId는 ASCII만 허용 — 시각+난수로 채번.
       const issueId = `issue-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+      // customer 필수 여부는 PG마다 다르다 — 토스는 자체 창에서 본인정보를 직접 받아 미입력이어도
+      // 되고, KG이니시스 PC창은 email/phone이 필수라 입력값이 있으면 함께 전달한다(값은 미저장).
       const res = await PortOne.requestIssueBillingKey({
         storeId: STORE_ID,
         channelKey: CHANNEL_KEY,
@@ -61,8 +63,8 @@ export default function PaymentMethodManager() {
         issueName: "Pocastation 결제 카드 등록",
         customer: {
           fullName: fullName || member?.nickname || "회원",
-          email,
-          phoneNumber: phone.replaceAll("-", ""),
+          ...(email ? { email } : {}),
+          ...(phone ? { phoneNumber: phone.replaceAll("-", "") } : {}),
         },
       });
       if (!res || res.code !== undefined) {
@@ -154,7 +156,8 @@ export default function PaymentMethodManager() {
         <div className="rounded-r3 border border-border bg-surface p-5">
           <p className="text-sm font-bold text-text-1">카드 등록</p>
           <p className="mt-1 text-xs text-text-3">
-            아래 정보는 결제사(KG이니시스) 카드 등록 창에 필요한 값으로, 서버에 저장되지 않아요.
+            아래 정보는 결제사(PG) 카드 등록 창에 전달되는 값으로, 서버에 저장되지 않아요. 결제사에
+            따라 등록 창에서 본인확인을 다시 진행할 수 있어요.
           </p>
           <div className="mt-4 flex flex-col gap-2.5">
             <input
@@ -167,7 +170,7 @@ export default function PaymentMethodManager() {
             <input
               className={inputClass}
               type="email"
-              placeholder="이메일"
+              placeholder="이메일 (선택)"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="email"
@@ -175,7 +178,7 @@ export default function PaymentMethodManager() {
             <input
               className={inputClass}
               type="tel"
-              placeholder="휴대폰 번호 (숫자만)"
+              placeholder="휴대폰 번호 (선택, 숫자만)"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               autoComplete="tel"
@@ -185,7 +188,7 @@ export default function PaymentMethodManager() {
             <button
               type="button"
               onClick={handleRegister}
-              disabled={busy || !email || !phone}
+              disabled={busy}
               className={`${PRIMARY_BUTTON_CLASS} disabled:opacity-50`}
             >
               {busy ? "진행 중..." : "카드 등록 창 열기"}

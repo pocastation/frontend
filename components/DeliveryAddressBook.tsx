@@ -4,40 +4,10 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
+import { loadPostcodeScript } from "@/lib/postcode";
 import type { DeliveryAddress } from "@/lib/types";
 
 const MAX_ADDRESSES = 10;
-const POSTCODE_SCRIPT = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
-
-// Daum 우편번호 서비스(키 불요)의 전역 객체 — 공식 타입이 없어 필요한 표면만 선언한다.
-type DaumPostcodeData = { zonecode: string; roadAddress: string; jibunAddress: string };
-declare global {
-  interface Window {
-    daum?: {
-      Postcode: new (options: { oncomplete: (data: DaumPostcodeData) => void; width?: string; height?: string }) => {
-        embed: (element: HTMLElement) => void;
-      };
-    };
-  }
-}
-
-let postcodeScriptPromise: Promise<void> | null = null;
-function loadPostcodeScript(): Promise<void> {
-  if (window.daum?.Postcode) return Promise.resolve();
-  if (!postcodeScriptPromise) {
-    postcodeScriptPromise = new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = POSTCODE_SCRIPT;
-      script.onload = () => resolve();
-      script.onerror = () => {
-        postcodeScriptPromise = null;
-        reject(new Error("우편번호 서비스를 불러오지 못했습니다."));
-      };
-      document.head.appendChild(script);
-    });
-  }
-  return postcodeScriptPromise;
-}
 
 type FormValues = {
   label: string;

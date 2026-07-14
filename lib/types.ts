@@ -435,7 +435,10 @@ export type NotificationType =
   | "PAYMENT_COMPLETED" // 결제 완료 — 구매자(청구 확인)·판매자(발송 준비)
   | "PAYMENT_FAILED" // 결제 실패 — 결제수단 확인·자동 재시도 안내
   | "ORDER_DEFAULTED" // 미결제 확정 — 주문 취소(구매자)·재등록 안내(판매자)
-  | "AUCTION_SUCCEEDED"; // 차순위 승계 — 구매 기회 제안(차순위)·낙찰자 변경(판매자)
+  | "AUCTION_SUCCEEDED" // 차순위 승계 — 구매 기회 제안(차순위)·낙찰자 변경(판매자)
+  | "ORDER_SHIPPED" // 발송 — 구매자에게 운송장 안내
+  | "ORDER_CONFIRMED" // 구매확정 — 판매자에게 정산 대기 안내
+  | "SHIPPING_OVERDUE"; // 발송기한 초과 — 판매자에게 발송 독촉
 
 // GET /api/members/me/succession-offers/{auctionId} — 제안 대상자 본인에게만 200(타인 404).
 export type SuccessionOfferResponse = {
@@ -457,12 +460,40 @@ export type OrderStatus =
   | "SECOND_CHANCE_OFFERED";
 
 // GET /api/members/me/orders/status?auctionIds= — 구매내역 주문 상태 배치 채움(wishlist 하트 패턴).
+export type FulfillmentStatus = "AWAITING_SHIPMENT" | "SHIPPED" | "CONFIRMED";
+
 export type MyOrderStatusResponse = {
   auctionId: number;
   status: OrderStatus;
   chargeAmount: number;
   nextActionAt: string | null;
   paidAt: string | null;
+  // 결제 완료(PAID) 후에만 채워진다(그 전엔 null) — #108.
+  fulfillmentStatus: FulfillmentStatus | null;
+  hasDeliveryAddress: boolean;
+  carrier: string | null;
+  trackingNumber: string | null;
+  shippedAt: string | null;
+  confirmedAt: string | null;
+};
+
+// GET /api/members/me/sold-orders/status — 판매자용(#110). 발송 UI가 소비, 배송지(발송용) 포함.
+export type SoldOrderResponse = {
+  auctionId: number;
+  fulfillmentStatus: FulfillmentStatus | null;
+  carrier: string | null;
+  trackingNumber: string | null;
+  shippedAt: string | null;
+  confirmedAt: string | null;
+  payoutAmount: number;
+  settlementStatus: "NONE" | "PENDING_SETTLEMENT" | "SETTLED";
+  deliveryAddress: {
+    recipientName: string;
+    phone: string;
+    postalCode: string;
+    address1: string;
+    address2: string | null;
+  } | null;
 };
 
 export type NotificationResponse = {

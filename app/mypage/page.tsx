@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import DeliveryAddressBook from "@/components/DeliveryAddressBook";
 import PaymentMethodManager from "@/components/PaymentMethodManager";
 import ProfileTab from "@/components/ProfileTab";
+import SettingsTab from "@/components/SettingsTab";
 import NotificationSettings from "@/components/NotificationSettings";
 import OrderDeliveryAddressForm from "@/components/OrderDeliveryAddressForm";
 import OrderShipForm from "@/components/OrderShipForm";
@@ -182,10 +183,8 @@ const TAB_TITLE: Record<Tab, string> = {
   settings: "계정 설정",
 };
 
-// 도메인이 아직 없는 탭(알림 설정·계정 설정)은 준비 중 안내만 보여준다 — 클릭했을 때 아무 반응
-// 없는 죽은 메뉴보다는, 메뉴는 다 보여주고 상태를 정직하게 알리는 쪽을 택했다.
-// 관심 목록(wishlist)·내 정보/배송지 관리(delivery address)·알림 설정(notification-settings)은 실구현됨.
-const STUB_TABS = new Set<Tab>(["settings"]);
+// 아직 준비 중인 탭만 안내를 보여준다 — 현재 남은 스텁 없음(계정 설정은 회원 탈퇴로 실구현됨).
+const STUB_TABS = new Set<Tab>([]);
 
 // /mypage?tab= 쿼리 검증용 — 존재하는 탭 키만 허용.
 const TAB_KEYS = new Set<Tab>([...TRADE_NAV, ...ACCOUNT_NAV].map((item) => item.key));
@@ -525,6 +524,14 @@ export default function MyPage() {
             <p className="mt-1 text-sm text-text-3">어떤 알림을 받을지 설정해요.</p>
             <div className="mt-5">
               <NotificationSettings />
+            </div>
+          </>
+        ) : tab === "settings" ? (
+          <>
+            <h1 className="font-display text-xl font-extrabold text-text-1">계정 설정</h1>
+            <p className="mt-1 text-sm text-text-3">계정을 관리해요.</p>
+            <div className="mt-5">
+              <SettingsTab />
             </div>
           </>
         ) : tab === "wishlist" ? (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api";
@@ -10,24 +10,55 @@ import { formatRelativeTime } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
 import type { NotificationListResponse, NotificationResponse, NotificationType } from "@/lib/types";
 
-// 타입별 상태 표기 — 채움 필 대신 도트 인디케이터(승인 시안 v2, #113 톤 통일).
-// 색은 의미 4가지만: 완료·낙찰=ok(그린), 실패=accent(레드), 종료·취소=중립(그레이), 진행성=primary.
-const TYPE_STATUS: Record<NotificationType, { label: string; dot: string }> = {
-  OUTBID: { label: "입찰 추월", dot: "bg-primary" },
-  AUCTION_WON: { label: "낙찰", dot: "bg-ok" },
-  AUCTION_LOST: { label: "패찰", dot: "bg-text-3" },
-  AUCTION_ENDED_NO_BIDS: { label: "유찰", dot: "bg-text-3" },
-  PAYMENT_COMPLETED: { label: "결제 완료", dot: "bg-ok" },
-  PAYMENT_FAILED: { label: "결제 실패", dot: "bg-accent" },
-  ORDER_DEFAULTED: { label: "주문 취소", dot: "bg-text-3" },
-  AUCTION_SUCCEEDED: { label: "구매 기회", dot: "bg-primary" },
-  ORDER_SHIPPED: { label: "발송", dot: "bg-primary" },
-  ORDER_CONFIRMED: { label: "구매 확정", dot: "bg-ok" },
-  SHIPPING_OVERDUE: { label: "발송 지연", dot: "bg-accent" },
+// 타입별 표기 — 당근식 리딩 아이콘(카테고리) + 의미색 톤(승인 시안 B, #119 후속).
+// 톤 4가지: 진행성=primary, 완료·낙찰=ok(그린), 실패·지연=accent(레드), 종료·취소=중립.
+type NotiTone = "primary" | "ok" | "accent" | "neutral";
+
+const TONE_CLASS: Record<NotiTone, string> = {
+  primary: "bg-primary-soft text-primary",
+  ok: "bg-ok-soft text-ok",
+  accent: "bg-accent-soft text-accent",
+  neutral: "bg-surface-3 text-text-3",
+};
+
+// 24x24 stroke 아이콘(굵기 1.8, currentColor 상속 — BellIcon과 동일 규격).
+const ICON_PATH: Record<string, ReactNode> = {
+  trendingUp: (<><path d="M3 17l6-6 4 4 8-8" /><path d="M17 7h4v4" /></>),
+  award: (<><circle cx="12" cy="9" r="6" /><path d="M9 14.5 8 22l4-2.5 4 2.5-1-7.5" /></>),
+  minus: (<><circle cx="12" cy="12" r="9" /><path d="M8 12h8" /></>),
+  card: (<><rect x="2.5" y="5" width="19" height="14" rx="2" /><path d="M2.5 10h19" /></>),
+  alertCircle: (<><circle cx="12" cy="12" r="9" /><path d="M12 8v4.5" /><path d="M12 16h.01" /></>),
+  xCircle: (<><circle cx="12" cy="12" r="9" /><path d="m15 9-6 6M9 9l6 6" /></>),
+  tag: (<><path d="M11.5 3H4v7.5L14 20.5 21.5 13z" /><path d="M8 8h.01" /></>),
+  box: (<><path d="M21 8.5 12 3 3 8.5v7L12 21l9-5.5z" /><path d="M3 8.5 12 14l9-5.5M12 14v7" /></>),
+  checkCircle: (<><circle cx="12" cy="12" r="9" /><path d="m8.5 12 2.5 2.5 4.5-5" /></>),
+  clock: (<><circle cx="12" cy="12" r="9" /><path d="M12 7.5V12l3 2" /></>),
+};
+
+const TYPE_META: Record<NotificationType, { label: string; tone: NotiTone; icon: string }> = {
+  OUTBID: { label: "입찰 추월", tone: "primary", icon: "trendingUp" },
+  AUCTION_WON: { label: "낙찰", tone: "ok", icon: "award" },
+  AUCTION_LOST: { label: "패찰", tone: "neutral", icon: "minus" },
+  AUCTION_ENDED_NO_BIDS: { label: "유찰", tone: "neutral", icon: "minus" },
+  PAYMENT_COMPLETED: { label: "결제 완료", tone: "ok", icon: "card" },
+  PAYMENT_FAILED: { label: "결제 실패", tone: "accent", icon: "alertCircle" },
+  ORDER_DEFAULTED: { label: "주문 취소", tone: "neutral", icon: "xCircle" },
+  AUCTION_SUCCEEDED: { label: "구매 기회", tone: "primary", icon: "tag" },
+  ORDER_SHIPPED: { label: "발송", tone: "primary", icon: "box" },
+  ORDER_CONFIRMED: { label: "구매 확정", tone: "ok", icon: "checkCircle" },
+  SHIPPING_OVERDUE: { label: "발송 지연", tone: "accent", icon: "clock" },
 };
 
 // 배포 시점 차이로 프론트가 모르는 타입이 와도 렌더가 깨지지 않게 폴백.
-const UNKNOWN_STATUS = { label: "알림", dot: "bg-text-3" };
+const UNKNOWN_META: { label: string; tone: NotiTone; icon: string } = { label: "알림", tone: "neutral", icon: "minus" };
+
+function NotiIcon({ name }: { name: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      {ICON_PATH[name] ?? ICON_PATH.minus}
+    </svg>
+  );
+}
 
 function BellIcon() {
   return (
@@ -168,38 +199,40 @@ export default function NotificationsPage() {
           <p className="text-xs">입찰 추월·낙찰·유찰 소식을 여기서 받아볼 수 있어요.</p>
         </div>
       ) : (
-        // 승인 시안 v2 — 개별 카드 대신 헤어라인으로 구분된 단일 리스트. 읽음 행은 배경만 가라앉힌다.
+        // 승인 시안 B — 카테고리 리딩 아이콘(의미색 톤) + 안읽음은 우측 단일 닷. 읽음 행은 배경·아이콘을 가라앉힌다.
         <ul className="overflow-hidden rounded-r3 border border-border">
           {notifications.map((notification) => {
-            const status = TYPE_STATUS[notification.type] ?? UNKNOWN_STATUS;
+            const meta = TYPE_META[notification.type] ?? UNKNOWN_META;
+            const unread = !notification.isRead;
             return (
               <li key={notification.id} className="border-b border-border/60 last:border-b-0">
                 <button
                   type="button"
                   onClick={() => handleClick(notification)}
-                  className={`flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-surface-2/60 ${FOCUS_RING} ${
-                    notification.isRead ? "bg-surface-2/40" : "bg-surface"
+                  className={`flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-2/60 ${FOCUS_RING} ${
+                    unread ? "bg-surface" : "bg-surface-2/40"
                   }`}
                 >
                   <span
-                    className={`mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full ${notification.isRead ? "bg-transparent" : "bg-primary"}`}
-                    aria-hidden="true"
-                  />
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${TONE_CLASS[meta.tone]} ${unread ? "" : "opacity-70"}`}
+                    aria-label={meta.label}
+                  >
+                    <NotiIcon name={meta.icon} />
+                  </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-baseline gap-2">
-                      <span className={`min-w-0 flex-1 truncate text-sm font-bold ${notification.isRead ? "text-text-2" : "text-text-1"}`}>
+                      <span className={`min-w-0 flex-1 truncate text-sm ${unread ? "font-bold text-text-1" : "text-text-2"}`}>
                         {notification.title}
                       </span>
                       <span className="shrink-0 text-[11px] tabular-nums text-text-3">
                         {formatRelativeTime(notification.createdAt)}
                       </span>
                     </span>
-                    <span className="mt-0.5 block text-[13px] leading-relaxed text-text-2">{notification.message}</span>
-                    <span className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-bold text-text-2">
-                      <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} aria-hidden="true" />
-                      {status.label}
+                    <span className={`mt-0.5 block truncate text-[13px] leading-relaxed ${unread ? "text-text-2" : "text-text-3"}`}>
+                      {notification.message}
                     </span>
                   </span>
+                  {unread && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />}
                 </button>
               </li>
             );

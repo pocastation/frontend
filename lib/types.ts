@@ -15,6 +15,8 @@ export type MemberResponse = {
   // 가입/로그인·닉네임 변경 응답에는 없어서 옵션으로 둔다.
   provider?: string;
   createdAt?: string;
+  // 다음 닉네임 변경 가능 시각(#118). null/미포함이면 지금 변경 가능. GET /me 에서만 채워진다.
+  nicknameChangeableAt?: string | null;
 };
 
 // GET/POST/PATCH /api/members/me/delivery-addresses — 마이페이지 배송지 관리.

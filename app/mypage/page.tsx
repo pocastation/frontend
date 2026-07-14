@@ -11,6 +11,7 @@ import ProfileTab from "@/components/ProfileTab";
 import NotificationSettings from "@/components/NotificationSettings";
 import OrderDeliveryAddressForm from "@/components/OrderDeliveryAddressForm";
 import OrderShipForm from "@/components/OrderShipForm";
+import { StatusIconCircle, type StatusTone } from "@/components/StatusIcon";
 import { formatDateTimeKST, formatKRW, formatTimeLeft } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
@@ -746,9 +747,9 @@ function OrderStatusFooter({
   order: MyOrderStatusResponse;
   onGoPayment: () => void;
 }) {
-  const pill = (dot: string, label: string) => (
-    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-1 text-[11px] font-bold text-text-2">
-      <span className={`h-1.5 w-1.5 rounded-full ${dot}`} aria-hidden="true" />
+  const pill = (icon: string, tone: StatusTone, label: string) => (
+    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-surface py-1 pl-1 pr-2.5 text-[11px] font-bold text-text-2">
+      <StatusIconCircle name={icon} tone={tone} size="h-[18px] w-[18px]" glyph="text-[11px]" />
       {label}
     </span>
   );
@@ -756,7 +757,7 @@ function OrderStatusFooter({
     switch (order.status) {
       case "PAID":
         return {
-          pill: pill("bg-ok", "결제 완료"),
+          pill: pill("card", "ok", "결제 완료"),
           message: (
             <>결제 금액 <b className="font-bold text-text-1">{formatKRW(order.chargeAmount)}</b> · 수수료 포함</>
           ),
@@ -764,7 +765,7 @@ function OrderStatusFooter({
         };
       case "PAYMENT_PENDING":
         return {
-          pill: pill("bg-primary", "결제 진행 중"),
+          pill: pill("clock", "primary", "결제 진행 중"),
           message: (
             <>등록된 카드로 자동 결제돼요 · 예상 <b className="font-bold text-text-1">{formatKRW(order.chargeAmount)}</b></>
           ),
@@ -772,7 +773,7 @@ function OrderStatusFooter({
         };
       case "PAYMENT_RETRYING":
         return {
-          pill: pill("bg-warn", "재시도 예정"),
+          pill: pill("clock", "warn", "재시도 예정"),
           message: order.nextActionAt
             ? <>{formatDateTimeKST(order.nextActionAt)}에 다시 결제를 시도해요</>
             : <>잠시 후 다시 결제를 시도해요</>,
@@ -780,7 +781,7 @@ function OrderStatusFooter({
         };
       case "SECOND_CHANCE_OFFERED":
         return {
-          pill: pill("bg-accent", "카드 등록 필요"),
+          pill: pill("alertCircle", "accent", "카드 등록 필요"),
           message: order.nextActionAt
             ? <>{formatDateTimeKST(order.nextActionAt)}까지 등록하면 자동 결제돼요</>
             : <>카드를 등록하면 자동 결제돼요</>,
@@ -788,14 +789,14 @@ function OrderStatusFooter({
         };
       case "PAYMENT_DEFAULTED":
         return {
-          pill: pill("bg-text-3", "주문 취소"),
+          pill: pill("xCircle", "neutral", "주문 취소"),
           message: <>기한 내 결제가 완료되지 않았어요</>,
           action: null,
         };
       default:
         // PAYMENT_FAILED(예약값) 등 — 과거 데이터 호환 폴백.
         return {
-          pill: pill("bg-text-3", "결제 확인 필요"),
+          pill: pill("alertCircle", "neutral", "결제 확인 필요"),
           message: <>결제 상태를 확인해 주세요</>,
           action: null,
         };
@@ -823,9 +824,9 @@ function OrderStatusFooter({
   );
 }
 
-const fulfillmentPill = (dot: string, label: string) => (
-  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-1 text-[11px] font-bold text-text-2">
-    <span className={`h-1.5 w-1.5 rounded-full ${dot}`} aria-hidden="true" />
+const fulfillmentPill = (icon: string, tone: StatusTone, label: string) => (
+  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-surface py-1 pl-1 pr-2.5 text-[11px] font-bold text-text-2">
+    <StatusIconCircle name={icon} tone={tone} size="h-[18px] w-[18px]" glyph="text-[11px]" />
     {label}
   </span>
 );
@@ -861,12 +862,12 @@ function BuyerFulfillmentFooter({
       <div className="flex flex-wrap items-center gap-2.5">
         {fs === "CONFIRMED" ? (
           <>
-            {fulfillmentPill("bg-ok", "구매 확정")}
+            {fulfillmentPill("checkCircle", "ok", "구매 확정")}
             <span className="min-w-0 flex-1">거래가 완료됐어요.</span>
           </>
         ) : fs === "SHIPPED" ? (
           <>
-            {fulfillmentPill("bg-primary", "배송 중")}
+            {fulfillmentPill("box", "primary", "배송 중")}
             <span className="min-w-0 flex-1">
               {order.carrier} {order.trackingNumber}
             </span>
@@ -881,7 +882,7 @@ function BuyerFulfillmentFooter({
           </>
         ) : !order.hasDeliveryAddress ? (
           <>
-            {fulfillmentPill("bg-accent", "배송지 입력 필요")}
+            {fulfillmentPill("alertCircle", "accent", "배송지 입력 필요")}
             <span className="min-w-0 flex-1">받을 주소를 입력하면 판매자가 발송해요.</span>
             <button
               type="button"
@@ -893,7 +894,7 @@ function BuyerFulfillmentFooter({
           </>
         ) : (
           <>
-            {fulfillmentPill("bg-primary", "발송 대기")}
+            {fulfillmentPill("clock", "primary", "발송 대기")}
             <span className="min-w-0 flex-1">판매자의 발송을 기다리고 있어요.</span>
           </>
         )}
@@ -927,21 +928,21 @@ function SellerFulfillmentFooter({
       <div className="flex flex-wrap items-center gap-2.5">
         {fs === "CONFIRMED" ? (
           <>
-            {fulfillmentPill("bg-ok", "구매 확정")}
+            {fulfillmentPill("checkCircle", "ok", "구매 확정")}
             <span className="min-w-0 flex-1">
               정산 예정 <b className="font-bold text-text-1">{formatKRW(soldOrder.payoutAmount)}</b> · 정산 준비 중
             </span>
           </>
         ) : fs === "SHIPPED" ? (
           <>
-            {fulfillmentPill("bg-primary", "발송 완료")}
+            {fulfillmentPill("box", "primary", "발송 완료")}
             <span className="min-w-0 flex-1">
               {soldOrder.carrier} {soldOrder.trackingNumber}
             </span>
           </>
         ) : addr ? (
           <>
-            {fulfillmentPill("bg-accent", "발송 대기")}
+            {fulfillmentPill("clock", "accent", "발송 대기")}
             <span className="min-w-0 flex-1">
               {addr.recipientName} · {addr.address1} {addr.address2 ?? ""}
             </span>
@@ -955,7 +956,7 @@ function SellerFulfillmentFooter({
           </>
         ) : (
           <>
-            {fulfillmentPill("bg-text-3", "배송지 대기")}
+            {fulfillmentPill("clock", "neutral", "배송지 대기")}
             <span className="min-w-0 flex-1">구매자가 배송지를 입력하면 발송할 수 있어요.</span>
           </>
         )}

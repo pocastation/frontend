@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { STATUS_TONE_CLASS, StatusGlyph, type StatusTone } from "@/components/StatusIcon";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api";
@@ -10,32 +11,9 @@ import { formatRelativeTime } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
 import type { NotificationListResponse, NotificationResponse, NotificationType } from "@/lib/types";
 
-// 타입별 표기 — 당근식 리딩 아이콘(카테고리) + 의미색 톤(승인 시안 B, #119 후속).
-// 톤 4가지: 진행성=primary, 완료·낙찰=ok(그린), 실패·지연=accent(레드), 종료·취소=중립.
-type NotiTone = "primary" | "ok" | "accent" | "neutral";
-
-const TONE_CLASS: Record<NotiTone, string> = {
-  primary: "bg-primary-soft text-primary",
-  ok: "bg-ok-soft text-ok",
-  accent: "bg-accent-soft text-accent",
-  neutral: "bg-surface-3 text-text-3",
-};
-
-// 24x24 stroke 아이콘(굵기 1.8, currentColor 상속 — BellIcon과 동일 규격).
-const ICON_PATH: Record<string, ReactNode> = {
-  trendingUp: (<><path d="M3 17l6-6 4 4 8-8" /><path d="M17 7h4v4" /></>),
-  award: (<><circle cx="12" cy="9" r="6" /><path d="M9 14.5 8 22l4-2.5 4 2.5-1-7.5" /></>),
-  minus: (<><circle cx="12" cy="12" r="9" /><path d="M8 12h8" /></>),
-  card: (<><rect x="2.5" y="5" width="19" height="14" rx="2" /><path d="M2.5 10h19" /></>),
-  alertCircle: (<><circle cx="12" cy="12" r="9" /><path d="M12 8v4.5" /><path d="M12 16h.01" /></>),
-  xCircle: (<><circle cx="12" cy="12" r="9" /><path d="m15 9-6 6M9 9l6 6" /></>),
-  tag: (<><path d="M11.5 3H4v7.5L14 20.5 21.5 13z" /><path d="M8 8h.01" /></>),
-  box: (<><path d="M21 8.5 12 3 3 8.5v7L12 21l9-5.5z" /><path d="M3 8.5 12 14l9-5.5M12 14v7" /></>),
-  checkCircle: (<><circle cx="12" cy="12" r="9" /><path d="m8.5 12 2.5 2.5 4.5-5" /></>),
-  clock: (<><circle cx="12" cy="12" r="9" /><path d="M12 7.5V12l3 2" /></>),
-};
-
-const TYPE_META: Record<NotificationType, { label: string; tone: NotiTone; icon: string }> = {
+// 타입별 표기 — 카테고리 아이콘(공용 StatusIcon) + 의미색 톤.
+// 톤: 진행성=primary, 완료·낙찰=ok(그린), 실패·지연=accent(레드), 종료·취소=중립.
+const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; icon: string }> = {
   OUTBID: { label: "입찰 추월", tone: "primary", icon: "trendingUp" },
   AUCTION_WON: { label: "낙찰", tone: "ok", icon: "award" },
   AUCTION_LOST: { label: "패찰", tone: "neutral", icon: "minus" },
@@ -50,15 +28,7 @@ const TYPE_META: Record<NotificationType, { label: string; tone: NotiTone; icon:
 };
 
 // 배포 시점 차이로 프론트가 모르는 타입이 와도 렌더가 깨지지 않게 폴백.
-const UNKNOWN_META: { label: string; tone: NotiTone; icon: string } = { label: "알림", tone: "neutral", icon: "minus" };
-
-function NotiIcon({ name }: { name: string }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      {ICON_PATH[name] ?? ICON_PATH.minus}
-    </svg>
-  );
-}
+const UNKNOWN_META: { label: string; tone: StatusTone; icon: string } = { label: "알림", tone: "neutral", icon: "minus" };
 
 function BellIcon() {
   return (
@@ -214,10 +184,10 @@ export default function NotificationsPage() {
                   }`}
                 >
                   <span
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${TONE_CLASS[meta.tone]} ${unread ? "" : "opacity-70"}`}
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[20px] ${STATUS_TONE_CLASS[meta.tone]} ${unread ? "" : "opacity-70"}`}
                     aria-label={meta.label}
                   >
-                    <NotiIcon name={meta.icon} />
+                    <StatusGlyph name={meta.icon} />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="flex items-baseline gap-2">

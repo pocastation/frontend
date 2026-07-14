@@ -131,7 +131,7 @@ export default function ProfileTab() {
           </div>
         </dl>
         <p className="mt-3 text-xs text-text-3">
-          이메일·가입 수단은 변경할 수 없어요. 비밀번호 변경과 회원 탈퇴는 준비 중이에요.
+          이메일·가입 수단은 변경할 수 없어요. 비밀번호 변경은 준비 중이고, 회원 탈퇴는 계정 설정에서 할 수 있어요.
         </p>
       </section>
     </div>

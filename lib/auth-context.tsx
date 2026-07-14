@@ -20,6 +20,7 @@ type AuthContextValue = {
   logout: () => Promise<void>;
   refresh: () => Promise<string | null>;
   updateNickname: (nickname: string) => Promise<void>;
+  withdraw: () => Promise<void>;
   fetchWithAuth: <T>(path: string, options?: ApiFetchOptions) => Promise<T>;
 };
 
@@ -123,9 +124,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [fetchWithAuth],
   );
 
+  const withdraw = useCallback(async () => {
+    // 서버가 프로필을 가명화하고 리프레시 토큰을 폐기한다(backend #120). 진행 중 거래가 있으면
+    // 409를 던져 호출측(SettingsTab)이 사유를 표시한다.
+    await fetchWithAuth<void>("/api/members/me", { method: "DELETE" });
+    // 세션 쿠키는 서버만 지울 수 있어 로그아웃을 best-effort로 호출(토큰은 이미 폐기됨)한 뒤
+    // 클라 상태를 정리한다.
+    try {
+      await apiFetch<void>("/api/auth/logout", { method: "POST" });
+    } catch {
+      // 리프레시 토큰이 이미 없어 실패해도 무방 — 상태만 정리하면 로그아웃된 것과 동일.
+    }
+    setAccessToken(null);
+    setMember(null);
+  }, [fetchWithAuth]);
+
   return (
     <AuthContext.Provider
-      value={{ accessToken, member, isLoading, login, logout, refresh, updateNickname, fetchWithAuth }}
+      value={{ accessToken, member, isLoading, login, logout, refresh, updateNickname, withdraw, fetchWithAuth }}
     >
       {children}
     </AuthContext.Provider>

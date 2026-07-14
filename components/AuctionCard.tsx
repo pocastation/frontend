@@ -9,12 +9,13 @@ import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionResponse } from "@/lib/types";
 import { formatKRW, isEndingSoon } from "@/lib/format";
 
-const STATUS_BADGE: Record<string, { label: string; className: string; pulse?: boolean }> = {
-  LIVE: { label: "진행 중", className: "bg-accent/90", pulse: true },
-  ENDING: { label: "마감 임박", className: "bg-[#F59E0B]/90" },
-  ENDED_SOLD: { label: "종료", className: "bg-text-2/85" },
-  ENDED_NO_BIDS: { label: "유찰", className: "bg-text-2/85" },
-  SCHEDULED: { label: "시작 예정", className: "bg-primary/85" },
+// v0 리톤 — 색 필 배지 대신 화이트 pill + 도트 인디케이터. 도트/텍스트만 상태색을 갖는다.
+const STATUS_BADGE: Record<string, { label: string; dot: string; text?: string; pulse?: boolean }> = {
+  LIVE: { label: "진행 중", dot: "bg-primary", pulse: true },
+  ENDING: { label: "마감 임박", dot: "bg-warn", text: "text-warn" },
+  ENDED_SOLD: { label: "종료", dot: "bg-text-3", text: "text-text-3" },
+  ENDED_NO_BIDS: { label: "유찰", dot: "bg-text-3", text: "text-text-3" },
+  SCHEDULED: { label: "시작 예정", dot: "bg-primary" },
 };
 
 export default function AuctionCard({
@@ -29,9 +30,9 @@ export default function AuctionCard({
   const isLive = auction.status === "LIVE";
   const isInstantSale = auction.saleType === "INSTANT";
   const badgeKey = isLive && !isInstantSale && isEndingSoon(auction.endAt) ? "ENDING" : auction.status;
-  const badge: { label: string; className: string; pulse?: boolean } = isInstantSale && isLive
-    ? { label: "즉시판매", className: "bg-primary/90" }
-    : STATUS_BADGE[badgeKey] ?? { label: auction.status, className: "bg-text-2/85" };
+  const badge: { label: string; dot: string; text?: string; pulse?: boolean } = isInstantSale && isLive
+    ? { label: "즉시판매", dot: "bg-primary" }
+    : STATUS_BADGE[badgeKey] ?? { label: auction.status, dot: "bg-text-3", text: "text-text-3" };
   const displayPrice = isInstantSale ? (auction.buyNowPrice ?? auction.currentPrice) : auction.currentPrice;
 
   const [imageFailed, setImageFailed] = useState(false);
@@ -52,7 +53,7 @@ export default function AuctionCard({
       href={`/auctions/${auction.id}`}
       className={`block overflow-hidden rounded-r4 border border-border bg-surface shadow-card transition-all hover:-translate-y-[3px] hover:border-primary hover:shadow-[0_8px_28px_rgba(17,17,24,0.1)] active:translate-y-0 ${FOCUS_RING}`}
     >
-      <div className="relative aspect-[2/3] overflow-hidden bg-gradient-to-br from-[#1e1065] to-[#4c1d95]">
+      <div className="relative aspect-[2/3] overflow-hidden bg-gradient-to-br from-[#f4f4f5] to-[#e7e7ea]">
         {showImage ? (
           <>
             {/* 로딩 중에는 shimmer가 이미지 뒤에서 비친다. 이미지는 항상 불투명하게 두어
@@ -73,7 +74,7 @@ export default function AuctionCard({
         ) : null}
         {/* URL이 없거나 로드 실패 시 중앙 폴백 아이콘 */}
         {!showImage && (
-          <span className="absolute inset-0 flex items-center justify-center text-white/45" aria-hidden="true">
+          <span className="absolute inset-0 flex items-center justify-center text-text-3/70" aria-hidden="true">
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
               <circle cx="8.5" cy="8.5" r="1.5" />
@@ -88,9 +89,9 @@ export default function AuctionCard({
         />
 
         <span
-          className={`absolute left-2 top-2 z-[2] flex items-center gap-1 rounded-full px-2 py-1 text-[10.5px] font-extrabold text-white backdrop-blur-sm ${badge.className}`}
+          className={`absolute left-2 top-2 z-[2] flex items-center gap-1.5 rounded-full border border-border bg-white/90 px-2 py-1 text-[10.5px] font-extrabold backdrop-blur-sm ${badge.text ?? "text-text-2"}`}
         >
-          {badge.pulse && <span className="h-1 w-1 animate-pulse rounded-full bg-white" aria-hidden="true" />}
+          <span className={`h-1.5 w-1.5 rounded-full ${badge.dot} ${badge.pulse ? "animate-pulse" : ""}`} aria-hidden="true" />
           {badge.label}
         </span>
 

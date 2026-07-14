@@ -253,7 +253,11 @@ export default function AdminMembersPage() {
                         selectedId === m.id ? "bg-primary-soft/50" : ""
                       } ${m.status === "SUSPENDED" ? "bg-accent-soft/40" : ""}`}
                     >
-                      <td className="px-4 py-3 font-bold text-text-1">{m.nickname}</td>
+                      <td className="px-4 py-3 font-bold text-text-1">
+                        <span className="block">{m.nickname}</span>
+                        {/* 변하지 않는 짧은 식별자(UUID 앞 8자리) — 닉 변경·동명이인과 무관하게 특정용. */}
+                        <span className="font-mono text-[11px] font-normal text-text-3">#{m.id.slice(0, 8)}</span>
+                      </td>
                       <td className="px-4 py-3 text-text-2">
                         <span className="block truncate">{m.email ?? "—"}</span>
                         <span className="text-[11px] text-text-3">{PROVIDER_LABEL[m.provider] ?? m.provider}</span>
@@ -298,9 +302,13 @@ export default function AdminMembersPage() {
             </div>
           ) : (
             <div className="rounded-r3 border border-border bg-surface p-4 shadow-card">
-              <div className="flex items-center justify-between">
-                <h2 className="font-display text-base font-extrabold text-text-1">{detail.nickname}</h2>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${MEMBER_STATUS_BADGE_CLASS[detail.status]}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <h2 className="font-display text-base font-extrabold text-text-1">{detail.nickname}</h2>
+                  {/* 변하지 않는 짧은 식별자(UUID 앞 8자리). 전체 UUID는 조치 API 경로에 그대로 쓰인다. */}
+                  <span className="font-mono text-[11px] text-text-3">#{detail.id.slice(0, 8)}</span>
+                </div>
+                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${MEMBER_STATUS_BADGE_CLASS[detail.status]}`}>
                   {MEMBER_STATUS_LABEL[detail.status]}
                 </span>
               </div>

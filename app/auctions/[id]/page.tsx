@@ -26,8 +26,10 @@ async function getAuction(id: string): Promise<AuctionDetailResponse | null> {
   }
 }
 
+// v0 리톤 — 파스텔 필 제거. 해시태그는 헤어라인 pill + 퍼플 텍스트, 배지는 헤어라인 + 뉴트럴 텍스트로 통일.
 const CHIP_CLASS =
-  `rounded-full bg-primary-soft px-2 py-0.5 text-xs font-bold text-primary transition-colors hover:bg-primary hover:text-white ${FOCUS_RING}`;
+  `rounded-full border border-border px-2 py-0.5 text-xs font-bold text-primary transition-colors hover:border-primary ${FOCUS_RING}`;
+const BADGE_CLASS = "rounded-full border border-border px-2.5 py-1 text-xs font-bold text-text-2";
 
 export default async function AuctionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -112,14 +114,14 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             <div className="mt-2 rounded-r3 border border-border p-3.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-soft text-sm font-bold text-primary">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-sm font-bold text-text-2">
                     {auction.sellerNickname.slice(0, 1).toUpperCase()}
                   </span>
                   <span className="flex items-center gap-1.5">
                     <span className="text-sm font-bold text-text-1">{auction.sellerNickname}</span>
                     {/* 판매자 등급·거래 후기 도메인은 아직 없다 — 모두 기본 등급(LV.1)만 노출하고
                         건수·평점처럼 판매자마다 달라야 할 숫자는 지어내지 않는다. */}
-                    <span className="rounded-full bg-primary-soft px-1.5 py-0.5 text-[10px] font-extrabold text-primary">
+                    <span className="rounded-full border border-border px-1.5 py-0.5 text-[10px] font-extrabold text-text-2">
                       LV.1
                     </span>
                   </span>
@@ -158,19 +160,17 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
           </h1>
 
           <div className="mt-3 flex flex-wrap gap-1.5">
-            <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary">
+            <span className={BADGE_CLASS}>
               {isInstantSale ? "즉시판매" : "경매"}
             </span>
-            <span className="rounded-full bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary">
+            <span className={BADGE_CLASS}>
               {SOURCE_LABEL[auction.source] ?? auction.source}
               {auction.sourceDetail ? ` · ${auction.sourceDetail}` : ""}
             </span>
-            <span className="rounded-full bg-surface-3 px-2.5 py-1 text-xs font-bold text-text-2">
+            <span className={BADGE_CLASS}>
               {GRADE_LABEL[auction.grade] ?? auction.grade}
             </span>
-            {auction.unopened && (
-              <span className="rounded-full bg-ok-soft px-2.5 py-1 text-xs font-bold text-ok">미개봉</span>
-            )}
+            {auction.unopened && <span className={BADGE_CLASS}>미개봉</span>}
           </div>
 
           {isInstantSale ? (
@@ -204,7 +204,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <div className="mt-10 flex items-center gap-3 rounded-r3 bg-primary-soft px-5 py-4 text-sm font-semibold text-text-1">
+      <div className="mt-10 flex items-center gap-3 rounded-r3 border border-border bg-surface-2 px-5 py-4 text-sm font-semibold text-text-1">
         안전한 거래를 위해 안내사항을 꼭 확인해주세요.
         <Link href="/guide" className={`ml-auto shrink-0 font-bold text-primary hover:underline ${FOCUS_RING}`}>
           자세히 보기 →

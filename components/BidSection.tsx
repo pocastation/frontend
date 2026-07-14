@@ -81,13 +81,6 @@ export default function BidSection({
   const outOfRange = amount < floor || amount > ceil;
   const total = useMemo(() => estimatedTotal(amount), [amount]);
 
-  // 호가 사다리 = 상한(+10호가)에서 최소 입찰가까지 1호가 간격으로 내려오는 가격들.
-  const rungs = useMemo(() => {
-    const list: number[] = [];
-    for (let p = ceil; p >= floor; p -= BID_MIN_INCREMENT) list.push(p);
-    return list;
-  }, [floor, ceil]);
-
   // 최신 순으로 첫 페이지를 다시 받아 교체한다(입찰 발생 시 authoritative하게 갱신).
   const fetchBids = useCallback(async () => {
     try {
@@ -172,9 +165,11 @@ export default function BidSection({
     return () => observer.disconnect();
   }, []);
 
-  function selectRung(price: number) {
+  // 입찰가 조정(스테퍼 ± · 빠른 가산) — 입찰 가능 범위[floor, ceil]로 클램프하고,
+  // 사용자가 직접 조정했음을 표시해 현재가 상승 시 자동 rebase가 값을 덮어쓰지 않게 한다.
+  function adjustAmount(next: number) {
     amountTouchedRef.current = true;
-    setAmount(price);
+    setAmount(Math.max(floor, Math.min(ceil, next)));
   }
 
   function scrollToBid() {
@@ -217,7 +212,7 @@ export default function BidSection({
       {/* 현재가 헤더 */}
       <div
         ref={priceHeaderRef}
-        className={`rounded-r3 border border-border p-4 shadow-card ${isLive ? "bg-primary-soft" : "bg-surface"}`}
+        className="rounded-r3 border border-border bg-surface p-4 shadow-card"
       >
         <div className="flex items-center justify-between text-xs font-semibold text-text-3">
           <span>현재가</span>
@@ -270,70 +265,75 @@ export default function BidSection({
           </Link>
         ) : (
           <div className="mt-4">
-            {/* 입찰 호가 — 현재가가 맨 아래, 위로 갈수록 높은 호가(최대 10호가 상한) */}
-            <div className="overflow-hidden rounded-r2 border border-border bg-surface">
-              <div className="flex items-center justify-between border-b border-border px-3.5 py-2.5 text-sm font-extrabold text-text-1">
-                <span>입찰 호가</span>
-                <span className="text-[11px] font-semibold text-text-3">현재가부터 상위 10호가</span>
+            {/* 입찰가 — v0 스테퍼(± · 빠른 가산). 호가 사다리를 대체하되 min/max·수수료 로직은 그대로 유지. */}
+            <div className="mb-2.5 flex items-baseline justify-between">
+              <span className="text-[13px] font-bold text-text-1">입찰가</span>
+              <span className="text-[11px] font-medium text-text-3 tabular-nums">
+                가능 범위 {formatKRW(floor)} – {formatKRW(ceil)}
+              </span>
+            </div>
+            <div className="flex h-[52px] items-stretch overflow-hidden rounded-r2 border border-border">
+              <button
+                type="button"
+                onClick={() => adjustAmount(amount - BID_MIN_INCREMENT)}
+                disabled={amount <= floor}
+                aria-label="입찰가 내리기"
+                className={`w-[52px] text-xl text-text-2 transition-colors hover:bg-surface-2 hover:text-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-2 ${FOCUS_RING}`}
+              >
+                −
+              </button>
+              <div
+                className="flex flex-1 items-center justify-center border-x border-border font-display text-xl font-bold tabular-nums text-text-1"
+                aria-live="polite"
+              >
+                {formatKRW(amount)}
               </div>
-              <div role="group" aria-label="입찰가 선택">
-                {rungs.map((p, i) => {
-                  const selected = p === amount;
-                  const isNextBid = i === rungs.length - 1;
-                  const tag = isNextBid ? "다음 호가" : `${rungs.length - i}호가`;
-                  return (
-                    <button
-                      key={p}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => selectRung(p)}
-                      className={`flex w-full items-center justify-between px-3.5 py-1.5 text-sm tabular-nums transition-colors ${FOCUS_RING} ${
-                        selected ? "bg-accent-soft font-bold text-accent" : "text-text-2 hover:bg-surface-2"
-                      }`}
-                    >
-                      <span>{formatKRW(p)}</span>
-                      <span className={`text-[10px] font-semibold ${selected ? "text-accent" : "text-text-3"}`}>
-                        {tag}
-                      </span>
-                    </button>
-                  );
-                })}
-                {/* 현재가 행 — 사다리 맨 아래 */}
-                <div className="flex items-center justify-between bg-primary-soft px-3.5 py-2.5 text-[15px] font-extrabold tabular-nums text-primary">
-                  <span>현재가 {formatKRW(currentPrice)}</span>
-                  <span className="text-xs font-bold">{bids[0]?.bidderNicknameMasked ?? "-"}</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between border-t border-border px-3.5 py-2 text-[11px] text-text-3">
-                <span>입찰 단위 {formatKRW(BID_MIN_INCREMENT)}</span>
-                <span>실시간 갱신 · SSE</span>
-              </div>
+              <button
+                type="button"
+                onClick={() => adjustAmount(amount + BID_MIN_INCREMENT)}
+                disabled={amount >= ceil}
+                aria-label="입찰가 올리기"
+                className={`w-[52px] text-xl text-text-2 transition-colors hover:bg-surface-2 hover:text-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-2 ${FOCUS_RING}`}
+              >
+                +
+              </button>
+            </div>
+            <div className="mt-2 flex gap-1.5">
+              {[BID_MIN_INCREMENT, 5000, 10000].map((delta) => (
+                <button
+                  key={delta}
+                  type="button"
+                  onClick={() => adjustAmount(amount + delta)}
+                  disabled={amount >= ceil}
+                  className={`h-9 flex-1 rounded-r2 bg-surface-2 text-xs font-medium text-text-2 transition-colors hover:bg-surface-3 hover:text-primary disabled:opacity-40 disabled:hover:bg-surface-2 disabled:hover:text-text-2 ${FOCUS_RING}`}
+                >
+                  +{delta.toLocaleString("ko-KR")}
+                </button>
+              ))}
             </div>
 
-            {/* 선택 요약 + 예상 결제 총액 */}
-            <div className="mt-3 rounded-r2 bg-surface-2 p-3 text-xs">
-              <div className="flex items-center justify-between text-text-3">
+            {/* 예상 결제 총액 — 박스 대신 헤어라인만(v0) */}
+            <div className="mt-4 text-[13px]">
+              <div className="flex items-center justify-between py-1 text-text-3">
                 <span>입찰가</span>
-                <span className="font-semibold text-text-2 tabular-nums">{formatKRW(amount)}</span>
+                <span className="font-medium tabular-nums text-text-2">{formatKRW(amount)}</span>
               </div>
-              <div className="mt-1 flex items-center justify-between text-text-3">
+              <div className="flex items-center justify-between py-1 text-text-3">
                 <span>구매자 수수료</span>
-                <span className="font-semibold text-text-2 tabular-nums">{formatKRW(buyerFee(amount))}</span>
+                <span className="font-medium tabular-nums text-text-2">{formatKRW(buyerFee(amount))}</span>
               </div>
-              <div className="mt-2 flex items-center justify-between border-t border-border pt-2">
-                <span className="font-semibold text-text-2">예상 결제 총액</span>
-                <span className="font-display text-sm font-extrabold text-primary tabular-nums">
-                  {formatKRW(total)}
-                </span>
+              <div className="mt-1.5 flex items-baseline justify-between border-t border-border pt-2.5">
+                <span className="font-bold text-text-1">예상 결제 총액</span>
+                <span className="font-display text-lg font-bold tabular-nums text-primary">{formatKRW(total)}</span>
               </div>
-              <p className="mt-1 text-[10px] text-text-3">낙찰 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
+              <p className="mt-1.5 text-[11px] text-text-3">낙찰 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
             </div>
 
             <button
               type="button"
               onClick={handleBid}
               disabled={submitting || outOfRange}
-              className={`mt-2 flex h-11 w-full items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
+              className={`mt-3.5 flex h-12 w-full items-center justify-center rounded-r2 bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
             >
               {submitting ? "처리 중..." : `${formatKRW(amount)} 입찰하기`}
             </button>
@@ -377,12 +377,12 @@ export default function BidSection({
               <li
                 key={bid.id}
                 className={`flex items-center justify-between rounded-r1 px-3 py-2 text-xs ${
-                  index === 0 ? "bg-ok-soft" : "bg-surface-2"
+                  index === 0 ? "bg-surface-3" : "bg-surface-2"
                 }`}
               >
-                <span className={`font-semibold ${index === 0 ? "text-ok" : "text-text-2"}`}>
+                <span className="font-semibold text-text-2">
                   {index === 0 && (
-                    <span className="mr-1.5 rounded-full bg-ok px-1.5 py-0.5 text-[10px] font-bold text-white">
+                    <span className="mr-1.5 rounded-full border border-border-2 bg-surface px-1.5 py-0.5 text-[10px] font-bold text-text-2">
                       최고가
                     </span>
                   )}

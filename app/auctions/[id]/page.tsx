@@ -7,6 +7,7 @@ import BidSection from "@/components/BidSection";
 import InstantPurchaseSection from "@/components/InstantPurchaseSection";
 import ReportButton from "@/components/ReportButton";
 import SearchLink from "@/components/SearchLink";
+import SellerShipPanel from "@/components/SellerShipPanel";
 import ShareButton from "@/components/ShareButton";
 import SuccessionOfferBanner from "@/components/SuccessionOfferBanner";
 import { apiFetch, ApiError } from "@/lib/api";
@@ -198,6 +199,8 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
               {auction.status === "ENDED_SOLD" && <SuccessionOfferBanner auctionId={auction.id} />}
             </>
           ) : null}
+          {/* 판매자 본인에게만(자체 게이팅) 발송 관리 패널 — 마이페이지 판매내역과 동일 발송 폼을 상세에서도 노출. */}
+          {auction.status === "ENDED_SOLD" && <SellerShipPanel auctionId={auction.id} />}
         </div>
       </div>
 

@@ -9,6 +9,8 @@ import DeliveryAddressBook from "@/components/DeliveryAddressBook";
 import PaymentMethodManager from "@/components/PaymentMethodManager";
 import ProfileTab from "@/components/ProfileTab";
 import NotificationSettings from "@/components/NotificationSettings";
+import OrderDeliveryAddressForm from "@/components/OrderDeliveryAddressForm";
+import OrderShipForm from "@/components/OrderShipForm";
 import { formatDateTimeKST, formatKRW, formatTimeLeft } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
@@ -17,6 +19,7 @@ import type {
   MyBiddingListResponse,
   MyBiddingResponse,
   MyOrderStatusResponse,
+  SoldOrderResponse,
   WishlistListResponse,
 } from "@/lib/types";
 
@@ -202,6 +205,8 @@ export default function MyPage() {
   const [wishlist, setWishlist] = useState<AuctionResponse[]>([]);
   // 구매(낙찰·즉시구매) 건의 주문 결제 상태 — auctionId 키(#113, wishlist 하트 배치 채움 패턴).
   const [orders, setOrders] = useState<Record<number, MyOrderStatusResponse>>({});
+  // 판매 건의 주문(판매자 관점, #119) — auctionId 키. 발송 UI가 소비.
+  const [soldOrders, setSoldOrders] = useState<Record<number, SoldOrderResponse>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -257,6 +262,21 @@ export default function MyPage() {
         }
       } catch {
         setOrders({});
+      }
+
+      // 판매 건의 주문(발송 UI) — 판매자 관점. 주문이 없는(미낙찰·미결제) 경매는 응답에 안 온다.
+      const sellingIds = sellingRes.content.map((a) => a.id);
+      try {
+        if (sellingIds.length > 0) {
+          const soldRes = await fetchWithAuth<SoldOrderResponse[]>(
+            `/api/members/me/sold-orders/status?auctionIds=${sellingIds.join(",")}`,
+          );
+          setSoldOrders(Object.fromEntries(soldRes.map((o) => [o.auctionId, o])));
+        } else {
+          setSoldOrders({});
+        }
+      } catch {
+        setSoldOrders({});
       }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "내 활동을 불러오지 못했습니다.");
@@ -395,7 +415,7 @@ export default function MyPage() {
               </DashboardPanel>
 
               <DashboardPanel title="낙찰/구매 내역" onSeeAll={() => setTab("won")}>
-                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} />
+                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} />
               </DashboardPanel>
 
               <DashboardPanel title="즉시구매 내역" onSeeAll={() => setTab("instantPurchases")}>
@@ -406,11 +426,12 @@ export default function MyPage() {
                   endedLabel="구매 완료"
                   orders={orders}
                   onGoPayment={() => setTab("payment")}
+                  onRefresh={loadMyActivity}
                 />
               </DashboardPanel>
 
               <DashboardPanel title="판매 중인 경매" onSeeAll={() => setTab("selling")}>
-                <SellingList items={liveSelling.slice(0, 3)} loading={loading} emptyText="판매 중인 경매가 없습니다." />
+                <SellingList items={liveSelling.slice(0, 3)} loading={loading} emptyText="판매 중인 경매가 없습니다." soldOrders={soldOrders} onRefresh={loadMyActivity} />
               </DashboardPanel>
             </div>
           </>
@@ -435,7 +456,7 @@ export default function MyPage() {
             <h1 className="font-display text-xl font-extrabold text-text-1">낙찰/구매 내역</h1>
             <p className="mt-1 text-sm text-text-3">낙찰한 경매 {wonBidding.length}건</p>
             <div className="mt-5">
-              <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} />
+              <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} />
             </div>
           </>
         ) : tab === "instantPurchases" ? (
@@ -450,6 +471,7 @@ export default function MyPage() {
                 endedLabel="구매 완료"
                 orders={orders}
                 onGoPayment={() => setTab("payment")}
+                onRefresh={loadMyActivity}
               />
             </div>
           </>
@@ -468,7 +490,7 @@ export default function MyPage() {
               </p>
             ) : (
               <div className="mt-5">
-                <SellingList items={liveSelling} loading={loading} emptyText="판매 중인 경매가 없습니다." />
+                <SellingList items={liveSelling} loading={loading} emptyText="판매 중인 경매가 없습니다." soldOrders={soldOrders} onRefresh={loadMyActivity} />
               </div>
             )}
           </>
@@ -522,7 +544,7 @@ export default function MyPage() {
             <h1 className="font-display text-xl font-extrabold text-text-1">판매 내역</h1>
             <p className="mt-1 text-sm text-text-3">등록한 경매 {selling.length}건</p>
             <div className="mt-5">
-              <SellingList items={selling} loading={loading} emptyText="아직 등록한 경매가 없어요." />
+              <SellingList items={selling} loading={loading} emptyText="아직 등록한 경매가 없어요." soldOrders={soldOrders} onRefresh={loadMyActivity} />
             </div>
           </>
         )}
@@ -581,14 +603,18 @@ function SellingList({
   endedLabel = "종료",
   orders,
   onGoPayment,
+  soldOrders,
+  onRefresh,
 }: {
   items: AuctionResponse[];
   loading: boolean;
   emptyText: string;
   endedLabel?: string;
-  // 즉시구매 내역처럼 "내가 구매자"인 목록에만 넘긴다 — 카드 하단에 결제 상태 푸터가 붙는다(#113).
+  // 즉시구매 내역처럼 "내가 구매자"인 목록엔 orders(#113)를, 판매 목록엔 soldOrders(#119)를 넘긴다.
   orders?: Record<number, MyOrderStatusResponse>;
   onGoPayment?: () => void;
+  soldOrders?: Record<number, SoldOrderResponse>;
+  onRefresh?: () => void;
 }) {
   if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
   if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
@@ -602,6 +628,7 @@ function SellingList({
           ? item.saleType === "INSTANT" ? "즉시판매" : item.endAt ? formatTimeLeft(item.endAt) : "진행 중"
           : endedLabel;
         const order = orders?.[item.id];
+        const soldOrder = soldOrders?.[item.id];
         return (
           <li key={item.id}>
             <div className="overflow-hidden rounded-r2 border border-border bg-surface transition-colors hover:border-primary">
@@ -625,7 +652,16 @@ function SellingList({
                   </span>
                 </span>
               </Link>
-              {order && onGoPayment && <OrderStatusFooter order={order} onGoPayment={onGoPayment} />}
+              {/* 구매자(즉시구매) 관점: PAID면 배송/확정, 아니면 결제 상태. 판매자 관점: 발송 푸터. */}
+              {order &&
+                (order.status === "PAID" && onRefresh ? (
+                  <BuyerFulfillmentFooter order={order} onRefresh={onRefresh} />
+                ) : onGoPayment ? (
+                  <OrderStatusFooter order={order} onGoPayment={onGoPayment} />
+                ) : null)}
+              {soldOrder && onRefresh && (
+                <SellerFulfillmentFooter soldOrder={soldOrder} onRefresh={onRefresh} />
+              )}
             </div>
           </li>
         );
@@ -787,12 +823,163 @@ function OrderStatusFooter({
   );
 }
 
+const fulfillmentPill = (dot: string, label: string) => (
+  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 py-1 text-[11px] font-bold text-text-2">
+    <span className={`h-1.5 w-1.5 rounded-full ${dot}`} aria-hidden="true" />
+    {label}
+  </span>
+);
+
+// 구매자 관점 배송/확정 푸터(#119) — 결제 완료(PAID) 주문에만. 배송지 입력·구매확정 인터랙션 포함.
+function BuyerFulfillmentFooter({
+  order,
+  onRefresh,
+}: {
+  order: MyOrderStatusResponse;
+  onRefresh: () => void;
+}) {
+  const { fetchWithAuth } = useAuth();
+  const [addressOpen, setAddressOpen] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+
+  async function confirm() {
+    if (confirming) return;
+    setConfirming(true);
+    try {
+      await fetchWithAuth<void>(`/api/auctions/${order.auctionId}/order/confirm`, { method: "POST" });
+      onRefresh();
+    } catch {
+      // 실패는 조용히 — 다음 새로고침에서 서버 상태로 보정.
+    } finally {
+      setConfirming(false);
+    }
+  }
+
+  const fs = order.fulfillmentStatus;
+  return (
+    <div className="border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
+      <div className="flex flex-wrap items-center gap-2.5">
+        {fs === "CONFIRMED" ? (
+          <>
+            {fulfillmentPill("bg-ok", "구매 확정")}
+            <span className="min-w-0 flex-1">거래가 완료됐어요.</span>
+          </>
+        ) : fs === "SHIPPED" ? (
+          <>
+            {fulfillmentPill("bg-primary", "배송 중")}
+            <span className="min-w-0 flex-1">
+              {order.carrier} {order.trackingNumber}
+            </span>
+            <button
+              type="button"
+              onClick={confirm}
+              disabled={confirming}
+              className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+            >
+              구매 확정
+            </button>
+          </>
+        ) : !order.hasDeliveryAddress ? (
+          <>
+            {fulfillmentPill("bg-accent", "배송지 입력 필요")}
+            <span className="min-w-0 flex-1">받을 주소를 입력하면 판매자가 발송해요.</span>
+            <button
+              type="button"
+              onClick={() => setAddressOpen((v) => !v)}
+              className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+            >
+              배송지 입력
+            </button>
+          </>
+        ) : (
+          <>
+            {fulfillmentPill("bg-primary", "발송 대기")}
+            <span className="min-w-0 flex-1">판매자의 발송을 기다리고 있어요.</span>
+          </>
+        )}
+      </div>
+      {addressOpen && fs === "AWAITING_SHIPMENT" && !order.hasDeliveryAddress && (
+        <OrderDeliveryAddressForm
+          auctionId={order.auctionId}
+          onDone={() => {
+            setAddressOpen(false);
+            onRefresh();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
+// 판매자 관점 발송 푸터(#119) — 판매 내역. sold-order가 있으면(=결제 완료된 낙찰) 발송/상태 표시.
+function SellerFulfillmentFooter({
+  soldOrder,
+  onRefresh,
+}: {
+  soldOrder: SoldOrderResponse;
+  onRefresh: () => void;
+}) {
+  const [shipOpen, setShipOpen] = useState(false);
+  const fs = soldOrder.fulfillmentStatus;
+  const addr = soldOrder.deliveryAddress;
+  return (
+    <div className="border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
+      <div className="flex flex-wrap items-center gap-2.5">
+        {fs === "CONFIRMED" ? (
+          <>
+            {fulfillmentPill("bg-ok", "구매 확정")}
+            <span className="min-w-0 flex-1">
+              정산 예정 <b className="font-bold text-text-1">{formatKRW(soldOrder.payoutAmount)}</b> · 정산 준비 중
+            </span>
+          </>
+        ) : fs === "SHIPPED" ? (
+          <>
+            {fulfillmentPill("bg-primary", "발송 완료")}
+            <span className="min-w-0 flex-1">
+              {soldOrder.carrier} {soldOrder.trackingNumber}
+            </span>
+          </>
+        ) : addr ? (
+          <>
+            {fulfillmentPill("bg-accent", "발송 대기")}
+            <span className="min-w-0 flex-1">
+              {addr.recipientName} · {addr.address1} {addr.address2 ?? ""}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShipOpen((v) => !v)}
+              className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+            >
+              발송 처리
+            </button>
+          </>
+        ) : (
+          <>
+            {fulfillmentPill("bg-text-3", "배송지 대기")}
+            <span className="min-w-0 flex-1">구매자가 배송지를 입력하면 발송할 수 있어요.</span>
+          </>
+        )}
+      </div>
+      {shipOpen && fs === "AWAITING_SHIPMENT" && addr && (
+        <OrderShipForm
+          auctionId={soldOrder.auctionId}
+          onShipped={() => {
+            setShipOpen(false);
+            onRefresh();
+          }}
+        />
+      )}
+    </div>
+  );
+}
+
 function MyBiddingList({
   items,
   loading,
   emptyText,
   orders,
   onGoPayment,
+  onRefresh,
 }: {
   items: MyBiddingResponse[];
   loading: boolean;
@@ -800,6 +987,7 @@ function MyBiddingList({
   // 낙찰 건의 주문 상태(auctionId 키) — 넘기면 카드 하단에 결제 상태 푸터가 붙는다(#113).
   orders?: Record<number, MyOrderStatusResponse>;
   onGoPayment?: () => void;
+  onRefresh?: () => void;
 }) {
   if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
   if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
@@ -842,7 +1030,13 @@ function MyBiddingList({
                   </span>
                 </span>
               </Link>
-              {order && onGoPayment && <OrderStatusFooter order={order} onGoPayment={onGoPayment} />}
+              {/* 낙찰 건도 PAID면 배송지 입력·구매확정 푸터, 그 전이면 결제 상태 푸터(#113/#119). */}
+              {order &&
+                (order.status === "PAID" && onRefresh ? (
+                  <BuyerFulfillmentFooter order={order} onRefresh={onRefresh} />
+                ) : onGoPayment ? (
+                  <OrderStatusFooter order={order} onGoPayment={onGoPayment} />
+                ) : null)}
             </div>
           </li>
         );

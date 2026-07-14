@@ -31,9 +31,16 @@ export default function ProfileTab() {
   const trimmed = nickname.trim();
   const unchanged = trimmed === member.nickname;
 
+  // 주 1회 제한(#118) — nicknameChangeableAt이 미래면 잠금. 그 시각까지 변경 불가.
+  const changeableAt = member.nicknameChangeableAt ? new Date(member.nicknameChangeableAt) : null;
+  const locked = changeableAt !== null && changeableAt.getTime() > Date.now();
+  const changeableDate = changeableAt
+    ? changeableAt.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })
+    : null;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!trimmed || unchanged) return;
+    if (!trimmed || unchanged || locked) return;
     setIsSubmitting(true);
     setError(null);
     setSaved(false);
@@ -66,6 +73,7 @@ export default function ProfileTab() {
               }}
               required
               maxLength={50}
+              disabled={locked}
               className={INPUT_CLASS}
             />
             {error && (
@@ -78,10 +86,17 @@ export default function ProfileTab() {
                 닉네임을 변경했어요.
               </p>
             )}
+            {locked ? (
+              <p className="mt-2 text-xs text-text-3">
+                닉네임은 7일에 한 번만 바꿀 수 있어요. 다음 변경 가능일: {changeableDate}
+              </p>
+            ) : (
+              <p className="mt-2 text-xs text-text-3">닉네임은 변경 후 7일간 다시 바꿀 수 없어요.</p>
+            )}
           </div>
           <button
             type="submit"
-            disabled={isSubmitting || !trimmed || unchanged}
+            disabled={isSubmitting || !trimmed || unchanged || locked}
             className={`shrink-0 px-4 py-2.5 ${PRIMARY_BUTTON_CLASS}`}
           >
             {isSubmitting ? "변경 중..." : "변경"}

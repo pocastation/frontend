@@ -111,13 +111,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateNickname = useCallback(
     async (nickname: string) => {
-      const updated = await fetchWithAuth<MemberResponse>("/api/members/me/nickname", {
+      await fetchWithAuth<MemberResponse>("/api/members/me/nickname", {
         method: "PATCH",
         body: { nickname },
       });
-      // PATCH 응답에는 /me 전용 보강 필드(provider·createdAt)가 없으므로 통째로 교체하면
-      // 내 정보 탭 표시값이 사라진다 — 기존 member 위에 병합한다.
-      setMember((prev) => (prev ? { ...prev, ...updated } : updated));
+      // 변경 성공 후 /me를 다시 읽는다 — PATCH 응답엔 보강 필드(provider·createdAt)뿐 아니라
+      // 갱신된 nicknameChangeableAt(#118 잠금 시각)도 없어서, 통째로 최신 프로필로 교체한다.
+      const me = await fetchWithAuth<MemberResponse>("/api/members/me");
+      setMember(me);
     },
     [fetchWithAuth],
   );

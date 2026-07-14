@@ -25,6 +25,7 @@ const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; ico
   ORDER_SHIPPED: { label: "발송", tone: "primary", icon: "box" },
   ORDER_CONFIRMED: { label: "구매 확정", tone: "ok", icon: "checkCircle" },
   SHIPPING_OVERDUE: { label: "발송 지연", tone: "accent", icon: "clock" },
+  SETTLEMENT_COMPLETED: { label: "정산 완료", tone: "ok", icon: "card" },
 };
 
 // 배포 시점 차이로 프론트가 모르는 타입이 와도 렌더가 깨지지 않게 폴백.

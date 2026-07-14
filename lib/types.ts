@@ -440,7 +440,8 @@ export type NotificationType =
   | "AUCTION_SUCCEEDED" // 차순위 승계 — 구매 기회 제안(차순위)·낙찰자 변경(판매자)
   | "ORDER_SHIPPED" // 발송 — 구매자에게 운송장 안내
   | "ORDER_CONFIRMED" // 구매확정 — 판매자에게 정산 대기 안내
-  | "SHIPPING_OVERDUE"; // 발송기한 초과 — 판매자에게 발송 독촉
+  | "SHIPPING_OVERDUE" // 발송기한 초과 — 판매자에게 발송 독촉
+  | "SETTLEMENT_COMPLETED"; // 정산 완료 — 판매자에게 실입금 예정 안내(실입금은 PG 사이클 시차)
 
 // GET /api/members/me/succession-offers/{auctionId} — 제안 대상자 본인에게만 200(타인 404).
 export type SuccessionOfferResponse = {

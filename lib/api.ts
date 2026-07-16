@@ -14,9 +14,14 @@ function resolveApiUrl(): string {
   return "http://localhost:8080";
 }
 
-// 백엔드가 반환하는 /media/** 등은 상대경로라 프론트(3000)가 아니라 백엔드(8080) 기준으로
-// 절대 URL을 조합해야 <img src>가 실제 파일을 찾는다.
+// 저장 방식에 따라 미디어 경로 형태가 다르다:
+//  - S3StorageClient(배포): 절대 URL(https://{cloudfront}/photos/…)을 통째로 저장 → 그대로 쓴다.
+//  - LocalStorageClient(로컬): /media/** 상대경로 → 프론트(3000)가 아니라 백엔드(8080) 기준으로 조합.
+// 절대 URL에 API 주소를 덧붙이면 "https://api…https://cloudfront…"로 깨지므로 반드시 분기한다.
 export function mediaUrl(path: string): string {
+  if (/^https?:\/\//i.test(path)) {
+    return path;
+  }
   return `${resolveApiUrl()}${path}`;
 }
 

@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { apiFetch, ApiError, type ApiFetchOptions } from "./api";
+import { apiFetch, apiFetchBlob, apiFetchMultipart, ApiError, type ApiFetchOptions } from "./api";
 import type { MemberResponse, TokenResponse } from "./types";
 
 type AuthContextValue = {
@@ -22,6 +22,8 @@ type AuthContextValue = {
   updateNickname: (nickname: string) => Promise<void>;
   withdraw: () => Promise<void>;
   fetchWithAuth: <T>(path: string, options?: ApiFetchOptions) => Promise<T>;
+  fetchMultipartWithAuth: <T>(path: string, formData: FormData) => Promise<T>;
+  fetchBlobWithAuth: (path: string) => Promise<Blob>;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -110,6 +112,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [accessToken, refresh],
   );
 
+  const fetchMultipartWithAuth = useCallback(
+    async <T,>(path: string, formData: FormData): Promise<T> => {
+      try {
+        return await apiFetchMultipart<T>(path, formData, accessToken);
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 401) {
+          const newToken = await refresh();
+          if (newToken) {
+            return await apiFetchMultipart<T>(path, formData, newToken);
+          }
+        }
+        throw err;
+      }
+    },
+    [accessToken, refresh],
+  );
+
+  const fetchBlobWithAuth = useCallback(
+    async (path: string): Promise<Blob> => {
+      try {
+        return await apiFetchBlob(path, accessToken);
+      } catch (err) {
+        if (err instanceof ApiError && err.status === 401) {
+          const newToken = await refresh();
+          if (newToken) {
+            return await apiFetchBlob(path, newToken);
+          }
+        }
+        throw err;
+      }
+    },
+    [accessToken, refresh],
+  );
+
   const updateNickname = useCallback(
     async (nickname: string) => {
       await fetchWithAuth<MemberResponse>("/api/members/me/nickname", {
@@ -141,7 +177,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ accessToken, member, isLoading, login, logout, refresh, updateNickname, withdraw, fetchWithAuth }}
+      value={{
+        accessToken,
+        member,
+        isLoading,
+        login,
+        logout,
+        refresh,
+        updateNickname,
+        withdraw,
+        fetchWithAuth,
+        fetchMultipartWithAuth,
+        fetchBlobWithAuth,
+      }}
     >
       {children}
     </AuthContext.Provider>

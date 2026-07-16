@@ -96,12 +96,10 @@ export const PROVIDER_LABEL: Record<string, string> = {
   GOOGLE: "구글",
 };
 
-// 어드민 화면(카탈로그 관리·경매 관리)이 공유하는 경매 상태 라벨. MVP는 자동승인이라
-// DRAFT/PENDING_REVIEW/APPROVED/REJECTED/SCHEDULED는 실제로는 거의 안 보이지만, 상태기계
-// 자체엔 남아있어 라벨은 준비해둔다.
+// 어드민 화면과 판매자 마이페이지가 공유하는 경매 상태 라벨.
 export const AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
   DRAFT: "임시저장",
-  PENDING_REVIEW: "검수 대기",
+  PENDING_REVIEW: "승인 대기중",
   APPROVED: "승인",
   REJECTED: "반려",
   SCHEDULED: "시작 예정",
@@ -190,6 +188,8 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   REPORT_REJECTED: "신고 반려",
   MEMBER_ROLE_GRANTED: "관리자 승격",
   MEMBER_ROLE_REVOKED: "관리자 권한회수",
+  AUCTION_APPROVED: "인증 경매 승인",
+  AUCTION_REJECTED: "인증 경매 반려",
 };
 
 export const AUDIT_ACTION_OPTIONS: AuditAction[] = [
@@ -201,6 +201,8 @@ export const AUDIT_ACTION_OPTIONS: AuditAction[] = [
   "REPORT_REJECTED",
   "MEMBER_ROLE_GRANTED",
   "MEMBER_ROLE_REVOKED",
+  "AUCTION_APPROVED",
+  "AUCTION_REJECTED",
 ];
 
 export const AUDIT_ACTION_BADGE_CLASS: Record<AuditAction, string> = {
@@ -212,6 +214,8 @@ export const AUDIT_ACTION_BADGE_CLASS: Record<AuditAction, string> = {
   REPORT_REJECTED: "bg-surface-2 text-text-2",
   MEMBER_ROLE_GRANTED: "bg-primary-soft text-primary",
   MEMBER_ROLE_REVOKED: "bg-[#fff7ed] text-[#b45309]",
+  AUCTION_APPROVED: "bg-ok-soft text-ok",
+  AUCTION_REJECTED: "bg-accent-soft text-accent",
 };
 
 export const AUDIT_TARGET_TYPE_LABEL: Record<AuditTargetType, string> = {

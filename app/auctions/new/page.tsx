@@ -4,6 +4,7 @@ import { useEffect, useId, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ArtistCombobox from "@/components/ArtistCombobox";
+import AuctionVerificationStep from "@/components/AuctionVerificationStep";
 import { apiFetch, ApiError, mediaUrl, uploadMediaImage } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { DURATION_OPTIONS, GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
@@ -17,7 +18,10 @@ import type {
 } from "@/lib/types";
 
 const MAX_IMAGES = 12;
-const TOTAL_STEPS = 5;
+const AUCTION_VERIFICATION_ENABLED =
+  process.env.NEXT_PUBLIC_AUCTION_VERIFICATION_ENABLED === "true" ||
+  (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_AUCTION_VERIFICATION_ENABLED !== "false");
+const TOTAL_STEPS = AUCTION_VERIFICATION_ENABLED ? 6 : 5;
 
 type UploadedImage = { url: string; thumbnailUrl: string };
 
@@ -56,6 +60,7 @@ export default function NewAuctionPage() {
 
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [isUploading, setIsUploading] = useState(false);
+  const [verificationId, setVerificationId] = useState<string | null>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -116,6 +121,7 @@ export default function NewAuctionPage() {
     if (s === 1) return artistId !== "" && title.trim().length > 0;
     if (s === 3) return priceValid;
     if (s === 4) return images.length > 0;
+    if (AUCTION_VERIFICATION_ENABLED && s === 5) return verificationId !== null;
     return true; // 판매 방식(0) · 상품 정보(2)는 기본값이 있어 항상 통과
   }
 
@@ -149,6 +155,10 @@ export default function NewAuctionPage() {
       setError("사진을 1장 이상 등록해주세요.");
       return;
     }
+    if (AUCTION_VERIFICATION_ENABLED && !verificationId) {
+      setError("판매 물품 소유 인증을 완료해주세요.");
+      return;
+    }
     const price = Number(startPrice);
     if (!Number.isFinite(price) || price < 0) {
       setError(saleType === "INSTANT" ? "즉시판매가를 입력해주세요." : "시작가를 입력해주세요.");
@@ -175,9 +185,10 @@ export default function NewAuctionPage() {
           buyNowPrice: saleType === "INSTANT" ? price : undefined,
           durationDays: saleType === "AUCTION" ? durationDays : undefined,
           images,
+          verificationId: AUCTION_VERIFICATION_ENABLED ? (verificationId ?? undefined) : undefined,
         },
       });
-      router.push(`/auctions/${created.id}`);
+      router.push(AUCTION_VERIFICATION_ENABLED ? "/mypage?tab=sellHistory" : `/auctions/${created.id}`);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "판매 등록에 실패했습니다.");
     } finally {
@@ -199,6 +210,7 @@ export default function NewAuctionPage() {
     "상품 정보",
     saleType === "INSTANT" ? "가격" : "가격 · 경매 기간",
     "사진",
+    ...(AUCTION_VERIFICATION_ENABLED ? ["사진 인증"] : []),
   ];
   const isLastStep = step === TOTAL_STEPS - 1;
 
@@ -538,6 +550,12 @@ export default function NewAuctionPage() {
                 )}
               </div>
             </div>
+          )}
+          {AUCTION_VERIFICATION_ENABLED && step === 5 && (
+            <AuctionVerificationStep
+              verificationId={verificationId}
+              onVerified={setVerificationId}
+            />
           )}
         </div>
 

@@ -102,3 +102,52 @@ export async function uploadMediaImage(file: File, accessToken: string): Promise
 
   return json.data as MediaUploadResponse;
 }
+
+export async function apiFetchMultipart<T>(
+  path: string,
+  formData: FormData,
+  accessToken: string | null,
+): Promise<T> {
+  const response = await fetch(`${resolveApiUrl()}${path}`, {
+    method: "POST",
+    credentials: "include",
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    body: formData,
+  });
+
+  let json: ApiResponse<T>;
+  try {
+    json = await response.json();
+  } catch {
+    throw new ApiError("서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.", null, response.status);
+  }
+
+  if (!response.ok || !json.success) {
+    throw new ApiError(json.message ?? "사진 분석에 실패했습니다.", json.errorCode, response.status);
+  }
+  return json.data as T;
+}
+
+export async function apiFetchBlob(path: string, accessToken: string | null): Promise<Blob> {
+  const response = await fetch(`${resolveApiUrl()}${path}`, {
+    method: "GET",
+    credentials: "include",
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : undefined,
+    cache: "no-store",
+  });
+
+  if (response.ok) {
+    return response.blob();
+  }
+
+  let message = "인증 사진을 불러오지 못했습니다.";
+  let errorCode: string | null = null;
+  try {
+    const json = (await response.json()) as ApiResponse<never>;
+    message = json.message ?? message;
+    errorCode = json.errorCode;
+  } catch {
+    // 이미지 API가 JSON 오류 본문을 주지 못한 경우 기본 문구를 사용한다.
+  }
+  throw new ApiError(message, errorCode, response.status);
+}

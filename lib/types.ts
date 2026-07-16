@@ -149,6 +149,8 @@ export type AdminAuctionSummary = {
   status: AuctionStatus;
   endAt: string | null;
   cancellationReason: string | null;
+  reviewReason: string | null;
+  reviewedAt: string | null;
 };
 
 export type AdminAuctionListResponse = {
@@ -260,6 +262,7 @@ export type AuctionRegisterRequest = {
   buyNowPrice?: number;
   durationDays?: number;
   images: { url: string; thumbnailUrl: string }[];
+  verificationId?: string;
 };
 
 export type AuctionPurchaseResponse = {
@@ -271,6 +274,59 @@ export type AuctionPurchaseResponse = {
 export type MediaUploadResponse = {
   url: string;
   thumbnailUrl: string;
+};
+
+export type VerificationStatus =
+  | "ISSUED"
+  | "RETAKE_REQUIRED"
+  | "PASSED"
+  | "CONSUMED"
+  | "EXPIRED";
+
+export type VerificationFailureReason =
+  | "QUALITY_REJECTED"
+  | "CODE_REGION_NOT_FOUND"
+  | "INVALID_CODE_FORMAT"
+  | "CODE_MISMATCH"
+  | "OCR_LOW_CONFIDENCE"
+  | "CARD_NOT_FOUND";
+
+export type VerificationChallengeResponse = {
+  id: string;
+  code: string;
+  status: VerificationStatus;
+  expiresAt: string;
+};
+
+export type VerificationAnalysisResponse = {
+  id: string;
+  status: VerificationStatus;
+  passed: boolean;
+  failureReason: VerificationFailureReason | null;
+  detectedCode: string | null;
+  expiresAt: string;
+};
+
+export type AdminAuctionVerificationResponse = {
+  verificationId: string;
+  auctionId: number;
+  status: VerificationStatus;
+  issuedCode: string;
+  detectedCode: string | null;
+  codeRegionDetected: boolean | null;
+  codeRegionScore: number | null;
+  codeExact: boolean | null;
+  ocrConfident: boolean | null;
+  ocrMeanTokenNll: number | null;
+  cardPresent: boolean | null;
+  cardScore: number | null;
+  qualityPassed: boolean | null;
+  failureReason: VerificationFailureReason | null;
+  modelVersion: string | null;
+  attemptCount: number;
+  expiresAt: string;
+  analyzedAt: string | null;
+  imageAvailable: boolean;
 };
 
 // POST /api/auctions/{id}/bids 응답 — 입찰 직후 갱신된 경매 상태.
@@ -399,7 +455,9 @@ export type AuditAction =
   | "REPORT_RESOLVED"
   | "REPORT_REJECTED"
   | "MEMBER_ROLE_GRANTED"
-  | "MEMBER_ROLE_REVOKED";
+  | "MEMBER_ROLE_REVOKED"
+  | "AUCTION_APPROVED"
+  | "AUCTION_REJECTED";
 
 export type AuditTargetType = "MEMBER" | "AUCTION";
 

@@ -14,6 +14,7 @@ import OrderDeliveryAddressForm from "@/components/OrderDeliveryAddressForm";
 import OrderShipForm from "@/components/OrderShipForm";
 import { StatusIconCircle, type StatusTone } from "@/components/StatusIcon";
 import { formatDateTimeKST, formatKRW, formatTimeLeft } from "@/lib/format";
+import { AUCTION_STATUS_BADGE_CLASS, AUCTION_STATUS_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
   AuctionListResponse,
@@ -24,6 +25,21 @@ import type {
   SoldOrderResponse,
   WishlistListResponse,
 } from "@/lib/types";
+
+const SELLING_TAB_STATUSES = new Set<AuctionResponse["status"]>([
+  "PENDING_REVIEW",
+  "APPROVED",
+  "SCHEDULED",
+  "LIVE",
+  "REJECTED",
+]);
+
+const PUBLIC_DETAIL_STATUSES = new Set<AuctionResponse["status"]>([
+  "LIVE",
+  "ENDED_SOLD",
+  "ENDED_NO_BIDS",
+  "CANCELLED",
+]);
 
 type Tab =
   | "dashboard"
@@ -318,7 +334,8 @@ export default function MyPage() {
     );
   }
 
-  const liveSelling = selling.filter((a) => a.status === "LIVE");
+  const activeSelling = selling.filter((auction) => SELLING_TAB_STATUSES.has(auction.status));
+  const sellingHistory = selling.filter((auction) => !SELLING_TAB_STATUSES.has(auction.status));
   const liveBidding = bidding.filter((b) => b.status === "LIVE");
   const wonBidding = bidding.filter((b) => b.status === "ENDED_SOLD" && b.isTopBidder);
 
@@ -402,7 +419,7 @@ export default function MyPage() {
               <DashboardStat label="입찰한 경매" value={`${bidding.length}건`} swatch="bg-accent-soft" />
               <DashboardStat label="낙찰 성공" value={`${wonBidding.length}건`} swatch="bg-ok-soft" />
               <DashboardStat label="즉시구매" value={`${instantPurchases.length}건`} swatch="bg-primary-soft" />
-              <DashboardStat label="판매 중인 경매" value={`${liveSelling.length}건`} swatch="bg-surface-3" />
+              <DashboardStat label="판매 중인 경매" value={`${activeSelling.length}건`} swatch="bg-surface-3" />
             </div>
 
             <div className="mt-8 grid gap-5 sm:grid-cols-2">
@@ -431,7 +448,14 @@ export default function MyPage() {
               </DashboardPanel>
 
               <DashboardPanel title="판매 중인 경매" onSeeAll={() => setTab("selling")}>
-                <SellingList items={liveSelling.slice(0, 3)} loading={loading} emptyText="판매 중인 경매가 없습니다." soldOrders={soldOrders} onRefresh={loadMyActivity} />
+                <SellingList
+                  items={activeSelling.slice(0, 3)}
+                  loading={loading}
+                  emptyText="등록한 경매가 없습니다."
+                  showReviewStatus
+                  soldOrders={soldOrders}
+                  onRefresh={loadMyActivity}
+                />
               </DashboardPanel>
             </div>
           </>
@@ -478,10 +502,10 @@ export default function MyPage() {
         ) : tab === "selling" ? (
           <>
             <h1 className="font-display text-xl font-extrabold text-text-1">판매 중인 경매</h1>
-            <p className="mt-1 text-sm text-text-3">판매 중인 경매 {liveSelling.length}건</p>
+            <p className="mt-1 text-sm text-text-3">등록한 경매와 검수 상태 {activeSelling.length}건</p>
             {loading ? (
               <p className="mt-6 text-sm text-text-3">불러오는 중...</p>
-            ) : liveSelling.length === 0 ? (
+            ) : activeSelling.length === 0 ? (
               <p className="mt-6 text-sm text-text-3">
                 아직 등록한 경매가 없어요.{" "}
                 <Link href="/auctions/new" className={`font-bold text-primary hover:underline ${FOCUS_RING}`}>
@@ -490,7 +514,14 @@ export default function MyPage() {
               </p>
             ) : (
               <div className="mt-5">
-                <SellingList items={liveSelling} loading={loading} emptyText="판매 중인 경매가 없습니다." soldOrders={soldOrders} onRefresh={loadMyActivity} />
+                <SellingList
+                  items={activeSelling}
+                  loading={loading}
+                  emptyText="등록한 경매가 없습니다."
+                  showReviewStatus
+                  soldOrders={soldOrders}
+                  onRefresh={loadMyActivity}
+                />
               </div>
             )}
           </>
@@ -550,9 +581,16 @@ export default function MyPage() {
         ) : (
           <>
             <h1 className="font-display text-xl font-extrabold text-text-1">판매 내역</h1>
-            <p className="mt-1 text-sm text-text-3">등록한 경매 {selling.length}건</p>
+            <p className="mt-1 text-sm text-text-3">종료되거나 취소된 경매 {sellingHistory.length}건</p>
             <div className="mt-5">
-              <SellingList items={selling} loading={loading} emptyText="아직 등록한 경매가 없어요." soldOrders={soldOrders} onRefresh={loadMyActivity} />
+              <SellingList
+                items={sellingHistory}
+                loading={loading}
+                emptyText="판매 내역이 없습니다."
+                showReviewStatus
+                soldOrders={soldOrders}
+                onRefresh={loadMyActivity}
+              />
             </div>
           </>
         )}
@@ -604,11 +642,25 @@ function DashboardPanel({
   );
 }
 
+function getSellerReviewBadge(status: AuctionResponse["status"]) {
+  if (status === "PENDING_REVIEW") {
+    return { label: AUCTION_STATUS_LABEL.PENDING_REVIEW, className: AUCTION_STATUS_BADGE_CLASS.PENDING_REVIEW };
+  }
+  if (status === "REJECTED") {
+    return { label: "반려됨", className: AUCTION_STATUS_BADGE_CLASS.REJECTED };
+  }
+  if (status === "APPROVED" || status === "SCHEDULED" || status === "LIVE") {
+    return { label: "승인됨", className: AUCTION_STATUS_BADGE_CLASS[status] };
+  }
+  return null;
+}
+
 function SellingList({
   items,
   loading,
   emptyText,
   endedLabel = "종료",
+  showReviewStatus = false,
   orders,
   onGoPayment,
   soldOrders,
@@ -618,6 +670,7 @@ function SellingList({
   loading: boolean;
   emptyText: string;
   endedLabel?: string;
+  showReviewStatus?: boolean;
   // 즉시구매 내역처럼 "내가 구매자"인 목록엔 orders(#113)를, 판매 목록엔 soldOrders(#119)를 넘긴다.
   orders?: Record<number, MyOrderStatusResponse>;
   onGoPayment?: () => void;
@@ -635,31 +688,46 @@ function SellingList({
         const timeLabel = isLive
           ? item.saleType === "INSTANT" ? "즉시판매" : item.endAt ? formatTimeLeft(item.endAt) : "진행 중"
           : endedLabel;
+        const reviewBadge = showReviewStatus ? getSellerReviewBadge(item.status) : null;
+        const canOpenDetail = PUBLIC_DETAIL_STATUSES.has(item.status);
         const order = orders?.[item.id];
         const soldOrder = soldOrders?.[item.id];
+        const summary = (
+          <>
+            <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
+            <span className="min-w-0 flex-1">
+              {item.artistName && (
+                <span className="block truncate text-[11px] font-extrabold text-primary">{item.artistName}</span>
+              )}
+              <span className="block truncate text-sm font-bold text-text-1">{item.title}</span>
+            </span>
+            <span className="shrink-0 text-right">
+              <span className="block font-display text-sm font-extrabold text-text-1">
+                {formatKRW(displayPrice)}
+              </span>
+              {reviewBadge ? (
+                <span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10.5px] font-bold ${reviewBadge.className}`}>
+                  {reviewBadge.label}
+                </span>
+              ) : (
+                <span className="block text-[10.5px] text-text-3">{timeLabel}</span>
+              )}
+              {reviewBadge && isLive && (
+                <span className="mt-0.5 block text-[10px] text-text-3">{timeLabel}</span>
+              )}
+            </span>
+          </>
+        );
         return (
           <li key={item.id}>
             <div className="overflow-hidden rounded-r2 border border-border bg-surface transition-colors hover:border-primary">
-              <Link
-                href={`/auctions/${item.id}`}
-                className={`flex items-center gap-3 p-2.5 ${FOCUS_RING}`}
-              >
-                <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
-                <span className="min-w-0 flex-1">
-                  {item.artistName && (
-                    <span className="block truncate text-[11px] font-extrabold text-primary">{item.artistName}</span>
-                  )}
-                  <span className="block truncate text-sm font-bold text-text-1">{item.title}</span>
-                </span>
-                <span className="shrink-0 text-right">
-                  <span className="block font-display text-sm font-extrabold text-text-1">
-                    {formatKRW(displayPrice)}
-                  </span>
-                  <span className="block text-[10.5px] text-text-3">
-                    {timeLabel}
-                  </span>
-                </span>
-              </Link>
+              {canOpenDetail ? (
+                <Link href={`/auctions/${item.id}`} className={`flex items-center gap-3 p-2.5 ${FOCUS_RING}`}>
+                  {summary}
+                </Link>
+              ) : (
+                <div className="flex items-center gap-3 p-2.5">{summary}</div>
+              )}
               {/* 구매자(즉시구매) 관점: PAID면 배송/확정, 아니면 결제 상태. 판매자 관점: 발송 푸터. */}
               {order &&
                 (order.status === "PAID" && onRefresh ? (

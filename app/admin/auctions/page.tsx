@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import AuctionVerificationReviewDialog from "@/components/AuctionVerificationReviewDialog";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatKRW, formatTimeLeft } from "@/lib/format";
@@ -19,11 +20,19 @@ const DEBOUNCE_MS = 300;
 
 const STATUS_FILTERS: { key: AuctionStatus | "ALL"; label: string }[] = [
   { key: "ALL", label: "전체" },
+  { key: "PENDING_REVIEW", label: "검수 대기" },
   { key: "LIVE", label: "진행 중" },
   { key: "ENDED_SOLD", label: "낙찰 종료" },
   { key: "ENDED_NO_BIDS", label: "유찰" },
+  { key: "REJECTED", label: "반려" },
   { key: "CANCELLED", label: "취소됨" },
 ];
+const PUBLIC_AUCTION_STATUSES = new Set<AuctionStatus>([
+  "LIVE",
+  "ENDED_SOLD",
+  "ENDED_NO_BIDS",
+  "CANCELLED",
+]);
 
 const SALE_TYPE_FILTERS: { key: AuctionSaleType | "ALL"; label: string }[] = [
   { key: "ALL", label: "전체 판매" },
@@ -37,6 +46,23 @@ function buildParams(q: string, status: AuctionStatus | "ALL", saleType: Auction
   if (status !== "ALL") params.set("status", status);
   if (saleType !== "ALL") params.set("saleType", saleType);
   return params;
+}
+
+function AuctionIdentity({ auction }: { auction: AdminAuctionSummary }) {
+  return (
+    <>
+      <span className="h-9 w-9 shrink-0 overflow-hidden rounded-r1 bg-surface-2">
+        {auction.representativeThumbnailUrl && (
+          // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
+          <img src={mediaUrl(auction.representativeThumbnailUrl)} alt="" className="h-full w-full object-cover" />
+        )}
+      </span>
+      <span className="min-w-0">
+        {auction.artistName && <span className="block truncate text-[11px] font-bold text-primary">{auction.artistName}</span>}
+        <span className="block max-w-[200px] truncate font-bold text-text-1">{auction.title}</span>
+      </span>
+    </>
+  );
 }
 
 export default function AdminAuctionsPage() {
@@ -53,6 +79,7 @@ export default function AdminAuctionsPage() {
   const [loadingMore, setLoadingMore] = useState(false);
 
   const [cancelTarget, setCancelTarget] = useState<AdminAuctionSummary | null>(null);
+  const [reviewTarget, setReviewTarget] = useState<AdminAuctionSummary | null>(null);
   const [reason, setReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
@@ -135,6 +162,12 @@ export default function AdminAuctionsPage() {
     }
   }
 
+  async function completeReview(message: string) {
+    setReviewTarget(null);
+    setNotice({ kind: "success", text: message });
+    await fetchList(query, statusFilter, saleTypeFilter);
+  }
+
   function getEndLabel(auction: AdminAuctionSummary) {
     if (auction.saleType === "INSTANT") {
       return auction.status === "LIVE" ? "판매 중" : "—";
@@ -147,7 +180,7 @@ export default function AdminAuctionsPage() {
   return (
     <div>
       <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">경매 관리</h1>
-      <p className="mt-1.5 text-sm text-text-3">경매를 조회하고 부적절한 매물을 취소할 수 있습니다.</p>
+      <p className="mt-1.5 text-sm text-text-3">인증사진을 검수해 경매를 승인하거나 반려하고, 공개된 매물을 관리합니다.</p>
 
       {notice && (
         <p
@@ -231,20 +264,37 @@ export default function AdminAuctionsPage() {
               </tr>
             ) : (
               auctions.map((a) => (
-                <tr key={a.id} className={`border-b border-border text-[13px] last:border-0 ${a.status === "CANCELLED" ? "bg-accent-soft/30" : ""}`}>
+                <tr
+                  key={a.id}
+                  className={`border-b border-border text-[13px] last:border-0 ${
+                    a.status === "PENDING_REVIEW"
+                      ? "bg-[#fff7ed]/40"
+                      : a.status === "REJECTED" || a.status === "CANCELLED"
+                        ? "bg-accent-soft/30"
+                        : ""
+                  }`}
+                >
                   <td className="px-4 py-3">
-                    <Link href={`/auctions/${a.id}`} className={`flex items-center gap-2.5 ${FOCUS_RING}`}>
-                      <span className="h-9 w-9 shrink-0 overflow-hidden rounded-r1 bg-surface-2">
-                        {a.representativeThumbnailUrl && (
-                          // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
-                          <img src={mediaUrl(a.representativeThumbnailUrl)} alt="" className="h-full w-full object-cover" />
-                        )}
-                      </span>
-                      <span className="min-w-0">
-                        {a.artistName && <span className="block truncate text-[11px] font-bold text-primary">{a.artistName}</span>}
-                        <span className="block max-w-[200px] truncate font-bold text-text-1">{a.title}</span>
-                      </span>
-                    </Link>
+                    {a.status === "PENDING_REVIEW" ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReviewTarget(a);
+                          setNotice(null);
+                        }}
+                        className={`flex w-full items-center gap-2.5 text-left ${FOCUS_RING}`}
+                      >
+                        <AuctionIdentity auction={a} />
+                      </button>
+                    ) : PUBLIC_AUCTION_STATUSES.has(a.status) ? (
+                      <Link href={`/auctions/${a.id}`} className={`flex items-center gap-2.5 ${FOCUS_RING}`}>
+                        <AuctionIdentity auction={a} />
+                      </Link>
+                    ) : (
+                      <div className="flex items-center gap-2.5">
+                        <AuctionIdentity auction={a} />
+                      </div>
+                    )}
                   </td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${AUCTION_SALE_TYPE_BADGE_CLASS[a.saleType]}`}>
@@ -261,10 +311,24 @@ export default function AdminAuctionsPage() {
                     {a.status === "CANCELLED" && a.cancellationReason && (
                       <span className="mt-1 block text-[10.5px] text-text-3">사유: {a.cancellationReason}</span>
                     )}
+                    {a.status === "REJECTED" && a.reviewReason && (
+                      <span className="mt-1 block text-[10.5px] text-text-3">사유: {a.reviewReason}</span>
+                    )}
                   </td>
                   <td className="px-4 py-3 text-text-3">{getEndLabel(a)}</td>
                   <td className="px-4 py-3">
-                    {a.status === "LIVE" ? (
+                    {a.status === "PENDING_REVIEW" ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setReviewTarget(a);
+                          setNotice(null);
+                        }}
+                        className={`rounded-full border border-[#fdba74] bg-[#fff7ed] px-3 py-1 text-xs font-bold text-[#b45309] transition-colors hover:bg-[#ffedd5] ${FOCUS_RING}`}
+                      >
+                        검수
+                      </button>
+                    ) : a.status === "LIVE" ? (
                       <button
                         type="button"
                         onClick={() => openCancelDialog(a)}
@@ -294,6 +358,14 @@ export default function AdminAuctionsPage() {
             {loadingMore ? "불러오는 중..." : "더 보기"}
           </button>
         </div>
+      )}
+
+      {reviewTarget && (
+        <AuctionVerificationReviewDialog
+          auction={reviewTarget}
+          onClose={() => setReviewTarget(null)}
+          onReviewed={completeReview}
+        />
       )}
 
       {cancelTarget && (

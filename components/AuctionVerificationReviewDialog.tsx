@@ -241,8 +241,6 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                   <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                     <dt className="text-text-3">코드 영역 점수</dt>
                     <dd className="text-right font-bold text-text-2">{verification.codeRegionScore?.toFixed(3) ?? "—"}</dd>
-                    <dt className="text-text-3">OCR NLL (진단용)</dt>
-                    <dd className="text-right font-bold text-text-2">{verification.ocrMeanTokenNll?.toFixed(3) ?? "—"}</dd>
                     <dt className="text-text-3">물품 형태 점수</dt>
                     <dd className="text-right font-bold text-text-2">{verification.cardScore?.toFixed(3) ?? "—"}</dd>
                     <dt className="text-text-3">분석 모델</dt>

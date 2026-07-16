@@ -24,16 +24,31 @@ export default function AuctionImageGallery({
     <div>
       <div className="relative aspect-[4/5] overflow-hidden rounded-r4 border border-border bg-surface-2">
         {active ? (
-          // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 물리 파일을 직접 서빙(로컬 디스크/S3), Next 이미지 최적화 대상 아님
-          <img
-            key={active.url}
-            src={mediaUrl(active.url)}
-            alt={`${title} 사진 ${activeIndex + 1}`}
-            className="h-full w-full object-contain animate-[fadeIn_150ms_ease-out]"
-            onError={(e) => {
-              e.currentTarget.style.display = "none";
-            }}
-          />
+          <>
+            {/* 블러 배경 — 레터박스 여백을 같은 이미지의 흐린 확대본으로 채운다. 작은 썸네일이라
+                즉시 떠서 원본 로드 전 미리보기 역할도 겸한다(체감 로딩 개선). 장식이라 aria-hidden. */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙(로컬/S3), Next 최적화 대상 아님 */}
+            <img
+              key={`${active.url}-bg`}
+              src={mediaUrl(active.thumbnailUrl)}
+              alt=""
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover blur-xl"
+            />
+            {/* 본 이미지 — object-contain으로 크롭 없이 전체를 보여준다. LCP라 우선 로드. */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙(로컬/S3), Next 최적화 대상 아님 */}
+            <img
+              key={active.url}
+              src={mediaUrl(active.url)}
+              alt={`${title} 사진 ${activeIndex + 1}`}
+              fetchPriority="high"
+              decoding="async"
+              className="relative h-full w-full object-contain animate-[fadeIn_150ms_ease-out]"
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
+            />
+          </>
         ) : (
           <div className="flex h-full items-center justify-center text-6xl" aria-hidden="true">
             🎴
@@ -85,6 +100,8 @@ export default function AuctionImageGallery({
               <img
                 src={mediaUrl(image.thumbnailUrl)}
                 alt=""
+                loading="lazy"
+                decoding="async"
                 className="h-full w-full object-cover"
                 onError={(e) => {
                   e.currentTarget.style.display = "none";

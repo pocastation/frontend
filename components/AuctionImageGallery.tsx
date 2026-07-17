@@ -56,14 +56,42 @@ export default function AuctionImageGallery({
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  const go = useCallback(
-    (delta: number) => setActiveIndex((i) => (i + delta + images.length) % images.length),
+  // ── 경매 상세 브라우징 뷰: 가로 scroll-snap 페이저 ──
+  // 모바일=스와이프로 넘김(화살표 없음), 데스크탑=화살표(끝에선 숨김). 루프 없음 — 양끝에서 멈춘다.
+  const browsePagerRef = useRef<HTMLDivElement>(null);
+  const browseNavLock = useRef(false);
+  const browseNavTimer = useRef(0);
+
+  // 네이티브 스와이프 정착 지점으로 활성 인덱스 동기화. 화살표 프로그램 스크롤 중(navLock)엔 무시.
+  const onBrowseScroll = useCallback(() => {
+    if (browseNavLock.current) return;
+    const pager = browsePagerRef.current;
+    if (!pager) return;
+    const idx = Math.round(pager.scrollLeft / pager.clientWidth);
+    if (idx !== activeIndex && idx >= 0 && idx < images.length) setActiveIndex(idx);
+  }, [activeIndex, images.length]);
+
+  // 화살표/썸네일용 — 인덱스를 즉시 갱신하고 해당 슬라이드로 부드럽게 스크롤(스무스 이벤트에 비의존).
+  const browseScrollToIndex = useCallback(
+    (i: number) => {
+      const pager = browsePagerRef.current;
+      if (!pager) return;
+      const idx = Math.max(0, Math.min(images.length - 1, i));
+      browseNavLock.current = true;
+      setActiveIndex(idx);
+      pager.scrollTo({ left: idx * pager.clientWidth, behavior: "smooth" });
+      window.clearTimeout(browseNavTimer.current);
+      browseNavTimer.current = window.setTimeout(() => {
+        browseNavLock.current = false;
+      }, 500);
+    },
     [images.length],
   );
 
   // ── 확대 라이트박스: 가로 scroll-snap 페이저(당근/번개식) ──
   // 스와이프 이동은 브라우저 컴포지터가 처리(off-main-thread)해 항상 부드럽다.
   // 확대(scale>1)는 "현재 슬라이드 내부"에서만 일어나고, 이때 페이저 스크롤을 잠가 드래그가 팬이 된다.
+  const overlayRef = useRef<HTMLDivElement>(null); // 확대 오버레이 루트(아래로 당겨 닫기 시 translateY 적용)
   const pagerRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLImageElement | null)[]>([]);
   const rafRef = useRef(0);
@@ -224,6 +252,12 @@ export default function AuctionImageGallery({
     sy: 0,
     stx: 0,
     sty: 0,
+    // 전체보기 상태에서 아래로 당겨 닫기(pull-to-dismiss).
+    pull: false, // 세로 당김 제스처로 확정됨
+    pullDecided: false, // 방향 판정 완료(가로=네이티브 스와이프에 양보)
+    psx: 0,
+    psy: 0,
+    pdy: 0, // 현재 세로 이동량
   });
   useEffect(() => {
     if (!zoomOpen) return;
@@ -257,6 +291,14 @@ export default function AuctionImageGallery({
         g.sy = p.y;
         g.stx = z.current.tx;
         g.sty = z.current.ty;
+      } else if (e.touches.length === 1) {
+        // 전체보기 한 손가락: 세로 당김 판정 준비(가로면 네이티브 스와이프에 양보).
+        g.pan = false;
+        g.pull = false;
+        g.pullDecided = false;
+        g.psx = e.touches[0].clientX;
+        g.psy = e.touches[0].clientY;
+        g.pdy = 0;
       }
     };
     const onMove = (e: TouchEvent) => {
@@ -288,6 +330,24 @@ export default function AuctionImageGallery({
         s.ty = g.sty + (p.y - g.sy);
         clampActive();
         scheduleApply();
+      } else if (e.touches.length === 1 && s.scale <= 1.001) {
+        // 전체보기: 아래로 당기면 오버레이를 따라 내리고(닫기 예고), 가로면 네이티브 스와이프에 맡긴다.
+        const dx = e.touches[0].clientX - g.psx;
+        const dy = e.touches[0].clientY - g.psy;
+        if (!g.pullDecided && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+          g.pullDecided = true;
+          g.pull = dy > 0 && Math.abs(dy) > Math.abs(dx); // 아래로 & 세로 우세일 때만 당김
+        }
+        if (g.pull) {
+          e.preventDefault();
+          g.pdy = Math.max(0, dy);
+          const ov = overlayRef.current;
+          if (ov) {
+            ov.style.transition = "none";
+            ov.style.transform = `translateY(${g.pdy}px)`;
+            ov.style.opacity = String(Math.max(0.4, 1 - g.pdy / 500));
+          }
+        }
       }
     };
     const onEnd = (e: TouchEvent) => {
@@ -295,8 +355,29 @@ export default function AuctionImageGallery({
       if (e.touches.length < 2) g.pinch = false;
       if (e.touches.length === 0) {
         g.pan = false;
-        if (z.current.scale <= 1.001) resetActive();
-        else applyActive();
+        if (g.pull) {
+          // 충분히 내렸으면 닫고, 아니면 제자리로 스냅백.
+          const ov = overlayRef.current;
+          const threshold = Math.min(140, (pager.clientHeight || 600) * 0.18);
+          if (g.pdy > threshold) {
+            if (ov) {
+              ov.style.transition = "transform 180ms ease, opacity 180ms ease";
+              ov.style.transform = `translateY(${pager.clientHeight || 800}px)`;
+              ov.style.opacity = "0";
+            }
+            window.setTimeout(() => setZoomOpen(false), 170);
+          } else if (ov) {
+            ov.style.transition = "transform 200ms ease, opacity 200ms ease";
+            ov.style.transform = "translateY(0px)";
+            ov.style.opacity = "1";
+          }
+          g.pull = false;
+          g.pullDecided = false;
+        } else if (z.current.scale <= 1.001) {
+          resetActive();
+        } else {
+          applyActive();
+        }
       }
     };
     pager.addEventListener("touchstart", onStart, { passive: false });
@@ -340,71 +421,81 @@ export default function AuctionImageGallery({
   return (
     <div>
       <div className="relative aspect-[4/5] overflow-hidden rounded-r4 border border-border bg-surface-2">
-        {active ? (
-          <button
-            type="button"
-            onClick={() => setZoomOpen(true)}
-            aria-label="사진 확대해서 상태 검수"
-            className={`absolute inset-0 h-full w-full cursor-zoom-in ${FOCUS_RING}`}
-          >
-            {/* 블러 배경 — 레터박스 여백을 같은 이미지의 흐린 확대본으로 채운다. */}
-            {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙(로컬/S3), Next 최적화 대상 아님 */}
-            <img
-              key={`${active.url}-bg`}
-              src={mediaUrl(active.thumbnailUrl)}
-              alt=""
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover blur-xl"
-            />
-            {/* 본 이미지 — display(폴백 url), object-contain으로 크롭 없이. LCP라 우선 로드. */}
-            {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙(로컬/S3), Next 최적화 대상 아님 */}
-            <img
-              key={active.url}
-              src={displaySrc(active)}
-              alt={`${title} 사진 ${activeIndex + 1}`}
-              fetchPriority="high"
-              decoding="async"
-              className="relative h-full w-full object-contain animate-[fadeIn_150ms_ease-out]"
-              onError={(e) => {
-                e.currentTarget.style.display = "none";
-              }}
-            />
-          </button>
+        {images.length > 0 ? (
+          <>
+            {/* 브라우징 페이저 — 모바일은 스와이프, 데스크탑은 화살표로 넘긴다. 슬라이드 탭=확대. */}
+            <div
+              ref={browsePagerRef}
+              onScroll={onBrowseScroll}
+              className="flex h-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              style={{ touchAction: "pan-x" }}
+            >
+              {images.map((image, index) => (
+                <button
+                  key={image.url}
+                  type="button"
+                  onClick={() => setZoomOpen(true)}
+                  aria-label="사진 확대해서 상태 검수"
+                  className={`relative h-full w-full shrink-0 snap-center snap-always cursor-zoom-in ${FOCUS_RING}`}
+                >
+                  {/* 블러 배경 — 레터박스 여백을 같은 이미지의 흐린 확대본으로 채운다. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙(로컬/S3), Next 최적화 대상 아님 */}
+                  <img
+                    src={mediaUrl(image.thumbnailUrl)}
+                    alt=""
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 h-full w-full scale-110 object-cover blur-xl"
+                  />
+                  {/* 본 이미지 — display(폴백 url), object-contain으로 크롭 없이. 첫 장은 LCP라 우선 로드. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙(로컬/S3), Next 최적화 대상 아님 */}
+                  <img
+                    src={displaySrc(image)}
+                    alt={`${title} 사진 ${index + 1}`}
+                    fetchPriority={index === 0 ? "high" : "auto"}
+                    loading={index === 0 ? undefined : "lazy"}
+                    decoding="async"
+                    className="relative h-full w-full object-contain"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                </button>
+              ))}
+            </div>
+
+            {hasMultiple && (
+              <>
+                {/* 화살표는 데스크탑에서만, 끝(첫/마지막)에선 그 방향을 숨겨 경계임을 알린다. 모바일은 스와이프. */}
+                {!isTouch && activeIndex > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => browseScrollToIndex(activeIndex - 1)}
+                    aria-label="이전 사진"
+                    className={`absolute left-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-text-1/50 text-white transition-colors hover:bg-text-1/70 ${FOCUS_RING}`}
+                  >
+                    <ChevronLeft />
+                  </button>
+                )}
+                {!isTouch && activeIndex < images.length - 1 && (
+                  <button
+                    type="button"
+                    onClick={() => browseScrollToIndex(activeIndex + 1)}
+                    aria-label="다음 사진"
+                    className={`absolute right-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-text-1/50 text-white transition-colors hover:bg-text-1/70 ${FOCUS_RING}`}
+                  >
+                    <ChevronRight />
+                  </button>
+                )}
+                <span className="pointer-events-none absolute bottom-2 right-2 z-10 rounded-full bg-text-1/60 px-2 py-0.5 text-[11px] font-semibold text-white tabular-nums">
+                  {activeIndex + 1} / {images.length}
+                </span>
+              </>
+            )}
+          </>
         ) : (
           <div className="flex h-full items-center justify-center text-6xl" aria-hidden="true">
             🎴
           </div>
-        )}
-
-        {hasMultiple && (
-          <>
-            {/* 화살표는 확대 버튼 위에 올리되 클릭을 확대와 분리(전파 차단). */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                go(-1);
-              }}
-              aria-label="이전 사진"
-              className={`absolute left-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-text-1/50 text-white transition-colors hover:bg-text-1/70 ${FOCUS_RING}`}
-            >
-              <ChevronLeft />
-            </button>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                go(1);
-              }}
-              aria-label="다음 사진"
-              className={`absolute right-2 top-1/2 z-10 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-text-1/50 text-white transition-colors hover:bg-text-1/70 ${FOCUS_RING}`}
-            >
-              <ChevronRight />
-            </button>
-            <span className="pointer-events-none absolute bottom-2 right-2 z-10 rounded-full bg-text-1/60 px-2 py-0.5 text-[11px] font-semibold text-white tabular-nums">
-              {activeIndex + 1} / {images.length}
-            </span>
-          </>
         )}
       </div>
 
@@ -417,7 +508,7 @@ export default function AuctionImageGallery({
               role="tab"
               aria-selected={index === activeIndex}
               aria-label={`${index + 1}번째 사진 보기`}
-              onClick={() => setActiveIndex(index)}
+              onClick={() => browseScrollToIndex(index)}
               className={`aspect-square overflow-hidden rounded-r2 border-2 transition-all ${FOCUS_RING} ${
                 index === activeIndex ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"
               }`}
@@ -444,12 +535,13 @@ export default function AuctionImageGallery({
       {zoomOpen &&
         active &&
         createPortal(
-          <div className="fixed inset-0 z-[400] flex flex-col bg-[rgba(8,7,12,0.94)]">
-            <div className="pointer-events-none absolute left-0 right-0 top-0 z-10 flex items-center gap-3 px-4 py-3 pr-16 text-[12.5px] font-semibold text-white/90">
-              <span className="tabular-nums">
+          <div ref={overlayRef} className="fixed inset-0 z-[400] flex flex-col bg-[rgba(8,7,12,0.94)]">
+            {/* 페이지 카운터 — 브라우징 뷰와 통일해 우하단. 여러 장일 때만 노출. */}
+            {hasMultiple && (
+              <span className="pointer-events-none absolute bottom-3 right-3.5 z-10 rounded-full bg-white/15 px-2.5 py-0.5 text-[12px] font-semibold text-white tabular-nums">
                 {activeIndex + 1} / {images.length}
               </span>
-            </div>
+            )}
             {/* 닫기 — 항상 잘 보이도록 우상단 고정 원형 버튼(Esc로도 닫힘). */}
             <button
               type="button"

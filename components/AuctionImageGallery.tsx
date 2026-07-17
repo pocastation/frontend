@@ -449,9 +449,6 @@ export default function AuctionImageGallery({
               <span className="tabular-nums">
                 {activeIndex + 1} / {images.length}
               </span>
-              <span className="text-[11.5px] font-medium text-white/55">
-                {isTouch ? "핀치로 확대·축소 · 밀어서 넘기기" : "스크롤 확대·축소 · 드래그 이동 · 화살표로 넘기기"}
-              </span>
             </div>
             {/* 닫기 — 항상 잘 보이도록 우상단 고정 원형 버튼(Esc로도 닫힘). */}
             <button
@@ -493,26 +490,27 @@ export default function AuctionImageGallery({
                 </div>
               ))}
             </div>
-            {/* 확대 뷰 화살표는 데스크탑(마우스)에서만 — 모바일은 스와이프로 넘긴다. */}
-            {hasMultiple && !isTouch && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => scrollToIndex(Math.max(0, activeIndex - 1))}
-                  aria-label="이전 사진"
-                  className={`absolute left-3.5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 ${FOCUS_RING}`}
-                >
-                  <ChevronLeft />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => scrollToIndex(Math.min(images.length - 1, activeIndex + 1))}
-                  aria-label="다음 사진"
-                  className={`absolute right-3.5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 ${FOCUS_RING}`}
-                >
-                  <ChevronRight />
-                </button>
-              </>
+            {/* 확대 뷰 화살표는 데스크탑(마우스)에서만 — 모바일은 스와이프로 넘긴다.
+                끝(첫/마지막 사진)에선 그 방향 화살표를 숨겨 경계임을 알린다. */}
+            {hasMultiple && !isTouch && activeIndex > 0 && (
+              <button
+                type="button"
+                onClick={() => scrollToIndex(activeIndex - 1)}
+                aria-label="이전 사진"
+                className={`absolute left-3.5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 ${FOCUS_RING}`}
+              >
+                <ChevronLeft />
+              </button>
+            )}
+            {hasMultiple && !isTouch && activeIndex < images.length - 1 && (
+              <button
+                type="button"
+                onClick={() => scrollToIndex(activeIndex + 1)}
+                aria-label="다음 사진"
+                className={`absolute right-3.5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 ${FOCUS_RING}`}
+              >
+                <ChevronRight />
+              </button>
             )}
           </div>,
           document.body,

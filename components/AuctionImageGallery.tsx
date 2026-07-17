@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { mediaUrl } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionImageResponse } from "@/lib/types";
@@ -144,6 +145,16 @@ export default function AuctionImageGallery({
   }, [zoomOpen, go]);
 
   // 드래그: 전체보기(최소배율)면 좌우로 사진 넘기기(스와이프), 확대 상태면 이동(pan).
+  // 확대 상태에서 인접 사진(master)을 미리 디코드해 둔다 → 전환 시 로드 대기(끊김) 없음.
+  useEffect(() => {
+    if (!zoomOpen || !hasMultiple) return;
+    const n = images.length;
+    [images[(activeIndex + 1) % n], images[(activeIndex - 1 + n) % n]].forEach((img) => {
+      const pre = new Image();
+      pre.src = mediaUrl(img.url);
+    });
+  }, [zoomOpen, activeIndex, images, hasMultiple]);
+
   const drag = useRef({ down: false, sx: 0, sy: 0, stx: 0, sty: 0, atFit: false });
   function onPointerDown(e: React.PointerEvent) {
     const s = t.current;
@@ -275,9 +286,12 @@ export default function AuctionImageGallery({
         </div>
       )}
 
-      {/* 확대 라이트박스 — master(url) 뷰어. 스크롤=줌, 드래그=이동/스와이프, 화살표·키보드 전환. */}
-      {zoomOpen && active && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-[rgba(8,7,12,0.94)]">
+      {/* 확대 라이트박스 — master(url) 뷰어. 스크롤=줌, 드래그=이동/스와이프, 화살표·키보드 전환.
+          헤더(.hdr, z-index:300)보다 위에 오도록 body로 portal + z-[400]. 조상 스택 컨텍스트에도 안 갇힘. */}
+      {zoomOpen &&
+        active &&
+        createPortal(
+          <div className="fixed inset-0 z-[400] flex flex-col bg-[rgba(8,7,12,0.94)]">
           <div className="flex items-center gap-3 px-4 py-3 pr-16 text-[12.5px] font-semibold text-white/90">
             <span className="tabular-nums">
               {activeIndex + 1} / {images.length}
@@ -308,9 +322,9 @@ export default function AuctionImageGallery({
             onDoubleClick={() => fit()}
           >
             {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙(로컬/S3) */}
+            {/* key remount 없이 src만 교체(엘리먼트 유지 → 전환 부드럽게). onLoad가 새 src마다 fit 재실행. */}
             <img
               ref={zoomImgRef}
-              key={active.url}
               src={mediaUrl(active.url)}
               alt={`${title} 확대 ${activeIndex + 1}`}
               draggable={false}
@@ -338,8 +352,9 @@ export default function AuctionImageGallery({
               </button>
             </>
           )}
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

@@ -538,6 +538,8 @@ export type MyOrderStatusResponse = {
   carrier: string | null;
   trackingNumber: string | null;
   shippedAt: string | null;
+  // 배송추적으로 감지된 실배송완료 시각(#134). null이면 미도착/미연동.
+  deliveredAt: string | null;
   confirmedAt: string | null;
 };
 

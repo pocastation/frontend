@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { FOCUS_RING, INPUT_CLASS } from "@/lib/ui";
 
-// 판매자 발송 처리(운송장 입력, #119). 경매 상세·마이페이지 판매 내역 두 곳에서 재사용한다.
+type Carrier = { code: string; name: string };
+
+// 판매자 발송 처리(운송장 입력, #119). 택배사는 드롭다운(#134) — 선택 시 표시명(carrier)과
+// 배송추적용 코드(carrierCode)를 함께 보낸다. 경매 상세·마이페이지 판매 내역 두 곳에서 재사용한다.
 export default function OrderShipForm({
   auctionId,
   onShipped,
@@ -14,14 +17,30 @@ export default function OrderShipForm({
   onShipped: () => void;
 }) {
   const { fetchWithAuth } = useAuth();
-  const [carrier, setCarrier] = useState("");
+  const [carriers, setCarriers] = useState<Carrier[]>([]);
+  const [carrierCode, setCarrierCode] = useState("");
   const [trackingNumber, setTrackingNumber] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    let alive = true;
+    fetchWithAuth<Carrier[]>("/api/delivery/carriers")
+      .then((list) => {
+        if (alive) setCarriers(list ?? []);
+      })
+      .catch(() => {
+        /* 목록을 못 불러도 발송 자체는 막지 않는다 — 아래에서 안내 */
+      });
+    return () => {
+      alive = false;
+    };
+  }, [fetchWithAuth]);
+
   async function submit() {
     if (saving) return;
-    if (!carrier.trim() || !trackingNumber.trim()) {
+    const carrier = carriers.find((c) => c.code === carrierCode);
+    if (!carrier || !trackingNumber.trim()) {
       setError("택배사와 운송장 번호를 입력해 주세요.");
       return;
     }
@@ -30,7 +49,7 @@ export default function OrderShipForm({
     try {
       await fetchWithAuth<void>(`/api/auctions/${auctionId}/order/ship`, {
         method: "POST",
-        body: { carrier: carrier.trim(), trackingNumber: trackingNumber.trim() },
+        body: { carrier: carrier.name, carrierCode: carrier.code, trackingNumber: trackingNumber.trim() },
       });
       onShipped();
     } catch (err) {
@@ -43,12 +62,19 @@ export default function OrderShipForm({
   return (
     <div className="mt-2.5 flex flex-col gap-2 rounded-r2 border border-border bg-surface p-3">
       <div className="flex gap-2">
-        <input
+        <select
           className={`${INPUT_CLASS} w-32`}
-          placeholder="택배사"
-          value={carrier}
-          onChange={(e) => setCarrier(e.target.value)}
-        />
+          value={carrierCode}
+          onChange={(e) => setCarrierCode(e.target.value)}
+          aria-label="택배사"
+        >
+          <option value="">택배사 선택</option>
+          {carriers.map((c) => (
+            <option key={c.code} value={c.code}>
+              {c.name}
+            </option>
+          ))}
+        </select>
         <input
           className={`${INPUT_CLASS} flex-1`}
           placeholder="운송장 번호"

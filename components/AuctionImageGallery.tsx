@@ -238,6 +238,51 @@ export default function AuctionImageGallery({
     return () => pager.removeEventListener("wheel", onWheel);
   }, [zoomOpen, zoomTo, applyActive, measureActive]);
 
+  // 데스크탑 마우스 드래그 = 확대(scale>1) 상태에서만 팬. 전체보기(fit)에선 팬 안 하고 화살표/스크롤에 맡긴다.
+  // (터치 팬은 별도 touch 핸들러가 처리 — 여기선 마우스만.)
+  useEffect(() => {
+    if (!zoomOpen) return;
+    const pager = pagerRef.current;
+    if (!pager) return;
+    let dragging = false;
+    let sx = 0,
+      sy = 0,
+      stx = 0,
+      sty = 0;
+    const onDown = (e: MouseEvent) => {
+      if (e.button !== 0 || z.current.scale <= 1.001) return; // 좌클릭 + 확대 상태에서만
+      dragging = true;
+      sx = e.clientX;
+      sy = e.clientY;
+      stx = z.current.tx;
+      sty = z.current.ty;
+      pager.style.cursor = "grabbing";
+      e.preventDefault();
+    };
+    const onMove = (e: MouseEvent) => {
+      if (!dragging) return;
+      e.preventDefault();
+      z.current.tx = stx + (e.clientX - sx);
+      z.current.ty = sty + (e.clientY - sy);
+      clampActive();
+      scheduleApply();
+    };
+    const onUp = () => {
+      if (!dragging) return;
+      dragging = false;
+      pager.style.cursor = z.current.scale > 1.001 ? "grab" : "";
+      applyActive();
+    };
+    pager.addEventListener("mousedown", onDown);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      pager.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [zoomOpen, clampActive, scheduleApply, applyActive]);
+
   // 터치: 두 손가락=핀치 확대/축소, 확대 상태 한 손가락=팬. 전체보기 한 손가락은 네이티브 스와이프에 맡김.
   const gesture = useRef({
     pinch: false,
@@ -562,6 +607,7 @@ export default function AuctionImageGallery({
                 overflowX: locked ? "hidden" : "auto",
                 overflowY: "hidden",
                 touchAction: locked ? "none" : "pan-x",
+                cursor: locked ? "grab" : undefined,
               }}
             >
               {images.map((image, index) => (

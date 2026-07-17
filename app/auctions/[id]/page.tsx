@@ -194,7 +194,9 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
                 startPrice={auction.startPrice}
                 viewCount={auction.viewCount}
               />
-              {auction.status === "LIVE" && <AuctionOutbidToggle auctionId={auction.id} />}
+              {auction.status === "LIVE" && (
+                <AuctionOutbidToggle auctionId={auction.id} sellerNickname={auction.sellerNickname} />
+              )}
               {/* 낙찰(ENDED_SOLD) 후 미결제 확정 시 차순위에게만 승계 제안 배너가 뜬다(대상자 아니면 미노출). */}
               {auction.status === "ENDED_SOLD" && <SuccessionOfferBanner auctionId={auction.id} />}
             </>

@@ -213,6 +213,8 @@ export type PhotocardGrade = "S" | "A" | "B" | "C";
 
 export type AuctionImageResponse = {
   url: string;
+  // 상세 기본(1200px). 다중 크기 도입 전 업로드분은 null → url(master)로 폴백(#128).
+  displayUrl: string | null;
   thumbnailUrl: string;
   displayOrder: number;
 };
@@ -272,8 +274,9 @@ export type AuctionPurchaseResponse = {
 };
 
 export type MediaUploadResponse = {
-  url: string;
-  thumbnailUrl: string;
+  url: string; // master(확대, 2560)
+  displayUrl: string; // 상세 기본(1200)
+  thumbnailUrl: string; // 목록(480)
 };
 
 export type VerificationStatus =

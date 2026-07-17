@@ -63,7 +63,10 @@ export default function AuctionImageGallery({
               aria-label="이전 사진"
               className={`absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-text-1/50 text-white transition-colors hover:bg-text-1/70 ${FOCUS_RING}`}
             >
-              ‹
+              {/* 텍스트 글리프(‹)는 폰트 메트릭 탓에 원 안에서 광학적으로 치우친다 → 대칭 viewBox SVG로 정중앙. */}
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="m15 18-6-6 6-6" />
+              </svg>
             </button>
             <button
               type="button"
@@ -71,7 +74,9 @@ export default function AuctionImageGallery({
               aria-label="다음 사진"
               className={`absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-text-1/50 text-white transition-colors hover:bg-text-1/70 ${FOCUS_RING}`}
             >
-              ›
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="m9 18 6-6-6-6" />
+              </svg>
             </button>
             <span className="absolute bottom-2 right-2 rounded-full bg-text-1/60 px-2 py-0.5 text-[11px] font-semibold text-white tabular-nums">
               {activeIndex + 1} / {images.length}

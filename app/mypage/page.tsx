@@ -942,9 +942,12 @@ function BuyerFulfillmentFooter({
           </>
         ) : fs === "SHIPPED" ? (
           <>
-            {fulfillmentPill("box", "primary", "배송 중")}
+            {order.deliveredAt
+              ? fulfillmentPill("checkCircle", "ok", "배송 완료")
+              : fulfillmentPill("box", "primary", "배송 중")}
             <span className="min-w-0 flex-1">
               {order.carrier} {order.trackingNumber}
+              {order.deliveredAt ? " · 받으셨으면 구매 확정해 주세요" : ""}
             </span>
             <button
               type="button"

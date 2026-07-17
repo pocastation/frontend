@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ArtistCombobox from "@/components/ArtistCombobox";
 import AuctionVerificationStep from "@/components/AuctionVerificationStep";
-import { apiFetch, ApiError, mediaUrl, uploadMediaImage } from "@/lib/api";
+import PhotoUploadGrid, { type PhotoItem } from "@/components/PhotoUploadGrid";
+import { apiFetch, ApiError, uploadMediaImage } from "@/lib/api";
 import { compressImage } from "@/lib/image-compress";
 import { useAuth } from "@/lib/auth-context";
 import { DURATION_OPTIONS, GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
@@ -23,8 +24,6 @@ const AUCTION_VERIFICATION_ENABLED =
   process.env.NEXT_PUBLIC_AUCTION_VERIFICATION_ENABLED === "true" ||
   (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_AUCTION_VERIFICATION_ENABLED !== "false");
 const TOTAL_STEPS = AUCTION_VERIFICATION_ENABLED ? 6 : 5;
-
-type UploadedImage = { url: string; displayUrl: string; thumbnailUrl: string };
 
 export default function NewAuctionPage() {
   const router = useRouter();
@@ -59,9 +58,19 @@ export default function NewAuctionPage() {
   const [startPrice, setStartPrice] = useState("");
   const [durationDays, setDurationDays] = useState<number>(3);
 
-  const [images, setImages] = useState<UploadedImage[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
+  const [items, setItems] = useState<PhotoItem[]>([]);
   const [verificationId, setVerificationId] = useState<string | null>(null);
+
+  // 완료된 사진만 순서대로 제출한다(실패 격리 — 실패 타일은 화면엔 남되 제출에선 제외).
+  const uploadedImages = items.filter((i) => i.status === "done" && i.uploaded).map((i) => i.uploaded!);
+  const isUploading = items.some((i) => i.status === "uploading");
+
+  // 언마운트 시 로컬 object URL 정리(누수 방지). 최신 items를 ref로 참조.
+  const itemsRef = useRef(items);
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
+  useEffect(() => () => itemsRef.current.forEach((i) => URL.revokeObjectURL(i.previewUrl)), []);
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -95,26 +104,39 @@ export default function NewAuctionPage() {
       .catch(() => setIdols([]));
   }, [artistId]);
 
-  async function handleFilesSelected(fileList: FileList | null) {
-    if (!fileList || fileList.length === 0 || !accessToken) return;
-    const files = Array.from(fileList).slice(0, MAX_IMAGES - images.length);
+  // 여러 장을 병렬로 업로드한다 — 각 파일이 독립적으로 진행/실패하므로 한 장이 실패해도 나머지는 계속된다.
+  function addFiles(files: File[]) {
+    if (!accessToken) return;
+    const picked = files.slice(0, MAX_IMAGES - items.length);
+    if (picked.length === 0) return;
     setError(null);
-    setIsUploading(true);
-    try {
-      for (const file of files) {
-        const compressed = await compressImage(file); // 업로드 전 상한 리사이즈(대역폭 절감)
-        const uploaded = await uploadMediaImage(compressed, accessToken);
-        setImages((prev) => [...prev, uploaded]);
-      }
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "이미지 업로드에 실패했습니다.");
-    } finally {
-      setIsUploading(false);
-    }
+    const newItems: PhotoItem[] = picked.map((file) => ({
+      id: crypto.randomUUID(),
+      previewUrl: URL.createObjectURL(file),
+      status: "uploading",
+    }));
+    setItems((prev) => [...prev, ...newItems]);
+    newItems.forEach((it, i) => {
+      const file = picked[i];
+      void (async () => {
+        try {
+          const compressed = await compressImage(file); // 업로드 전 상한 리사이즈(대역폭 절감)
+          const uploaded = await uploadMediaImage(compressed, accessToken);
+          setItems((prev) => prev.map((x) => (x.id === it.id ? { ...x, status: "done", uploaded } : x)));
+        } catch (err) {
+          const message = err instanceof ApiError ? err.message : "업로드 실패";
+          setItems((prev) => prev.map((x) => (x.id === it.id ? { ...x, status: "error", error: message } : x)));
+        }
+      })();
+    });
   }
 
-  function removeImage(index: number) {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+  function removeItem(id: string) {
+    setItems((prev) => {
+      const found = prev.find((x) => x.id === id);
+      if (found) URL.revokeObjectURL(found.previewUrl);
+      return prev.filter((x) => x.id !== id);
+    });
   }
 
   // 각 스텝의 필수값이 채워졌는지 — 안 채워지면 "다음"/"등록" 비활성.
@@ -122,7 +144,7 @@ export default function NewAuctionPage() {
   function isStepValid(s: number): boolean {
     if (s === 1) return artistId !== "" && title.trim().length > 0;
     if (s === 3) return priceValid;
-    if (s === 4) return images.length > 0;
+    if (s === 4) return uploadedImages.length > 0 && !isUploading;
     if (AUCTION_VERIFICATION_ENABLED && s === 5) return verificationId !== null;
     return true; // 판매 방식(0) · 상품 정보(2)는 기본값이 있어 항상 통과
   }
@@ -153,7 +175,7 @@ export default function NewAuctionPage() {
       setError("아티스트를 선택해주세요.");
       return;
     }
-    if (images.length === 0) {
+    if (uploadedImages.length === 0) {
       setError("사진을 1장 이상 등록해주세요.");
       return;
     }
@@ -186,7 +208,7 @@ export default function NewAuctionPage() {
           startPrice: price,
           buyNowPrice: saleType === "INSTANT" ? price : undefined,
           durationDays: saleType === "AUCTION" ? durationDays : undefined,
-          images,
+          images: uploadedImages,
           verificationId: AUCTION_VERIFICATION_ENABLED ? (verificationId ?? undefined) : undefined,
         },
       });
@@ -502,55 +524,13 @@ export default function NewAuctionPage() {
           {step === 4 && (
             <div>
               <p className="mb-2 text-xs text-text-3">1~{MAX_IMAGES}장, 첫 장이 대표사진으로 노출돼요.</p>
-              <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
-                {images.map((image, index) => (
-                  <div key={image.url} className="relative">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일 */}
-                    <img
-                      src={mediaUrl(image.thumbnailUrl)}
-                      alt={`업로드 사진 ${index + 1}`}
-                      className="aspect-square rounded-r2 border border-border object-cover"
-                    />
-                    {index === 0 && (
-                      <span className="absolute left-1 top-1 rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold text-white">
-                        대표
-                      </span>
-                    )}
-                    <button
-                      type="button"
-                      aria-label={`${index + 1}번째 사진 삭제`}
-                      onClick={() => removeImage(index)}
-                      className={`absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-xs text-white transition-transform hover:scale-110 active:scale-95 ${FOCUS_RING}`}
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
-
-                {images.length < MAX_IMAGES && (
-                  <label
-                    className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-r2 border-2 border-dashed border-border-2 text-text-3 transition-colors hover:border-primary hover:text-primary ${
-                      isUploading ? "pointer-events-none opacity-60" : ""
-                    } ${FOCUS_RING}`}
-                  >
-                    <span className="text-xl leading-none" aria-hidden="true">
-                      {isUploading ? "…" : "+"}
-                    </span>
-                    <span className="text-[10px] font-semibold">{isUploading ? "업로드 중" : "사진 추가"}</span>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      multiple
-                      disabled={isUploading}
-                      onChange={(e) => {
-                        handleFilesSelected(e.target.files);
-                        e.target.value = "";
-                      }}
-                      className="sr-only"
-                    />
-                  </label>
-                )}
-              </div>
+              <PhotoUploadGrid
+                items={items}
+                max={MAX_IMAGES}
+                onAddFiles={addFiles}
+                onRemove={removeItem}
+                onReorder={setItems}
+              />
             </div>
           )}
           {AUCTION_VERIFICATION_ENABLED && step === 5 && (

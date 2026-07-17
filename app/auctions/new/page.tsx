@@ -23,7 +23,7 @@ const AUCTION_VERIFICATION_ENABLED =
   (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_AUCTION_VERIFICATION_ENABLED !== "false");
 const TOTAL_STEPS = AUCTION_VERIFICATION_ENABLED ? 6 : 5;
 
-type UploadedImage = { url: string; thumbnailUrl: string };
+type UploadedImage = { url: string; displayUrl: string; thumbnailUrl: string };
 
 export default function NewAuctionPage() {
   const router = useRouter();

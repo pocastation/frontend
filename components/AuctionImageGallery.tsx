@@ -25,6 +25,13 @@ function ChevronRight() {
     </svg>
   );
 }
+function XIcon() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M18 6 6 18M6 6l12 12" />
+    </svg>
+  );
+}
 
 export default function AuctionImageGallery({
   images,
@@ -47,11 +54,22 @@ export default function AuctionImageGallery({
   const viewRef = useRef<HTMLDivElement>(null);
   const zoomImgRef = useRef<HTMLImageElement>(null);
   const t = useRef({ scale: 1, tx: 0, ty: 0, minScale: 1, maxScale: 4, nw: 1, nh: 1 });
+  const rafRef = useRef(0);
 
+  // translate3d로 GPU 합성 레이어를 강제해 큰 이미지 이동 시 리페인트를 막는다(drag 버벅임 해소).
   const apply = useCallback(() => {
     const el = zoomImgRef.current;
-    if (el) el.style.transform = `translate(${t.current.tx}px, ${t.current.ty}px) scale(${t.current.scale})`;
+    if (el) el.style.transform = `translate3d(${t.current.tx}px, ${t.current.ty}px, 0) scale(${t.current.scale})`;
   }, []);
+
+  // 드래그/휠은 pointermove가 프레임보다 자주 발생 → rAF로 프레임당 한 번만 transform을 적용(coalesce).
+  const scheduleApply = useCallback(() => {
+    if (rafRef.current) return;
+    rafRef.current = requestAnimationFrame(() => {
+      rafRef.current = 0;
+      apply();
+    });
+  }, [apply]);
 
   const clampPan = useCallback(() => {
     const v = viewRef.current;
@@ -138,13 +156,12 @@ export default function AuctionImageGallery({
     const s = t.current;
     if (d.atFit) {
       s.tx = d.stx + (e.clientX - d.sx); // 손가락 따라 살짝 이동(스와이프 피드백)
-      apply();
     } else {
       s.tx = d.stx + (e.clientX - d.sx);
       s.ty = d.sty + (e.clientY - d.sy);
       clampPan();
-      apply();
     }
+    scheduleApply(); // 프레임당 1회만 반영 → 버벅임 해소
   }
   function onPointerUp(e: React.PointerEvent) {
     const d = drag.current;
@@ -261,17 +278,23 @@ export default function AuctionImageGallery({
       {/* 확대 라이트박스 — master(url) 뷰어. 스크롤=줌, 드래그=이동/스와이프, 화살표·키보드 전환. */}
       {zoomOpen && active && (
         <div className="fixed inset-0 z-50 flex flex-col bg-[rgba(8,7,12,0.94)]">
-          <div className="flex items-center justify-between gap-3 px-4 py-3 text-[12.5px] font-semibold text-white/90">
+          <div className="flex items-center gap-3 px-4 py-3 pr-16 text-[12.5px] font-semibold text-white/90">
             <span className="tabular-nums">
               {activeIndex + 1} / {images.length}
             </span>
             <span className="hidden text-[11.5px] font-medium text-white/55 sm:inline">
               스크롤 확대·축소 · 드래그 이동 · 전체보기서 좌우로 넘기기
             </span>
-            <button type="button" onClick={() => setZoomOpen(false)} aria-label="닫기" className={`text-lg ${FOCUS_RING}`}>
-              ✕
-            </button>
           </div>
+          {/* 닫기 — 항상 잘 보이도록 우상단 고정 원형 버튼(Esc로도 닫힘). */}
+          <button
+            type="button"
+            onClick={() => setZoomOpen(false)}
+            aria-label="닫기"
+            className={`absolute right-3.5 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 ${FOCUS_RING}`}
+          >
+            <XIcon />
+          </button>
           <div
             ref={viewRef}
             className="relative flex-1 cursor-grab touch-none overflow-hidden active:cursor-grabbing"

@@ -21,6 +21,8 @@ export default function ProfileTab() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  // 현재 시각을 렌더 본문에서 직접 읽으면 비순수(react-hooks/purity)라, 마운트 시 한 번만 지연 초기화로 캡처한다.
+  const [now] = useState(() => Date.now());
 
   if (!member) return null;
 
@@ -33,7 +35,7 @@ export default function ProfileTab() {
 
   // 주 1회 제한(#118) — nicknameChangeableAt이 미래면 잠금. 그 시각까지 변경 불가.
   const changeableAt = member.nicknameChangeableAt ? new Date(member.nicknameChangeableAt) : null;
-  const locked = changeableAt !== null && changeableAt.getTime() > Date.now();
+  const locked = changeableAt !== null && changeableAt.getTime() > now;
   const changeableDate = changeableAt
     ? changeableAt.toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric" })
     : null;

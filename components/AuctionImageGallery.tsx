@@ -46,6 +46,16 @@ export default function AuctionImageGallery({
   const active = images[activeIndex];
   const hasMultiple = images.length > 1;
 
+  // 확대 뷰 넘기기 방식을 기기별로 분기: 터치(모바일)=드래그 스와이프만, 마우스(데스크탑)=화살표만.
+  const [isTouch, setIsTouch] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: coarse)");
+    const update = () => setIsTouch(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
   const go = useCallback(
     (delta: number) => setActiveIndex((i) => (i + delta + images.length) % images.length),
     [images.length],
@@ -155,10 +165,18 @@ export default function AuctionImageGallery({
     });
   }, [zoomOpen, activeIndex, images, hasMultiple]);
 
-  const drag = useRef({ down: false, sx: 0, sy: 0, stx: 0, sty: 0, atFit: false });
+  const drag = useRef({ down: false, sx: 0, sy: 0, stx: 0, sty: 0, atFit: false, touch: false });
   function onPointerDown(e: React.PointerEvent) {
     const s = t.current;
-    drag.current = { down: true, sx: e.clientX, sy: e.clientY, stx: s.tx, sty: s.ty, atFit: s.scale <= s.minScale + 0.001 };
+    drag.current = {
+      down: true,
+      sx: e.clientX,
+      sy: e.clientY,
+      stx: s.tx,
+      sty: s.ty,
+      atFit: s.scale <= s.minScale + 0.001,
+      touch: e.pointerType === "touch",
+    };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   }
   function onPointerMove(e: React.PointerEvent) {
@@ -166,8 +184,11 @@ export default function AuctionImageGallery({
     if (!d.down) return;
     const s = t.current;
     if (d.atFit) {
+      // 전체보기 상태의 드래그는 "사진 넘기기"라 터치(모바일)에서만 반응한다. 데스크탑은 화살표로만 이동.
+      if (!d.touch) return;
       s.tx = d.stx + (e.clientX - d.sx); // 손가락 따라 살짝 이동(스와이프 피드백)
     } else {
+      // 확대 상태의 드래그는 이동(pan) — 기기 무관.
       s.tx = d.stx + (e.clientX - d.sx);
       s.ty = d.sty + (e.clientY - d.sy);
       clampPan();
@@ -176,7 +197,7 @@ export default function AuctionImageGallery({
   }
   function onPointerUp(e: React.PointerEvent) {
     const d = drag.current;
-    if (d.down && d.atFit) {
+    if (d.down && d.atFit && d.touch) {
       const dx = e.clientX - d.sx;
       const threshold = Math.min(80, (viewRef.current?.clientWidth ?? 400) * 0.15);
       if (Math.abs(dx) > threshold && hasMultiple) go(dx > 0 ? -1 : 1);
@@ -296,8 +317,8 @@ export default function AuctionImageGallery({
             <span className="tabular-nums">
               {activeIndex + 1} / {images.length}
             </span>
-            <span className="hidden text-[11.5px] font-medium text-white/55 sm:inline">
-              스크롤 확대·축소 · 드래그 이동 · 전체보기서 좌우로 넘기기
+            <span className="text-[11.5px] font-medium text-white/55">
+              {isTouch ? "드래그로 넘기기" : "스크롤 확대·축소 · 드래그 이동 · 화살표로 넘기기"}
             </span>
           </div>
           {/* 닫기 — 항상 잘 보이도록 우상단 고정 원형 버튼(Esc로도 닫힘). */}
@@ -332,7 +353,8 @@ export default function AuctionImageGallery({
               className="absolute left-0 top-0 max-w-none origin-top-left select-none will-change-transform"
             />
           </div>
-          {hasMultiple && (
+          {/* 확대 뷰 화살표는 데스크탑(마우스)에서만 — 모바일은 드래그 스와이프로 넘긴다. */}
+          {hasMultiple && !isTouch && (
             <>
               <button
                 type="button"

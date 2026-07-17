@@ -6,6 +6,7 @@ import Link from "next/link";
 import ArtistCombobox from "@/components/ArtistCombobox";
 import AuctionVerificationStep from "@/components/AuctionVerificationStep";
 import { apiFetch, ApiError, mediaUrl, uploadMediaImage } from "@/lib/api";
+import { compressImage } from "@/lib/image-compress";
 import { useAuth } from "@/lib/auth-context";
 import { DURATION_OPTIONS, GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
@@ -101,7 +102,8 @@ export default function NewAuctionPage() {
     setIsUploading(true);
     try {
       for (const file of files) {
-        const uploaded = await uploadMediaImage(file, accessToken);
+        const compressed = await compressImage(file); // 업로드 전 상한 리사이즈(대역폭 절감)
+        const uploaded = await uploadMediaImage(compressed, accessToken);
         setImages((prev) => [...prev, uploaded]);
       }
     } catch (err) {

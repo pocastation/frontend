@@ -428,7 +428,8 @@ export default function AuctionImageGallery({
               ref={browsePagerRef}
               onScroll={onBrowseScroll}
               className="flex h-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              style={{ touchAction: "pan-x" }}
+              // pan-x=가로 스와이프는 페이저가 가져가고, pan-y=세로 드래그는 페이지 스크롤로 넘긴다(세로 오버플로 없어 자연 체이닝).
+              style={{ touchAction: "pan-x pan-y" }}
             >
               {images.map((image, index) => (
                 <button

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
+import { compressImage } from "@/lib/image-compress";
 import { useAuth } from "@/lib/auth-context";
 import { FOCUS_RING, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import type {
@@ -90,7 +91,9 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
     setAnalyzing(true);
     setError(null);
     const formData = new FormData();
-    formData.append("file", file);
+    // OCR 민감 이미지라 품질 보수적(q0.9)으로 압축.
+    const compressed = await compressImage(file, { quality: 0.9 });
+    formData.append("file", compressed);
     try {
       const analysis = await fetchMultipartWithAuth<VerificationAnalysisResponse>(
         `/api/auction-verifications/${challenge.id}/analyze`,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { mediaUrl } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionImageResponse } from "@/lib/types";
@@ -44,6 +45,16 @@ export default function AuctionImageGallery({
   const [zoomOpen, setZoomOpen] = useState(false);
   const active = images[activeIndex];
   const hasMultiple = images.length > 1;
+
+  // 확대 뷰 넘기기 방식을 기기별로 분기: 터치(모바일)=드래그 스와이프만, 마우스(데스크탑)=화살표만.
+  const [isTouch, setIsTouch] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: coarse)");
+    const update = () => setIsTouch(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   const go = useCallback(
     (delta: number) => setActiveIndex((i) => (i + delta + images.length) % images.length),
@@ -144,10 +155,28 @@ export default function AuctionImageGallery({
   }, [zoomOpen, go]);
 
   // 드래그: 전체보기(최소배율)면 좌우로 사진 넘기기(스와이프), 확대 상태면 이동(pan).
-  const drag = useRef({ down: false, sx: 0, sy: 0, stx: 0, sty: 0, atFit: false });
+  // 확대 상태에서 인접 사진(master)을 미리 디코드해 둔다 → 전환 시 로드 대기(끊김) 없음.
+  useEffect(() => {
+    if (!zoomOpen || !hasMultiple) return;
+    const n = images.length;
+    [images[(activeIndex + 1) % n], images[(activeIndex - 1 + n) % n]].forEach((img) => {
+      const pre = new Image();
+      pre.src = mediaUrl(img.url);
+    });
+  }, [zoomOpen, activeIndex, images, hasMultiple]);
+
+  const drag = useRef({ down: false, sx: 0, sy: 0, stx: 0, sty: 0, atFit: false, touch: false });
   function onPointerDown(e: React.PointerEvent) {
     const s = t.current;
-    drag.current = { down: true, sx: e.clientX, sy: e.clientY, stx: s.tx, sty: s.ty, atFit: s.scale <= s.minScale + 0.001 };
+    drag.current = {
+      down: true,
+      sx: e.clientX,
+      sy: e.clientY,
+      stx: s.tx,
+      sty: s.ty,
+      atFit: s.scale <= s.minScale + 0.001,
+      touch: e.pointerType === "touch",
+    };
     (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
   }
   function onPointerMove(e: React.PointerEvent) {
@@ -155,8 +184,11 @@ export default function AuctionImageGallery({
     if (!d.down) return;
     const s = t.current;
     if (d.atFit) {
+      // 전체보기 상태의 드래그는 "사진 넘기기"라 터치(모바일)에서만 반응한다. 데스크탑은 화살표로만 이동.
+      if (!d.touch) return;
       s.tx = d.stx + (e.clientX - d.sx); // 손가락 따라 살짝 이동(스와이프 피드백)
     } else {
+      // 확대 상태의 드래그는 이동(pan) — 기기 무관.
       s.tx = d.stx + (e.clientX - d.sx);
       s.ty = d.sty + (e.clientY - d.sy);
       clampPan();
@@ -165,7 +197,7 @@ export default function AuctionImageGallery({
   }
   function onPointerUp(e: React.PointerEvent) {
     const d = drag.current;
-    if (d.down && d.atFit) {
+    if (d.down && d.atFit && d.touch) {
       const dx = e.clientX - d.sx;
       const threshold = Math.min(80, (viewRef.current?.clientWidth ?? 400) * 0.15);
       if (Math.abs(dx) > threshold && hasMultiple) go(dx > 0 ? -1 : 1);
@@ -275,15 +307,18 @@ export default function AuctionImageGallery({
         </div>
       )}
 
-      {/* 확대 라이트박스 — master(url) 뷰어. 스크롤=줌, 드래그=이동/스와이프, 화살표·키보드 전환. */}
-      {zoomOpen && active && (
-        <div className="fixed inset-0 z-50 flex flex-col bg-[rgba(8,7,12,0.94)]">
+      {/* 확대 라이트박스 — master(url) 뷰어. 스크롤=줌, 드래그=이동/스와이프, 화살표·키보드 전환.
+          헤더(.hdr, z-index:300)보다 위에 오도록 body로 portal + z-[400]. 조상 스택 컨텍스트에도 안 갇힘. */}
+      {zoomOpen &&
+        active &&
+        createPortal(
+          <div className="fixed inset-0 z-[400] flex flex-col bg-[rgba(8,7,12,0.94)]">
           <div className="flex items-center gap-3 px-4 py-3 pr-16 text-[12.5px] font-semibold text-white/90">
             <span className="tabular-nums">
               {activeIndex + 1} / {images.length}
             </span>
-            <span className="hidden text-[11.5px] font-medium text-white/55 sm:inline">
-              스크롤 확대·축소 · 드래그 이동 · 전체보기서 좌우로 넘기기
+            <span className="text-[11.5px] font-medium text-white/55">
+              {isTouch ? "드래그로 넘기기" : "스크롤 확대·축소 · 드래그 이동 · 화살표로 넘기기"}
             </span>
           </div>
           {/* 닫기 — 항상 잘 보이도록 우상단 고정 원형 버튼(Esc로도 닫힘). */}
@@ -308,9 +343,9 @@ export default function AuctionImageGallery({
             onDoubleClick={() => fit()}
           >
             {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙(로컬/S3) */}
+            {/* key remount 없이 src만 교체(엘리먼트 유지 → 전환 부드럽게). onLoad가 새 src마다 fit 재실행. */}
             <img
               ref={zoomImgRef}
-              key={active.url}
               src={mediaUrl(active.url)}
               alt={`${title} 확대 ${activeIndex + 1}`}
               draggable={false}
@@ -318,7 +353,8 @@ export default function AuctionImageGallery({
               className="absolute left-0 top-0 max-w-none origin-top-left select-none will-change-transform"
             />
           </div>
-          {hasMultiple && (
+          {/* 확대 뷰 화살표는 데스크탑(마우스)에서만 — 모바일은 드래그 스와이프로 넘긴다. */}
+          {hasMultiple && !isTouch && (
             <>
               <button
                 type="button"
@@ -338,8 +374,9 @@ export default function AuctionImageGallery({
               </button>
             </>
           )}
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

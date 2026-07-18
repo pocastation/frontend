@@ -246,6 +246,13 @@ export type AuctionDetailResponse = {
   bidCount: number;
   viewCount: number;
   images: AuctionImageResponse[];
+  // 검수영상(개봉·틸팅 등, 경매당 최대 1개). 영상 없이 등록된 경매는 null/미존재.
+  video?: AuctionVideoResponse | null;
+};
+
+export type AuctionVideoResponse = {
+  url: string; // 재생용 MP4
+  posterUrl: string | null; // 정지컷 포스터(없을 수 있음)
 };
 
 export type AuctionRegisterRequest = {
@@ -277,6 +284,20 @@ export type MediaUploadResponse = {
   url: string; // master(확대, 2560)
   displayUrl: string; // 상세 기본(1200)
   thumbnailUrl: string; // 목록(480)
+};
+
+export type VideoStatus = "PROCESSING" | "READY" | "FAILED";
+
+export type VideoUploadResponse = {
+  videoId: string;
+  status: VideoStatus; // 업로드 직후엔 PROCESSING
+};
+
+export type VideoStatusResponse = {
+  videoId: string;
+  status: VideoStatus;
+  url: string | null; // READY일 때 재생용 MP4
+  posterUrl: string | null; // READY일 때 정지컷(없을 수 있음)
 };
 
 export type VerificationStatus =

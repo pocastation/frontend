@@ -6,8 +6,10 @@ import Link from "next/link";
 import ArtistCombobox from "@/components/ArtistCombobox";
 import AuctionVerificationStep from "@/components/AuctionVerificationStep";
 import PhotoUploadGrid, { type PhotoItem } from "@/components/PhotoUploadGrid";
-import { apiFetch, ApiError, uploadMediaImage } from "@/lib/api";
+import VideoUploadField, { type VideoItem } from "@/components/VideoUploadField";
+import { apiFetch, ApiError, getVideoStatus, uploadMediaImage, uploadMediaVideo } from "@/lib/api";
 import { compressImage } from "@/lib/image-compress";
+import { validateVideo } from "@/lib/video-validate";
 import { useAuth } from "@/lib/auth-context";
 import { DURATION_OPTIONS, GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
@@ -23,7 +25,23 @@ const MAX_IMAGES = 12;
 const AUCTION_VERIFICATION_ENABLED =
   process.env.NEXT_PUBLIC_AUCTION_VERIFICATION_ENABLED === "true" ||
   (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_AUCTION_VERIFICATION_ENABLED !== "false");
-const TOTAL_STEPS = AUCTION_VERIFICATION_ENABLED ? 6 : 5;
+const AUCTION_VIDEO_ENABLED =
+  process.env.NEXT_PUBLIC_AUCTION_VIDEO_ENABLED === "true" ||
+  (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_AUCTION_VIDEO_ENABLED !== "false");
+
+// 위저드 스텝 순서 — 사진 다음에 영상, 그다음 (옵션) 사진 인증. 플래그로 스텝이 빠질 수 있어
+// 인덱스 하드코딩(step === 4) 대신 키 배열로 관리한다(중간 스텝 삽입 시 인덱스가 밀리는 버그 방지).
+type StepKey = "saleType" | "info" | "product" | "price" | "photos" | "video" | "verification";
+const STEP_KEYS: StepKey[] = [
+  "saleType",
+  "info",
+  "product",
+  "price",
+  "photos",
+  ...(AUCTION_VIDEO_ENABLED ? (["video"] as StepKey[]) : []),
+  ...(AUCTION_VERIFICATION_ENABLED ? (["verification"] as StepKey[]) : []),
+];
+const TOTAL_STEPS = STEP_KEYS.length;
 
 export default function NewAuctionPage() {
   const router = useRouter();
@@ -59,18 +77,53 @@ export default function NewAuctionPage() {
   const [durationDays, setDurationDays] = useState<number>(3);
 
   const [items, setItems] = useState<PhotoItem[]>([]);
+  const [video, setVideo] = useState<(VideoItem & { videoId?: string }) | null>(null);
   const [verificationId, setVerificationId] = useState<string | null>(null);
 
   // 완료된 사진만 순서대로 제출한다(실패 격리 — 실패 타일은 화면엔 남되 제출에선 제외).
   const uploadedImages = items.filter((i) => i.status === "done" && i.uploaded).map((i) => i.uploaded!);
   const isUploading = items.some((i) => i.status === "uploading");
 
-  // 언마운트 시 로컬 object URL 정리(누수 방지). 최신 items를 ref로 참조.
+  // 언마운트 시 로컬 object URL 정리(누수 방지). 최신 items/video를 ref로 참조.
   const itemsRef = useRef(items);
   useEffect(() => {
     itemsRef.current = items;
   }, [items]);
   useEffect(() => () => itemsRef.current.forEach((i) => URL.revokeObjectURL(i.previewUrl)), []);
+
+  const videoRef = useRef(video);
+  useEffect(() => {
+    videoRef.current = video;
+  }, [video]);
+  useEffect(() => () => {
+    if (videoRef.current) URL.revokeObjectURL(videoRef.current.previewUrl);
+  }, []);
+
+  // 트랜스코딩 지연 폴링 — 업로드 후 PROCESSING 동안 상태를 주기적으로 확인해 READY/FAILED로 전이.
+  // status/videoId/token 변화에만 재구독하도록 필요한 값만 의존성에 둔다(전체 video 객체 참조 회피).
+  const videoStatus = video?.status;
+  const videoId = video?.videoId;
+  useEffect(() => {
+    if (videoStatus !== "processing" || !videoId || !accessToken) return;
+    let cancelled = false;
+    const timer = setInterval(async () => {
+      try {
+        const s = await getVideoStatus(videoId, accessToken);
+        if (cancelled) return;
+        if (s.status === "READY") {
+          setVideo((v) => (v ? { ...v, status: "ready" } : v));
+        } else if (s.status === "FAILED") {
+          setVideo((v) => (v ? { ...v, status: "error", error: "영상 처리에 실패했어요. 다시 시도해주세요." } : v));
+        }
+      } catch {
+        // 일시 오류는 다음 틱에 재시도
+      }
+    }, 2500);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [videoStatus, videoId, accessToken]);
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -139,14 +192,50 @@ export default function NewAuctionPage() {
     });
   }
 
+  // 영상은 1개만 — 새로 고르면 클라 검증 후 업로드하고, PROCESSING이 되면 위 폴링 effect가 완료를 감지한다.
+  async function addVideo(file: File) {
+    if (!accessToken) return;
+    setError(null);
+    const result = await validateVideo(file);
+    if (!result.ok) {
+      setError(result.reason);
+      return;
+    }
+    const previewUrl = URL.createObjectURL(file);
+    setVideo({ previewUrl, status: "uploading" });
+    try {
+      const uploaded = await uploadMediaVideo(file, accessToken);
+      setVideo((v) => (v ? { ...v, status: "processing", videoId: uploaded.videoId } : v));
+    } catch (err) {
+      const message = err instanceof ApiError ? err.message : "영상 업로드에 실패했어요.";
+      setVideo((v) => (v ? { ...v, status: "error", error: message } : v));
+    }
+  }
+
+  function removeVideo() {
+    setVideo((v) => {
+      if (v) URL.revokeObjectURL(v.previewUrl);
+      return null;
+    });
+  }
+
   // 각 스텝의 필수값이 채워졌는지 — 안 채워지면 "다음"/"등록" 비활성.
   const priceValid = startPrice.trim() !== "" && Number.isFinite(Number(startPrice)) && Number(startPrice) >= 0;
   function isStepValid(s: number): boolean {
-    if (s === 1) return artistId !== "" && title.trim().length > 0;
-    if (s === 3) return priceValid;
-    if (s === 4) return uploadedImages.length > 0 && !isUploading;
-    if (AUCTION_VERIFICATION_ENABLED && s === 5) return verificationId !== null;
-    return true; // 판매 방식(0) · 상품 정보(2)는 기본값이 있어 항상 통과
+    switch (STEP_KEYS[s]) {
+      case "info":
+        return artistId !== "" && title.trim().length > 0;
+      case "price":
+        return priceValid;
+      case "photos":
+        return uploadedImages.length > 0 && !isUploading;
+      case "video":
+        return video?.status === "ready"; // 처리 완료된 영상만 통과(필수)
+      case "verification":
+        return verificationId !== null;
+      default:
+        return true; // 판매 방식 · 상품 정보는 기본값이 있어 항상 통과
+    }
   }
 
   function goNext() {
@@ -179,6 +268,10 @@ export default function NewAuctionPage() {
       setError("사진을 1장 이상 등록해주세요.");
       return;
     }
+    if (AUCTION_VIDEO_ENABLED && video?.status !== "ready") {
+      setError("검수영상 처리가 완료된 뒤 등록할 수 있어요.");
+      return;
+    }
     if (AUCTION_VERIFICATION_ENABLED && !verificationId) {
       setError("판매 물품 소유 인증을 완료해주세요.");
       return;
@@ -209,6 +302,7 @@ export default function NewAuctionPage() {
           buyNowPrice: saleType === "INSTANT" ? price : undefined,
           durationDays: saleType === "AUCTION" ? durationDays : undefined,
           images: uploadedImages,
+          videoId: AUCTION_VIDEO_ENABLED ? (video?.videoId ?? undefined) : undefined,
           verificationId: AUCTION_VERIFICATION_ENABLED ? (verificationId ?? undefined) : undefined,
         },
       });
@@ -228,14 +322,16 @@ export default function NewAuctionPage() {
     );
   }
 
-  const stepTitles = [
-    "판매 방식",
-    "카테고리 · 소개",
-    "상품 정보",
-    saleType === "INSTANT" ? "가격" : "가격 · 경매 기간",
-    "사진",
-    ...(AUCTION_VERIFICATION_ENABLED ? ["사진 인증"] : []),
-  ];
+  const stepKey = STEP_KEYS[step];
+  const stepTitle: Record<StepKey, string> = {
+    saleType: "판매 방식",
+    info: "카테고리 · 소개",
+    product: "상품 정보",
+    price: saleType === "INSTANT" ? "가격" : "가격 · 경매 기간",
+    photos: "사진",
+    video: "영상",
+    verification: "사진 인증",
+  };
   const isLastStep = step === TOTAL_STEPS - 1;
 
   return (
@@ -261,7 +357,7 @@ export default function NewAuctionPage() {
         {/* 진행 표시 */}
         <div className="mb-6">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-sm font-extrabold text-text-1">{stepTitles[step]}</h2>
+            <h2 className="text-sm font-extrabold text-text-1">{stepTitle[stepKey]}</h2>
             <span className="text-xs font-bold text-text-3">
               {step + 1} / {TOTAL_STEPS}
             </span>
@@ -283,7 +379,7 @@ export default function NewAuctionPage() {
               : "animate-[wizardInLeft_240ms_ease-out]"
           }`}
         >
-          {step === 0 && (
+          {stepKey === "saleType" && (
             <div className="grid gap-2 sm:grid-cols-2">
               {[
                 { type: "AUCTION" as const, title: "경매판매", desc: "정한 기간 동안 입찰을 받아 판매해요." },
@@ -312,7 +408,7 @@ export default function NewAuctionPage() {
             </div>
           )}
 
-          {step === 1 && (
+          {stepKey === "info" && (
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
                 <label htmlFor={artistFieldId} className="text-xs font-bold text-text-2">
@@ -375,7 +471,7 @@ export default function NewAuctionPage() {
             </div>
           )}
 
-          {step === 2 && (
+          {stepKey === "product" && (
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
@@ -472,7 +568,7 @@ export default function NewAuctionPage() {
             </div>
           )}
 
-          {step === 3 && (
+          {stepKey === "price" && (
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
                 <label htmlFor={startPriceFieldId} className="text-xs font-bold text-text-2">
@@ -521,7 +617,7 @@ export default function NewAuctionPage() {
             </div>
           )}
 
-          {step === 4 && (
+          {stepKey === "photos" && (
             <div>
               <p className="mb-2 text-xs text-text-3">1~{MAX_IMAGES}장, 첫 장이 대표사진으로 노출돼요.</p>
               <PhotoUploadGrid
@@ -533,7 +629,15 @@ export default function NewAuctionPage() {
               />
             </div>
           )}
-          {AUCTION_VERIFICATION_ENABLED && step === 5 && (
+          {stepKey === "video" && (
+            <div>
+              <p className="mb-2 text-xs text-text-3">
+                개봉·틸팅 등 실물을 확인할 수 있는 검수영상 1개를 올려주세요. 정품 신뢰도가 올라가요.
+              </p>
+              <VideoUploadField video={video} onSelect={addVideo} onRemove={removeVideo} />
+            </div>
+          )}
+          {stepKey === "verification" && (
             <AuctionVerificationStep
               verificationId={verificationId}
               onVerified={setVerificationId}

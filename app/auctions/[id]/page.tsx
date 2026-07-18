@@ -10,7 +10,7 @@ import SearchLink from "@/components/SearchLink";
 import SellerShipPanel from "@/components/SellerShipPanel";
 import ShareButton from "@/components/ShareButton";
 import SuccessionOfferBanner from "@/components/SuccessionOfferBanner";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
 import { ACTION_ICON_BUTTON, FOCUS_RING } from "@/lib/ui";
 import type { AuctionDetailResponse } from "@/lib/types";
@@ -78,6 +78,20 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
         {/* 왼쪽: 사진 + 상품 정보 + 판매자 */}
         <div>
           <AuctionImageGallery images={auction.images} title={auction.title} />
+
+          {auction.video && (
+            <section className="mt-4">
+              <video
+                controls
+                playsInline
+                preload="metadata"
+                poster={auction.video.posterUrl ? mediaUrl(auction.video.posterUrl) : undefined}
+                src={mediaUrl(auction.video.url)}
+                className="aspect-video w-full rounded-r3 border border-border bg-black"
+              />
+              <p className="mt-1.5 text-xs text-text-3">판매자가 올린 검수영상</p>
+            </section>
+          )}
 
           {auction.description && (
             <section className="mt-6">

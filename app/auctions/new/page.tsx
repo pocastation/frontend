@@ -55,6 +55,7 @@ export default function NewAuctionPage() {
   const gradeFieldId = useId();
   const unopenedFieldId = useId();
   const startPriceFieldId = useId();
+  const successionAllowedFieldId = useId();
 
   const [saleType, setSaleType] = useState<AuctionSaleType>("AUCTION");
   const [artists, setArtists] = useState<{ id: number; name: string }[]>([]);
@@ -69,6 +70,8 @@ export default function NewAuctionPage() {
   const [unopened, setUnopened] = useState(false);
   const [startPrice, setStartPrice] = useState("");
   const [durationDays, setDurationDays] = useState<number>(3);
+  // 차순위 승계 seller opt-in(§7-3, 2026-07-19) — 판매 성사율 우선으로 기본 허용.
+  const [successionAllowed, setSuccessionAllowed] = useState(true);
 
   const [items, setItems] = useState<PhotoItem[]>([]);
   const [video, setVideo] = useState<(VideoItem & { videoId?: string }) | null>(null);
@@ -298,6 +301,7 @@ export default function NewAuctionPage() {
           startPrice: price,
           buyNowPrice: saleType === "INSTANT" ? price : undefined,
           durationDays: saleType === "AUCTION" ? durationDays : undefined,
+          successionAllowed: saleType === "AUCTION" ? successionAllowed : undefined,
           images: uploadedImages,
           videoId: AUCTION_VIDEO_ENABLED ? (video?.videoId ?? undefined) : undefined,
           verificationId: AUCTION_VERIFICATION_ENABLED ? (verificationId ?? undefined) : undefined,
@@ -566,6 +570,28 @@ export default function NewAuctionPage() {
                     ))}
                   </div>
                 </fieldset>
+              )}
+
+              {saleType === "AUCTION" && (
+                <div>
+                  <label
+                    htmlFor={successionAllowedFieldId}
+                    className="flex w-fit items-center gap-2 text-sm text-text-2"
+                  >
+                    <input
+                      id={successionAllowedFieldId}
+                      type="checkbox"
+                      checked={successionAllowed}
+                      onChange={(e) => setSuccessionAllowed(e.target.checked)}
+                      className={`h-4 w-4 accent-primary ${FOCUS_RING}`}
+                    />
+                    차순위 승계 허용
+                  </label>
+                  <p className="mt-1 text-[11px] text-text-3">
+                    낙찰자가 결제하지 않으면 차순위 입찰자에게 구매 기회를 제안해요(24시간 내 수락, 1단계까지만).
+                    해제하면 낙찰자 미결제 시 곧바로 거래가 종료돼요.
+                  </p>
+                </div>
               )}
             </div>
           )}

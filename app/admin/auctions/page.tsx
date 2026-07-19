@@ -168,6 +168,23 @@ export default function AdminAuctionsPage() {
     await fetchList(query, statusFilter, saleTypeFilter);
   }
 
+  // 홈 배너(Hero) 노출 토글(#150) — 지정한 LIVE 경매가 홈 배너에 우선 노출된다.
+  async function toggleFeatured(auction: AdminAuctionSummary) {
+    try {
+      await fetchWithAuth<void>(`/api/admin/auctions/${auction.id}/featured`, {
+        method: "PATCH",
+        body: { featured: !auction.featured },
+      });
+      setNotice({
+        kind: "success",
+        text: `"${auction.title}" 배너 노출을 ${auction.featured ? "껐" : "켰"}습니다.`,
+      });
+      await fetchList(query, statusFilter, saleTypeFilter);
+    } catch (err) {
+      setNotice({ kind: "error", text: err instanceof ApiError ? err.message : "배너 설정에 실패했습니다." });
+    }
+  }
+
   function getEndLabel(auction: AdminAuctionSummary) {
     if (auction.saleType === "INSTANT") {
       return auction.status === "LIVE" ? "판매 중" : "—";
@@ -329,13 +346,32 @@ export default function AdminAuctionsPage() {
                         검수
                       </button>
                     ) : a.status === "LIVE" ? (
-                      <button
-                        type="button"
-                        onClick={() => openCancelDialog(a)}
-                        className={`rounded-full border border-accent/40 bg-accent-soft px-3 py-1 text-xs font-bold text-accent transition-colors hover:bg-accent hover:text-white ${FOCUS_RING}`}
-                      >
-                        취소
-                      </button>
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => void toggleFeatured(a)}
+                          aria-pressed={a.featured}
+                          title="홈 배너 노출 토글"
+                          className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-bold transition-colors ${FOCUS_RING} ${
+                            a.featured
+                              ? "border-primary text-primary hover:bg-primary/5"
+                              : "border-border-2 text-text-3 hover:border-primary hover:text-primary"
+                          }`}
+                        >
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${a.featured ? "bg-primary" : "bg-border-2"}`}
+                            aria-hidden="true"
+                          />
+                          배너
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => openCancelDialog(a)}
+                          className={`rounded-full border border-accent/40 bg-accent-soft px-3 py-1 text-xs font-bold text-accent transition-colors hover:bg-accent hover:text-white ${FOCUS_RING}`}
+                        >
+                          취소
+                        </button>
+                      </div>
                     ) : (
                       <span className="text-xs text-text-3">—</span>
                     )}

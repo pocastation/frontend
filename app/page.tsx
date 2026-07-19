@@ -26,6 +26,15 @@ async function getPopularAuctions(): Promise<AuctionListResponse | null> {
   }
 }
 
+// 홈 배너(Hero) — 관리자가 지정(featured)한 LIVE 경매. 없으면 인기 경매로 폴백(#150).
+async function getFeaturedAuctions(): Promise<AuctionListResponse | null> {
+  try {
+    return await apiFetch<AuctionListResponse>("/api/auctions/featured?size=5", { cache: "no-store" });
+  } catch {
+    return null;
+  }
+}
+
 async function getInstantSales(): Promise<AuctionListResponse | null> {
   try {
     return await apiFetch<AuctionListResponse>("/api/auctions?saleType=INSTANT&size=60", { cache: "no-store" });
@@ -35,17 +44,23 @@ async function getInstantSales(): Promise<AuctionListResponse | null> {
 }
 
 export default async function Home() {
-  const [auctions, popular, instantSales] = await Promise.all([
+  const [auctions, featured, popular, instantSales] = await Promise.all([
     getAuctions(),
+    getFeaturedAuctions(),
     getPopularAuctions(),
     getInstantSales(),
   ]);
   const content = auctions?.content ?? [];
   const instantContent = instantSales?.content ?? [];
+  // 배너: 관리자 지정(featured) 우선 → 없으면 인기 경매 → 그것도 없으면 최신 라이브 앞부분.
+  const featuredContent = featured?.content ?? [];
+  const heroFeatured = featuredContent.length
+    ? featuredContent.slice(0, 3)
+    : (popular?.content?.length ? popular.content.slice(0, 3) : content.slice(0, 3));
 
   return (
     <div>
-      <Hero liveCount={content.length} featured={content.slice(0, 3)} />
+      <Hero liveCount={content.length} featured={heroFeatured} />
       <AuctionTicker />
       <AuctionExplorer
         initialAuctions={content}

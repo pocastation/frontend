@@ -151,6 +151,7 @@ export type AdminAuctionSummary = {
   cancellationReason: string | null;
   reviewReason: string | null;
   reviewedAt: string | null;
+  featured: boolean;
 };
 
 export type AdminAuctionListResponse = {

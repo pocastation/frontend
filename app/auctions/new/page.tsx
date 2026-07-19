@@ -53,10 +53,7 @@ export default function NewAuctionPage() {
   const descriptionFieldId = useId();
   const sourceFieldId = useId();
   const gradeFieldId = useId();
-  const sourceDetailFieldId = useId();
-  const albumNameFieldId = useId();
   const unopenedFieldId = useId();
-  const conditionNoteFieldId = useId();
   const startPriceFieldId = useId();
 
   const [saleType, setSaleType] = useState<AuctionSaleType>("AUCTION");
@@ -68,11 +65,8 @@ export default function NewAuctionPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [source, setSource] = useState<PhotocardSource>("ALBUM");
-  const [sourceDetail, setSourceDetail] = useState("");
-  const [albumName, setAlbumName] = useState("");
   const [grade, setGrade] = useState<PhotocardGrade>("S");
   const [unopened, setUnopened] = useState(false);
-  const [conditionNote, setConditionNote] = useState("");
   const [startPrice, setStartPrice] = useState("");
   const [durationDays, setDurationDays] = useState<number>(3);
 
@@ -292,11 +286,8 @@ export default function NewAuctionPage() {
           title,
           description: description || undefined,
           source,
-          sourceDetail: sourceDetail || undefined,
-          albumName: albumName || undefined,
           grade,
           unopened,
-          conditionNote: conditionNote || undefined,
           saleType,
           startPrice: price,
           buyNowPrice: saleType === "INSTANT" ? price : undefined,
@@ -462,7 +453,7 @@ export default function NewAuctionPage() {
                   id={descriptionFieldId}
                   maxLength={2000}
                   rows={3}
-                  placeholder="구매 경로, 보관 방식 등 참고할 내용을 적어주세요."
+                  placeholder="구매 경로·앨범·보관 방식과 함께, 하자·상태(스크래치·눌림·화이트 등)를 있는 그대로 적어주세요."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   className={INPUT_CLASS}
@@ -510,36 +501,6 @@ export default function NewAuctionPage() {
                 </div>
               </div>
 
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor={sourceDetailFieldId} className="text-xs font-bold text-text-2">
-                  출처 상세 (선택)
-                </label>
-                <input
-                  id={sourceDetailFieldId}
-                  type="text"
-                  maxLength={100}
-                  placeholder="예: 알라딘 예약특전, 3차 팬사인회 등"
-                  value={sourceDetail}
-                  onChange={(e) => setSourceDetail(e.target.value)}
-                  className={INPUT_CLASS}
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor={albumNameFieldId} className="text-xs font-bold text-text-2">
-                  앨범명 (선택)
-                </label>
-                <input
-                  id={albumNameFieldId}
-                  type="text"
-                  maxLength={100}
-                  placeholder="예: Proof"
-                  value={albumName}
-                  onChange={(e) => setAlbumName(e.target.value)}
-                  className={INPUT_CLASS}
-                />
-              </div>
-
               <label htmlFor={unopenedFieldId} className="flex w-fit items-center gap-2 text-sm text-text-2">
                 <input
                   id={unopenedFieldId}
@@ -550,21 +511,6 @@ export default function NewAuctionPage() {
                 />
                 미개봉 상품입니다
               </label>
-
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor={conditionNoteFieldId} className="text-xs font-bold text-text-2">
-                  하자/상태 상세 고지 (선택)
-                </label>
-                <textarea
-                  id={conditionNoteFieldId}
-                  maxLength={2000}
-                  rows={2}
-                  placeholder="스크래치, 눌림, 화이트 등 있는 그대로 적어주세요."
-                  value={conditionNote}
-                  onChange={(e) => setConditionNote(e.target.value)}
-                  className={INPUT_CLASS}
-                />
-              </div>
             </div>
           )}
 

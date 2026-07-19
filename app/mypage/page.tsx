@@ -10,7 +10,7 @@ import PaymentMethodManager from "@/components/PaymentMethodManager";
 import ProfileTab from "@/components/ProfileTab";
 import SettingsTab from "@/components/SettingsTab";
 import NotificationSettings from "@/components/NotificationSettings";
-import OrderDeliveryAddressForm from "@/components/OrderDeliveryAddressForm";
+import DeliveryAddressModal from "@/components/DeliveryAddressModal";
 import OrderShipForm from "@/components/OrderShipForm";
 import { StatusIconCircle, type StatusTone } from "@/components/StatusIcon";
 import { formatDateTimeKST, formatKRW, formatTimeLeft } from "@/lib/format";
@@ -225,6 +225,10 @@ export default function MyPage() {
   const [soldOrders, setSoldOrders] = useState<Record<number, SoldOrderResponse>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // 낙찰 후 배송지 입력 팝업(§13 "배송지 자동채움") — 기본배송지가 없어 자동확정 못한 주문을
+  // 마이페이지 진입 즉시 모달로 띄운다. 사용자가 "나중에"로 닫으면 이번 세션에선 다시 안 띄운다.
+  const [addressModalOrder, setAddressModalOrder] = useState<{ auctionId: number; title: string } | null>(null);
+  const dismissedAddressIds = useRef<Set<number>>(new Set());
 
   // 알림·주문 상태 푸터의 CTA가 /mypage?tab=payment 로 진입할 수 있게 쿼리를 1회 반영한다.
   // (탭이 로컬 state뿐이라 SSR 초기값으로 읽으면 하이드레이션이 어긋난다 — 마운트 후 전환.)
@@ -301,6 +305,38 @@ export default function MyPage() {
     }
   }, [fetchWithAuth]);
 
+  // 배송지 미확정(기본배송지 없이 낙찰) 주문이 있으면 진입 즉시 팝업 — 이미 열려있거나 이번
+  // 세션에 "나중에"로 닫은 주문은 다시 띄우지 않는다.
+  useEffect(() => {
+    if (addressModalOrder) return;
+    const pending = Object.values(orders).find(
+      (o) =>
+        o.status === "PAID" &&
+        o.fulfillmentStatus === "AWAITING_SHIPMENT" &&
+        !o.hasDeliveryAddress &&
+        !dismissedAddressIds.current.has(o.auctionId),
+    );
+    if (!pending) return;
+    const auction = [...bidding, ...instantPurchases].find((a) => a.id === pending.auctionId);
+    setAddressModalOrder({ auctionId: pending.auctionId, title: auction?.title ?? "낙찰 상품" });
+  }, [orders, bidding, instantPurchases, addressModalOrder]);
+
+  function openAddressModal(auctionId: number, title: string) {
+    setAddressModalOrder({ auctionId, title });
+  }
+
+  function closeAddressModal() {
+    if (addressModalOrder) dismissedAddressIds.current.add(addressModalOrder.auctionId);
+    setAddressModalOrder(null);
+  }
+
+  // orders를 먼저 갱신한 뒤에 모달을 닫아야 한다 — 순서를 바꾸면 아직 갱신 전인 stale orders로
+  // 자동팝업 이펙트가 재평가되어 방금 확정한 같은 주문을 또 띄우는 레이스가 생긴다.
+  async function handleAddressSaved() {
+    await loadMyActivity();
+    setAddressModalOrder(null);
+  }
+
   // 관심목록 해제 — 실패하면(드묾) 전체를 다시 불러와 서버 상태와 어긋나지 않게 한다.
   async function handleRemoveWishlist(auctionId: number) {
     setWishlist((prev) => prev.filter((a) => a.id !== auctionId));
@@ -341,6 +377,14 @@ export default function MyPage() {
 
   return (
     <div className="mx-auto grid max-w-[1160px] gap-6 px-4 py-8 sm:py-10 lg:grid-cols-[240px_1fr]">
+      {addressModalOrder && (
+        <DeliveryAddressModal
+          auctionId={addressModalOrder.auctionId}
+          auctionTitle={addressModalOrder.title}
+          onClose={closeAddressModal}
+          onSaved={handleAddressSaved}
+        />
+      )}
       <aside>
         <div className="rounded-r3 border border-border bg-surface p-5 text-center shadow-card">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary-soft text-xl font-extrabold text-primary">
@@ -432,7 +476,7 @@ export default function MyPage() {
               </DashboardPanel>
 
               <DashboardPanel title="낙찰/구매 내역" onSeeAll={() => setTab("won")}>
-                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} />
+                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} />
               </DashboardPanel>
 
               <DashboardPanel title="즉시구매 내역" onSeeAll={() => setTab("instantPurchases")}>
@@ -444,6 +488,7 @@ export default function MyPage() {
                   orders={orders}
                   onGoPayment={() => setTab("payment")}
                   onRefresh={loadMyActivity}
+                  onOpenAddressModal={openAddressModal}
                 />
               </DashboardPanel>
 
@@ -480,7 +525,7 @@ export default function MyPage() {
             <h1 className="font-display text-xl font-extrabold text-text-1">낙찰/구매 내역</h1>
             <p className="mt-1 text-sm text-text-3">낙찰한 경매 {wonBidding.length}건</p>
             <div className="mt-5">
-              <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} />
+              <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} />
             </div>
           </>
         ) : tab === "instantPurchases" ? (
@@ -496,6 +541,7 @@ export default function MyPage() {
                 orders={orders}
                 onGoPayment={() => setTab("payment")}
                 onRefresh={loadMyActivity}
+                onOpenAddressModal={openAddressModal}
               />
             </div>
           </>
@@ -665,12 +711,14 @@ function SellingList({
   onGoPayment,
   soldOrders,
   onRefresh,
+  onOpenAddressModal,
 }: {
   items: AuctionResponse[];
   loading: boolean;
   emptyText: string;
   endedLabel?: string;
   showReviewStatus?: boolean;
+  onOpenAddressModal?: (auctionId: number, title: string) => void;
   // 즉시구매 내역처럼 "내가 구매자"인 목록엔 orders(#113)를, 판매 목록엔 soldOrders(#119)를 넘긴다.
   orders?: Record<number, MyOrderStatusResponse>;
   onGoPayment?: () => void;
@@ -731,7 +779,11 @@ function SellingList({
               {/* 구매자(즉시구매) 관점: PAID면 배송/확정, 아니면 결제 상태. 판매자 관점: 발송 푸터. */}
               {order &&
                 (order.status === "PAID" && onRefresh ? (
-                  <BuyerFulfillmentFooter order={order} onRefresh={onRefresh} />
+                  <BuyerFulfillmentFooter
+                    order={order}
+                    onRefresh={onRefresh}
+                    onOpenAddressModal={() => onOpenAddressModal?.(item.id, item.title)}
+                  />
                 ) : onGoPayment ? (
                   <OrderStatusFooter order={order} onGoPayment={onGoPayment} />
                 ) : null)}
@@ -906,16 +958,17 @@ const fulfillmentPill = (icon: string, tone: StatusTone, label: string) => (
   </span>
 );
 
-// 구매자 관점 배송/확정 푸터(#119) — 결제 완료(PAID) 주문에만. 배송지 입력·구매확정 인터랙션 포함.
+// 구매자 관점 배송/확정 푸터(#119) — 결제 완료(PAID) 주문에만. 배송지 입력(모달 트리거)·구매확정 포함.
 function BuyerFulfillmentFooter({
   order,
   onRefresh,
+  onOpenAddressModal,
 }: {
   order: MyOrderStatusResponse;
   onRefresh: () => void;
+  onOpenAddressModal: () => void;
 }) {
   const { fetchWithAuth } = useAuth();
-  const [addressOpen, setAddressOpen] = useState(false);
   const [confirming, setConfirming] = useState(false);
 
   async function confirm() {
@@ -964,7 +1017,7 @@ function BuyerFulfillmentFooter({
             <span className="min-w-0 flex-1">받을 주소를 입력하면 판매자가 발송해요.</span>
             <button
               type="button"
-              onClick={() => setAddressOpen((v) => !v)}
+              onClick={onOpenAddressModal}
               className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
             >
               배송지 입력
@@ -977,15 +1030,6 @@ function BuyerFulfillmentFooter({
           </>
         )}
       </div>
-      {addressOpen && fs === "AWAITING_SHIPMENT" && !order.hasDeliveryAddress && (
-        <OrderDeliveryAddressForm
-          auctionId={order.auctionId}
-          onDone={() => {
-            setAddressOpen(false);
-            onRefresh();
-          }}
-        />
-      )}
     </div>
   );
 }
@@ -1059,6 +1103,7 @@ function MyBiddingList({
   orders,
   onGoPayment,
   onRefresh,
+  onOpenAddressModal,
 }: {
   items: MyBiddingResponse[];
   loading: boolean;
@@ -1067,6 +1112,7 @@ function MyBiddingList({
   orders?: Record<number, MyOrderStatusResponse>;
   onGoPayment?: () => void;
   onRefresh?: () => void;
+  onOpenAddressModal?: (auctionId: number, title: string) => void;
 }) {
   if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
   if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
@@ -1112,7 +1158,11 @@ function MyBiddingList({
               {/* 낙찰 건도 PAID면 배송지 입력·구매확정 푸터, 그 전이면 결제 상태 푸터(#113/#119). */}
               {order &&
                 (order.status === "PAID" && onRefresh ? (
-                  <BuyerFulfillmentFooter order={order} onRefresh={onRefresh} />
+                  <BuyerFulfillmentFooter
+                    order={order}
+                    onRefresh={onRefresh}
+                    onOpenAddressModal={() => onOpenAddressModal?.(item.id, item.title)}
+                  />
                 ) : onGoPayment ? (
                   <OrderStatusFooter order={order} onGoPayment={onGoPayment} />
                 ) : null)}

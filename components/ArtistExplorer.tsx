@@ -114,7 +114,7 @@ export default function ArtistExplorer({
           />
         </label>
 
-        <div className="flex shrink-0 gap-1.5" role="group" aria-label="아티스트 타입 필터">
+        <div className="flex shrink-0 gap-1.5" role="group" aria-label="스타 타입 필터">
           <button
             type="button"
             aria-pressed={type === null}
@@ -148,7 +148,7 @@ export default function ArtistExplorer({
 
       {error && (
         <div className="mb-4">
-          <ExploreError title="아티스트를 불러오지 못했어요" onRetry={fetchFirstPage} />
+          <ExploreError title="스타를 불러오지 못했어요" onRetry={fetchFirstPage} />
         </div>
       )}
 
@@ -163,7 +163,7 @@ export default function ArtistExplorer({
         // 빈 목록도 로딩 중 높이가 다른 스피너로 교체하지 않고 dim만(레이아웃 시프트 방지).
         <div className={loading ? "opacity-60 transition-opacity" : undefined}>
           <ExploreEmpty
-            title={filtered ? "조건에 맞는 아티스트가 없어요" : "등록된 아티스트가 없습니다"}
+            title={filtered ? "조건에 맞는 스타가 없어요" : "등록된 스타가 없습니다"}
             hint={filtered ? "다른 키워드로 검색하거나 필터를 바꿔보세요." : undefined}
             onClear={
               filtered

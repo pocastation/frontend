@@ -255,7 +255,7 @@ export default function NewAuctionPage() {
     setError(null);
 
     if (artistId === "") {
-      setError("아티스트를 선택해주세요.");
+      setError("스타를 선택해주세요.");
       return;
     }
     if (uploadedImages.length === 0) {
@@ -403,7 +403,7 @@ export default function NewAuctionPage() {
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
                 <label htmlFor={artistFieldId} className="text-xs font-bold text-text-2">
-                  아티스트 <span className="text-accent">*</span>
+                  스타 <span className="text-accent">*</span>
                 </label>
                 <ArtistCombobox id={artistFieldId} options={artists} value={artistId} onChange={setArtistId} />
               </div>

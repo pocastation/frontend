@@ -50,7 +50,7 @@ export default async function EndedAuctionsPage({
         initialTotalPages={auctions?.totalPages ?? 0}
         initialQuery={query}
         emptyTitle="종료된 경매가 없습니다"
-        searchPlaceholder="종료 경매 제목, 아티스트명, 멤버명으로 검색"
+        searchPlaceholder="종료 경매 제목, 스타명, 멤버명으로 검색"
       />
     </div>
   );

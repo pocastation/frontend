@@ -18,7 +18,7 @@ export default function ArtistAuctionGrid({ auctions }: { auctions: AuctionRespo
         </svg>
         <div>
           <p className="font-display text-sm font-extrabold text-text-1">아직 등록된 경매가 없어요</p>
-          <p className="mt-1 text-xs text-text-3">이 아티스트의 경매가 등록되면 여기에 표시돼요.</p>
+          <p className="mt-1 text-xs text-text-3">이 스타의 경매가 등록되면 여기에 표시돼요.</p>
         </div>
       </div>
     );

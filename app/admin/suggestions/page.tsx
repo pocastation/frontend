@@ -103,7 +103,7 @@ export default function AdminSuggestionsPage() {
       <div className="mb-5">
         <h1 className="font-display text-xl font-extrabold text-text-1">건의 관리</h1>
         <p className="mt-1 text-sm text-text-3">
-          사용자가 낸 아티스트·기획사·멤버 등록 건의를 검토해요. 반영은 카탈로그 관리에서 직접 추가하세요.
+          사용자가 낸 스타·기획사·멤버 등록 건의를 검토해요. 반영은 카탈로그 관리에서 직접 추가하세요.
         </p>
       </div>
 

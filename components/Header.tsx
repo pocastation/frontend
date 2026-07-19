@@ -12,7 +12,7 @@ import { useNotifications } from "@/lib/notification-context";
 const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/auctions", label: "경매" },
   { href: "/instant-sales", label: "즉시판매" },
-  { href: "/artists", label: "아티스트" },
+  { href: "/artists", label: "스타" },
 ];
 
 const FOCUS_RING =
@@ -113,8 +113,8 @@ export default function Header() {
           <input
             id={searchFieldId}
             type="search"
-            aria-label="아티스트, 멤버, 앨범 검색"
-            placeholder="아티스트, 멤버, 앨범 검색..."
+            aria-label="스타, 멤버, 앨범 검색"
+            placeholder="스타, 멤버, 앨범 검색..."
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
           />
@@ -211,7 +211,7 @@ export default function Header() {
         <div id="mobile-menu" className="border-t border-border bg-white px-4 py-3 sm:hidden">
           <form className="relative mb-3" role="search" onSubmit={handleSearchSubmit}>
             <label htmlFor={mobileSearchFieldId} className="sr-only">
-              아티스트, 멤버, 앨범 검색
+              스타, 멤버, 앨범 검색
             </label>
             <button type="submit" aria-label="검색" className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-3">
               <SearchIcon />
@@ -219,7 +219,7 @@ export default function Header() {
             <input
               id={mobileSearchFieldId}
               type="search"
-              placeholder="아티스트, 멤버, 앨범 검색..."
+              placeholder="스타, 멤버, 앨범 검색..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               className={`w-full rounded-full border border-border bg-bg py-2 pl-9 pr-3.5 text-sm outline-none focus:border-primary ${FOCUS_RING}`}

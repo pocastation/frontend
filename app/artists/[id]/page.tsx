@@ -61,7 +61,7 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
         href="/artists"
         className={`mb-4 inline-flex items-center gap-1 rounded-r2 px-1 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
       >
-        <span aria-hidden="true">←</span> 아티스트 목록으로
+        <span aria-hidden="true">←</span> 스타 목록으로
       </Link>
 
       <div className="flex flex-col gap-6 rounded-r4 border border-border bg-surface p-6 shadow-card sm:flex-row sm:items-center sm:p-8">

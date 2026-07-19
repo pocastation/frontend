@@ -11,6 +11,7 @@ import ProfileTab from "@/components/ProfileTab";
 import SettingsTab from "@/components/SettingsTab";
 import NotificationSettings from "@/components/NotificationSettings";
 import DeliveryAddressModal from "@/components/DeliveryAddressModal";
+import ReviewComposerModal from "@/components/ReviewComposerModal";
 import OrderShipForm from "@/components/OrderShipForm";
 import { StatusIconCircle, type StatusTone } from "@/components/StatusIcon";
 import { formatDateTimeKST, formatKRW, formatTimeLeft } from "@/lib/format";
@@ -22,6 +23,7 @@ import type {
   MyBiddingListResponse,
   MyBiddingResponse,
   MyOrderStatusResponse,
+  ReviewableOrderResponse,
   SoldOrderResponse,
   WishlistListResponse,
 } from "@/lib/types";
@@ -229,6 +231,9 @@ export default function MyPage() {
   // 마이페이지 진입 즉시 모달로 띄운다. 사용자가 "나중에"로 닫으면 이번 세션에선 다시 안 띄운다.
   const [addressModalOrder, setAddressModalOrder] = useState<{ auctionId: number; title: string } | null>(null);
   const dismissedAddressIds = useRef<Set<number>>(new Set());
+  // 거래 리뷰(§12.6) — 작성 가능한(구매확정 후 14일 내 미작성) 주문 목록 + 작성 모달 대상.
+  const [reviewable, setReviewable] = useState<ReviewableOrderResponse[]>([]);
+  const [reviewModalOrder, setReviewModalOrder] = useState<ReviewableOrderResponse | null>(null);
 
   // 알림·주문 상태 푸터의 CTA가 /mypage?tab=payment 로 진입할 수 있게 쿼리를 1회 반영한다.
   // (탭이 로컬 state뿐이라 SSR 초기값으로 읽으면 하이드레이션이 어긋난다 — 마운트 후 전환.)
@@ -298,6 +303,13 @@ export default function MyPage() {
       } catch {
         setSoldOrders({});
       }
+
+      // 작성 가능한 리뷰(구매확정 후 14일 내 미작성) — 실패는 non-fatal.
+      try {
+        setReviewable(await fetchWithAuth<ReviewableOrderResponse[]>("/api/reviews/reviewable"));
+      } catch {
+        setReviewable([]);
+      }
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "내 활동을 불러오지 못했습니다.");
     } finally {
@@ -335,6 +347,32 @@ export default function MyPage() {
   async function handleAddressSaved() {
     await loadMyActivity();
     setAddressModalOrder(null);
+  }
+
+  // 구매확정 직후 곧바로 후기 작성 모달을 띄운다(당근식 즉시 진입) — 확정 반영 후 reviewable에서
+  // 방금 확정한 주문을 찾아 연다. 확정 자체는 이미 성공했으니 모달 실패는 조용히(목록에서 재작성 가능).
+  const handleConfirmed = useCallback(
+    async (auctionId: number) => {
+      await loadMyActivity();
+      try {
+        const rev = await fetchWithAuth<ReviewableOrderResponse[]>("/api/reviews/reviewable");
+        setReviewable(rev);
+        const target = rev.find((r) => r.auctionId === auctionId);
+        if (target) setReviewModalOrder(target);
+      } catch {
+        // 무시 — 마이페이지 "작성 가능한 리뷰"에서 나중에 작성 가능.
+      }
+    },
+    [fetchWithAuth, loadMyActivity],
+  );
+
+  async function handleReviewSaved() {
+    setReviewModalOrder(null);
+    try {
+      setReviewable(await fetchWithAuth<ReviewableOrderResponse[]>("/api/reviews/reviewable"));
+    } catch {
+      // 무시 — 다음 새로고침에서 보정.
+    }
   }
 
   // 관심목록 해제 — 실패하면(드묾) 전체를 다시 불러와 서버 상태와 어긋나지 않게 한다.
@@ -383,6 +421,15 @@ export default function MyPage() {
           auctionTitle={addressModalOrder.title}
           onClose={closeAddressModal}
           onSaved={handleAddressSaved}
+        />
+      )}
+      {reviewModalOrder && (
+        <ReviewComposerModal
+          orderId={reviewModalOrder.orderId}
+          title={reviewModalOrder.title}
+          sellerNickname={reviewModalOrder.sellerNickname}
+          onClose={() => setReviewModalOrder(null)}
+          onSaved={handleReviewSaved}
         />
       )}
       <aside>
@@ -466,6 +513,30 @@ export default function MyPage() {
               <DashboardStat label="판매 중인 경매" value={`${activeSelling.length}건`} swatch="bg-surface-3" />
             </div>
 
+            {reviewable.length > 0 && (
+              <div className="mt-6 rounded-r3 border border-border bg-surface p-4 shadow-card">
+                <p className="text-sm font-bold text-text-1">작성할 수 있는 거래 후기 {reviewable.length}건</p>
+                <p className="mt-0.5 text-xs text-text-3">구매확정한 거래의 후기를 남겨 판매자에게 힘을 실어주세요.</p>
+                <ul className="mt-3 flex flex-col divide-y divide-border/70">
+                  {reviewable.map((r) => (
+                    <li key={r.orderId} className="flex items-center justify-between gap-3 py-2.5">
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-semibold text-text-1">{r.title}</span>
+                        <span className="block text-xs text-text-3">{r.sellerNickname ?? "판매자"}님과의 거래</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setReviewModalOrder(r)}
+                        className={`shrink-0 rounded-full bg-primary px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+                      >
+                        후기 쓰기
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
             <div className="mt-8 grid gap-5 sm:grid-cols-2">
               <DashboardPanel title="참여 중인 경매" onSeeAll={() => setTab("participating")}>
                 <MyBiddingList items={liveBidding.slice(0, 3)} loading={loading} emptyText="참여 중인 경매가 없습니다." />
@@ -476,7 +547,7 @@ export default function MyPage() {
               </DashboardPanel>
 
               <DashboardPanel title="낙찰/구매 내역" onSeeAll={() => setTab("won")}>
-                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} />
+                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
               </DashboardPanel>
 
               <DashboardPanel title="즉시구매 내역" onSeeAll={() => setTab("instantPurchases")}>
@@ -489,6 +560,7 @@ export default function MyPage() {
                   onGoPayment={() => setTab("payment")}
                   onRefresh={loadMyActivity}
                   onOpenAddressModal={openAddressModal}
+                  onConfirmed={handleConfirmed}
                 />
               </DashboardPanel>
 
@@ -525,7 +597,7 @@ export default function MyPage() {
             <h1 className="font-display text-xl font-extrabold text-text-1">낙찰/구매 내역</h1>
             <p className="mt-1 text-sm text-text-3">낙찰한 경매 {wonBidding.length}건</p>
             <div className="mt-5">
-              <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} />
+              <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
             </div>
           </>
         ) : tab === "instantPurchases" ? (
@@ -542,6 +614,7 @@ export default function MyPage() {
                 onGoPayment={() => setTab("payment")}
                 onRefresh={loadMyActivity}
                 onOpenAddressModal={openAddressModal}
+                onConfirmed={handleConfirmed}
               />
             </div>
           </>
@@ -712,6 +785,7 @@ function SellingList({
   soldOrders,
   onRefresh,
   onOpenAddressModal,
+  onConfirmed,
 }: {
   items: AuctionResponse[];
   loading: boolean;
@@ -724,6 +798,7 @@ function SellingList({
   onGoPayment?: () => void;
   soldOrders?: Record<number, SoldOrderResponse>;
   onRefresh?: () => void;
+  onConfirmed?: (auctionId: number) => void;
 }) {
   if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
   if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
@@ -783,6 +858,7 @@ function SellingList({
                     order={order}
                     onRefresh={onRefresh}
                     onOpenAddressModal={() => onOpenAddressModal?.(item.id, item.title)}
+                    onConfirmed={onConfirmed}
                   />
                 ) : onGoPayment ? (
                   <OrderStatusFooter order={order} onGoPayment={onGoPayment} />
@@ -963,10 +1039,12 @@ function BuyerFulfillmentFooter({
   order,
   onRefresh,
   onOpenAddressModal,
+  onConfirmed,
 }: {
   order: MyOrderStatusResponse;
   onRefresh: () => void;
   onOpenAddressModal: () => void;
+  onConfirmed?: (auctionId: number) => void;
 }) {
   const { fetchWithAuth } = useAuth();
   const [confirming, setConfirming] = useState(false);
@@ -976,7 +1054,9 @@ function BuyerFulfillmentFooter({
     setConfirming(true);
     try {
       await fetchWithAuth<void>(`/api/auctions/${order.auctionId}/order/confirm`, { method: "POST" });
-      onRefresh();
+      // 당근식 즉시 진입 — 확정 성공 직후 후기 모달을 띄운다(onConfirmed가 새로고침까지 겸함).
+      if (onConfirmed) onConfirmed(order.auctionId);
+      else onRefresh();
     } catch {
       // 실패는 조용히 — 다음 새로고침에서 서버 상태로 보정.
     } finally {
@@ -1104,6 +1184,7 @@ function MyBiddingList({
   onGoPayment,
   onRefresh,
   onOpenAddressModal,
+  onConfirmed,
 }: {
   items: MyBiddingResponse[];
   loading: boolean;
@@ -1113,6 +1194,7 @@ function MyBiddingList({
   onGoPayment?: () => void;
   onRefresh?: () => void;
   onOpenAddressModal?: (auctionId: number, title: string) => void;
+  onConfirmed?: (auctionId: number) => void;
 }) {
   if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
   if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
@@ -1162,6 +1244,7 @@ function MyBiddingList({
                     order={order}
                     onRefresh={onRefresh}
                     onOpenAddressModal={() => onOpenAddressModal?.(item.id, item.title)}
+                    onConfirmed={onConfirmed}
                   />
                 ) : onGoPayment ? (
                   <OrderStatusFooter order={order} onGoPayment={onGoPayment} />

@@ -9,6 +9,7 @@ import BidSection from "@/components/BidSection";
 import InstantPurchaseSection from "@/components/InstantPurchaseSection";
 import ReportButton from "@/components/ReportButton";
 import SearchLink from "@/components/SearchLink";
+import SellerReviewSummary from "@/components/SellerReviewSummary";
 import SellerShipPanel from "@/components/SellerShipPanel";
 import ShareButton from "@/components/ShareButton";
 import SuccessionOfferBanner from "@/components/SuccessionOfferBanner";
@@ -169,14 +170,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-sm font-bold text-text-2">
                     {auction.sellerNickname.slice(0, 1).toUpperCase()}
                   </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="text-sm font-bold text-text-1">{auction.sellerNickname}</span>
-                    {/* 판매자 등급·거래 후기 도메인은 아직 없다 — 모두 기본 등급(LV.1)만 노출하고
-                        건수·평점처럼 판매자마다 달라야 할 숫자는 지어내지 않는다. */}
-                    <span className="rounded-full border border-border px-1.5 py-0.5 text-[10px] font-extrabold text-text-2">
-                      LV.1
-                    </span>
-                  </span>
+                  <span className="text-sm font-bold text-text-1">{auction.sellerNickname}</span>
                 </div>
                 {auction.artistName && (
                   <SearchLink
@@ -187,7 +181,8 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
                   </SearchLink>
                 )}
               </div>
-              <p className="mt-1.5 text-[11px] text-text-3">거래 후기 기능은 준비 중이에요.</p>
+              {/* 실제 거래 후기(평균 별점·건수·받은 태그 + 목록). 후기 0건이면 "아직 없어요"로 정직하게(§1). */}
+              <SellerReviewSummary sellerId={auction.sellerId} />
             </div>
           </section>
         </div>

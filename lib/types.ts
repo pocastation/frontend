@@ -233,6 +233,7 @@ export type AuctionImageResponse = {
 
 export type AuctionDetailResponse = {
   id: number;
+  sellerId: string;
   sellerNickname: string;
   artistId: number;
   artistName: string | null;
@@ -663,4 +664,58 @@ export type AdminSuggestionListResponse = {
   size: number;
   totalElements: number;
   totalPages: number;
+};
+
+// ─── 거래 리뷰·별점(§12.6, #156/#201) ───
+
+// BE가 코드와 한국어 라벨을 함께 내려줌 — FE는 자산 없이 렌더.
+export type ReviewTagView = { code: string; label: string };
+
+export type ReviewReportReason = "ABUSE" | "FALSE_INFO" | "PRIVACY" | "SPAM" | "ETC";
+
+// 판매자 리뷰 목록 항목(공개). 작성자는 닉네임으로만 노출.
+export type ReviewResponse = {
+  id: number;
+  rating: number;
+  body: string | null;
+  tags: ReviewTagView[];
+  reviewerNickname: string | null;
+  createdAt: string;
+};
+
+export type SellerReviewListResponse = {
+  content: ReviewResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+// GET /api/sellers/{sellerId}/rating — 판매자 집계(평균·건수·받은 태그).
+export type SellerRatingResponse = {
+  averageRating: number | null; // 리뷰 0건이면 null
+  reviewCount: number;
+  tags: { code: string; label: string; count: number }[];
+};
+
+// GET /api/reviews/reviewable — 내 구매확정 주문 중 미작성 리뷰 대상.
+export type ReviewableOrderResponse = {
+  orderId: number;
+  auctionId: number;
+  title: string;
+  sellerNickname: string | null;
+  confirmedAt: string;
+  writableUntil: string;
+};
+
+// GET /api/admin/reviews/reports — 관리자 신고 대기열 항목.
+export type AdminReviewReportResponse = {
+  reviewId: number;
+  rating: number;
+  body: string | null;
+  reviewStatus: "VISIBLE" | "BLINDED" | "DELETED";
+  reviewerNickname: string | null;
+  sellerNickname: string | null;
+  reviewCreatedAt: string;
+  reports: { reasonCode: ReviewReportReason; detail: string | null; createdAt: string }[];
 };

@@ -11,6 +11,7 @@ import type {
   ArtistStatus,
   ArtistType,
   MemberResponse,
+  ParentAgency,
 } from "@/lib/types";
 
 type IdolResponse = {
@@ -35,6 +36,20 @@ const ARTIST_STATUS_LABEL: Record<ArtistStatus, string> = {
   ACTIVE: "활동",
   HIATUS: "휴식",
   DISBANDED: "해체",
+};
+const ARTIST_STATUS_OPTIONS: ArtistStatus[] = ["ACTIVE", "HIATUS", "DISBANDED"];
+const PARENT_AGENCY_OPTIONS: ParentAgency[] = ["HYBE", "SM", "JYP", "YG"];
+
+type EditForm = {
+  name: string;
+  nameEn: string;
+  agency: string;
+  fandomName: string;
+  debutDate: string;
+  imageUrl: string;
+  status: ArtistStatus;
+  visible: boolean;
+  parentAgency: "" | ParentAgency;
 };
 
 const initialArtistForm = {
@@ -96,12 +111,16 @@ export default function AdminCatalogPage() {
   const [artistForm, setArtistForm] = useState(initialArtistForm);
   const [idolForm, setIdolForm] = useState(initialIdolForm);
   const [membershipForm, setMembershipForm] = useState(initialMembershipForm);
+  const [editing, setEditing] = useState<ArtistResponse | null>(null);
+  const [editForm, setEditForm] = useState<EditForm | null>(null);
+  const [editSubmitting, setEditSubmitting] = useState(false);
 
   const loadOverview = useCallback(async () => {
     setIsDataLoading(true);
     setNotice(null);
     try {
-      const artistRes = await apiFetch<ArtistListResponse>("/api/artists?size=120", { cache: "no-store" });
+      // 관리자 목록은 숨김(visible=false) 스타도 포함하고 편집에 필요한 전 필드를 담는다(#148).
+      const artistRes = await fetchWithAuth<ArtistListResponse>("/api/admin/artists?size=300");
       setArtists(artistRes.content);
       setArtistTotal(artistRes.totalElements);
     } catch (err) {
@@ -109,7 +128,7 @@ export default function AdminCatalogPage() {
     } finally {
       setIsDataLoading(false);
     }
-  }, []);
+  }, [fetchWithAuth]);
 
   const loadArtistMembers = useCallback(async (artistId: number) => {
     try {
@@ -169,6 +188,55 @@ export default function AdminCatalogPage() {
       setNotice({ kind: "error", text: getErrorMessage(err, "스타 등록에 실패했습니다.") });
     } finally {
       setSubmitting(null);
+    }
+  }
+
+  // 편집 모달 열기 — 전 필드 프리필(updateProfile이 전체 덮어쓰기라 현재값 보존이 필수).
+  function openEdit(artist: ArtistResponse) {
+    setEditing(artist);
+    setEditForm({
+      name: artist.name,
+      nameEn: artist.nameEn ?? "",
+      agency: artist.agency ?? "",
+      fandomName: artist.fandomName ?? "",
+      debutDate: artist.debutDate ?? "",
+      imageUrl: artist.imageUrl ?? "",
+      status: artist.status,
+      visible: artist.visible,
+      parentAgency: artist.parentAgency ?? "",
+    });
+    setNotice(null);
+  }
+
+  async function handleUpdateArtist(e: FormEvent) {
+    e.preventDefault();
+    if (!canUseAdmin || !accessToken || !editing || !editForm) return;
+
+    setEditSubmitting(true);
+    setNotice(null);
+    try {
+      const updated = await fetchWithAuth<ArtistResponse>(`/api/admin/artists/${editing.id}`, {
+        method: "PATCH",
+        body: {
+          name: editForm.name.trim(),
+          nameEn: optionalText(editForm.nameEn),
+          agency: optionalText(editForm.agency),
+          fandomName: optionalText(editForm.fandomName),
+          debutDate: optionalText(editForm.debutDate),
+          imageUrl: optionalText(editForm.imageUrl),
+          status: editForm.status,
+          visible: editForm.visible,
+          parentAgency: editForm.parentAgency || null,
+        },
+      });
+      setArtists((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
+      setEditing(null);
+      setEditForm(null);
+      setNotice({ kind: "success", text: `${updated.name} 정보를 수정했습니다.` });
+    } catch (err) {
+      setNotice({ kind: "error", text: getErrorMessage(err, "스타 수정에 실패했습니다.") });
+    } finally {
+      setEditSubmitting(false);
     }
   }
 
@@ -283,26 +351,40 @@ export default function AdminCatalogPage() {
         </div>
 
         <div className="mt-4 grid gap-x-4 gap-y-0.5 sm:grid-cols-2 lg:grid-cols-3">
-          {artists.slice(0, 30).map((artist) => (
-              <button
+          {artists.map((artist) => (
+              <div
                 key={artist.id}
-                type="button"
-                onClick={() => {
-                  handleArtistSelect(String(artist.id));
-                  setMembershipForm((prev) => ({ ...prev, artistId: String(artist.id) }));
-                }}
-                className={`flex w-full items-center justify-between gap-3 border-b border-border py-2.5 text-left ${FOCUS_RING}`}
+                className="flex items-center justify-between gap-2 border-b border-border py-2.5"
               >
-                <span>
-                  <span className="block text-sm font-bold text-text-1">{artist.name}</span>
-                  <span className="text-xs text-text-3">
-                    {ARTIST_TYPE_LABEL[artist.type]} · {artist.agency ?? "소속사 미입력"}
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleArtistSelect(String(artist.id));
+                    setMembershipForm((prev) => ({ ...prev, artistId: String(artist.id) }));
+                  }}
+                  className={`flex flex-1 items-center justify-between gap-3 text-left ${FOCUS_RING}`}
+                >
+                  <span>
+                    <span className="block text-sm font-bold text-text-1">
+                      {artist.name}
+                      {!artist.visible && <span className="ml-1 text-[11px] font-semibold text-text-3">· 숨김</span>}
+                    </span>
+                    <span className="text-xs text-text-3">
+                      {ARTIST_TYPE_LABEL[artist.type]} · {artist.agency ?? "소속사 미입력"}
+                    </span>
                   </span>
-                </span>
-                <span className="shrink-0 rounded-full bg-surface-3 px-2 py-1 text-[11px] font-bold text-text-2">
-                  {ARTIST_STATUS_LABEL[artist.status]}
-                </span>
-              </button>
+                  <span className="shrink-0 rounded-full bg-surface-3 px-2 py-1 text-[11px] font-bold text-text-2">
+                    {ARTIST_STATUS_LABEL[artist.status]}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openEdit(artist)}
+                  className={`shrink-0 rounded-full border border-border-2 px-2.5 py-1 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+                >
+                  편집
+                </button>
+              </div>
           ))}
         </div>
       </section>
@@ -492,6 +574,139 @@ export default function AdminCatalogPage() {
           </div>
         </form>
       </section>
+
+      {editing && editForm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="스타 편집"
+        >
+          <form
+            onSubmit={handleUpdateArtist}
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-r3 bg-surface p-5 shadow-modal"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-base font-extrabold text-text-1">
+                스타 편집 · {editing.name}
+              </h2>
+              <button
+                type="button"
+                aria-label="닫기"
+                onClick={() => {
+                  setEditing(null);
+                  setEditForm(null);
+                }}
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-text-3 hover:text-text-1 ${FOCUS_RING}`}
+              >
+                ×
+              </button>
+            </div>
+            <p className="mt-1 text-[11px] text-text-3">
+              타입({ARTIST_TYPE_LABEL[editing.type]})은 여기서 바꿀 수 없어요. 이미지는 자체제작·라이선스 보유분만 권장.
+            </p>
+
+            <div className="mt-4 flex flex-col gap-3">
+              <input
+                required
+                maxLength={100}
+                placeholder="이름 *"
+                value={editForm.name}
+                onChange={(e) => setEditForm((p) => (p ? { ...p, name: e.target.value } : p))}
+                className={INPUT_CLASS}
+              />
+              <input
+                maxLength={100}
+                placeholder="영문명"
+                value={editForm.nameEn}
+                onChange={(e) => setEditForm((p) => (p ? { ...p, nameEn: e.target.value } : p))}
+                className={INPUT_CLASS}
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  maxLength={100}
+                  placeholder="소속사"
+                  value={editForm.agency}
+                  onChange={(e) => setEditForm((p) => (p ? { ...p, agency: e.target.value } : p))}
+                  className={INPUT_CLASS}
+                />
+                <input
+                  maxLength={50}
+                  placeholder="팬덤명"
+                  value={editForm.fandomName}
+                  onChange={(e) => setEditForm((p) => (p ? { ...p, fandomName: e.target.value } : p))}
+                  className={INPUT_CLASS}
+                />
+              </div>
+              <input
+                type="date"
+                value={editForm.debutDate}
+                onChange={(e) => setEditForm((p) => (p ? { ...p, debutDate: e.target.value } : p))}
+                className={INPUT_CLASS}
+              />
+              <input
+                maxLength={500}
+                placeholder="이미지 URL"
+                value={editForm.imageUrl}
+                onChange={(e) => setEditForm((p) => (p ? { ...p, imageUrl: e.target.value } : p))}
+                className={INPUT_CLASS}
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  value={editForm.status}
+                  onChange={(e) => setEditForm((p) => (p ? { ...p, status: e.target.value as ArtistStatus } : p))}
+                  className={INPUT_CLASS}
+                >
+                  {ARTIST_STATUS_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {ARTIST_STATUS_LABEL[s]}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={editForm.parentAgency}
+                  onChange={(e) =>
+                    setEditForm((p) => (p ? { ...p, parentAgency: e.target.value as "" | ParentAgency } : p))
+                  }
+                  className={INPUT_CLASS}
+                >
+                  <option value="">빅4 미분류</option>
+                  {PARENT_AGENCY_OPTIONS.map((a) => (
+                    <option key={a} value={a}>
+                      {a}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <label className="flex w-fit items-center gap-2 text-sm text-text-2">
+                <input
+                  type="checkbox"
+                  checked={editForm.visible}
+                  onChange={(e) => setEditForm((p) => (p ? { ...p, visible: e.target.checked } : p))}
+                  className={`h-4 w-4 accent-primary ${FOCUS_RING}`}
+                />
+                공개(노출)
+              </label>
+            </div>
+
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(null);
+                  setEditForm(null);
+                }}
+                className={`h-11 flex-1 ${SECONDARY_BUTTON_CLASS}`}
+              >
+                취소
+              </button>
+              <button type="submit" disabled={editSubmitting} className={`h-11 flex-1 ${PRIMARY_BUTTON_CLASS}`}>
+                {editSubmitting ? "저장 중..." : "저장"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

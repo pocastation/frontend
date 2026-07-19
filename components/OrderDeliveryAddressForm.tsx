@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { loadPostcodeScript } from "@/lib/postcode";
+import { formatPhoneInput } from "@/lib/phone";
 import { FOCUS_RING, INPUT_CLASS } from "@/lib/ui";
 
 // 배송지 미확정 주문에 구매자가 배송지를 입력하는 인라인 폼(#119). 주소록(DeliveryAddressBook)과 달리
@@ -85,7 +86,7 @@ export default function OrderDeliveryAddressForm({
           className={`${INPUT_CLASS} flex-1`}
           placeholder="연락처 (010-0000-0000)"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
         />
       </div>
       <div className="flex gap-2">

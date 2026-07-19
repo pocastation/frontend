@@ -5,6 +5,7 @@ import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import { loadPostcodeScript } from "@/lib/postcode";
+import { formatPhoneInput } from "@/lib/phone";
 import type { DeliveryAddress } from "@/lib/types";
 
 const MAX_ADDRESSES = 10;
@@ -344,7 +345,7 @@ function AddressForm({
               id={phoneId}
               type="tel"
               value={values.phone}
-              onChange={(e) => set("phone", e.target.value)}
+              onChange={(e) => set("phone", formatPhoneInput(e.target.value))}
               required
               placeholder="010-0000-0000"
               pattern="^0\d{1,2}-?\d{3,4}-?\d{4}$"

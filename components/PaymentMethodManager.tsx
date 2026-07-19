@@ -5,6 +5,7 @@ import * as PortOne from "@portone/browser-sdk/v2";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { getCardBrandStyle } from "@/lib/cardBrand";
+import { formatPhoneInput } from "@/lib/phone";
 import { FOCUS_RING, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import type { PaymentMethod } from "@/lib/types";
 
@@ -221,9 +222,9 @@ export default function PaymentMethodManager() {
             <input
               className={inputClass}
               type="tel"
-              placeholder="휴대폰 번호 (선택, 숫자만)"
+              placeholder="휴대폰 번호 (선택)"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
               autoComplete="tel"
             />
           </div>

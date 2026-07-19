@@ -231,7 +231,7 @@ export const MEMBER_ROLE_LABEL: Record<MemberRole, string> = {
 // ─── 건의(suggestion) ───
 
 export const SUGGESTION_KIND_LABEL: Record<SuggestionKind, string> = {
-  ARTIST: "아티스트",
+  ARTIST: "스타",
   AGENCY: "기획사",
   MEMBER: "멤버",
 };

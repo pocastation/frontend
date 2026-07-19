@@ -59,7 +59,7 @@ export default function SuggestArtistButton() {
   return (
     <>
       <div className="mt-8 flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-8 text-center">
-        <p className="text-sm font-bold text-text-2">찾는 아티스트·기획사·멤버가 없나요?</p>
+        <p className="text-sm font-bold text-text-2">찾는 스타·기획사·멤버가 없나요?</p>
         <p className="text-xs text-text-3">등록을 건의하면 검토 후 추가해드려요.</p>
         <button
           type="button"
@@ -84,7 +84,7 @@ export default function SuggestArtistButton() {
         >
           <form onSubmit={submit} className="w-full max-w-sm rounded-r3 bg-surface p-5 shadow-modal">
             <h2 className="font-display text-base font-extrabold text-text-1">등록 건의</h2>
-            <p className="mt-1 text-xs text-text-3">추가됐으면 하는 아티스트·기획사·멤버를 알려주세요.</p>
+            <p className="mt-1 text-xs text-text-3">추가됐으면 하는 스타·기획사·멤버를 알려주세요.</p>
 
             <fieldset className="mt-4">
               <legend className="mb-1.5 text-xs font-bold text-text-2">종류</legend>

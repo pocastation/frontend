@@ -119,7 +119,7 @@ export default function AdminCatalogPage() {
       setArtistMembers(res.content);
     } catch (err) {
       setArtistMembers([]);
-      setNotice({ kind: "error", text: getErrorMessage(err, "아티스트 멤버를 불러오지 못했습니다.") });
+      setNotice({ kind: "error", text: getErrorMessage(err, "스타 멤버를 불러오지 못했습니다.") });
     }
   }, []);
 
@@ -131,7 +131,7 @@ export default function AdminCatalogPage() {
 
   useEffect(() => {
     if (selectedArtistId === "") return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 선택된 아티스트가 바뀔 때 서버 멤버 목록을 동기화한다.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 선택된 스타가 바뀔 때 서버 멤버 목록을 동기화한다.
     void loadArtistMembers(selectedArtistId);
   }, [loadArtistMembers, selectedArtistId]);
 
@@ -164,9 +164,9 @@ export default function AdminCatalogPage() {
       setArtistForm(initialArtistForm);
       setArtists((prev) => [created, ...prev]);
       setArtistTotal((prev) => prev + 1);
-      setNotice({ kind: "success", text: `${created.name} 아티스트를 등록했습니다.` });
+      setNotice({ kind: "success", text: `${created.name} 스타를 등록했습니다.` });
     } catch (err) {
-      setNotice({ kind: "error", text: getErrorMessage(err, "아티스트 등록에 실패했습니다.") });
+      setNotice({ kind: "error", text: getErrorMessage(err, "스타 등록에 실패했습니다.") });
     } finally {
       setSubmitting(null);
     }
@@ -207,7 +207,7 @@ export default function AdminCatalogPage() {
     const artistId = Number(membershipForm.artistId);
     const idolId = Number(membershipForm.idolId);
     if (!artistId || !idolId) {
-      setNotice({ kind: "error", text: "아티스트와 멤버 ID를 모두 입력해주세요." });
+      setNotice({ kind: "error", text: "스타와 멤버 ID를 모두 입력해주세요." });
       return;
     }
 
@@ -221,7 +221,7 @@ export default function AdminCatalogPage() {
           joinedAt: optionalText(membershipForm.joinedAt),
         },
       });
-      setNotice({ kind: "success", text: "아티스트와 멤버를 연결했습니다." });
+      setNotice({ kind: "success", text: "스타와 멤버를 연결했습니다." });
       setMembershipForm((prev) => ({ ...prev, joinedAt: "" }));
       if (selectedArtistId === artistId) {
         await loadArtistMembers(artistId);
@@ -238,7 +238,7 @@ export default function AdminCatalogPage() {
       <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">카탈로그 관리</h1>
-          <p className="mt-1.5 text-sm text-text-3">아티스트·멤버 마스터데이터를 등록하고 관리합니다.</p>
+          <p className="mt-1.5 text-sm text-text-3">스타·멤버 마스터데이터를 등록하고 관리합니다.</p>
         </div>
         <button
           type="button"
@@ -265,11 +265,11 @@ export default function AdminCatalogPage() {
 
       <section className="mt-6 rounded-r2 border border-border bg-white p-4 shadow-card">
         <h2 className="font-display text-base font-extrabold text-text-1">카탈로그 요약</h2>
-        <p className="mt-1 text-xs text-text-3">등록된 아티스트와 운영 상태입니다.</p>
+        <p className="mt-1 text-xs text-text-3">등록된 스타와 운영 상태입니다.</p>
 
         <div className="mt-4 grid grid-cols-2 gap-2 sm:max-w-xs">
           <div className="rounded-r2 bg-surface-2 p-3">
-            <p className="text-xs text-text-3">아티스트</p>
+            <p className="text-xs text-text-3">스타</p>
             <p className="mt-1 font-display text-xl font-extrabold text-text-1">
               {artistTotal.toLocaleString("ko-KR")}
             </p>
@@ -309,12 +309,12 @@ export default function AdminCatalogPage() {
 
       <section className="mt-6 grid gap-4 lg:grid-cols-3">
         <form onSubmit={handleCreateArtist} className="rounded-r2 border border-border bg-white p-4 shadow-card">
-          <h2 className="font-display text-base font-extrabold text-text-1">아티스트 등록</h2>
+          <h2 className="font-display text-base font-extrabold text-text-1">스타 등록</h2>
           <div className="mt-4 flex flex-col gap-3">
             <input
               required
               maxLength={100}
-              placeholder="아티스트명 *"
+              placeholder="스타명 *"
               value={artistForm.name}
               onChange={(e) => setArtistForm((prev) => ({ ...prev, name: e.target.value }))}
               className={INPUT_CLASS}
@@ -361,7 +361,7 @@ export default function AdminCatalogPage() {
             />
             <input
               inputMode="numeric"
-              placeholder="상위 아티스트 ID"
+              placeholder="상위 스타 ID"
               value={artistForm.parentArtistId}
               onChange={(e) => setArtistForm((prev) => ({ ...prev, parentArtistId: e.target.value }))}
               className={INPUT_CLASS}
@@ -374,7 +374,7 @@ export default function AdminCatalogPage() {
               className={INPUT_CLASS}
             />
             <button type="submit" disabled={submitting === "artist"} className={`mt-1 h-11 ${PRIMARY_BUTTON_CLASS}`}>
-              {submitting === "artist" ? "등록 중..." : "아티스트 등록"}
+              {submitting === "artist" ? "등록 중..." : "스타 등록"}
             </button>
           </div>
         </form>
@@ -429,7 +429,7 @@ export default function AdminCatalogPage() {
         </form>
 
         <form onSubmit={handleAddMembership} className="rounded-r2 border border-border bg-white p-4 shadow-card">
-          <h2 className="font-display text-base font-extrabold text-text-1">아티스트-멤버 연결</h2>
+          <h2 className="font-display text-base font-extrabold text-text-1">스타-멤버 연결</h2>
           <div className="mt-4 flex flex-col gap-3">
             <select
               required
@@ -440,7 +440,7 @@ export default function AdminCatalogPage() {
               }}
               className={INPUT_CLASS}
             >
-              <option value="">아티스트 선택 *</option>
+              <option value="">스타 선택 *</option>
               {artists.map((artist) => (
                 <option key={artist.id} value={artist.id}>
                   {artist.name} · #{artist.id}
@@ -471,7 +471,7 @@ export default function AdminCatalogPage() {
           </div>
 
           <div className="mt-5 border-t border-border pt-4">
-            <h3 className="text-xs font-extrabold text-text-3">선택 아티스트 멤버</h3>
+            <h3 className="text-xs font-extrabold text-text-3">선택 스타 멤버</h3>
             <div className="mt-2 max-h-[160px] overflow-y-auto">
               {artistMembers.length > 0 ? (
                 <div className="divide-y divide-border">
@@ -486,7 +486,7 @@ export default function AdminCatalogPage() {
                   ))}
                 </div>
               ) : (
-                <p className="py-4 text-sm text-text-3">아티스트를 선택하면 연결된 멤버가 표시됩니다.</p>
+                <p className="py-4 text-sm text-text-3">스타를 선택하면 연결된 멤버가 표시됩니다.</p>
               )}
             </div>
           </div>

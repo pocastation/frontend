@@ -31,6 +31,17 @@ export type DeliveryAddress = {
   isDefault: boolean;
 };
 
+// GET/POST/PATCH/DELETE /api/members/me/payment-methods — 마이페이지 결제수단 관리(#152).
+// 회원당 최대 3장, 기본카드(isDefault) 1개. cardName/cardNumber는 PG가 내려준 표시용 값
+// (카드번호 원문은 서버·프론트 어디에도 없음).
+export type PaymentMethod = {
+  id: number;
+  cardName: string | null;
+  cardNumber: string | null;
+  isDefault: boolean;
+  registeredAt: string;
+};
+
 export type TokenResponse = {
   accessToken: string;
   expiresInSeconds: number;

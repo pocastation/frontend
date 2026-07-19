@@ -21,9 +21,31 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   weight: ["500", "700", "800"],
 });
 
+// 링크 미리보기(OG) 절대 URL 기준. 환경별 사이트 URL을 NEXT_PUBLIC_SITE_URL로 주입(미설정 시 폴백).
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://pocastation.com");
+
+const SITE_NAME = "Pocastation";
+const SITE_TITLE = "Pocastation — K-POP 포카 경매";
+const SITE_DESCRIPTION = "K-pop 포토카드 특화 경매 플랫폼";
+
 export const metadata: Metadata = {
-  title: "Pocastation — K-POP 포카 경매",
-  description: "K-pop 포토카드 특화 경매 플랫폼",
+  metadataBase: new URL(siteUrl),
+  title: SITE_TITLE,
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    locale: "ko_KR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+  },
 };
 
 export default function RootLayout({

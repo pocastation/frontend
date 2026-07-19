@@ -1,3 +1,5 @@
+import { cache } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import AuctionImageGallery from "@/components/AuctionImageGallery";
@@ -15,7 +17,8 @@ import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
 import { ACTION_ICON_BUTTON, FOCUS_RING } from "@/lib/ui";
 import type { AuctionDetailResponse } from "@/lib/types";
 
-async function getAuction(id: string): Promise<AuctionDetailResponse | null> {
+// cache()로 감싸 generateMetadata와 페이지 본문이 같은 요청에서 한 번만 페치하도록 dedup한다.
+const getAuction = cache(async (id: string): Promise<AuctionDetailResponse | null> => {
   try {
     return await apiFetch<AuctionDetailResponse>(`/api/auctions/${id}`, { cache: "no-store" });
   } catch (err) {
@@ -24,6 +27,41 @@ async function getAuction(id: string): Promise<AuctionDetailResponse | null> {
     }
     throw err;
   }
+});
+
+// 링크 미리보기 — 제목·대표사진·설명(스타·유형·현재가). 사진 없으면 기본 OG 이미지(app/opengraph-image) 상속.
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const auction = await getAuction(id);
+  if (!auction) {
+    return { title: "경매를 찾을 수 없어요 — Pocastation" };
+  }
+  const cover = auction.images?.[0];
+  const image = cover ? mediaUrl(cover.displayUrl ?? cover.url) : undefined;
+  const description = [
+    auction.artistName,
+    auction.idolName,
+    auction.saleType === "INSTANT" ? "즉시판매" : "경매",
+    `현재가 ${auction.currentPrice.toLocaleString("ko-KR")}원`,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  return {
+    title: `${auction.title} — Pocastation`,
+    description,
+    openGraph: {
+      title: auction.title,
+      description,
+      type: "website",
+      images: image ? [image] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: auction.title,
+      description,
+      images: image ? [image] : undefined,
+    },
+  };
 }
 
 // v0 리톤 — 파스텔 필 제거. 해시태그는 헤어라인 pill + 퍼플 텍스트, 배지는 헤어라인 + 뉴트럴 텍스트로 통일.

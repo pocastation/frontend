@@ -1,3 +1,5 @@
+import { cache } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -7,7 +9,8 @@ import { ARTIST_STATUS_BADGE_CLASS, ARTIST_STATUS_LABEL, ARTIST_TYPE_LABEL } fro
 import { FOCUS_RING } from "@/lib/ui";
 import type { ArtistDetailResponse, AuctionListResponse } from "@/lib/types";
 
-async function getArtist(id: string): Promise<ArtistDetailResponse | null> {
+// cache()로 감싸 generateMetadata와 본문이 한 번만 페치하도록 dedup.
+const getArtist = cache(async (id: string): Promise<ArtistDetailResponse | null> => {
   try {
     return await apiFetch<ArtistDetailResponse>(`/api/artists/${id}`, { cache: "no-store" });
   } catch (err) {
@@ -16,6 +19,22 @@ async function getArtist(id: string): Promise<ArtistDetailResponse | null> {
     }
     throw err;
   }
+});
+
+// 링크 미리보기 — 스타명·설명. 스타 공식 이미지는 저작권으로 미사용(§9.1)이라 기본 OG 이미지를 상속한다.
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const artist = await getArtist(id);
+  if (!artist) {
+    return { title: "스타를 찾을 수 없어요 — Pocastation" };
+  }
+  const description = `${artist.name} 포토카드 경매·즉시판매 — Pocastation`;
+  return {
+    title: `${artist.name} — Pocastation`,
+    description,
+    openGraph: { title: `${artist.name} — Pocastation`, description, type: "website" },
+    twitter: { card: "summary_large_image", title: `${artist.name} — Pocastation`, description },
+  };
 }
 
 // 아티스트id로 직접 필터하는 경매 API가 없어, 경매 상세의 "다른 경매 보기"(SearchLink)와 같은

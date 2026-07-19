@@ -5,7 +5,7 @@ import * as PortOne from "@portone/browser-sdk/v2";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { getCardBrandStyle } from "@/lib/cardBrand";
-import { formatPhoneInput } from "@/lib/phone";
+import { formatCardNumber } from "@/lib/cardNumber";
 import { FOCUS_RING, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import type { PaymentMethod } from "@/lib/types";
 
@@ -18,15 +18,13 @@ const CHANNEL_KEY = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "";
 // MAX_METHODS장, 기본카드가 청구 대상(#152). 포트원 SDK(결제창)로 빌링키를 발급받아 백엔드에
 // 등록한다. 카드번호는 우리 서버·프론트 어디에도 원문이 남지 않는다(PG 결제창에서만 입력,
 // 표시는 PG가 내려준 마스킹 값).
+// 현재 채널(토스)은 결제창 안에서 본인정보를 직접 받으므로 이름/이메일/휴대폰 사전입력 폼이
+// 불필요 — 버튼 클릭 즉시 PG 결제창을 연다(닉네임만 fullName 기본값으로 전달).
 export default function PaymentMethodManager() {
   const { member, fetchWithAuth } = useAuth();
 
   const [methods, setMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
-  const [formOpen, setFormOpen] = useState(false);
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
@@ -61,11 +59,7 @@ export default function PaymentMethodManager() {
         billingKeyMethod: "CARD",
         issueId,
         issueName: "Pocastation 결제 카드 등록",
-        customer: {
-          fullName: fullName || member?.nickname || "회원",
-          ...(email ? { email } : {}),
-          ...(phone ? { phoneNumber: phone.replaceAll("-", "") } : {}),
-        },
+        customer: { fullName: member?.nickname || "회원" },
       });
       if (!res || res.code !== undefined) {
         // 사용자가 창을 닫은 경우 등 — PG가 준 메시지를 그대로 보여준다.
@@ -73,10 +67,6 @@ export default function PaymentMethodManager() {
         return;
       }
       await fetchWithAuth(PATH, { method: "POST", body: { billingKey: res.billingKey } });
-      setFormOpen(false);
-      setFullName("");
-      setEmail("");
-      setPhone("");
       setMessage({ type: "ok", text: "카드가 등록됐어요. 낙찰 시 이 카드로 자동 결제돼요." });
       await load();
     } catch (err) {
@@ -122,8 +112,6 @@ export default function PaymentMethodManager() {
     return <p className="py-10 text-center text-sm text-text-3">불러오는 중...</p>;
   }
 
-  const inputClass = `h-11 w-full rounded-r2 border border-border-2 bg-white px-3.5 text-sm text-text-1 placeholder:text-text-3 focus:border-primary focus:outline-none ${FOCUS_RING}`;
-
   return (
     <div className="max-w-md">
       {message && (
@@ -137,15 +125,20 @@ export default function PaymentMethodManager() {
         </p>
       )}
 
-      {methods.length === 0 && !formOpen ? (
+      {methods.length === 0 ? (
         <div className="flex flex-col items-start gap-3 rounded-r3 border border-dashed border-border-2 p-6">
           <p className="text-sm font-bold text-text-2">등록된 카드가 없어요.</p>
           <p className="text-xs text-text-3">
             경매 낙찰 시 자동 결제에 사용할 카드를 미리 등록해 두세요. 카드번호는 결제사(PG) 창에서만
             입력되고 서버에 저장되지 않아요.
           </p>
-          <button type="button" onClick={() => setFormOpen(true)} className={PRIMARY_BUTTON_CLASS}>
-            카드 등록하기
+          <button
+            type="button"
+            onClick={handleRegister}
+            disabled={busy}
+            className={`px-5 py-2.5 disabled:opacity-50 ${PRIMARY_BUTTON_CLASS}`}
+          >
+            {busy ? "진행 중..." : "카드 등록하기"}
           </button>
         </div>
       ) : (
@@ -178,75 +171,20 @@ export default function PaymentMethodManager() {
             ))}
           </ul>
 
-          {!formOpen && (
-            <div className="mt-4 flex items-center justify-between">
-              <p className="text-xs text-text-3">
-                {methods.length}/{MAX_METHODS}장 등록됨
-              </p>
-              <button
-                type="button"
-                onClick={() => setFormOpen(true)}
-                disabled={methods.length >= MAX_METHODS}
-                className={`px-4 py-2 text-sm disabled:opacity-50 ${SECONDARY_BUTTON_CLASS}`}
-              >
-                카드 추가
-              </button>
-            </div>
-          )}
-        </>
-      )}
-
-      {formOpen && (
-        <div className="mt-4 rounded-r3 border border-border bg-surface p-5">
-          <p className="text-sm font-bold text-text-1">카드 등록</p>
-          <p className="mt-1 text-xs text-text-3">
-            아래 정보는 결제사(PG) 카드 등록 창에 전달되는 값으로, 서버에 저장되지 않아요. 결제사에
-            따라 등록 창에서 본인확인을 다시 진행할 수 있어요.
-          </p>
-          <div className="mt-4 flex flex-col gap-2.5">
-            <input
-              className={inputClass}
-              placeholder="이름"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              autoComplete="name"
-            />
-            <input
-              className={inputClass}
-              type="email"
-              placeholder="이메일 (선택)"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-            />
-            <input
-              className={inputClass}
-              type="tel"
-              placeholder="휴대폰 번호 (선택)"
-              value={phone}
-              onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
-              autoComplete="tel"
-            />
-          </div>
-          <div className="mt-4 flex gap-2">
+          <div className="mt-4 flex items-center justify-between">
+            <p className="text-xs text-text-3">
+              {methods.length}/{MAX_METHODS}장 등록됨
+            </p>
             <button
               type="button"
               onClick={handleRegister}
-              disabled={busy}
-              className={`${PRIMARY_BUTTON_CLASS} disabled:opacity-50`}
+              disabled={busy || methods.length >= MAX_METHODS}
+              className={`px-4 py-2 text-sm disabled:opacity-50 ${SECONDARY_BUTTON_CLASS}`}
             >
-              {busy ? "진행 중..." : "카드 등록 창 열기"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setFormOpen(false)}
-              disabled={busy}
-              className={`rounded-full border border-border-2 bg-white px-5 py-2 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-50 ${FOCUS_RING}`}
-            >
-              취소
+              {busy ? "진행 중..." : "카드 추가"}
             </button>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
@@ -274,8 +212,8 @@ function CardVisual({ method }: { method: PaymentMethod }) {
       </div>
       {/* EMV 칩 느낌의 최소 장식 — 이미지 자산 없이 CSS만으로 "카드처럼" 보이게 한다. */}
       <div className="h-6 w-8 rounded-[4px] bg-white/25" />
-      <p className="font-mono text-[15px] tracking-[0.12em] tabular-nums" style={{ color: style.text }}>
-        {method.cardNumber ?? "•••• •••• •••• ••••"}
+      <p className="font-mono text-[15px] tracking-[0.08em] tabular-nums" style={{ color: style.text }}>
+        {method.cardNumber ? formatCardNumber(method.cardNumber) : "•••• •••• •••• ••••"}
       </p>
     </div>
   );

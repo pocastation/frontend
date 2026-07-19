@@ -424,6 +424,7 @@ export type BidStreamEvent = {
 
 export type ArtistType = "GROUP" | "SOLO" | "UNIT";
 export type ArtistStatus = "ACTIVE" | "HIATUS" | "DISBANDED";
+export type ParentAgency = "SM" | "JYP" | "YG" | "HYBE";
 
 export type ArtistResponse = {
   id: number;
@@ -432,8 +433,11 @@ export type ArtistResponse = {
   type: ArtistType;
   agency: string | null;
   fandomName: string | null;
+  debutDate: string | null;
   status: ArtistStatus;
   imageUrl: string | null;
+  visible: boolean;
+  parentAgency: ParentAgency | null;
 };
 
 export type ArtistListResponse = {

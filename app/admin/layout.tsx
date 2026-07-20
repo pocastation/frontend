@@ -99,6 +99,7 @@ const OPERATION_NAV: NavItem[] = [
   { href: "/admin/catalog", label: "카탈로그 관리", icon: <CardIcon />, ready: true },
   { href: "/admin/auctions", label: "경매 관리", icon: <GavelIcon />, ready: true },
   { href: "/admin/reports", label: "신고 관리", icon: <FlagIcon />, ready: true },
+  { href: "/admin/reviews", label: "리뷰 신고", icon: <FlagIcon />, ready: true },
   { href: "/admin/suggestions", label: "건의 관리", icon: <LightbulbIcon />, ready: true },
   { href: "/admin/audit", label: "감사 로그", icon: <ClipboardListIcon />, ready: true },
   { href: "/admin/notices", label: "공지사항", icon: <MegaphoneIcon />, ready: false },

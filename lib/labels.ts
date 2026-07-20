@@ -14,6 +14,7 @@ import type {
   ReportReason,
   ReportStatus,
   ResolutionAction,
+  ReviewReportReason,
 } from "./types";
 
 // 등록 폼 select와 상세 페이지 배지 표시가 공유하는 한글 라벨.
@@ -249,3 +250,33 @@ export const SUGGESTION_STATUS_BADGE_CLASS: Record<SuggestionStatus, string> = {
   ACCEPTED: "bg-ok-soft text-ok",
   REJECTED: "bg-surface-3 text-text-2",
 };
+
+// ─── 거래 리뷰(§12.6) ───
+
+// 당근식 긍정 매너 태그(선택형 칩). BE ReviewMannerTag enum과 코드·라벨을 1:1로 미러링한다
+// (BE에 태그 목록 조회 API를 따로 두지 않고 이 고정 셋으로 렌더 — 태그 추가 시 양쪽 동기화).
+export const REVIEW_MANNER_TAGS: { code: string; label: string }[] = [
+  { code: "PHOTO_MATCHES_ITEM", label: "사진과 실물이 같아요" },
+  { code: "AS_DESCRIBED", label: "상태가 설명과 같아요" },
+  { code: "WELL_PACKAGED", label: "포장이 꼼꼼해요" },
+  { code: "FAST_SHIPPING", label: "발송이 빨라요" },
+  { code: "FAST_RESPONSE", label: "응답이 빨라요" },
+  { code: "KIND", label: "친절하고 매너가 좋아요" },
+  { code: "ON_TIME", label: "약속 시간을 잘 지켜요" },
+];
+
+export const REVIEW_REPORT_REASON_LABEL: Record<ReviewReportReason, string> = {
+  ABUSE: "욕설·비방",
+  FALSE_INFO: "허위 사실",
+  PRIVACY: "개인정보 노출",
+  SPAM: "광고·도배",
+  ETC: "기타",
+};
+
+export const REVIEW_REPORT_REASON_OPTIONS: ReviewReportReason[] = [
+  "ABUSE",
+  "FALSE_INFO",
+  "PRIVACY",
+  "SPAM",
+  "ETC",
+];

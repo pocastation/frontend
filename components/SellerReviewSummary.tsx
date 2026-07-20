@@ -39,7 +39,17 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
         const res = await apiFetch<SellerRatingResponse>(`/api/sellers/${sellerId}/rating`, { cache: "no-store" });
         if (!cancelled) setRating(res);
       } catch {
-        if (!cancelled) setRating({ averageRating: null, reviewCount: 0, tags: [] });
+        // 조회 실패 시 최소 표시(레벨 1·후기 0) — 카드 자체가 깨지지 않게 한다.
+        if (!cancelled) {
+          setRating({
+            averageRating: null,
+            reviewCount: 0,
+            tags: [],
+            trustLevel: 1,
+            trustLevelLabel: "덕린이 🌱",
+            tradeCount: 0,
+          });
+        }
       }
     })();
     return () => {
@@ -76,13 +86,23 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
     return <p className="mt-1.5 text-[11px] text-text-3">후기를 불러오는 중...</p>;
   }
 
-  if (rating.reviewCount === 0) {
-    return <p className="mt-1.5 text-[11px] text-text-3">아직 받은 거래 후기가 없어요.</p>;
-  }
-
   return (
     <div className="mt-2">
-      <div className="flex items-center gap-1.5">
+      {/* 신뢰 레벨(덕력 등급, §12.7) — 거래 경험 기반이라 리뷰가 0건이어도 표시한다. */}
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1">
+          <span className="text-text-3">Lv.{rating.trustLevel}</span>
+          {rating.trustLevelLabel}
+        </span>
+        {rating.tradeCount > 0 && (
+          <span className="text-[11px] text-text-3">거래 {rating.tradeCount}회</span>
+        )}
+      </div>
+
+      {rating.reviewCount === 0 ? (
+        <p className="mt-1.5 text-[11px] text-text-3">아직 받은 거래 후기가 없어요.</p>
+      ) : (
+      <div className="mt-1.5 flex items-center gap-1.5">
         <Stars value={rating.averageRating ?? 0} className="text-sm" />
         <span className="text-sm font-bold text-text-1">{(rating.averageRating ?? 0).toFixed(1)}</span>
         <button
@@ -93,6 +113,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
           거래 후기 {rating.reviewCount}개 {expanded ? "접기" : "보기"}
         </button>
       </div>
+      )}
 
       {rating.tags.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-1.5">

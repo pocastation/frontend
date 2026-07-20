@@ -691,11 +691,15 @@ export type SellerReviewListResponse = {
   totalPages: number;
 };
 
-// GET /api/sellers/{sellerId}/rating — 판매자 집계(평균·건수·받은 태그).
+// GET /api/sellers/{sellerId}/rating — 판매자 집계(평균·건수·받은 태그) + 신뢰 레벨(§12.7).
+// 신뢰점수(0~100) 자체는 내부 지표라 BE가 내려주지 않는다 — 레벨·레벨명·거래수만 노출.
 export type SellerRatingResponse = {
   averageRating: number | null; // 리뷰 0건이면 null
   reviewCount: number;
   tags: { code: string; label: string; count: number }[];
+  trustLevel: number; // 1~10
+  trustLevelLabel: string; // "덕린이 🌱" 등 — BE가 라벨까지 내려준다
+  tradeCount: number; // 완료(구매확정) 거래 건수, 판매+구매 합산
 };
 
 // GET /api/reviews/reviewable — 내 구매확정 주문 중 미작성 리뷰 대상.

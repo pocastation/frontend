@@ -17,6 +17,16 @@ export type MemberResponse = {
   createdAt?: string;
   // 다음 닉네임 변경 가능 시각(#118). null/미포함이면 지금 변경 가능. GET /me 에서만 채워진다.
   nicknameChangeableAt?: string | null;
+  // 신뢰 레벨 진행도(§12.7, #166) — GET /me 에서만 채워진다.
+  // 신뢰점수(0~100) 숫자는 BE가 본인에게도 내려주지 않는다(산식 역산·미세변동 문의 방지).
+  trustLevel?: number;
+  trustLevelLabel?: string;
+  tradeCount?: number;
+  nextLevelLabel?: string | null; // 최고 레벨이면 null
+  tradesToNextLevel?: number;
+  // 거래 요건은 채웠지만 신뢰도가 낮아 레벨이 상한에 걸린 상태.
+  // true면 "거래를 더 하세요"가 아니라 "후기를 쌓으세요"로 안내해야 한다.
+  levelCappedByTrust?: boolean;
 };
 
 // GET/POST/PATCH /api/members/me/delivery-addresses — 마이페이지 배송지 관리.
@@ -700,6 +710,17 @@ export type SellerRatingResponse = {
   trustLevel: number; // 1~10
   trustLevelLabel: string; // "덕린이 🌱" 등 — BE가 라벨까지 내려준다
   tradeCount: number; // 완료(구매확정) 거래 건수, 판매+구매 합산
+};
+
+// GET /api/sellers/popular — 인기(신뢰) 판매자 랭킹. 신뢰점수 숫자는 내려오지 않는다(§9.2-4).
+export type PopularSellerResponse = {
+  sellerId: string;
+  nickname: string;
+  trustLevel: number;
+  trustLevelLabel: string;
+  tradeCount: number;
+  averageRating: number | null; // 리뷰 0건이면 null
+  reviewCount: number;
 };
 
 // GET /api/reviews/reviewable — 내 구매확정 주문 중 미작성 리뷰 대상.

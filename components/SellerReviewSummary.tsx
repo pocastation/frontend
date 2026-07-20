@@ -42,6 +42,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
         // 조회 실패 시 최소 표시(레벨 1·후기 0) — 카드 자체가 깨지지 않게 한다.
         if (!cancelled) {
           setRating({
+            nickname: null,
             averageRating: null,
             reviewCount: 0,
             tags: [],

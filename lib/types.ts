@@ -704,6 +704,8 @@ export type SellerReviewListResponse = {
 // GET /api/sellers/{sellerId}/rating — 판매자 집계(평균·건수·받은 태그) + 신뢰 레벨(§12.7).
 // 신뢰점수(0~100) 자체는 내부 지표라 BE가 내려주지 않는다 — 레벨·레벨명·거래수만 노출.
 export type SellerRatingResponse = {
+  // 판매자 표시명(#168). 탈퇴 회원은 가명("탈퇴회원_...")으로 내려온다.
+  nickname: string | null;
   averageRating: number | null; // 리뷰 0건이면 null
   reviewCount: number;
   tags: { code: string; label: string; count: number }[];

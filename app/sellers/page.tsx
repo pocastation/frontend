@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { apiFetch } from "@/lib/api";
+import { FOCUS_RING } from "@/lib/ui";
 import type { PopularSellerResponse } from "@/lib/types";
 
 export const metadata: Metadata = {
@@ -46,7 +48,11 @@ export default async function PopularSellersPage() {
       ) : (
         <ol className="mt-6 flex flex-col divide-y divide-border/70 rounded-r3 border border-border bg-surface">
           {sellers.map((seller, index) => (
-            <li key={seller.sellerId} className="flex items-center gap-3 p-4">
+            <li key={seller.sellerId} className="p-0">
+              <Link
+                href={`/sellers/${seller.sellerId}`}
+                className={`flex items-center gap-3 p-4 transition-colors hover:bg-surface-2/50 ${FOCUS_RING}`}
+              >
               {/* 순위 — 상위 3명만 강조하고 나머지는 뉴트럴(절제 톤). */}
               <span
                 className={`w-6 shrink-0 text-center font-display text-sm font-extrabold ${
@@ -80,6 +86,10 @@ export default async function PopularSellersPage() {
                   )}
                 </div>
               </div>
+                <span aria-hidden="true" className="shrink-0 text-text-3">
+                  →
+                </span>
+              </Link>
             </li>
           ))}
         </ol>

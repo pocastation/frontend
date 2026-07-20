@@ -170,7 +170,12 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
                   <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-sm font-bold text-text-2">
                     {auction.sellerNickname.slice(0, 1).toUpperCase()}
                   </span>
-                  <span className="text-sm font-bold text-text-1">{auction.sellerNickname}</span>
+                  <Link
+                    href={`/sellers/${auction.sellerId}`}
+                    className={`rounded-r2 text-sm font-bold text-text-1 transition-colors hover:text-primary ${FOCUS_RING}`}
+                  >
+                    {auction.sellerNickname}
+                  </Link>
                 </div>
                 {auction.artistName && (
                   <SearchLink

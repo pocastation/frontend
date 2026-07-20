@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import ArtistAuctionGrid from "@/components/ArtistAuctionGrid";
+import AuctionGrid from "@/components/AuctionGrid";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { ARTIST_STATUS_BADGE_CLASS, ARTIST_STATUS_LABEL, ARTIST_TYPE_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
@@ -190,7 +190,7 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="font-display text-[17px] font-extrabold text-text-1">{artist.name}의 진행 중인 경매</h2>
         </div>
-        <ArtistAuctionGrid auctions={auctions?.content ?? []} />
+        <AuctionGrid auctions={auctions?.content ?? []} />
       </section>
     </div>
   );

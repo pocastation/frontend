@@ -13,6 +13,7 @@ const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/auctions", label: "경매" },
   { href: "/instant-sales", label: "즉시판매" },
   { href: "/artists", label: "스타" },
+  { href: "/sellers", label: "인기 판매자" },
 ];
 
 const FOCUS_RING =

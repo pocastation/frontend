@@ -513,6 +513,30 @@ export default function MyPage() {
               <DashboardStat label="판매 중인 경매" value={`${activeSelling.length}건`} swatch="bg-surface-3" />
             </div>
 
+            {/* 내 신뢰 레벨(§12.7) — 점수 숫자는 서버가 내려주지 않으므로 레벨·거래수·진행도만 표시. */}
+            {member?.trustLevel != null && (
+              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-r3 border border-border bg-surface p-4 shadow-card">
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs font-bold text-text-1">
+                  <span className="text-text-3">Lv.{member.trustLevel}</span>
+                  {member.trustLevelLabel}
+                </span>
+                <span className="text-xs text-text-3">거래 {member.tradeCount ?? 0}회</span>
+                <span className="min-w-0 flex-1 text-xs text-text-2">
+                  {member.levelCappedByTrust ? (
+                    // 거래 요건은 넘었지만 신뢰도가 낮아 상한에 걸린 상태 — 거래를 더 하라고 안내하면 오해를 준다.
+                    <>좋은 거래 후기를 쌓으면 레벨이 더 올라가요.</>
+                  ) : member.nextLevelLabel ? (
+                    <>
+                      다음 레벨 <b className="font-bold text-text-1">{member.nextLevelLabel}</b>까지 거래{" "}
+                      <b className="font-bold text-primary">{member.tradesToNextLevel ?? 0}회</b> 남았어요.
+                    </>
+                  ) : (
+                    <>최고 레벨이에요. 덕질의 정점에 오르셨네요.</>
+                  )}
+                </span>
+              </div>
+            )}
+
             {reviewable.length > 0 && (
               <div className="mt-6 rounded-r3 border border-border bg-surface p-4 shadow-card">
                 <p className="text-sm font-bold text-text-1">작성할 수 있는 거래 후기 {reviewable.length}건</p>

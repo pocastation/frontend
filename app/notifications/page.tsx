@@ -26,6 +26,7 @@ const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; ico
   ORDER_CONFIRMED: { label: "구매 확정", tone: "ok", icon: "checkCircle" },
   SHIPPING_OVERDUE: { label: "발송 지연", tone: "accent", icon: "clock" },
   SETTLEMENT_COMPLETED: { label: "정산 완료", tone: "ok", icon: "card" },
+  INQUIRY_ANSWERED: { label: "문의 답변", tone: "ok", icon: "checkCircle" },
 };
 
 // 배포 시점 차이로 프론트가 모르는 타입이 와도 렌더가 깨지지 않게 폴백.
@@ -125,6 +126,10 @@ export default function NotificationsPage() {
       } finally {
         refreshBell();
       }
+    }
+    if (notification.type === "INQUIRY_ANSWERED") {
+      router.push("/inquiries");
+      return;
     }
     if (notification.auctionId != null) {
       router.push(`/auctions/${notification.auctionId}`);

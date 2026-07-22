@@ -91,6 +91,13 @@ function LightbulbIcon() {
     </svg>
   );
 }
+function MessageIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-5.5 4v-4.5A2.5 2.5 0 0 1 4 13.5Z" />
+    </svg>
+  );
+}
 
 // 지금 쓸 수 있는 메뉴 / 준비 중인 메뉴를 구분해 보여준다(어드민 기능 지도 §2026-07-06 기준).
 const OPERATION_NAV: NavItem[] = [
@@ -101,6 +108,7 @@ const OPERATION_NAV: NavItem[] = [
   { href: "/admin/reports", label: "신고 관리", icon: <FlagIcon />, ready: true },
   { href: "/admin/reviews", label: "리뷰 신고", icon: <FlagIcon />, ready: true },
   { href: "/admin/suggestions", label: "건의 관리", icon: <LightbulbIcon />, ready: true },
+  { href: "/admin/inquiries", label: "문의 관리", icon: <MessageIcon />, ready: true },
   { href: "/admin/audit", label: "감사 로그", icon: <ClipboardListIcon />, ready: true },
   { href: "/admin/notices", label: "공지사항", icon: <MegaphoneIcon />, ready: false },
 ];

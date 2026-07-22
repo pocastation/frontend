@@ -550,7 +550,8 @@ export type NotificationType =
   | "ORDER_SHIPPED" // 발송 — 구매자에게 운송장 안내
   | "ORDER_CONFIRMED" // 구매확정 — 판매자에게 정산 대기 안내
   | "SHIPPING_OVERDUE" // 발송기한 초과 — 판매자에게 발송 독촉
-  | "SETTLEMENT_COMPLETED"; // 정산 완료 — 판매자에게 실입금 예정 안내(실입금은 PG 사이클 시차)
+  | "SETTLEMENT_COMPLETED" // 정산 완료 — 판매자에게 실입금 예정 안내(실입금은 PG 사이클 시차)
+  | "INQUIRY_ANSWERED"; // 1:1 문의 답변 완료
 
 // GET /api/members/me/succession-offers/{auctionId} — 제안 대상자 본인에게만 200(타인 404).
 export type SuccessionOfferResponse = {
@@ -631,6 +632,44 @@ export type NotificationListResponse = {
 // GET/PATCH /api/members/me/notification-settings — 마이페이지 알림 설정.
 export type NotificationSettings = {
   outbidEnabled: boolean;
+};
+
+// ─── 1:1 문의 ───
+
+export type InquiryStatus = "RECEIVED" | "CHECKING" | "ANSWERED";
+export type InquiryCategory = "ACCOUNT" | "AUCTION" | "PAYMENT" | "DELIVERY" | "ETC";
+
+export type InquiryResponse = {
+  id: number;
+  category: InquiryCategory;
+  title: string;
+  content: string;
+  status: InquiryStatus;
+  answer: string | null;
+  createdAt: string;
+  updatedAt: string;
+  answeredAt: string | null;
+};
+
+export type InquiryListResponse = {
+  content: InquiryResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+export type AdminInquiryResponse = InquiryResponse & {
+  memberId: string;
+  memberNickname: string | null;
+};
+
+export type AdminInquiryListResponse = {
+  content: AdminInquiryResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 };
 
 // ─── 건의(catalog suggestion) ───

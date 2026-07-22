@@ -10,6 +10,7 @@ const FOOTER_COLUMNS = [
     title: "고객지원",
     links: [
       { label: "공지사항", href: "/notices" },
+      { label: "문의하기", href: "/inquiries" },
       { label: "자주 묻는 질문", href: "/faq" },
     ],
   },

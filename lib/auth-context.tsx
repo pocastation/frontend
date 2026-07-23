@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { apiFetch, apiFetchBlob, apiFetchMultipart, ApiError, type ApiFetchOptions } from "./api";
 import type { MemberResponse, TokenResponse } from "./types";
 
@@ -22,6 +23,8 @@ type AuthContextValue = {
   updateNickname: (nickname: string) => Promise<void>;
   // 소셜 가입자 온보딩(#217) — 닉네임 확정 + 약관·처리방침 동의 + 만 14세 확인을 한 번에 보낸다.
   completeOnboarding: (payload: OnboardingPayload) => Promise<void>;
+  // 재동의(#219, BE #198) — 동의 기록이 없는 기존 회원이 동의만 다시 낸다(닉네임은 건드리지 않는다).
+  recordConsents: (payload: ConsentPayload) => Promise<void>;
   withdraw: () => Promise<void>;
   fetchWithAuth: <T>(path: string, options?: ApiFetchOptions) => Promise<T>;
   fetchMultipartWithAuth: <T>(path: string, formData: FormData) => Promise<T>;
@@ -37,9 +40,20 @@ export type OnboardingPayload = {
   marketingAgreed: boolean;
 };
 
+// 재동의 전송 형태 — BE ConsentRequest(#198)와 1:1. 온보딩과 달리 닉네임이 없다.
+export type ConsentPayload = Omit<OnboardingPayload, "nickname">;
+
+// 동의 게이트(BE #198)가 쓰기 요청을 막을 때 내려주는 코드. 이 코드를 보면 재동의 화면으로 보낸다.
+export const SERVICE_CONSENT_REQUIRED = "SERVICE_CONSENT_REQUIRED";
+
+// 재동의 화면 경로. 동의를 마치면 원래 있던 화면으로 돌려보내기 위해 현재 경로를 붙인다.
+export const CONSENT_PATH = "/onboarding/consents";
+
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [member, setMember] = useState<MemberResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -103,6 +117,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMember(null);
   }, []);
 
+  // 동의 게이트(BE #198)에 막히면 재동의 화면으로 보낸다.
+  //
+  // 프론트가 스스로 "동의 안 했으니 막자"고 판단하지 않고 **서버가 403을 줄 때만** 반응한다.
+  // 그래야 서버 플래그(app.consent.enforce)를 켜고 끄는 것만으로 동작이 따라오고,
+  // 프론트에 별도 스위치를 둬서 두 상태가 어긋나는 일이 없다.
+  //
+  // 에러는 삼키지 않고 그대로 던진다 — 호출측이 로딩 상태를 정리해야 하고,
+  // 라우팅이 끝나기 전에 화면이 성공한 것처럼 보이면 안 된다.
+  const redirectOnConsentRequired = useCallback(
+    (err: unknown) => {
+      if (err instanceof ApiError && err.errorCode === SERVICE_CONSENT_REQUIRED) {
+        // 이미 재동의 화면이면 다시 밀어 넣지 않는다(뒤로가기 히스토리 오염 방지).
+        if (pathname !== CONSENT_PATH) {
+          router.push(`${CONSENT_PATH}?next=${encodeURIComponent(pathname ?? "/")}`);
+        }
+      }
+    },
+    [pathname, router],
+  );
+
   // access token 만료(401) 시 refreshToken 쿠키로 한 번 갱신을 시도하고, 성공하면
   // 원 요청을 새 토큰으로 한 번만 재시도한다. refresh도 실패하면(쿠키 만료/탈취 탐지 등)
   // 원래 401 에러를 그대로 던져 무한 재시도를 막는다.
@@ -117,10 +151,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return await apiFetch<T>(path, { ...options, accessToken: newToken });
           }
         }
+        redirectOnConsentRequired(err);
         throw err;
       }
     },
-    [accessToken, refresh],
+    [accessToken, refresh, redirectOnConsentRequired],
   );
 
   const fetchMultipartWithAuth = useCallback(
@@ -134,10 +169,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return await apiFetchMultipart<T>(path, formData, newToken);
           }
         }
+        redirectOnConsentRequired(err);
         throw err;
       }
     },
-    [accessToken, refresh],
+    [accessToken, refresh, redirectOnConsentRequired],
   );
 
   const fetchBlobWithAuth = useCallback(
@@ -151,10 +187,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return await apiFetchBlob(path, newToken);
           }
         }
+        redirectOnConsentRequired(err);
         throw err;
       }
     },
-    [accessToken, refresh],
+    [accessToken, refresh, redirectOnConsentRequired],
   );
 
   const updateNickname = useCallback(
@@ -180,6 +217,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // 닉네임 변경과 같은 이유로 /me를 다시 읽어 통째로 교체한다(보강 필드·잠금 시각 반영).
       const me = await fetchWithAuth<MemberResponse>("/api/members/me");
       setMember(me);
+    },
+    [fetchWithAuth],
+  );
+
+  // 재동의(#219) — 기존 회원이 동의만 다시 낸다. 온보딩과 달리 닉네임을 보내지 않는다:
+  // 대상은 닉네임이 이미 확정된 회원이라, 여기서 닉네임을 다시 받으면 중복·변경제한 규칙까지 얽힌다.
+  const recordConsents = useCallback(
+    async (payload: ConsentPayload) => {
+      await fetchWithAuth<{ consented: boolean }>("/api/members/me/consents", {
+        method: "POST",
+        body: payload,
+      });
     },
     [fetchWithAuth],
   );
@@ -210,6 +259,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         refresh,
         updateNickname,
         completeOnboarding,
+        recordConsents,
         withdraw,
         fetchWithAuth,
         fetchMultipartWithAuth,

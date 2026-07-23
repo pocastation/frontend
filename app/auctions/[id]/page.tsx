@@ -14,6 +14,7 @@ import SellerShipPanel from "@/components/SellerShipPanel";
 import ShareButton from "@/components/ShareButton";
 import SuccessionOfferBanner from "@/components/SuccessionOfferBanner";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
+import { INTERMEDIARY_NOTICE } from "@/lib/business";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
 import { ACTION_ICON_BUTTON, FOCUS_RING } from "@/lib/ui";
 import type { AuctionDetailResponse } from "@/lib/types";
@@ -253,6 +254,9 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
               {auction.status === "ENDED_SOLD" && <SuccessionOfferBanner auctionId={auction.id} />}
             </>
           ) : null}
+          {/* 전자상거래법 §20 — 중개자 고지는 "입찰·구매 전"에 보여야 해서 결제 영역 바로 아래에 둔다. */}
+          <p className="mt-3 text-xs leading-relaxed text-text-3">{INTERMEDIARY_NOTICE}</p>
+
           {/* 판매자 본인에게만(자체 게이팅) 발송 관리 패널 — 마이페이지 판매내역과 동일 발송 폼을 상세에서도 노출. */}
           {auction.status === "ENDED_SOLD" && <SellerShipPanel auctionId={auction.id} />}
         </div>

@@ -6,6 +6,11 @@ import Link from "next/link";
 import { apiFetch, ApiError, fetchNicknameSuggestion } from "@/lib/api";
 import { useGuestOnly } from "@/lib/use-guest-only";
 import NicknameSuggestButton from "@/components/NicknameSuggestButton";
+import ConsentFields, {
+  EMPTY_CONSENTS,
+  hasAllRequiredConsents,
+  type ConsentValues,
+} from "@/components/ConsentFields";
 import { INPUT_CLASS, PRIMARY_BUTTON_CLASS } from "@/lib/ui";
 
 export default function SignupPage() {
@@ -17,6 +22,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [nickname, setNickname] = useState("");
+  const [consents, setConsents] = useState<ConsentValues>(EMPTY_CONSENTS);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,11 +41,16 @@ export default function SignupPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    // 서버도 같은 규칙으로 막지만(BE #183), 제출 후 400을 보여주기보다 여기서 먼저 안내한다.
+    if (!hasAllRequiredConsents(consents)) {
+      setError("필수 항목에 모두 동의해야 가입할 수 있어요.");
+      return;
+    }
     setIsSubmitting(true);
     try {
       await apiFetch("/api/members/signup", {
         method: "POST",
-        body: { email, password, nickname },
+        body: { email, password, nickname, ...consents },
       });
       router.replace("/login");
     } catch (err) {
@@ -112,6 +123,9 @@ export default function SignupPage() {
           className={INPUT_CLASS}
         />
         <NicknameSuggestButton onSuggest={setNickname} />
+        <div className="mt-1">
+          <ConsentFields values={consents} onChange={setConsents} />
+        </div>
         {error && (
           <p role="alert" aria-live="polite" className="text-xs text-accent">
             {error}

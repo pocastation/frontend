@@ -20,10 +20,21 @@ type AuthContextValue = {
   logout: () => Promise<void>;
   refresh: () => Promise<string | null>;
   updateNickname: (nickname: string) => Promise<void>;
+  // 소셜 가입자 온보딩(#217) — 닉네임 확정 + 약관·처리방침 동의 + 만 14세 확인을 한 번에 보낸다.
+  completeOnboarding: (payload: OnboardingPayload) => Promise<void>;
   withdraw: () => Promise<void>;
   fetchWithAuth: <T>(path: string, options?: ApiFetchOptions) => Promise<T>;
   fetchMultipartWithAuth: <T>(path: string, formData: FormData) => Promise<T>;
   fetchBlobWithAuth: (path: string) => Promise<Blob>;
+};
+
+// 온보딩 전송 형태 — BE OnboardingRequest(#183)와 1:1.
+export type OnboardingPayload = {
+  nickname: string;
+  termsAgreed: boolean;
+  privacyAgreed: boolean;
+  ageOver14Confirmed: boolean;
+  marketingAgreed: boolean;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -160,6 +171,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [fetchWithAuth],
   );
 
+  const completeOnboarding = useCallback(
+    async (payload: OnboardingPayload) => {
+      await fetchWithAuth<MemberResponse>("/api/members/me/onboarding", {
+        method: "POST",
+        body: payload,
+      });
+      // 닉네임 변경과 같은 이유로 /me를 다시 읽어 통째로 교체한다(보강 필드·잠금 시각 반영).
+      const me = await fetchWithAuth<MemberResponse>("/api/members/me");
+      setMember(me);
+    },
+    [fetchWithAuth],
+  );
+
   const withdraw = useCallback(async () => {
     // 서버가 프로필을 가명화하고 리프레시 토큰을 폐기한다(backend #120). 진행 중 거래가 있으면
     // 409를 던져 호출측(SettingsTab)이 사유를 표시한다.
@@ -185,6 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         refresh,
         updateNickname,
+        completeOnboarding,
         withdraw,
         fetchWithAuth,
         fetchMultipartWithAuth,

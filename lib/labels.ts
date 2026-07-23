@@ -15,6 +15,9 @@ import type {
   ReportStatus,
   ResolutionAction,
   ReviewReportReason,
+  DisputeStatus,
+  RefundReason,
+  ReturnReason,
 } from "./types";
 
 // 등록 폼 select와 상세 페이지 배지 표시가 공유하는 한글 라벨.
@@ -280,3 +283,49 @@ export const REVIEW_REPORT_REASON_OPTIONS: ReviewReportReason[] = [
   "SPAM",
   "ETC",
 ];
+
+// ─── 반품·분쟁(#175) ───
+
+export const RETURN_REASON_LABEL: Record<ReturnReason, string> = {
+  COUNTERFEIT_SUSPECTED: "가품이 의심돼요",
+  CONDITION_MISMATCH: "상태가 설명과 달라요",
+  WRONG_ITEM: "다른 물건이 왔어요",
+  DAMAGED_IN_TRANSIT: "배송 중 파손됐어요",
+  ETC: "기타",
+};
+
+export const RETURN_REASON_OPTIONS: ReturnReason[] = [
+  "COUNTERFEIT_SUSPECTED",
+  "CONDITION_MISMATCH",
+  "WRONG_ITEM",
+  "DAMAGED_IN_TRANSIT",
+  "ETC",
+];
+
+// 반송비 안내(2026-07-23 결정) — 정산에 반영하지 않고 문구로만 안내한다.
+// 판매자 귀책이 명백한 사유는 판매자 부담으로 안내하고, 그 외는 협의 대상으로 둔다.
+export const RETURN_SHIPPING_FEE_NOTE: Record<ReturnReason, string> = {
+  COUNTERFEIT_SUSPECTED: "판매자 귀책이라 반송비는 판매자 부담이에요.",
+  CONDITION_MISMATCH: "판매자 귀책이라 반송비는 판매자 부담이에요.",
+  WRONG_ITEM: "판매자 귀책이라 반송비는 판매자 부담이에요.",
+  DAMAGED_IN_TRANSIT: "배송 중 파손은 택배사 보상 대상이라 반송비는 협의가 필요해요.",
+  ETC: "반송비 부담은 판매자와 협의해 주세요.",
+};
+
+export const DISPUTE_STATUS_LABEL: Record<DisputeStatus, string> = {
+  NONE: "",
+  RETURN_REQUESTED: "반품 요청",
+  RETURN_ACCEPTED: "반품 수락",
+  RETURN_SHIPPED: "반송 중",
+  UNDER_MEDIATION: "중재 진행",
+  RESOLVED_REFUND: "반품 완료",
+  RESOLVED_DISMISSED: "반품 기각",
+};
+
+export const REFUND_REASON_LABEL: Record<RefundReason, string> = {
+  BUYER_CANCELLED: "구매자 취소",
+  SHIPPING_OVERDUE: "발송 기한 초과",
+  SELLER_CANCELLED: "판매자 취소",
+  RETURN_COMPLETED: "반품 완료",
+  ADMIN_DECISION: "중재 결정",
+};

@@ -570,7 +570,34 @@ export type OrderStatus =
   | "PAYMENT_RETRYING"
   | "PAYMENT_FAILED"
   | "PAYMENT_DEFAULTED"
-  | "SECOND_CHANCE_OFFERED";
+  | "SECOND_CHANCE_OFFERED"
+  // 환불(#173) — PAID의 역방향 종착. 구매확정 전에만 진입한다.
+  | "REFUNDING"
+  | "REFUNDED";
+
+// 반품·분쟁(#175). 결제·배송·정산과 직교하는 축 — 분쟁이 열려 있으면 자동 구매확정이 멈춘다.
+export type DisputeStatus =
+  | "NONE"
+  | "RETURN_REQUESTED"
+  | "RETURN_ACCEPTED"
+  | "RETURN_SHIPPED"
+  | "UNDER_MEDIATION"
+  | "RESOLVED_REFUND"
+  | "RESOLVED_DISMISSED";
+
+export type ReturnReason =
+  | "COUNTERFEIT_SUSPECTED"
+  | "CONDITION_MISMATCH"
+  | "WRONG_ITEM"
+  | "DAMAGED_IN_TRANSIT"
+  | "ETC";
+
+export type RefundReason =
+  | "BUYER_CANCELLED"
+  | "SHIPPING_OVERDUE"
+  | "SELLER_CANCELLED"
+  | "RETURN_COMPLETED"
+  | "ADMIN_DECISION";
 
 // GET /api/members/me/orders/status?auctionIds= — 구매내역 주문 상태 배치 채움(wishlist 하트 패턴).
 export type FulfillmentStatus = "AWAITING_SHIPMENT" | "SHIPPED" | "CONFIRMED";
@@ -590,6 +617,21 @@ export type MyOrderStatusResponse = {
   // 배송추적으로 감지된 실배송완료 시각(#134). null이면 미도착/미연동.
   deliveredAt: string | null;
   confirmedAt: string | null;
+  // 환불(#173) — 환불 절차에 진입한 주문에만 채워진다.
+  refundReason: RefundReason | null;
+  refundAmount: number | null;
+  refundedAt: string | null;
+  // 반품·분쟁(#175). disputeDueAt은 현재 단계의 기한 — 단계마다 의미가 다르다.
+  disputeStatus: DisputeStatus;
+  returnReason: ReturnReason | null;
+  returnDetail: string | null;
+  disputeNote: string | null;
+  returnCarrier: string | null;
+  returnTrackingNumber: string | null;
+  disputeDueAt: string | null;
+  // 가능 여부는 서버가 판정한다(#177) — 조건이 4개 축에 걸쳐 있어 화면에서 재구현하면 어긋난다.
+  cancellable: boolean;
+  returnable: boolean;
 };
 
 // GET /api/members/me/sold-orders/status — 판매자용(#110). 발송 UI가 소비, 배송지(발송용) 포함.
@@ -609,6 +651,15 @@ export type SoldOrderResponse = {
     address1: string;
     address2: string | null;
   } | null;
+  // 환불로 종료된 거래를 발송 UI에서 걸러내기 위해 함께 내려온다(#177).
+  orderStatus: OrderStatus;
+  // 반품·분쟁(#175) — 판매자가 수락·거절·수령확인 중 무엇을 해야 하는지 판정하는 근거.
+  disputeStatus: DisputeStatus;
+  returnReason: ReturnReason | null;
+  returnDetail: string | null;
+  returnCarrier: string | null;
+  returnTrackingNumber: string | null;
+  disputeDueAt: string | null;
 };
 
 export type NotificationResponse = {
@@ -784,4 +835,32 @@ export type AdminReviewReportResponse = {
   sellerNickname: string | null;
   reviewCreatedAt: string;
   reports: { reasonCode: ReviewReportReason; detail: string | null; createdAt: string }[];
+};
+
+// ─── 관리자 분쟁 중재(#175) ───
+
+export type AdminDisputeResponse = {
+  orderId: number;
+  auctionId: number;
+  title: string;
+  buyerId: string;
+  sellerId: string;
+  chargeAmount: number;
+  disputeStatus: DisputeStatus;
+  returnReason: ReturnReason | null;
+  returnDetail: string | null;
+  disputeNote: string | null;
+  returnCarrier: string | null;
+  returnTrackingNumber: string | null;
+  returnRequestedAt: string | null;
+  disputeDueAt: string | null;
+  disputeResolvedAt: string | null;
+};
+
+export type AdminDisputeListResponse = {
+  content: AdminDisputeResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 };

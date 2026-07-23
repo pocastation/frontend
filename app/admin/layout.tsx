@@ -109,13 +109,13 @@ const OPERATION_NAV: NavItem[] = [
   { href: "/admin/reviews", label: "리뷰 신고", icon: <FlagIcon />, ready: true },
   { href: "/admin/suggestions", label: "건의 관리", icon: <LightbulbIcon />, ready: true },
   { href: "/admin/inquiries", label: "문의 관리", icon: <MessageIcon />, ready: true },
+  { href: "/admin/disputes", label: "분쟁·중재", icon: <ScaleIcon />, ready: true },
   { href: "/admin/audit", label: "감사 로그", icon: <ClipboardListIcon />, ready: true },
   { href: "/admin/notices", label: "공지사항", icon: <MegaphoneIcon />, ready: false },
 ];
 
 const COMING_NAV: NavItem[] = [
   { href: "/admin/settlement", label: "결제·정산", icon: <TagIcon />, ready: false },
-  { href: "/admin/disputes", label: "분쟁·중재", icon: <ScaleIcon />, ready: false },
   { href: "/admin/notifications", label: "알림 발송", icon: <BellIcon />, ready: false },
 ];
 

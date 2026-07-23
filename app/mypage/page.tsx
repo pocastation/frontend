@@ -13,9 +13,16 @@ import NotificationSettings from "@/components/NotificationSettings";
 import DeliveryAddressModal from "@/components/DeliveryAddressModal";
 import ReviewComposerModal from "@/components/ReviewComposerModal";
 import OrderShipForm from "@/components/OrderShipForm";
+import ReturnRequestModal from "@/components/ReturnRequestModal";
+import ReturnShipForm from "@/components/ReturnShipForm";
 import { StatusIconCircle, type StatusTone } from "@/components/StatusIcon";
 import { formatDateTimeKST, formatKRW, formatTimeLeft } from "@/lib/format";
-import { AUCTION_STATUS_BADGE_CLASS, AUCTION_STATUS_LABEL } from "@/lib/labels";
+import {
+  AUCTION_STATUS_BADGE_CLASS,
+  AUCTION_STATUS_LABEL,
+  REFUND_REASON_LABEL,
+  RETURN_REASON_LABEL,
+} from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
   AuctionListResponse,
@@ -880,6 +887,7 @@ function SellingList({
                 (order.status === "PAID" && onRefresh ? (
                   <BuyerFulfillmentFooter
                     order={order}
+                    title={item.title}
                     onRefresh={onRefresh}
                     onOpenAddressModal={() => onOpenAddressModal?.(item.id, item.title)}
                     onConfirmed={onConfirmed}
@@ -1020,6 +1028,30 @@ function OrderStatusFooter({
           message: <>기한 내 결제가 완료되지 않았어요</>,
           action: null,
         };
+      // 환불(#173) — 취소·반품이 확정된 뒤 PG 취소를 기다리는 구간과 완료 구간.
+      case "REFUNDING":
+        return {
+          pill: pill("clock", "primary", "환불 처리 중"),
+          message: (
+            <>
+              {order.refundReason ? `${REFUND_REASON_LABEL[order.refundReason]} · ` : ""}
+              <b className="font-bold text-text-1">{formatKRW(order.refundAmount ?? order.chargeAmount)}</b> 환불을
+              진행하고 있어요
+            </>
+          ),
+          action: null,
+        };
+      case "REFUNDED":
+        return {
+          pill: pill("checkCircle", "ok", "환불 완료"),
+          message: (
+            <>
+              <b className="font-bold text-text-1">{formatKRW(order.refundAmount ?? order.chargeAmount)}</b> 환불됐어요 ·
+              카드사에 따라 반영까지 영업일이 걸릴 수 있어요
+            </>
+          ),
+          action: null,
+        };
       default:
         // PAYMENT_FAILED(예약값) 등 — 과거 데이터 호환 폴백.
         return {
@@ -1061,17 +1093,21 @@ const fulfillmentPill = (icon: string, tone: StatusTone, label: string) => (
 // 구매자 관점 배송/확정 푸터(#119) — 결제 완료(PAID) 주문에만. 배송지 입력(모달 트리거)·구매확정 포함.
 function BuyerFulfillmentFooter({
   order,
+  title,
   onRefresh,
   onOpenAddressModal,
   onConfirmed,
 }: {
   order: MyOrderStatusResponse;
+  title: string;
   onRefresh: () => void;
   onOpenAddressModal: () => void;
   onConfirmed?: (auctionId: number) => void;
 }) {
   const { fetchWithAuth } = useAuth();
   const [confirming, setConfirming] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [returnOpen, setReturnOpen] = useState(false);
 
   async function confirm() {
     if (confirming) return;
@@ -1088,9 +1124,41 @@ function BuyerFulfillmentFooter({
     }
   }
 
+  // 발송 전 주문 취소(약관 제13조 제2항). 되돌릴 수 없으니 한 번 되묻는다.
+  async function cancel() {
+    if (cancelling) return;
+    if (!window.confirm("주문을 취소하고 환불받을까요? 취소한 뒤에는 되돌릴 수 없어요.")) return;
+    setCancelling(true);
+    try {
+      await fetchWithAuth<void>(`/api/auctions/${order.auctionId}/order/cancel`, { method: "POST" });
+      onRefresh();
+    } catch {
+      // 실패는 조용히 — 다음 새로고침에서 서버 상태로 보정.
+    } finally {
+      setCancelling(false);
+    }
+  }
+
   const fs = order.fulfillmentStatus;
+
+  // 반품이 열려 있으면 배송 상태보다 분쟁 단계가 우선 — 지금 내가 뭘 해야 하는지가 먼저다.
+  if (order.disputeStatus !== "NONE" && order.disputeStatus !== "RESOLVED_DISMISSED") {
+    return <BuyerDisputeFooter order={order} onRefresh={onRefresh} />;
+  }
+
   return (
     <div className="border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
+      {returnOpen && (
+        <ReturnRequestModal
+          auctionId={order.auctionId}
+          title={title}
+          onClose={() => setReturnOpen(false)}
+          onDone={() => {
+            setReturnOpen(false);
+            onRefresh();
+          }}
+        />
+      )}
       <div className="flex flex-wrap items-center gap-2.5">
         {fs === "CONFIRMED" ? (
           <>
@@ -1106,6 +1174,16 @@ function BuyerFulfillmentFooter({
               {order.carrier} {order.trackingNumber}
               {order.deliveredAt ? " · 받으셨으면 구매 확정해 주세요" : ""}
             </span>
+            {/* 반품은 구매확정 전에만 가능하다(약관 제15조 제2항) — 확정 버튼 옆에 나란히 둔다. */}
+            {order.returnable && (
+              <button
+                type="button"
+                onClick={() => setReturnOpen(true)}
+                className={`shrink-0 rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+              >
+                반품 요청
+              </button>
+            )}
             <button
               type="button"
               onClick={confirm}
@@ -1131,9 +1209,116 @@ function BuyerFulfillmentFooter({
           <>
             {fulfillmentPill("clock", "primary", "발송 대기")}
             <span className="min-w-0 flex-1">판매자의 발송을 기다리고 있어요.</span>
+            {/* 발송 전에는 구매자가 스스로 취소할 수 있다(약관 제13조 제2항). */}
+            {order.cancellable && (
+              <button
+                type="button"
+                onClick={cancel}
+                disabled={cancelling}
+                className={`shrink-0 rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
+              >
+                주문 취소
+              </button>
+            )}
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+// 반품이 열린 주문의 구매자 푸터(#213) — 배송 상태보다 "지금 내가 뭘 해야 하는지"가 먼저다.
+// 각 단계에 기한이 걸려 있어(disputeDueAt) 언제까지인지를 함께 보여준다.
+function BuyerDisputeFooter({
+  order,
+  onRefresh,
+}: {
+  order: MyOrderStatusResponse;
+  onRefresh: () => void;
+}) {
+  const [shipOpen, setShipOpen] = useState(false);
+  const due = order.disputeDueAt ? formatDateTimeKST(order.disputeDueAt) : null;
+
+  const body = (() => {
+    switch (order.disputeStatus) {
+      case "RETURN_REQUESTED":
+        return {
+          pill: fulfillmentPill("clock", "primary", "반품 요청"),
+          message: due ? (
+            <>{due}까지 판매자가 응답해요 · 응답이 없으면 자동으로 수락돼요</>
+          ) : (
+            <>판매자의 응답을 기다리고 있어요</>
+          ),
+        };
+      case "RETURN_ACCEPTED":
+        return {
+          pill: fulfillmentPill("box", "accent", "반송 필요"),
+          message: due ? (
+            <>반품이 수락됐어요 · {due}까지 반송하고 운송장을 등록해 주세요</>
+          ) : (
+            <>반품이 수락됐어요 · 물품을 반송하고 운송장을 등록해 주세요</>
+          ),
+        };
+      case "RETURN_SHIPPED":
+        return {
+          pill: fulfillmentPill("box", "primary", "반송 중"),
+          message: (
+            <>
+              {order.returnCarrier} {order.returnTrackingNumber} · 판매자 확인 후 환불돼요
+            </>
+          ),
+        };
+      case "UNDER_MEDIATION":
+        return {
+          pill: fulfillmentPill("alertCircle", "warn", "중재 진행"),
+          message: <>운영진이 확인하고 있어요 · 결과를 알림으로 알려드릴게요</>,
+        };
+      case "RESOLVED_REFUND":
+        return {
+          pill: fulfillmentPill("checkCircle", "ok", "반품 완료"),
+          message: <>반품이 확정돼 환불 절차가 진행돼요</>,
+        };
+      default:
+        return {
+          pill: fulfillmentPill("alertCircle", "neutral", "반품 확인 필요"),
+          message: <>반품 상태를 확인해 주세요</>,
+        };
+    }
+  })();
+
+  return (
+    <div className="border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
+      <div className="flex flex-wrap items-center gap-2.5">
+        {body.pill}
+        <span className="min-w-0 flex-1">{body.message}</span>
+        {order.disputeStatus === "RETURN_ACCEPTED" && !shipOpen && (
+          <button
+            type="button"
+            onClick={() => setShipOpen(true)}
+            className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+          >
+            반송 등록
+          </button>
+        )}
+        {shipOpen && (
+          <ReturnShipForm
+            auctionId={order.auctionId}
+            onShipped={() => {
+              setShipOpen(false);
+              onRefresh();
+            }}
+          />
+        )}
+      </div>
+      {order.returnReason && (
+        <p className="mt-1.5 text-[11px] text-text-3">
+          사유 {RETURN_REASON_LABEL[order.returnReason]}
+          {order.returnDetail ? ` · ${order.returnDetail}` : ""}
+        </p>
+      )}
+      {order.disputeNote && order.disputeStatus === "UNDER_MEDIATION" && (
+        <p className="mt-1 text-[11px] text-text-3">판매자 의견 · {order.disputeNote}</p>
+      )}
     </div>
   );
 }
@@ -1149,6 +1334,21 @@ function SellerFulfillmentFooter({
   const [shipOpen, setShipOpen] = useState(false);
   const fs = soldOrder.fulfillmentStatus;
   const addr = soldOrder.deliveryAddress;
+
+  // 반품이 열려 있으면 발송 상태보다 반품 대응이 우선 — 판매자가 지금 눌러야 할 버튼이 여기 있다.
+  if (soldOrder.disputeStatus !== "NONE" && soldOrder.disputeStatus !== "RESOLVED_DISMISSED") {
+    return <SellerDisputeFooter soldOrder={soldOrder} onRefresh={onRefresh} />;
+  }
+  // 환불로 끝난 거래는 발송 UI를 띄우지 않는다(취소·미발송 자동취소 포함).
+  if (soldOrder.orderStatus === "REFUNDING" || soldOrder.orderStatus === "REFUNDED") {
+    return (
+      <div className="flex flex-wrap items-center gap-2.5 border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
+        {fulfillmentPill("xCircle", "neutral", "거래 취소")}
+        <span className="min-w-0 flex-1">거래가 취소돼 구매자에게 환불됐어요 · 정산 대상이 아니에요.</span>
+      </div>
+    );
+  }
+
   return (
     <div className="border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
       <div className="flex flex-wrap items-center gap-2.5">
@@ -1195,6 +1395,140 @@ function SellerFulfillmentFooter({
             onRefresh();
           }}
         />
+      )}
+    </div>
+  );
+}
+
+// 반품이 열린 주문의 판매자 푸터(#213). 단계마다 판매자가 할 일이 다르다 —
+// 요청 도착 시 수락/거절, 반송 도착 시 수령확인/훼손신고. 무응답은 자동 수락되므로 기한을 명시한다.
+function SellerDisputeFooter({
+  soldOrder,
+  onRefresh,
+}: {
+  soldOrder: SoldOrderResponse;
+  onRefresh: () => void;
+}) {
+  const { fetchWithAuth } = useAuth();
+  const [busy, setBusy] = useState(false);
+  const due = soldOrder.disputeDueAt ? formatDateTimeKST(soldOrder.disputeDueAt) : null;
+
+  // 거절·훼손신고는 사유가 필수다(관리자 중재의 판단 근거) — prompt로 받고 비면 중단한다.
+  async function act(path: string, note?: string) {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await fetchWithAuth<void>(`/api/auctions/${soldOrder.auctionId}/order/return/${path}`, {
+        method: "POST",
+        body: note === undefined ? undefined : { note },
+      });
+      onRefresh();
+    } catch {
+      // 실패는 조용히 — 다음 새로고침에서 서버 상태로 보정.
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function actWithNote(path: string, question: string) {
+    const note = window.prompt(question)?.trim();
+    if (!note) return;
+    void act(path, note);
+  }
+
+  const outlineBtn = `shrink-0 rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`;
+  const solidBtn = `shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`;
+
+  const body = (() => {
+    switch (soldOrder.disputeStatus) {
+      case "RETURN_REQUESTED":
+        return {
+          pill: fulfillmentPill("alertCircle", "accent", "반품 요청"),
+          message: due ? (
+            <>{due}까지 응답해 주세요 · 응답이 없으면 자동으로 수락돼요</>
+          ) : (
+            <>구매자가 반품을 요청했어요</>
+          ),
+          actions: (
+            <>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => actWithNote("reject", "반품을 거절하는 사유를 적어주세요. 운영진 중재의 판단 근거가 돼요.")}
+                className={outlineBtn}
+              >
+                거절
+              </button>
+              <button type="button" disabled={busy} onClick={() => void act("accept")} className={solidBtn}>
+                수락
+              </button>
+            </>
+          ),
+        };
+      case "RETURN_ACCEPTED":
+        return {
+          pill: fulfillmentPill("clock", "primary", "반송 대기"),
+          message: due ? <>{due}까지 구매자가 반송해요</> : <>구매자의 반송을 기다리고 있어요</>,
+          actions: null,
+        };
+      case "RETURN_SHIPPED":
+        return {
+          pill: fulfillmentPill("box", "accent", "반송 도착 확인"),
+          message: (
+            <>
+              {soldOrder.returnCarrier} {soldOrder.returnTrackingNumber}
+              {due ? ` · ${due}까지 확인하지 않으면 자동 환불돼요` : ""}
+            </>
+          ),
+          actions: (
+            <>
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => actWithNote("damaged", "어떤 점이 훼손됐는지 적어주세요. 운영진 중재로 넘어가요.")}
+                className={outlineBtn}
+              >
+                훼손 신고
+              </button>
+              <button type="button" disabled={busy} onClick={() => void act("receive")} className={solidBtn}>
+                수령 확인
+              </button>
+            </>
+          ),
+        };
+      case "UNDER_MEDIATION":
+        return {
+          pill: fulfillmentPill("alertCircle", "warn", "중재 진행"),
+          message: <>운영진이 확인하고 있어요 · 결과를 알림으로 알려드릴게요</>,
+          actions: null,
+        };
+      case "RESOLVED_REFUND":
+        return {
+          pill: fulfillmentPill("xCircle", "neutral", "반품 완료"),
+          message: <>반품이 확정돼 구매자에게 환불돼요 · 정산 대상이 아니에요</>,
+          actions: null,
+        };
+      default:
+        return {
+          pill: fulfillmentPill("alertCircle", "neutral", "반품 확인 필요"),
+          message: <>반품 상태를 확인해 주세요</>,
+          actions: null,
+        };
+    }
+  })();
+
+  return (
+    <div className="border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
+      <div className="flex flex-wrap items-center gap-2.5">
+        {body.pill}
+        <span className="min-w-0 flex-1">{body.message}</span>
+        {body.actions}
+      </div>
+      {soldOrder.returnReason && (
+        <p className="mt-1.5 text-[11px] text-text-3">
+          사유 {RETURN_REASON_LABEL[soldOrder.returnReason]}
+          {soldOrder.returnDetail ? ` · ${soldOrder.returnDetail}` : ""}
+        </p>
       )}
     </div>
   );
@@ -1266,6 +1600,7 @@ function MyBiddingList({
                 (order.status === "PAID" && onRefresh ? (
                   <BuyerFulfillmentFooter
                     order={order}
+                    title={item.title}
                     onRefresh={onRefresh}
                     onOpenAddressModal={() => onOpenAddressModal?.(item.id, item.title)}
                     onConfirmed={onConfirmed}

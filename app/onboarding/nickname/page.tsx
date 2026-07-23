@@ -5,14 +5,20 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
 import NicknameSuggestButton from "@/components/NicknameSuggestButton";
+import ConsentFields, {
+  EMPTY_CONSENTS,
+  hasAllRequiredConsents,
+  type ConsentValues,
+} from "@/components/ConsentFields";
 import { INPUT_CLASS, PRIMARY_BUTTON_CLASS } from "@/lib/ui";
 
 export default function NicknameOnboardingPage() {
   const router = useRouter();
-  const { accessToken, member, isLoading, updateNickname } = useAuth();
+  const { accessToken, member, isLoading, completeOnboarding } = useAuth();
   const nicknameId = useId();
   const [nickname, setNickname] = useState("");
   const [prefilled, setPrefilled] = useState(false);
+  const [consents, setConsents] = useState<ConsentValues>(EMPTY_CONSENTS);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -33,12 +39,17 @@ export default function NicknameOnboardingPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    // 서버도 같은 규칙으로 막지만(BE #183), 제출 후 400을 보여주기보다 여기서 먼저 안내한다.
+    if (!hasAllRequiredConsents(consents)) {
+      setError("필수 항목에 모두 동의해야 시작할 수 있어요.");
+      return;
+    }
     setIsSubmitting(true);
     try {
-      await updateNickname(nickname);
+      await completeOnboarding({ nickname, ...consents });
       router.replace("/");
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "닉네임 저장에 실패했습니다.");
+      setError(err instanceof ApiError ? err.message : "가입 절차를 완료하지 못했어요.");
     } finally {
       setIsSubmitting(false);
     }
@@ -47,10 +58,10 @@ export default function NicknameOnboardingPage() {
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
       <h1 className="mb-2 text-center font-display text-xl font-extrabold text-text-1">
-        닉네임을 확인해주세요
+        가입을 마무리해주세요
       </h1>
       <p className="mb-6 text-center text-xs text-text-3">
-        경매·거래에서 다른 사용자에게 보여지는 이름이에요. 나중에도 바꿀 수 있어요.
+        닉네임은 경매·거래에서 다른 사용자에게 보여지는 이름이에요. 나중에도 바꿀 수 있어요.
       </p>
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
         <label htmlFor={nicknameId} className="sr-only">
@@ -69,6 +80,9 @@ export default function NicknameOnboardingPage() {
           className={INPUT_CLASS}
         />
         <NicknameSuggestButton onSuggest={setNickname} />
+        <div className="mt-1">
+          <ConsentFields values={consents} onChange={setConsents} />
+        </div>
         {error && (
           <p role="alert" aria-live="polite" className="text-xs text-accent">
             {error}

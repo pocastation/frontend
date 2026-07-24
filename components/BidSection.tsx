@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { apiFetch, ApiError, apiStreamUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { formatKRW, formatCountdown, formatRelativeTime, formatDateTimeKST, isBeforeEnd } from "@/lib/format";
+import { formatKRW, formatCountdown, formatRelativeTime, formatDateTimeKST, isBeforeEnd, isEndingSoon } from "@/lib/format";
 import {
   BID_MIN_INCREMENT,
   buyerFee,
@@ -75,6 +75,8 @@ export default function BidSection({
   const [priceHeaderInView, setPriceHeaderInView] = useState(false);
 
   const isLive = status === "LIVE" && isBeforeEnd(endAt);
+  // 마감 임박일 때만 카운트다운을 주황(warn)으로 강조 — 그 외에는 뉴트럴로 둔다(색 절제).
+  const endingSoon = isLive && isEndingSoon(endAt);
   const isOwnAuction = member?.nickname != null && member.nickname === sellerNickname;
   const floor = minNextBid(currentPrice, bidCount);
   const ceil = maxNextBid(currentPrice);
@@ -209,24 +211,30 @@ export default function BidSection({
 
   return (
     <div className="mt-6">
-      {/* 현재가 헤더 */}
-      <div
-        ref={priceHeaderRef}
-        className="rounded-r3 border border-border bg-surface p-4 shadow-card"
-      >
+      {/* 입찰 박스 — 현재가·입찰 입력·예상 결제·CTA를 하나의 카드로 묶는다(그림자 없이 헤어라인). */}
+      <div ref={priceHeaderRef} className="rounded-r3 border border-border bg-surface p-5">
+        {/* 현재가 헤더 */}
         <div className="flex items-center justify-between text-xs font-semibold text-text-3">
           <span>현재가</span>
           <span>입찰 {bidCount}회</span>
         </div>
-        <div className="mt-1 flex items-baseline justify-between gap-2">
+        <div className="mt-1.5 flex items-center justify-between gap-2">
           <span className="font-display text-3xl font-extrabold text-text-1 tabular-nums" aria-live="polite">
             {formatKRW(currentPrice)}
           </span>
-          <span
-            className={`shrink-0 text-right text-sm font-bold tabular-nums ${isLive ? "text-accent" : "text-text-3"}`}
-          >
-            {isLive ? formatCountdown(endAt) : (STATUS_LABEL[status] ?? "종료")}
-            {isLive && <span className="block text-[10px] font-normal text-text-3">마감까지</span>}
+          <span className="flex shrink-0 flex-col items-end gap-1">
+            {isLive && <span className="text-[10px] font-medium text-text-3">마감까지</span>}
+            <span
+              className={`text-sm font-bold tabular-nums ${
+                !isLive
+                  ? "text-text-3"
+                  : endingSoon
+                    ? "rounded-r1 bg-warn-soft px-2 py-0.5 text-warn"
+                    : "text-text-1"
+              }`}
+            >
+              {isLive ? formatCountdown(endAt) : (STATUS_LABEL[status] ?? "종료")}
+            </span>
           </span>
         </div>
         {isLive && (
@@ -248,118 +256,118 @@ export default function BidSection({
             조회 <span className="font-semibold text-text-2 tabular-nums">{viewCount.toLocaleString("ko-KR")}</span>
           </span>
         </div>
+
+        {/* 입찰 영역 (진행 중일 때만) — 같은 카드 안, 헤어라인으로 구분 */}
+        {isLive &&
+          (isOwnAuction ? (
+            <div className="mt-4 rounded-r2 border border-border bg-surface-2 p-4 text-center text-sm font-semibold text-text-2">
+              내 경매입니다. 직접 입찰할 수 없어요.
+            </div>
+          ) : !accessToken ? (
+            <Link
+              href={`/login?redirect=/auctions/${auctionId}`}
+              className={`mt-4 flex h-12 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
+            >
+              로그인하고 입찰하기
+            </Link>
+          ) : (
+            <div className="mt-4 border-t border-border pt-4">
+              {/* 입찰가 — v0 스테퍼(± · 빠른 가산). 호가 사다리를 대체하되 min/max·수수료 로직은 그대로 유지. */}
+              <div className="mb-2.5 flex items-baseline justify-between">
+                <span className="text-[13px] font-bold text-text-1">입찰가</span>
+                <span className="text-[11px] font-medium text-text-3 tabular-nums">
+                  가능 범위 {formatKRW(floor)} – {formatKRW(ceil)}
+                </span>
+              </div>
+              <div className="flex h-[52px] items-stretch overflow-hidden rounded-r2 border border-border">
+                <button
+                  type="button"
+                  onClick={() => adjustAmount(amount - BID_MIN_INCREMENT)}
+                  disabled={amount <= floor}
+                  aria-label="입찰가 내리기"
+                  className={`w-[52px] text-xl text-text-2 transition-colors hover:bg-surface-2 hover:text-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-2 ${FOCUS_RING}`}
+                >
+                  −
+                </button>
+                <div
+                  className="flex flex-1 items-center justify-center border-x border-border font-display text-xl font-bold tabular-nums text-text-1"
+                  aria-live="polite"
+                >
+                  {formatKRW(amount)}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => adjustAmount(amount + BID_MIN_INCREMENT)}
+                  disabled={amount >= ceil}
+                  aria-label="입찰가 올리기"
+                  className={`w-[52px] text-xl text-text-2 transition-colors hover:bg-surface-2 hover:text-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-2 ${FOCUS_RING}`}
+                >
+                  +
+                </button>
+              </div>
+              <div className="mt-2 flex gap-1.5">
+                {[BID_MIN_INCREMENT, 5000, 10000].map((delta) => (
+                  <button
+                    key={delta}
+                    type="button"
+                    onClick={() => adjustAmount(amount + delta)}
+                    disabled={amount >= ceil}
+                    className={`h-9 flex-1 rounded-r2 border border-border text-xs font-medium text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-40 disabled:hover:border-border disabled:hover:text-text-2 ${FOCUS_RING}`}
+                  >
+                    +{delta.toLocaleString("ko-KR")}
+                  </button>
+                ))}
+              </div>
+
+              {/* 예상 결제 총액 — 연회색 박스. 총액은 뉴트럴(보라 아님). */}
+              <div className="mt-4 rounded-r2 bg-surface-2 p-3.5 text-[13px]">
+                <div className="flex items-center justify-between py-0.5 text-text-3">
+                  <span>입찰가</span>
+                  <span className="font-medium tabular-nums text-text-2">{formatKRW(amount)}</span>
+                </div>
+                <div className="flex items-center justify-between py-0.5 text-text-3">
+                  <span>구매자 수수료</span>
+                  <span className="font-medium tabular-nums text-text-2">{formatKRW(buyerFee(amount))}</span>
+                </div>
+                <div className="mt-1.5 flex items-baseline justify-between border-t border-border pt-2.5">
+                  <span className="font-bold text-text-1">예상 결제 총액</span>
+                  <span className="font-display text-lg font-bold tabular-nums text-text-1">{formatKRW(total)}</span>
+                </div>
+                <p className="mt-1.5 text-[11px] text-text-3">낙찰 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleBid}
+                disabled={submitting || outOfRange}
+                className={`mt-3.5 flex h-12 w-full items-center justify-center rounded-r2 bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+              >
+                {submitting ? "처리 중..." : `${formatKRW(amount)} 입찰하기`}
+              </button>
+
+              {outOfRange && (
+                <p className="mt-1 text-[11px] font-semibold text-accent">
+                  입찰 가능 범위 {formatKRW(floor)} ~ {formatKRW(ceil)}
+                </p>
+              )}
+
+              {message && (
+                <p
+                  role="alert"
+                  aria-live="polite"
+                  className={`mt-2 rounded-r2 px-3 py-2 text-xs font-semibold ${
+                    message.type === "ok" ? "bg-ok-soft text-ok" : "bg-accent-soft text-accent"
+                  }`}
+                >
+                  {message.text}
+                </p>
+              )}
+            </div>
+          ))}
       </div>
 
-      {/* 입찰 영역 (진행 중일 때만) */}
-      {isLive &&
-        (isOwnAuction ? (
-          <div className="mt-4 rounded-r2 border border-border bg-surface-2 p-4 text-center text-sm font-semibold text-text-2">
-            내 경매입니다. 직접 입찰할 수 없어요.
-          </div>
-        ) : !accessToken ? (
-          <Link
-            href={`/login?redirect=/auctions/${auctionId}`}
-            className={`mt-4 flex h-11 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
-          >
-            로그인하고 입찰하기
-          </Link>
-        ) : (
-          <div className="mt-4">
-            {/* 입찰가 — v0 스테퍼(± · 빠른 가산). 호가 사다리를 대체하되 min/max·수수료 로직은 그대로 유지. */}
-            <div className="mb-2.5 flex items-baseline justify-between">
-              <span className="text-[13px] font-bold text-text-1">입찰가</span>
-              <span className="text-[11px] font-medium text-text-3 tabular-nums">
-                가능 범위 {formatKRW(floor)} – {formatKRW(ceil)}
-              </span>
-            </div>
-            <div className="flex h-[52px] items-stretch overflow-hidden rounded-r2 border border-border">
-              <button
-                type="button"
-                onClick={() => adjustAmount(amount - BID_MIN_INCREMENT)}
-                disabled={amount <= floor}
-                aria-label="입찰가 내리기"
-                className={`w-[52px] text-xl text-text-2 transition-colors hover:bg-surface-2 hover:text-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-2 ${FOCUS_RING}`}
-              >
-                −
-              </button>
-              <div
-                className="flex flex-1 items-center justify-center border-x border-border font-display text-xl font-bold tabular-nums text-text-1"
-                aria-live="polite"
-              >
-                {formatKRW(amount)}
-              </div>
-              <button
-                type="button"
-                onClick={() => adjustAmount(amount + BID_MIN_INCREMENT)}
-                disabled={amount >= ceil}
-                aria-label="입찰가 올리기"
-                className={`w-[52px] text-xl text-text-2 transition-colors hover:bg-surface-2 hover:text-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-2 ${FOCUS_RING}`}
-              >
-                +
-              </button>
-            </div>
-            <div className="mt-2 flex gap-1.5">
-              {[BID_MIN_INCREMENT, 5000, 10000].map((delta) => (
-                <button
-                  key={delta}
-                  type="button"
-                  onClick={() => adjustAmount(amount + delta)}
-                  disabled={amount >= ceil}
-                  className={`h-9 flex-1 rounded-r2 bg-surface-2 text-xs font-medium text-text-2 transition-colors hover:bg-surface-3 hover:text-primary disabled:opacity-40 disabled:hover:bg-surface-2 disabled:hover:text-text-2 ${FOCUS_RING}`}
-                >
-                  +{delta.toLocaleString("ko-KR")}
-                </button>
-              ))}
-            </div>
-
-            {/* 예상 결제 총액 — 박스 대신 헤어라인만(v0) */}
-            <div className="mt-4 text-[13px]">
-              <div className="flex items-center justify-between py-1 text-text-3">
-                <span>입찰가</span>
-                <span className="font-medium tabular-nums text-text-2">{formatKRW(amount)}</span>
-              </div>
-              <div className="flex items-center justify-between py-1 text-text-3">
-                <span>구매자 수수료</span>
-                <span className="font-medium tabular-nums text-text-2">{formatKRW(buyerFee(amount))}</span>
-              </div>
-              <div className="mt-1.5 flex items-baseline justify-between border-t border-border pt-2.5">
-                <span className="font-bold text-text-1">예상 결제 총액</span>
-                <span className="font-display text-lg font-bold tabular-nums text-primary">{formatKRW(total)}</span>
-              </div>
-              <p className="mt-1.5 text-[11px] text-text-3">낙찰 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
-            </div>
-
-            <button
-              type="button"
-              onClick={handleBid}
-              disabled={submitting || outOfRange}
-              className={`mt-3.5 flex h-12 w-full items-center justify-center rounded-r2 bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
-            >
-              {submitting ? "처리 중..." : `${formatKRW(amount)} 입찰하기`}
-            </button>
-
-            {outOfRange && (
-              <p className="mt-1 text-[11px] font-semibold text-accent">
-                입찰 가능 범위 {formatKRW(floor)} ~ {formatKRW(ceil)}
-              </p>
-            )}
-
-            {message && (
-              <p
-                role="alert"
-                aria-live="polite"
-                className={`mt-2 rounded-r2 px-3 py-2 text-xs font-semibold ${
-                  message.type === "ok" ? "bg-ok-soft text-ok" : "bg-accent-soft text-accent"
-                }`}
-              >
-                {message.text}
-              </p>
-            )}
-          </div>
-        ))}
-
-      {/* 입찰 이력 */}
-      <section className="mt-6 rounded-r3 border border-border bg-surface p-4 shadow-card">
+      {/* 입찰 이력 — 1위 행은 연보라 하이라이트 + 순번 배지, 나머지는 헤어라인 행 */}
+      <section className="mt-4 rounded-r3 border border-border bg-surface p-5">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-text-1">
             입찰 이력 {bidCount > 0 && <span className="text-text-3">({bidCount})</span>}
@@ -372,28 +380,41 @@ export default function BidSection({
           )}
         </div>
         {bids.length > 0 ? (
-          <ul className="mt-2 flex flex-col gap-1">
-            {bids.map((bid, index) => (
-              <li
-                key={bid.id}
-                className={`flex items-center justify-between rounded-r1 px-3 py-2 text-xs ${
-                  index === 0 ? "bg-surface-3" : "bg-surface-2"
-                }`}
-              >
-                <span className="font-semibold text-text-2">
-                  {index === 0 && (
-                    <span className="mr-1.5 rounded-full border border-border-2 bg-surface px-1.5 py-0.5 text-[10px] font-bold text-text-2">
-                      최고가
+          <ul className="mt-2 flex flex-col">
+            {bids.map((bid, index) => {
+              const isTop = index === 0;
+              return (
+                <li
+                  key={bid.id}
+                  className={`flex items-center justify-between px-3 py-2.5 text-xs ${
+                    isTop
+                      ? "mb-1 rounded-r2 bg-primary-soft"
+                      : "border-b border-border last:border-b-0"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <span
+                      className={
+                        isTop
+                          ? "flex h-5 w-5 items-center justify-center rounded-r1 border border-primary text-[11px] font-bold text-primary"
+                          : "w-5 text-center text-[11px] font-bold text-text-3"
+                      }
+                    >
+                      {index + 1}
                     </span>
-                  )}
-                  {bid.bidderNicknameMasked}
-                </span>
-                <span className="flex items-baseline gap-2">
-                  <span className="font-bold text-text-1 tabular-nums">{formatKRW(bid.amount)}</span>
-                  <span className="text-[10px] text-text-3">{formatRelativeTime(bid.createdAt)}</span>
-                </span>
-              </li>
-            ))}
+                    <span className={`font-semibold ${isTop ? "text-text-1" : "text-text-2"}`}>
+                      {bid.bidderNicknameMasked}
+                    </span>
+                  </span>
+                  <span className="flex items-baseline gap-2">
+                    <span className="text-[10px] text-text-3">{formatRelativeTime(bid.createdAt)}</span>
+                    <span className={`tabular-nums ${isTop ? "text-sm font-bold text-text-1" : "text-text-2"}`}>
+                      {formatKRW(bid.amount)}
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className="mt-2 text-xs text-text-3">아직 입찰이 없습니다.</p>
@@ -419,7 +440,7 @@ export default function BidSection({
               <span className="font-display text-lg font-extrabold text-text-1 tabular-nums">
                 {formatKRW(currentPrice)}
               </span>
-              <span className="truncate text-[11px] font-bold text-accent tabular-nums">
+              <span className={`truncate text-[11px] font-bold tabular-nums ${endingSoon ? "text-warn" : "text-text-3"}`}>
                 {formatCountdown(endAt)}
               </span>
             </div>

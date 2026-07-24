@@ -7,6 +7,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthProvider } from "@/lib/auth-context";
 import { WishlistProvider } from "@/lib/wishlist-context";
 import { NotificationProvider } from "@/lib/notification-context";
+import { ToastProvider } from "@/lib/toast-context";
 import "./globals.css";
 
 const notoSansKr = Noto_Sans_KR({
@@ -63,9 +64,11 @@ export default function RootLayout({
         <AuthProvider>
           <NotificationProvider>
             <WishlistProvider>
-              <Header />
-              <main className="flex-1">{children}</main>
-              <Footer />
+              <ToastProvider>
+                <Header />
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </ToastProvider>
             </WishlistProvider>
           </NotificationProvider>
         </AuthProvider>

@@ -69,7 +69,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 // v0 리톤 — 파스텔 필 제거. 해시태그는 헤어라인 pill + 퍼플 텍스트, 배지는 헤어라인 + 뉴트럴 텍스트로 통일.
 const CHIP_CLASS =
   `rounded-full border border-border px-2 py-0.5 text-xs font-bold text-primary transition-colors hover:border-primary ${FOCUS_RING}`;
-const BADGE_CLASS = "rounded-full border border-border px-2.5 py-1 text-xs font-bold text-text-2";
+const BADGE_CLASS = "rounded-full border border-border px-2 py-1 text-xs font-bold text-text-2";
 
 export default async function AuctionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -146,9 +146,9 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             <h2 className="text-sm font-bold text-text-1">상품 정보</h2>
             <div className="mt-2 divide-y divide-border rounded-r3 border border-border">
               {specRows.map((row) => (
-                <div key={row.label} className="flex items-center justify-between px-3.5 py-2 text-sm">
+                <div key={row.label} className="flex items-center justify-between gap-3 px-4 py-2.5 text-sm">
                   <span className="text-text-3">{row.label}</span>
-                  <span className="font-semibold text-text-1">{row.value}</span>
+                  <span className="text-right font-semibold text-text-1">{row.value}</span>
                 </div>
               ))}
             </div>
@@ -165,10 +165,10 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
 
           <section className="mt-6">
             <h2 className="text-sm font-bold text-text-1">판매자 정보</h2>
-            <div className="mt-2 rounded-r3 border border-border p-3.5">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface-2 text-sm font-bold text-text-2">
+            <div className="mt-2 rounded-r3 border border-border p-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-r2 bg-surface-2 text-base font-bold text-text-2">
                     {auction.sellerNickname.slice(0, 1).toUpperCase()}
                   </span>
                   <Link
@@ -195,7 +195,8 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
 
         {/* 오른쪽: 제목 · 배지 · 입찰 */}
         <div>
-          <div className="flex flex-wrap gap-1.5">
+          {/* pill의 좌측 안쪽 여백만큼 라벨 줄을 아웃덴트해, 라벨 텍스트 좌측을 제목(h1)과 맞춘다. */}
+          <div className="-ml-2 flex flex-wrap gap-1.5">
             {auction.artistName && (
               <SearchLink query={auction.artistName} className={CHIP_CLASS}>
                 #{auction.artistName}
@@ -212,7 +213,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             {auction.title}
           </h1>
 
-          <div className="mt-3 flex flex-wrap gap-1.5">
+          <div className="-ml-2 mt-3 flex flex-wrap gap-1.5">
             <span className={BADGE_CLASS}>
               {isInstantSale ? "즉시판매" : "경매"}
             </span>

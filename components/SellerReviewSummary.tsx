@@ -100,35 +100,40 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
         )}
       </div>
 
-      {rating.reviewCount === 0 ? (
-        <p className="mt-1.5 text-[11px] text-text-3">아직 받은 거래 후기가 없어요.</p>
-      ) : (
-      <div className="mt-1.5 flex items-center gap-1.5">
-        <Stars value={rating.averageRating ?? 0} className="text-sm" />
-        <span className="text-sm font-bold text-text-1">{(rating.averageRating ?? 0).toFixed(1)}</span>
-        <button
-          type="button"
-          onClick={toggleExpand}
-          className={`rounded-r2 text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
-        >
-          거래 후기 {rating.reviewCount}개 {expanded ? "접기" : "보기"}
-        </button>
-      </div>
-      )}
-
-      {rating.tags.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5">
-          {rating.tags.map((t) => (
-            <span
-              key={t.code}
-              className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-semibold text-text-2"
-            >
-              {t.label}
-              <span className="text-text-3">{t.count}</span>
+      {/* 별점 + 후기 보기 + 매너 태그를 한 줄에(시안). 후기 0건이면 안내 문구만. */}
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+        {rating.reviewCount === 0 ? (
+          <span className="text-[11px] text-text-3">아직 받은 거래 후기가 없어요.</span>
+        ) : (
+          <>
+            <span className="flex items-center gap-1.5">
+              <Stars value={rating.averageRating ?? 0} className="text-sm" />
+              <span className="text-sm font-bold text-text-1">{(rating.averageRating ?? 0).toFixed(1)}</span>
             </span>
-          ))}
-        </div>
-      )}
+            <button
+              type="button"
+              onClick={toggleExpand}
+              className={`rounded-r2 text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
+            >
+              거래 후기 {rating.reviewCount}개 {expanded ? "접기" : "보기"}
+            </button>
+          </>
+        )}
+        {rating.tags.length > 0 && (
+          <>
+            {rating.reviewCount > 0 && <span className="h-3 w-px bg-border" aria-hidden="true" />}
+            {rating.tags.map((t) => (
+              <span
+                key={t.code}
+                className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-semibold text-text-2"
+              >
+                {t.label}
+                <span className="text-text-3">{t.count}</span>
+              </span>
+            ))}
+          </>
+        )}
+      </div>
 
       {expanded && (
         <div className="mt-3 flex flex-col divide-y divide-border/70 border-t border-border/70">

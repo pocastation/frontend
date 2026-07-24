@@ -93,41 +93,44 @@ export default function AuctionExplorer({
 
   return (
     <section id={sectionId} className="mx-auto max-w-[1160px] px-4 py-10">
-      {/* 제목을 정렬 칩과 같은 줄에 두어 카드 그리드와의 간격을 좁힌다. 부제는 바로 아래 한 줄. */}
-      <div className="mb-1.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+      {/* (1) 제목 + 전체보기 한 줄  (2) 부제  (3) 정렬칩 가로 스크롤 — 모바일에서 칩이 2줄로
+          접히거나 전체보기·부제가 밀리지 않게 한다. 칩 줄은 스와이프 가능(스크롤바는 숨김). */}
+      <div className="flex items-center justify-between gap-4">
         <h2 className="font-display text-xl font-extrabold tracking-tight text-text-1">
           {heading}
         </h2>
-
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-          {loading && <InlineSpinner />}
-          <div className="flex flex-wrap gap-1.5" role="group" aria-label="정렬 기준">
-            {SORT_OPTIONS.map((option) => (
-              <button
-                key={option.key}
-                type="button"
-                aria-pressed={sortBy === option.key}
-                onClick={() => setSortBy(option.key)}
-                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
-                  sortBy === option.key
-                    ? "border-primary bg-primary text-white"
-                    : "border-border text-text-2 hover:border-primary hover:text-primary"
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-          <Link
-            href={allHref}
-            className={`shrink-0 text-xs font-bold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
-          >
-            전체 보기 →
-          </Link>
-        </div>
+        <Link
+          href={allHref}
+          className={`shrink-0 text-xs font-bold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
+        >
+          전체 보기 →
+        </Link>
       </div>
 
-      {subcopy && <p className="mb-6 text-[13px] text-text-3">{subcopy}</p>}
+      {subcopy && <p className="mt-1 text-[13px] text-text-3">{subcopy}</p>}
+
+      <div
+        className="mt-4 mb-6 flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        role="group"
+        aria-label="정렬 기준"
+      >
+        {loading && <InlineSpinner />}
+        {SORT_OPTIONS.map((option) => (
+          <button
+            key={option.key}
+            type="button"
+            aria-pressed={sortBy === option.key}
+            onClick={() => setSortBy(option.key)}
+            className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+              sortBy === option.key
+                ? "border-primary bg-primary text-white"
+                : "border-border text-text-2 hover:border-primary hover:text-primary"
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
 
       <div className={sidebar ? "grid items-start gap-6 lg:grid-cols-[1fr_280px]" : undefined}>
         <div>

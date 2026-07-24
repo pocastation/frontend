@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { apiFetch, ApiError, apiStreamUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/lib/toast-context";
 import { formatKRW, formatCountdown, formatRelativeTime, formatDateTimeKST, isBeforeEnd, isEndingSoon } from "@/lib/format";
 import {
   BID_MIN_INCREMENT,
@@ -55,6 +56,7 @@ export default function BidSection({
   viewCount,
 }: Props) {
   const { member, accessToken, fetchWithAuth } = useAuth();
+  const toast = useToast();
 
   const [currentPrice, setCurrentPrice] = useState(initialCurrentPrice);
   const [bidCount, setBidCount] = useState(initialBidCount);
@@ -64,7 +66,9 @@ export default function BidSection({
   const [bidTotalPages, setBidTotalPages] = useState(1);
   const [amount, setAmount] = useState(() => minNextBid(initialCurrentPrice, initialBidCount));
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  // 내가 현재 최고 입찰자인지 — 내 입찰 성공/서버 '이미 최고 입찰자' 응답으로 켜지고, 남이 추월(SSE)하면 꺼진다.
+  const [isTopBidder, setIsTopBidder] = useState(false);
+  const myTopBidRef = useRef<number | null>(null);
   // 카운트다운/상대시각을 1초마다 다시 그리기 위한 틱(값은 안 읽고 리렌더 트리거로만 쓴다).
   const [, setNowTick] = useState(0);
   // 다른 사람 입찰로 현재가가 오르면 입력값 하한도 따라 올려야 한다. 단 사용자가 사다리에서
@@ -132,7 +136,11 @@ export default function BidSection({
       setCurrentPrice(data.currentPrice);
       setBidCount(data.bidCount);
       setEndAt(data.endAt);
-      setMessage(null);
+      // 내 최고가보다 높은 입찰이 들어오면 추월된 것 — 내 SSE 에코(같은 금액)는 무시한다.
+      if (myTopBidRef.current != null && data.currentPrice > myTopBidRef.current) {
+        myTopBidRef.current = null;
+        setIsTopBidder(false);
+      }
       fetchBids();
     });
     source.onerror = () => {};
@@ -179,7 +187,6 @@ export default function BidSection({
   }
 
   async function handleBid() {
-    setMessage(null);
     setSubmitting(true);
     try {
       const res = await fetchWithAuth<BidResponse>(`/api/auctions/${auctionId}/bids`, {
@@ -189,21 +196,34 @@ export default function BidSection({
       setCurrentPrice(res.currentPrice);
       setBidCount(res.bidCount);
       setEndAt(res.endAt);
+      // 내가 방금 최고가가 됐다 — 버튼을 잠그고, 추월 감지를 위해 내 금액을 기록한다.
+      myTopBidRef.current = res.currentPrice;
+      setIsTopBidder(true);
       // 내 입찰 성공 시 다음 최소 입찰가로 즉시 올려둔다. rebase 효과에만 맡기면, 서버가 커밋
       // 직후 쏘는 SSE가 POST 응답보다 먼저 도착해 currentPrice를 갱신할 때 amountTouchedRef가
       // 아직 true라 스킵되고, 이후 값이 안 바뀌어 재실행도 안 돼 옛 입찰가에 갇히는 레이스가 있다.
       amountTouchedRef.current = false;
       setAmount(minNextBid(res.currentPrice, res.bidCount));
-      setMessage({
-        type: "ok",
-        text: res.extended ? "입찰 완료! 마감 임박으로 종료 시간이 연장됐어요." : "입찰 완료!",
+      toast.show({
+        variant: res.extended ? "warn" : "success",
+        text: res.extended
+          ? "입찰 완료 · 마감 임박으로 종료 시간이 연장됐어요."
+          : "입찰 완료! 현재 최고 입찰자가 되었어요.",
       });
       fetchBids();
     } catch (err) {
-      setMessage({
-        type: "err",
-        text: err instanceof ApiError ? err.message : "입찰에 실패했습니다. 잠시 후 다시 시도해주세요.",
-      });
+      const text = err instanceof ApiError ? err.message : "입찰에 실패했습니다. 잠시 후 다시 시도해주세요.";
+      // '이미 최고 입찰자'는 에러가 아니라 정상 상태 — 정보 톤으로 안내하고 버튼도 잠근다.
+      if (err instanceof ApiError && err.message.includes("최고 입찰")) {
+        setIsTopBidder(true);
+        toast.show({
+          variant: "info",
+          text: "이미 회원님이 최고 입찰자예요.",
+          sub: "더 높은 금액으로만 다시 입찰할 수 있어요.",
+        });
+      } else {
+        toast.show({ variant: "danger", text });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -339,29 +359,15 @@ export default function BidSection({
               <button
                 type="button"
                 onClick={handleBid}
-                disabled={submitting || outOfRange}
-                className={`mt-3.5 flex h-12 w-full items-center justify-center rounded-r2 bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+                disabled={submitting || outOfRange || isTopBidder}
+                className={`mt-3.5 flex h-12 w-full items-center justify-center rounded-r2 bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-primary ${FOCUS_RING}`}
               >
-                {submitting ? "처리 중..." : `${formatKRW(amount)} 입찰하기`}
+                {isTopBidder
+                  ? "현재 최고 입찰자예요"
+                  : submitting
+                    ? "처리 중..."
+                    : `${formatKRW(amount)} 입찰하기`}
               </button>
-
-              {outOfRange && (
-                <p className="mt-1 text-[11px] font-semibold text-accent">
-                  입찰 가능 범위 {formatKRW(floor)} ~ {formatKRW(ceil)}
-                </p>
-              )}
-
-              {message && (
-                <p
-                  role="alert"
-                  aria-live="polite"
-                  className={`mt-2 rounded-r2 px-3 py-2 text-xs font-semibold ${
-                    message.type === "ok" ? "bg-ok-soft text-ok" : "bg-accent-soft text-accent"
-                  }`}
-                >
-                  {message.text}
-                </p>
-              )}
             </div>
           ))}
       </div>
@@ -456,6 +462,10 @@ export default function BidSection({
             >
               로그인하고 입찰
             </Link>
+          ) : isTopBidder ? (
+            <span className="shrink-0 rounded-r2 bg-surface-2 px-4 py-2.5 text-sm font-bold text-text-3">
+              최고 입찰자
+            </span>
           ) : (
             <button
               type="button"

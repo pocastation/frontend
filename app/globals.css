@@ -19,6 +19,9 @@
   /* 대기·재시도 상태 표시용(주문 결제 상태 도트, #113) */
   --color-warn: #d97706;
   --color-warn-soft: #fdf2e3;
+  /* 에러 전용색(브랜드 accent와 분리) — 토스트·검증 등 danger 상태 */
+  --color-danger: #dc2626;
+  --color-danger-soft: #fef2f2;
 
   --color-bg: #ffffff;
   --color-surface: #ffffff;
@@ -78,6 +81,12 @@ body {
 @keyframes wizardInLeft {
   from { opacity: 0; transform: translateX(-28px); }
   to { opacity: 1; transform: translateX(0); }
+}
+
+/* 토스트 진입 — 하단에서 살짝 올라오며 페이드 인(reduced-motion에선 위 전역 규칙이 무력화). */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 /* prefers-reduced-motion 사용자에게는 트랜지션/애니메이션을 사실상 없앤다(접근성). */

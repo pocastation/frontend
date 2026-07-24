@@ -8,8 +8,40 @@ import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import type { AuctionResponse } from "@/lib/types";
 import WishlistHeart from "@/components/WishlistHeart";
 
-// 캐러셀은 실제 진행 중인 경매(최대 3건, page.tsx가 이미 가져온 목록의 앞부분)만 순환한다 —
-// 가짜 슬라이드를 지어내지 않는다. 경매가 하나뿐이거나 없으면 화살표 없이 카드 하나만 보인다.
+// 브랜드 서사(포카+스테이션 = 우주 정거장): 히어로는 딥스페이스 밤하늘 캔버스다. 그라데이션·글로우 없이
+// 단색 위에 별빛만 흩뿌린다 — 흰·연보라 별점 다수 + 별빛골드(#EBC06B) 포인트 별 소수.
+// 좌표·크기는 고정 배열로 둔다(장식이라 aria-hidden). 별에 한해 아주 옅은 글로우(box-shadow)는 허용.
+// 좌표는 좌측 텍스트 컬럼(대략 left 3~50% · top 15~80%)을 피해 상단 띠·우측·하단에만 둔다 —
+// 별이 헤드라인/버튼 위로 겹치지 않게. 우측 별 일부는 featured 카드 뒤로 가려질 수 있으나 무방하다.
+const STAR_DOTS: { top: string; left: string; size: number; lav?: boolean }[] = [
+  { top: "4%", left: "12%", size: 2 },
+  { top: "7%", left: "31%", size: 2, lav: true },
+  { top: "5%", left: "50%", size: 2 },
+  { top: "9%", left: "63%", size: 3, lav: true },
+  { top: "6%", left: "82%", size: 2 },
+  { top: "3%", left: "94%", size: 2, lav: true },
+  { top: "30%", left: "92%", size: 3 },
+  { top: "52%", left: "88%", size: 2, lav: true },
+  { top: "68%", left: "95%", size: 3 },
+  { top: "44%", left: "56%", size: 2, lav: true },
+  { top: "90%", left: "22%", size: 2, lav: true },
+  { top: "88%", left: "47%", size: 3 },
+  { top: "92%", left: "76%", size: 2, lav: true },
+  { top: "5%", left: "6%", size: 2 },
+];
+
+const STAR_SPARKLES: { top: string; left: string; size: number; lav?: boolean }[] = [
+  { top: "8%", left: "40%", size: 11 },
+  { top: "72%", left: "67%", size: 9, lav: true },
+  { top: "22%", left: "93%", size: 13 },
+];
+
+const STAR_GOLD: { top: string; left: string; size: number }[] = [
+  { top: "6%", left: "44%", size: 20 },
+  { top: "8%", left: "72%", size: 17 },
+  { top: "88%", left: "70%", size: 24 },
+];
+
 export default function Hero({ liveCount, featured }: { liveCount: number; featured: AuctionResponse[] }) {
   const [index, setIndex] = useState(0);
   const current = featured[index] ?? null;
@@ -21,21 +53,42 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
   }
 
   return (
-    <section
-      className="relative overflow-hidden"
-      style={{
-        background:
-          "radial-gradient(ellipse 70% 90% at 15% 30%, #2a1a6e 0%, #17102f 55%), linear-gradient(120deg, #1a1235 0%, #241a4a 100%)",
-      }}
-    >
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 50% 60% at 88% 60%, rgba(244,63,94,.22) 0%, transparent 60%), radial-gradient(ellipse 40% 50% at 30% 90%, rgba(91,63,232,.5) 0%, transparent 55%)",
-        }}
-        aria-hidden="true"
-      />
+    <section className="relative overflow-hidden bg-deepspace text-white">
+      {/* 밤하늘 별빛 — 순장식(aria-hidden). 흰·연보라 점 + 4각 별 + 별빛골드 포인트. */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        {STAR_DOTS.map((s, i) => (
+          <span
+            key={`d${i}`}
+            className="absolute rounded-full"
+            style={{
+              top: s.top,
+              left: s.left,
+              width: s.size,
+              height: s.size,
+              background: s.lav ? "#c8bcff" : "#ffffff",
+              boxShadow: `0 0 ${s.size + 2}px ${s.lav ? "rgba(200,188,255,.7)" : "rgba(255,255,255,.8)"}`,
+            }}
+          />
+        ))}
+        {STAR_SPARKLES.map((s, i) => (
+          <span
+            key={`s${i}`}
+            className="absolute leading-none"
+            style={{ top: s.top, left: s.left, fontSize: s.size, color: s.lav ? "#c8bcff" : "#ffffff" }}
+          >
+            ✦
+          </span>
+        ))}
+        {STAR_GOLD.map((s, i) => (
+          <span
+            key={`g${i}`}
+            className="absolute leading-none text-star"
+            style={{ top: s.top, left: s.left, fontSize: s.size, textShadow: "0 0 8px rgba(235,192,107,.6)" }}
+          >
+            ★
+          </span>
+        ))}
+      </div>
 
       {hasMultiple && (
         <>
@@ -58,38 +111,35 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
         </>
       )}
 
-      <div className="relative mx-auto flex max-w-[1160px] flex-col items-center gap-10 px-4 py-12 sm:flex-row sm:items-center sm:justify-between sm:py-16">
+      <div className="relative mx-auto flex max-w-[1160px] flex-col items-center gap-12 px-4 py-16 sm:flex-row sm:items-center sm:justify-between sm:py-20">
         <div className="max-w-[560px] text-center sm:text-left">
-          <div className="mb-5 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold tracking-wide text-white/85">
-            <span className="flex items-center gap-1 rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-extrabold tracking-wider text-white">
-              <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" aria-hidden="true" />
-              LIVE
-            </span>
-            지금 <strong className="mx-0.5 text-white">{liveCount}개</strong> 경매 진행 중
+          <div className="mb-5 inline-flex items-center gap-2 rounded-r1 border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold tracking-wide text-white/90">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-ok" aria-hidden="true" />
+            LIVE 지금 <strong className="text-white">{liveCount.toLocaleString()}개</strong> 경매 진행 중
           </div>
 
-          <h1 className="font-display text-[clamp(26px,4.5vw,44px)] font-extrabold leading-[1.1] tracking-[-0.03em] text-white">
-            <span className="font-sans font-black tracking-[-0.02em]">K-POP 포토카드</span>
+          <h1 className="font-display text-[clamp(28px,4.5vw,42px)] font-extrabold leading-[1.25] tracking-[-0.02em] text-white">
+            <span className="font-sans font-black">K-POP 포토카드</span>
             <br />
-            우주에서 만나는
+            <span style={{ color: "#c8bcff" }}>우주에서 만나는</span>
             <br />
-            <span className="font-sans font-black tracking-[-0.02em]">경매 플랫폼</span>
+            <span className="font-sans font-black">경매 플랫폼</span>
           </h1>
 
-          <p className="mt-3.5 text-sm leading-relaxed text-white/60">
+          <p className="mt-4 text-base leading-relaxed" style={{ color: "#c8bcff" }}>
             희귀 포카부터 한정판 굿즈까지 — 공정한 경매로 진짜 가치를 찾아드립니다.
           </p>
 
-          <div className="mt-7 flex justify-center gap-2.5 sm:justify-start">
+          <div className="mt-8 flex justify-center gap-3 sm:justify-start">
             <Link
               href="#auctions"
-              className="inline-flex h-11 items-center justify-center rounded-full bg-white px-6 text-sm font-bold text-primary transition-transform hover:scale-[1.03] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+              className="inline-flex h-12 items-center justify-center rounded-r2 bg-primary px-7 text-sm font-bold text-white transition-colors hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace"
             >
               진행 중인 경매 보기 →
             </Link>
             <Link
               href="/guide"
-              className="inline-flex h-11 items-center justify-center rounded-full border border-white/30 px-6 text-sm font-bold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
+              className="inline-flex h-12 items-center justify-center rounded-r2 border border-white/40 px-7 text-sm font-bold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace"
             >
               이용 방법
             </Link>
@@ -99,42 +149,55 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
         {current && (
           <Link
             href={`/auctions/${current.id}`}
-            className="group hidden w-48 shrink-0 overflow-hidden rounded-r5 border border-white/20 bg-white/10 shadow-modal backdrop-blur-xl transition duration-300 ease-out hover:-translate-y-2 hover:border-white/35 hover:shadow-[0_24px_60px_-15px_rgba(91,63,232,0.6)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:block"
+            className="group relative hidden aspect-[3/4] w-72 shrink-0 overflow-hidden rounded-r4 border border-white/20 transition duration-300 ease-out hover:-translate-y-1.5 hover:border-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:block"
           >
-            <div className="relative flex aspect-[3/4] items-center justify-center bg-gradient-to-br from-[#1e1065] to-[#4c1d95] text-5xl">
-              {current.representativeThumbnailUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
-                <img
-                  src={mediaUrl(current.representativeThumbnailUrl)}
-                  alt={current.title}
-                  className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.07] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-                />
-              ) : (
-                <span className="text-white/45" aria-hidden="true">
-                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                    <circle cx="8.5" cy="8.5" r="1.5" />
-                    <path d="m21 15-5-5L5 21" />
-                  </svg>
-                </span>
-              )}
-              <WishlistHeart
-                auctionId={current.id}
-                active={wishlisted.has(current.id)}
-                onToggle={(next) => toggle(current.id, next)}
-                className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm hover:text-accent"
+            {current.representativeThumbnailUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
+              <img
+                src={mediaUrl(current.representativeThumbnailUrl)}
+                alt={current.title}
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               />
-            </div>
-            <div className="border-t border-white/10 p-3.5">
-              <p className="truncate text-sm font-bold text-white">{current.artistName ?? current.title}</p>
-              <p className="mt-0.5 truncate text-xs text-white/50">{current.title}</p>
-              <p className="mt-2 flex items-center justify-between font-display text-base font-bold text-white">
-                {formatKRW(current.currentPrice)}
-                <span className="flex items-center gap-1 rounded-full bg-accent px-1.5 py-0.5 text-[10px] font-extrabold tracking-wider">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-white" aria-hidden="true" />
-                  LIVE
-                </span>
-              </p>
+            ) : (
+              <span className="absolute inset-0 flex items-center justify-center bg-white/5 text-white/40" aria-hidden="true">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <path d="m21 15-5-5L5 21" />
+                </svg>
+              </span>
+            )}
+            <span
+              className="pointer-events-none absolute inset-0"
+              style={{ background: "linear-gradient(180deg, transparent 45%, rgba(0,0,0,0.82) 100%)" }}
+              aria-hidden="true"
+            />
+
+            <span className="absolute left-3 top-3 z-[2] flex items-center gap-1.5 rounded-r1 bg-primary px-2 py-1 text-[10px] font-extrabold tracking-wider">
+              <span className="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true" />
+              LIVE
+            </span>
+
+            <WishlistHeart
+              auctionId={current.id}
+              active={wishlisted.has(current.id)}
+              onToggle={(next) => toggle(current.id, next)}
+              className="absolute right-3 top-3 z-[2] flex h-7 w-7 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm hover:text-accent"
+            />
+
+            <div className="absolute inset-x-5 bottom-5 z-[2] text-white">
+              <p className="truncate text-sm font-bold">{current.artistName ?? current.title}</p>
+              <p className="mt-0.5 truncate text-xs text-white/60">{current.title}</p>
+              <div className="mt-3 flex items-end justify-between border-t border-white/20 pt-3">
+                <div>
+                  <p className="text-[10px] text-white/60">현재 입찰가</p>
+                  <p className="font-display text-lg font-bold">{formatKRW(current.currentPrice)}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] text-white/60">입찰</p>
+                  <p className="font-display text-sm font-bold">{current.bidCount}회</p>
+                </div>
+              </div>
             </div>
           </Link>
         )}

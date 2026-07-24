@@ -107,7 +107,7 @@ export default function AuctionCard({
 
       <div className="px-3.5 py-3">
         {auction.artistName && (
-          <p className="truncate text-[10.5px] font-extrabold tracking-wide text-primary">
+          <p className="truncate text-[12px] font-semibold text-text-2">
             {auction.artistName}
           </p>
         )}

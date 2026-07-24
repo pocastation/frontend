@@ -49,7 +49,6 @@ export default function AuctionExplorer({
 }) {
   const [sortBy, setSortBy] = useState<SortKey>(DEFAULT_SORT);
   const [results, setResults] = useState<AuctionResponse[]>(initialAuctions);
-  const [totalElements, setTotalElements] = useState(initialAuctions.length);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const isFirstRun = useRef(true);
@@ -67,7 +66,6 @@ export default function AuctionExplorer({
       const res = await apiFetch<AuctionListResponse>(`/api/auctions?${params}`, { cache: "no-store" });
       if (reqId !== reqIdRef.current) return; // 더 최신 요청에 밀렸으면 무시
       setResults(res.content);
-      setTotalElements(res.totalElements);
     } catch {
       // 실패해도 직전 결과는 유지하고, 에러 배너로 재시도를 유도한다(조용히 삼키지 않는다).
       if (reqId !== reqIdRef.current) return;
@@ -78,9 +76,8 @@ export default function AuctionExplorer({
   }, [saleType, sortBy]);
 
   const heading = title ?? (saleType === "INSTANT" ? "즉시판매" : "진행 중인 경매");
-  const subcopy = description ?? (
-    saleType === "INSTANT" ? "기다리지 않고 바로 구매할 수 있는 포토카드" : "실시간 업데이트 · 지금 바로 확인하세요"
-  );
+  // '진행 중인 경매'는 제목만 남긴다(건수·부제 제거). 즉시판매 등 description을 넘긴 섹션만 부제를 노출한다.
+  const subcopy = description ?? (saleType === "INSTANT" ? "기다리지 않고 바로 구매할 수 있는 포토카드" : null);
   const emptyTitle = saleType === "INSTANT" ? "등록된 즉시판매가 없습니다" : "진행 중인 경매가 없습니다";
   const allHref = viewAllHref ?? (saleType === "INSTANT" ? "/instant-sales" : "/auctions");
 
@@ -101,7 +98,7 @@ export default function AuctionExplorer({
           <h2 className="font-display text-xl font-extrabold tracking-tight text-text-1">
             {heading}
           </h2>
-          <p className="mt-1 text-[13px] text-text-3">{subcopy}</p>
+          {subcopy && <p className="mt-1 text-[13px] text-text-3">{subcopy}</p>}
         </div>
         <Link
           href={allHref}
@@ -113,7 +110,6 @@ export default function AuctionExplorer({
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 text-xs text-text-3">
-          <span>{totalElements}개</span>
           {loading && <InlineSpinner />}
         </div>
 

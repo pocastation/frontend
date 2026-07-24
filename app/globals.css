@@ -6,11 +6,14 @@
  * bg-primary, text-text-2, rounded-r4, shadow-card, font-display 등.
  */
 @theme {
-  --color-primary: #5b3fe8;
-  --color-primary-dark: #4a30cc;
-  --color-primary-soft: #eee9fd;
+  --color-primary: #5326d9;
+  --color-primary-dark: #4420ae;
+  --color-primary-soft: #ede8fc;
   --color-accent: #f43f5e;
   --color-accent-soft: #fff0f2;
+  /* 브랜드 서사(포카+스테이션 = 우주 정거장) — 히어로/스플래시 딥스페이스 캔버스와 별빛 골드 */
+  --color-deepspace: #160c2e;
+  --color-star: #ebc06b;
   --color-ok: #15803d;
   --color-ok-soft: #f0fdf4;
   /* 대기·재시도 상태 표시용(주문 결제 상태 도트, #113) */
@@ -35,7 +38,7 @@
   --radius-r5: 22px;
 
   --shadow-card: 0 1px 3px rgba(17, 17, 24, 0.06), 0 4px 16px rgba(17, 17, 24, 0.04);
-  --shadow-primary: 0 8px 32px rgba(91, 63, 232, 0.18);
+  --shadow-primary: 0 8px 32px rgba(83, 38, 217, 0.18);
   --shadow-modal: 0 24px 64px rgba(17, 17, 24, 0.16);
 
   --font-sans: var(--font-noto-sans-kr), -apple-system, sans-serif;

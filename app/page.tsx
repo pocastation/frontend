@@ -1,5 +1,4 @@
 import AuctionExplorer from "@/components/AuctionExplorer";
-import AuctionRankSidebar from "@/components/AuctionRankSidebar";
 import AuctionTicker from "@/components/AuctionTicker";
 import Hero from "@/components/Hero";
 import { apiFetch } from "@/lib/api";
@@ -62,9 +61,6 @@ export default async function Home() {
     <div>
       <Hero liveCount={content.length} featured={heroFeatured} />
       <AuctionTicker />
-      {/* 인기 경매는 본문 폭을 차지하는 사이드바가 아니라, 우측 여백에 떠서 스크롤을 따라다니는
-          플로팅 바(fixed)로 둔다 — 넓은 화면(1680px+)에서만 노출된다. */}
-      <AuctionRankSidebar auctions={popular?.content ?? []} />
       <AuctionExplorer initialAuctions={content} />
       <AuctionExplorer
         initialAuctions={instantContent}

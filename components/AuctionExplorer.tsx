@@ -76,8 +76,8 @@ export default function AuctionExplorer({
   }, [saleType, sortBy]);
 
   const heading = title ?? (saleType === "INSTANT" ? "즉시판매" : "진행 중인 경매");
-  // '진행 중인 경매'는 제목만 남긴다(건수·부제 제거). 즉시판매 등 description을 넘긴 섹션만 부제를 노출한다.
-  const subcopy = description ?? (saleType === "INSTANT" ? "기다리지 않고 바로 구매할 수 있는 포토카드" : null);
+  // 섹션 부제(제목 바로 아래). 건수는 노출하지 않는다.
+  const subcopy = description ?? (saleType === "INSTANT" ? "기다리지 않고 바로 구매할 수 있는 포토카드" : "실시간 업데이트 · 지금 바로 확인하세요");
   const emptyTitle = saleType === "INSTANT" ? "등록된 즉시판매가 없습니다" : "진행 중인 경매가 없습니다";
   const allHref = viewAllHref ?? (saleType === "INSTANT" ? "/instant-sales" : "/auctions");
 
@@ -93,44 +93,41 @@ export default function AuctionExplorer({
 
   return (
     <section id={sectionId} className="mx-auto max-w-[1160px] px-4 py-10">
-      <div className="mb-5 flex items-end justify-between">
-        <div>
-          <h2 className="font-display text-xl font-extrabold tracking-tight text-text-1">
-            {heading}
-          </h2>
-          {subcopy && <p className="mt-1 text-[13px] text-text-3">{subcopy}</p>}
-        </div>
-        <Link
-          href={allHref}
-          className={`shrink-0 text-xs font-bold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
-        >
-          전체 보기 →
-        </Link>
-      </div>
+      {/* 제목을 정렬 칩과 같은 줄에 두어 카드 그리드와의 간격을 좁힌다. 부제는 바로 아래 한 줄. */}
+      <div className="mb-1.5 flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+        <h2 className="font-display text-xl font-extrabold tracking-tight text-text-1">
+          {heading}
+        </h2>
 
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 text-xs text-text-3">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
           {loading && <InlineSpinner />}
-        </div>
-
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="정렬 기준">
-          {SORT_OPTIONS.map((option) => (
-            <button
-              key={option.key}
-              type="button"
-              aria-pressed={sortBy === option.key}
-              onClick={() => setSortBy(option.key)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
-                sortBy === option.key
-                  ? "border-primary bg-primary text-white"
-                  : "border-border text-text-2 hover:border-primary hover:text-primary"
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="정렬 기준">
+            {SORT_OPTIONS.map((option) => (
+              <button
+                key={option.key}
+                type="button"
+                aria-pressed={sortBy === option.key}
+                onClick={() => setSortBy(option.key)}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+                  sortBy === option.key
+                    ? "border-primary bg-primary text-white"
+                    : "border-border text-text-2 hover:border-primary hover:text-primary"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <Link
+            href={allHref}
+            className={`shrink-0 text-xs font-bold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
+          >
+            전체 보기 →
+          </Link>
         </div>
       </div>
+
+      {subcopy && <p className="mb-6 text-[13px] text-text-3">{subcopy}</p>}
 
       <div className={sidebar ? "grid items-start gap-6 lg:grid-cols-[1fr_280px]" : undefined}>
         <div>

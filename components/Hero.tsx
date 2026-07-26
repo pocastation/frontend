@@ -9,7 +9,7 @@ import type { AuctionResponse } from "@/lib/types";
 import WishlistHeart from "@/components/WishlistHeart";
 
 // 브랜드 서사(포카+스테이션 = 우주 정거장): 히어로는 딥스페이스 밤하늘 캔버스다. 그라데이션·글로우 없이
-// 단색 위에 별빛만 흩뿌린다 — 흰·연보라 별점 다수 + 별빛골드(#EBC06B) 포인트 별 소수.
+// 단색 위에 별빛만 흩뿌린다 — 흰·연보라 별점 다수 + 흰·연보라 4각 별(✦) 소수.
 // 좌표·크기는 고정 배열로 둔다(장식이라 aria-hidden). 별에 한해 아주 옅은 글로우(box-shadow)는 허용.
 // 좌표는 좌측 텍스트 컬럼(대략 left 3~50% · top 15~80%)을 피해 상단 띠·우측·하단에만 둔다 —
 // 별이 헤드라인/버튼 위로 겹치지 않게. 우측 별 일부는 featured 카드 뒤로 가려질 수 있으나 무방하다.
@@ -36,12 +36,6 @@ const STAR_SPARKLES: { top: string; left: string; size: number; lav?: boolean }[
   { top: "22%", left: "93%", size: 13 },
 ];
 
-const STAR_GOLD: { top: string; left: string; size: number }[] = [
-  { top: "6%", left: "44%", size: 20 },
-  { top: "8%", left: "72%", size: 17 },
-  { top: "88%", left: "70%", size: 24 },
-];
-
 export default function Hero({ liveCount, featured }: { liveCount: number; featured: AuctionResponse[] }) {
   const [index, setIndex] = useState(0);
   const current = featured[index] ?? null;
@@ -54,7 +48,7 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
 
   return (
     <section className="relative overflow-hidden bg-deepspace text-white">
-      {/* 밤하늘 별빛 — 순장식(aria-hidden). 흰·연보라 점 + 4각 별 + 별빛골드 포인트. */}
+      {/* 밤하늘 별빛 — 순장식(aria-hidden). 흰·연보라 점 + 4각 별(✦). */}
       <div className="pointer-events-none absolute inset-0" aria-hidden="true">
         {STAR_DOTS.map((s, i) => (
           <span
@@ -77,15 +71,6 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
             style={{ top: s.top, left: s.left, fontSize: s.size, color: s.lav ? "#c8bcff" : "#ffffff" }}
           >
             ✦
-          </span>
-        ))}
-        {STAR_GOLD.map((s, i) => (
-          <span
-            key={`g${i}`}
-            className="absolute leading-none text-star"
-            style={{ top: s.top, left: s.left, fontSize: s.size, textShadow: "0 0 8px rgba(235,192,107,.6)" }}
-          >
-            ★
           </span>
         ))}
       </div>

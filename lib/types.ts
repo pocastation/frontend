@@ -211,6 +211,16 @@ export type AuctionResponse = {
   viewCount: number;
 };
 
+// 판매자 본인의 목록에만 포함되는 운영 사유. 공개 경매 응답에는 노출되지 않는다.
+export type MySellingAuctionResponse = AuctionResponse & {
+  cancellationReason: string | null;
+  reviewReason: string | null;
+};
+
+export type MySellingAuctionListResponse = Omit<AuctionListResponse, "content"> & {
+  content: MySellingAuctionResponse[];
+};
+
 export type AuctionListResponse = {
   content: AuctionResponse[];
   page: number;

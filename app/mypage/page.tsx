@@ -29,6 +29,8 @@ import type {
   AuctionResponse,
   MyBiddingListResponse,
   MyBiddingResponse,
+  MySellingAuctionListResponse,
+  MySellingAuctionResponse,
   MyOrderStatusResponse,
   ReviewableOrderResponse,
   SoldOrderResponse,
@@ -49,6 +51,8 @@ const PUBLIC_DETAIL_STATUSES = new Set<AuctionResponse["status"]>([
   "ENDED_NO_BIDS",
   "CANCELLED",
 ]);
+
+type SellingListItem = AuctionResponse | MySellingAuctionResponse;
 
 type Tab =
   | "dashboard"
@@ -224,7 +228,7 @@ export default function MyPage() {
   // "아무 반응 없어" 보인다. 탭이 바뀌면(초기 진입 제외) 콘텐츠로 스크롤해준다(lg 미만).
   const contentRef = useRef<HTMLDivElement>(null);
   const firstTabRender = useRef(true);
-  const [selling, setSelling] = useState<AuctionResponse[]>([]);
+  const [selling, setSelling] = useState<MySellingAuctionResponse[]>([]);
   const [bidding, setBidding] = useState<MyBiddingResponse[]>([]);
   const [instantPurchases, setInstantPurchases] = useState<AuctionResponse[]>([]);
   const [wishlist, setWishlist] = useState<AuctionResponse[]>([]);
@@ -267,7 +271,7 @@ export default function MyPage() {
     setError(null);
     try {
       const [sellingRes, biddingRes, instantPurchasesRes, wishlistRes] = await Promise.all([
-        fetchWithAuth<AuctionListResponse>("/api/members/me/selling?size=50"),
+        fetchWithAuth<MySellingAuctionListResponse>("/api/members/me/selling?size=50"),
         fetchWithAuth<MyBiddingListResponse>("/api/members/me/bidding?size=50"),
         fetchWithAuth<AuctionListResponse>("/api/members/me/instant-purchases?size=50"),
         fetchWithAuth<WishlistListResponse>("/api/members/me/wishlist?size=50"),
@@ -805,6 +809,24 @@ function getSellerReviewBadge(status: AuctionResponse["status"]) {
   return null;
 }
 
+function getSellerModerationReason(item: SellingListItem) {
+  if (
+    item.status === "REJECTED"
+    && "reviewReason" in item
+    && item.reviewReason?.trim()
+  ) {
+    return { label: "반려 사유", text: item.reviewReason };
+  }
+  if (
+    item.status === "CANCELLED"
+    && "cancellationReason" in item
+    && item.cancellationReason?.trim()
+  ) {
+    return { label: "취소 사유", text: item.cancellationReason };
+  }
+  return null;
+}
+
 function SellingList({
   items,
   loading,
@@ -818,7 +840,7 @@ function SellingList({
   onOpenAddressModal,
   onConfirmed,
 }: {
-  items: AuctionResponse[];
+  items: SellingListItem[];
   loading: boolean;
   emptyText: string;
   endedLabel?: string;
@@ -846,6 +868,7 @@ function SellingList({
         const canOpenDetail = PUBLIC_DETAIL_STATUSES.has(item.status);
         const order = orders?.[item.id];
         const soldOrder = soldOrders?.[item.id];
+        const moderationReason = getSellerModerationReason(item);
         const summary = (
           <>
             <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
@@ -881,6 +904,14 @@ function SellingList({
                 </Link>
               ) : (
                 <div className="flex items-center gap-3 p-2.5">{summary}</div>
+              )}
+              {moderationReason && (
+                <div className="border-t border-border bg-surface-2 px-3 py-2.5">
+                  <p className="text-[11px] font-extrabold text-text-2">{moderationReason.label}</p>
+                  <p className="mt-1 whitespace-pre-wrap break-words text-xs leading-5 text-text-2">
+                    {moderationReason.text}
+                  </p>
+                </div>
               )}
               {/* 구매자(즉시구매) 관점: PAID면 배송/확정, 아니면 결제 상태. 판매자 관점: 발송 푸터. */}
               {order &&

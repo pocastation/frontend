@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { INQUIRY_CATEGORIES } from "@/lib/inquiries";
@@ -17,11 +17,25 @@ function ArrowLeft() {
   );
 }
 
+// useSearchParams()는 Suspense 경계 안에서만 쓸 수 있다(빌드 시 정적 최적화 요구사항) — 로그인 페이지와 같은 구조.
 export default function NewInquiryPage() {
+  return (
+    <Suspense
+      fallback={<div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">불러오는 중...</div>}
+    >
+      <NewInquiryForm />
+    </Suspense>
+  );
+}
+
+function NewInquiryForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { accessToken, isLoading, fetchWithAuth } = useAuth();
   const [category, setCategory] = useState<InquiryCategory>("AUCTION");
-  const [title, setTitle] = useState("");
+  // 승인 거절·취소 안내에서 넘어오면 어떤 매물 건인지 제목에 미리 채워둔다 — 판매자가 매물을
+  // 안 적으면 관리자가 어떤 건인지 특정할 수 없다.
+  const [title, setTitle] = useState(() => (searchParams.get("subject") ?? "").slice(0, 100));
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

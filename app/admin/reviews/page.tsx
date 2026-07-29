@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import ReportScopeTabs from "../reports/ReportScopeTabs";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatDateTimeKST } from "@/lib/format";
@@ -58,8 +59,9 @@ export default function AdminReviewsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-xl font-extrabold text-text-1">리뷰 신고</h1>
-      <p className="mt-1 text-sm text-text-3">신고된 거래 후기를 검토하고 블라인드/반려해요.</p>
+      <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">신고 관리</h1>
+      <p className="mt-1.5 text-sm text-text-3">신고된 거래 후기를 검토하고 블라인드하거나 신고를 반려해요.</p>
+      <ReportScopeTabs />
 
       {error && (
         <p role="alert" className="mt-4 rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">

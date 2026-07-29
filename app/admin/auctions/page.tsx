@@ -7,13 +7,20 @@ import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatKRW, formatTimeLeft } from "@/lib/format";
 import {
+  AUCTION_CANCELLATION_REASON_OPTIONS,
   AUCTION_SALE_TYPE_BADGE_CLASS,
   AUCTION_SALE_TYPE_LABEL,
   AUCTION_STATUS_BADGE_CLASS,
   AUCTION_STATUS_LABEL,
 } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
-import type { AdminAuctionListResponse, AdminAuctionSummary, AuctionSaleType, AuctionStatus } from "@/lib/types";
+import type {
+  AdminAuctionListResponse,
+  AdminAuctionSummary,
+  AuctionCancellationReasonCode,
+  AuctionSaleType,
+  AuctionStatus,
+} from "@/lib/types";
 
 const PAGE_SIZE = 20;
 const DEBOUNCE_MS = 300;
@@ -24,7 +31,7 @@ const STATUS_FILTERS: { key: AuctionStatus | "ALL"; label: string }[] = [
   { key: "LIVE", label: "진행 중" },
   { key: "ENDED_SOLD", label: "낙찰 종료" },
   { key: "ENDED_NO_BIDS", label: "유찰" },
-  { key: "REJECTED", label: "반려" },
+  { key: "REJECTED", label: "승인 거절" },
   { key: "CANCELLED", label: "취소됨" },
 ];
 const PUBLIC_AUCTION_STATUSES = new Set<AuctionStatus>([
@@ -80,7 +87,7 @@ export default function AdminAuctionsPage() {
 
   const [cancelTarget, setCancelTarget] = useState<AdminAuctionSummary | null>(null);
   const [reviewTarget, setReviewTarget] = useState<AdminAuctionSummary | null>(null);
-  const [reason, setReason] = useState("");
+  const [reasonCode, setReasonCode] = useState<AuctionCancellationReasonCode | "">("");
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
 
@@ -135,14 +142,14 @@ export default function AdminAuctionsPage() {
 
   function openCancelDialog(auction: AdminAuctionSummary) {
     setCancelTarget(auction);
-    setReason("");
+    setReasonCode("");
     setNotice(null);
   }
 
   async function confirmCancel() {
     if (!cancelTarget || submitting) return;
-    if (!reason.trim()) {
-      setNotice({ kind: "error", text: "취소 사유를 입력해주세요." });
+    if (!reasonCode) {
+      setNotice({ kind: "error", text: "취소 사유를 선택해주세요." });
       return;
     }
     setSubmitting(true);
@@ -150,9 +157,12 @@ export default function AdminAuctionsPage() {
     try {
       await fetchWithAuth<void>(`/api/admin/auctions/${cancelTarget.id}/cancel`, {
         method: "PATCH",
-        body: { reason: reason.trim() },
+        body: { reasonCode },
       });
-      setNotice({ kind: "success", text: `"${cancelTarget.title}"을(를) 취소했습니다.` });
+      setNotice({
+        kind: "success",
+        text: `"${cancelTarget.title}"을(를) 취소했습니다. 판매자에게 사유가 전달됐습니다.`,
+      });
       setCancelTarget(null);
       await fetchList(query, statusFilter, saleTypeFilter);
     } catch (err) {
@@ -168,7 +178,8 @@ export default function AdminAuctionsPage() {
     await fetchList(query, statusFilter, saleTypeFilter);
   }
 
-  // 홈 배너(Hero) 노출 토글(#150) — 지정한 LIVE 경매가 홈 배너에 우선 노출된다.
+  // 홈 배너(Hero) 노출 토글(#150) — 배너는 단일 슬롯이라 새로 켜면 기존 지정이 자동 해제된다.
+  // 홈 배너 조회는 '진행 중인 경매' 매물만 대상이라 즉시판매는 애초에 지정할 수 없다(서버도 409로 막는다).
   async function toggleFeatured(auction: AdminAuctionSummary) {
     try {
       await fetchWithAuth<void>(`/api/admin/auctions/${auction.id}/featured`, {
@@ -177,7 +188,9 @@ export default function AdminAuctionsPage() {
       });
       setNotice({
         kind: "success",
-        text: `"${auction.title}" 배너 노출을 ${auction.featured ? "껐" : "켰"}습니다.`,
+        text: auction.featured
+          ? `"${auction.title}"을(를) 홈 배너에서 내렸습니다.`
+          : `"${auction.title}"을(를) 홈 배너로 지정했습니다. 기존 배너 지정은 해제됩니다.`,
       });
       await fetchList(query, statusFilter, saleTypeFilter);
     } catch (err) {
@@ -193,11 +206,13 @@ export default function AdminAuctionsPage() {
   }
 
   const hasMore = page + 1 < totalPages;
+  const selectedCancelReason =
+    AUCTION_CANCELLATION_REASON_OPTIONS.find((option) => option.code === reasonCode) ?? null;
 
   return (
     <div>
       <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">경매 관리</h1>
-      <p className="mt-1.5 text-sm text-text-3">인증사진을 검수해 경매를 승인하거나 반려하고, 공개된 매물을 관리합니다.</p>
+      <p className="mt-1.5 text-sm text-text-3">인증사진을 검수해 경매를 승인하거나 거절하고, 공개된 매물을 관리합니다.</p>
 
       {notice && (
         <p
@@ -259,17 +274,18 @@ export default function AdminAuctionsPage() {
       <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
       <div className="overflow-x-auto rounded-r3 border border-border bg-surface shadow-card">
-        <table className="w-full min-w-[820px] border-collapse">
+        {/* 열이 8개라 820px에서는 배지·버튼이 눌려 줄바꿈됐다. 가로 스크롤 컨테이너 안이라 최소폭을 넓혀도 안전하다. */}
+        <table className="w-full min-w-[980px] border-collapse">
           <thead>
             <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
-              <th className="px-4 py-2.5">경매</th>
-              <th className="px-4 py-2.5">유형</th>
-              <th className="px-4 py-2.5">판매자</th>
-              <th className="px-4 py-2.5">현재가</th>
-              <th className="px-4 py-2.5">입찰</th>
-              <th className="px-4 py-2.5">상태</th>
-              <th className="px-4 py-2.5">마감</th>
-              <th className="px-4 py-2.5">관리</th>
+              <th className="whitespace-nowrap px-4 py-2.5">경매</th>
+              <th className="whitespace-nowrap px-4 py-2.5">유형</th>
+              <th className="whitespace-nowrap px-4 py-2.5">판매자</th>
+              <th className="whitespace-nowrap px-4 py-2.5">현재가</th>
+              <th className="whitespace-nowrap px-4 py-2.5">입찰</th>
+              <th className="whitespace-nowrap px-4 py-2.5">상태</th>
+              <th className="whitespace-nowrap px-4 py-2.5">마감</th>
+              <th className="whitespace-nowrap px-4 py-2.5">관리</th>
             </tr>
           </thead>
           <tbody>
@@ -313,16 +329,17 @@ export default function AdminAuctionsPage() {
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${AUCTION_SALE_TYPE_BADGE_CLASS[a.saleType]}`}>
+                  {/* 배지에 whitespace-nowrap이 없으면 좁은 열에서 "경매판매"가 두 줄로 쪼개진다. */}
+                  <td className="whitespace-nowrap px-4 py-3">
+                    <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-extrabold ${AUCTION_SALE_TYPE_BADGE_CLASS[a.saleType]}`}>
                       {AUCTION_SALE_TYPE_LABEL[a.saleType]}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-text-2">{a.sellerNickname ?? "—"}</td>
-                  <td className="px-4 py-3 font-display font-bold text-text-1">{formatKRW(a.currentPrice)}</td>
-                  <td className="px-4 py-3 text-text-2">{a.saleType === "INSTANT" ? "즉시구매" : `${a.bidCount}회`}</td>
+                  <td className="whitespace-nowrap px-4 py-3 font-display font-bold text-text-1">{formatKRW(a.currentPrice)}</td>
+                  <td className="whitespace-nowrap px-4 py-3 text-text-2">{a.saleType === "INSTANT" ? "즉시구매" : `${a.bidCount}회`}</td>
                   <td className="px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${AUCTION_STATUS_BADGE_CLASS[a.status]}`}>
+                    <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-extrabold ${AUCTION_STATUS_BADGE_CLASS[a.status]}`}>
                       {AUCTION_STATUS_LABEL[a.status]}
                     </span>
                     {a.status === "CANCELLED" && a.cancellationReason && (
@@ -332,8 +349,8 @@ export default function AdminAuctionsPage() {
                       <span className="mt-1 block text-[10.5px] text-text-3">사유: {a.reviewReason}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-text-3">{getEndLabel(a)}</td>
-                  <td className="px-4 py-3">
+                  <td className="whitespace-nowrap px-4 py-3 text-text-3">{getEndLabel(a)}</td>
+                  <td className="whitespace-nowrap px-4 py-3">
                     {a.status === "PENDING_REVIEW" ? (
                       <button
                         type="button"
@@ -347,12 +364,19 @@ export default function AdminAuctionsPage() {
                       </button>
                     ) : a.status === "LIVE" ? (
                       <div className="flex items-center gap-1.5">
+                        {/* 즉시판매는 홈 배너 대상이 아니다(홈 조회가 경매 매물만 본다) — 눌러도 안 되는 버튼 대신
+                            비활성 상태로 이유를 노출한다. */}
                         <button
                           type="button"
                           onClick={() => void toggleFeatured(a)}
+                          disabled={a.saleType !== "AUCTION"}
                           aria-pressed={a.featured}
-                          title="홈 배너 노출 토글"
-                          className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-bold transition-colors ${FOCUS_RING} ${
+                          title={
+                            a.saleType === "AUCTION"
+                              ? "홈 배너 노출 토글 (배너는 한 건만 지정됩니다)"
+                              : "홈 배너에는 경매 매물만 지정할 수 있습니다"
+                          }
+                          className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-3 py-1 text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING} ${
                             a.featured
                               ? "border-primary text-primary hover:bg-primary/5"
                               : "border-border-2 text-text-3 hover:border-primary hover:text-primary"
@@ -409,18 +433,40 @@ export default function AdminAuctionsPage() {
           <div className="w-full max-w-sm rounded-r3 bg-surface p-5 shadow-modal">
             <h2 className="font-display text-base font-extrabold text-text-1">경매 취소</h2>
             <p className="mt-1.5 text-[13px] text-text-3">
-              &quot;{cancelTarget.title}&quot;을(를) 취소합니다. 이 작업은 되돌릴 수 없습니다.
+              &quot;{cancelTarget.title}&quot;을(를) 취소합니다. 이 작업은 되돌릴 수 없고, 선택한 사유가 판매자에게 알림으로 전달됩니다.
             </p>
-            <label className="sr-only" htmlFor="cancel-reason">취소 사유</label>
-            <textarea
-              id="cancel-reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="취소 사유를 입력하세요."
-              rows={3}
-              autoFocus
-              className={`mt-3 w-full resize-none rounded-r2 border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
-            />
+            {/* 사유는 템플릿 선택 — 검수 거절과 같은 이유(문구 일관성·집계). */}
+            <fieldset className="mt-3">
+              <legend className="sr-only">취소 사유</legend>
+              <div className="grid gap-1.5">
+                {AUCTION_CANCELLATION_REASON_OPTIONS.map((option) => (
+                  <label
+                    key={option.code}
+                    className={`flex cursor-pointer items-center gap-2 rounded-r2 border px-3 py-2 text-[13px] transition-colors ${
+                      reasonCode === option.code
+                        ? "border-accent bg-accent-soft font-bold text-accent"
+                        : "border-border text-text-2 hover:border-text-2"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="cancel-reason"
+                      value={option.code}
+                      checked={reasonCode === option.code}
+                      onChange={() => setReasonCode(option.code)}
+                      className="h-3.5 w-3.5 shrink-0 accent-[var(--color-accent)]"
+                    />
+                    {option.label}
+                  </label>
+                ))}
+              </div>
+              {selectedCancelReason && (
+                <p className="mt-3 border-l-2 border-border-2 bg-surface-2 px-3 py-2 text-[12px] leading-5 text-text-2">
+                  <span className="font-extrabold text-text-3">판매자에게 전달될 문구 · </span>
+                  {selectedCancelReason.preview}
+                </p>
+              )}
+            </fieldset>
             <div className="mt-3 flex gap-2">
               <button
                 type="button"

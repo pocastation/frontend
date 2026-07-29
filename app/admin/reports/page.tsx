@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import ReportScopeTabs from "./ReportScopeTabs";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatRelativeTime } from "@/lib/format";
@@ -143,6 +144,7 @@ export default function AdminReportsPage() {
     <div>
       <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">신고 관리</h1>
       <p className="mt-1.5 text-sm text-text-3">접수된 신고 내역을 확인하고 필요한 조치를 취할 수 있습니다.</p>
+      <ReportScopeTabs />
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_340px]">
         {/* 목록 — min-w-0로 테이블(min-w)이 그리드 컬럼을 늘려 페이지가 넘치는 걸 막는다. */}

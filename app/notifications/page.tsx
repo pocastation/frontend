@@ -18,6 +18,8 @@ const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; ico
   AUCTION_WON: { label: "낙찰", tone: "ok", icon: "award" },
   AUCTION_LOST: { label: "패찰", tone: "neutral", icon: "minus" },
   AUCTION_ENDED_NO_BIDS: { label: "유찰", tone: "neutral", icon: "minus" },
+  AUCTION_REJECTED: { label: "보완 필요", tone: "accent", icon: "alertCircle" },
+  AUCTION_CANCELLED: { label: "매물 취소", tone: "accent", icon: "xCircle" },
   PAYMENT_COMPLETED: { label: "결제 완료", tone: "ok", icon: "card" },
   PAYMENT_FAILED: { label: "결제 실패", tone: "accent", icon: "alertCircle" },
   ORDER_DEFAULTED: { label: "주문 취소", tone: "neutral", icon: "xCircle" },

@@ -99,25 +99,51 @@ function MessageIcon() {
   );
 }
 
-// 지금 쓸 수 있는 메뉴 / 준비 중인 메뉴를 구분해 보여준다(어드민 기능 지도 §2026-07-06 기준).
-const OPERATION_NAV: NavItem[] = [
-  { href: "/admin", label: "대시보드", icon: <GridIcon />, ready: true },
-  { href: "/admin/members", label: "회원 관리", icon: <UsersIcon />, ready: true },
-  { href: "/admin/catalog", label: "카탈로그 관리", icon: <CardIcon />, ready: true },
-  { href: "/admin/auctions", label: "경매 관리", icon: <GavelIcon />, ready: true },
-  { href: "/admin/reports", label: "신고 관리", icon: <FlagIcon />, ready: true },
-  { href: "/admin/reviews", label: "리뷰 신고", icon: <FlagIcon />, ready: true },
-  { href: "/admin/suggestions", label: "건의 관리", icon: <LightbulbIcon />, ready: true },
-  { href: "/admin/inquiries", label: "문의 관리", icon: <MessageIcon />, ready: true },
-  { href: "/admin/disputes", label: "분쟁·중재", icon: <ScaleIcon />, ready: true },
-  { href: "/admin/audit", label: "감사 로그", icon: <ClipboardListIcon />, ready: true },
-  { href: "/admin/notices", label: "공지사항", icon: <MegaphoneIcon />, ready: false },
+// 한 덩어리로 11개가 늘어서 있어 원하는 메뉴를 찾기 어려웠다 — 성격별로 묶고,
+// '리뷰 신고'는 '신고 관리' 안의 하위 탭(ReportScopeTabs)으로 흡수했다.
+// 사이드바에 없어도 /admin/reviews 는 그대로 접근 가능하고, 활성 표시는 '신고 관리'가 받는다.
+type NavGroup = { title: string; items: NavItem[] };
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    title: "운영",
+    items: [
+      { href: "/admin", label: "대시보드", icon: <GridIcon />, ready: true },
+      { href: "/admin/members", label: "회원 관리", icon: <UsersIcon />, ready: true },
+      { href: "/admin/catalog", label: "카탈로그 관리", icon: <CardIcon />, ready: true },
+      { href: "/admin/auctions", label: "경매 관리", icon: <GavelIcon />, ready: true },
+    ],
+  },
+  {
+    title: "검토·조치",
+    items: [
+      { href: "/admin/reports", label: "신고 관리", icon: <FlagIcon />, ready: true },
+      { href: "/admin/disputes", label: "분쟁·중재", icon: <ScaleIcon />, ready: true },
+    ],
+  },
+  {
+    title: "고객 지원",
+    items: [
+      { href: "/admin/inquiries", label: "문의 관리", icon: <MessageIcon />, ready: true },
+      { href: "/admin/suggestions", label: "건의 관리", icon: <LightbulbIcon />, ready: true },
+    ],
+  },
+  {
+    title: "기록",
+    items: [{ href: "/admin/audit", label: "감사 로그", icon: <ClipboardListIcon />, ready: true }],
+  },
+  {
+    title: "준비 중",
+    items: [
+      { href: "/admin/notices", label: "공지사항", icon: <MegaphoneIcon />, ready: false },
+      { href: "/admin/settlement", label: "결제·정산", icon: <TagIcon />, ready: false },
+      { href: "/admin/notifications", label: "알림 발송", icon: <BellIcon />, ready: false },
+    ],
+  },
 ];
 
-const COMING_NAV: NavItem[] = [
-  { href: "/admin/settlement", label: "결제·정산", icon: <TagIcon />, ready: false },
-  { href: "/admin/notifications", label: "알림 발송", icon: <BellIcon />, ready: false },
-];
+// 모바일 탭바·활성 판정에 쓰는 평탄화 목록.
+const READY_NAV: NavItem[] = NAV_GROUPS.flatMap((group) => group.items).filter((item) => item.ready);
 
 function NavLink({ item, active }: { item: NavItem; active: boolean }) {
   const base = "flex items-center gap-2.5 rounded-r2 px-2.5 py-2 text-sm font-bold transition-colors";
@@ -182,7 +208,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
 
   function isActive(href: string) {
-    return href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+    if (href === "/admin") return pathname === "/admin";
+    // 리뷰 신고는 사이드바 항목이 없고 '신고 관리'의 하위 탭이라, 활성 표시를 신고 관리가 대신 받는다.
+    if (href === "/admin/reports" && pathname.startsWith("/admin/reviews")) return true;
+    return pathname.startsWith(href);
   }
 
   return (
@@ -193,7 +222,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         aria-label="관리자 메뉴"
         className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden"
       >
-        {OPERATION_NAV.filter((item) => item.ready).map((item) => {
+        {READY_NAV.map((item) => {
           const active = isActive(item.href);
           return (
             <Link
@@ -215,18 +244,16 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <aside className="hidden w-[220px] shrink-0 lg:block">
           <div className="sticky top-20 rounded-r3 border border-border bg-surface p-2 shadow-card">
             <p className="px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold tracking-wide text-primary">POCASTATION ADMIN</p>
-            <p className="px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold text-text-3">운영</p>
-            <nav aria-label="운영 메뉴" className="flex flex-col">
-              {OPERATION_NAV.map((item) => (
-                <NavLink key={item.href} item={item} active={isActive(item.href)} />
-              ))}
-            </nav>
-            <p className="mt-2 px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold text-text-3">준비 중</p>
-            <nav aria-label="준비 중 메뉴" className="flex flex-col">
-              {COMING_NAV.map((item) => (
-                <NavLink key={item.href} item={item} active={false} />
-              ))}
-            </nav>
+            {NAV_GROUPS.map((group) => (
+              <div key={group.title}>
+                <p className="px-2.5 pb-1.5 pt-2.5 text-[11px] font-extrabold text-text-3">{group.title}</p>
+                <nav aria-label={`${group.title} 메뉴`} className="flex flex-col">
+                  {group.items.map((item) => (
+                    <NavLink key={item.href} item={item} active={item.ready && isActive(item.href)} />
+                  ))}
+                </nav>
+              </div>
+            ))}
           </div>
         </aside>
 

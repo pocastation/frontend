@@ -25,10 +25,11 @@ async function getPopularAuctions(): Promise<AuctionListResponse | null> {
   }
 }
 
-// 홈 배너(Hero) — 관리자가 지정(featured)한 LIVE 경매. 없으면 인기 경매로 폴백(#150).
+// 홈 배너(Hero) — 관리자가 지정(featured)한 LIVE 경매. 배너는 단일 슬롯이라 1건만 가져온다.
+// 지정이 없으면 빈 목록이 오고, 아래에서 인기 경매로 폴백한다(#150).
 async function getFeaturedAuctions(): Promise<AuctionListResponse | null> {
   try {
-    return await apiFetch<AuctionListResponse>("/api/auctions/featured?size=5", { cache: "no-store" });
+    return await apiFetch<AuctionListResponse>("/api/auctions/featured?size=1", { cache: "no-store" });
   } catch {
     return null;
   }
@@ -51,11 +52,10 @@ export default async function Home() {
   ]);
   const content = auctions?.content ?? [];
   const instantContent = instantSales?.content ?? [];
-  // 배너: 관리자 지정(featured) 우선 → 없으면 인기 경매 → 그것도 없으면 최신 라이브 앞부분.
-  const featuredContent = featured?.content ?? [];
-  const heroFeatured = featuredContent.length
-    ? featuredContent.slice(0, 3)
-    : (popular?.content?.length ? popular.content.slice(0, 3) : content.slice(0, 3));
+  // 배너는 한 자리다 — 관리자 지정(featured) 1건 우선 → 없으면 인기 1위 → 그것도 없으면 최신 1건.
+  // 여러 건을 넘기면 Hero가 캐러셀이 되어, 지정하지 않았는데도 네비 버튼이 뜨는 상태가 됐었다.
+  const heroFeatured =
+    featured?.content?.[0] ?? popular?.content?.[0] ?? content[0] ?? null;
 
   return (
     <div>

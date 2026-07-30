@@ -3,6 +3,8 @@ import type {
   SuggestionStatus,
   ArtistStatus,
   ArtistType,
+  AuctionCancellationReasonCode,
+  AuctionRejectionReasonCode,
   AuctionSaleType,
   AuctionStatus,
   AuditAction,
@@ -100,17 +102,26 @@ export const PROVIDER_LABEL: Record<string, string> = {
   GOOGLE: "구글",
 };
 
-// 어드민 화면과 판매자 마이페이지가 공유하는 경매 상태 라벨.
+// 어드민 화면 기준 경매 상태 라벨.
+// REJECTED는 보는 사람에 따라 문구를 달리한다 — 관리자에게는 자기가 내린 조치가 명확해야 하고
+// (승인 거절), 판매자에게는 "고쳐서 다시 올리면 된다"가 읽혀야 한다(보완 필요, 아래 SELLER_ 맵).
+// 상태값 자체(REJECTED)는 그대로 두고 표시 문구만 나눈다.
 export const AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
   DRAFT: "임시저장",
   PENDING_REVIEW: "승인 대기중",
   APPROVED: "승인",
-  REJECTED: "반려",
+  REJECTED: "승인 거절",
   SCHEDULED: "시작 예정",
   LIVE: "진행 중",
   ENDED_SOLD: "낙찰 종료",
   ENDED_NO_BIDS: "유찰",
   CANCELLED: "취소됨",
+};
+
+// 판매자(마이페이지)에게 보여줄 경매 상태 문구 — 위 맵과 다른 항목만 덮어쓴다.
+export const SELLER_AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
+  ...AUCTION_STATUS_LABEL,
+  REJECTED: "보완 필요",
 };
 
 export const AUCTION_STATUS_BADGE_CLASS: Record<AuctionStatus, string> = {
@@ -231,6 +242,40 @@ export const MEMBER_ROLE_LABEL: Record<MemberRole, string> = {
   ADMIN: "관리자",
   USER: "일반",
 };
+
+// ─── 경매 모더레이션 사유 템플릿 ───
+// 관리자는 자유 텍스트 대신 이 목록에서 하나를 고른다. 판매자에게 나가는 실제 문구는 서버가
+// 소유하고(AuctionRejectionReason·AuctionCancellationReason), 여기는 관리자용 요약 라벨과
+// 판매자에게 어떤 문구가 나가는지 확인용 미리보기다. 두 목록의 순서·코드는 서버 enum과 맞춘다.
+export const AUCTION_REJECTION_REASON_OPTIONS: {
+  code: AuctionRejectionReasonCode;
+  label: string;
+  preview: string;
+}[] = [
+  { code: "CODE_MISMATCH", label: "인증 코드 불일치", preview: "인증 사진의 코드가 발급된 코드와 달라요. 발급된 코드를 정확히 적어 다시 촬영해 주세요." },
+  { code: "CODE_UNREADABLE", label: "코드 판독 불가", preview: "인증 사진에서 코드를 알아볼 수 없어요. 코드가 잘리거나 가려지지 않게 다시 촬영해 주세요." },
+  { code: "ITEM_MISMATCH", label: "인증/판매 상품 불일치", preview: "인증 사진의 상품과 판매 사진의 상품이 달라 보여요. 같은 상품으로 다시 촬영해 주세요." },
+  { code: "IMAGE_QUALITY", label: "사진 품질 미달", preview: "사진이 흐리거나 어두워 상태를 확인하기 어려워요. 밝은 곳에서 초점을 맞춰 다시 촬영해 주세요." },
+  { code: "SUSPECTED_EDIT", label: "합성·편집 의심", preview: "사진에 편집·합성이 의심되는 부분이 있어요. 보정 없이 원본 그대로 다시 등록해 주세요." },
+  { code: "THIRD_PARTY_IMAGE", label: "사진 도용 의심", preview: "직접 촬영한 사진이 아닌 것으로 보여요. 판매하실 실물을 직접 촬영해 등록해 주세요." },
+  { code: "INFO_MISMATCH", label: "상품 정보 불일치", preview: "등록한 상품 정보(스타·등급·개봉 여부 등)가 사진과 맞지 않아요. 정보를 수정해 다시 등록해 주세요." },
+  { code: "PROHIBITED_ITEM", label: "거래 불가 상품", preview: "포카스테이션에서 거래할 수 없는 상품이에요. 등록 가능한 상품인지 확인해 주세요." },
+];
+
+// REPORT_CONFIRMED는 신고 처리(신고 관리 화면)에서 서버가 자동으로 붙이는 코드라 여기선 뺀다.
+export const AUCTION_CANCELLATION_REASON_OPTIONS: {
+  code: AuctionCancellationReasonCode;
+  label: string;
+  preview: string;
+}[] = [
+  { code: "REPORTED_FAKE", label: "위조품 의심 신고", preview: "위조품 의심 신고가 접수돼 매물을 내렸어요." },
+  { code: "PROHIBITED_ITEM", label: "거래 불가 상품", preview: "포카스테이션에서 거래할 수 없는 상품이라 매물을 내렸어요." },
+  { code: "INFO_MISMATCH", label: "상품 정보 불일치", preview: "등록한 상품 정보가 실제와 달라 매물을 내렸어요." },
+  { code: "DUPLICATE_LISTING", label: "중복 등록", preview: "같은 상품이 중복 등록돼 있어 매물을 내렸어요." },
+  { code: "SELLER_REQUEST", label: "판매자 요청", preview: "판매자 요청으로 매물을 내렸어요." },
+  { code: "POLICY_VIOLATION", label: "운영 정책 위반", preview: "운영 정책을 위반해 매물을 내렸어요." },
+  { code: "SUSPECTED_ABUSE", label: "비정상 거래 정황", preview: "비정상적인 거래 정황이 확인돼 매물을 내렸어요." },
+];
 
 // ─── 건의(suggestion) ───
 

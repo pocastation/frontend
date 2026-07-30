@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { mediaUrl } from "@/lib/api";
 import { formatKRW } from "@/lib/format";
@@ -36,15 +35,12 @@ const STAR_SPARKLES: { top: string; left: string; size: number; lav?: boolean }[
   { top: "22%", left: "93%", size: 13 },
 ];
 
-export default function Hero({ liveCount, featured }: { liveCount: number; featured: AuctionResponse[] }) {
-  const [index, setIndex] = useState(0);
-  const current = featured[index] ?? null;
-  const hasMultiple = featured.length > 1;
-  const { wishlisted, toggle } = useWishlistStatus(featured.map((a) => a.id));
-
-  function go(delta: number) {
-    setIndex((i) => (i + delta + featured.length) % featured.length);
-  }
+// 배너는 **단일 슬롯**이다 — 관리자가 지정한 매물 1건(없으면 홈이 넘겨주는 폴백 1건)만 보여준다.
+// 캐러셀(좌우 네비 버튼)은 제거했다: 지정이 없을 때 폴백 여러 건이 들어와 화살표만 떠 있는 상태가 됐고,
+// 배너의 목적(관리자가 고른 매물 하나를 강조)과도 맞지 않았다.
+export default function Hero({ liveCount, featured }: { liveCount: number; featured: AuctionResponse | null }) {
+  const current = featured;
+  const { wishlisted, toggle } = useWishlistStatus(current ? [current.id] : []);
 
   return (
     <section className="relative overflow-hidden bg-deepspace text-white">
@@ -74,27 +70,6 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
           </span>
         ))}
       </div>
-
-      {hasMultiple && (
-        <>
-          <button
-            type="button"
-            onClick={() => go(-1)}
-            aria-label="이전 경매"
-            className="absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          >
-            ‹
-          </button>
-          <button
-            type="button"
-            onClick={() => go(1)}
-            aria-label="다음 경매"
-            className="absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          >
-            ›
-          </button>
-        </>
-      )}
 
       <div className="relative mx-auto flex max-w-[1160px] flex-col items-center gap-12 px-4 py-16 sm:flex-row sm:items-center sm:justify-between sm:py-20">
         <div className="max-w-[560px] text-center sm:text-left">

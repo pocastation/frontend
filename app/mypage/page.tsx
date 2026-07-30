@@ -20,6 +20,7 @@ import { formatDateTimeKST, formatKRW, formatTimeLeft } from "@/lib/format";
 import {
   AUCTION_STATUS_BADGE_CLASS,
   AUCTION_STATUS_LABEL,
+  SELLER_AUCTION_STATUS_LABEL,
   REFUND_REASON_LABEL,
   RETURN_REASON_LABEL,
 } from "@/lib/labels";
@@ -54,12 +55,14 @@ const PUBLIC_DETAIL_STATUSES = new Set<AuctionResponse["status"]>([
 
 type SellingListItem = AuctionResponse | MySellingAuctionResponse;
 
+// 메뉴가 13개까지 늘어나 스캔이 어려워져, 같은 성격의 화면을 한 탭 + 내부 필터로 합쳤다.
+// - bidding("입찰"): 예전 participating(진행 중) + bidHistory(전체)
+// - purchases("구매 내역"): 예전 won(경매 낙찰) + instantPurchases(즉시구매)
+// 예전 키로 들어오는 딥링크(/mypage?tab=won 등)는 LEGACY_TAB_ALIAS로 흡수한다.
 type Tab =
   | "dashboard"
-  | "participating"
-  | "bidHistory"
-  | "won"
-  | "instantPurchases"
+  | "bidding"
+  | "purchases"
   | "selling"
   | "sellHistory"
   | "wishlist"
@@ -68,6 +71,10 @@ type Tab =
   | "shipping"
   | "payment"
   | "settings";
+
+// 합쳐진 탭 안에서 어느 묶음을 보고 있는지.
+type BiddingFilter = "live" | "all";
+type PurchaseFilter = "auction" | "instant";
 
 function DashboardIcon() {
   return (
@@ -82,14 +89,6 @@ function TicketIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
       <path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4Z" />
-    </svg>
-  );
-}
-function ReceiptIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-      <path d="M6 3h12v18l-3-2-3 2-3-2-3 2Z" />
-      <path d="M9 8h6M9 12h6" />
     </svg>
   );
 }
@@ -179,10 +178,8 @@ function LogoutIcon() {
 
 const TRADE_NAV: { key: Tab; label: string; icon: () => ReactNode }[] = [
   { key: "dashboard", label: "대시보드", icon: DashboardIcon },
-  { key: "participating", label: "참여 중인 경매", icon: TicketIcon },
-  { key: "bidHistory", label: "입찰 내역", icon: ReceiptIcon },
-  { key: "won", label: "낙찰/구매 내역", icon: BadgeCheckIcon },
-  { key: "instantPurchases", label: "즉시구매 내역", icon: BadgeCheckIcon },
+  { key: "bidding", label: "입찰", icon: TicketIcon },
+  { key: "purchases", label: "구매 내역", icon: BadgeCheckIcon },
   { key: "selling", label: "판매 중인 경매", icon: TagIcon },
   { key: "sellHistory", label: "판매 내역", icon: ArchiveIcon },
   { key: "wishlist", label: "관심 목록", icon: HeartIcon },
@@ -198,10 +195,8 @@ const ACCOUNT_NAV: { key: Tab; label: string; icon: () => ReactNode }[] = [
 
 const TAB_TITLE: Record<Tab, string> = {
   dashboard: "대시보드",
-  participating: "참여 중인 경매",
-  bidHistory: "입찰 내역",
-  won: "낙찰/구매 내역",
-  instantPurchases: "즉시구매 내역",
+  bidding: "입찰",
+  purchases: "구매 내역",
   selling: "판매 중인 경매",
   sellHistory: "판매 내역",
   wishlist: "관심 목록",
@@ -218,12 +213,66 @@ const STUB_TABS = new Set<Tab>([]);
 // /mypage?tab= 쿼리 검증용 — 존재하는 탭 키만 허용.
 const TAB_KEYS = new Set<Tab>([...TRADE_NAV, ...ACCOUNT_NAV].map((item) => item.key));
 
+// 탭을 합치기 전 키로 들어오는 기존 링크·북마크를 새 탭(+내부 필터)으로 흘려보낸다.
+const LEGACY_TAB_ALIAS: Record<string, { tab: Tab; bidding?: BiddingFilter; purchase?: PurchaseFilter }> = {
+  participating: { tab: "bidding", bidding: "live" },
+  bidHistory: { tab: "bidding", bidding: "all" },
+  won: { tab: "purchases", purchase: "auction" },
+  instantPurchases: { tab: "purchases", purchase: "instant" },
+};
+
+// 합쳐진 탭 안의 세그먼트 필터 — 사이드바 메뉴를 늘리지 않고 묶음을 전환한다.
+function FilterChips<T extends string>({
+  options,
+  value,
+  onChange,
+  label,
+}: {
+  options: { key: T; label: string; count: number }[];
+  value: T;
+  onChange: (next: T) => void;
+  label: string;
+}) {
+  return (
+    <div className="mt-4 flex flex-wrap gap-1.5" role="group" aria-label={label}>
+      {options.map((option) => (
+        <button
+          key={option.key}
+          type="button"
+          aria-pressed={value === option.key}
+          onClick={() => onChange(option.key)}
+          className={`h-9 rounded-r2 border px-3.5 text-[13px] font-bold transition-colors ${FOCUS_RING} ${
+            value === option.key
+              ? "border-primary bg-primary text-white"
+              : "border-border-2 bg-white text-text-2 hover:border-primary hover:text-primary"
+          }`}
+        >
+          {option.label}
+          <span className="ml-1.5 tabular-nums opacity-70">{option.count}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 // 당근식 통합 마이페이지 — 판매자/구매자 계정 구분 없이 "내 활동" = 판매 + 입찰.
 export default function MyPage() {
   const router = useRouter();
   const { accessToken, member, isLoading, fetchWithAuth, logout } = useAuth();
 
   const [tab, setTab] = useState<Tab>("dashboard");
+  const [biddingFilter, setBiddingFilter] = useState<BiddingFilter>("live");
+  const [purchaseFilter, setPurchaseFilter] = useState<PurchaseFilter>("auction");
+
+  // 대시보드 패널의 "전체 보기"는 합쳐진 탭으로 가되, 그 패널이 보여주던 묶음이 선택된 채로 열려야 한다.
+  function goToBidding(filter: BiddingFilter) {
+    setBiddingFilter(filter);
+    setTab("bidding");
+  }
+  function goToPurchases(filter: PurchaseFilter) {
+    setPurchaseFilter(filter);
+    setTab("purchases");
+  }
   // 모바일에선 메뉴(aside)가 콘텐츠 위에 쌓여, 탭을 눌러도 콘텐츠가 화면 밖 아래에서 바뀌어
   // "아무 반응 없어" 보인다. 탭이 바뀌면(초기 진입 제외) 콘텐츠로 스크롤해준다(lg 미만).
   const contentRef = useRef<HTMLDivElement>(null);
@@ -250,9 +299,17 @@ export default function MyPage() {
   // (탭이 로컬 state뿐이라 SSR 초기값으로 읽으면 하이드레이션이 어긋난다 — 마운트 후 전환.)
   useEffect(() => {
     const requested = new URLSearchParams(window.location.search).get("tab");
-    if (requested && TAB_KEYS.has(requested as Tab)) {
+    if (!requested) return;
+    if (TAB_KEYS.has(requested as Tab)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- URL 쿼리는 마운트 후에만 읽을 수 있다.
       setTab(requested as Tab);
+      return;
+    }
+    const alias = LEGACY_TAB_ALIAS[requested];
+    if (alias) {
+      setTab(alias.tab);
+      if (alias.bidding) setBiddingFilter(alias.bidding);
+      if (alias.purchase) setPurchaseFilter(alias.purchase);
     }
   }, []);
 
@@ -573,19 +630,19 @@ export default function MyPage() {
             )}
 
             <div className="mt-8 grid gap-5 sm:grid-cols-2">
-              <DashboardPanel title="참여 중인 경매" onSeeAll={() => setTab("participating")}>
+              <DashboardPanel title="참여 중인 경매" onSeeAll={() => goToBidding("live")}>
                 <MyBiddingList items={liveBidding.slice(0, 3)} loading={loading} emptyText="참여 중인 경매가 없습니다." />
               </DashboardPanel>
 
-              <DashboardPanel title="입찰 내역" onSeeAll={() => setTab("bidHistory")}>
+              <DashboardPanel title="입찰 내역" onSeeAll={() => goToBidding("all")}>
                 <MyBiddingList items={bidding.slice(0, 3)} loading={loading} emptyText="아직 입찰한 경매가 없어요." />
               </DashboardPanel>
 
-              <DashboardPanel title="낙찰/구매 내역" onSeeAll={() => setTab("won")}>
+              <DashboardPanel title="낙찰/구매 내역" onSeeAll={() => goToPurchases("auction")}>
                 <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
               </DashboardPanel>
 
-              <DashboardPanel title="즉시구매 내역" onSeeAll={() => setTab("instantPurchases")}>
+              <DashboardPanel title="즉시구매 내역" onSeeAll={() => goToPurchases("instant")}>
                 <SellingList
                   items={instantPurchases.slice(0, 3)}
                   loading={loading}
@@ -611,46 +668,56 @@ export default function MyPage() {
               </DashboardPanel>
             </div>
           </>
-        ) : tab === "participating" ? (
+        ) : tab === "bidding" ? (
           <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">참여 중인 경매</h1>
-            <p className="mt-1 text-sm text-text-3">진행 중인 경매 {liveBidding.length}건</p>
+            <h1 className="font-display text-xl font-extrabold text-text-1">입찰</h1>
+            <p className="mt-1 text-sm text-text-3">입찰에 참여한 경매를 모아서 봐요.</p>
+            <FilterChips
+              label="입찰 목록 필터"
+              value={biddingFilter}
+              onChange={setBiddingFilter}
+              options={[
+                { key: "live", label: "진행 중", count: liveBidding.length },
+                { key: "all", label: "전체", count: bidding.length },
+              ]}
+            />
             <div className="mt-5">
-              <MyBiddingList items={liveBidding} loading={loading} emptyText="참여 중인 경매가 없습니다." />
-            </div>
-          </>
-        ) : tab === "bidHistory" ? (
-          <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">입찰 내역</h1>
-            <p className="mt-1 text-sm text-text-3">입찰에 참여한 경매 {bidding.length}건</p>
-            <div className="mt-5">
-              <MyBiddingList items={bidding} loading={loading} emptyText="아직 입찰한 경매가 없어요." />
-            </div>
-          </>
-        ) : tab === "won" ? (
-          <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">낙찰/구매 내역</h1>
-            <p className="mt-1 text-sm text-text-3">낙찰한 경매 {wonBidding.length}건</p>
-            <div className="mt-5">
-              <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
-            </div>
-          </>
-        ) : tab === "instantPurchases" ? (
-          <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">즉시구매 내역</h1>
-            <p className="mt-1 text-sm text-text-3">구매한 즉시판매 {instantPurchases.length}건</p>
-            <div className="mt-5">
-              <SellingList
-                items={instantPurchases}
+              <MyBiddingList
+                items={biddingFilter === "live" ? liveBidding : bidding}
                 loading={loading}
-                emptyText="구매한 즉시판매가 없습니다."
-                endedLabel="구매 완료"
-                orders={orders}
-                onGoPayment={() => setTab("payment")}
-                onRefresh={loadMyActivity}
-                onOpenAddressModal={openAddressModal}
-                onConfirmed={handleConfirmed}
+                emptyText={biddingFilter === "live" ? "참여 중인 경매가 없습니다." : "아직 입찰한 경매가 없어요."}
               />
+            </div>
+          </>
+        ) : tab === "purchases" ? (
+          <>
+            <h1 className="font-display text-xl font-extrabold text-text-1">구매 내역</h1>
+            <p className="mt-1 text-sm text-text-3">경매 낙찰과 즉시구매를 한곳에서 봐요.</p>
+            <FilterChips
+              label="구매 내역 필터"
+              value={purchaseFilter}
+              onChange={setPurchaseFilter}
+              options={[
+                { key: "auction", label: "경매 낙찰", count: wonBidding.length },
+                { key: "instant", label: "즉시구매", count: instantPurchases.length },
+              ]}
+            />
+            <div className="mt-5">
+              {purchaseFilter === "auction" ? (
+                <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
+              ) : (
+                <SellingList
+                  items={instantPurchases}
+                  loading={loading}
+                  emptyText="구매한 즉시판매가 없습니다."
+                  endedLabel="구매 완료"
+                  orders={orders}
+                  onGoPayment={() => setTab("payment")}
+                  onRefresh={loadMyActivity}
+                  onOpenAddressModal={openAddressModal}
+                  onConfirmed={handleConfirmed}
+                />
+              )}
             </div>
           </>
         ) : tab === "selling" ? (
@@ -801,7 +868,8 @@ function getSellerReviewBadge(status: AuctionResponse["status"]) {
     return { label: AUCTION_STATUS_LABEL.PENDING_REVIEW, className: AUCTION_STATUS_BADGE_CLASS.PENDING_REVIEW };
   }
   if (status === "REJECTED") {
-    return { label: "반려됨", className: AUCTION_STATUS_BADGE_CLASS.REJECTED };
+    // 판매자에게는 "반려"가 아니라 "보완 필요" — 고쳐서 다시 등록할 수 있는 흐름이다.
+    return { label: SELLER_AUCTION_STATUS_LABEL.REJECTED, className: AUCTION_STATUS_BADGE_CLASS.REJECTED };
   }
   if (status === "APPROVED" || status === "SCHEDULED" || status === "LIVE") {
     return { label: "승인됨", className: AUCTION_STATUS_BADGE_CLASS[status] };
@@ -815,14 +883,14 @@ function getSellerModerationReason(item: SellingListItem) {
     && "reviewReason" in item
     && item.reviewReason?.trim()
   ) {
-    return { label: "반려 사유", text: item.reviewReason };
+    return { label: "보완이 필요한 이유", text: item.reviewReason, inquiryTag: "승인 거절 문의" };
   }
   if (
     item.status === "CANCELLED"
     && "cancellationReason" in item
     && item.cancellationReason?.trim()
   ) {
-    return { label: "취소 사유", text: item.cancellationReason };
+    return { label: "취소 사유", text: item.cancellationReason, inquiryTag: "매물 취소 문의" };
   }
   return null;
 }
@@ -910,6 +978,18 @@ function SellingList({
                   <p className="text-[11px] font-extrabold text-text-2">{moderationReason.label}</p>
                   <p className="mt-1 whitespace-pre-wrap break-words text-xs leading-5 text-text-2">
                     {moderationReason.text}
+                  </p>
+                  {/* 사유는 정해진 템플릿이라 개별 사정까지는 담기지 않는다 — 더 물어볼 게 있으면
+                      1:1 문의로 보낸다(관리자와 판매자 사이의 유일한 양방향 창구). */}
+                  <p className="mt-2 text-[11px] leading-5 text-text-3">
+                    안내가 충분하지 않다면{" "}
+                    <Link
+                      href={`/inquiries/new?subject=${encodeURIComponent(`[${moderationReason.inquiryTag}] ${item.title}`)}`}
+                      className={`font-bold text-primary underline underline-offset-2 ${FOCUS_RING}`}
+                    >
+                      1:1 문의
+                    </Link>
+                    로 문의해 주세요.
                   </p>
                 </div>
               )}

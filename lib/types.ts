@@ -196,6 +196,29 @@ export type AuctionStatus =
 
 export type AuctionSaleType = "AUCTION" | "INSTANT";
 
+// 검수 승인 거절 / 강제 취소 사유 템플릿 — 백엔드 enum(AuctionRejectionReason·
+// AuctionCancellationReason)과 1:1로 맞춘다. 판매자 노출 문구는 서버가 만들어 저장하므로
+// 프론트는 관리자에게 보여줄 짧은 라벨만 갖는다(lib/labels.ts).
+export type AuctionRejectionReasonCode =
+  | "CODE_MISMATCH"
+  | "CODE_UNREADABLE"
+  | "ITEM_MISMATCH"
+  | "IMAGE_QUALITY"
+  | "SUSPECTED_EDIT"
+  | "THIRD_PARTY_IMAGE"
+  | "INFO_MISMATCH"
+  | "PROHIBITED_ITEM";
+
+export type AuctionCancellationReasonCode =
+  | "REPORTED_FAKE"
+  | "REPORT_CONFIRMED"
+  | "PROHIBITED_ITEM"
+  | "INFO_MISMATCH"
+  | "DUPLICATE_LISTING"
+  | "SELLER_REQUEST"
+  | "POLICY_VIOLATION"
+  | "SUSPECTED_ABUSE";
+
 export type AuctionResponse = {
   id: number;
   title: string;
@@ -553,6 +576,8 @@ export type NotificationType =
   | "AUCTION_WON"
   | "AUCTION_LOST"
   | "AUCTION_ENDED_NO_BIDS"
+  | "AUCTION_REJECTED" // 검수 승인 거절 — 판매자에게 보완 사유 안내
+  | "AUCTION_CANCELLED" // 관리자 강제 취소 — 판매자에게 사유 안내
   | "PAYMENT_COMPLETED" // 결제 완료 — 구매자(청구 확인)·판매자(발송 준비)
   | "PAYMENT_FAILED" // 결제 실패 — 결제수단 확인·자동 재시도 안내
   | "ORDER_DEFAULTED" // 미결제 확정 — 주문 취소(구매자)·재등록 안내(판매자)

@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { AUCTION_REJECTION_REASON_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
   AdminAuctionSummary,
   AdminAuctionVerificationResponse,
   AuctionImageResponse,
+  AuctionRejectionReasonCode,
 } from "@/lib/types";
 
 type Props = {
@@ -60,10 +62,21 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
   const [verification, setVerification] = useState<AdminAuctionVerificationResponse | null>(null);
   const [verificationImageUrl, setVerificationImageUrl] = useState<string | null>(null);
   const [publicImages, setPublicImages] = useState<AuctionImageResponse[]>([]);
-  const [reason, setReason] = useState("");
+  const [reasonCode, setReasonCode] = useState<AuctionRejectionReasonCode | "">("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const selectedReason = AUCTION_REJECTION_REASON_OPTIONS.find((option) => option.code === reasonCode) ?? null;
+
+  // Esc로 닫기 — 처리 중(submitting)에는 막는다(승인/반려 요청이 날아간 뒤 창만 사라지는 걸 방지).
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && !submitting) onClose();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [onClose, submitting]);
 
   useEffect(() => {
     let active = true;
@@ -117,8 +130,8 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
 
   async function reject() {
     if (submitting) return;
-    if (!reason.trim()) {
-      setError("반려 사유를 입력해주세요.");
+    if (!reasonCode) {
+      setError("거절 사유를 선택해주세요.");
       return;
     }
     setSubmitting(true);
@@ -126,11 +139,11 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
     try {
       await fetchWithAuth<void>(`/api/admin/auctions/${auction.id}/reject`, {
         method: "PATCH",
-        body: { reason: reason.trim() },
+        body: { reasonCode },
       });
-      await onReviewed(`"${auction.title}"을(를) 반려했습니다.`);
+      await onReviewed(`"${auction.title}"의 승인을 거절했습니다. 판매자에게 사유가 전달됐습니다.`);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "반려에 실패했습니다.");
+      setError(err instanceof ApiError ? err.message : "승인 거절에 실패했습니다.");
       setSubmitting(false);
     }
   }
@@ -141,6 +154,10 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
       role="dialog"
       aria-modal="true"
       aria-labelledby="verification-review-title"
+      onClick={(event) => {
+        // 배경(오버레이 자신)을 클릭했을 때만 닫는다. 내부 클릭은 버블링돼도 무시.
+        if (event.target === event.currentTarget && !submitting) onClose();
+      }}
     >
       <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[960px] flex-col overflow-hidden rounded-r3 bg-surface shadow-modal sm:max-h-[calc(100dvh-3rem)]">
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-border bg-surface px-5 py-4">
@@ -150,14 +167,19 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
             </h2>
             <p className="mt-0.5 truncate text-xs text-text-3">{auction.title} · {auction.sellerNickname ?? "판매자 미상"}</p>
           </div>
+          {/* 닫기는 얇은 '×' 글리프였을 때 배경과 구분이 안 돼 "버튼이 없다"고 읽혔다.
+              테두리 있는 원형 + Lucide 계열 X SVG로 교체한다(글리프는 폰트에 따라 광학 중심도 어긋난다). */}
           <button
             type="button"
             onClick={onClose}
             disabled={submitting}
             aria-label="검수 창 닫기"
-            className={`flex h-9 w-9 shrink-0 items-center justify-center text-2xl text-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
+            title="닫기 (Esc)"
+            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-surface text-text-2 transition-colors hover:border-text-2 hover:bg-surface-2 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
           >
-            ×
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+              <path d="M18 6 6 18M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
@@ -251,30 +273,62 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                 </section>
               </div>
 
-              <div className="mt-6 border-t border-border pt-5">
-                <label htmlFor="verification-reject-reason" className="text-xs font-extrabold text-text-2">
-                  반려 사유
-                </label>
-                <textarea
-                  id="verification-reject-reason"
-                  value={reason}
-                  onChange={(event) => setReason(event.target.value)}
-                  rows={2}
-                  maxLength={500}
-                  placeholder="반려할 때 판매자에게 전달할 사유를 입력하세요."
-                  className={`mt-2 w-full resize-none rounded-r2 border border-border px-3 py-2 text-sm outline-none focus:border-primary ${FOCUS_RING}`}
-                />
+              {/* 사유는 정해진 템플릿에서 고른다 — 판매자마다 다른 표현이 나가면 "무엇을 고치면 되는지"가
+                  흔들리고, 사유별 집계도 불가능하다. 선택한 문구가 그대로 판매자에게 전달되므로
+                  아래에 미리보기를 노출한다. */}
+              <fieldset className="mt-6 border-t border-border pt-5">
+                <legend className="text-xs font-extrabold text-text-2">승인 거절 사유</legend>
+                <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
+                  {AUCTION_REJECTION_REASON_OPTIONS.map((option) => (
+                    <label
+                      key={option.code}
+                      className={`flex cursor-pointer items-center gap-2 rounded-r2 border px-3 py-2 text-[13px] transition-colors ${
+                        reasonCode === option.code
+                          ? "border-accent bg-accent-soft font-bold text-accent"
+                          : "border-border text-text-2 hover:border-text-2"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="verification-reject-reason"
+                        value={option.code}
+                        checked={reasonCode === option.code}
+                        onChange={() => {
+                          setReasonCode(option.code);
+                          setError(null);
+                        }}
+                        className="h-3.5 w-3.5 shrink-0 accent-[var(--color-accent)]"
+                      />
+                      {option.label}
+                    </label>
+                  ))}
+                </div>
+                {selectedReason && (
+                  <p className="mt-3 border-l-2 border-border-2 bg-surface-2 px-3 py-2 text-[12px] leading-5 text-text-2">
+                    <span className="font-extrabold text-text-3">판매자에게 전달될 문구 · </span>
+                    {selectedReason.preview}
+                  </p>
+                )}
                 {error && (
                   <p className="mt-2 text-xs text-accent" role="alert">{error}</p>
                 )}
                 <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                  {/* 헤더 닫기까지 스크롤을 올려야 했던 문제 — 액션 줄에도 닫기를 둔다. */}
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    disabled={submitting}
+                    className={`h-11 border border-border-2 px-5 text-sm font-extrabold text-text-2 hover:border-text-2 hover:bg-surface-2 disabled:opacity-50 ${FOCUS_RING}`}
+                  >
+                    닫기
+                  </button>
                   <button
                     type="button"
                     onClick={reject}
                     disabled={submitting}
                     className={`h-11 border border-accent px-5 text-sm font-extrabold text-accent hover:bg-accent-soft disabled:opacity-50 ${FOCUS_RING}`}
                   >
-                    반려
+                    승인 거절
                   </button>
                   <button
                     type="button"
@@ -285,7 +339,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     {submitting ? "처리 중..." : "승인하고 공개"}
                   </button>
                 </div>
-              </div>
+              </fieldset>
             </>
           ) : null}
         </div>

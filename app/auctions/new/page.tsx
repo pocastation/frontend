@@ -17,6 +17,7 @@ import type {
   ArtistListResponse,
   ArtistMemberResponse,
   AuctionSaleType,
+  AuctionStatus,
   PhotocardGrade,
   PhotocardSource,
 } from "@/lib/types";
@@ -287,7 +288,7 @@ export default function NewAuctionPage() {
 
     setIsSubmitting(true);
     try {
-      const created = await fetchWithAuth<{ id: number }>("/api/auctions", {
+      const created = await fetchWithAuth<{ id: number; status: AuctionStatus }>("/api/auctions", {
         method: "POST",
         body: {
           artistId,
@@ -307,7 +308,13 @@ export default function NewAuctionPage() {
           verificationId: AUCTION_VERIFICATION_ENABLED ? (verificationId ?? undefined) : undefined,
         },
       });
-      router.push(AUCTION_VERIFICATION_ENABLED ? "/mypage?tab=sellHistory" : `/auctions/${created.id}`);
+      // 목적지는 빌드타임 플래그가 아니라 **서버가 알려준 실제 상태**로 정한다. 자동 승인이면
+      // 바로 내 경매를 보여주고, 검수 대기면 안내 화면으로 보낸다(거기서 홈으로 자동 이동).
+      router.push(
+        created.status === "PENDING_REVIEW"
+          ? `/auctions/submitted?id=${created.id}`
+          : `/auctions/${created.id}`,
+      );
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "판매 등록에 실패했습니다.");
     } finally {

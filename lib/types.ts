@@ -27,6 +27,12 @@ export type MemberResponse = {
   // 거래 요건은 채웠지만 신뢰도가 낮아 레벨이 상한에 걸린 상태.
   // true면 "거래를 더 하세요"가 아니라 "후기를 쌓으세요"로 안내해야 한다.
   levelCappedByTrust?: boolean;
+  // 이메일 인증(#244, BE #224) — GET /me 에서만 채워진다.
+  // 소셜 가입 회원은 대상이 아니라 항상 true다(배너를 띄우면 안 된다).
+  emailVerified?: boolean;
+  // 서버의 거래 차단 게이트가 켜져 있는지. 배너 문구를 "인증해 주세요"와 "인증해야 거래할 수
+  // 있어요" 중에 고르는 데 쓴다 — 켜지지도 않은 제한을 예고하면 거짓 안내가 된다.
+  emailVerificationRequired?: boolean;
 };
 
 // GET/POST/PATCH /api/members/me/delivery-addresses — 마이페이지 배송지 관리.

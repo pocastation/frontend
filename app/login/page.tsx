@@ -107,6 +107,14 @@ function LoginForm() {
       <Link href="/signup" className={`mt-3 flex h-11 items-center justify-center ${SECONDARY_BUTTON_CLASS}`}>
         이메일 회원가입
       </Link>
+      <p className="mt-3 text-center text-xs text-text-3">
+        <Link
+          href="/auth/forgot-password"
+          className={`rounded-r1 underline underline-offset-2 transition-colors hover:text-text-2 ${FOCUS_RING}`}
+        >
+          비밀번호를 잊으셨나요?
+        </Link>
+      </p>
 
       <div className="my-5 flex items-center gap-3 text-[11px] text-text-3">
         <span className="h-px flex-1 bg-border" />

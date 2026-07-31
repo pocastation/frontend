@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import AuctionGrid from "@/components/AuctionGrid";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { ARTIST_STATUS_BADGE_CLASS, ARTIST_STATUS_LABEL, ARTIST_TYPE_LABEL } from "@/lib/labels";
+import { DEFAULT_OG_IMAGE } from "@/lib/site";
 import { FOCUS_RING } from "@/lib/ui";
 import type { ArtistDetailResponse, AuctionListResponse } from "@/lib/types";
 
@@ -21,7 +22,7 @@ const getArtist = cache(async (id: string): Promise<ArtistDetailResponse | null>
   }
 });
 
-// 링크 미리보기 — 스타명·설명. 스타 공식 이미지는 저작권으로 미사용(§9.1)이라 기본 OG 이미지를 상속한다.
+// 링크 미리보기 — 스타명·설명. 스타 공식 이미지는 저작권으로 쓰지 않으므로(§9.1) 브랜드 기본 카드를 쓴다.
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
   const artist = await getArtist(id);
@@ -32,7 +33,15 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   return {
     title: `${artist.name} — Pocastation`,
     description,
-    openGraph: { title: `${artist.name} — Pocastation`, description, type: "website" },
+    // images를 명시하지 않으면 루트 OG 이미지 자동 주입이 끊겨 og:image가 통째로 빠진다
+    // (twitter:card가 summary_large_image라 미리보기가 비어 보인다). 스타 공식 이미지는
+    // 저작권으로 쓰지 않으므로(§9.1) 브랜드 기본 카드를 쓴다.
+    openGraph: {
+      title: `${artist.name} — Pocastation`,
+      description,
+      type: "website",
+      images: [DEFAULT_OG_IMAGE],
+    },
     twitter: { card: "summary_large_image", title: `${artist.name} — Pocastation`, description },
   };
 }

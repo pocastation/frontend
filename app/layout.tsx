@@ -8,6 +8,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import { WishlistProvider } from "@/lib/wishlist-context";
 import { NotificationProvider } from "@/lib/notification-context";
 import { ToastProvider } from "@/lib/toast-context";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 const notoSansKr = Noto_Sans_KR({
@@ -22,21 +23,16 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   weight: ["500", "700", "800"],
 });
 
-// 링크 미리보기(OG) 절대 URL 기준. 환경별 사이트 URL을 NEXT_PUBLIC_SITE_URL로 주입(미설정 시 폴백).
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://pocastation.com");
-
-const SITE_NAME = "Pocastation";
-const SITE_TITLE = "Pocastation — K-POP 포카 경매";
-const SITE_DESCRIPTION = "K-pop 포토카드 특화 경매 플랫폼";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
+  // 정규 URL. 없으면 크롤러가 쿼리·추적 파라미터가 붙은 주소를 별개 페이지로 볼 수 있다.
+  alternates: { canonical: "/" },
   openGraph: {
     type: "website",
+    // og:url이 빠져 있었다 — 일부 크롤러(특히 카카오)는 이걸로 정규 주소를 잡는다.
+    url: "/",
     siteName: SITE_NAME,
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,

@@ -5,6 +5,7 @@ import Link from "next/link";
 import AuctionGrid from "@/components/AuctionGrid";
 import SellerReviewSummary from "@/components/SellerReviewSummary";
 import { apiFetch, ApiError } from "@/lib/api";
+import { DEFAULT_OG_IMAGE } from "@/lib/site";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionListResponse, SellerRatingResponse } from "@/lib/types";
 
@@ -46,7 +47,13 @@ export async function generateMetadata({ params }: { params: Promise<{ sellerId:
   return {
     title: `${seller.nickname} — Pocastation`,
     description,
-    openGraph: { title: `${seller.nickname} 판매자`, description, type: "profile" },
+    // artists/[id]와 같은 이유 — openGraph를 정의하면 루트 OG 이미지가 자동 주입되지 않는다.
+    openGraph: {
+      title: `${seller.nickname} 판매자`,
+      description,
+      type: "profile",
+      images: [DEFAULT_OG_IMAGE],
+    },
   };
 }
 

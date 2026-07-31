@@ -116,7 +116,15 @@ export default function AdminAuctionsPage() {
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
-      void fetchList("", "ALL", "ALL");
+      // 대시보드의 "최근 등록 경매"가 검수 대기 건을 이 목록으로 보낼 때 필터를 실어 보낸다
+      // (?status=PENDING_REVIEW). 알 수 없는 값이면 무시하고 전체로 연다.
+      const requested = new URLSearchParams(window.location.search).get("status");
+      const initial = requested && STATUS_FILTERS.some((f) => f.key === requested)
+        ? (requested as AuctionStatus | "ALL")
+        : "ALL";
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- URL 쿼리는 마운트 후에만 읽을 수 있다(마이페이지 ?tab=과 같은 패턴).
+      if (initial !== "ALL") setStatusFilter(initial);
+      void fetchList("", initial, "ALL");
       return;
     }
     const timer = setTimeout(() => void fetchList(query, statusFilter, saleTypeFilter), DEBOUNCE_MS);

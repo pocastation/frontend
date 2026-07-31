@@ -5,9 +5,15 @@ import Link from "next/link";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatKRW } from "@/lib/format";
-import { MEMBER_STATUS_BADGE_CLASS, MEMBER_STATUS_LABEL, PROVIDER_LABEL } from "@/lib/labels";
+import {
+  AUCTION_STATUS_BADGE_CLASS,
+  AUCTION_STATUS_LABEL,
+  MEMBER_STATUS_BADGE_CLASS,
+  MEMBER_STATUS_LABEL,
+  PROVIDER_LABEL,
+} from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
-import type { AdminDashboardResponse } from "@/lib/types";
+import type { AdminDashboardResponse, AuctionStatus } from "@/lib/types";
 
 function StatCard({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
@@ -21,6 +27,22 @@ function StatCard({ label, value, tone }: { label: string; value: string; tone: 
 
 function formatDate(iso: string) {
   return iso.slice(0, 10).replace(/-/g, ".");
+}
+
+// "최근 등록 경매"는 상태를 가리지 않고 최신순으로 가져오므로 검수 대기·거절 건도 섞인다.
+// 공개 상세(/auctions/{id})는 비공개 상태를 404로 막으니, 공개된 것만 상세로 보내고
+// 나머지는 경매 관리 화면으로 보낸다(경매 관리 목록이 이미 쓰는 것과 같은 기준).
+const PUBLIC_AUCTION_STATUSES = new Set<AuctionStatus>([
+  "LIVE",
+  "ENDED_SOLD",
+  "ENDED_NO_BIDS",
+  "CANCELLED",
+]);
+
+function recentAuctionHref(status: AuctionStatus, id: number) {
+  if (PUBLIC_AUCTION_STATUSES.has(status)) return `/auctions/${id}`;
+  // 검수 대기는 그 필터가 걸린 목록으로, 그 외(거절·임시저장 등)는 전체 목록으로.
+  return status === "PENDING_REVIEW" ? "/admin/auctions?status=PENDING_REVIEW" : "/admin/auctions";
 }
 
 export default function AdminDashboardPage() {
@@ -113,7 +135,7 @@ export default function AdminDashboardPage() {
             <ul className="flex flex-col divide-y divide-border">
               {data.recentAuctions.map((a) => (
                 <li key={a.id}>
-                  <Link href={`/auctions/${a.id}`} className={`flex items-center gap-3 py-2.5 ${FOCUS_RING}`}>
+                  <Link href={recentAuctionHref(a.status, a.id)} className={`flex items-center gap-3 py-2.5 ${FOCUS_RING}`}>
                     <span className="h-9 w-9 shrink-0 overflow-hidden rounded-r1 bg-surface-2">
                       {a.representativeThumbnailUrl && (
                         // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
@@ -124,7 +146,15 @@ export default function AdminDashboardPage() {
                       {a.artistName && <span className="block truncate text-[11px] font-bold text-primary">{a.artistName}</span>}
                       <span className="block truncate text-sm font-bold text-text-1">{a.title}</span>
                     </span>
-                    <span className="shrink-0 font-display text-xs font-extrabold text-text-1">{formatKRW(a.currentPrice)}</span>
+                    <span className="shrink-0 text-right">
+                      <span className="block font-display text-xs font-extrabold text-text-1">{formatKRW(a.currentPrice)}</span>
+                      {/* 공개 전 상태는 눌러도 상세가 안 열리므로, 왜 그런지 상태로 알려준다. */}
+                      {!PUBLIC_AUCTION_STATUSES.has(a.status) && (
+                        <span className={`mt-1 inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-extrabold ${AUCTION_STATUS_BADGE_CLASS[a.status]}`}>
+                          {AUCTION_STATUS_LABEL[a.status]}
+                        </span>
+                      )}
+                    </span>
                   </Link>
                 </li>
               ))}

@@ -26,8 +26,9 @@ const MAX_IMAGES = 12;
 const AUCTION_VERIFICATION_ENABLED =
   process.env.NEXT_PUBLIC_AUCTION_VERIFICATION_ENABLED === "true" ||
   (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_AUCTION_VERIFICATION_ENABLED !== "false");
-// 검수영상은 기본 활성화하고, 긴급 롤백이 필요할 때만 환경변수로 명시적으로 끈다.
-const AUCTION_VIDEO_ENABLED = process.env.NEXT_PUBLIC_AUCTION_VIDEO_ENABLED !== "false";
+const AUCTION_VIDEO_ENABLED =
+  process.env.NEXT_PUBLIC_AUCTION_VIDEO_ENABLED === "true" ||
+  (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_AUCTION_VIDEO_ENABLED !== "false");
 
 // 위저드 스텝 순서 — 사진 다음에 영상, 그다음 (옵션) 사진 인증. 플래그로 스텝이 빠질 수 있어
 // 인덱스 하드코딩(step === 4) 대신 키 배열로 관리한다(중간 스텝 삽입 시 인덱스가 밀리는 버그 방지).

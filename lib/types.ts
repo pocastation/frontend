@@ -364,6 +364,8 @@ export type VideoStatusResponse = {
 
 export type VerificationStatus =
   | "ISSUED"
+  | "QUEUED"
+  | "ANALYZING"
   | "RETAKE_REQUIRED"
   | "PASSED"
   | "CONSUMED"
@@ -375,7 +377,8 @@ export type VerificationFailureReason =
   | "INVALID_CODE_FORMAT"
   | "CODE_MISMATCH"
   | "OCR_LOW_CONFIDENCE"
-  | "CARD_NOT_FOUND";
+  | "CARD_NOT_FOUND"
+  | "ANALYSIS_UNAVAILABLE";
 
 export type VerificationChallengeResponse = {
   id: string;
@@ -391,6 +394,8 @@ export type VerificationAnalysisResponse = {
   failureReason: VerificationFailureReason | null;
   detectedCode: string | null;
   expiresAt: string;
+  queuePosition: number | null;
+  queuedAt: string | null;
 };
 
 export type AdminAuctionVerificationResponse = {

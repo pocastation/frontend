@@ -18,6 +18,7 @@ const FAILURE_MESSAGE: Record<VerificationFailureReason, string> = {
   CODE_MISMATCH: "사진 속 코드가 발급 코드와 일치하지 않습니다. 현재 코드를 확인해 다시 찍어주세요.",
   OCR_LOW_CONFIDENCE: "코드가 선명하지 않습니다. 정면에 가깝게 다시 촬영해주세요.",
   CARD_NOT_FOUND: "사진에서 포토카드 또는 별도의 직사각형 물체를 찾지 못했습니다. 코드와 포토카드를 한 화면에 담아주세요.",
+  ANALYSIS_UNAVAILABLE: "사진 분석 중 일시적인 문제가 발생했습니다. 같은 사진으로 다시 시도해주세요.",
 };
 
 type Props = {
@@ -53,6 +54,41 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
     : 0;
   const expired = Boolean(challenge) && secondsLeft === 0;
   const passed = Boolean(verificationId && result?.passed);
+  const processing = result?.status === "QUEUED" || result?.status === "ANALYZING";
+
+  useEffect(() => {
+    if (!challenge || !processing) return;
+    const challengeId = challenge.id;
+    let cancelled = false;
+    let timer: number | undefined;
+
+    async function poll() {
+      try {
+        const status = await fetchWithAuth<VerificationAnalysisResponse>(
+          `/api/auction-verifications/${challengeId}`,
+        );
+        if (cancelled) return;
+        setResult(status);
+        setError(null);
+        if (status.status === "QUEUED" || status.status === "ANALYZING") {
+          timer = window.setTimeout(poll, 2000);
+          return;
+        }
+        setAnalyzing(false);
+        onVerified(status.passed ? status.id : null);
+      } catch {
+        if (cancelled) return;
+        setError("분석 상태를 다시 확인하고 있습니다.");
+        timer = window.setTimeout(poll, 2000);
+      }
+    }
+
+    timer = window.setTimeout(poll, 1000);
+    return () => {
+      cancelled = true;
+      if (timer !== undefined) window.clearTimeout(timer);
+    };
+  }, [challenge, fetchWithAuth, onVerified, processing]);
 
   async function issueChallenge() {
     if (issuing || analyzing) return;
@@ -100,11 +136,13 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
         formData,
       );
       setResult(analysis);
-      onVerified(analysis.passed ? analysis.id : null);
+      if (analysis.status !== "QUEUED" && analysis.status !== "ANALYZING") {
+        setAnalyzing(false);
+        onVerified(analysis.passed ? analysis.id : null);
+      }
     } catch (err) {
       onVerified(null);
       setError(err instanceof ApiError ? err.message : "사진 분석에 실패했습니다.");
-    } finally {
       setAnalyzing(false);
     }
   }
@@ -132,14 +170,18 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
           <div className="border-l-4 border-primary bg-primary-soft px-4 py-3">
             <div className="flex items-center justify-between gap-3">
               <span className="text-[11px] font-extrabold uppercase text-primary">Verification code</span>
-              <span className={`text-xs font-bold ${expired ? "text-accent" : "text-text-2"}`}>
-                {expired ? "만료됨" : `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, "0")}`}
+              <span className={`text-xs font-bold ${expired && !processing ? "text-accent" : "text-text-2"}`}>
+                {processing
+                  ? "사진 접수 완료"
+                  : expired
+                    ? "만료됨"
+                    : `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, "0")}`}
               </span>
             </div>
             <p className="mt-2 font-mono text-3xl text-text-1" aria-label={`인증 코드 ${challenge.code}`}>
               {challenge.code}
             </p>
-            {!expired && !passed && (
+            {!expired && !passed && !processing && (
               <div className="mt-3 flex justify-end">
                 <button
                   type="button"
@@ -153,15 +195,26 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
             )}
           </div>
 
-          {expired ? (
-            <button type="button" onClick={issueChallenge} className={`h-11 w-full ${PRIMARY_BUTTON_CLASS}`}>
-              인증 코드 재발급
-            </button>
+          {processing ? (
+            <div className="border border-primary/30 bg-primary-soft px-4 py-3" role="status">
+              <p className="text-sm font-extrabold text-primary">
+                {result?.status === "ANALYZING" ? "인증 사진 분석 중" : "인증 사진 분석 대기 중"}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-text-2">
+                {result?.status === "QUEUED" && result.queuePosition
+                  ? `현재 대기 순서 ${result.queuePosition}번째입니다. 순서대로 확인하고 있습니다.`
+                  : "코드와 카드 형태를 확인하고 있습니다. 잠시만 기다려주세요."}
+              </p>
+            </div>
           ) : passed ? (
             <div className="border border-ok/30 bg-ok-soft px-4 py-3" role="status">
               <p className="text-sm font-extrabold text-ok">사진 인증 완료</p>
               <p className="mt-1 text-xs text-text-2">등록 후 관리자 검수를 거쳐 경매가 공개됩니다.</p>
             </div>
+          ) : expired ? (
+            <button type="button" onClick={issueChallenge} className={`h-11 w-full ${PRIMARY_BUTTON_CLASS}`}>
+              인증 코드 재발급
+            </button>
           ) : (
             <>
               <label

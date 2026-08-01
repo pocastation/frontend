@@ -53,10 +53,12 @@ export default function EmailVerificationBanner() {
         <p className="flex-1 text-xs leading-relaxed text-text-2">
           이메일 인증이 아직이에요.{" "}
           <span className="text-text-3">
-            {/* 서버 게이트가 꺼져 있는데 "인증해야 거래할 수 있다"고 쓰면 켜지지도 않은 제한을
-                예고하는 거짓 안내가 된다. 문구를 서버 상태(/me)에 맞춘다. */}
+            {/* 서버 게이트가 꺼져 있는데 "인증해야 이용할 수 있다"고 쓰면 켜지지도 않은 제한을
+                예고하는 거짓 안내가 된다. 문구를 서버 상태(/me)에 맞춘다.
+                게이트가 켜진 상태에서 이 배너가 보이는 경우는 좁다 — 인증 전에는 로그인이
+                막히므로, 게이트를 켜기 전에 발급된 accessToken이 아직 살아 있는 구간뿐이다. */}
             {member.emailVerificationRequired
-              ? "인증을 마쳐야 입찰·구매·판매를 이용할 수 있어요."
+              ? "인증을 마쳐야 거래하거나 다시 로그인할 수 있어요."
               : "가입할 때 받은 메일에서 인증을 완료해 주세요."}
           </span>
         </p>

@@ -46,6 +46,10 @@ export type ConsentPayload = Omit<OnboardingPayload, "nickname">;
 // 동의 게이트(BE #198)가 쓰기 요청을 막을 때 내려주는 코드. 이 코드를 보면 재동의 화면으로 보낸다.
 export const SERVICE_CONSENT_REQUIRED = "SERVICE_CONSENT_REQUIRED";
 
+// 이메일 인증 전 로그인 차단(BE #224). 자격증명은 맞았고 남은 관문이 인증뿐이라는 뜻이라
+// 401이 아니라 403으로 온다 — 로그인 화면이 이 코드를 보고 재발송 UI를 띄운다.
+export const EMAIL_NOT_VERIFIED = "EMAIL_NOT_VERIFIED";
+
 // 재동의 화면 경로. 동의를 마치면 원래 있던 화면으로 돌려보내기 위해 현재 경로를 붙인다.
 export const CONSENT_PATH = "/onboarding/consents";
 

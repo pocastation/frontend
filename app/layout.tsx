@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_KR, Plus_Jakarta_Sans } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AuthProvider } from "@/lib/auth-context";
@@ -62,6 +63,8 @@ export default function RootLayout({
             <WishlistProvider>
               <ToastProvider>
                 <Header />
+                {/* 이메일 미인증 안내(#244) — 스스로 조건을 판단해 해당 없으면 아무것도 렌더하지 않는다. */}
+                <EmailVerificationBanner />
                 <main className="flex-1">{children}</main>
                 <Footer />
               </ToastProvider>

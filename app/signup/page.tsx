@@ -25,6 +25,7 @@ export default function SignupPage() {
   const [consents, setConsents] = useState<ConsentValues>(EMPTY_CONSENTS);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [signedUp, setSignedUp] = useState(false);
 
   // 진입 시 서비스가 생성한 닉네임을 기본값으로 채운다("따뜻한북극여우" 류). 사용자가 맘에 안 들면
   // "다른 닉네임 추천"을 누르거나 직접 수정하면 된다.
@@ -52,7 +53,9 @@ export default function SignupPage() {
         method: "POST",
         body: { email, password, nickname, ...consents },
       });
-      router.replace("/login");
+      // 로그인 화면으로 바로 보내지 않는다(#244) — 인증이 가입 흐름의 일부라, 지금 로그인하려 해도
+      // 막힌다. "메일을 확인하세요"를 먼저 알려야 사용자가 로그인 실패를 오류로 오해하지 않는다.
+      setSignedUp(true);
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "회원가입에 실패했습니다.");
     } finally {
@@ -69,6 +72,36 @@ export default function SignupPage() {
   }
   if (!isGuest) {
     return null;
+  }
+
+  if (signedUp) {
+    return (
+      <div className="mx-auto max-w-sm px-4 py-16 text-center">
+        <h1 className="mb-4 font-display text-xl font-extrabold text-text-1">
+          인증 메일을 보냈어요
+        </h1>
+        <p aria-live="polite" className="text-sm leading-relaxed text-text-2">
+          <span className="font-bold text-text-1">{email}</span> 으로
+          <br />
+          인증 링크를 보냈어요. 링크를 눌러 인증을 완료해 주세요.
+        </p>
+        <p className="mt-3 text-xs leading-relaxed text-text-3">
+          메일이 보이지 않으면 스팸함도 확인해 주세요.
+          <br />
+          링크는 24시간 동안 유효해요.
+          <br />
+          {/* 인증 전 로그인이 막히므로, 여기서 미리 알려야 사용자가 로그인 실패를 오류로 오해하지 않는다. */}
+          인증을 마쳐야 로그인할 수 있어요.
+        </p>
+        <button
+          type="button"
+          onClick={() => router.replace("/login")}
+          className={`mt-6 flex h-11 w-full items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
+        >
+          로그인하러 가기
+        </button>
+      </div>
+    );
   }
 
   return (

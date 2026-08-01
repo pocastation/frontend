@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useGuestOnly, safeRedirectPath } from "@/lib/use-guest-only";
-import { ApiError } from "@/lib/api";
+import { apiFetch, ApiError } from "@/lib/api";
+import { EMAIL_NOT_VERIFIED } from "@/lib/auth-context";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import { GoogleIcon } from "@/components/GoogleIcon";
 
@@ -27,18 +28,47 @@ function LoginForm() {
     searchParams.get("error") === "suspended" ? "정지된 계정입니다. 고객센터로 문의해주세요." : null,
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // 이메일 인증 전에는 로그인이 막힌다(BE #224). 그런데 재발송 API는 로그인이 필요하므로,
+  // 막힌 사용자는 재발송 버튼에 도달할 길이 없다 — 그래서 이 화면이 그 출구를 겸한다.
+  // 방금 입력한 자격증명으로 재발송하므로, 남의 주소로는 메일을 보낼 수 없다.
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendState, setResendState] = useState<"idle" | "sending" | "sent">("idle");
+  const [resendError, setResendError] = useState<string | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    setNeedsVerification(false);
+    setResendState("idle");
+    setResendError(null);
     setIsSubmitting(true);
     try {
       await login(email, password);
       router.replace(redirectTo);
     } catch (err) {
+      if (err instanceof ApiError && err.errorCode === EMAIL_NOT_VERIFIED) {
+        setNeedsVerification(true);
+      }
       setError(err instanceof ApiError ? err.message : "로그인에 실패했습니다.");
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleResend() {
+    setResendState("sending");
+    setResendError(null);
+    try {
+      await apiFetch<void>("/api/auth/email-verification/resend", {
+        method: "POST",
+        body: { email, password },
+      });
+      setResendState("sent");
+    } catch (err) {
+      setResendState("idle");
+      setResendError(
+        err instanceof ApiError ? err.message : "발송에 실패했어요. 잠시 후 다시 시도해 주세요.",
+      );
     }
   }
 
@@ -96,6 +126,34 @@ function LoginForm() {
             {error}
           </p>
         )}
+        {needsVerification && (
+          <div className="flex flex-col gap-2 rounded-r2 border border-border bg-surface-2 p-3">
+            {resendState === "sent" ? (
+              <p aria-live="polite" className="text-xs leading-relaxed text-text-2">
+                인증 메일을 다시 보냈어요. 메일함(스팸함 포함)을 확인해 주세요.
+              </p>
+            ) : (
+              <>
+                <p className="text-xs leading-relaxed text-text-3">
+                  메일을 못 받으셨나요? 인증 메일을 다시 보내드려요.
+                </p>
+                <button
+                  type="button"
+                  onClick={handleResend}
+                  disabled={resendState === "sending"}
+                  className={`h-9 ${SECONDARY_BUTTON_CLASS}`}
+                >
+                  {resendState === "sending" ? "보내는 중..." : "인증 메일 다시 받기"}
+                </button>
+              </>
+            )}
+            {resendError && (
+              <p role="alert" aria-live="polite" className="text-xs text-accent">
+                {resendError}
+              </p>
+            )}
+          </div>
+        )}
         <button
           type="submit"
           disabled={isSubmitting}
@@ -107,6 +165,14 @@ function LoginForm() {
       <Link href="/signup" className={`mt-3 flex h-11 items-center justify-center ${SECONDARY_BUTTON_CLASS}`}>
         이메일 회원가입
       </Link>
+      <p className="mt-3 text-center text-xs text-text-3">
+        <Link
+          href="/auth/forgot-password"
+          className={`rounded-r1 underline underline-offset-2 transition-colors hover:text-text-2 ${FOCUS_RING}`}
+        >
+          비밀번호를 잊으셨나요?
+        </Link>
+      </p>
 
       <div className="my-5 flex items-center gap-3 text-[11px] text-text-3">
         <span className="h-px flex-1 bg-border" />

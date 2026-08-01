@@ -10,6 +10,7 @@ import type {
   AdminAuctionVerificationResponse,
   AuctionImageResponse,
   AuctionRejectionReasonCode,
+  AuctionVideoResponse,
 } from "@/lib/types";
 
 type Props = {
@@ -62,6 +63,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
   const [verification, setVerification] = useState<AdminAuctionVerificationResponse | null>(null);
   const [verificationImageUrl, setVerificationImageUrl] = useState<string | null>(null);
   const [publicImages, setPublicImages] = useState<AuctionImageResponse[]>([]);
+  const [reviewVideo, setReviewVideo] = useState<AuctionVideoResponse | null>(null);
   const [reasonCode, setReasonCode] = useState<AuctionRejectionReasonCode | "">("");
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -86,13 +88,15 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
       setLoading(true);
       setError(null);
       try {
-        const [detail, images] = await Promise.all([
+        const [detail, images, video] = await Promise.all([
           fetchWithAuth<AdminAuctionVerificationResponse>(`/api/admin/auctions/${auction.id}/verification`),
           fetchWithAuth<AuctionImageResponse[]>(`/api/admin/auctions/${auction.id}/images`),
+          fetchWithAuth<AuctionVideoResponse | null>(`/api/admin/auctions/${auction.id}/video`),
         ]);
         if (!active) return;
         setVerification(detail);
         setPublicImages(images);
+        setReviewVideo(video);
         if (detail.imageAvailable) {
           const blob = await fetchBlobWithAuth(`/api/admin/auctions/${auction.id}/verification/image`);
           if (!active) return;
@@ -150,7 +154,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center overflow-hidden bg-black/50 p-3 sm:p-6"
+      className="fixed inset-0 z-[400] flex items-center justify-center overflow-hidden bg-black/50 p-3 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="verification-review-title"
@@ -203,6 +207,29 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                       )}
                     </div>
                   </figure>
+
+                  <div className="mt-4">
+                    <p className="mb-2 text-xs font-extrabold text-text-2">틸팅 검수영상</p>
+                    {reviewVideo ? (
+                      <video
+                        controls
+                        playsInline
+                        preload="metadata"
+                        poster={reviewVideo.posterUrl ? mediaUrl(reviewVideo.posterUrl) : undefined}
+                        src={mediaUrl(reviewVideo.url)}
+                        className="aspect-video w-full border border-border bg-black object-contain"
+                      >
+                        브라우저가 영상 재생을 지원하지 않습니다.
+                      </video>
+                    ) : (
+                      <div className="flex aspect-video items-center justify-center border border-border bg-surface-2 text-xs text-text-3">
+                        등록된 검수영상 없음
+                      </div>
+                    )}
+                    <p className="mt-1.5 text-[11px] leading-5 text-text-3">
+                      개봉 상태와 표면 틸팅을 재생해 판매사진·인증사진과 같은 물품인지 확인하세요.
+                    </p>
+                  </div>
 
                   <div className="mt-4">
                     <p className="mb-2 text-xs font-extrabold text-text-2">공개 판매 사진 {publicImages.length}장</p>

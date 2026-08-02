@@ -22,16 +22,17 @@ type Props = {
 function ResultValue({
   value,
   label,
-  advisory = false,
+  score,
   description,
 }: {
   value: boolean | null;
   label: string;
-  advisory?: boolean;
+  score?: number | null;
   description?: string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const passed = value === true;
+  const percentage = value == null ? null : score == null ? (value ? 100 : 0) : score * 100;
   return (
     <div className="border-b border-border py-2 last:border-0">
       <div className="flex items-center justify-between gap-3">
@@ -48,7 +49,7 @@ function ResultValue({
           <span className="text-xs text-text-2">{label}</span>
         )}
         <span className={`text-xs font-extrabold ${value === null ? "text-text-3" : passed ? "text-ok" : "text-accent"}`}>
-          {value === null ? "미분석" : passed ? "통과" : advisory ? "주의" : "실패"}
+          {percentage === null ? "미분석" : `${percentage.toFixed(percentage % 1 === 0 ? 0 : 1)}%`}
         </span>
       </div>
       {description && expanded && (
@@ -279,19 +280,22 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     <ResultValue
                       label="기본 이미지 품질 (참고)"
                       value={verification.qualityPassed}
-                      advisory
                       description="사진의 해상도, 밝기, 흔들림과 초점 상태를 규칙 기반으로 확인한 참고값입니다. 인증 성공 여부를 직접 결정하지 않으며 관리자가 원본 사진과 함께 판단합니다."
                     />
-                    <ResultValue label="코드 영역 탐지" value={verification.codeRegionDetected} />
+                    <ResultValue
+                      label="코드 영역 탐지"
+                      value={verification.codeRegionDetected}
+                      score={verification.codeRegionScore}
+                    />
                     <ResultValue label="발급 코드 정확히 일치" value={verification.codeExact} />
-                    <ResultValue label="판매 물품 형태 확인" value={verification.cardPresent} />
-                    <ResultValue label="합성 위험도 분석" value={null} advisory />
+                    <ResultValue
+                      label="판매 물품 형태 확인"
+                      value={verification.cardPresent}
+                      score={verification.cardScore}
+                    />
+                    <ResultValue label="합성 위험도 분석" value={null} />
                   </div>
                   <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                    <dt className="text-text-3">코드 영역 점수</dt>
-                    <dd className="text-right font-bold text-text-2">{verification.codeRegionScore?.toFixed(3) ?? "—"}</dd>
-                    <dt className="text-text-3">물품 형태 점수</dt>
-                    <dd className="text-right font-bold text-text-2">{verification.cardScore?.toFixed(3) ?? "—"}</dd>
                     <dt className="text-text-3">분석 모델</dt>
                     <dd className="truncate text-right font-bold text-text-2" title={verification.modelVersion ?? undefined}>
                       {verification.modelVersion ?? "—"}

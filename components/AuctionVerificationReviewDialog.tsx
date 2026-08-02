@@ -19,42 +19,46 @@ type Props = {
   onReviewed: (message: string) => Promise<void>;
 };
 
-function ResultValue({
-  value,
-  label,
-  score,
-  description,
+function formatPercentage(value: number | null) {
+  if (value === null || !Number.isFinite(value)) return "미분석";
+  const percentage = value * 100;
+  return `${percentage.toFixed(percentage % 1 === 0 ? 0 : 1)}%`;
+}
+
+function AnalysisSection({
+  title,
+  passed,
+  metrics,
+  condition,
+  advisory = false,
 }: {
-  value: boolean | null;
-  label: string;
-  score?: number | null;
-  description?: string;
+  title: string;
+  passed: boolean | null;
+  metrics: { label: string; value: string; passed?: boolean | null }[];
+  condition: string;
+  advisory?: boolean;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const passed = value === true;
-  const percentage = value == null ? null : score == null ? (value ? 100 : 0) : score * 100;
   return (
-    <div className="border-b border-border py-2 last:border-0">
+    <div className="border-b border-border py-3 last:border-0">
       <div className="flex items-center justify-between gap-3">
-        {description ? (
-          <button
-            type="button"
-            onClick={() => setExpanded((current) => !current)}
-            aria-expanded={expanded}
-            className={`text-left text-xs text-text-2 underline decoration-dotted underline-offset-4 hover:text-primary ${FOCUS_RING}`}
-          >
-            {label}
-          </button>
-        ) : (
-          <span className="text-xs text-text-2">{label}</span>
-        )}
-        <span className={`text-xs font-extrabold ${value === null ? "text-text-3" : passed ? "text-ok" : "text-accent"}`}>
-          {percentage === null ? "미분석" : `${percentage.toFixed(percentage % 1 === 0 ? 0 : 1)}%`}
+        <h3 className="text-xs font-extrabold text-text-2">{title}</h3>
+        <span className={`text-xs font-extrabold ${passed === null ? "text-text-3" : passed ? "text-ok" : "text-accent"}`}>
+          {passed === null ? "미분석" : passed ? advisory ? "참고 기준 충족" : "통과" : advisory ? "참고 기준 미달" : "미통과"}
         </span>
       </div>
-      {description && expanded && (
-        <p className="mt-2 bg-surface-2 px-3 py-2 text-[11px] leading-5 text-text-3">{description}</p>
-      )}
+      <dl className="mt-2 grid gap-1.5 text-xs">
+        {metrics.map((metric) => (
+          <div key={metric.label} className="flex items-center justify-between gap-3">
+            <dt className="text-text-3">{metric.label}</dt>
+            <dd className={`font-bold ${metric.passed == null ? "text-text-2" : metric.passed ? "text-ok" : "text-accent"}`}>
+              {metric.value}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <p className="mt-2 border-l-2 border-border-2 pl-2 text-[11px] leading-5 text-text-3">
+        <span className="font-extrabold text-text-2">통과 조건 · </span>{condition}
+      </p>
     </div>
   );
 }
@@ -71,6 +75,14 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
   const [error, setError] = useState<string | null>(null);
 
   const selectedReason = AUCTION_REJECTION_REASON_OPTIONS.find((option) => option.code === reasonCode) ?? null;
+  const ocrConfidence = verification?.ocrMeanTokenNll == null
+    ? null
+    : Math.exp(-verification.ocrMeanTokenNll);
+  const finalPassed = verification?.status === "PASSED" || verification?.status === "CONSUMED";
+  const finalAnalyzed = verification != null
+    && verification.status !== "ISSUED"
+    && verification.status !== "QUEUED"
+    && verification.status !== "ANALYZING";
 
   // Esc로 닫기 — 처리 중(submitting)에는 막는다(승인/반려 요청이 날아간 뒤 창만 사라지는 걸 방지).
   useEffect(() => {
@@ -277,23 +289,55 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     <strong className="font-mono text-xl text-text-1">{verification.detectedCode ?? "—"}</strong>
                   </div>
                   <div className="mt-2">
-                    <ResultValue
-                      label="기본 이미지 품질 (참고)"
-                      value={verification.qualityPassed}
-                      description="사진의 해상도, 밝기, 흔들림과 초점 상태를 규칙 기반으로 확인한 참고값입니다. 인증 성공 여부를 직접 결정하지 않으며 관리자가 원본 사진과 함께 판단합니다."
+                    <AnalysisSection
+                      title="OCR 인식 신뢰도"
+                      passed={verification.ocrConfident}
+                      advisory
+                      metrics={[{
+                        label: "e^(-평균 토큰 NLL) × 100",
+                        value: formatPercentage(ocrConfidence),
+                      }]}
+                      condition="평균 토큰 NLL ≤ 1.0 (신뢰도 약 36.8% 이상). 참고 지표이며 최종 통과를 직접 결정하지 않습니다."
                     />
-                    <ResultValue
-                      label="코드 영역 탐지"
-                      value={verification.codeRegionDetected}
-                      score={verification.codeRegionScore}
+                    <AnalysisSection
+                      title="코드 영역 탐지"
+                      passed={verification.codeRegionDetected}
+                      metrics={[
+                        { label: "코드 영역 모델 점수", value: formatPercentage(verification.codeRegionScore) },
+                        {
+                          label: "모서리 유효 여부",
+                          value: verification.codeCornersValid === null ? "미분석" : verification.codeCornersValid ? "유효" : "유효하지 않음",
+                          passed: verification.codeCornersValid,
+                        },
+                      ]}
+                      condition="코드 영역 모델 점수 ≥ 50%이며 네 모서리가 유효한 볼록 사각형이어야 합니다."
                     />
-                    <ResultValue label="발급 코드 정확히 일치" value={verification.codeExact} />
-                    <ResultValue
-                      label="판매 물품 형태 확인"
-                      value={verification.cardPresent}
-                      score={verification.cardScore}
+                    <AnalysisSection
+                      title="판매 물품 형태 확인"
+                      passed={verification.cardPresent}
+                      metrics={[
+                        { label: "카드 모델 점수", value: formatPercentage(verification.cardModelScore) },
+                        { label: "기하학 점수", value: formatPercentage(verification.geometryScore) },
+                      ]}
+                      condition="카드 모델 점수 ≥ 66.7% 또는 기하학 점수 ≥ 90% 중 하나를 충족해야 합니다."
                     />
-                    <ResultValue label="합성 위험도 분석" value={null} />
+                    <div className="mt-4 border border-border px-3 py-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <h3 className="text-xs font-extrabold text-text-1">최종 자동 판정</h3>
+                        <span className={`text-xs font-extrabold ${!finalAnalyzed ? "text-text-3" : finalPassed ? "text-ok" : "text-accent"}`}>
+                          {!finalAnalyzed ? "미분석" : finalPassed ? "통과" : "미통과"}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-[11px] leading-5 text-text-3">
+                        코드 영역 통과 + 유효한 6자리 코드 + 발급 코드 정확히 일치 + 판매 물품 형태 통과를 모두 충족해야 합니다.
+                      </p>
+                      <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-xs">
+                        <span className="text-text-3">발급 코드 일치 여부</span>
+                        <strong className={verification.codeExact === null ? "text-text-3" : verification.codeExact ? "text-ok" : "text-accent"}>
+                          {verification.codeExact === null ? "미분석" : verification.codeExact ? "일치" : "불일치"}
+                        </strong>
+                      </div>
+                    </div>
                   </div>
                   <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                     <dt className="text-text-3">분석 모델</dt>

@@ -406,11 +406,14 @@ export type AdminAuctionVerificationResponse = {
   detectedCode: string | null;
   codeRegionDetected: boolean | null;
   codeRegionScore: number | null;
+  codeCornersValid: boolean | null;
   codeExact: boolean | null;
   ocrConfident: boolean | null;
   ocrMeanTokenNll: number | null;
   cardPresent: boolean | null;
   cardScore: number | null;
+  cardModelScore: number | null;
+  geometryScore: number | null;
   qualityPassed: boolean | null;
   failureReason: VerificationFailureReason | null;
   modelVersion: string | null;

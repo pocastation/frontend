@@ -410,6 +410,8 @@ export type AdminAuctionVerificationResponse = {
   codeExact: boolean | null;
   ocrConfident: boolean | null;
   ocrMeanTokenNll: number | null;
+  ocrConfidenceScore: number | null;
+  ocrTokenConfidences: { token: string; confidence: number }[] | null;
   cardPresent: boolean | null;
   cardScore: number | null;
   cardModelScore: number | null;

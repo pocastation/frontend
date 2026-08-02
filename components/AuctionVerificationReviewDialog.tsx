@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { ReactNode } from "react";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { AUCTION_REJECTION_REASON_OPTIONS } from "@/lib/labels";
@@ -31,19 +32,26 @@ function AnalysisSection({
   metrics,
   condition,
   advisory = false,
+  children,
 }: {
   title: string;
   passed: boolean | null;
   metrics: { label: string; value: string; passed?: boolean | null }[];
   condition: string;
   advisory?: boolean;
+  children?: ReactNode;
 }) {
+  const analyzed = metrics.some((metric) => metric.value !== "미분석");
+  const statusText = advisory
+    ? analyzed ? "참고 지표" : "미분석"
+    : passed === null ? "미분석" : passed ? "통과" : "미통과";
+  const statusColor = advisory || passed === null ? "text-text-3" : passed ? "text-ok" : "text-accent";
   return (
     <div className="border-b border-border py-3 last:border-0">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-xs font-extrabold text-text-2">{title}</h3>
-        <span className={`text-xs font-extrabold ${passed === null ? "text-text-3" : passed ? "text-ok" : "text-accent"}`}>
-          {passed === null ? "미분석" : passed ? advisory ? "참고 기준 충족" : "통과" : advisory ? "참고 기준 미달" : "미통과"}
+        <span className={`text-xs font-extrabold ${statusColor}`}>
+          {statusText}
         </span>
       </div>
       <dl className="mt-2 grid gap-1.5 text-xs">
@@ -56,8 +64,9 @@ function AnalysisSection({
           </div>
         ))}
       </dl>
+      {children}
       <p className="mt-2 border-l-2 border-border-2 pl-2 text-[11px] leading-5 text-text-3">
-        <span className="font-extrabold text-text-2">통과 조건 · </span>{condition}
+        <span className="font-extrabold text-text-2">{advisory ? "산출 방식" : "통과 조건"} · </span>{condition}
       </p>
     </div>
   );
@@ -75,9 +84,6 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
   const [error, setError] = useState<string | null>(null);
 
   const selectedReason = AUCTION_REJECTION_REASON_OPTIONS.find((option) => option.code === reasonCode) ?? null;
-  const ocrConfidence = verification?.ocrMeanTokenNll == null
-    ? null
-    : Math.exp(-verification.ocrMeanTokenNll);
   const finalPassed = verification?.status === "PASSED" || verification?.status === "CONSUMED";
   const finalAnalyzed = verification != null
     && verification.status !== "ISSUED"
@@ -291,14 +297,30 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                   <div className="mt-2">
                     <AnalysisSection
                       title="OCR 인식 신뢰도"
-                      passed={verification.ocrConfident}
+                      passed={null}
                       advisory
                       metrics={[{
-                        label: "e^(-평균 토큰 NLL) × 100",
-                        value: formatPercentage(ocrConfidence),
+                        label: "OCR 전체 신뢰도",
+                        value: formatPercentage(verification.ocrConfidenceScore),
                       }]}
-                      condition="평균 토큰 NLL ≤ 1.0 (신뢰도 약 36.8% 이상). 참고 지표이며 최종 통과를 직접 결정하지 않습니다."
-                    />
+                      condition="TrOCR이 실제로 선택한 인식 단위별 확률의 기하평균입니다. 참고 지표이며 최종 통과를 직접 결정하지 않습니다."
+                    >
+                      <div className="mt-3 border-t border-border pt-2">
+                        <p className="text-[11px] font-extrabold text-text-3">인식 단위별 확률</p>
+                        {verification.ocrTokenConfidences?.length ? (
+                          <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
+                            {verification.ocrTokenConfidences.map((item, index) => (
+                              <div key={`${item.token}-${index}`} className="flex items-center justify-between gap-2 text-xs">
+                                <span className="font-mono font-bold text-text-2">{item.token}</span>
+                                <span className="font-bold text-text-1">{formatPercentage(item.confidence)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="mt-1 text-xs text-text-3">미분석</p>
+                        )}
+                      </div>
+                    </AnalysisSection>
                     <AnalysisSection
                       title="코드 영역 탐지"
                       passed={verification.codeRegionDetected}

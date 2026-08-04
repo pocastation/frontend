@@ -56,11 +56,13 @@ export default function GuideTabs({ tabs, ariaLabel }: { tabs: GuideTab[]; ariaL
 
   return (
     <>
-      {/* 모바일은 가로 스크롤, 데스크톱은 중앙 정렬 */}
+      {/* 밑줄 탭 — 알약 버튼 세 개를 가운데 늘어놓으면 문서가 아니라 랜딩 위젯처럼 보인다.
+          선택 표시는 브랜드 보라가 아니라 잉크색 밑줄이다. 보라는 이 페이지에서
+          진짜 CTA 하나에만 쓴다(색이 흔해지면 강조가 강조를 못 한다). */}
       <div
         role="tablist"
         aria-label={ariaLabel}
-        className="-mx-4 flex gap-1.5 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:justify-center sm:overflow-visible sm:px-0 [&::-webkit-scrollbar]:hidden"
+        className="-mx-5 flex gap-6 overflow-x-auto border-b border-border px-5 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden"
       >
         {tabs.map((tab, i) => (
           <button
@@ -76,10 +78,10 @@ export default function GuideTabs({ tabs, ariaLabel }: { tabs: GuideTab[]; ariaL
             tabIndex={active === i ? 0 : -1}
             onClick={() => select(i)}
             onKeyDown={(e) => handleKeyDown(e, i)}
-            className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-2 text-[13px] font-bold transition-colors ${FOCUS_RING} ${
+            className={`-mb-px shrink-0 whitespace-nowrap border-b-2 pb-3 text-[13.5px] transition-colors ${FOCUS_RING} ${
               active === i
-                ? "border-primary bg-primary text-white"
-                : "border-border bg-surface text-text-2 hover:border-primary hover:text-primary"
+                ? "border-current font-extrabold text-text-1"
+                : "border-transparent font-semibold text-text-3 hover:text-text-1"
             }`}
           >
             {tab.label}
@@ -94,7 +96,6 @@ export default function GuideTabs({ tabs, ariaLabel }: { tabs: GuideTab[]; ariaL
           id={`panel-${tab.id}`}
           aria-labelledby={`tab-${tab.id}`}
           hidden={active !== i}
-          className="mt-6"
         >
           {tab.panel}
         </div>

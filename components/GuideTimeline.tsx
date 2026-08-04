@@ -1,9 +1,13 @@
 import type { ReactNode } from "react";
 
-// 가이드의 단계 타임라인 — 좌측 번호 레일 + 우측 카드.
+// 가이드의 단계 목록.
 //
-// 원본 시안은 단계 배지를 파스텔 필(accent-soft 배경 + accent 텍스트)로 썼는데, 레포 디자인 규칙이
-// 파스텔 필 배지를 금지한다(CLAUDE.md). 헤어라인 테두리 + 뉴트럴 텍스트로 바꿨다.
+// 처음에는 좌측에 번호 레일을 세운 타임라인이었는데, 그러면 **단계 카드만 레일 폭(36px + gap)만큼
+// 안쪽으로 밀려** 같은 화면의 다른 박스(안전 거래 팁 등)와 좌변이 어긋난다. 실측 56px 차이였다.
+// 번호를 카드 안으로 넣어 모든 박스가 같은 좌변·같은 폭을 쓰게 했다.
+//
+// 배지는 아이콘이 맡고 번호는 제목 앞에 작게 붙인다 — 번호 배지와 아이콘 배지를 나란히 두면
+// 시각 요소가 겹쳐 답답해진다.
 
 export type GuideStep = {
   title: string;
@@ -15,44 +19,37 @@ export type GuideStep = {
 
 export default function GuideTimeline({ steps }: { steps: GuideStep[] }) {
   return (
-    <ol className="mt-6 flex flex-col">
+    <ol className="mt-6 flex flex-col gap-3">
       {steps.map((step, i) => (
-        <li key={step.title} className="flex gap-3.5 sm:gap-5">
-          <div className="flex flex-col items-center">
+        <li
+          key={step.title}
+          className="rounded-r3 border border-border bg-surface p-5 shadow-card"
+        >
+          <div className="flex items-start gap-3">
             <span
               aria-hidden="true"
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft font-display text-sm font-extrabold text-primary"
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-r2 bg-surface-2 text-primary"
             >
-              {i + 1}
+              {step.icon}
             </span>
-            {i < steps.length - 1 && <span aria-hidden="true" className="w-px flex-1 bg-border-2" />}
-          </div>
 
-          <div
-            className={`min-w-0 flex-1 rounded-r3 border border-border bg-surface p-4 shadow-card sm:p-5 ${
-              i < steps.length - 1 ? "mb-3.5" : ""
-            }`}
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-center gap-2.5">
-                <span
-                  aria-hidden="true"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-r2 bg-surface-2 text-primary"
-                >
-                  {step.icon}
-                </span>
-                <h3 className="font-display text-[15px] font-extrabold text-text-1">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="font-display text-[15px] font-extrabold leading-9 text-text-1">
+                  <span aria-hidden="true" className="mr-1.5 font-bold text-text-3">
+                    {i + 1}.
+                  </span>
                   <span className="sr-only">{i + 1}단계. </span>
                   {step.title}
                 </h3>
+                {step.note && (
+                  <span className="mt-1.5 shrink-0 rounded-r1 border border-border-2 px-2 py-1 text-[10.5px] font-bold text-text-3">
+                    {step.note}
+                  </span>
+                )}
               </div>
-              {step.note && (
-                <span className="shrink-0 rounded-r1 border border-border-2 px-2 py-1 text-[10.5px] font-bold text-text-3">
-                  {step.note}
-                </span>
-              )}
+              <div className="mt-1 text-[13px] leading-relaxed text-text-2">{step.body}</div>
             </div>
-            <div className="mt-2.5 text-[13px] leading-relaxed text-text-2">{step.body}</div>
           </div>
         </li>
       ))}

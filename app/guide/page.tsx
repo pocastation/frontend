@@ -263,7 +263,9 @@ export default function GuidePage() {
             </div>
           </div>
 
-          <div className="grid gap-4 p-5 sm:grid-cols-3">
+          {/* 세 칼럼이 그냥 나란히 있으면 문단 길이가 제각각이라 흐트러져 보인다.
+              칼럼 사이에 헤어라인을 넣어 경계를 세운다(디자인 규칙: 뉴트럴 + 헤어라인). */}
+          <div className="grid gap-5 p-5 sm:grid-cols-3 sm:gap-0 sm:[&>*+*]:border-l sm:[&>*+*]:border-border sm:[&>*+*]:pl-5 sm:[&>*:not(:last-child)]:pr-5">
             <div>
               <h3 className="flex items-center gap-1.5 text-[13px] font-extrabold text-text-1">
                 <span aria-hidden="true" className="text-primary">

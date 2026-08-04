@@ -32,9 +32,12 @@ function Field({
   optional?: boolean;
   children: React.ReactNode;
 }) {
+  // 좁은 화면에서 라벨을 고정폭 열로 두면(기존 92px) 설명이 남은 150px 남짓에 갇혀
+  // 한 항목이 10줄까지 쪼개졌다. 모바일은 라벨을 위로 올려 설명이 폭을 다 쓰게 하고,
+  // 2열 정렬은 폭이 확보되는 sm 이상에서만 한다.
   return (
-    <li className="flex items-baseline gap-2.5 px-3.5 py-2.5 text-[12.5px] leading-relaxed [&+li]:border-t [&+li]:border-border">
-      <span className="w-[92px] shrink-0 font-extrabold text-text-1 sm:w-[110px]">
+    <li className="flex flex-col gap-1 px-3.5 py-3 text-[12.5px] leading-relaxed [&+li]:border-t [&+li]:border-border sm:flex-row sm:items-baseline sm:gap-3 sm:py-2.5">
+      <span className="font-extrabold whitespace-nowrap text-text-1 sm:w-[104px] sm:shrink-0">
         {name}
         {required && (
           <span aria-hidden="true" className="ml-1 font-extrabold text-accent">
@@ -45,7 +48,7 @@ function Field({
           <span className="ml-1 align-[1px] text-[10px] font-extrabold text-text-3">선택</span>
         )}
       </span>
-      <span className="text-text-2">{children}</span>
+      <span className="min-w-0 flex-1 text-text-2">{children}</span>
     </li>
   );
 }
@@ -68,44 +71,43 @@ function Callout({ tone, children }: { tone: "tip" | "warn"; children: React.Rea
   );
 }
 
+// 번호는 카드 바깥 레일이 아니라 카드 헤더 안에 둔다.
+// 레일을 세우면 단계 카드만 레일 폭(36px + gap 20px)만큼 안쪽으로 밀려,
+// 바로 아래 '등록하고 나면' 섹션과 좌변이 56px 어긋난다(실측).
 function Step({
   id,
   index,
   title,
   sub,
   children,
-  last,
 }: {
   id: string;
   index: number;
   title: string;
   sub: string;
   children: React.ReactNode;
-  last?: boolean;
 }) {
   return (
-    <li id={id} className="flex scroll-mt-20 gap-3.5 sm:gap-5">
-      <div className="flex flex-col items-center">
+    <li
+      id={id}
+      className="scroll-mt-20 rounded-r3 border border-border bg-surface p-[18px] shadow-card sm:p-[22px]"
+    >
+      <div className="flex items-center gap-3">
         <span
           aria-hidden="true"
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-soft font-display text-sm font-extrabold text-primary"
         >
           {index}
         </span>
-        {!last && <span aria-hidden="true" className="w-px flex-1 bg-border-2" />}
+        <div className="min-w-0">
+          <h2 className="font-display text-base font-extrabold text-text-1">
+            <span className="sr-only">{index}단계. </span>
+            {title}
+          </h2>
+          <p className="mt-0.5 text-[12.5px] leading-relaxed text-text-3">{sub}</p>
+        </div>
       </div>
-      <div
-        className={`min-w-0 flex-1 rounded-r3 border border-border bg-surface p-[18px] shadow-card sm:p-[22px] ${
-          last ? "" : "mb-4"
-        }`}
-      >
-        <h2 className="font-display text-base font-extrabold text-text-1">
-          <span className="sr-only">{index}단계. </span>
-          {title}
-        </h2>
-        <p className="mt-1 text-[12.5px] text-text-3">{sub}</p>
-        {children}
-      </div>
+      {children}
     </li>
   );
 }
@@ -141,7 +143,7 @@ export default function SellGuidePage() {
       </GuideHero>
 
       <div className="mx-auto max-w-[880px] px-4 py-10 pb-16">
-        <p className="flex items-start gap-2.5 rounded-r3 bg-primary-soft px-4 py-3.5 text-[13px] leading-relaxed text-text-1">
+        <p className="flex items-start gap-2.5 rounded-r3 bg-primary-soft px-[18px] py-3.5 text-[13px] leading-relaxed text-text-1 sm:px-[22px]">
           <span aria-hidden="true" className="mt-px shrink-0 text-primary">
             <InfoIcon />
           </span>
@@ -156,7 +158,7 @@ export default function SellGuidePage() {
           </span>
         </p>
 
-        <ol className="mt-8 flex flex-col">
+        <ol className="mt-8 flex flex-col gap-4">
           {/* 1 — 판매 방식 */}
           <Step
             id="step-1"
@@ -305,7 +307,6 @@ export default function SellGuidePage() {
             index={7}
             title="사진 인증"
             sub="사진만 퍼온 매물을 걸러내기 위한 단계예요."
-            last
           >
             <p className="mt-3 text-[13px] leading-relaxed text-text-2">
               화면에 <b className="font-bold text-text-1">인증 코드</b>가 나오면, 종이에 그 코드를
@@ -328,7 +329,7 @@ export default function SellGuidePage() {
           className="mt-9 overflow-hidden rounded-r4 border border-border bg-surface shadow-card"
           aria-labelledby="after-heading"
         >
-          <div className="flex items-center gap-3 border-b border-border bg-primary-soft px-5 py-4">
+          <div className="flex items-center gap-3 border-b border-border bg-primary-soft px-[18px] py-4 sm:px-[22px]">
             <span
               aria-hidden="true"
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-r2 bg-primary text-white"
@@ -354,7 +355,7 @@ export default function SellGuidePage() {
               </p>
             </div>
           </div>
-          <div className="flex flex-col gap-3 px-5 py-4.5">
+          <div className="flex flex-col gap-3 px-[18px] py-[18px] sm:px-[22px]">
             {[
               <>
                 <b className="font-extrabold text-text-1">매물이 노출돼요.</b> 등록을 마치면 경매

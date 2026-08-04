@@ -349,7 +349,7 @@ export default function NewAuctionPage() {
           <p className="mt-1 text-xs text-text-3">정확한 정보와 실물 사진일수록 거래 신뢰도가 올라가요.</p>
         </div>
         <Link
-          href="/guide"
+          href="/guide/sell"
           className={`flex shrink-0 items-center gap-1 rounded-full border border-border-2 px-3 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
         >
           판매 가이드

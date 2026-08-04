@@ -57,12 +57,13 @@ export default function GuideTabs({ tabs, ariaLabel }: { tabs: GuideTab[]; ariaL
   return (
     <>
       {/* 밑줄 탭 — 알약 버튼 세 개를 가운데 늘어놓으면 문서가 아니라 랜딩 위젯처럼 보인다.
-          선택 표시는 브랜드 보라가 아니라 잉크색 밑줄이다. 보라는 이 페이지에서
-          진짜 CTA 하나에만 쓴다(색이 흔해지면 강조가 강조를 못 한다). */}
+          활성 표시는 브랜드 보라다. 보라를 배경·아이콘·제목에서 걷어낸 대신,
+          '지금 어느 흐름을 보고 있는가'처럼 상태를 말하는 자리에는 확실하게 쓴다.
+          밑줄만으로는 약해서 글자색·굵기·크기까지 함께 올린다. */}
       <div
         role="tablist"
         aria-label={ariaLabel}
-        className="-mx-5 flex gap-6 overflow-x-auto border-b border-border px-5 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden"
+        className="-mx-5 flex gap-7 overflow-x-auto border-b border-border-2 px-5 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden"
       >
         {tabs.map((tab, i) => (
           <button
@@ -78,10 +79,10 @@ export default function GuideTabs({ tabs, ariaLabel }: { tabs: GuideTab[]; ariaL
             tabIndex={active === i ? 0 : -1}
             onClick={() => select(i)}
             onKeyDown={(e) => handleKeyDown(e, i)}
-            className={`-mb-px shrink-0 whitespace-nowrap border-b-2 pb-3 text-[13.5px] transition-colors ${FOCUS_RING} ${
+            className={`-mb-px shrink-0 whitespace-nowrap border-b-2 pb-3.5 transition-colors ${FOCUS_RING} ${
               active === i
-                ? "border-current font-extrabold text-text-1"
-                : "border-transparent font-semibold text-text-3 hover:text-text-1"
+                ? "border-current text-[15px] font-extrabold tracking-[-0.02em] text-primary"
+                : "border-transparent text-[14px] font-bold text-text-3 hover:text-text-1"
             }`}
           >
             {tab.label}

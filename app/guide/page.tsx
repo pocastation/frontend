@@ -1,5 +1,4 @@
 import Link from "next/link";
-import GuidePageHeader from "@/components/GuidePageHeader";
 import GuideSteps, { type GuideStep } from "@/components/GuideSteps";
 import GuideTabs from "@/components/GuideTabs";
 import { FOCUS_RING } from "@/lib/ui";
@@ -16,28 +15,28 @@ const GENERAL_STEPS: GuideStep[] = [
     title: "회원가입 · 본인인증",
     body: (
       <>
-        이메일 · 카카오 · 네이버 · 구글 중 편한 방법으로 가입해요. 가입할 때 이메일 인증과 본인인증을
-        마치면 입찰 · 구매 · 판매를 시작할 수 있어요.
+        이메일이나 소셜 계정(카카오 · 네이버 · 구글)으로 가입하고 이메일 인증과 본인인증을 마치면
+        입찰 · 구매 · 판매를 시작할 수 있어요.
       </>
     ),
   },
   {
-    title: "마이페이지 세팅",
+    title: "배송지 · 결제수단 등록",
     note: "입찰 전 필수",
     body: (
       <>
-        배송지와 결제수단(카드)을 미리 등록해 두세요. 경매는{" "}
+        마이페이지에서 배송지와 카드를 미리 등록해 두세요. 경매는{" "}
         <b className="font-bold text-text-1">낙찰 즉시 자동으로 결제</b>되기 때문에, 카드가 등록돼
         있어야 입찰할 수 있어요.
       </>
     ),
   },
   {
-    title: "알림 확인",
+    title: "알림 설정",
     body: (
       <>
-        입찰 추월, 낙찰, 결제, 발송 같은 소식은 알림함으로 와요. 마이페이지의 알림 설정에서 종류별로
-        끄고 켤 수 있고, 관심 있는 경매만 따로 지정할 수도 있어요.
+        입찰 추월, 낙찰, 결제, 발송 같은 소식은 알림함으로 와요. 종류별로 끄고 켤 수 있고, 관심 있는
+        경매만 따로 지정할 수도 있어요.
       </>
     ),
   },
@@ -70,7 +69,7 @@ const SELLER_STEPS: GuideStep[] = [
     ),
   },
   {
-    title: "안전 배송",
+    title: "포장하고 발송하기",
     note: "3영업일 이내",
     body: (
       <>
@@ -95,11 +94,11 @@ const SELLER_STEPS: GuideStep[] = [
 // 구매자 — 검색부터 구매 확정까지.
 const BUYER_STEPS: GuideStep[] = [
   {
-    title: "포카 검색 · 탐색",
+    title: "포카 검색하기",
     body: (
       <>
         스타 · 멤버 · 앨범으로 검색하고, 마감임박 · 인기순으로 정렬해 원하는 포카를 찾아요. 상세
-        페이지의 사진과 상태 정보를 꼼꼼히 확인하는 게 좋아요.
+        페이지의 사진과 상태 등급을 꼼꼼히 확인하는 게 좋아요.
       </>
     ),
   },
@@ -149,12 +148,12 @@ function Panel({
 }) {
   return (
     <>
-      <p className="mt-7 text-[13px] text-text-3">{intro}</p>
+      <p className="mt-6 text-[13px] text-text-3">{intro}</p>
       <GuideSteps steps={steps} />
       <div className="mt-8">
         <Link
           href={ctaHref}
-          className={`inline-flex h-12 items-center rounded-[3px] bg-primary px-8 text-[14px] font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+          className={`inline-flex h-12 items-center rounded-[4px] bg-primary px-8 text-[14px] font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
         >
           {ctaLabel}
         </Link>
@@ -163,48 +162,40 @@ function Panel({
   );
 }
 
-// 안전 거래 팁 — 본문과 성격이 다른 '읽고 넘어가는' 블록이라 배경 띠로 분리한다.
-// 테두리 카드를 하나 더 얹는 대신 지면 자체를 바꿔서 구분한다.
+// 안전 거래 팁 — 3칼럼 카드는 어느 서비스에나 붙는 템플릿으로 읽힌다.
+// 번호 · 제목 · 짧은 설명 · 구분선의 목록으로 바꾼다.
 const SAFETY = [
   {
-    title: "상태를 먼저 본다",
-    lines: [
-      "스크래치 · 눌림 · 휨 · 모서리 까짐이 대표적인 하자예요.",
-      "판매자는 하자 부위를 밝은 곳에서 근접 촬영해 등록해요.",
-      "표기되지 않은 하자는 반품 · 분쟁 사유가 될 수 있어요.",
-    ],
+    t: "상태를 먼저 본다",
+    d: "스크래치 · 눌림 · 휨 · 모서리 까짐이 대표적인 하자예요. 판매자는 하자 부위를 근접 촬영해 등록하고, 표기되지 않은 하자는 반품 · 분쟁 사유가 될 수 있어요.",
   },
   {
-    title: "결제는 플랫폼 안에서",
-    lines: [
-      "대금은 구매 확정 전까지 안전하게 보관돼요.",
-      "구매 확정을 눌러야 판매자에게 정산되니, 물품을 확인하기 전에는 누르지 마세요.",
-    ],
+    t: "결제는 플랫폼 안에서만",
+    d: "대금은 구매 확정 전까지 안전하게 보관돼요. 구매 확정을 눌러야 판매자에게 정산되니, 물품을 확인하기 전에는 누르지 마세요.",
   },
   {
-    title: "외부 거래는 보호받지 못한다",
-    lines: [
-      "계좌 직거래나 다른 메신저 결제 유도는 사기 위험이 높아요.",
-      "플랫폼 보호 대상이 아니니, 유도하는 상대는 즉시 신고해 주세요.",
-    ],
+    t: "외부 거래는 보호받지 못한다",
+    d: "계좌 직거래나 다른 메신저 결제 유도는 사기 위험이 높아요. 플랫폼 보호 대상이 아니니, 유도하는 상대는 즉시 신고해 주세요.",
   },
 ];
 
 export default function GuidePage() {
   return (
     <>
-      <div className="mx-auto max-w-[820px] px-5 pt-10 pb-14 sm:pt-14">
-        <GuidePageHeader
-          kicker="가이드"
-          title={
-            <>
-              포카스테이션,
-              <br className="hidden sm:block" /> 이렇게 거래해요
-            </>
-          }
-          lead="처음이어도 괜찮아요. 준비 · 판매 · 구매 세 가지 흐름으로 나눠 정리했어요."
-          meta="읽는 데 약 3분"
-        />
+      {/* ── 첫 화면 ── 문서 제목이 아니라 브랜드 문장으로 연다.
+          다만 화면을 다 잡아먹는 히어로는 만들지 않는다 — 바로 아래 탭이 같이 보여야 한다. */}
+      <div className="mx-auto max-w-[820px] px-5 pt-11 pb-14 sm:pt-14">
+        <header>
+          <span aria-hidden="true" className="block h-[3px] w-7 bg-primary" />
+          <h1 className="mt-5 font-display text-[30px] font-extrabold leading-[1.16] tracking-[-0.045em] text-text-1 sm:text-[38px]">
+            포카스테이션,
+            <br />
+            이렇게 거래해요
+          </h1>
+          <p className="mt-4 max-w-[30rem] text-[14px] leading-[1.75] text-text-2">
+            처음이어도 괜찮아요. 준비 · 판매 · 구매까지 거래 흐름을 정리했어요.
+          </p>
+        </header>
 
         <div className="mt-9">
           <GuideTabs
@@ -251,12 +242,12 @@ export default function GuidePage() {
         </div>
       </div>
 
-      {/* ── 안전 거래 팁 ── */}
+      {/* ── 안전 거래 팁 ── 본문과 성격이 다른 '읽고 넘어가는' 블록이라 지면을 바꾼다. */}
       <section className="border-t border-border bg-surface-2" aria-labelledby="safe-tips">
         <div className="mx-auto max-w-[820px] px-5 py-12 sm:py-14">
           <h2
             id="safe-tips"
-            className="font-display text-[18px] font-extrabold tracking-[-0.02em] text-text-1"
+            className="font-display text-[19px] font-extrabold tracking-[-0.03em] text-text-1"
           >
             안전 거래 팁
           </h2>
@@ -264,20 +255,25 @@ export default function GuidePage() {
             거래 전 1분만 읽어도 분쟁을 크게 줄일 수 있어요.
           </p>
 
-          <div className="mt-7 grid gap-8 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-border-2 sm:[&>*+*]:pl-6 sm:[&>*:not(:last-child)]:pr-6">
-            {SAFETY.map((col) => (
-              <div key={col.title}>
-                <h3 className="text-[13px] font-extrabold tracking-[-0.01em] text-text-1">
-                  {col.title}
-                </h3>
-                <ul className="mt-2.5 flex flex-col gap-2 text-[12.5px] leading-[1.7] text-text-2">
-                  {col.lines.map((line) => (
-                    <li key={line}>{line}</li>
-                  ))}
-                </ul>
-              </div>
+          <ol className="mt-6">
+            {SAFETY.map(({ t, d }, i) => (
+              <li
+                key={t}
+                className="flex gap-4 border-t border-border-2/60 py-4 last:border-b last:border-border-2/60"
+              >
+                <span
+                  aria-hidden="true"
+                  className="mt-[3px] font-display text-[11px] font-extrabold tabular-nums text-text-3"
+                >
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[13.5px] font-extrabold tracking-[-0.02em] text-text-1">{t}</p>
+                  <p className="mt-1 max-w-[42rem] text-[12.5px] leading-[1.75] text-text-2">{d}</p>
+                </div>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 

@@ -51,6 +51,9 @@ export default function SignupPage() {
   // 서버로 보내지 않는다 — 오타를 본인이 잡게 하는 화면 장치일 뿐이다.
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [nickname, setNickname] = useState("");
+  // 추천 닉네임이 도착하기 전 한순간 빈칸이 보인다. 그 사이 플레이스홀더가 "닉네임"이면
+  // 사용자가 직접 채워야 하는 칸으로 읽힌다 — 불러오는 중임을 그대로 적는다.
+  const [nicknameLoading, setNicknameLoading] = useState(true);
   const [consents, setConsents] = useState<ConsentValues>(EMPTY_CONSENTS);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -61,7 +64,8 @@ export default function SignupPage() {
     let active = true;
     void fetchNicknameSuggestion()
       .then((n) => active && setNickname((prev) => prev || n))
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => active && setNicknameLoading(false));
     return () => {
       active = false;
     };
@@ -167,15 +171,21 @@ export default function SignupPage() {
             className={`mt-2 ${FIELD} ${FOCUS_RING}`}
           />
           {/* 규칙을 문장으로만 적으면 어디가 모자란지 알 수 없다. 조건별로 충족 여부를 보여준다.
-              도트 인디케이터 — 채워지면 잉크색, 아니면 헤어라인. */}
-          <ul id={`${passwordId}-rule`} className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+              처음엔 12px 도트 4개를 한 줄에 붙였는데 잘 안 보였다 — 2열 격자로 벌리고,
+              충족한 항목은 체크 표시로 바꿔 "무엇이 남았는지"가 형태로 읽히게 했다. */}
+          <ul id={`${passwordId}-rule`} className="mt-2.5 grid grid-cols-2 gap-x-3 gap-y-2">
             {checks.map((c) => (
-              <li key={c.label} className="flex items-center gap-1.5 text-[12px]">
+              <li key={c.label} className="flex items-center gap-2 text-[12.5px]">
                 <span
                   aria-hidden="true"
-                  className={`h-1.5 w-1.5 rounded-full ${c.ok ? "bg-text-1" : "border border-border-2"}`}
-                />
+                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
+                    c.ok ? "bg-text-1 text-white" : "border border-border-2 text-transparent"
+                  }`}
+                >
+                  ✓
+                </span>
                 <span className={c.ok ? "font-bold text-text-1" : "text-text-3"}>{c.label}</span>
+                <span className="sr-only">{c.ok ? " 충족" : " 미충족"}</span>
               </li>
             ))}
           </ul>
@@ -213,11 +223,14 @@ export default function SignupPage() {
             required
             maxLength={50}
             autoComplete="nickname"
-            placeholder="닉네임"
+            placeholder={nicknameLoading ? "추천 닉네임을 불러오는 중..." : "닉네임"}
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
             className={`mt-2 ${FIELD} ${FOCUS_RING}`}
           />
+          <p className="mt-1.5 text-[12px] leading-[1.65] text-text-3">
+            서비스가 하나 지어뒀어요. 마음에 들지 않으면 고치거나 다시 추천받으세요.
+          </p>
           <div className="mt-2">
             <NicknameSuggestButton onSuggest={setNickname} />
           </div>

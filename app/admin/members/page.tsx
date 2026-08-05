@@ -24,11 +24,13 @@ const STATUS_FILTERS: { key: MemberStatus | "ALL"; label: string }[] = [
   { key: "WITHDRAWN", label: "탈퇴" },
 ];
 
-function buildParams(q: string, status: MemberStatus | "ALL", page: number) {
-  const params = new URLSearchParams({ size: String(PAGE_SIZE), page: String(page) });
+function buildParams(q: string, status: MemberStatus | "ALL", unverifiedOnly: boolean, page: number) {
+  const params = new URLSearchParams({ page: String(page), size: String(PAGE_SIZE) });
   if (q.trim()) params.set("q", q.trim());
-  if (status !== "ALL") params.set("status", status);
-  return params;
+  // 미인증 필터를 켜면 서버가 status를 무시한다(BE #256) — 화면에서도 함께 보내지 않는다.
+  if (unverifiedOnly) params.set("emailVerified", "false");
+  else if (status !== "ALL") params.set("status", status);
+  return params.toString();
 }
 
 function formatDate(iso: string) {
@@ -40,6 +42,8 @@ export default function AdminMembersPage() {
 
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<MemberStatus | "ALL">("ALL");
+  // 전환 이전 잔여 미인증 회원을 찾는 필터(BE #256). 이 결과가 0이 되면 레거시 정리가 끝난 것이다.
+  const [unverifiedOnly, setUnverifiedOnly] = useState(false);
   const [members, setMembers] = useState<AdminMemberSummary[]>([]);
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
@@ -60,13 +64,21 @@ export default function AdminMembersPage() {
   const [roleError, setRoleError] = useState<string | null>(null);
   const [roleToast, setRoleToast] = useState<string | null>(null);
 
+  // 파기(BE #250) — 되돌릴 수 없어 정지·탈퇴와 분리된 상태로 관리한다.
+  const [purging, setPurging] = useState(false);
+  const [purgeReason, setPurgeReason] = useState("");
+  const [purgeSubmitting, setPurgeSubmitting] = useState(false);
+  const [purgeError, setPurgeError] = useState<string | null>(null);
+
   const isFirstRun = useRef(true);
 
   const fetchList = useCallback(
-    async (q: string, status: MemberStatus | "ALL") => {
+    async (q: string, status: MemberStatus | "ALL", unverified: boolean) => {
       setLoading(true);
       try {
-        const res = await fetchWithAuth<AdminMemberListResponse>(`/api/admin/members?${buildParams(q, status, 0)}`);
+        const res = await fetchWithAuth<AdminMemberListResponse>(
+          `/api/admin/members?${buildParams(q, status, unverified, 0)}`,
+        );
         setMembers(res.content);
         setPage(0);
         setTotalElements(res.totalElements);
@@ -83,19 +95,19 @@ export default function AdminMembersPage() {
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
-      void fetchList("", "ALL");
+      void fetchList("", "ALL", false);
       return;
     }
-    const timer = setTimeout(() => void fetchList(query, statusFilter), DEBOUNCE_MS);
+    const timer = setTimeout(() => void fetchList(query, statusFilter, unverifiedOnly), DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [query, statusFilter, fetchList]);
+  }, [query, statusFilter, unverifiedOnly, fetchList]);
 
   async function loadMore() {
     const nextPage = page + 1;
     setLoadingMore(true);
     try {
       const res = await fetchWithAuth<AdminMemberListResponse>(
-        `/api/admin/members?${buildParams(query, statusFilter, nextPage)}`,
+        `/api/admin/members?${buildParams(query, statusFilter, unverifiedOnly, nextPage)}`,
       );
       setMembers((prev) => [...prev, ...res.content]);
       setPage(nextPage);
@@ -148,7 +160,7 @@ export default function AdminMembersPage() {
       };
       setNotice({ kind: "success", text: `${detail.nickname} 회원을 ${labels[action]}했습니다.` });
       setReason("");
-      await Promise.all([openDetail(detail.id), fetchList(query, statusFilter)]);
+      await Promise.all([openDetail(detail.id), fetchList(query, statusFilter, unverifiedOnly)]);
     } catch (err) {
       setNotice({ kind: "error", text: err instanceof ApiError ? err.message : "상태 변경에 실패했습니다." });
     } finally {
@@ -174,11 +186,37 @@ export default function AdminMembersPage() {
       setTimeout(() => setRoleToast(null), 4000);
       setRoleTarget(null);
       setRoleReason("");
-      await Promise.all([openDetail(detail.id), fetchList(query, statusFilter)]);
+      await Promise.all([openDetail(detail.id), fetchList(query, statusFilter, unverifiedOnly)]);
     } catch (err) {
       setRoleError(err instanceof ApiError ? err.message : "역할 변경에 실패했습니다.");
     } finally {
       setRoleSubmitting(false);
+    }
+  }
+
+  // 파기(BE #250) — 자발 탈퇴와 같은 경로다. 배송지·OAuth·결제수단·본인인증·인증토큰을 지우고
+  // 프로필을 가명화하며, 그 주소의 발송 금지도 함께 푼다. 되돌릴 수 없다.
+  async function purge() {
+    if (!detail || purgeSubmitting) return;
+    if (!purgeReason.trim()) {
+      setPurgeError("파기 사유를 입력해야 합니다.");
+      return;
+    }
+    setPurgeSubmitting(true);
+    setPurgeError(null);
+    try {
+      await fetchWithAuth<void>(`/api/admin/members/${detail.id}/purge`, {
+        method: "POST",
+        body: { reason: purgeReason.trim() },
+      });
+      setPurging(false);
+      setPurgeReason("");
+      setNotice({ kind: "success", text: "개인정보를 파기했습니다." });
+      await Promise.all([openDetail(detail.id), fetchList(query, statusFilter, unverifiedOnly)]);
+    } catch (err) {
+      setPurgeError(err instanceof ApiError ? err.message : "파기에 실패했습니다.");
+    } finally {
+      setPurgeSubmitting(false);
     }
   }
 
@@ -214,17 +252,36 @@ export default function AdminMembersPage() {
                   type="button"
                   aria-pressed={statusFilter === f.key}
                   onClick={() => setStatusFilter(f.key)}
-                  className={`h-10 rounded-full border px-3 text-xs font-bold transition-colors ${FOCUS_RING} ${
-                    statusFilter === f.key ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+                  disabled={unverifiedOnly}
+                  className={`h-10 rounded-full border px-3 text-xs font-bold transition-colors disabled:opacity-40 ${FOCUS_RING} ${
+                    statusFilter === f.key && !unverifiedOnly ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
                   }`}
                 >
                   {f.label}
                 </button>
               ))}
             </div>
+            {/* 미인증은 상태와 다른 축이라 따로 둔다. 서버가 이 필터를 켜면 status를 무시하므로(BE #256)
+                화면에서도 상태 버튼을 잠가 "걸었는데 안 먹는" 상태를 만들지 않는다. */}
+            <button
+              type="button"
+              aria-pressed={unverifiedOnly}
+              onClick={() => setUnverifiedOnly((v) => !v)}
+              className={`h-10 rounded-full border px-3 text-xs font-bold transition-colors ${FOCUS_RING} ${
+                unverifiedOnly ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+              }`}
+            >
+              미인증만
+            </button>
           </div>
 
           <p className="mb-2 text-xs text-text-3">총 {totalElements}명{loading && " · 불러오는 중..."}</p>
+          {unverifiedOnly && (
+            <p className="mb-3 border-l-[3px] border-border-2 pl-3 text-[12px] leading-relaxed text-text-3">
+              인증 후 가입으로 바꾼 뒤로는 미인증 회원이 새로 생기지 않아요. 여기 남은 건 전환 이전
+              가입자이고, <b className="font-bold text-text-2">이 수가 0이 되면 정리가 끝난 거예요.</b>
+            </p>
+          )}
 
           <div className="overflow-x-auto rounded-r3 border border-border bg-surface shadow-card">
             <table className="w-full min-w-[560px] border-collapse">
@@ -260,7 +317,13 @@ export default function AdminMembersPage() {
                       </td>
                       <td className="px-4 py-3 text-text-2">
                         <span className="block truncate">{m.email ?? "—"}</span>
-                        <span className="text-[11px] text-text-3">{PROVIDER_LABEL[m.provider] ?? m.provider}</span>
+                        <span className="text-[11px] text-text-3">
+                          {PROVIDER_LABEL[m.provider] ?? m.provider}
+                          {/* 소셜은 인증 개념이 없어 항상 null이다 — 이메일 가입자만 미인증으로 읽는다. */}
+                          {m.provider === "EMAIL" && m.emailVerifiedAt === null && m.email !== null && (
+                            <span className="ml-1.5 font-bold text-accent">미인증</span>
+                          )}
+                        </span>
                       </td>
                       <td className="whitespace-nowrap px-4 py-3">
                         <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${MEMBER_STATUS_BADGE_CLASS[m.status]}`}>
@@ -330,6 +393,14 @@ export default function AdminMembersPage() {
                   <dt className="text-text-3">가입일</dt>
                   <dd className="font-semibold text-text-1">{formatDate(detail.createdAt)}</dd>
                 </div>
+                {detail.provider === "EMAIL" && detail.email !== null && (
+                  <div className="flex justify-between gap-2">
+                    <dt className="text-text-3">이메일 인증</dt>
+                    <dd className={`font-semibold ${detail.emailVerifiedAt ? "text-text-1" : "text-accent"}`}>
+                      {detail.emailVerifiedAt ? formatDate(detail.emailVerifiedAt) : "미인증"}
+                    </dd>
+                  </div>
+                )}
               </dl>
 
               <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3">
@@ -454,10 +525,87 @@ export default function AdminMembersPage() {
                   </p>
                 )}
               </div>
+
+              {/* 개인정보 파기 — 정지·탈퇴와 다른 조치다. 그쪽은 되돌릴 수 있고 이건 아니다.
+                  처리방침 제6조 "삭제 요구"를 이행하는 경로이기도 하다. */}
+              <div className="mt-4 border-t border-border pt-4">
+                <p className="mb-2 text-[11px] font-extrabold text-text-3">개인정보</p>
+                {detail.email === null ? (
+                  <p className="rounded-r2 bg-surface-2 px-3 py-2 text-center text-[11.5px] leading-relaxed text-text-3">
+                    이미 파기된 계정이에요
+                  </p>
+                ) : (
+                  <>
+                    <p className="mb-2 text-[11.5px] leading-relaxed text-text-3">
+                      이메일·비밀번호·배송지·결제수단을 지우고 프로필을 가명화해요.{" "}
+                      <b className="font-bold text-text-2">되돌릴 수 없어요.</b>
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPurging(true);
+                        setPurgeReason("");
+                        setPurgeError(null);
+                      }}
+                      className={`h-10 w-full rounded-r2 border border-accent bg-white text-sm font-bold text-accent transition-colors hover:bg-accent hover:text-white ${FOCUS_RING}`}
+                    >
+                      개인정보 파기
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           )}
         </aside>
       </div>
+
+      {purging && detail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-sm rounded-r3 bg-surface p-5 shadow-modal">
+            <h2 className="font-display text-base font-extrabold text-text-1">개인정보 파기</h2>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
+              &quot;{detail.nickname}&quot;님의 이메일·비밀번호·배송지·결제수단·본인인증 결과를 지우고
+              프로필을 가명화합니다. 그 주소의 발송 금지도 함께 풀립니다.
+            </p>
+            <p className="mt-2 border-l-[3px] border-accent pl-3 text-[12.5px] leading-relaxed text-text-2">
+              <b className="font-extrabold text-text-1">되돌릴 수 없습니다.</b> 진행 중인 거래가 있으면
+              거절되니, 거래를 먼저 정리한 뒤 다시 시도하세요.
+            </p>
+            <label className="sr-only" htmlFor="purge-reason">파기 사유</label>
+            <textarea
+              id="purge-reason"
+              value={purgeReason}
+              onChange={(e) => setPurgeReason(e.target.value)}
+              placeholder="예) 정보주체 파기 요구 접수"
+              rows={3}
+              autoFocus
+              maxLength={200}
+              className={`mt-3 w-full resize-none rounded-r2 border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+            />
+            {purgeError && (
+              <p role="alert" className="mt-2 text-[12px] font-bold text-danger">{purgeError}</p>
+            )}
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPurging(false)}
+                disabled={purgeSubmitting}
+                className={`h-10 flex-1 rounded-r2 border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={purge}
+                disabled={purgeSubmitting}
+                className={`h-10 flex-1 rounded-r2 bg-accent text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+              >
+                {purgeSubmitting ? "파기 중..." : "파기"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {roleTarget && detail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">

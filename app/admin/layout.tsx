@@ -91,6 +91,17 @@ function LightbulbIcon() {
     </svg>
   );
 }
+function MailBanIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M22 12V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9" />
+      <path d="m2 7 10 6 10-6" />
+      <circle cx="18" cy="18" r="4" />
+      <path d="m15.5 20.5 5-5" />
+    </svg>
+  );
+}
+
 function MessageIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -131,6 +142,12 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: "기록",
     items: [{ href: "/admin/audit", label: "감사 로그", icon: <ClipboardListIcon />, ready: true }],
+  },
+  {
+    title: "메일",
+    items: [
+      { href: "/admin/email-suppressions", label: "발송 금지 목록", icon: <MailBanIcon />, ready: true },
+    ],
   },
   {
     title: "준비 중",

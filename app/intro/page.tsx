@@ -10,7 +10,7 @@ import { FOCUS_RING } from "@/lib/ui";
 export const metadata: Metadata = {
   title: "포카스테이션 사전예약 — 믿고 거래하는 K-POP 포토카드 경매",
   description:
-    "사진 인증으로 실물을 확인하고, 대금은 거래가 끝날 때까지 보호해요. 지금 사전 신청하면 정식 오픈 소식을 가장 먼저 받고 선착순 혜택도 챙겨드려요.",
+    "사진 인증으로 실물을 확인하고, 대금은 거래가 끝날 때까지 보호해요. 지금 사전 신청하면 정식 오픈 소식을 가장 먼저 받아보실 수 있어요.",
   alternates: { canonical: "/intro" },
   openGraph: {
     type: "website",
@@ -49,10 +49,6 @@ const FEATURES: { title: string; body: string }[] = [
 ];
 
 const BENEFITS: { title: string; body: string }[] = [
-  {
-    title: "거래 수수료 2,000 포인트",
-    body: "정식 가입 선착순 30명께 수수료 결제에 쓸 수 있는 2,000 포인트를 드려요.",
-  },
   {
     title: "정식 오픈 최우선 알림",
     body: "오픈 소식을 가장 먼저 받아보세요. 남겨주신 이메일로 안내가 나가요.",

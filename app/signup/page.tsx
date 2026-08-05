@@ -201,7 +201,6 @@ export default function SignupPage() {
             required
             maxLength={PASSWORD_MAX}
             autoComplete="new-password"
-            placeholder="위와 같은 비밀번호를 한 번 더"
             value={passwordConfirm}
             onChange={(e) => setPasswordConfirm(e.target.value)}
             aria-invalid={confirmMismatch || undefined}
@@ -228,9 +227,6 @@ export default function SignupPage() {
             onChange={(e) => setNickname(e.target.value)}
             className={`mt-2 ${FIELD} ${FOCUS_RING}`}
           />
-          <p className="mt-1.5 text-[12px] leading-[1.65] text-text-3">
-            서비스가 하나 지어뒀어요. 마음에 들지 않으면 고치거나 다시 추천받으세요.
-          </p>
           <div className="mt-2">
             <NicknameSuggestButton onSuggest={setNickname} />
           </div>

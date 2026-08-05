@@ -28,12 +28,23 @@ export function validatePassword(password: string): string | null {
   return null;
 }
 
-/** 입력 중 실시간 표시용 — 어느 조건이 충족됐는지 하나씩 알려준다. */
+/**
+ * 입력 중 실시간 표시용 — 어느 조건이 충족됐는지 하나씩 알려준다.
+ *
+ * 라벨은 세로 목록에 놓이므로 "영문"보다 "영문 포함"처럼 문장으로 읽히게 쓴다.
+ * 공백 금지는 길이 조건에 붙여둔다 — 항목을 하나 더 만들면 목록만 길어진다.
+ */
 export function passwordChecks(password: string) {
   return [
-    { label: `${PASSWORD_MIN}~${PASSWORD_MAX}자`, ok: password.length >= PASSWORD_MIN && password.length <= PASSWORD_MAX },
-    { label: "영문", ok: /[A-Za-z]/.test(password) },
-    { label: "숫자", ok: /[0-9]/.test(password) },
-    { label: "특수문자", ok: /[!-/:-@[-`{-~]/.test(password) },
+    {
+      label: `${PASSWORD_MIN}자 이상 ${PASSWORD_MAX}자 이하 (공백 제외)`,
+      ok:
+        password.length >= PASSWORD_MIN &&
+        password.length <= PASSWORD_MAX &&
+        !/\s/.test(password),
+    },
+    { label: "영문 포함", ok: /[A-Za-z]/.test(password) },
+    { label: "숫자 포함", ok: /[0-9]/.test(password) },
+    { label: "특수문자 포함", ok: /[!-/:-@[-`{-~]/.test(password) },
   ];
 }

@@ -54,6 +54,9 @@ export default function SignupPage() {
   // 추천 닉네임이 도착하기 전 한순간 빈칸이 보인다. 그 사이 플레이스홀더가 "닉네임"이면
   // 사용자가 직접 채워야 하는 칸으로 읽힌다 — 불러오는 중임을 그대로 적는다.
   const [nicknameLoading, setNicknameLoading] = useState(true);
+  // 비밀번호 규칙은 칠 때만 필요한 정보다. 늘 펼쳐두면 폼이 길어지고, 다 채운 뒤에도
+  // 남아 시선을 끈다 — 포커스가 들어와 있는 동안만 띄운다.
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const [consents, setConsents] = useState<ConsentValues>(EMPTY_CONSENTS);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -144,7 +147,7 @@ export default function SignupPage() {
             type="email"
             required
             autoComplete="email"
-            placeholder="example@email.com"
+            placeholder="이메일 입력"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className={`mt-2 ${FIELD} ${FOCUS_RING}`}
@@ -158,37 +161,30 @@ export default function SignupPage() {
           <label htmlFor={passwordId}>
             <Label required>비밀번호</Label>
           </label>
-          <input
-            id={passwordId}
-            type="password"
-            required
-            maxLength={PASSWORD_MAX}
-            autoComplete="new-password"
-            placeholder={PASSWORD_RULE_TEXT}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            aria-describedby={`${passwordId}-rule`}
-            className={`mt-2 ${FIELD} ${FOCUS_RING}`}
-          />
-          {/* 규칙을 문장으로만 적으면 어디가 모자란지 알 수 없다. 조건별로 충족 여부를 보여준다.
-              처음엔 12px 도트 4개를 한 줄에 붙였는데 잘 안 보였다 — 2열 격자로 벌리고,
-              충족한 항목은 체크 표시로 바꿔 "무엇이 남았는지"가 형태로 읽히게 했다. */}
-          <ul id={`${passwordId}-rule`} className="mt-2.5 grid grid-cols-2 gap-x-3 gap-y-2">
-            {checks.map((c) => (
-              <li key={c.label} className="flex items-center gap-2 text-[12.5px]">
-                <span
-                  aria-hidden="true"
-                  className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full text-[9px] font-bold ${
-                    c.ok ? "bg-text-1 text-white" : "border border-border-2 text-transparent"
-                  }`}
-                >
-                  ✓
-                </span>
-                <span className={c.ok ? "font-bold text-text-1" : "text-text-3"}>{c.label}</span>
-                <span className="sr-only">{c.ok ? " 충족" : " 미충족"}</span>
-              </li>
-            ))}
-          </ul>
+          {/* 규칙 패널이 아래 내용을 덮으므로 기준점을 만든다 — 펼쳐질 때 폼이 밀리면
+              그 아래를 보고 있던 사용자의 시선이 끌려간다. */}
+          <div className="relative">
+            <input
+              id={passwordId}
+              type="password"
+              required
+              maxLength={PASSWORD_MAX}
+              autoComplete="new-password"
+              placeholder="비밀번호 입력"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onFocus={() => setPasswordFocused(true)}
+              onBlur={() => setPasswordFocused(false)}
+              aria-describedby={`${passwordId}-rule`}
+              className={`mt-2 ${FIELD} ${FOCUS_RING}`}
+            />
+            {passwordFocused && <PasswordRules checks={checks} touched={password.length > 0} />}
+          </div>
+          {/* 패널은 포커스가 있을 때만 뜨므로, 보조기기에는 항상 읽히는 요약을 따로 둔다. */}
+          <span id={`${passwordId}-rule`} className="sr-only">
+            {PASSWORD_RULE_TEXT}. 남은 조건:{" "}
+            {checks.filter((c) => !c.ok).map((c) => c.label).join(", ") || "없음"}
+          </span>
         </div>
 
         <div>
@@ -222,7 +218,7 @@ export default function SignupPage() {
             required
             maxLength={50}
             autoComplete="nickname"
-            placeholder={nicknameLoading ? "추천 닉네임을 불러오는 중..." : "닉네임"}
+            placeholder={nicknameLoading ? "추천 닉네임을 불러오는 중..." : "닉네임 입력"}
             value={nickname}
             onChange={(e) => setNickname(e.target.value)}
             className={`mt-2 ${FIELD} ${FOCUS_RING}`}
@@ -258,6 +254,60 @@ export default function SignupPage() {
           로그인
         </Link>
       </p>
+    </div>
+  );
+}
+
+/**
+ * 비밀번호 규칙 패널 — 입력칸에 포커스가 있는 동안만 뜬다.
+ *
+ * <p>규칙을 문장 하나로 적으면 무엇이 모자란지 알 수 없어 사용자가 추측으로 고친다.
+ * 조건을 나눠 충족 여부를 보여주면 남은 게 무엇인지 형태로 읽힌다.
+ *
+ * <p><b>빈 칸일 때는 빨간 X를 띄우지 않는다.</b> 아직 아무것도 안 친 사람에게 전부 실패라고
+ * 표시하는 건 사실도 아니고 겁만 준다 — 치기 시작한 뒤부터 통과/미통과를 가른다.
+ *
+ * <p>패널은 아래 내용을 덮는다. 폼을 밀어내면 펼쳐질 때마다 아래를 보던 시선이 끌려가고,
+ * 다 채워 닫히면 또 밀려 올라온다.
+ */
+function PasswordRules({
+  checks,
+  touched,
+}: {
+  checks: { label: string; ok: boolean }[];
+  touched: boolean;
+}) {
+  const met = checks.filter((c) => c.ok).length;
+  // 진행 막대는 "얼마나 왔는지"만 말한다. 색까지 단계별로 바꾸면 규칙마다 의미를 따로 외워야 한다.
+  const ratio = (met / checks.length) * 100;
+
+  return (
+    <div
+      // 떠 있는 층이라 그림자를 쓴다 — 장식이 아니라 아래 내용과 겹친다는 신호다.
+      className="absolute inset-x-0 top-full z-20 mt-1.5 rounded-[4px] border border-border-2 bg-white p-3.5 shadow-[0_4px_16px_rgba(17,17,24,0.08)]"
+    >
+      <div className="h-[3px] w-full overflow-hidden rounded-full bg-surface-2">
+        <div
+          className="h-full bg-text-1 transition-[width] duration-200"
+          style={{ width: `${ratio}%` }}
+        />
+      </div>
+
+      <ul className="mt-3 flex flex-col gap-1.5">
+        {checks.map((c) => (
+          <li key={c.label} className="flex items-center gap-2 text-[12.5px] leading-[1.5]">
+            <span
+              aria-hidden="true"
+              className={`w-3 shrink-0 text-center text-[11px] font-bold ${
+                !touched ? "text-text-3" : c.ok ? "text-ok" : "text-danger"
+              }`}
+            >
+              {!touched ? "·" : c.ok ? "✓" : "✕"}
+            </span>
+            <span className={c.ok && touched ? "text-text-2" : "text-text-3"}>{c.label}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

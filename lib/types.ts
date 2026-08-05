@@ -77,6 +77,10 @@ export type AdminMemberSummary = {
   role: string;
   createdAt: string;
   suspensionReason: string | null;
+  // null이면 미인증. 인증 후 가입 전환(BE #252) 이후로는 새로 생기지 않는 상태라,
+  // 비어 있는 회원은 전환 이전 잔여분이다. 소셜 회원은 인증 개념이 없어 항상 null이므로
+  // "미인증"으로 읽지 않는다 — provider로 구분한다.
+  emailVerifiedAt: string | null;
 };
 
 export type AdminMemberListResponse = {
@@ -91,6 +95,23 @@ export type AdminMemberListResponse = {
 export type AdminMemberDetailResponse = AdminMemberSummary & {
   sellingCount: number;
   biddingCount: number;
+};
+
+// GET /api/admin/email-suppressions — 하드바운스·스팸신고로 발송이 막힌 주소 목록(BE #250).
+export type AdminEmailSuppression = {
+  id: number;
+  email: string;
+  reason: "HARD_BOUNCE" | "COMPLAINT" | "MANUAL";
+  detail: string | null;
+  suppressedAt: string;
+};
+
+export type AdminEmailSuppressionListResponse = {
+  content: AdminEmailSuppression[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 };
 
 export type MemberStatusAction = "SUSPEND" | "UNSUSPEND" | "WITHDRAW";

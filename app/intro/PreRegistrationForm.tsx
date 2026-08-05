@@ -144,7 +144,7 @@ export default function PreRegistrationForm() {
         사전 신청하고 혜택 받기
       </h2>
       <p className="mt-1.5 text-[12.5px] leading-[1.65] text-text-3">
-        정식 가입 선착순 30명께 거래 수수료 결제 전용 2,000 포인트를 드려요.
+        정식 오픈 소식을 가장 먼저 알려드리고, 사전 신청자에게만 드리는 얼리어답터 배지를 드려요.
       </p>
 
       <div className="mt-5 flex flex-col gap-4">

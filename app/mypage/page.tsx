@@ -7,6 +7,7 @@ import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import DeliveryAddressBook from "@/components/DeliveryAddressBook";
 import PaymentMethodManager from "@/components/PaymentMethodManager";
+import SettlementAccountManager from "@/components/SettlementAccountManager";
 import ProfileTab from "@/components/ProfileTab";
 import SettingsTab from "@/components/SettingsTab";
 import NotificationSettings from "@/components/NotificationSettings";
@@ -70,6 +71,7 @@ type Tab =
   | "notifications"
   | "shipping"
   | "payment"
+  | "settlement"
   | "settings";
 
 // 합쳐진 탭 안에서 어느 묶음을 보고 있는지.
@@ -158,6 +160,17 @@ function CardIcon() {
   );
 }
 
+// 정산계좌 — 지폐·카드와 구분되게 건물(은행) 실루엣으로.
+function BankIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
+      <path d="M3 10 12 4l9 6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 10v8M10 10v8M14 10v8M19 10v8" strokeLinecap="round" />
+      <path d="M3 20h18" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function GearIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -190,6 +203,8 @@ const ACCOUNT_NAV: { key: Tab; label: string; icon: () => ReactNode }[] = [
   { key: "notifications", label: "알림 설정", icon: BellIcon },
   { key: "shipping", label: "배송지 관리", icon: PinIcon },
   { key: "payment", label: "결제수단", icon: CardIcon },
+  // 결제수단(내는 돈) 바로 다음에 정산계좌(받는 돈)를 둔다 — 판매자만 쓰지만 성격은 계정 정보다.
+  { key: "settlement", label: "정산계좌", icon: BankIcon },
   { key: "settings", label: "계정 설정", icon: GearIcon },
 ];
 
@@ -204,6 +219,7 @@ const TAB_TITLE: Record<Tab, string> = {
   notifications: "알림 설정",
   shipping: "배송지 관리",
   payment: "결제수단",
+  settlement: "정산계좌",
   settings: "계정 설정",
 };
 
@@ -768,6 +784,14 @@ export default function MyPage() {
             <p className="mt-1 text-sm text-text-3">낙찰 시 자동 결제에 사용할 카드를 관리해요.</p>
             <div className="mt-5">
               <PaymentMethodManager />
+            </div>
+          </>
+        ) : tab === "settlement" ? (
+          <>
+            <h1 className="font-display text-xl font-extrabold text-text-1">정산계좌</h1>
+            <p className="mt-1 text-sm text-text-3">판매 대금을 받을 계좌를 등록해요.</p>
+            <div className="mt-5">
+              <SettlementAccountManager />
             </div>
           </>
         ) : tab === "notifications" ? (

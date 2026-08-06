@@ -936,3 +936,17 @@ export type AdminDisputeListResponse = {
   totalElements: number;
   totalPages: number;
 };
+
+// 판매자 정산계좌(BE #258). 서버는 뒤 4자리만 내려준다 — 평문 계좌번호는 응답에 없다.
+export type SettlementAccount = {
+  bank: string;
+  bankName: string;
+  maskedAccountNumber: string;
+  holderName: string;
+  verified: boolean;
+};
+
+export type BankOption = {
+  code: string;
+  name: string;
+};

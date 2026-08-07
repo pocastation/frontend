@@ -9,7 +9,11 @@ import PhotoUploadGrid, { type PhotoItem } from "@/components/PhotoUploadGrid";
 import VideoUploadField, { type VideoItem } from "@/components/VideoUploadField";
 import { apiFetch, ApiError } from "@/lib/api";
 import { compressImage } from "@/lib/image-compress";
-import { validateVideo } from "@/lib/video-validate";
+import {
+  MAX_VIDEO_DURATION_SEC,
+  MIN_VIDEO_DURATION_SEC,
+  validateVideo,
+} from "@/lib/video-validate";
 import { useAuth } from "@/lib/auth-context";
 import { DURATION_OPTIONS, GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
@@ -21,6 +25,7 @@ import type {
   MediaUploadResponse,
   PhotocardGrade,
   PhotocardSource,
+  VideoFailureReason,
   VideoStatusResponse,
   VideoUploadResponse,
 } from "@/lib/types";
@@ -57,6 +62,16 @@ const TOTAL_STEPS = STEP_KEYS.length;
 // 업로드 실패 사유를 사람이 읽을 문장으로 바꾼다(#269).
 // 401은 리프레시까지 실패했다는 뜻이라 "다시 시도"로 안내하면 사용자가 같은 실패를 반복한다 —
 // 재로그인이 필요하다는 것을 분명히 말해야 한다.
+// 영상이 서버에서 FAILED가 된 이유를 문장으로 바꾼다(backend #266).
+// 길이 위반은 **같은 파일을 다시 올려도 영원히 실패한다** — "다시 시도해주세요"로 안내하면
+// 판매자가 그 자리에서 무한히 막힌다. 사유를 모르는 경우(전환 이전 행)는 기존 문구를 유지한다.
+function videoFailureMessage(reason: VideoFailureReason | null): string {
+  if (reason === "DURATION_OUT_OF_RANGE") {
+    return `영상 길이가 ${MIN_VIDEO_DURATION_SEC}~${MAX_VIDEO_DURATION_SEC}초를 벗어났어요. 길이를 맞춰 다시 올려주세요.`;
+  }
+  return "영상 처리에 실패했어요. 다시 시도해주세요.";
+}
+
 function uploadErrorMessage(err: unknown, what: string): string {
   if (err instanceof ApiError) {
     if (err.status === 401) {
@@ -136,7 +151,7 @@ export default function NewAuctionPage() {
         if (s.status === "READY") {
           setVideo((v) => (v ? { ...v, status: "ready" } : v));
         } else if (s.status === "FAILED") {
-          setVideo((v) => (v ? { ...v, status: "error", error: "영상 처리에 실패했어요. 다시 시도해주세요." } : v));
+          setVideo((v) => (v ? { ...v, status: "error", error: videoFailureMessage(s.failureReason) } : v));
         }
       } catch {
         // 일시 오류는 다음 틱에 재시도

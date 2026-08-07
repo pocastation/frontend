@@ -387,11 +387,15 @@ export type VideoUploadResponse = {
   status: VideoStatus; // 업로드 직후엔 PROCESSING
 };
 
+// 검수영상이 FAILED가 된 이유(backend #266). 전환 이전 FAILED 행은 사유를 소급할 수 없어 null이다.
+export type VideoFailureReason = "TRANSCODE_FAILED" | "DURATION_OUT_OF_RANGE";
+
 export type VideoStatusResponse = {
   videoId: string;
   status: VideoStatus;
   url: string | null; // READY일 때 재생용 MP4
   posterUrl: string | null; // READY일 때 정지컷(없을 수 있음)
+  failureReason: VideoFailureReason | null; // FAILED일 때만
 };
 
 export type VerificationStatus =

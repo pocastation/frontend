@@ -26,6 +26,8 @@ const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; ico
   AUCTION_SUCCEEDED: { label: "구매 기회", tone: "primary", icon: "tag" },
   ORDER_SHIPPED: { label: "발송", tone: "primary", icon: "box" },
   ORDER_CONFIRMED: { label: "구매 확정", tone: "ok", icon: "checkCircle" },
+  // 조치가 필요한 알림이라 accent다 — 읽고 끝나는 통지가 아니라 사용자가 지금 뭔가 해야 한다.
+  DELIVERY_ADDRESS_REQUIRED: { label: "배송지 입력", tone: "accent", icon: "pin" },
   SHIPPING_OVERDUE: { label: "발송 지연", tone: "accent", icon: "clock" },
   SETTLEMENT_COMPLETED: { label: "정산 완료", tone: "ok", icon: "card" },
   INQUIRY_ANSWERED: { label: "문의 답변", tone: "ok", icon: "checkCircle" },
@@ -131,6 +133,13 @@ export default function NotificationsPage() {
     }
     if (notification.type === "INQUIRY_ANSWERED") {
       router.push("/inquiries");
+      return;
+    }
+    // 배송지 입력은 경매 상세가 아니라 구매 내역에서 한다 — 상품 페이지로 보내면
+    // "입력하라"는 알림을 받고 입력할 곳이 없는 화면에 도착한다.
+    // 마이페이지에 들어가면 미입력 주문의 배송지 팝업이 자동으로 열린다.
+    if (notification.type === "DELIVERY_ADDRESS_REQUIRED") {
+      router.push("/mypage?tab=purchases");
       return;
     }
     if (notification.auctionId != null) {

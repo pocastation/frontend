@@ -23,6 +23,7 @@ const ICON_PATH: Record<string, ReactNode> = {
   tag: (<><path d="M11.5 3H4v7.5L14 20.5 21.5 13z" /><path d="M8 8h.01" /></>),
   box: (<><path d="M21 8.5 12 3 3 8.5v7L12 21l9-5.5z" /><path d="M3 8.5 12 14l9-5.5M12 14v7" /></>),
   checkCircle: (<><circle cx="12" cy="12" r="9" /><path d="m8.5 12 2.5 2.5 4.5-5" /></>),
+  pin: (<><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z" /><circle cx="12" cy="10" r="2.5" /></>),
   clock: (<><circle cx="12" cy="12" r="9" /><path d="M12 7.5V12l3 2" /></>),
 };
 

@@ -5,6 +5,13 @@ export type ApiResponse<T> = {
   message: string | null;
 };
 
+// 회원 배지(BE #264). 라벨·설명을 서버가 내려준다 — 프론트가 문구를 따로 두면 두 레포가 갈라진다.
+export type BadgeView = {
+  code: string;
+  label: string;
+  description: string;
+};
+
 export type MemberResponse = {
   id: string;
   // OAuth 가입 회원은 이메일을 저장하지 않는다(§13 최소수집) — null 가능.
@@ -33,6 +40,8 @@ export type MemberResponse = {
   // 서버의 거래 차단 게이트가 켜져 있는지. 배너 문구를 "인증해 주세요"와 "인증해야 거래할 수
   // 있어요" 중에 고르는 데 쓴다 — 켜지지도 않은 제한을 예고하면 거짓 안내가 된다.
   emailVerificationRequired?: boolean;
+  // 배지(BE #264) — GET /me 에서만 채워진다. 없으면 빈 배열이다.
+  badges?: BadgeView[];
 };
 
 // GET/POST/PATCH /api/members/me/delivery-addresses — 마이페이지 배송지 관리.
@@ -875,6 +884,7 @@ export type SellerRatingResponse = {
   trustLevel: number; // 1~10
   trustLevelLabel: string; // "덕린이 🌱" 등 — BE가 라벨까지 내려준다
   tradeCount: number; // 완료(구매확정) 거래 건수, 판매+구매 합산
+  badges: BadgeView[];
 };
 
 // GET /api/sellers/popular — 인기(신뢰) 판매자 랭킹. 신뢰점수 숫자는 내려오지 않는다(§9.2-4).

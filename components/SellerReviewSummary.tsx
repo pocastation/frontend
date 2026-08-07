@@ -6,6 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import { REVIEW_REPORT_REASON_LABEL, REVIEW_REPORT_REASON_OPTIONS } from "@/lib/labels";
 import { formatRelativeTime } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
+import BadgeChips from "@/components/BadgeChips";
 import type { ReviewReportReason, ReviewResponse, SellerRatingResponse, SellerReviewListResponse } from "@/lib/types";
 
 const PAGE_SIZE = 5;
@@ -49,6 +50,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
             trustLevel: 1,
             trustLevelLabel: "덕린이 🌱",
             tradeCount: 0,
+            badges: [],
           });
         }
       }
@@ -95,6 +97,8 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
           <span className="text-text-3">Lv.{rating.trustLevel}</span>
           {rating.trustLevelLabel}
         </span>
+        {/* 배지(#264)는 레벨 바로 뒤 — 레벨과 나란히 놓여야 "두 번째 자격"으로 읽힌다. */}
+        <BadgeChips badges={rating.badges} />
         {rating.tradeCount > 0 && (
           <span className="text-[11px] text-text-3">거래 {rating.tradeCount}회</span>
         )}

@@ -11,9 +11,15 @@ export function resolveApiUrl(): string {
   if (process.env.NODE_ENV === "production") {
     throw new Error("NEXT_PUBLIC_API_URL이 설정되지 않았습니다. 프로덕션 배포 시 반드시 지정해야 합니다.");
   }
-  // 개발 기본값은 **빈 문자열**이다 — 절대 URL(:8080) 대신 같은 출처로 호출하고
-  // next.config의 rewrite가 백엔드로 넘긴다. 브라우저가 보는 출처가 하나가 되어
-  // 쿠키가 1st-party가 되고 CORS도 발생하지 않는다(로컬 로그인 유지 문제, next.config 주석 참고).
+  // ⚠️ 서버(RSC·라우트 핸들러)에서는 상대 경로로 fetch할 수 없다 — Node fetch는 절대 URL만
+  // 받고 `/api/...`는 ERR_INVALID_URL로 죽는다. 실제로 `/sellers/[sellerId]`의 SSR이 이걸로
+  // 깨졌다. 프록시는 브라우저를 위한 장치이고(쿠키·CORS), 서버는 애초에 그 문제가 없으므로
+  // 백엔드로 곧장 나가면 된다.
+  if (typeof window === "undefined") {
+    return process.env.LOCAL_BACKEND_ORIGIN ?? "http://localhost:8080";
+  }
+  // 브라우저에서는 **빈 문자열** — 같은 출처로 호출하고 next.config의 rewrite가 백엔드로 넘긴다.
+  // 브라우저가 보는 출처가 하나가 되어 쿠키가 1st-party가 되고 CORS도 발생하지 않는다.
   // staging에 붙여 보려면 NEXT_PUBLIC_API_URL을 명시하면 이 분기를 지나가지 않는다.
   return "";
 }

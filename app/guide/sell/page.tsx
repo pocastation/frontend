@@ -4,7 +4,7 @@ import { FOCUS_RING } from "@/lib/ui";
 export const metadata = {
   title: "판매 등록 가이드 — Pocastation",
   description:
-    "판매 방식 선택부터 사진 인증까지 — 포카스테이션 판매 등록 7단계를 항목별로 상세히 안내합니다.",
+    "판매 방식 선택부터 사진 인증까지 — 포카스테이션 판매 등록 6단계를 항목별로 상세히 안내합니다.",
 };
 
 // 등록 화면(app/auctions/new)의 실제 스텝 순서와 1:1로 맞춘다.
@@ -14,9 +14,8 @@ const STEPS = [
   { id: "step-2", label: "카테고리 · 소개" },
   { id: "step-3", label: "상품 정보" },
   { id: "step-4", label: "가격 · 기간" },
-  { id: "step-5", label: "사진" },
-  { id: "step-6", label: "영상" },
-  { id: "step-7", label: "사진 인증" },
+  { id: "step-5", label: "사진 · 영상" },
+  { id: "step-6", label: "사진 인증" },
 ];
 
 /**
@@ -25,34 +24,27 @@ const STEPS = [
  * 지면 구성은 단계마다 다르지만(선택 타일 · 폼 · 강조 패널 · 슬롯 · 산문 · 미니 플로우)
  * 번호와 제목의 **조판 규칙만은** 공유한다. 일관성은 여기까지고, 그 아래부터는 반복하지 않는다.
  *
- * `quiet`는 규칙이 아니라 요령을 다루는 단계(영상)용이다 — 위 규칙선을 지우고 제목을 낮춰
- * 앞 단계에 딸린 보충처럼 읽히게 한다. 일곱 단계가 전부 같은 무게로 서 있으면
- * 어느 단계가 실제로 중요한지 화면이 말해주지 못한다.
+ * 단계 안의 두 번째 입력(사진 단계의 영상)은 이 머리말을 쓰지 않는다 — `h3` + 헤어라인으로
+ * 한 급 낮춰야 "별도 단계가 아니라 같은 단계의 뒷부분"으로 읽힌다.
  */
 function StepHead({
   n,
   title,
   lead,
-  quiet,
 }: {
   n: number;
   title: string;
   lead?: string;
-  quiet?: boolean;
 }) {
   return (
-    <div className={quiet ? "" : "border-t border-text-1/25 pt-4"}>
+    <div className="border-t border-text-1/25 pt-4">
       <span
         aria-hidden="true"
         className="block font-display text-[11px] font-extrabold tabular-nums tracking-[0.08em] text-text-3"
       >
         {String(n).padStart(2, "0")}
       </span>
-      <h2
-        className={`mt-1.5 font-display font-extrabold tracking-[-0.035em] text-text-1 ${
-          quiet ? "text-[17px]" : "text-[21px]"
-        }`}
-      >
+      <h2 className="mt-1.5 font-display text-[21px] font-extrabold tracking-[-0.035em] text-text-1">
         <span className="sr-only">{n}단계. </span>
         {title}
       </h2>
@@ -161,7 +153,7 @@ export default function SellGuidePage() {
             시작하면 훨씬 빨라요.
           </p>
           <p className="mt-3 text-[12px] text-text-3">
-            총 7단계 · 로그인 후 헤더의 ‘판매 등록’에서 시작해요 ·{" "}
+            총 6단계 · 로그인 후 헤더의 ‘판매 등록’에서 시작해요 ·{" "}
             <span aria-hidden="true" className="font-extrabold text-primary">
               *
             </span>{" "}
@@ -425,21 +417,24 @@ export default function SellGuidePage() {
           <Help>배송비는 판매자 부담이니 감안해서 가격을 정해주세요.</Help>
         </section>
 
-        {/* ── 05 사진 ── 이 서비스에서 가장 중요한 입력. 설명 대신 슬롯 자체를 보여준다. */}
+        {/* ── 05 사진 · 영상 ── 이 서비스에서 가장 중요한 입력. 설명 대신 슬롯 자체를 보여준다.
+            등록 화면에서 두 입력이 한 단계로 합쳐졌으므로(#279) 여기도 한 절로 붙인다. */}
         <section id="step-5" className="mt-14 scroll-mt-24">
           <StepHead
             n={5}
-            title="사진"
-            lead="구매자가 가장 오래 보는 정보예요. 최대 12장까지 올릴 수 있고, 첫 장이 목록에 걸리는 대표사진이 돼요."
+            title="사진 · 영상"
+            lead="구매자가 가장 오래 보는 정보예요. 사진 3~6장과 틸팅 영상 1개를 한 단계에서 올려요. 첫 장이 목록에 걸리는 대표사진이 돼요."
           />
           <div aria-hidden="true" className="mt-5 flex gap-1.5 overflow-x-auto pb-1">
-            {Array.from({ length: 12 }, (_, i) => (
+            {Array.from({ length: 6 }, (_, i) => (
               <div
                 key={i}
                 className={`flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-[3px] text-[10px] font-bold ${
                   i === 0
                     ? "border border-current bg-surface-2 text-text-1"
-                    : "border border-dashed border-border-2 text-text-3"
+                    : i < 3
+                      ? "border border-dashed border-border-2 text-text-3"
+                      : "border border-dashed border-border-2/60 text-text-3/60"
                 }`}
               >
                 {i === 0 ? "대표" : i + 1}
@@ -447,30 +442,41 @@ export default function SellGuidePage() {
             ))}
           </div>
           <Help>
-            앞 · 뒷면, 모서리 네 곳, 하자 부위 근접샷을 밝은 곳에서 찍으면 문의와 분쟁이 크게 줄어요.
+            3장까지는 반드시 채워야 하고, 나머지 세 칸은 선택이에요. 앞 · 뒷면, 모서리 네 곳, 하자 부위
+            근접샷을 밝은 곳에서 찍으면 문의와 분쟁이 크게 줄어요.
           </Help>
+
+          {/* 슬리브 — 요령이지만 실제로 분쟁을 만드는 지점이라 helper보다 한 칸 올려 쓴다. */}
+          <p className="mt-5 max-w-[34rem] text-[13px] leading-[1.75] text-text-2">
+            <b className="font-extrabold text-text-1">슬리브 · 탑로더에서 꺼내고 찍어주세요.</b> 비닐에
+            생긴 반사 · 흠집 · 먼지가 카드 자체의 상태로 오해받아요. 상태를 좋게 보이려고 씌운 채
+            찍어도 받는 사람은 결국 실물을 보게 되고, 그 차이가 그대로 분쟁이 됩니다.
+          </p>
 
           <p className="mt-6 border-l-[3px] border-accent pl-4 text-[13px] leading-[1.75] text-text-2">
             <b className="font-extrabold text-text-1">도용 사진은 등록하지 마세요.</b> 타인의 사진을
             사용한 매물은 신고 대상이며, 확인되면 판매가 제한될 수 있어요. 반드시 직접 촬영한 실물
             사진을 올려주세요.
           </p>
+
+          {/* 영상 — 같은 단계 안의 두 번째 입력이라 헤어라인으로 나누고 제목을 낮춘다. */}
+          <div className="mt-8 border-t border-border pt-5">
+            <h3 className="font-display text-[15px] font-extrabold tracking-[-0.03em] text-text-1">
+              틸팅 영상
+            </h3>
+            <p className="mt-2 max-w-[34rem] text-[13.5px] leading-[1.8] text-text-2">
+              포카를 손에 들고 앞뒤로 천천히 돌리며 <b className="font-bold text-text-1">10~15초</b>로
+              찍어주세요. 홀로그램 · 코팅 상태처럼 사진으로는 판단하기 어려운 부분이 영상에서 드러나요.
+              조명 아래에서 각도를 바꿔가며 찍으면 표면 상태가 잘 보이고, 흔들림이 적을수록 좋아요.
+              영상도 슬리브는 벗기고 찍어주세요.
+            </p>
+          </div>
         </section>
 
-        {/* ── 06 영상 ── 규칙이 아니라 요령이다. 규칙선도 목업도 없이 조용히 둔다. */}
-        <section id="step-6" className="mt-12 scroll-mt-24">
-          <StepHead n={6} title="영상" quiet />
-          <p className="mt-2.5 max-w-[34rem] text-[13.5px] leading-[1.8] text-text-2">
-            포카를 손에 들고 앞뒤로 천천히 돌리며 찍어주세요. 홀로그램 · 코팅 상태처럼 사진으로는
-            판단하기 어려운 부분이 영상에서 드러나요. 조명 아래에서 각도를 바꿔가며 찍으면 표면 상태가
-            잘 보이고, 흔들림이 적을수록 좋아요.
-          </p>
-        </section>
-
-        {/* ── 07 사진 인증 ── 입력이 아니라 절차다. 순서가 있는 세 동작으로 보여준다. */}
-        <section id="step-7" className="mt-14 scroll-mt-24">
+        {/* ── 06 사진 인증 ── 입력이 아니라 절차다. 순서가 있는 세 동작으로 보여준다. */}
+        <section id="step-6" className="mt-14 scroll-mt-24">
           <StepHead
-            n={7}
+            n={6}
             title="사진 인증"
             lead="사진만 퍼온 매물을 걸러내는 단계예요. 정품 여부가 아니라, 지금 그 포카를 실제로 갖고 있는지만 확인해요."
           />

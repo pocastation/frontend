@@ -3,7 +3,10 @@
 // 포맷(컨테이너)·용량은 즉시 판정, 길이는 메타데이터를 읽을 수 있을 때만(HEVC는 브라우저가 못 읽어 skip) 검사한다.
 
 export const MAX_VIDEO_SIZE_MB = 50;
-export const MAX_VIDEO_DURATION_SEC = 60;
+// 틸팅 영상 길이(#279) — 카드를 앞뒤로 한 바퀴 돌리는 데 필요한 최소가 10초이고, 15초를 넘으면
+// 구매자가 끝까지 보지 않는다. 상한만 있던 60초는 사실상 제한이 아니었다.
+export const MIN_VIDEO_DURATION_SEC = 10;
+export const MAX_VIDEO_DURATION_SEC = 15;
 const ALLOWED_TYPES = ["video/mp4", "video/quicktime", "video/webm"];
 
 export type VideoValidationResult = { ok: true } | { ok: false; reason: string };
@@ -16,9 +19,14 @@ export async function validateVideo(file: File): Promise<VideoValidationResult> 
     return { ok: false, reason: `영상 용량은 ${MAX_VIDEO_SIZE_MB}MB 이하여야 해요.` };
   }
 
+  // 길이를 못 읽으면(HEVC 등) 통과시킨다 — 여기서 막으면 아이폰 사용자가 통째로 걸린다.
+  // 대신 서버가 트랜스코딩 후 실제 길이로 다시 판정한다(backend #266).
   const duration = await readDurationSeconds(file);
-  if (duration != null && duration > MAX_VIDEO_DURATION_SEC) {
-    return { ok: false, reason: `영상 길이는 ${MAX_VIDEO_DURATION_SEC}초 이하여야 해요.` };
+  if (duration != null && (duration < MIN_VIDEO_DURATION_SEC || duration > MAX_VIDEO_DURATION_SEC)) {
+    return {
+      ok: false,
+      reason: `영상 길이는 ${MIN_VIDEO_DURATION_SEC}~${MAX_VIDEO_DURATION_SEC}초여야 해요.`,
+    };
   }
   return { ok: true };
 }

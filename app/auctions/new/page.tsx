@@ -9,7 +9,11 @@ import PhotoUploadGrid, { type PhotoItem } from "@/components/PhotoUploadGrid";
 import VideoUploadField, { type VideoItem } from "@/components/VideoUploadField";
 import { apiFetch, ApiError } from "@/lib/api";
 import { compressImage } from "@/lib/image-compress";
-import { validateVideo } from "@/lib/video-validate";
+import {
+  MAX_VIDEO_DURATION_SEC,
+  MIN_VIDEO_DURATION_SEC,
+  validateVideo,
+} from "@/lib/video-validate";
 import { useAuth } from "@/lib/auth-context";
 import { DURATION_OPTIONS, GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
@@ -21,27 +25,36 @@ import type {
   MediaUploadResponse,
   PhotocardGrade,
   PhotocardSource,
+  VideoFailureReason,
   VideoStatusResponse,
   VideoUploadResponse,
 } from "@/lib/types";
 
-const MAX_IMAGES = 12;
+// 사진 장수(#279) — 3장 미만이면 구매자가 상태를 판단할 근거가 없고(라이브에 1장짜리 매물이
+// 실제로 올라왔다), 상한을 6장으로 낮춘 건 "다 올릴 수 있다"보다 "무엇을 올려야 하는지"를
+// 말해주는 편이 사진의 질을 올리기 때문이다. 서버도 같은 값으로 막는다(backend #266).
+const MIN_IMAGES = 3;
+const MAX_IMAGES = 6;
 const AUCTION_VERIFICATION_ENABLED =
   process.env.NEXT_PUBLIC_AUCTION_VERIFICATION_ENABLED === "true" ||
   (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_AUCTION_VERIFICATION_ENABLED !== "false");
 // 검수영상은 기본 활성화하고, 긴급 롤백이 필요할 때만 환경변수로 명시적으로 끈다.
 const AUCTION_VIDEO_ENABLED = process.env.NEXT_PUBLIC_AUCTION_VIDEO_ENABLED !== "false";
 
-// 위저드 스텝 순서 — 사진 다음에 영상, 그다음 (옵션) 사진 인증. 플래그로 스텝이 빠질 수 있어
-// 인덱스 하드코딩(step === 4) 대신 키 배열로 관리한다(중간 스텝 삽입 시 인덱스가 밀리는 버그 방지).
-type StepKey = "saleType" | "info" | "product" | "price" | "photos" | "video" | "verification";
+// 위저드 스텝 순서 — 사진·영상을 한 단계(media)에서 받고, 그다음 (옵션) 사진 인증.
+// 플래그로 스텝이 빠질 수 있어 인덱스 하드코딩(step === 4) 대신 키 배열로 관리한다
+// (중간 스텝 삽입 시 인덱스가 밀리는 버그 방지).
+//
+// 사진과 영상을 합친 이유(#279): 둘 다 "파일을 올리고 처리가 끝나기를 기다린다"는 같은 동작이라
+// 단계를 나눠도 사용자가 하는 일이 달라지지 않는다. 오히려 영상 트랜스코딩을 기다리는 동안
+// 앞뒤로 오갈 수 없어 폼이 멈춘 것처럼 보였다. 폼이 짧을수록 액세스 토큰 만료(#269)도 덜 겪는다.
+type StepKey = "saleType" | "info" | "product" | "price" | "media" | "verification";
 const STEP_KEYS: StepKey[] = [
   "saleType",
   "info",
   "product",
   "price",
-  "photos",
-  ...(AUCTION_VIDEO_ENABLED ? (["video"] as StepKey[]) : []),
+  "media",
   ...(AUCTION_VERIFICATION_ENABLED ? (["verification"] as StepKey[]) : []),
 ];
 const TOTAL_STEPS = STEP_KEYS.length;
@@ -49,6 +62,16 @@ const TOTAL_STEPS = STEP_KEYS.length;
 // 업로드 실패 사유를 사람이 읽을 문장으로 바꾼다(#269).
 // 401은 리프레시까지 실패했다는 뜻이라 "다시 시도"로 안내하면 사용자가 같은 실패를 반복한다 —
 // 재로그인이 필요하다는 것을 분명히 말해야 한다.
+// 영상이 서버에서 FAILED가 된 이유를 문장으로 바꾼다(backend #266).
+// 길이 위반은 **같은 파일을 다시 올려도 영원히 실패한다** — "다시 시도해주세요"로 안내하면
+// 판매자가 그 자리에서 무한히 막힌다. 사유를 모르는 경우(전환 이전 행)는 기존 문구를 유지한다.
+function videoFailureMessage(reason: VideoFailureReason | null): string {
+  if (reason === "DURATION_OUT_OF_RANGE") {
+    return `영상 길이가 ${MIN_VIDEO_DURATION_SEC}~${MAX_VIDEO_DURATION_SEC}초를 벗어났어요. 길이를 맞춰 다시 올려주세요.`;
+  }
+  return "영상 처리에 실패했어요. 다시 시도해주세요.";
+}
+
 function uploadErrorMessage(err: unknown, what: string): string {
   if (err instanceof ApiError) {
     if (err.status === 401) {
@@ -128,7 +151,7 @@ export default function NewAuctionPage() {
         if (s.status === "READY") {
           setVideo((v) => (v ? { ...v, status: "ready" } : v));
         } else if (s.status === "FAILED") {
-          setVideo((v) => (v ? { ...v, status: "error", error: "영상 처리에 실패했어요. 다시 시도해주세요." } : v));
+          setVideo((v) => (v ? { ...v, status: "error", error: videoFailureMessage(s.failureReason) } : v));
         }
       } catch {
         // 일시 오류는 다음 틱에 재시도
@@ -279,10 +302,13 @@ export default function NewAuctionPage() {
         return artistId !== "" && title.trim().length > 0;
       case "price":
         return priceValid;
-      case "photos":
-        return uploadedImages.length > 0 && !isUploading;
-      case "video":
-        return video?.status === "ready"; // 처리 완료된 영상만 통과(필수)
+      // 사진·영상이 한 단계라 둘 다 충족해야 넘어간다. 영상은 처리 완료된 것만 통과(필수).
+      case "media":
+        return (
+          uploadedImages.length >= MIN_IMAGES &&
+          !isUploading &&
+          (!AUCTION_VIDEO_ENABLED || video?.status === "ready")
+        );
       case "verification":
         return verificationId !== null;
       default:
@@ -316,8 +342,8 @@ export default function NewAuctionPage() {
       setError("스타를 선택해주세요.");
       return;
     }
-    if (uploadedImages.length === 0) {
-      setError("사진을 1장 이상 등록해주세요.");
+    if (uploadedImages.length < MIN_IMAGES) {
+      setError(`사진을 ${MIN_IMAGES}장 이상 등록해주세요.`);
       return;
     }
     if (AUCTION_VIDEO_ENABLED && video?.status !== "ready") {
@@ -417,8 +443,7 @@ export default function NewAuctionPage() {
     info: "카테고리 · 소개",
     product: "상품 정보",
     price: saleType === "INSTANT" ? "가격" : "가격 · 경매 기간",
-    photos: "사진",
-    video: "영상",
+    media: AUCTION_VIDEO_ENABLED ? "사진 · 영상" : "사진",
     verification: "사진 인증",
   };
   const isLastStep = step === TOTAL_STEPS - 1;
@@ -684,9 +709,11 @@ export default function NewAuctionPage() {
             </div>
           )}
 
-          {stepKey === "photos" && (
+          {stepKey === "media" && (
             <div>
-              <p className="mb-2 text-xs text-text-3">1~{MAX_IMAGES}장, 첫 장이 대표사진으로 노출돼요.</p>
+              <p className="mb-2 text-xs text-text-3">
+                {MIN_IMAGES}~{MAX_IMAGES}장, 첫 장이 대표사진으로 노출돼요.
+              </p>
               <PhotoUploadGrid
                 items={items}
                 max={MAX_IMAGES}
@@ -694,14 +721,22 @@ export default function NewAuctionPage() {
                 onRemove={removeItem}
                 onReorder={setItems}
               />
-            </div>
-          )}
-          {stepKey === "video" && (
-            <div>
-              <p className="mb-2 text-xs text-text-3">
-                개봉·틸팅 등 실물을 확인할 수 있는 검수영상 1개를 올려주세요. 정품 신뢰도가 올라가요.
+              {/* 슬리브 안내(#279) — 경고가 아니라 촬영 요령이라 규칙선 강조 없이 helper로 둔다.
+                  사진·영상 양쪽에 걸리는 이야기라 두 슬롯 사이가 아니라 사진 아래에 한 번만 쓴다. */}
+              <p className="mt-2 text-xs leading-5 text-text-3">
+                포토카드는 <b className="font-bold text-text-2">슬리브·탑로더에서 꺼내고 촬영</b>해 주세요.
+                비닐의 반사와 흠집이 카드 자체의 상태로 오해받아 문의와 분쟁이 생겨요.
               </p>
-              <VideoUploadField video={video} onSelect={addVideo} onRemove={removeVideo} />
+
+              {AUCTION_VIDEO_ENABLED && (
+                <div className="mt-6 border-t border-border pt-5">
+                  <p className="mb-2 text-xs text-text-3">
+                    포카를 손에 들고 앞뒤로 천천히 돌리는 틸팅 영상 1개를 올려주세요. 홀로그램·코팅
+                    상태처럼 사진으로는 판단하기 어려운 부분이 영상에서 드러나요.
+                  </p>
+                  <VideoUploadField video={video} onSelect={addVideo} onRemove={removeVideo} />
+                </div>
+              )}
             </div>
           )}
           {stepKey === "verification" && (

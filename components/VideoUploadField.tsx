@@ -2,6 +2,11 @@
 
 import { useRef } from "react";
 import { FOCUS_RING } from "@/lib/ui";
+import {
+  MAX_VIDEO_DURATION_SEC,
+  MAX_VIDEO_SIZE_MB,
+  MIN_VIDEO_DURATION_SEC,
+} from "@/lib/video-validate";
 
 // 검수영상 슬롯 한 개의 상태. previewUrl은 로컬 object URL(즉시 프리뷰), 서버 트랜스코딩과 별개.
 export type VideoItem = {
@@ -36,7 +41,10 @@ export default function VideoUploadField({ video, onSelect, onRemove }: Props) {
           +
         </span>
         <span className="text-xs font-semibold">영상 선택</span>
-        <span className="text-[11px]">MP4·MOV·WebM · 60초 · 50MB 이하</span>
+        {/* 규칙 문구는 검증 상수에서 그대로 만든다 — 문구와 실제 판정이 어긋나면 그게 더 나쁘다. */}
+        <span className="text-[11px]">
+          MP4·MOV·WebM · {MIN_VIDEO_DURATION_SEC}~{MAX_VIDEO_DURATION_SEC}초 · {MAX_VIDEO_SIZE_MB}MB 이하
+        </span>
         <input
           ref={inputRef}
           type="file"

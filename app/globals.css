@@ -45,7 +45,7 @@
   --radius-r5: 22px;
 
   --shadow-card: 0 1px 3px rgba(17, 17, 24, 0.06), 0 4px 16px rgba(17, 17, 24, 0.04);
-  --shadow-primary: 0 8px 32px rgba(83, 38, 217, 0.18);
+  /* --shadow-primary(보라 글로우)는 #277에서 제거했다. 장식 그림자라 남겨두면 다시 쓰인다. */
   --shadow-modal: 0 24px 64px rgba(17, 17, 24, 0.16);
 
   --font-sans: var(--font-noto-sans-kr), -apple-system, sans-serif;
@@ -157,45 +157,13 @@ button {
   gap: 1rem;
 }
 
+/* 로고는 이제 마크 없이 워드마크 글자뿐이다(#277) — 모양은 components/Wordmark.tsx가 갖고,
+   여기는 헤더 안에서의 자리만 잡는다. */
 .logo {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 8px;
-  border-radius: var(--radius-r2);
-}
-
-.logo-i {
-  display: flex;
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-r2);
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 16px;
-}
-
-.logo-nm {
-  display: block;
-  color: var(--color-text-1);
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1.1;
-}
-
-.logo-ds {
-  display: block;
-  margin-top: 1px;
-  color: var(--color-text-3);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0;
-  line-height: 1.2;
+  border-radius: var(--radius-r1);
 }
 
 .srch {
@@ -260,10 +228,11 @@ button {
     background 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* 활성/hover는 연보라 알약이었다 — 보라는 상태를 말하는 자리에만 쓰고 배경에는 쓰지 않는다는
+   규칙과 어긋나, 배경을 걷고 글자만 잉크로 올린다(#277). 어디 있는지는 오히려 더 또렷하다. */
 .gnv a:hover,
 .gnv a.on {
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-text-1);
 }
 
 .hdr-r {
@@ -319,13 +288,14 @@ button {
   background: var(--color-accent);
 }
 
+/* CTA 라운드는 알약이었다 — /guide가 쓰는 4px 계열에 맞춰 7px로 내린다(#277). */
 .btn {
   display: inline-flex;
   height: 36px;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border-radius: 9999px;
+  border-radius: 7px;
   font-size: 13.5px;
   font-weight: 800;
   line-height: 1;
@@ -340,11 +310,12 @@ button {
   transform: translateY(-1px);
 }
 
+/* 보라 글로우(--shadow-primary)를 뺐다(#277) — 장식 그림자이고, 이 버튼은 전 페이지에 뜨므로
+   사이트 어디서나 보였다. */
 .btn-p {
   border: 1px solid var(--color-primary);
   background: var(--color-primary);
   color: #fff;
-  box-shadow: var(--shadow-primary);
   padding-inline: 18px;
 }
 
@@ -369,7 +340,7 @@ button {
 .auth-skel {
   width: 78px;
   height: 36px;
-  border-radius: 9999px;
+  border-radius: 7px;
   background: linear-gradient(90deg, var(--color-border) 0%, var(--color-surface-2) 50%, var(--color-border) 100%);
   background-size: 200% 100%;
   animation: fadeIn 180ms ease both;

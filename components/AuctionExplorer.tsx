@@ -21,6 +21,10 @@ export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: "price_desc", label: "높은 가격" },
 ];
 
+// 즉시판매는 마감이 없으므로 "마감임박" 정렬이 성립하지 않는다. 전용 페이지(/instant-sales)는
+// 이미 빼 뒀는데 홈 임베드만 SORT_OPTIONS 전체를 그대로 써서 이 항목이 홈에만 남아 있었다(#277).
+const INSTANT_SORT_OPTIONS = SORT_OPTIONS.filter((option) => option.key !== "ending_soon");
+
 const DEFAULT_SORT: SortKey = "latest";
 const DEBOUNCE_MS = 300;
 // 모바일은 2열(카드가 화면폭을 꽉 채우지 않게), sm 이상은 auto-fill로 데스크탑 밀도 유지.
@@ -75,6 +79,7 @@ export default function AuctionExplorer({
     }
   }, [saleType, sortBy]);
 
+  const sortOptions = saleType === "INSTANT" ? INSTANT_SORT_OPTIONS : SORT_OPTIONS;
   const heading = title ?? (saleType === "INSTANT" ? "즉시판매" : "진행 중인 경매");
   // 섹션 부제(제목 바로 아래). 건수는 노출하지 않는다.
   const subcopy = description ?? (saleType === "INSTANT" ? "기다리지 않고 바로 구매할 수 있는 포토카드" : "실시간 업데이트 · 지금 바로 확인하세요");
@@ -115,7 +120,7 @@ export default function AuctionExplorer({
         aria-label="정렬 기준"
       >
         {loading && <InlineSpinner />}
-        {SORT_OPTIONS.map((option) => (
+        {sortOptions.map((option) => (
           <button
             key={option.key}
             type="button"

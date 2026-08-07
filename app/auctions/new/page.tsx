@@ -7,7 +7,7 @@ import ArtistCombobox from "@/components/ArtistCombobox";
 import AuctionVerificationStep from "@/components/AuctionVerificationStep";
 import PhotoUploadGrid, { type PhotoItem } from "@/components/PhotoUploadGrid";
 import VideoUploadField, { type VideoItem } from "@/components/VideoUploadField";
-import { apiFetch, ApiError, getVideoStatus, uploadMediaImage, uploadMediaVideo } from "@/lib/api";
+import { apiFetch, ApiError } from "@/lib/api";
 import { compressImage } from "@/lib/image-compress";
 import { validateVideo } from "@/lib/video-validate";
 import { useAuth } from "@/lib/auth-context";
@@ -18,8 +18,11 @@ import type {
   ArtistMemberResponse,
   AuctionSaleType,
   AuctionStatus,
+  MediaUploadResponse,
   PhotocardGrade,
   PhotocardSource,
+  VideoStatusResponse,
+  VideoUploadResponse,
 } from "@/lib/types";
 
 const MAX_IMAGES = 12;
@@ -43,9 +46,22 @@ const STEP_KEYS: StepKey[] = [
 ];
 const TOTAL_STEPS = STEP_KEYS.length;
 
+// 업로드 실패 사유를 사람이 읽을 문장으로 바꾼다(#269).
+// 401은 리프레시까지 실패했다는 뜻이라 "다시 시도"로 안내하면 사용자가 같은 실패를 반복한다 —
+// 재로그인이 필요하다는 것을 분명히 말해야 한다.
+function uploadErrorMessage(err: unknown, what: string): string {
+  if (err instanceof ApiError) {
+    if (err.status === 401) {
+      return `로그인이 만료돼 ${what}을 올리지 못했어요. 다시 로그인한 뒤 이어서 등록해 주세요.`;
+    }
+    return err.message;
+  }
+  return `${what} 업로드에 실패했어요. 잠시 후 다시 시도해 주세요.`;
+}
+
 export default function NewAuctionPage() {
   const router = useRouter();
-  const { accessToken, isLoading: isAuthLoading, fetchWithAuth } = useAuth();
+  const { accessToken, isLoading: isAuthLoading, fetchWithAuth, fetchMultipartWithAuth } = useAuth();
 
   const artistFieldId = useId();
   const idolFieldId = useId();
@@ -105,7 +121,9 @@ export default function NewAuctionPage() {
     let cancelled = false;
     const timer = setInterval(async () => {
       try {
-        const s = await getVideoStatus(videoId, accessToken);
+        // 폴링도 갱신되는 경로로 간다 — catch가 오류를 삼키므로 토큰이 만료되면
+        // "처리 중"에서 영원히 멈춘 것처럼 보인다(#269).
+        const s = await fetchWithAuth<VideoStatusResponse>(`/api/media/videos/${videoId}`);
         if (cancelled) return;
         if (s.status === "READY") {
           setVideo((v) => (v ? { ...v, status: "ready" } : v));
@@ -120,7 +138,7 @@ export default function NewAuctionPage() {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [videoStatus, videoId, accessToken]);
+  }, [videoStatus, videoId, accessToken, fetchWithAuth]);
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -135,6 +153,28 @@ export default function NewAuctionPage() {
       router.replace("/login");
     }
   }, [isAuthLoading, accessToken, router]);
+
+  // 정산계좌가 없으면 폼을 채우게 두지 않는다(BE #260 게이트와 짝). 서버는 마지막 제출에서
+  // 409로 막는데, 그때는 사진까지 다 올린 뒤라 사용자가 한 번 더 처음부터 해야 한다.
+  // 여기서 먼저 세우면 "등록하러 갔다가 계좌부터 만들고 돌아오는" 한 번의 왕복으로 끝난다.
+  const [settlementReady, setSettlementReady] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (isAuthLoading || !accessToken) return;
+    let alive = true;
+    fetchWithAuth<unknown>("/api/members/me/settlement-account")
+      .then(() => {
+        if (alive) setSettlementReady(true);
+      })
+      .catch((err: unknown) => {
+        if (!alive) return;
+        // 404 = 미등록(정상 상태). 그 외 오류로 등록을 막으면 서버가 잠깐 흔들릴 때
+        // 판매 자체가 멈춘다 — 판정은 서버의 409에 맡기고 여기선 통과시킨다.
+        setSettlementReady(!(err instanceof ApiError && err.status === 404));
+      });
+    return () => {
+      alive = false;
+    };
+  }, [isAuthLoading, accessToken, fetchWithAuth]);
 
   useEffect(() => {
     apiFetch<ArtistListResponse>("/api/artists?size=100")
@@ -171,11 +211,18 @@ export default function NewAuctionPage() {
       void (async () => {
         try {
           const compressed = await compressImage(file); // 업로드 전 상한 리사이즈(대역폭 절감)
-          const uploaded = await uploadMediaImage(compressed, accessToken);
+          // fetchMultipartWithAuth를 쓰는 이유: 401이면 리프레시 후 재시도한다(#269).
+          // 액세스 토큰은 30분인데 이 폼은 5단계라, 사진 단계에 도달할 때쯤 만료돼 있기 쉽다.
+          const formData = new FormData();
+          formData.append("file", compressed);
+          const uploaded = await fetchMultipartWithAuth<MediaUploadResponse>("/api/media/images", formData);
           setItems((prev) => prev.map((x) => (x.id === it.id ? { ...x, status: "done", uploaded } : x)));
         } catch (err) {
-          const message = err instanceof ApiError ? err.message : "업로드 실패";
+          const message = uploadErrorMessage(err, "사진");
           setItems((prev) => prev.map((x) => (x.id === it.id ? { ...x, status: "error", error: message } : x)));
+          // 타일은 좁아서 사유를 다 못 보여준다 — 폼 상단에 한 번 띄운다. 이게 없으면
+          // 사용자도 우리도 "업로드 실패" 네 글자만 보고 원인을 추측하게 된다.
+          setError(message);
         }
       })();
     });
@@ -201,11 +248,14 @@ export default function NewAuctionPage() {
     const previewUrl = URL.createObjectURL(file);
     setVideo({ previewUrl, status: "uploading" });
     try {
-      const uploaded = await uploadMediaVideo(file, accessToken);
+      const formData = new FormData();
+      formData.append("file", file);
+      const uploaded = await fetchMultipartWithAuth<VideoUploadResponse>("/api/media/videos", formData);
       setVideo((v) => (v ? { ...v, status: "processing", videoId: uploaded.videoId } : v));
     } catch (err) {
-      const message = err instanceof ApiError ? err.message : "영상 업로드에 실패했어요.";
+      const message = uploadErrorMessage(err, "영상");
       setVideo((v) => (v ? { ...v, status: "error", error: message } : v));
+      setError(message);
     }
   }
 
@@ -321,10 +371,42 @@ export default function NewAuctionPage() {
     }
   }
 
-  if (isAuthLoading || !accessToken) {
+  if (isAuthLoading || !accessToken || settlementReady === null) {
     return (
       <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3" aria-live="polite">
         불러오는 중...
+      </div>
+    );
+  }
+
+  // 정산계좌 미등록 — 폼을 아예 열지 않는다. 판매 대금을 보낼 곳이 없는 상태로 낙찰되면
+  // 대금은 묶이고 구매자는 영문도 모른 채 기다린다.
+  if (!settlementReady) {
+    return (
+      <div className="mx-auto max-w-[520px] px-5 pt-16 pb-20">
+        <p className="text-[11px] font-extrabold tracking-[0.08em] text-primary">등록 전 한 가지</p>
+        <h1 className="mt-2 font-display text-[24px] font-extrabold tracking-[-0.035em] text-text-1">
+          정산계좌를 먼저 등록해 주세요
+        </h1>
+        <p className="mt-3 text-[13.5px] leading-[1.8] text-text-2">
+          판매 대금은 구매확정 후 등록하신 계좌로 들어와요. 계좌 없이 낙찰되면 대금을 보내드릴 수 없어
+          거래가 그대로 멈춥니다.
+        </p>
+        <p className="mt-2 text-[12.5px] leading-relaxed text-text-3">1분이면 끝나고, 한 번만 등록하면 돼요.</p>
+        <div className="mt-7 flex flex-wrap items-center gap-3">
+          <Link
+            href="/mypage?tab=settlement"
+            className={`inline-flex h-12 items-center rounded-[4px] bg-primary px-7 text-[14.5px] font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+          >
+            정산계좌 등록하러 가기
+          </Link>
+          <Link
+            href="/"
+            className={`inline-flex h-12 items-center rounded-[4px] border border-border-2 px-6 text-[14px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+          >
+            나중에 하기
+          </Link>
+        </div>
       </div>
     );
   }

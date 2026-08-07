@@ -35,6 +35,8 @@ export default function DeliveryAddressModal({
   const [address1, setAddress1] = useState("");
   const [address2, setAddress2] = useState("");
   const [postcodeOpen, setPostcodeOpen] = useState(false);
+  // 새 주소를 주소록에도 남길지. 기본 켬 — 대부분은 다음에도 같은 곳으로 받는다.
+  const [saveToBook, setSaveToBook] = useState(true);
   const postcodeBoxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -121,6 +123,21 @@ export default function DeliveryAddressModal({
         method: "POST",
         body,
       });
+      // 주문 배송지는 그 주문에 박제되는 스냅샷이라(발송 후 주소가 바뀌면 안 된다) 주소록에는
+      // 아무것도 남지 않는다. 그래서 여기서 새로 입력한 주소는 주소록에도 넣어준다 —
+      // 안 그러면 "입력했는데 배송지 탭에 없다"가 되고, 다음 낙찰 때 또 처음부터 입력해야 한다.
+      // 첫 주소면 서버가 자동으로 기본 배송지로 잡아줘서 그다음부터는 자동 확정된다.
+      if (selectedId === "new" && saveToBook) {
+        try {
+          await fetchWithAuth<unknown>("/api/members/me/delivery-addresses", {
+            method: "POST",
+            body: { ...body, label: "기본 배송지", isDefault: (addresses?.length ?? 0) === 0 },
+          });
+        } catch {
+          // 주소록 저장이 실패해도 주문 배송지는 이미 확정됐다 — 거래를 막지 않는다.
+          // 사용자는 나중에 마이페이지에서 직접 등록할 수 있다.
+        }
+      }
       onSaved();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "배송지를 저장하지 못했어요. 잠시 후 다시 시도해 주세요.");
@@ -236,6 +253,15 @@ export default function DeliveryAddressModal({
                   value={address2}
                   onChange={(e) => setAddress2(e.target.value)}
                 />
+                <label className="flex items-center gap-2 text-[12.5px] text-text-2">
+                  <input
+                    type="checkbox"
+                    checked={saveToBook}
+                    onChange={(e) => setSaveToBook(e.target.checked)}
+                    className={`h-4 w-4 accent-[var(--color-primary)] ${FOCUS_RING}`}
+                  />
+                  이 주소를 배송지로 저장 — 다음 낙찰부터 자동으로 확정돼요
+                </label>
               </div>
             )}
           </div>

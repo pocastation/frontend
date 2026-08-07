@@ -198,12 +198,19 @@ const TRADE_NAV: { key: Tab; label: string; icon: () => ReactNode }[] = [
   { key: "wishlist", label: "관심 목록", icon: HeartIcon },
 ];
 
-const ACCOUNT_NAV: { key: Tab; label: string; icon: () => ReactNode }[] = [
+const ACCOUNT_NAV: { key: Tab; label: string; icon: () => ReactNode; hidden?: boolean }[] = [
   { key: "profile", label: "내 정보", icon: UserIcon },
   { key: "notifications", label: "알림 설정", icon: BellIcon },
   { key: "shipping", label: "배송지 관리", icon: PinIcon },
-  { key: "payment", label: "결제수단", icon: CardIcon },
-  // 결제수단(내는 돈) 바로 다음에 정산계좌(받는 돈)를 둔다 — 판매자만 쓰지만 성격은 계정 정보다.
+  // 결제수단(카드 빌링키)은 목록에서만 감춘다(2026-08-07). 카드에 에스크로 상품이 없다는 것이
+  // 확인돼(docs ⓪-1) 결제 흐름이 가상계좌 전환 / 카드 유지 + 정산보류 두 갈래로 갈렸고 아직
+  // 결정 전이다. 결정도 안 난 수단을 스스로 등록하러 오게 둘 이유는 없다.
+  //
+  // ⚠️ 목록에서 빼되 **항목은 남긴다.** 지우면 TAB_KEYS에서도 빠져 `?tab=payment` 진입이
+  // 검증에서 튕기고, 그 순간 카드 미등록 낙찰자의 [카드 등록] CTA(SECOND_CHANCE_OFFERED)와
+  // 승계 배너 링크가 통째로 죽는다 — 낙찰됐는데 결제할 방법이 사라진다.
+  // 되살릴 때는 hidden만 지우면 된다.
+  { key: "payment", label: "결제수단", icon: CardIcon, hidden: true },
   { key: "settlement", label: "정산계좌", icon: BankIcon },
   { key: "settings", label: "계정 설정", icon: GearIcon },
 ];
@@ -544,7 +551,7 @@ export default function MyPage() {
 
           <p className="mt-2 px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold text-text-3">계정 관리</p>
           <nav aria-label="계정 관리 메뉴" className="flex flex-col">
-            {ACCOUNT_NAV.map(({ key, label, icon: Icon }) => (
+            {ACCOUNT_NAV.filter((item) => !item.hidden).map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 type="button"

@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import { apiFetch, ApiError, apiStreamUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useDeliveryAddressGate } from "@/lib/use-delivery-address-gate";
 import { useToast } from "@/lib/toast-context";
 import { formatKRW, formatCountdown, formatRelativeTime, formatDateTimeKST, isBeforeEnd, isEndingSoon } from "@/lib/format";
 import {
@@ -57,6 +59,9 @@ export default function BidSection({
 }: Props) {
   const { member, accessToken, fetchWithAuth } = useAuth();
   const toast = useToast();
+  // 배송지 관문(#283) — 없으면 CTA 라벨이 바뀌고 누를 때 등록 모달이 뜬다.
+  const { needsAddress, markRegistered, isGateRejection } = useDeliveryAddressGate();
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
 
   const [currentPrice, setCurrentPrice] = useState(initialCurrentPrice);
   const [bidCount, setBidCount] = useState(initialBidCount);
@@ -187,6 +192,12 @@ export default function BidSection({
   }
 
   async function handleBid() {
+    // 배송지가 없으면 입찰을 보내지 않고 등록부터 받는다(#283). 서버도 같은 조건으로 막지만,
+    // 여기서 잡아야 사용자가 오류 대신 다음 행동을 본다.
+    if (needsAddress) {
+      setAddressModalOpen(true);
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetchWithAuth<BidResponse>(`/api/auctions/${auctionId}/bids`, {
@@ -213,8 +224,12 @@ export default function BidSection({
       fetchBids();
     } catch (err) {
       const text = err instanceof ApiError ? err.message : "입찰에 실패했습니다. 잠시 후 다시 시도해주세요.";
-      // '이미 최고 입찰자'는 에러가 아니라 정상 상태 — 정보 톤으로 안내하고 버튼도 잠근다.
-      if (err instanceof ApiError && err.message.includes("최고 입찰")) {
+      // 서버 관문 거부 — 화면 상태가 낡았다는 뜻이다(다른 탭에서 배송지를 지웠거나 조회가 실패했다).
+      // 오류 토스트 대신 등록 모달로 이어 붙인다.
+      if (isGateRejection(err)) {
+        setAddressModalOpen(true);
+      } else if (err instanceof ApiError && err.message.includes("최고 입찰")) {
+        // '이미 최고 입찰자'는 에러가 아니라 정상 상태 — 정보 톤으로 안내하고 버튼도 잠근다.
         setIsTopBidder(true);
         toast.show({
           variant: "info",
@@ -366,8 +381,18 @@ export default function BidSection({
                   ? "현재 최고 입찰자예요"
                   : submitting
                     ? "처리 중..."
-                    : `${formatKRW(amount)} 입찰하기`}
+                    : needsAddress
+                      ? "배송지 등록하고 입찰하기"
+                      : `${formatKRW(amount)} 입찰하기`}
               </button>
+              {/* 누르기 전에 알려준다(#283) — 마감 임박에 알게 되면 등록할 시간이 없다.
+                  버튼은 비활성화하지 않는다. 회색 버튼은 이유를 말해주지 않는다. */}
+              {needsAddress && (
+                <p className="mt-2 text-[11.5px] leading-[1.6] text-text-3">
+                  낙찰되면 바로 보내드릴 수 있게 받을 주소를 먼저 등록해요.{" "}
+                  <b className="font-bold text-text-2">한 번만 하면 다음부터는 물어보지 않아요.</b>
+                </p>
+              )}
             </div>
           ))}
       </div>
@@ -476,6 +501,26 @@ export default function BidSection({
             </button>
           )}
         </div>
+      )}
+
+      {/* 배송지 등록(#283). 저장해도 입찰을 대신 눌러주지 않는다 — 입찰은 취소할 수 없는 청약이라
+          사용자가 한 번 더 눌러야 한다(약관 §13조의2 ②). 대신 버튼이 정상 라벨로 돌아오고
+          입찰 박스로 스크롤해 흐름이 끊긴 느낌을 줄인다. */}
+      {addressModalOpen && (
+        <DeliveryAddressGateModal
+          action="입찰"
+          onClose={() => setAddressModalOpen(false)}
+          onSaved={() => {
+            setAddressModalOpen(false);
+            markRegistered();
+            toast.show({
+              variant: "success",
+              text: "배송지를 등록했어요.",
+              sub: "이제 입찰할 수 있어요.",
+            });
+            scrollToBid();
+          }}
+        />
       )}
     </div>
   );

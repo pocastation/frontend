@@ -151,6 +151,7 @@ function PinIcon() {
   );
 }
 // Feather Icons credit-card — 아이콘 path는 손으로 그리지 않고 검증된 오픈소스 path를 그대로 사용.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- 결제수단 탭을 되살릴 때 그대로 쓴다(위 주석 참고).
 function CardIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -202,8 +203,12 @@ const ACCOUNT_NAV: { key: Tab; label: string; icon: () => ReactNode }[] = [
   { key: "profile", label: "내 정보", icon: UserIcon },
   { key: "notifications", label: "알림 설정", icon: BellIcon },
   { key: "shipping", label: "배송지 관리", icon: PinIcon },
-  { key: "payment", label: "결제수단", icon: CardIcon },
-  // 결제수단(내는 돈) 바로 다음에 정산계좌(받는 돈)를 둔다 — 판매자만 쓰지만 성격은 계정 정보다.
+  // 결제수단(카드 빌링키)은 당분간 숨긴다(2026-08-07). 카드에는 에스크로 상품이 없다는 것이
+  // 확인돼(docs ⓪-1) 결제 흐름이 가상계좌 전환 / 카드 유지 + 정산보류 두 갈래로 갈렸고, 아직
+  // 결정 전이다. 결정도 안 난 수단을 미리 등록시키면 되돌릴 때 그 카드들을 다 폐기해야 한다.
+  // 삭제가 아니라 목록에서만 뺀다 — 코드·API·직접 접근(?tab=payment)은 그대로 살아 있어
+  // 결정이 나면 이 한 줄을 되돌리는 것으로 끝난다.
+  // { key: "payment", label: "결제수단", icon: CardIcon },
   { key: "settlement", label: "정산계좌", icon: BankIcon },
   { key: "settings", label: "계정 설정", icon: GearIcon },
 ];

@@ -1,4 +1,4 @@
-import type { ApiResponse, MediaUploadResponse, VideoStatusResponse, VideoUploadResponse } from "./types";
+import type { ApiResponse } from "./types";
 
 // 이 fetch는 서버 컴포넌트(Node)에서도 실행될 수 있는데, 그 환경은 브라우저 쿠키를
 // 실을 수 없어 NEXT_PUBLIC_API_URL 누락을 눈치채기 어렵다 — 프로덕션에서는 로컬호스트로
@@ -82,77 +82,8 @@ export async function fetchNicknameSuggestion(): Promise<string> {
   return res.nickname;
 }
 
-// multipart 업로드는 apiFetch의 JSON 직렬화·Content-Type과 안 맞아 별도 함수로 분리.
-export async function uploadMediaImage(file: File, accessToken: string): Promise<MediaUploadResponse> {
-  const formData = new FormData();
-  formData.append("file", file);
 
-  const response = await fetch(`${resolveApiUrl()}/api/media/images`, {
-    method: "POST",
-    credentials: "include",
-    headers: { Authorization: `Bearer ${accessToken}` },
-    body: formData,
-  });
 
-  let json: ApiResponse<MediaUploadResponse>;
-  try {
-    json = await response.json();
-  } catch {
-    throw new ApiError("서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.", null, response.status);
-  }
-
-  if (!response.ok || !json.success) {
-    throw new ApiError(json.message ?? "이미지 업로드에 실패했습니다.", json.errorCode, response.status);
-  }
-
-  return json.data as MediaUploadResponse;
-}
-
-// 검수영상 업로드 — 원본을 올리면 서버가 트랜스코딩 잡을 걸고 PROCESSING을 반환한다.
-export async function uploadMediaVideo(file: File, accessToken: string): Promise<VideoUploadResponse> {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  const response = await fetch(`${resolveApiUrl()}/api/media/videos`, {
-    method: "POST",
-    credentials: "include",
-    headers: { Authorization: `Bearer ${accessToken}` },
-    body: formData,
-  });
-
-  let json: ApiResponse<VideoUploadResponse>;
-  try {
-    json = await response.json();
-  } catch {
-    throw new ApiError("서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.", null, response.status);
-  }
-
-  if (!response.ok || !json.success) {
-    throw new ApiError(json.message ?? "영상 업로드에 실패했습니다.", json.errorCode, response.status);
-  }
-  return json.data as VideoUploadResponse;
-}
-
-// 트랜스코딩 상태 지연 폴링 — 프론트가 주기적으로 호출해 READY/FAILED를 감지한다.
-export async function getVideoStatus(videoId: string, accessToken: string): Promise<VideoStatusResponse> {
-  const response = await fetch(`${resolveApiUrl()}/api/media/videos/${videoId}`, {
-    method: "GET",
-    credentials: "include",
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-
-  let json: ApiResponse<VideoStatusResponse>;
-  try {
-    json = await response.json();
-  } catch {
-    throw new ApiError("서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.", null, response.status);
-  }
-
-  if (!response.ok || !json.success) {
-    throw new ApiError(json.message ?? "영상 상태 조회에 실패했습니다.", json.errorCode, response.status);
-  }
-  return json.data as VideoStatusResponse;
-}
 
 export async function apiFetchMultipart<T>(
   path: string,

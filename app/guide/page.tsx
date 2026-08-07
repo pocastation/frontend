@@ -55,7 +55,7 @@ const SELLER_STEPS: GuideStep[] = [
           href="/guide/sell"
           className={`font-bold text-primary underline decoration-primary/30 underline-offset-4 transition-colors hover:decoration-primary ${FOCUS_RING}`}
         >
-          등록 7단계 자세히 보기
+          등록 6단계 자세히 보기
         </Link>
       </>
     ),

@@ -3,7 +3,7 @@ import type { ApiResponse } from "./types";
 // 이 fetch는 서버 컴포넌트(Node)에서도 실행될 수 있는데, 그 환경은 브라우저 쿠키를
 // 실을 수 없어 NEXT_PUBLIC_API_URL 누락을 눈치채기 어렵다 — 프로덕션에서는 로컬호스트로
 // 조용히 폴백하는 대신 실제로 요청이 나가는 시점에 크게 실패시킨다.
-function resolveApiUrl(): string {
+export function resolveApiUrl(): string {
   const configured = process.env.NEXT_PUBLIC_API_URL;
   if (configured) {
     return configured;
@@ -11,7 +11,11 @@ function resolveApiUrl(): string {
   if (process.env.NODE_ENV === "production") {
     throw new Error("NEXT_PUBLIC_API_URL이 설정되지 않았습니다. 프로덕션 배포 시 반드시 지정해야 합니다.");
   }
-  return "http://localhost:8080";
+  // 개발 기본값은 **빈 문자열**이다 — 절대 URL(:8080) 대신 같은 출처로 호출하고
+  // next.config의 rewrite가 백엔드로 넘긴다. 브라우저가 보는 출처가 하나가 되어
+  // 쿠키가 1st-party가 되고 CORS도 발생하지 않는다(로컬 로그인 유지 문제, next.config 주석 참고).
+  // staging에 붙여 보려면 NEXT_PUBLIC_API_URL을 명시하면 이 분기를 지나가지 않는다.
+  return "";
 }
 
 // 저장 방식에 따라 미디어 경로 형태가 다르다:

@@ -5,12 +5,11 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useGuestOnly, safeRedirectPath } from "@/lib/use-guest-only";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch, ApiError, resolveApiUrl } from "@/lib/api";
 import { EMAIL_NOT_VERIFIED } from "@/lib/auth-context";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import { GoogleIcon } from "@/components/GoogleIcon";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
 
 function LoginForm() {
   const router = useRouter();
@@ -188,7 +187,7 @@ function LoginForm() {
             디자인 통일성을 위해 의도적으로 감수한 트레이드오프 — 카카오가 아이콘 전용 공식
             에셋을 제공하면 교체 권장. */}
         <a
-          href={`${API_URL}/oauth2/authorization/kakao`}
+          href={`${resolveApiUrl()}/oauth2/authorization/kakao`}
           className={`flex flex-col items-center gap-1.5 rounded-r2 p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
         >
           <span className="block h-11 w-11 overflow-hidden rounded-full">
@@ -203,7 +202,7 @@ function LoginForm() {
           <span className="text-[11px] text-text-3">카카오</span>
         </a>
         <a
-          href={`${API_URL}/oauth2/authorization/naver`}
+          href={`${resolveApiUrl()}/oauth2/authorization/naver`}
           className={`flex flex-col items-center gap-1.5 rounded-r2 p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- 네이버 공식 아이콘형 에셋 그대로 사용 */}
@@ -211,7 +210,7 @@ function LoginForm() {
           <span className="text-[11px] text-text-3">네이버</span>
         </a>
         <a
-          href={`${API_URL}/oauth2/authorization/google`}
+          href={`${resolveApiUrl()}/oauth2/authorization/google`}
           className={`flex flex-col items-center gap-1.5 rounded-r2 p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
         >
           <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DADCE0] bg-white">

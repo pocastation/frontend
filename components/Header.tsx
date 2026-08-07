@@ -3,6 +3,7 @@
 import { useId, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import Wordmark from "@/components/Wordmark";
 import { useAuth } from "@/lib/auth-context";
 import { useNotifications } from "@/lib/notification-context";
 
@@ -99,12 +100,8 @@ export default function Header() {
   return (
     <header className="hdr">
       <div className="pg hdr-in">
-        <Link href="/" onClick={closeMenu} className="logo">
-          <span className="logo-i">★</span>
-          <span>
-            <span className="logo-nm">POCA</span>
-            <span className="logo-ds">K-POP 포카 경매</span>
-          </span>
+        <Link href="/" onClick={closeMenu} className="logo" aria-label="포카스테이션 홈">
+          <Wordmark className="text-[19px] leading-none" />
         </Link>
 
         <form className="srch" role="search" onSubmit={handleSearchSubmit}>

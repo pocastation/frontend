@@ -1,3 +1,4 @@
+import Wordmark from "@/components/Wordmark";
 import { BUSINESS_INFO, INTERMEDIARY_NOTICE } from "@/lib/business";
 
 const FOOTER_COLUMNS = [
@@ -53,11 +54,8 @@ export default function Footer() {
     <footer className="bg-text-1 px-4 pb-7 pt-12 text-white/40">
       <div className="mx-auto grid max-w-[1160px] grid-cols-2 gap-10 sm:grid-cols-4">
         <div>
-          <div className="mb-3 flex items-center gap-2 font-display text-sm font-extrabold text-white">
-            <span className="flex h-7 w-7 items-center justify-center rounded-r1 bg-primary text-sm">
-              ★
-            </span>
-            POCA
+          <div className="mb-3">
+            <Wordmark tone="inverse" className="text-[22px] leading-none" />
           </div>
           <p className="max-w-[22ch] text-xs leading-relaxed">
             K-pop 포토카드 특화 경매 플랫폼

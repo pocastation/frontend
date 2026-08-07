@@ -7,16 +7,20 @@ import WishlistHeart from "@/components/WishlistHeart";
 import { mediaUrl } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionResponse } from "@/lib/types";
-import { formatKRW, isEndingSoon } from "@/lib/format";
+import { formatKRW } from "@/lib/format";
 
-// v0 리톤 — 색 필 배지 대신 화이트 pill + 도트 인디케이터. 도트/텍스트만 상태색을 갖는다.
-const STATUS_BADGE: Record<string, { label: string; dot: string; text?: string; pulse?: boolean }> = {
-  LIVE: { label: "진행 중", dot: "bg-primary", pulse: true },
-  ENDING: { label: "마감 임박", dot: "bg-warn", text: "text-warn" },
-  ENDED_SOLD: { label: "종료", dot: "bg-text-3", text: "text-text-3" },
-  ENDED_NO_BIDS: { label: "유찰", dot: "bg-text-3", text: "text-text-3" },
-  SCHEDULED: { label: "시작 예정", dot: "bg-primary" },
-};
+// 매물은 카드가 아니다(#277). 번개장터·KREAM 실측 결과 두 서비스 모두 상품 목록에 테두리·그림자·
+// 카드 배경이 없고, 라운드는 카드가 아니라 **이미지에** 붙는다. 테두리를 두르면 격자에 수십 장이
+// 깔릴 때 상자가 사진보다 먼저 보인다 — 여기서는 이미지와 텍스트 스택만 두고 구분은 여백이 한다.
+//
+// 타일 비율은 4:5다. 포토카드 실물은 2:3이지만 판매자가 올리는 건 카드가 아니라 **카드를 찍은
+// 사진**이고, 휴대폰 세로 사진은 대개 3:4다. 4:5는 그것을 위아래 6.3%만 잘라 담는다(2:3이면
+// 좌우 11.1%가 잘려 카드 자체를 자른다).
+//
+// 상태 표시는 좌상단 칩 하나뿐이다. "진행 중" 배지는 없앴다 — 시계가 돌고 있다는 것이 곧 진행
+// 중이라는 뜻이라, 배지를 함께 띄우면 같은 사실을 두 번 말하게 된다.
+const OVERLAY_CHIP =
+  "absolute left-1.5 top-1.5 z-[2] rounded-[4px] bg-text-1/80 px-1.5 py-0.5 text-[9.5px] font-extrabold leading-[1.35] text-white";
 
 export default function AuctionCard({
   auction,
@@ -29,10 +33,7 @@ export default function AuctionCard({
 }) {
   const isLive = auction.status === "LIVE";
   const isInstantSale = auction.saleType === "INSTANT";
-  const badgeKey = isLive && !isInstantSale && isEndingSoon(auction.endAt) ? "ENDING" : auction.status;
-  const badge: { label: string; dot: string; text?: string; pulse?: boolean } = isInstantSale && isLive
-    ? { label: "즉시판매", dot: "bg-primary" }
-    : STATUS_BADGE[badgeKey] ?? { label: auction.status, dot: "bg-text-3", text: "text-text-3" };
+  const isEnded = auction.status === "ENDED_SOLD" || auction.status === "ENDED_NO_BIDS";
   const displayPrice = isInstantSale ? (auction.buyNowPrice ?? auction.currentPrice) : auction.currentPrice;
 
   const [imageFailed, setImageFailed] = useState(false);
@@ -49,24 +50,21 @@ export default function AuctionCard({
   }
 
   return (
-    <Link
-      href={`/auctions/${auction.id}`}
-      className={`block overflow-hidden rounded-r4 border border-border bg-surface shadow-card transition-all hover:-translate-y-[3px] hover:border-primary hover:shadow-[0_8px_28px_rgba(17,17,24,0.1)] active:translate-y-0 ${FOCUS_RING}`}
-    >
-      <div className="relative aspect-[2/3] overflow-hidden bg-gradient-to-br from-[#f4f4f5] to-[#e7e7ea]">
+    <Link href={`/auctions/${auction.id}`} className={`group block ${FOCUS_RING}`}>
+      {/* 라운드는 이 이미지 타일에만 있다. 로딩 전 지면은 단색이다 — 회색 그라디언트는
+          이미지가 없다는 사실을 굳이 장식하던 것이라 걷어냈다. */}
+      <div className="relative aspect-[4/5] overflow-hidden rounded-[12px] bg-surface-2">
         {showImage ? (
           <>
             {/* 로딩 중에는 shimmer가 이미지 뒤에서 비친다. 이미지는 항상 불투명하게 두어
-             * (SSR 하이드레이션 레이스로 onLoad를 놓쳐도) 절대 투명하게 갇히지 않는다 —
-             * 로드되면 불투명한 이미지가 shimmer를 자연히 덮는다. imageLoaded는 로딩이
-             * 확인되면 shimmer를 걷어 애니메이션을 멈추는 용도(정확성이 아니라 정리용). */}
+             * (SSR 하이드레이션 레이스로 onLoad를 놓쳐도) 절대 투명하게 갇히지 않는다. */}
             {!imageLoaded && <span className="sk-shimmer absolute inset-0" aria-hidden="true" />}
             {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일 */}
             <img
               ref={syncImageState}
               src={mediaUrl(auction.representativeThumbnailUrl!)}
               alt={auction.title}
-              className="absolute inset-0 h-full w-full object-cover"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageFailed(true)}
             />
@@ -82,51 +80,45 @@ export default function AuctionCard({
             </svg>
           </span>
         )}
-        <span
-          className="pointer-events-none absolute inset-0"
-          style={{ background: "linear-gradient(180deg, transparent 55%, rgba(17,17,24,0.4) 100%)" }}
-          aria-hidden="true"
-        />
 
-        <span
-          className={`absolute left-2 top-2 z-[2] flex items-center gap-1.5 rounded-full border border-border bg-white/90 px-2 py-1 text-[10.5px] font-extrabold backdrop-blur-sm ${badge.text ?? "text-text-2"}`}
-        >
-          <span className={`h-1.5 w-1.5 rounded-full ${badge.dot} ${badge.pulse ? "animate-pulse" : ""}`} aria-hidden="true" />
-          {badge.label}
-        </span>
-
+        {/* 경매는 남은 시간, 즉시판매는 마감이 없으므로 라벨. 둘 다 같은 잉크 칩이라
+            오버레이 언어가 하나다. */}
         {isLive && !isInstantSale && auction.endAt && <AuctionCountdown endAt={auction.endAt} />}
+        {isLive && isInstantSale && <span className={OVERLAY_CHIP}>즉시구매</span>}
 
-        <WishlistHeart
-          auctionId={auction.id}
-          active={wishlisted}
-          onToggle={onToggleWishlist}
-          className={`absolute right-2 top-2 z-[2] flex h-7 w-7 items-center justify-center rounded-full bg-white/85 text-text-2 backdrop-blur-sm transition-colors hover:text-accent ${FOCUS_RING}`}
-        />
+        {/* 거래가 끝난 매물은 칩이 아니라 지면 전체가 상태를 말한다. */}
+        {isEnded && (
+          <span className="absolute inset-0 z-[2] grid place-items-center bg-white/70 text-xs font-extrabold text-text-2">
+            {auction.status === "ENDED_NO_BIDS" ? "유찰" : isInstantSale ? "판매 완료" : "종료"}
+          </span>
+        )}
+
+        {!isEnded && (
+          <WishlistHeart
+            auctionId={auction.id}
+            active={wishlisted}
+            onToggle={onToggleWishlist}
+            className={`absolute right-1.5 bottom-1.5 z-[2] flex h-7 w-7 items-center justify-center rounded-full text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] transition-colors hover:text-accent ${FOCUS_RING}`}
+          />
+        )}
       </div>
 
-      <div className="px-3.5 py-3">
-        {auction.artistName && (
-          <p className="truncate text-[12px] font-semibold text-text-2">
-            {auction.artistName}
-          </p>
-        )}
-        <h3 className="mt-0.5 truncate text-sm font-bold leading-tight text-text-1">{auction.title}</h3>
-
-        <div className="my-2.5 h-px bg-border" />
-
-        <div className="flex items-baseline justify-between">
-          <span className="font-display text-base font-bold tracking-tight text-text-1">
-            {formatKRW(displayPrice)}
-          </span>
-          <span className="font-display text-[11px] text-text-3">
-            {isInstantSale
-              ? "즉시구매"
-              : auction.status === "ENDED_NO_BIDS"
-                ? "입찰 없음"
-                : `${auction.bidCount}회 입찰`}
-          </span>
-        </div>
+      {/* 가격이 첫 줄이다. 경매에서 가장 먼저 읽는 수치가 카드 바닥에서 입찰 횟수와 같은 크기로
+          눌려 있었다 — 번개장터가 가격을 제목 위에 두는 순서를 따른다. */}
+      <div className="px-0.5 pt-2.5">
+        <p className={`font-display text-[17px] font-extrabold tracking-[-0.03em] tabular-nums ${isEnded ? "text-text-3" : "text-text-1"}`}>
+          {formatKRW(displayPrice)}
+        </p>
+        <h3 className="mt-0.5 truncate text-[12.5px] text-text-2">
+          {auction.artistName ? `${auction.artistName} ${auction.title}` : auction.title}
+        </h3>
+        <p className="mt-1 text-[11px] text-text-3">
+          {isInstantSale
+            ? "즉시구매"
+            : auction.status === "ENDED_NO_BIDS"
+              ? "입찰 없음"
+              : `${auction.bidCount}회 입찰`}
+        </p>
       </div>
     </Link>
   );

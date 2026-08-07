@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import AuctionCountdown from "@/components/AuctionCountdown";
 import { mediaUrl } from "@/lib/api";
 import { formatKRW } from "@/lib/format";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
@@ -109,7 +110,7 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
         {current && (
           <Link
             href={`/auctions/${current.id}`}
-            className="group relative hidden aspect-[3/4] w-72 shrink-0 overflow-hidden rounded-r4 border border-white/20 transition duration-300 ease-out hover:-translate-y-1.5 hover:border-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:block"
+            className="group relative hidden aspect-[4/5] w-72 shrink-0 overflow-hidden rounded-[12px] border border-white/20 transition duration-300 ease-out hover:-translate-y-1.5 hover:border-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:block"
           >
             {current.representativeThumbnailUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
@@ -133,16 +134,15 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
               aria-hidden="true"
             />
 
-            <span className="absolute left-3 top-3 z-[2] flex items-center gap-1.5 rounded-r1 bg-primary px-2 py-1 text-[10px] font-extrabold tracking-wider">
-              <span className="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true" />
-              LIVE
-            </span>
+            {/* 목록 카드는 이미 흰 pill + 도트에서 잉크 시계 칩으로 정리했는데 여기만 보라 필
+                배지로 남아 있었다 — 같은 요소가 두 언어를 쓰던 셈이라 같은 칩으로 맞춘다(#277). */}
+            {current.endAt && <AuctionCountdown endAt={current.endAt} />}
 
             <WishlistHeart
               auctionId={current.id}
               active={wishlisted.has(current.id)}
               onToggle={(next) => toggle(current.id, next)}
-              className="absolute right-3 top-3 z-[2] flex h-7 w-7 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm hover:text-accent"
+              className="absolute right-3 top-3 z-[2] flex h-7 w-7 items-center justify-center rounded-full text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] hover:text-accent"
             />
 
             <div className="absolute inset-x-5 bottom-5 z-[2] text-white">

@@ -11,6 +11,7 @@ import SettlementAccountManager from "@/components/SettlementAccountManager";
 import ProfileTab from "@/components/ProfileTab";
 import SettingsTab from "@/components/SettingsTab";
 import NotificationSettings from "@/components/NotificationSettings";
+import BadgeChips from "@/components/BadgeChips";
 import DeliveryAddressModal from "@/components/DeliveryAddressModal";
 import ReviewComposerModal from "@/components/ReviewComposerModal";
 import OrderShipForm from "@/components/OrderShipForm";
@@ -529,6 +530,19 @@ export default function MyPage() {
             {member?.nickname.slice(0, 1).toUpperCase()}
           </span>
           <p className="mt-2.5 font-display text-sm font-extrabold text-text-1">{member?.nickname}</p>
+          {/* 레벨·배지는 대시보드가 아니라 여기다(#275) — 어느 탭에 있든 보이는 자리라
+              "나는 누구인가"에 해당하는 정보의 제자리다. 진행도 안내는 대시보드에 남긴다. */}
+          {(member?.trustLevel != null || (member?.badges?.length ?? 0) > 0) && (
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
+              {member?.trustLevel != null && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1">
+                  <span className="text-text-3">Lv.{member.trustLevel}</span>
+                  {member.trustLevelLabel}
+                </span>
+              )}
+              <BadgeChips badges={member?.badges ?? []} />
+            </div>
+          )}
         </div>
 
         <div className="mt-4 rounded-r3 border border-border bg-surface p-2 shadow-card">
@@ -604,13 +618,10 @@ export default function MyPage() {
               <DashboardStat label="판매 중인 경매" value={`${activeSelling.length}건`} swatch="bg-surface-3" />
             </div>
 
-            {/* 내 신뢰 레벨(§12.7) — 점수 숫자는 서버가 내려주지 않으므로 레벨·거래수·진행도만 표시. */}
+            {/* 내 신뢰 레벨 진행도(§12.7) — 레벨·배지는 왼쪽 사용자 카드로 옮겼고(#275)
+                여기는 "다음 레벨까지 얼마나"만 남긴다. 같은 정보를 두 곳에 두면 시선이 갈린다. */}
             {member?.trustLevel != null && (
               <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-r3 border border-border bg-surface p-4 shadow-card">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs font-bold text-text-1">
-                  <span className="text-text-3">Lv.{member.trustLevel}</span>
-                  {member.trustLevelLabel}
-                </span>
                 <span className="text-xs text-text-3">거래 {member.tradeCount ?? 0}회</span>
                 <span className="min-w-0 flex-1 text-xs text-text-2">
                   {member.levelCappedByTrust ? (

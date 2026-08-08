@@ -8,6 +8,7 @@ import { formatDateTimeKST, formatKRW } from "@/lib/format";
 import { DISPUTE_STATUS_LABEL, RETURN_REASON_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AdminDisputeListResponse, AdminDisputeResponse } from "@/lib/types";
+import AdminNotice from "@/components/AdminNotice";
 
 const PAGE_SIZE = 30;
 
@@ -93,14 +94,14 @@ export default function AdminDisputesPage() {
       </div>
 
       {notice && (
-        <p role="status" className="mb-3 rounded-r2 bg-primary-soft px-3 py-2 text-sm font-semibold text-primary">
+        <AdminNotice kind="info" className="mb-3">
           {notice}
-        </p>
+        </AdminNotice>
       )}
       {error && (
-        <p role="alert" className="mb-3 rounded-r2 bg-accent-soft px-3 py-2 text-sm font-semibold text-accent">
+        <AdminNotice kind="error" className="mb-3">
           {error}
-        </p>
+        </AdminNotice>
       )}
 
       <div className="min-h-[560px] overflow-hidden rounded-r3 border border-border bg-surface lg:grid lg:grid-cols-[340px_minmax(0,1fr)]">

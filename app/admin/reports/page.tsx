@@ -168,7 +168,7 @@ export default function AdminReportsPage() {
 
           <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
-          <div className="overflow-x-auto rounded-r3 border border-border bg-surface shadow-card">
+          <div className="overflow-x-auto rounded-r3 border border-border bg-surface">
             <table className="w-full min-w-[640px] border-collapse">
               <thead>
                 <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
@@ -251,11 +251,11 @@ export default function AdminReportsPage() {
               신고를 선택하면 상세 내용과 처리 기능이 표시됩니다.
             </div>
           ) : detailLoading || !detail ? (
-            <div className="rounded-r3 border border-border bg-surface p-8 text-center text-sm text-text-3 shadow-card">
+            <div className="rounded-r3 border border-border bg-surface p-8 text-center text-sm text-text-3">
               {detailLoading ? "불러오는 중..." : "정보를 불러오지 못했습니다."}
             </div>
           ) : (
-            <div className="rounded-r3 border border-border bg-surface p-4 shadow-card">
+            <div className="rounded-r3 border border-border bg-surface p-4">
               <div className="flex items-start justify-between gap-2">
                 <h2 className="font-display text-base font-extrabold text-text-1">{detail.auctionTitle ?? "-"}</h2>
                 <StatusBadge tone={REPORT_STATUS_TONE[detail.reports[0]?.status ?? "RECEIVED"]} className="shrink-0">

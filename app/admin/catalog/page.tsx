@@ -331,7 +331,7 @@ export default function AdminCatalogPage() {
         </div>
       )}
 
-      <section className="mt-6 rounded-r2 border border-border bg-white p-4 shadow-card">
+      <section className="mt-6 rounded-r2 border border-border bg-white p-4">
         <h2 className="font-display text-base font-extrabold text-text-1">카탈로그 요약</h2>
         <p className="mt-1 text-xs text-text-3">등록된 스타와 운영 상태입니다.</p>
 
@@ -390,7 +390,7 @@ export default function AdminCatalogPage() {
       </section>
 
       <section className="mt-6 grid gap-4 lg:grid-cols-3">
-        <form onSubmit={handleCreateArtist} className="rounded-r2 border border-border bg-white p-4 shadow-card">
+        <form onSubmit={handleCreateArtist} className="rounded-r2 border border-border bg-white p-4">
           <h2 className="font-display text-base font-extrabold text-text-1">스타 등록</h2>
           <div className="mt-4 flex flex-col gap-3">
             <input
@@ -461,7 +461,7 @@ export default function AdminCatalogPage() {
           </div>
         </form>
 
-        <form onSubmit={handleCreateIdol} className="rounded-r2 border border-border bg-white p-4 shadow-card">
+        <form onSubmit={handleCreateIdol} className="rounded-r2 border border-border bg-white p-4">
           <h2 className="font-display text-base font-extrabold text-text-1">멤버 등록</h2>
           <div className="mt-4 flex flex-col gap-3">
             <input
@@ -510,7 +510,7 @@ export default function AdminCatalogPage() {
           </div>
         </form>
 
-        <form onSubmit={handleAddMembership} className="rounded-r2 border border-border bg-white p-4 shadow-card">
+        <form onSubmit={handleAddMembership} className="rounded-r2 border border-border bg-white p-4">
           <h2 className="font-display text-base font-extrabold text-text-1">스타-멤버 연결</h2>
           <div className="mt-4 flex flex-col gap-3">
             <select

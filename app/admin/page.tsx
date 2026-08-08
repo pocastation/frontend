@@ -15,13 +15,21 @@ import {
 import { FOCUS_RING } from "@/lib/ui";
 import type { AdminDashboardResponse, AuctionStatus } from "@/lib/types";
 import StatusBadge from "@/components/StatusBadge";
+import AdminNotice from "@/components/AdminNotice";
 
-function StatCard({ label, value, tone }: { label: string; value: string; tone: string }) {
+/**
+ * 대시보드 통계 한 칸(#294).
+ *
+ * <p>예전에는 다섯 개가 각각 카드였다. 통계는 <b>서로 비교하는 값</b>이라 각자 껍데기에 갇힐 이유가
+ * 없고, 모바일 2열에서는 카드 패딩 탓에 숫자가 잘렸다. 헤어라인으로만 나누면 한 줄로 읽힌다.
+ *
+ * <p>색 스와치도 뺐다 — 다섯 개에 서로 다른 파스텔을 물려 놨는데 그 색이 아무 뜻도 없었다.
+ */
+function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-r3 border border-border bg-surface p-4 shadow-card">
-      <span className={`mb-2.5 block h-2 w-6 rounded-full ${tone}`} aria-hidden="true" />
+    <div className="min-w-0 flex-1 basis-[128px] border-l border-border px-4 first:border-l-0 first:pl-0">
       <p className="text-xs font-bold text-text-3">{label}</p>
-      <p className="mt-1.5 font-display text-2xl font-extrabold text-text-1">{value}</p>
+      <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1">{value}</p>
     </div>
   );
 }
@@ -75,21 +83,22 @@ export default function AdminDashboardPage() {
       <p className="mt-1.5 text-sm text-text-3">Pocastation 운영 현황을 한눈에 확인하세요.</p>
 
       {error && (
-        <p role="alert" className="mt-5 rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
+        <AdminNotice kind="error" className="mt-5">
           {error}
-        </p>
+        </AdminNotice>
       )}
 
-      <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-        <StatCard label="전체 회원 수" value={loading ? "—" : `${data?.totalMembers ?? 0}명`} tone="bg-primary-soft" />
-        <StatCard label="오늘 신규 가입" value={loading ? "—" : `${data?.todaySignups ?? 0}명`} tone="bg-ok-soft" />
-        <StatCard label="진행 중인 경매" value={loading ? "—" : `${data?.liveAuctions ?? 0}건`} tone="bg-surface-3" />
-        <StatCard label="처리 대기 신고" value={loading ? "—" : `${data?.pendingReportCount ?? 0}건`} tone="bg-accent-soft" />
-        <StatCard label="처리 대기 건의" value={loading ? "—" : `${data?.pendingSuggestionCount ?? 0}건`} tone="bg-primary-soft" />
+      {/* 위아래 규칙선 안에서 세로선으로만 나눈다 — 다섯 값이 한 덩어리로 읽혀야 비교가 된다. */}
+      <div className="mt-6 flex flex-wrap gap-y-4 border-y border-border py-4">
+        <Stat label="전체 회원 수" value={loading ? "—" : `${data?.totalMembers ?? 0}명`} />
+        <Stat label="오늘 신규 가입" value={loading ? "—" : `${data?.todaySignups ?? 0}명`} />
+        <Stat label="진행 중인 경매" value={loading ? "—" : `${data?.liveAuctions ?? 0}건`} />
+        <Stat label="처리 대기 신고" value={loading ? "—" : `${data?.pendingReportCount ?? 0}건`} />
+        <Stat label="처리 대기 건의" value={loading ? "—" : `${data?.pendingSuggestionCount ?? 0}건`} />
       </div>
 
       <div className="mt-8 grid gap-5 lg:grid-cols-2">
-        <section className="rounded-r3 border border-border bg-surface p-4 shadow-card">
+        <section className="rounded-r3 border border-border bg-surface p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-sm font-extrabold text-text-1">최근 가입 회원</h2>
             <Link href="/admin/members" className={`text-xs font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
@@ -121,7 +130,7 @@ export default function AdminDashboardPage() {
           )}
         </section>
 
-        <section className="rounded-r3 border border-border bg-surface p-4 shadow-card">
+        <section className="rounded-r3 border border-border bg-surface p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-sm font-extrabold text-text-1">최근 등록 경매</h2>
             <Link href="/auctions" className={`text-xs font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>

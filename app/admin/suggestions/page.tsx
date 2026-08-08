@@ -12,6 +12,7 @@ import {
 import { FOCUS_RING } from "@/lib/ui";
 import type { AdminSuggestionListResponse, AdminSuggestionResponse, SuggestionStatus } from "@/lib/types";
 import StatusBadge from "@/components/StatusBadge";
+import AdminNotice from "@/components/AdminNotice";
 
 const STATUS_FILTERS: { value: SuggestionStatus | "ALL"; label: string }[] = [
   { value: "RECEIVED", label: "접수" },
@@ -128,14 +129,14 @@ export default function AdminSuggestionsPage() {
       </div>
 
       {notice && (
-        <p role="status" className="mb-3 rounded-r2 bg-primary-soft px-3 py-2 text-sm font-semibold text-primary">
+        <AdminNotice kind="info" className="mb-3">
           {notice}
-        </p>
+        </AdminNotice>
       )}
       {error && (
-        <p role="alert" className="mb-3 rounded-r2 bg-accent-soft px-3 py-2 text-sm font-semibold text-accent">
+        <AdminNotice kind="error" className="mb-3">
           {error}
-        </p>
+        </AdminNotice>
       )}
 
       {loading ? (
@@ -143,9 +144,11 @@ export default function AdminSuggestionsPage() {
       ) : items.length === 0 ? (
         <p className="py-16 text-center text-sm text-text-3">해당 상태의 건의가 없어요.</p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        // 균일 반복 카드를 헤어라인 행으로(#294) — 같은 껍데기가 N번 반복되면 각 건이
+        // 분리돼 보일 뿐 어느 것이 급한지는 말해주지 않는다. 구분은 선이 한다.
+        <ul className="flex flex-col divide-y divide-border border-y border-border">
           {items.map((s) => (
-            <li key={s.id} className="rounded-r3 border border-border bg-surface p-4 shadow-card">
+            <li key={s.id} className="py-4">
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-surface-3 px-2 py-0.5 text-[11px] font-bold text-text-2">
                   {SUGGESTION_KIND_LABEL[s.kind]}

@@ -11,6 +11,7 @@ import type {
   AdminInquiryResponse,
   InquiryStatus,
 } from "@/lib/types";
+import AdminNotice from "@/components/AdminNotice";
 
 type Filter = InquiryStatus | "ALL";
 
@@ -161,14 +162,14 @@ export default function AdminInquiriesPage() {
       </div>
 
       {notice && (
-        <p role="status" className="mb-3 rounded-r2 bg-primary-soft px-3 py-2 text-sm font-semibold text-primary">
+        <AdminNotice kind="info" className="mb-3">
           {notice}
-        </p>
+        </AdminNotice>
       )}
       {error && (
-        <p role="alert" className="mb-3 rounded-r2 bg-accent-soft px-3 py-2 text-sm font-semibold text-accent">
+        <AdminNotice kind="error" className="mb-3">
           {error}
-        </p>
+        </AdminNotice>
       )}
 
       <div className="min-h-[560px] overflow-hidden rounded-r3 border border-border bg-surface lg:grid lg:grid-cols-[320px_minmax(0,1fr)]">

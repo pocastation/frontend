@@ -266,7 +266,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
       <div className="flex gap-6">
         <aside className="hidden w-[220px] shrink-0 lg:block">
-          <div className="sticky top-20 rounded-r3 border border-border bg-surface p-2 shadow-card">
+          <div className="sticky top-20 rounded-r3 border border-border bg-surface p-2">
             <p className="px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold tracking-wide text-primary">POCASTATION ADMIN</p>
             {NAV_GROUPS.map((group) => (
               <div key={group.title}>

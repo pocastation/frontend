@@ -8,11 +8,13 @@ import { formatDateTimeKST } from "@/lib/format";
 import { REVIEW_REPORT_REASON_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AdminReviewReportResponse } from "@/lib/types";
+import AdminNotice from "@/components/AdminNotice";
 
 // 별점 표시(★ 채움).
 function Stars({ value }: { value: number }) {
   return (
-    <span className="text-[#f5b301]" aria-label={`별점 ${value}점`}>
+    // 하드코딩 노랑을 별빛 골드 토큰으로(#294) — 브랜드에 이미 별 색이 있다.
+    <span className="text-[var(--color-star-line)]" aria-label={`별점 ${value}점`}>
       {"★★★★★".slice(0, value)}
       <span className="text-border-2">{"★★★★★".slice(value)}</span>
     </span>
@@ -64,9 +66,9 @@ export default function AdminReviewsPage() {
       <ReportScopeTabs />
 
       {error && (
-        <p role="alert" className="mt-4 rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
+        <AdminNotice kind="error" className="mt-4">
           {error}
-        </p>
+        </AdminNotice>
       )}
 
       {loading ? (

@@ -14,6 +14,7 @@ import type {
   MemberStatusAction,
 } from "@/lib/types";
 import StatusBadge from "@/components/StatusBadge";
+import AdminNotice from "@/components/AdminNotice";
 
 const PAGE_SIZE = 20;
 const DEBOUNCE_MS = 300;
@@ -284,7 +285,7 @@ export default function AdminMembersPage() {
             </p>
           )}
 
-          <div className="overflow-x-auto rounded-r3 border border-border bg-surface shadow-card">
+          <div className="overflow-x-auto rounded-r3 border border-border bg-surface">
             <table className="w-full min-w-[560px] border-collapse">
               <thead>
                 <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
@@ -307,12 +308,18 @@ export default function AdminMembersPage() {
                     <tr
                       key={m.id}
                       onClick={() => openDetail(m.id)}
+                      // 선택 상태(연보라)는 규칙상 허용되는 「선택」이라 남긴다. 정지 행만
+                      // 전체 배경 워시에서 좌측 규칙선으로 바꿨다(#294).
                       className={`cursor-pointer border-b border-border text-[13px] transition-colors last:border-0 hover:bg-surface-2 ${
                         selectedId === m.id ? "bg-primary-soft/50" : ""
-                      } ${m.status === "SUSPENDED" ? "bg-accent-soft/40" : ""}`}
+                      }`}
                     >
                       {/* 가입 방식을 이메일 칸에서 여기로 옮겼다(#291) — 이메일에 온전한 폭을 주기 위해서다. */}
-                      <td className="px-4 py-3 font-bold text-text-1">
+                      <td
+                        className={`px-4 py-3 font-bold text-text-1 ${
+                          m.status === "SUSPENDED" ? "border-l-2 border-l-accent" : "border-l-2 border-l-transparent"
+                        }`}
+                      >
                         <span className="block">{m.nickname}</span>
                         {/* 변하지 않는 짧은 식별자(UUID 앞 8자리) — 닉 변경·동명이인과 무관하게 특정용. */}
                         <span className="font-mono text-[11px] font-normal text-text-3">#{m.id.slice(0, 8)}</span>
@@ -362,11 +369,11 @@ export default function AdminMembersPage() {
               회원을 선택하면 상세 정보와 관리 기능이 표시됩니다.
             </div>
           ) : detailLoading || !detail ? (
-            <div className="rounded-r3 border border-border bg-surface p-8 text-center text-sm text-text-3 shadow-card">
+            <div className="rounded-r3 border border-border bg-surface p-8 text-center text-sm text-text-3">
               {detailLoading ? "불러오는 중..." : "정보를 불러오지 못했습니다."}
             </div>
           ) : (
-            <div className="rounded-r3 border border-border bg-surface p-4 shadow-card">
+            <div className="rounded-r3 border border-border bg-surface p-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <h2 className="font-display text-base font-extrabold text-text-1">{detail.nickname}</h2>
@@ -509,7 +516,8 @@ export default function AdminMembersPage() {
                   <button
                     type="button"
                     onClick={() => { setRoleTarget("USER"); setRoleReason(""); setRoleError(null); }}
-                    className={`h-10 w-full rounded-r2 border border-[#fbdca8] bg-[#fff7ed] text-sm font-bold text-[#b45309] transition-opacity hover:opacity-90 ${FOCUS_RING}`}
+                    // 하드코딩 주황을 별빛 골드 토큰으로(#294). 배경 필 대신 테두리.
+                    className={`h-10 w-full rounded-r2 border border-[var(--color-star-line)] text-sm font-bold text-[var(--color-star-ink)] transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
                   >
                     관리자 권한 회수
                   </button>
@@ -631,9 +639,9 @@ export default function AdminMembersPage() {
               className={`mt-3 w-full resize-none rounded-r2 border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
             />
             {roleError && (
-              <p role="alert" className="mt-2 rounded-r2 bg-accent-soft px-3 py-2 text-[12px] font-semibold text-accent">
-                {roleError}
-              </p>
+              <AdminNotice kind="error" className="mt-2">
+          {roleError}
+        </AdminNotice>
             )}
             <div className="mt-3 flex gap-2">
               <button
@@ -658,7 +666,9 @@ export default function AdminMembersPage() {
       )}
 
       {roleToast && (
-        <div className="fixed bottom-6 left-1/2 z-50 flex max-w-sm -translate-x-1/2 items-start gap-2.5 rounded-r3 border border-[#bfe8d2] bg-ok-soft px-4 py-3 shadow-modal">
+        // 떠 있는 토스트는 지면 위에 얹히므로 배경·그림자를 남긴다 — 인라인 알림과 성격이 다르다.
+        // 하드코딩 테두리만 토큰으로 바꿨다(#294).
+        <div className="fixed bottom-6 left-1/2 z-50 flex max-w-sm -translate-x-1/2 items-start gap-2.5 rounded-r3 border border-ok/30 bg-ok-soft px-4 py-3 shadow-modal">
           <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ok text-[11px] font-bold text-white">✓</span>
           <p className="text-[12.5px] font-semibold leading-relaxed text-ok">{roleToast}</p>
         </div>

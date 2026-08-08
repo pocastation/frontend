@@ -286,7 +286,7 @@ export default function AdminAuctionsPage() {
 
       <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
-      <div className="overflow-x-auto rounded-r3 border border-border bg-surface shadow-card">
+      <div className="overflow-x-auto rounded-r3 border border-border bg-surface">
         {/* 유형 컬럼을 제목 아래로 내려 8열 → 7열, 최소폭 980 → 900(#291).
             지면 상한이 1720이라 1440 모니터에서 콘텐츠 1164px — 이제 여유가 264px 있다. */}
         <table className="w-full min-w-[900px] border-collapse">
@@ -309,18 +309,19 @@ export default function AdminAuctionsPage() {
                 </td>
               </tr>
             ) : (
+              // 행 전체를 파스텔로 칠하던 것을 첫 칸의 좌측 규칙선으로 바꿨다(#294).
+              // 같은 정보를 주면서 색 면적은 2px로 줄고, 하드코딩 주황도 사라진다.
               auctions.map((a) => (
-                <tr
-                  key={a.id}
-                  className={`border-b border-border text-[13px] last:border-0 ${
-                    a.status === "PENDING_REVIEW"
-                      ? "bg-[#fff7ed]/40"
-                      : a.status === "REJECTED" || a.status === "CANCELLED"
-                        ? "bg-accent-soft/30"
-                        : ""
-                  }`}
-                >
-                  <td className="px-4 py-3">
+                <tr key={a.id} className="border-b border-border text-[13px] last:border-0">
+                  <td
+                    className={`px-4 py-3 ${
+                      a.status === "PENDING_REVIEW"
+                        ? "border-l-2 border-l-[var(--color-star-line)]"
+                        : a.status === "REJECTED" || a.status === "CANCELLED"
+                          ? "border-l-2 border-l-accent"
+                          : "border-l-2 border-l-transparent"
+                    }`}
+                  >
                     {a.status === "PENDING_REVIEW" ? (
                       <button
                         type="button"
@@ -365,7 +366,9 @@ export default function AdminAuctionsPage() {
                           setReviewTarget(a);
                           setNotice(null);
                         }}
-                        className={`rounded-full border border-[#fdba74] bg-[#fff7ed] px-3 py-1 text-xs font-bold text-[#b45309] transition-colors hover:bg-[#ffedd5] ${FOCUS_RING}`}
+                        // 하드코딩 주황 3색을 별빛 골드 토큰으로(#294). 배경 필 대신 테두리로 —
+                        // 조치 버튼이 상태 배지보다 강해 보이면 안 된다.
+                        className={`rounded-full border border-[var(--color-star-line)] px-3 py-1 text-xs font-bold text-[var(--color-star-ink)] transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
                       >
                         검수
                       </button>

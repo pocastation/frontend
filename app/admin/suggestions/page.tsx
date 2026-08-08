@@ -6,11 +6,12 @@ import { useAuth } from "@/lib/auth-context";
 import { formatRelativeTime } from "@/lib/format";
 import {
   SUGGESTION_KIND_LABEL,
-  SUGGESTION_STATUS_BADGE_CLASS,
+  SUGGESTION_STATUS_TONE,
   SUGGESTION_STATUS_LABEL,
 } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AdminSuggestionListResponse, AdminSuggestionResponse, SuggestionStatus } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
 
 const STATUS_FILTERS: { value: SuggestionStatus | "ALL"; label: string }[] = [
   { value: "RECEIVED", label: "접수" },
@@ -149,9 +150,9 @@ export default function AdminSuggestionsPage() {
                 <span className="rounded-full bg-surface-3 px-2 py-0.5 text-[11px] font-bold text-text-2">
                   {SUGGESTION_KIND_LABEL[s.kind]}
                 </span>
-                <span className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${SUGGESTION_STATUS_BADGE_CLASS[s.status]}`}>
+                <StatusBadge tone={SUGGESTION_STATUS_TONE[s.status]}>
                   {SUGGESTION_STATUS_LABEL[s.status]}
-                </span>
+                </StatusBadge>
                 <span className="ml-auto text-[11px] text-text-3">{formatRelativeTime(s.createdAt)}</span>
               </div>
               <p className="mt-2 text-sm font-bold text-text-1">{s.name}</p>

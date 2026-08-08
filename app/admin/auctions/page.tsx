@@ -8,9 +8,9 @@ import { useAuth } from "@/lib/auth-context";
 import { formatKRW, formatTimeLeft } from "@/lib/format";
 import {
   AUCTION_CANCELLATION_REASON_OPTIONS,
-  AUCTION_SALE_TYPE_BADGE_CLASS,
+  AUCTION_SALE_TYPE_TONE,
   AUCTION_SALE_TYPE_LABEL,
-  AUCTION_STATUS_BADGE_CLASS,
+  AUCTION_STATUS_TONE,
   AUCTION_STATUS_LABEL,
 } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
@@ -21,6 +21,7 @@ import type {
   AuctionSaleType,
   AuctionStatus,
 } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
 
 const PAGE_SIZE = 20;
 const DEBOUNCE_MS = 300;
@@ -337,19 +338,18 @@ export default function AdminAuctionsPage() {
                       </div>
                     )}
                   </td>
-                  {/* 배지에 whitespace-nowrap이 없으면 좁은 열에서 "경매판매"가 두 줄로 쪼개진다. */}
                   <td className="whitespace-nowrap px-4 py-3">
-                    <span className={`whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-extrabold ${AUCTION_SALE_TYPE_BADGE_CLASS[a.saleType]}`}>
+                    <StatusBadge tone={AUCTION_SALE_TYPE_TONE[a.saleType]}>
                       {AUCTION_SALE_TYPE_LABEL[a.saleType]}
-                    </span>
+                    </StatusBadge>
                   </td>
                   <td className="px-4 py-3 text-text-2">{a.sellerNickname ?? "—"}</td>
                   <td className="whitespace-nowrap px-4 py-3 font-display font-bold text-text-1">{formatKRW(a.currentPrice)}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-text-2">{a.saleType === "INSTANT" ? "즉시구매" : `${a.bidCount}회`}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-extrabold ${AUCTION_STATUS_BADGE_CLASS[a.status]}`}>
+                    <StatusBadge tone={AUCTION_STATUS_TONE[a.status]}>
                       {AUCTION_STATUS_LABEL[a.status]}
-                    </span>
+                    </StatusBadge>
                     {a.status === "CANCELLED" && a.cancellationReason && (
                       <span className="mt-1 block text-[10.5px] text-text-3">사유: {a.cancellationReason}</span>
                     )}

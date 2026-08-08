@@ -1,3 +1,4 @@
+import type { StatusTone } from "@/components/StatusBadge";
 import type {
   SuggestionKind,
   SuggestionStatus,
@@ -75,10 +76,10 @@ export const ARTIST_STATUS_LABEL: Record<ArtistStatus, string> = {
   DISBANDED: "해체",
 };
 
-export const ARTIST_STATUS_BADGE_CLASS: Record<ArtistStatus, string> = {
-  ACTIVE: "bg-ok-soft text-ok",
-  HIATUS: "bg-[#fff7ed] text-[#b45309]",
-  DISBANDED: "bg-surface-2 text-text-3",
+export const ARTIST_STATUS_TONE: Record<ArtistStatus, StatusTone> = {
+  ACTIVE: "ok",
+  HIATUS: "warn",
+  DISBANDED: "muted",
 };
 
 // 어드민 회원 상태 — 실제 상태를 그대로 반영(정지/탈퇴를 감추지 않음).
@@ -88,10 +89,10 @@ export const MEMBER_STATUS_LABEL: Record<MemberStatus, string> = {
   WITHDRAWN: "탈퇴",
 };
 
-export const MEMBER_STATUS_BADGE_CLASS: Record<MemberStatus, string> = {
-  ACTIVE: "bg-ok-soft text-ok",
-  SUSPENDED: "bg-accent-soft text-accent",
-  WITHDRAWN: "bg-surface-2 text-text-3",
+export const MEMBER_STATUS_TONE: Record<MemberStatus, StatusTone> = {
+  ACTIVE: "ok",
+  SUSPENDED: "danger",
+  WITHDRAWN: "muted",
 };
 
 // 가입 방식 표시 — 소셜은 provider 그대로, 그 외는 이메일.
@@ -124,16 +125,18 @@ export const SELLER_AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
   REJECTED: "보완 필요",
 };
 
-export const AUCTION_STATUS_BADGE_CLASS: Record<AuctionStatus, string> = {
-  DRAFT: "bg-surface-2 text-text-3",
-  PENDING_REVIEW: "bg-[#fff7ed] text-[#b45309]",
-  APPROVED: "bg-ok-soft text-ok",
-  REJECTED: "bg-accent-soft text-accent",
-  SCHEDULED: "bg-primary-soft text-primary",
-  LIVE: "bg-ok-soft text-ok",
-  ENDED_SOLD: "bg-surface-2 text-text-3",
-  ENDED_NO_BIDS: "bg-surface-2 text-text-3",
-  CANCELLED: "bg-accent-soft text-accent",
+// SCHEDULED에서 보라를 뺐다(#289) — 보라는 CTA·선택 상태에만 쓴다는 규칙을 어기고 있었고,
+// 「예정」은 판단이 없는 중립 상태라 색으로 강조할 이유도 없다.
+export const AUCTION_STATUS_TONE: Record<AuctionStatus, StatusTone> = {
+  DRAFT: "muted",
+  PENDING_REVIEW: "warn",
+  APPROVED: "ok",
+  REJECTED: "danger",
+  SCHEDULED: "neutral",
+  LIVE: "ok",
+  ENDED_SOLD: "muted",
+  ENDED_NO_BIDS: "muted",
+  CANCELLED: "danger",
 };
 
 export const AUCTION_SALE_TYPE_LABEL: Record<AuctionSaleType, string> = {
@@ -141,9 +144,11 @@ export const AUCTION_SALE_TYPE_LABEL: Record<AuctionSaleType, string> = {
   INSTANT: "즉시판매",
 };
 
-export const AUCTION_SALE_TYPE_BADGE_CLASS: Record<AuctionSaleType, string> = {
-  AUCTION: "bg-primary-soft text-primary",
-  INSTANT: "bg-ok-soft text-ok",
+// 판매 유형은 **상태가 아니라 분류**다(#289). 좋고 나쁨이 없는 값에 색을 주면 상태 배지와
+// 뒤섞여 "어느 색이 무슨 뜻인지"가 흐려진다 — 둘 다 중립으로 두고 글자로 구분한다.
+export const AUCTION_SALE_TYPE_TONE: Record<AuctionSaleType, StatusTone> = {
+  AUCTION: "neutral",
+  INSTANT: "neutral",
 };
 
 // 신고 사유 6종 — 신고 모달의 선택지 순서와 어드민 목록의 배지 순서가 이 배열을 공유한다.
@@ -165,13 +170,16 @@ export const REPORT_REASON_OPTIONS: ReportReason[] = [
   "ETC",
 ];
 
-export const REPORT_REASON_BADGE_CLASS: Record<ReportReason, string> = {
-  BANNED_ITEM: "bg-surface-2 text-text-2",
-  PHOTO_THEFT: "bg-[#fbe7f0] text-[#d63a7e]",
-  HARMFUL_CONTENT: "bg-[#fbe7f0] text-[#d63a7e]",
-  FRAUD_SUSPECTED: "bg-[#fdf1de] text-[#e08a1e]",
-  ABUSE: "bg-[#f1ebfe] text-[#8b5cf6]",
-  ETC: "bg-surface-2 text-text-2",
+// 신고 사유도 분류지만 **심각도가 실제로 다르다**(#289). 예전에는 6종에 분홍·주황·보라를 흩뿌려
+// 색이 우선순위를 말해주지 못했다. 즉시 확인해야 하는 둘만 danger 로 두고 나머지는 중립으로 둔다
+// — 색이 둘뿐이면 그 둘이 눈에 들어온다.
+export const REPORT_REASON_TONE: Record<ReportReason, StatusTone> = {
+  BANNED_ITEM: "neutral",
+  PHOTO_THEFT: "neutral",
+  HARMFUL_CONTENT: "danger",
+  FRAUD_SUSPECTED: "danger",
+  ABUSE: "neutral",
+  ETC: "muted",
 };
 
 // 접수/처리완료/반려 — 처리완료·반려를 감추지 않고 그대로 보여준다(§1 신뢰 원칙).
@@ -181,10 +189,12 @@ export const REPORT_STATUS_LABEL: Record<ReportStatus, string> = {
   REJECTED: "반려",
 };
 
-export const REPORT_STATUS_BADGE_CLASS: Record<ReportStatus, string> = {
-  RECEIVED: "bg-[#fff7ed] text-[#b45309]",
-  RESOLVED: "bg-ok-soft text-ok",
-  REJECTED: "bg-accent-soft text-accent",
+// REJECTED를 danger에서 muted로 내렸다(#289) — 반려는 사고가 아니라 **처리가 끝난 상태**다.
+// 붉게 두면 미처리 건과 같은 무게로 보여 관리자가 다시 들여다보게 된다.
+export const REPORT_STATUS_TONE: Record<ReportStatus, StatusTone> = {
+  RECEIVED: "warn",
+  RESOLVED: "ok",
+  REJECTED: "muted",
 };
 
 export const RESOLUTION_ACTION_LABEL: Record<ResolutionAction, string> = {
@@ -220,17 +230,19 @@ export const AUDIT_ACTION_OPTIONS: AuditAction[] = [
   "AUCTION_REJECTED",
 ];
 
-export const AUDIT_ACTION_BADGE_CLASS: Record<AuditAction, string> = {
-  MEMBER_SUSPENDED: "bg-accent-soft text-accent",
-  MEMBER_UNSUSPENDED: "bg-ok-soft text-ok",
-  MEMBER_WITHDRAWN: "bg-surface-2 text-text-2",
-  AUCTION_CANCELLED: "bg-accent-soft text-accent",
-  REPORT_RESOLVED: "bg-ok-soft text-ok",
-  REPORT_REJECTED: "bg-surface-2 text-text-2",
-  MEMBER_ROLE_GRANTED: "bg-primary-soft text-primary",
-  MEMBER_ROLE_REVOKED: "bg-[#fff7ed] text-[#b45309]",
-  AUCTION_APPROVED: "bg-ok-soft text-ok",
-  AUCTION_REJECTED: "bg-accent-soft text-accent",
+// 권한 부여를 warn 으로 올렸다(#289). 예전에는 보라였는데, **관리자 권한이 늘어나는 조치**는
+// 감사 로그에서 가장 먼저 눈에 띄어야 하는 항목이다 — 색이 아니라 뜻으로 정한다.
+export const AUDIT_ACTION_TONE: Record<AuditAction, StatusTone> = {
+  MEMBER_SUSPENDED: "danger",
+  MEMBER_UNSUSPENDED: "ok",
+  MEMBER_WITHDRAWN: "muted",
+  AUCTION_CANCELLED: "danger",
+  REPORT_RESOLVED: "ok",
+  REPORT_REJECTED: "muted",
+  MEMBER_ROLE_GRANTED: "warn",
+  MEMBER_ROLE_REVOKED: "neutral",
+  AUCTION_APPROVED: "ok",
+  AUCTION_REJECTED: "danger",
 };
 
 export const AUDIT_TARGET_TYPE_LABEL: Record<AuditTargetType, string> = {
@@ -295,10 +307,10 @@ export const SUGGESTION_STATUS_LABEL: Record<SuggestionStatus, string> = {
   REJECTED: "반려",
 };
 
-export const SUGGESTION_STATUS_BADGE_CLASS: Record<SuggestionStatus, string> = {
-  RECEIVED: "bg-primary-soft text-primary",
-  ACCEPTED: "bg-ok-soft text-ok",
-  REJECTED: "bg-surface-3 text-text-2",
+export const SUGGESTION_STATUS_TONE: Record<SuggestionStatus, StatusTone> = {
+  RECEIVED: "neutral",
+  ACCEPTED: "ok",
+  REJECTED: "muted",
 };
 
 // ─── 거래 리뷰(§12.6) ───

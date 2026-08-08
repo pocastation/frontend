@@ -20,7 +20,7 @@ import ReturnShipForm from "@/components/ReturnShipForm";
 import { StatusIconCircle, type StatusTone } from "@/components/StatusIcon";
 import { formatDateTimeKST, formatKRW, formatTimeLeft } from "@/lib/format";
 import {
-  AUCTION_STATUS_BADGE_CLASS,
+  AUCTION_STATUS_TONE,
   AUCTION_STATUS_LABEL,
   SELLER_AUCTION_STATUS_LABEL,
   REFUND_REASON_LABEL,
@@ -39,6 +39,7 @@ import type {
   SoldOrderResponse,
   WishlistListResponse,
 } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
 
 const SELLING_TAB_STATUSES = new Set<AuctionResponse["status"]>([
   "PENDING_REVIEW",
@@ -907,14 +908,14 @@ function DashboardPanel({
 
 function getSellerReviewBadge(status: AuctionResponse["status"]) {
   if (status === "PENDING_REVIEW") {
-    return { label: AUCTION_STATUS_LABEL.PENDING_REVIEW, className: AUCTION_STATUS_BADGE_CLASS.PENDING_REVIEW };
+    return { label: AUCTION_STATUS_LABEL.PENDING_REVIEW, tone: AUCTION_STATUS_TONE.PENDING_REVIEW };
   }
   if (status === "REJECTED") {
     // 판매자에게는 "반려"가 아니라 "보완 필요" — 고쳐서 다시 등록할 수 있는 흐름이다.
-    return { label: SELLER_AUCTION_STATUS_LABEL.REJECTED, className: AUCTION_STATUS_BADGE_CLASS.REJECTED };
+    return { label: SELLER_AUCTION_STATUS_LABEL.REJECTED, tone: AUCTION_STATUS_TONE.REJECTED };
   }
   if (status === "APPROVED" || status === "SCHEDULED" || status === "LIVE") {
-    return { label: "승인됨", className: AUCTION_STATUS_BADGE_CLASS[status] };
+    return { label: "승인됨", tone: AUCTION_STATUS_TONE[status] };
   }
   return null;
 }
@@ -993,9 +994,9 @@ function SellingList({
                 {formatKRW(displayPrice)}
               </span>
               {reviewBadge ? (
-                <span className={`mt-1 inline-flex rounded-full px-2 py-0.5 text-[10.5px] font-bold ${reviewBadge.className}`}>
+                <StatusBadge tone={reviewBadge.tone} className="mt-1">
                   {reviewBadge.label}
-                </span>
+                </StatusBadge>
               ) : (
                 <span className="block text-[10.5px] text-text-3">{timeLabel}</span>
               )}

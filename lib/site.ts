@@ -11,6 +11,18 @@ export const SITE_TITLE = "Pocastation — K-POP 포카 경매";
 export const SITE_DESCRIPTION = "K-pop 포토카드 특화 경매 플랫폼";
 
 /**
+ * 공식 X(구 트위터) 계정 핸들. `@`를 포함해 적는다(예: `"@pocastation"`).
+ *
+ * <p>두 곳에 쓰인다 — ① `twitter:site` 메타로 <b>카드 하단에 출처 계정</b>이 붙는다
+ * ② 공유 문구의 `via @…`. 둘 다 <b>값이 있을 때만</b> 나가므로 미확보 상태에서 빈 값이
+ * 새어나가지 않는다.
+ *
+ * <p>계정을 만들면 <b>여기 한 줄만</b> 채우면 된다(`business.ts`의 미확보 항목과 같은 방식).
+ * 링크가 아무리 퍼져도 이 값이 없으면 계정으로 유입되지 않는다.
+ */
+export const X_HANDLE = null as string | null;
+
+/**
  * 기본 링크 미리보기 이미지(루트 `app/opengraph-image.tsx`).
  *
  * <p><b>페이지에서 `openGraph`를 정의하면 Next.js가 파일 기반 OG 이미지 자동 주입을 덮어써

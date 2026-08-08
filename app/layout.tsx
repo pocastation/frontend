@@ -9,7 +9,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import { WishlistProvider } from "@/lib/wishlist-context";
 import { NotificationProvider } from "@/lib/notification-context";
 import { ToastProvider } from "@/lib/toast-context";
-import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL } from "@/lib/site";
+import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL, X_HANDLE } from "@/lib/site";
 import "./globals.css";
 
 const notoSansKr = Noto_Sans_KR({
@@ -41,6 +41,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    // 핸들이 있을 때만 넣는다 — 빈 문자열을 내보내면 카드가 깨진 계정을 가리킨다(#287).
+    ...(X_HANDLE ? { site: X_HANDLE } : {}),
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },

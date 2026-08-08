@@ -55,6 +55,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       title: auction.title,
       description,
       type: "website",
+      // 정규 주소(#287) — 루트에만 있어 상세는 비어 있었다. 일부 크롤러가 이 값으로 정규 주소를
+      // 잡으므로, 추적 파라미터가 붙은 공유 링크가 별개 페이지로 취급되는 것을 막는다.
+      url: `/auctions/${id}`,
       images: image ? [image] : undefined,
     },
     twitter: {
@@ -108,7 +111,11 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
           <span aria-hidden="true">←</span> {isInstantSale ? "즉시판매 목록으로" : "목록으로"}
         </Link>
         <div className="flex items-center gap-1">
-          <ShareButton title={auction.title} />
+          {/* 해시태그는 스타명 하나만 — 공백을 뺀다(X가 첫 공백에서 태그를 끊는다). */}
+          <ShareButton
+            title={auction.title}
+            hashtag={auction.artistName?.replace(/\s+/g, "") || undefined}
+          />
           <AuctionWishlistButton auctionId={auction.id} className={ACTION_ICON_BUTTON} />
           <ReportButton auctionId={auction.id} />
         </div>

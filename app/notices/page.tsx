@@ -31,9 +31,6 @@ export default function NoticesPage() {
         <p className="mt-3.5 max-w-[33rem] text-[13.5px] leading-[1.75] text-text-2">
           약관·정책이 바뀌거나 서비스에 변화가 있을 때 여기에 먼저 알려드려요.
         </p>
-        <p className="mt-3 text-[12px] text-text-3">
-          약관 개정은 시행일 7일 전(회원에게 불리한 개정은 30일 전)부터 이곳에 게시합니다
-        </p>
       </header>
 
       <ul className="mt-8 border-t border-border">

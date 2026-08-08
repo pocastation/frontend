@@ -68,7 +68,7 @@ export default function NotificationSettings() {
           {error}
         </p>
       )}
-      <section className="rounded-r3 border border-border bg-surface p-5 shadow-card">
+      <section className="rounded-r3 border border-border bg-surface p-5">
         <ToggleRow
           title="입찰 추월 알림"
           description="내가 최고 입찰자에서 밀렸을 때 알려드려요."

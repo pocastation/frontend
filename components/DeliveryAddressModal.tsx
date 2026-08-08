@@ -153,7 +153,7 @@ export default function DeliveryAddressModal({
       role="presentation"
     >
       <div
-        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-r3 border border-border bg-surface p-5 shadow-card"
+        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-r3 border border-border bg-surface p-5"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"

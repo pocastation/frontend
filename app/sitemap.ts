@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { apiFetch } from "@/lib/api";
+import { NOTICES } from "@/lib/notices-content";
 import { SITE_URL } from "@/lib/site";
 import type { ArtistListResponse, AuctionListResponse } from "@/lib/types";
 
@@ -47,6 +48,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: s.changeFrequency,
     priority: s.priority,
   }));
+
+  // 공지 상세(#300) — 약관 개정 고지처럼 링크로 공유되는 문서라 개별 주소도 색인 대상이다.
+  // 콘텐츠가 정적이라 API 호출 없이 그대로 넣는다. lastModified는 게시일을 쓴다 — 지금 시각을
+  // 넣으면 바뀌지 않은 공지가 매번 갱신된 것으로 보인다.
+  for (const notice of NOTICES) {
+    entries.push({
+      url: `${SITE_URL}/notices/${notice.slug}`,
+      lastModified: new Date(notice.date),
+      changeFrequency: "yearly",
+      priority: 0.3,
+    });
+  }
 
   // 스타 상세 — 카탈로그는 자주 바뀌지 않고 개수도 적어 전부 넣는다.
   const artists = await safeFetch<ArtistListResponse>("/api/artists?size=200");

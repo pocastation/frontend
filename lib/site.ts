@@ -17,10 +17,10 @@ export const SITE_DESCRIPTION = "K-pop 포토카드 특화 경매 플랫폼";
  * ② 공유 문구의 `via @…`. 둘 다 <b>값이 있을 때만</b> 나가므로 미확보 상태에서 빈 값이
  * 새어나가지 않는다.
  *
- * <p>계정을 만들면 <b>여기 한 줄만</b> 채우면 된다(`business.ts`의 미확보 항목과 같은 방식).
- * 링크가 아무리 퍼져도 이 값이 없으면 계정으로 유입되지 않는다.
+ * <p>타입은 `string | null`로 둔다 — 계정이 바뀌거나 잠기면 다시 `null`로 내리는 것이
+ * 잘못된 핸들을 내보내는 것보다 낫다. 두 소비처 모두 null 가드가 이미 있다.
  */
-export const X_HANDLE = null as string | null;
+export const X_HANDLE = "@pocastation" as string | null;
 
 /**
  * 기본 링크 미리보기 이미지(루트 `app/opengraph-image.tsx`).

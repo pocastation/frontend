@@ -8,7 +8,6 @@ import { useAuth } from "@/lib/auth-context";
 import { formatKRW, formatTimeLeft } from "@/lib/format";
 import {
   AUCTION_CANCELLATION_REASON_OPTIONS,
-  AUCTION_SALE_TYPE_TONE,
   AUCTION_SALE_TYPE_LABEL,
   AUCTION_STATUS_TONE,
   AUCTION_STATUS_LABEL,
@@ -67,7 +66,12 @@ function AuctionIdentity({ auction }: { auction: AdminAuctionSummary }) {
       </span>
       <span className="min-w-0">
         {auction.artistName && <span className="block truncate text-[11px] font-bold text-primary">{auction.artistName}</span>}
-        <span className="block max-w-[200px] truncate font-bold text-text-1">{auction.title}</span>
+        {/* 제목의 max-w-[200px]를 걷어냈다(#291) — 980px 표에서 가장 중요한 정보에 가장 좁은 칸을
+            주고 있었다. 지면이 1720까지 넓어진 만큼 그 여유를 제목이 쓴다. */}
+        <span className="block truncate font-bold text-text-1">{auction.title}</span>
+        {/* 유형을 컬럼에서 여기로 내렸다 — 두세 글자짜리 값에 컬럼 하나를 주는 것보다,
+            제목을 읽을 때 함께 읽히는 편이 낫다. 정보는 사라지지 않는다. */}
+        <span className="block text-[11px] text-text-3">{AUCTION_SALE_TYPE_LABEL[auction.saleType]}</span>
       </span>
     </>
   );
@@ -283,12 +287,12 @@ export default function AdminAuctionsPage() {
       <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
       <div className="overflow-x-auto rounded-r3 border border-border bg-surface shadow-card">
-        {/* 열이 8개라 820px에서는 배지·버튼이 눌려 줄바꿈됐다. 가로 스크롤 컨테이너 안이라 최소폭을 넓혀도 안전하다. */}
-        <table className="w-full min-w-[980px] border-collapse">
+        {/* 유형 컬럼을 제목 아래로 내려 8열 → 7열, 최소폭 980 → 900(#291).
+            지면 상한이 1720이라 1440 모니터에서 콘텐츠 1164px — 이제 여유가 264px 있다. */}
+        <table className="w-full min-w-[900px] border-collapse">
           <thead>
             <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
               <th className="whitespace-nowrap px-4 py-2.5">경매</th>
-              <th className="whitespace-nowrap px-4 py-2.5">유형</th>
               <th className="whitespace-nowrap px-4 py-2.5">판매자</th>
               <th className="whitespace-nowrap px-4 py-2.5">현재가</th>
               <th className="whitespace-nowrap px-4 py-2.5">입찰</th>
@@ -300,7 +304,7 @@ export default function AdminAuctionsPage() {
           <tbody>
             {auctions.length === 0 && !loading ? (
               <tr>
-                <td colSpan={8} className="px-4 py-12 text-center text-sm text-text-3">
+                <td colSpan={7} className="px-4 py-12 text-center text-sm text-text-3">
                   {query ? "검색 결과가 없습니다." : "경매가 없습니다."}
                 </td>
               </tr>
@@ -337,11 +341,6 @@ export default function AdminAuctionsPage() {
                         <AuctionIdentity auction={a} />
                       </div>
                     )}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3">
-                    <StatusBadge tone={AUCTION_SALE_TYPE_TONE[a.saleType]}>
-                      {AUCTION_SALE_TYPE_LABEL[a.saleType]}
-                    </StatusBadge>
                   </td>
                   <td className="px-4 py-3 text-text-2">{a.sellerNickname ?? "—"}</td>
                   <td className="whitespace-nowrap px-4 py-3 font-display font-bold text-text-1">{formatKRW(a.currentPrice)}</td>

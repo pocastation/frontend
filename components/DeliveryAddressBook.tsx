@@ -155,7 +155,7 @@ export default function DeliveryAddressBook() {
           ) : (
             <ul className="flex flex-col gap-3">
               {addresses.map((address) => (
-                <li key={address.id} className="rounded-r3 border border-border bg-surface p-4 shadow-card">
+                <li key={address.id} className="rounded-r3 border border-border bg-surface p-4">
                   <div className="flex items-center gap-2">
                     {address.label && (
                       <span className="text-sm font-extrabold text-text-1">{address.label}</span>
@@ -301,7 +301,7 @@ function AddressForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-r3 border border-border bg-surface p-5 shadow-card">
+    <form onSubmit={handleSubmit} className="rounded-r3 border border-border bg-surface p-5">
       <h2 className="font-display text-sm font-extrabold text-text-1">
         {isEdit ? "배송지 수정" : "배송지 추가"}
       </h2>

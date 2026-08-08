@@ -196,7 +196,7 @@ function CardVisual({ method }: { method: PaymentMethod }) {
   const style = getCardBrandStyle(method.cardName);
   return (
     <div
-      className="relative flex h-40 w-full flex-col justify-between rounded-r3 p-5 shadow-card"
+      className="relative flex h-40 w-full flex-col justify-between rounded-r3 p-5"
       style={{ backgroundImage: `linear-gradient(135deg, ${style.from}, ${style.to})` }}
     >
       <div className="flex items-start justify-between">

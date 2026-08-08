@@ -526,7 +526,7 @@ export default function MyPage() {
         />
       )}
       <aside>
-        <div className="rounded-r3 border border-border bg-surface p-5 text-center shadow-card">
+        <div className="rounded-r3 border border-border bg-surface p-5 text-center">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary-soft text-xl font-extrabold text-primary">
             {member?.nickname.slice(0, 1).toUpperCase()}
           </span>
@@ -546,7 +546,7 @@ export default function MyPage() {
           )}
         </div>
 
-        <div className="mt-4 rounded-r3 border border-border bg-surface p-2 shadow-card">
+        <div className="mt-4 rounded-r3 border border-border bg-surface p-2">
           <p className="px-2.5 pb-1.5 pt-1 text-[11px] font-extrabold text-text-3">거래 관리</p>
           <nav aria-label="거래 관리 메뉴" className="flex flex-col">
             {TRADE_NAV.map(({ key, label, icon: Icon }) => (
@@ -611,18 +611,19 @@ export default function MyPage() {
             <h1 className="font-display text-xl font-extrabold text-text-1">대시보드</h1>
             <p className="mt-1 text-sm text-text-3">{member?.nickname}님, 좋은 포토카드와의 만남이 가득하길 바라요.</p>
 
-            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-5">
-              <DashboardStat label="참여 중인 경매" value={`${liveBidding.length}건`} swatch="bg-primary-soft" />
-              <DashboardStat label="입찰한 경매" value={`${bidding.length}건`} swatch="bg-accent-soft" />
-              <DashboardStat label="낙찰 성공" value={`${wonBidding.length}건`} swatch="bg-ok-soft" />
-              <DashboardStat label="즉시구매" value={`${instantPurchases.length}건`} swatch="bg-primary-soft" />
-              <DashboardStat label="판매 중인 경매" value={`${activeSelling.length}건`} swatch="bg-surface-3" />
+            {/* 위아래 규칙선 안에서 세로선으로만 나눈다 — 다섯 값이 한 덩어리로 읽혀야 비교가 된다. */}
+            <div className="mt-5 flex flex-wrap gap-y-4 border-y border-border py-4">
+              <DashboardStat label="참여 중인 경매" value={`${liveBidding.length}건`} />
+              <DashboardStat label="입찰한 경매" value={`${bidding.length}건`} />
+              <DashboardStat label="낙찰 성공" value={`${wonBidding.length}건`} />
+              <DashboardStat label="즉시구매" value={`${instantPurchases.length}건`} />
+              <DashboardStat label="판매 중인 경매" value={`${activeSelling.length}건`} />
             </div>
 
             {/* 내 신뢰 레벨 진행도(§12.7) — 레벨·배지는 왼쪽 사용자 카드로 옮겼고(#275)
                 여기는 "다음 레벨까지 얼마나"만 남긴다. 같은 정보를 두 곳에 두면 시선이 갈린다. */}
             {member?.trustLevel != null && (
-              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-r3 border border-border bg-surface p-4 shadow-card">
+              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-r3 border border-border bg-surface p-4">
                 <span className="text-xs text-text-3">거래 {member.tradeCount ?? 0}회</span>
                 <span className="min-w-0 flex-1 text-xs text-text-2">
                   {member.levelCappedByTrust ? (
@@ -641,7 +642,7 @@ export default function MyPage() {
             )}
 
             {reviewable.length > 0 && (
-              <div className="mt-6 rounded-r3 border border-border bg-surface p-4 shadow-card">
+              <div className="mt-6 rounded-r3 border border-border bg-surface p-4">
                 <p className="text-sm font-bold text-text-1">작성할 수 있는 거래 후기 {reviewable.length}건</p>
                 <p className="mt-0.5 text-xs text-text-3">구매확정한 거래의 후기를 남겨 판매자에게 힘을 실어주세요.</p>
                 <ul className="mt-3 flex flex-col divide-y divide-border/70">
@@ -874,12 +875,20 @@ function Thumb({ url, alt }: { url: string | null; alt: string }) {
   );
 }
 
-function DashboardStat({ label, value, swatch }: { label: string; value: string; swatch: string }) {
+/**
+ * 대시보드 통계 한 칸(#296) — 관리자 대시보드(#294)와 같은 처리다.
+ *
+ * <p>예전에는 다섯 개가 각각 카드였다. 통계는 <b>서로 비교하는 값</b>이라 각자 껍데기에 갇힐 이유가
+ * 없고, 모바일 2열에서는 카드 패딩 탓에 숫자가 잘렸다.
+ *
+ * <p>색 스와치도 뺐다 — 다섯 개에 서로 다른 파스텔을 물려 놨는데 <b>그 색이 아무 뜻도 없었다.</b>
+ * 「참여 중인 경매」와 「즉시구매」가 같은 연보라였다.
+ */
+function DashboardStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-r3 border border-border bg-surface p-4 shadow-card">
-      <span className={`mb-2.5 block h-2 w-6 rounded-full ${swatch}`} aria-hidden="true" />
+    <div className="min-w-0 flex-1 basis-[112px] border-l border-border px-4 first:border-l-0 first:pl-0">
       <p className="text-xs font-bold text-text-3">{label}</p>
-      <p className="mt-1.5 font-display text-lg font-extrabold text-text-1">{value}</p>
+      <p className="mt-1 font-display text-lg font-extrabold tabular-nums text-text-1">{value}</p>
     </div>
   );
 }
@@ -894,7 +903,7 @@ function DashboardPanel({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-r3 border border-border bg-surface p-4 shadow-card">
+    <section className="rounded-r3 border border-border bg-surface p-4">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="font-display text-sm font-extrabold text-text-1">{title}</h2>
         <button type="button" onClick={onSeeAll} className={`text-xs font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>

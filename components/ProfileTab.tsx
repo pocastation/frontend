@@ -58,7 +58,7 @@ export default function ProfileTab() {
 
   return (
     <div className="max-w-xl">
-      <section className="rounded-r3 border border-border bg-surface p-5 shadow-card">
+      <section className="rounded-r3 border border-border bg-surface p-5">
         <h2 className="font-display text-sm font-extrabold text-text-1">닉네임</h2>
         <form onSubmit={handleSubmit} className="mt-3 flex items-start gap-2">
           <div className="min-w-0 flex-1">
@@ -106,7 +106,7 @@ export default function ProfileTab() {
         </form>
       </section>
 
-      <section className="mt-4 rounded-r3 border border-border bg-surface p-5 shadow-card">
+      <section className="mt-4 rounded-r3 border border-border bg-surface p-5">
         <h2 className="font-display text-sm font-extrabold text-text-1">계정 정보</h2>
         <dl className="mt-3 flex flex-col divide-y divide-border">
           <div className="flex items-center justify-between gap-4 py-2.5">

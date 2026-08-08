@@ -33,7 +33,7 @@ export default function SettingsTab() {
 
   return (
     <div className="max-w-xl">
-      <section className="rounded-r3 border border-accent/30 bg-surface p-5 shadow-card">
+      <section className="rounded-r3 border border-accent/30 bg-surface p-5">
         <h2 className="font-display text-sm font-extrabold text-accent">회원 탈퇴</h2>
         <div className="mt-3 space-y-1.5 text-sm text-text-2">
           <p>탈퇴하면 계정을 다시 사용할 수 없고, 되돌릴 수 없어요.</p>

@@ -5,10 +5,11 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import AuctionGrid from "@/components/AuctionGrid";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
-import { ARTIST_STATUS_BADGE_CLASS, ARTIST_STATUS_LABEL, ARTIST_TYPE_LABEL } from "@/lib/labels";
+import { ARTIST_STATUS_TONE, ARTIST_STATUS_LABEL, ARTIST_TYPE_LABEL } from "@/lib/labels";
 import { DEFAULT_OG_IMAGE } from "@/lib/site";
 import { FOCUS_RING } from "@/lib/ui";
 import type { ArtistDetailResponse, AuctionListResponse } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
 
 // cache()로 감싸 generateMetadata와 본문이 한 번만 페치하도록 dedup.
 const getArtist = cache(async (id: string): Promise<ArtistDetailResponse | null> => {
@@ -101,11 +102,9 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
         </span>
 
         <div className="min-w-0 flex-1 text-center sm:text-left">
-          <span
-            className={`mb-2.5 inline-block rounded-full px-2.5 py-1 text-xs font-extrabold ${ARTIST_STATUS_BADGE_CLASS[artist.status]}`}
-          >
+          <StatusBadge tone={ARTIST_STATUS_TONE[artist.status]} className="mb-2.5">
             {ARTIST_STATUS_LABEL[artist.status]}
-          </span>
+          </StatusBadge>
           <div className="mb-4 flex flex-wrap items-center justify-center gap-2.5 sm:justify-start">
             <h1 className="font-display text-[26px] font-extrabold tracking-tight text-text-1">{artist.name}</h1>
             {artist.nameEn && <span className="text-sm font-semibold text-text-3">{artist.nameEn}</span>}

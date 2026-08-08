@@ -8,12 +8,13 @@ import { useAuth } from "@/lib/auth-context";
 import { formatRelativeTime } from "@/lib/format";
 import {
   REPORT_REASON_LABEL,
-  REPORT_STATUS_BADGE_CLASS,
+  REPORT_STATUS_TONE,
   REPORT_STATUS_LABEL,
   RESOLUTION_ACTION_LABEL,
 } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AdminReportDetailResponse, AdminReportListResponse, AdminReportSummary, ReportStatus, ResolutionAction } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
 
 const PAGE_SIZE = 20;
 
@@ -218,9 +219,9 @@ export default function AdminReportsPage() {
                       </td>
                       <td className="px-4 py-3 text-text-3">{formatRelativeTime(r.latestReportedAt)}</td>
                       <td className="px-4 py-3">
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${REPORT_STATUS_BADGE_CLASS[r.status]}`}>
+                        <StatusBadge tone={REPORT_STATUS_TONE[r.status]}>
                           {REPORT_STATUS_LABEL[r.status]}
-                        </span>
+                        </StatusBadge>
                       </td>
                     </tr>
                   ))
@@ -257,9 +258,9 @@ export default function AdminReportsPage() {
             <div className="rounded-r3 border border-border bg-surface p-4 shadow-card">
               <div className="flex items-start justify-between gap-2">
                 <h2 className="font-display text-base font-extrabold text-text-1">{detail.auctionTitle ?? "-"}</h2>
-                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${REPORT_STATUS_BADGE_CLASS[detail.reports[0]?.status ?? "RECEIVED"]}`}>
+                <StatusBadge tone={REPORT_STATUS_TONE[detail.reports[0]?.status ?? "RECEIVED"]} className="shrink-0">
                   {REPORT_STATUS_LABEL[detail.reports[0]?.status ?? "RECEIVED"]}
-                </span>
+                </StatusBadge>
               </div>
 
               <dl className="mt-3 flex flex-col gap-1.5 border-t border-border pt-3 text-[12.5px]">

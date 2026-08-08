@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { mediaUrl } from "@/lib/api";
-import { ARTIST_STATUS_BADGE_CLASS, ARTIST_STATUS_LABEL, ARTIST_TYPE_LABEL } from "@/lib/labels";
+import { ARTIST_STATUS_TONE, ARTIST_STATUS_LABEL, ARTIST_TYPE_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { ArtistResponse } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
 
 export default function ArtistCard({ artist }: { artist: ArtistResponse }) {
   return (
@@ -13,11 +14,9 @@ export default function ArtistCard({ artist }: { artist: ArtistResponse }) {
       {/* 상태 배지는 '활동 중'을 빼고 예외 상태(휴식기·해체)만 노출한다. 대부분이 ACTIVE라
           전 카드에 같은 배지가 붙어 정보량 없이 시선만 끌었다. 해체·휴식기는 계속 감추지 않는다. */}
       {artist.status !== "ACTIVE" && (
-        <span
-          className={`absolute right-2.5 top-2.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-extrabold ${ARTIST_STATUS_BADGE_CLASS[artist.status]}`}
-        >
+        <StatusBadge tone={ARTIST_STATUS_TONE[artist.status]} className="absolute right-2.5 top-2.5">
           {ARTIST_STATUS_LABEL[artist.status]}
-        </span>
+        </StatusBadge>
       )}
 
       <span className="mb-2.5 h-[76px] w-[76px] shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-primary-soft to-surface-3">

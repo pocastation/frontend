@@ -4,9 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatRelativeTime } from "@/lib/format";
-import { AUDIT_ACTION_BADGE_CLASS, AUDIT_ACTION_LABEL, AUDIT_ACTION_OPTIONS, AUDIT_TARGET_TYPE_LABEL } from "@/lib/labels";
+import { AUDIT_ACTION_TONE, AUDIT_ACTION_LABEL, AUDIT_ACTION_OPTIONS, AUDIT_TARGET_TYPE_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AdminAuditLogListResponse, AdminAuditLogResponse, AuditAction, AuditTargetType } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
 
 const PAGE_SIZE = 20;
 const SELECT_CLASS =
@@ -142,9 +143,9 @@ export default function AdminAuditLogPage() {
                   <td className="whitespace-nowrap px-4 py-3 text-text-3">{formatRelativeTime(log.createdAt)}</td>
                   <td className="whitespace-nowrap px-4 py-3 font-semibold text-text-1">{log.actorNickname ?? "—"}</td>
                   <td className="whitespace-nowrap px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${AUDIT_ACTION_BADGE_CLASS[log.action]}`}>
+                    <StatusBadge tone={AUDIT_ACTION_TONE[log.action]}>
                       {AUDIT_ACTION_LABEL[log.action]}
-                    </span>
+                    </StatusBadge>
                   </td>
                   <td className="px-4 py-3">
                     <span className="block max-w-[200px] truncate font-semibold text-text-1">{log.targetLabel ?? "—"}</span>

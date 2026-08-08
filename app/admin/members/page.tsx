@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { MEMBER_ROLE_LABEL, MEMBER_STATUS_BADGE_CLASS, MEMBER_STATUS_LABEL, PROVIDER_LABEL } from "@/lib/labels";
+import { MEMBER_ROLE_LABEL, MEMBER_STATUS_TONE, MEMBER_STATUS_LABEL, PROVIDER_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
   AdminMemberDetailResponse,
@@ -13,6 +13,7 @@ import type {
   MemberStatus,
   MemberStatusAction,
 } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
 
 const PAGE_SIZE = 20;
 const DEBOUNCE_MS = 300;
@@ -326,9 +327,9 @@ export default function AdminMembersPage() {
                         </span>
                       </td>
                       <td className="whitespace-nowrap px-4 py-3">
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${MEMBER_STATUS_BADGE_CLASS[m.status]}`}>
+                        <StatusBadge tone={MEMBER_STATUS_TONE[m.status]}>
                           {MEMBER_STATUS_LABEL[m.status]}
-                        </span>
+                        </StatusBadge>
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-text-2">{m.role === "ADMIN" ? "관리자" : "일반"}</td>
                       <td className="whitespace-nowrap px-4 py-3 tabular-nums text-text-3">{formatDate(m.createdAt)}</td>
@@ -371,9 +372,9 @@ export default function AdminMembersPage() {
                   {/* 변하지 않는 짧은 식별자(UUID 앞 8자리). 전체 UUID는 조치 API 경로에 그대로 쓰인다. */}
                   <span className="font-mono text-[11px] text-text-3">#{detail.id.slice(0, 8)}</span>
                 </div>
-                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${MEMBER_STATUS_BADGE_CLASS[detail.status]}`}>
+                <StatusBadge tone={MEMBER_STATUS_TONE[detail.status]} className="shrink-0">
                   {MEMBER_STATUS_LABEL[detail.status]}
-                </span>
+                </StatusBadge>
               </div>
 
               <dl className="mt-3 flex flex-col gap-1.5 border-t border-border pt-3 text-[12.5px]">

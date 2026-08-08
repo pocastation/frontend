@@ -6,14 +6,15 @@ import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatKRW } from "@/lib/format";
 import {
-  AUCTION_STATUS_BADGE_CLASS,
+  AUCTION_STATUS_TONE,
   AUCTION_STATUS_LABEL,
-  MEMBER_STATUS_BADGE_CLASS,
+  MEMBER_STATUS_TONE,
   MEMBER_STATUS_LABEL,
   PROVIDER_LABEL,
 } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AdminDashboardResponse, AuctionStatus } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
 
 function StatCard({ label, value, tone }: { label: string; value: string; tone: string }) {
   return (
@@ -110,9 +111,9 @@ export default function AdminDashboardPage() {
                     <span className="block truncate text-sm font-bold text-text-1">{m.nickname}</span>
                     <span className="block truncate text-[11px] text-text-3">{PROVIDER_LABEL[m.provider] ?? m.provider}</span>
                   </span>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${MEMBER_STATUS_BADGE_CLASS[m.status]}`}>
+                  <StatusBadge tone={MEMBER_STATUS_TONE[m.status]} className="shrink-0">
                     {MEMBER_STATUS_LABEL[m.status]}
-                  </span>
+                  </StatusBadge>
                   <span className="shrink-0 text-[11px] tabular-nums text-text-3">{formatDate(m.createdAt)}</span>
                 </li>
               ))}
@@ -150,9 +151,9 @@ export default function AdminDashboardPage() {
                       <span className="block font-display text-xs font-extrabold text-text-1">{formatKRW(a.currentPrice)}</span>
                       {/* 공개 전 상태는 눌러도 상세가 안 열리므로, 왜 그런지 상태로 알려준다. */}
                       {!PUBLIC_AUCTION_STATUSES.has(a.status) && (
-                        <span className={`mt-1 inline-block whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-extrabold ${AUCTION_STATUS_BADGE_CLASS[a.status]}`}>
+                        <StatusBadge tone={AUCTION_STATUS_TONE[a.status]} className="mt-1">
                           {AUCTION_STATUS_LABEL[a.status]}
-                        </span>
+                        </StatusBadge>
                       )}
                     </span>
                   </Link>

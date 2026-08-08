@@ -288,8 +288,8 @@ export default function AdminMembersPage() {
             <table className="w-full min-w-[560px] border-collapse">
               <thead>
                 <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
-                  <th className="px-4 py-2.5">닉네임</th>
-                  <th className="px-4 py-2.5">이메일 / 가입</th>
+                  <th className="px-4 py-2.5">회원</th>
+                  <th className="px-4 py-2.5">이메일</th>
                   <th className="whitespace-nowrap px-4 py-2.5">상태</th>
                   <th className="whitespace-nowrap px-4 py-2.5">역할</th>
                   <th className="whitespace-nowrap px-4 py-2.5">가입일</th>
@@ -311,14 +311,12 @@ export default function AdminMembersPage() {
                         selectedId === m.id ? "bg-primary-soft/50" : ""
                       } ${m.status === "SUSPENDED" ? "bg-accent-soft/40" : ""}`}
                     >
+                      {/* 가입 방식을 이메일 칸에서 여기로 옮겼다(#291) — 이메일에 온전한 폭을 주기 위해서다. */}
                       <td className="px-4 py-3 font-bold text-text-1">
                         <span className="block">{m.nickname}</span>
                         {/* 변하지 않는 짧은 식별자(UUID 앞 8자리) — 닉 변경·동명이인과 무관하게 특정용. */}
                         <span className="font-mono text-[11px] font-normal text-text-3">#{m.id.slice(0, 8)}</span>
-                      </td>
-                      <td className="px-4 py-3 text-text-2">
-                        <span className="block truncate">{m.email ?? "—"}</span>
-                        <span className="text-[11px] text-text-3">
+                        <span className="block text-[11px] font-normal text-text-3">
                           {PROVIDER_LABEL[m.provider] ?? m.provider}
                           {/* 소셜은 인증 개념이 없어 항상 null이다 — 이메일 가입자만 미인증으로 읽는다. */}
                           {m.provider === "EMAIL" && m.emailVerifiedAt === null && m.email !== null && (
@@ -326,6 +324,9 @@ export default function AdminMembersPage() {
                           )}
                         </span>
                       </td>
+                      {/* 자르지 않고 줄바꿈한다 — 이메일은 관리자가 계정을 특정하는 식별 정보라
+                          잘리면 누구인지 알 수 없다. 잘린 이메일보다 두 줄 이메일이 낫다. */}
+                      <td className="px-4 py-3 text-text-2 [word-break:break-all]">{m.email ?? "—"}</td>
                       <td className="whitespace-nowrap px-4 py-3">
                         <StatusBadge tone={MEMBER_STATUS_TONE[m.status]}>
                           {MEMBER_STATUS_LABEL[m.status]}

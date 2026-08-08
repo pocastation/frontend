@@ -231,8 +231,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     return pathname.startsWith(href);
   }
 
+  // 지면 상한 1240 → 1720(#291). 1240은 **읽기 편한 줄 길이**를 위한 값인데, 관리자는 읽는
+  // 화면이 아니라 여러 건을 한눈에 비교하는 화면이라 같은 상한을 쓸 이유가 없었다. 그 결과
+  // 콘텐츠 영역이 964px(1240 − px-4 32 − 사이드바 220 − gap 24)로 고정돼, 경매 표의
+  // min-w-[980px]가 **어떤 모니터에서도** 16px 모자라 항상 가로 스크롤이 났다.
+  //
+  // 무제한으로 풀지는 않는다 — 2560 울트라와이드에서 표가 2300px로 늘어나면 눈이 좌우로 너무
+  // 멀리 가 밀도가 아니라 피로가 된다. 마이페이지는 사용자 화면이라 1160px 상한을 그대로 둔다.
   return (
-    <div className="mx-auto max-w-[1240px] px-4 py-6 sm:py-8">
+    <div className="mx-auto max-w-[1720px] px-4 py-6 sm:py-8">
       {/* 모바일 내비 — 사이드바가 lg 미만에서 숨겨지므로, 사용 가능한 운영 메뉴를 가로 스크롤
           탭바로 제공해 모바일에서도 섹션 이동이 되게 한다. */}
       <nav

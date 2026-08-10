@@ -53,8 +53,14 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
     ? Math.max(0, Math.floor((new Date(challenge.expiresAt).getTime() - now) / 1000))
     : 0;
   const expired = Boolean(challenge) && secondsLeft === 0;
-  const passed = Boolean(verificationId && result?.passed);
-  const processing = result?.status === "QUEUED" || result?.status === "ANALYZING";
+  const passed = Boolean(verificationId && result?.passed && !expired);
+  const processing = !expired && (result?.status === "QUEUED" || result?.status === "ANALYZING");
+
+  useEffect(() => {
+    if (expired && verificationId) {
+      onVerified(null);
+    }
+  }, [expired, onVerified, verificationId]);
 
   useEffect(() => {
     if (!challenge || !processing) return;
@@ -75,7 +81,8 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
           return;
         }
         setAnalyzing(false);
-        onVerified(status.passed ? status.id : null);
+        const stillValid = status.passed && new Date(status.expiresAt).getTime() > Date.now();
+        onVerified(stillValid ? status.id : null);
       } catch {
         if (cancelled) return;
         setError("분석 상태를 다시 확인하고 있습니다.");
@@ -138,7 +145,8 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
       setResult(analysis);
       if (analysis.status !== "QUEUED" && analysis.status !== "ANALYZING") {
         setAnalyzing(false);
-        onVerified(analysis.passed ? analysis.id : null);
+        const stillValid = analysis.passed && new Date(analysis.expiresAt).getTime() > Date.now();
+        onVerified(stillValid ? analysis.id : null);
       }
     } catch (err) {
       onVerified(null);
@@ -152,7 +160,8 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
       <div className="border-b border-border pb-4">
         <p className="text-sm font-extrabold text-text-1">판매 물품 소유 인증</p>
         <p className="mt-1 text-xs leading-5 text-text-3">
-          발급 코드를 손으로 써서 포토카드와 함께 촬영해주세요. 인증 사진은 상품 상세에 공개되지 않고 관리자만 확인합니다.
+          발급 코드를 손으로 써서 포토카드와 함께 촬영해주세요. 코드는 발급 후 3분 뒤 만료되며,
+          분석을 통과해도 시간이 연장되지 않습니다.
         </p>
       </div>
 
@@ -181,6 +190,13 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
             <p className="mt-2 font-mono text-3xl text-text-1" aria-label={`인증 코드 ${challenge.code}`}>
               {challenge.code}
             </p>
+            {!processing && secondsLeft > 0 && secondsLeft <= 60 && (
+              <p className="mt-2 text-xs font-bold text-accent" role="status">
+                {passed
+                  ? "인증이 곧 만료됩니다. 지금 판매 등록을 완료해주세요."
+                  : "코드가 곧 만료됩니다. 1분 안에 사진 확인을 완료해주세요."}
+              </p>
+            )}
             {!expired && !passed && !processing && (
               <div className="mt-3 flex justify-end">
                 <button
@@ -209,7 +225,9 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
           ) : passed ? (
             <div className="border border-ok/30 bg-ok-soft px-4 py-3" role="status">
               <p className="text-sm font-extrabold text-ok">사진 인증 완료</p>
-              <p className="mt-1 text-xs text-text-2">등록 후 관리자 검수를 거쳐 경매가 공개됩니다.</p>
+              <p className="mt-1 text-xs text-text-2">
+                위 남은 시간 안에 등록을 완료해주세요. 이후 관리자 검수를 거쳐 경매가 공개됩니다.
+              </p>
             </div>
           ) : expired ? (
             <button type="button" onClick={issueChallenge} className={`h-11 w-full ${PRIMARY_BUTTON_CLASS}`}>

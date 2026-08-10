@@ -33,6 +33,13 @@ export const BUSINESS_INFO = {
    * 개인정보처리방침 제10조와 값이 어긋나면 안 되므로 여기가 단일 소스다.
    */
   privacyOfficer: "김재윤 (대표자)" as string | null,
+  /**
+   * 개인정보보호책임자 전용 연락처 — 처리방침 제10조(보호책임자·담당부서·열람청구)가 쓴다.
+   * 고객센터 대표번호(`phone`)와 의도적으로 분리한다. 법 §31이 요구하는 것은
+   * "정보주체가 보호책임자에게 직접 닿는 창구"라 대표번호와 같을 필요가 없다.
+   */
+  privacyOfficerPhone: "010-3714-4353",
+  privacyOfficerEmail: "kimjaeyoon70@gmail.com",
 
   /** 호스팅 제공자 (전상법 §10 표시사항) */
   hostingProvider: "Vercel Inc.",

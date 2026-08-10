@@ -53,6 +53,12 @@ export type PrivacyArticle = {
 
 const LAW = "「개인정보 보호법」";
 
+/**
+ * 제10조 세 행이 모두 같은 창구를 쓴다 — 1인 사업자라 보호책임자·담당부서·열람청구 접수처가 동일하다.
+ * 고객센터 대표번호가 아니라 보호책임자 전용 연락처를 쓴다(법 §31).
+ */
+const PRIVACY_OFFICER_CONTACT = `전화 ${BUSINESS_INFO.privacyOfficerPhone} / 이메일 ${BUSINESS_INFO.privacyOfficerEmail}`;
+
 export const PRIVACY_ARTICLES: PrivacyArticle[] = [
   {
     no: "제1조",
@@ -450,18 +456,10 @@ export const PRIVACY_ARTICLES: PrivacyArticle[] = [
         [
           "개인정보 보호책임자",
           `성명 ${BUSINESS_INFO.ceoName} / 직위 대표자`,
-          `전화 ${BUSINESS_INFO.phone ?? "-"} / 이메일 ${BUSINESS_INFO.email ?? "-"}`,
+          PRIVACY_OFFICER_CONTACT,
         ],
-        [
-          "개인정보보호 담당부서",
-          "경영관리부서",
-          `전화 ${BUSINESS_INFO.phone ?? "-"} / 이메일 ${BUSINESS_INFO.email ?? "-"}`,
-        ],
-        [
-          "개인정보 열람청구 접수·처리 부서",
-          "경영관리부서",
-          `전화 ${BUSINESS_INFO.phone ?? "-"} / 이메일 ${BUSINESS_INFO.email ?? "-"}`,
-        ],
+        ["개인정보보호 담당부서", "경영관리부서", PRIVACY_OFFICER_CONTACT],
+        ["개인정보 열람청구 접수·처리 부서", "경영관리부서", PRIVACY_OFFICER_CONTACT],
       ],
     },
     bullets: [

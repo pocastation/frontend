@@ -902,6 +902,8 @@ export type PopularSellerResponse = {
   tradeCount: number;
   averageRating: number | null; // 리뷰 0건이면 null
   reviewCount: number;
+  // BE #273. 배포 이전 응답에는 이 필드가 없어 옵셔널로 둔다 — 프론트가 먼저 나가도 화면이 깨지지 않는다.
+  badges?: BadgeView[];
 };
 
 // GET /api/reviews/reviewable — 내 구매확정 주문 중 미작성 리뷰 대상.

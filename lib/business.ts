@@ -18,14 +18,21 @@ export const BUSINESS_INFO = {
   /** 사업장 주소 */
   address: "경기도 용인시 기흥구 보정로 115, 505-C12호(보정동, 우영프라자)",
 
-  /** 유선전화 — 미확보(휴대폰 번호는 PG 심사에서 인정되지 않아 070 등 유선 확보 후 기입). */
-  phone: null as string | null,
-  /** 고객문의 이메일 — 도메인 메일 개설 시 교체 예정. */
+  /** 유선전화 — 2026-08-10 확보. 개인정보처리방침 제6조·제10조의 연락처도 이 값을 본다. */
+  phone: "070-8027-4603" as string | null,
+  /**
+   * 고객문의 겸 개인정보 관련 문의 이메일.
+   * ⚠️ `privacy@pocastation.com` 도메인 메일로 교체 권장 — 개인정보처리방침에 실린 주소라
+   *    영구 공개된다. SES는 발신 전용이라 수신은 별도 구성이 필요하다.
+   */
   email: "pocastation.official@gmail.com" as string | null,
   /** 통신판매업 신고번호 — PG 승인 시 발급되는 구매안전서비스 이용확인증이 선행이라 그 후에 기입. */
   mailOrderNumber: null as string | null,
-  /** 개인정보보호책임자 — 지정 후 기입. */
-  privacyOfficer: null as string | null,
+  /**
+   * 개인정보보호책임자 — 법 §31. 임원이 없으면 사업주·대표자가 맡는다.
+   * 개인정보처리방침 제10조와 값이 어긋나면 안 되므로 여기가 단일 소스다.
+   */
+  privacyOfficer: "김재윤 (대표자)" as string | null,
 
   /** 호스팅 제공자 (전상법 §10 표시사항) */
   hostingProvider: "Vercel Inc.",

@@ -21,7 +21,9 @@ const FOOTER_COLUMNS = [
     title: "약관",
     links: [
       { label: "이용약관", href: "/terms" },
-      { label: "개인정보처리방침", href: "/privacy" },
+      // 법 §30② — "개인정보 처리방침"이라는 명칭을 그대로 쓰되, 글자 크기·색상으로
+      // 다른 고지사항과 구분해 정보주체가 쉽게 확인할 수 있어야 한다.
+      { label: "개인정보 처리방침", href: "/privacy", emphasis: true },
     ],
   },
 ];
@@ -70,7 +72,11 @@ export default function Footer() {
               <a
                 key={link.label}
                 href={link.href}
-                className="block w-fit rounded-r1 py-1 text-xs transition-colors hover:text-white/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-text-1"
+                className={`block w-fit rounded-r1 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-text-1 ${
+                  "emphasis" in link && link.emphasis
+                    ? "text-[13px] font-extrabold text-white/90 hover:text-white"
+                    : "text-xs hover:text-white/85"
+                }`}
               >
                 {link.label}
               </a>

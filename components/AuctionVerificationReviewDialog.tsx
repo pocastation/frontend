@@ -26,6 +26,11 @@ function formatPercentage(value: number | null) {
   return `${percentage.toFixed(percentage % 1 === 0 ? 0 : 1)}%`;
 }
 
+function formatNll(value: number | null) {
+  if (value === null || !Number.isFinite(value)) return "미분석";
+  return value.toFixed(2);
+}
+
 function AnalysisSection({
   title,
   passed,
@@ -89,6 +94,9 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
     && verification.status !== "ISSUED"
     && verification.status !== "QUEUED"
     && verification.status !== "ANALYZING";
+  const modelVersion = verification?.modelVersion ?? null;
+  const isTrocrV5 = modelVersion?.includes("trocr-v5") ?? false;
+  const modelVersionPending = modelVersion === null;
 
   // Esc로 닫기 — 처리 중(submitting)에는 막는다(승인/반려 요청이 날아간 뒤 창만 사라지는 걸 방지).
   useEffect(() => {
@@ -294,19 +302,63 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     <span className="text-xs font-bold text-text-3">인식 코드</span>
                     <strong className="font-mono text-xl text-text-1">{verification.detectedCode ?? "—"}</strong>
                   </div>
+                  <div
+                    className={`mt-3 border px-3 py-3 ${
+                      modelVersionPending
+                        ? "border-border bg-surface-2"
+                        : isTrocrV5
+                          ? "border-border"
+                          : "border-accent bg-accent-soft"
+                    }`}
+                    role={!modelVersionPending && !isTrocrV5 ? "alert" : undefined}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="text-xs font-extrabold text-text-1">OCR 모델</h3>
+                      <span className={`text-xs font-extrabold ${modelVersionPending ? "text-text-3" : isTrocrV5 ? "text-ok" : "text-accent"}`}>
+                        {modelVersionPending ? "분석 정보 대기" : isTrocrV5 ? "TrOCR v5" : "v5 아님"}
+                      </span>
+                    </div>
+                    {isTrocrV5 ? (
+                      <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
+                        <dt className="text-text-3">전처리</dt>
+                        <dd className="text-right font-bold text-text-2">명암 자동 보정</dd>
+                        <dt className="text-text-3">디코딩</dt>
+                        <dd className="text-right font-bold text-text-2">Beam 5 후보 비교</dd>
+                      </dl>
+                    ) : (
+                      <p className="mt-2 text-[11px] leading-5 text-text-3">
+                        {modelVersionPending
+                          ? "모델 버전은 분석이 끝난 뒤 표시됩니다."
+                          : "TrOCR v5 결과가 아닙니다. 모델 버전과 분석 결과를 확인하세요."}
+                      </p>
+                    )}
+                  </div>
                   <div className="mt-2">
                     <AnalysisSection
-                      title="OCR 인식 신뢰도"
+                      title={isTrocrV5 ? "OCR 인식 참고 지표 · TrOCR v5" : "OCR 인식 참고 지표"}
                       passed={null}
                       advisory
-                      metrics={[{
-                        label: "OCR 전체 신뢰도",
-                        value: formatPercentage(verification.ocrConfidenceScore),
-                      }]}
-                      condition="TrOCR이 실제로 선택한 인식 단위별 확률의 기하평균입니다. 참고 지표이며 최종 통과를 직접 결정하지 않습니다."
+                      metrics={[
+                        {
+                          label: "선택 결과 참고 점수",
+                          value: formatPercentage(verification.ocrConfidenceScore),
+                        },
+                        {
+                          label: "평균 NLL",
+                          value: formatNll(verification.ocrMeanTokenNll),
+                        },
+                      ]}
+                      condition={isTrocrV5
+                        ? "TrOCR v5가 최종 선택한 인식 단위의 참고 점수와 평균 NLL입니다. NLL은 낮을수록 모델 불확실도가 낮지만, 확률 보정값이 아니며 최종 통과를 직접 결정하지 않습니다."
+                        : "모델이 최종 선택한 인식 단위의 참고 지표입니다. 확률 보정값이 아니며 최종 통과를 직접 결정하지 않습니다."}
                     >
                       <div className="mt-3 border-t border-border pt-2">
-                        <p className="text-[11px] font-extrabold text-text-3">인식 단위별 확률</p>
+                        <p className="text-[11px] font-extrabold text-text-3">인식 단위별 참고 점수</p>
+                        <p className="mt-1 text-[11px] leading-5 text-text-3">
+                          {isTrocrV5
+                            ? "v5가 최종 후보로 선택한 토큰 단위 점수입니다. 한 토큰에 여러 문자가 묶일 수 있습니다."
+                            : "모델이 반환한 토큰 단위 참고 점수입니다."}
+                        </p>
                         {verification.ocrTokenConfidences?.length ? (
                           <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
                             {verification.ocrTokenConfidences.map((item, index) => (
@@ -363,8 +415,8 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                   </div>
                   <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                     <dt className="text-text-3">분석 모델</dt>
-                    <dd className="truncate text-right font-bold text-text-2" title={verification.modelVersion ?? undefined}>
-                      {verification.modelVersion ?? "—"}
+                    <dd className="truncate text-right font-bold text-text-2" title={modelVersion ?? undefined}>
+                      {modelVersion ?? "—"}
                     </dd>
                   </dl>
                 </section>

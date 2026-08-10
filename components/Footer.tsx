@@ -73,8 +73,10 @@ export default function Footer() {
                 key={link.label}
                 href={link.href}
                 className={`block w-fit rounded-r1 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-text-1 ${
+                  // 구분은 하되 과하지 않게 — 크기 반 포인트·굵기·명도 세 축을 조금씩만 쓴다.
+                  // 푸터에서 혼자 튀면 법 요구를 넘어 디자인을 깨뜨린다.
                   "emphasis" in link && link.emphasis
-                    ? "text-[13px] font-extrabold text-white/90 hover:text-white"
+                    ? "text-[12.5px] font-bold text-white/70 hover:text-white/90"
                     : "text-xs hover:text-white/85"
                 }`}
               >

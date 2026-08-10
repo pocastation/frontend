@@ -503,8 +503,8 @@ export default function SellGuidePage() {
             <li>
               <p className="text-[12.5px] font-extrabold text-text-1">포카와 함께 한 장에 담아요</p>
               <p className="mt-2 text-[12.5px] leading-[1.7] text-text-2">
-                코드와 실물이 한 프레임에 같이 보여야 해요. 발급 후 10분이 지나면 새 코드를 받아야
-                해요.
+                코드와 실물이 한 프레임에 같이 보여야 해요. 코드는 발급 시각부터 3분 뒤 만료되고,
+                사진 분석을 통과해도 시간이 연장되지 않으니 그 안에 판매 등록까지 완료해야 해요.
               </p>
             </li>
           </ol>

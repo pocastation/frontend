@@ -391,7 +391,12 @@ export default function NewAuctionPage() {
           : `/auctions/${created.id}`,
       );
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "판매 등록에 실패했습니다.");
+      if (err instanceof ApiError && err.errorCode === "VERIFICATION_EXPIRED") {
+        setVerificationId(null);
+        setError("인증 코드가 만료되었습니다. 입력한 판매 정보는 유지되니 새 코드를 발급해주세요.");
+      } else {
+        setError(err instanceof ApiError ? err.message : "판매 등록에 실패했습니다.");
+      }
     } finally {
       setIsSubmitting(false);
     }

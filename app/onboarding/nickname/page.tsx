@@ -14,7 +14,7 @@ import { INPUT_CLASS, PRIMARY_BUTTON_CLASS } from "@/lib/ui";
 
 export default function NicknameOnboardingPage() {
   const router = useRouter();
-  const { accessToken, member, isLoading, completeOnboarding } = useAuth();
+  const { accessToken, member, isLoading, completeOnboarding, fetchWithAuth } = useAuth();
   const nicknameId = useId();
   const [nickname, setNickname] = useState("");
   const [prefilled, setPrefilled] = useState(false);
@@ -36,6 +36,24 @@ export default function NicknameOnboardingPage() {
     }
   }, [isLoading, accessToken, router]);
 
+  /**
+   * 온보딩 다음 목적지(#319).
+   *
+   * 본인인증 게이트가 켜져 있을 때만 인증 단계로 보낸다. 꺼져 있으면 인증을 완료할 수단 자체가
+   * 없으므로(대행사 어댑터 미계약), 보내봐야 아무것도 못 하는 화면을 한 번 더 거치게 할 뿐이다.
+   * 조회에 실패하면 홈으로 — 가입 마지막 단계에서 상태 조회 하나 때문에 막히면 안 된다.
+   */
+  async function nextStepAfterOnboarding(): Promise<string> {
+    try {
+      const status = await fetchWithAuth<{ verified: boolean; required: boolean }>(
+        "/api/members/me/identity-verification",
+      );
+      return status.required && !status.verified ? "/onboarding/identity" : "/";
+    } catch {
+      return "/";
+    }
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
@@ -47,7 +65,7 @@ export default function NicknameOnboardingPage() {
     setIsSubmitting(true);
     try {
       await completeOnboarding({ nickname, ...consents });
-      router.replace("/");
+      router.replace(await nextStepAfterOnboarding());
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "가입 절차를 완료하지 못했어요.");
     } finally {

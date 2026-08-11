@@ -27,6 +27,9 @@ function VerifyEmailContent() {
   const [status, setStatus] = useState<Status>(token ? "verifying" : "missing");
   const [message, setMessage] = useState<string | null>(null);
   const [confirmed, setConfirmed] = useState<SignUpConfirmResponse | null>(null);
+  // 가입 직후 본인인증으로 이을지 판단한다(#321). 게이트가 꺼져 있으면 인증을 완료할 수단이
+  // 없으므로 안내하지 않는다 — 누르면 아무것도 못 하는 화면으로 보내게 된다.
+  const [identityNeeded, setIdentityNeeded] = useState(false);
   // React 18 StrictMode의 개발 모드 이중 실행에서 같은 토큰을 두 번 보내면, 두 번째 호출이
   // "이미 사용된 링크"로 실패해 성공 화면 대신 실패 화면이 뜬다(토큰이 1회용이라 그렇다).
   const attemptedRef = useRef(false);
@@ -50,7 +53,18 @@ function VerifyEmailContent() {
         setStatus("signedUp");
         // confirm 응답이 리프레시 쿠키를 심어준다 — 그걸로 세션을 집어오면 곧바로 로그인 상태가 된다.
         // 링크를 눌러 가입이 끝났는데 다시 로그인 화면으로 보내면 방금 정한 비밀번호를 또 쳐야 한다.
-        await refresh();
+        const issued = await refresh();
+        if (issued) {
+          try {
+            const identity = await apiFetch<{ verified: boolean; required: boolean }>(
+              "/api/members/me/identity-verification",
+              { accessToken: issued },
+            );
+            setIdentityNeeded(identity.required && !identity.verified);
+          } catch {
+            // 조회에 실패하면 안내하지 않는다. 가입 마지막 화면이 부가 조회 하나로 흔들리면 안 된다.
+          }
+        }
         return;
       } catch (err) {
         // 대기 행 토큰이 아니었을 뿐일 수 있다 — 기존 회원 인증으로 한 번 더 시도한다.
@@ -110,7 +124,9 @@ function VerifyEmailContent() {
             환영해요, {confirmed.nickname}님
           </h1>
           <p className="mt-3 text-[13.5px] leading-[1.8] text-text-2">
-            인증이 끝나 바로 로그인됐어요. 이제 입찰 · 구매 · 판매를 시작할 수 있어요.
+            {identityNeeded
+              ? "이메일 인증이 끝나 바로 로그인됐어요. 마지막으로 휴대폰 본인인증만 마치면 돼요."
+              : "인증이 끝나 바로 로그인됐어요. 이제 입찰 · 구매 · 판매를 시작할 수 있어요."}
           </p>
 
           {/* 조용히 바꿔놓으면 나중에 "내 닉네임이 왜 이래"가 된다. 이건 진짜 알려야 하는 사실이라
@@ -126,9 +142,20 @@ function VerifyEmailContent() {
           )}
 
           <div className="mt-7 flex flex-wrap items-center gap-3">
-            <Link href="/" className={`${PRIMARY} ${FOCUS_RING}`}>
-              둘러보러 가기
-            </Link>
+            {/* 가입을 마치는 마지막 단계가 본인인증이다(#321). 환영 화면을 건너뛰고 자동으로
+                넘기지 않는 이유는 닉네임이 바뀐 경우 그 고지를 반드시 보여줘야 하기 때문이다. */}
+            {identityNeeded ? (
+              <Link
+                href="/onboarding/identity?next=%2F"
+                className={`${PRIMARY} ${FOCUS_RING}`}
+              >
+                본인인증하고 시작하기
+              </Link>
+            ) : (
+              <Link href="/" className={`${PRIMARY} ${FOCUS_RING}`}>
+                둘러보러 가기
+              </Link>
+            )}
             {confirmed.nicknameChanged && (
               <Link href="/mypage" className={`${SECONDARY} ${FOCUS_RING}`}>
                 닉네임 바꾸기

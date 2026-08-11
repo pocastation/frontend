@@ -16,7 +16,12 @@ function AuthCallbackInner() {
     refresh().then((token) => {
       if (cancelled) return;
       if (token) {
-        router.replace(isNewMember ? "/onboarding/nickname" : "/");
+        // 소셜 신규 가입은 본인인증 → 닉네임·동의 순으로 잇는다(#321).
+        // 인증을 먼저 두는 이유는 "인증된 사람만 가입을 마친다"가 정책이기 때문이고,
+        // 게이트가 꺼져 있으면 /onboarding/identity가 스스로 next로 넘긴다.
+        router.replace(
+          isNewMember ? "/onboarding/identity?next=%2Fonboarding%2Fnickname" : "/",
+        );
       } else {
         setFailed(true);
       }

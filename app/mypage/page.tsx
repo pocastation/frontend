@@ -793,9 +793,13 @@ export default function MyPage() {
             {/*
               본인인증 진입점(#319). 기존 회원의 재인증 경로이자, 게이트가 꺼져 있는 동안
               인증 화면에 닿을 수 있는 유일한 길이다 — 온보딩은 required=false면 건너뛴다.
+
+              제목은 패널이 아니라 여기서 준다(#321). 온보딩 화면은 h1이 「본인인증」이라
+              패널이 제목을 들고 있으면 같은 말이 두 번 나온다.
             */}
             <div className="mt-8 border-t border-border pt-6">
-              <IdentityVerificationPanel />
+              <h2 className="text-sm font-bold text-text-1">본인인증</h2>
+              <IdentityVerificationPanel className="mt-3" />
             </div>
           </>
         ) : tab === "shipping" ? (

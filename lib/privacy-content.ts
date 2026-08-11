@@ -55,7 +55,10 @@ const LAW = "「개인정보 보호법」";
 
 /**
  * 제10조 세 행이 모두 같은 창구를 쓴다 — 1인 사업자라 보호책임자·담당부서·열람청구 접수처가 동일하다.
- * 고객센터 대표번호가 아니라 보호책임자 전용 연락처를 쓴다(법 §31).
+ *
+ * 값은 고객센터 대표번호·서비스 메일과 같다. 법 §31이 요구하는 것은 "정보주체가 보호책임자에게
+ * 닿는 창구"라 별도 번호일 필요가 없고, **개인 연락처를 영구 공개 문서에 싣지 않기 위한 선택**이다
+ * (#317). 값을 바꾸려면 `BUSINESS_INFO.privacyOfficer*`의 경고 주석을 먼저 읽을 것.
  */
 const PRIVACY_OFFICER_CONTACT = `전화 ${BUSINESS_INFO.privacyOfficerPhone} / 이메일 ${BUSINESS_INFO.privacyOfficerEmail}`;
 

@@ -26,11 +26,6 @@ function formatPercentage(value: number | null) {
   return `${percentage.toFixed(percentage % 1 === 0 ? 0 : 1)}%`;
 }
 
-function formatNll(value: number | null) {
-  if (value === null || !Number.isFinite(value)) return "미분석";
-  return value.toFixed(2);
-}
-
 function AnalysisSection({
   title,
   passed,
@@ -343,15 +338,14 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                           label: "선택 결과 참고 점수",
                           value: formatPercentage(verification.ocrConfidenceScore),
                         },
-                        {
-                          label: "평균 NLL",
-                          value: formatNll(verification.ocrMeanTokenNll),
-                        },
                       ]}
                       condition={isTrocrV5
-                        ? "TrOCR v5가 최종 선택한 인식 단위의 참고 점수와 평균 NLL입니다. NLL은 낮을수록 모델 불확실도가 낮지만, 확률 보정값이 아니며 최종 통과를 직접 결정하지 않습니다."
+                        ? "TrOCR v5가 코드를 한 단위씩 생성할 때 각 단계에서 선택한 단위에 부여한 모델 점수입니다. 여러 문자가 한 단위로 묶일 수 있으며, 선택 결과 참고 점수는 이 단위별 점수의 기하평균입니다. 정답 확률이나 자동 통과 기준은 아닙니다."
                         : "모델이 최종 선택한 인식 단위의 참고 지표입니다. 확률 보정값이 아니며 최종 통과를 직접 결정하지 않습니다."}
                     >
+                      <p className="mt-1 text-[11px] leading-5 text-text-3">
+                        높을수록 모델이 읽어낸 코드 전체를 강하게 지지한다는 뜻입니다. 낮다면 점수가 가장 낮은 부분을 사진과 대조하세요.
+                      </p>
                       <div className="mt-3 border-t border-border pt-2">
                         <p className="text-[11px] font-extrabold text-text-3">인식 단위별 참고 점수</p>
                         <p className="mt-1 text-[11px] leading-5 text-text-3">

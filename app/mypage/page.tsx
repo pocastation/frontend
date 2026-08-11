@@ -40,6 +40,7 @@ import type {
   WishlistListResponse,
 } from "@/lib/types";
 import StatusBadge from "@/components/StatusBadge";
+import IdentityVerificationPanel from "@/components/IdentityVerificationPanel";
 
 const SELLING_TAB_STATUSES = new Set<AuctionResponse["status"]>([
   "PENDING_REVIEW",
@@ -788,6 +789,13 @@ export default function MyPage() {
             <p className="mt-1 text-sm text-text-3">닉네임과 계정 정보를 확인하고 관리해요.</p>
             <div className="mt-5">
               <ProfileTab />
+            </div>
+            {/*
+              본인인증 진입점(#319). 기존 회원의 재인증 경로이자, 게이트가 꺼져 있는 동안
+              인증 화면에 닿을 수 있는 유일한 길이다 — 온보딩은 required=false면 건너뛴다.
+            */}
+            <div className="mt-8 border-t border-border pt-6">
+              <IdentityVerificationPanel />
             </div>
           </>
         ) : tab === "shipping" ? (

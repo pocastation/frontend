@@ -34,12 +34,21 @@ export const BUSINESS_INFO = {
    */
   privacyOfficer: "김재윤 (대표자)" as string | null,
   /**
-   * 개인정보보호책임자 전용 연락처 — 처리방침 제10조(보호책임자·담당부서·열람청구)가 쓴다.
-   * 고객센터 대표번호(`phone`)와 의도적으로 분리한다. 법 §31이 요구하는 것은
-   * "정보주체가 보호책임자에게 직접 닿는 창구"라 대표번호와 같을 필요가 없다.
+   * 개인정보보호책임자 연락처 — 처리방침 제10조(보호책임자·담당부서·열람청구)가 쓴다.
+   *
+   * ⚠️ **개인 휴대폰·개인 이메일을 넣지 말 것.** 처리방침은 영구 공개 문서이고 이 레포는
+   * public이라, 한 번 넣으면 값을 되돌려도 git 히스토리에 남는다. 실제로 2026-08-11까지
+   * 대표자 개인 휴대폰·개인 Gmail이 공개돼 있었다(#317).
+   *
+   * 법 §31이 요구하는 것은 "정보주체가 보호책임자에게 닿는 창구"이지 개인 연락처가 아니다.
+   * 1인 사업자라 고객센터 대표번호(`phone`)와 같은 값을 쓴다 — 070 유선번호가 대표자에게
+   * 착신되므로 요건을 충족한다.
+   *
+   * 🔜 `privacy@pocastation.com` 도메인 메일로 옮기는 편이 낫다. SES는 발신 전용이라
+   *    수신 구성(Google Workspace 또는 SES 수신규칙)이 선행돼야 해서 미뤄 뒀다.
    */
-  privacyOfficerPhone: "010-3714-4353",
-  privacyOfficerEmail: "kimjaeyoon70@gmail.com",
+  privacyOfficerPhone: "070-8027-4603",
+  privacyOfficerEmail: "pocastation.official@gmail.com",
 
   /** 호스팅 제공자 (전상법 §10 표시사항) */
   hostingProvider: "Vercel Inc.",

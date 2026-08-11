@@ -2,7 +2,13 @@
 
 import { useEffect, useId, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { apiFetch, ApiError, fetchNicknameSuggestion } from "@/lib/api";
+import {
+  apiFetch,
+  ApiError,
+  fetchNicknameSuggestion,
+  fetchSignupRequirements,
+} from "@/lib/api";
+import { IDENTITY_NOT_READY_MESSAGE, openIdentityWindow } from "@/lib/identity-verification";
 import { useGuestOnly } from "@/lib/use-guest-only";
 import NicknameSuggestButton from "@/components/NicknameSuggestButton";
 import ConsentFields, {
@@ -61,6 +67,10 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [requested, setRequested] = useState(false);
+  // 본인인증이 가입의 관문인지(#323). 서버 설정이 단일 진실원이라 매번 물어본다.
+  // 조회에 실패하면 false로 둔다 — 관문이 없는 셈 치고 진행하면 서버가 최종적으로 막아준다.
+  // 반대로 true로 두면 서버는 안 받는데 화면만 인증을 요구해 가입이 통째로 멈춘다.
+  const [identityRequired, setIdentityRequired] = useState(false);
 
   // 진입 시 서비스가 생성한 닉네임을 기본값으로 채운다("따뜻한북극여우" 류).
   useEffect(() => {
@@ -69,6 +79,16 @@ export default function SignupPage() {
       .then((n) => active && setNickname((prev) => prev || n))
       .catch(() => {})
       .finally(() => active && setNicknameLoading(false));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+    void fetchSignupRequirements()
+      .then((r) => active && setIdentityRequired(r.identityVerificationRequired))
+      .catch(() => {});
     return () => {
       active = false;
     };
@@ -98,10 +118,23 @@ export default function SignupPage() {
 
     setIsSubmitting(true);
     try {
+      // 본인인증이 관문이면 여기서 대행사 표준창을 띄운다(#323). 인증을 통과해야 요청이 나간다.
+      //
+      // 폼 검증을 모두 통과한 뒤에 띄우는 순서가 중요하다 — 인증부터 시키고 나서
+      // "비밀번호가 규칙에 안 맞아요"를 보여주면, 이미 끝낸 인증을 다시 하게 된다.
+      let identityReceiptId: string | undefined;
+      if (identityRequired) {
+        const receiptId = await openIdentityWindow();
+        if (!receiptId) {
+          setError(IDENTITY_NOT_READY_MESSAGE);
+          return;
+        }
+        identityReceiptId = receiptId;
+      }
       // 이 요청은 회원을 만들지 않는다(BE #252) — 인증 대기와 메일만 남는다.
       await apiFetch("/api/members/signup", {
         method: "POST",
-        body: { email, password, nickname, ...consents },
+        body: { email, password, nickname, ...consents, identityReceiptId },
       });
       setRequested(true);
     } catch (err) {
@@ -133,7 +166,9 @@ export default function SignupPage() {
           회원가입
         </h1>
         <p className="mt-2 text-[13px] leading-[1.7] text-text-2">
-          입력하신 주소로 인증 메일을 보내드려요. 링크를 눌러야 가입이 끝나요.
+          {identityRequired
+            ? "휴대폰 본인인증을 마치면 입력하신 주소로 인증 메일을 보내드려요. 링크를 눌러야 가입이 끝나요."
+            : "입력하신 주소로 인증 메일을 보내드려요. 링크를 눌러야 가입이 끝나요."}
         </p>
       </header>
 
@@ -241,7 +276,13 @@ export default function SignupPage() {
           disabled={isSubmitting}
           className={`flex h-[52px] w-full items-center justify-center rounded-[4px] bg-primary text-[15px] font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
         >
-          {isSubmitting ? "보내는 중..." : "인증 메일 받기"}
+          {/* 문구가 다음에 무슨 일이 일어나는지 말한다 — 관문이 켜져 있으면 이 버튼이 인증창을 띄운다.
+              "가입하기"로 두면 눌렀을 때 인증창이 뜨는 게 예고 없는 일이 된다. */}
+          {isSubmitting
+            ? "보내는 중..."
+            : identityRequired
+              ? "본인 인증하고 가입하기"
+              : "인증 메일 받기"}
         </button>
       </form>
 
@@ -326,6 +367,13 @@ function resolveError(err: unknown): string {
       return "이미 사용 중인 닉네임이에요. 다른 닉네임을 골라주세요.";
     case "EMAIL_RESEND_TOO_SOON":
       return "조금 전에 메일을 보냈어요. 1분 뒤에 다시 시도해 주세요.";
+    case "IDENTITY_VERIFICATION_REQUIRED_FOR_SIGNUP":
+      return "본인인증을 마쳐야 가입할 수 있어요.";
+    // 인증창은 통과했는데 그 결과가 이미 다른 가입에 쓰인 경우다(BE #295).
+    case "IDENTITY_VERIFICATION_RECEIPT_REUSED":
+      return "이미 사용된 인증 정보예요. 본인인증을 다시 진행해 주세요.";
+    case "IDENTITY_VERIFICATION_UNAVAILABLE":
+      return IDENTITY_NOT_READY_MESSAGE;
     default:
       return err.message;
   }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { ApiError } from "@/lib/api";
+import { IDENTITY_NOT_READY_MESSAGE, openIdentityWindow } from "@/lib/identity-verification";
 import { PRIMARY_BUTTON_CLASS } from "@/lib/ui";
 
 // 본인인증 패널(#319, #321). 가입 흐름(/onboarding/identity)과 마이페이지가 같은 것을 쓴다 —
@@ -15,20 +16,6 @@ import { PRIMARY_BUTTON_CLASS } from "@/lib/ui";
 // 화면에 남아야 한다. 한 줄로 줄이고 자세한 것은 처리방침으로 넘긴다.
 
 export type IdentityStatus = { verified: boolean; required: boolean };
-
-/**
- * 대행사 표준창을 띄우는 자리.
- *
- * <p>다날 연동정보(모듈·암호키)를 아직 받지 못해 비어 있다. 계약이 끝나면 여기서 표준창을 열고
- * 대행사가 돌려주는 식별자를 반환하면 된다 — 그 값을 서버에 넘기면 서버가 대행사에 다시 조회해
- * 결과를 확정한다(BE #293). <b>인증 결과를 여기서 만들어 서버로 보내면 안 된다</b>: 위조된 인증이
- * 그대로 저장된다.
- *
- * @returns 대행사 발급 식별자. 연동 전에는 항상 null.
- */
-async function openIdentityWindow(): Promise<string | null> {
-  return null;
-}
 
 export default function IdentityVerificationPanel({
   onVerified,
@@ -81,7 +68,7 @@ export default function IdentityVerificationPanel({
       // 연동 전에는 여기서 끝난다. 버튼을 비활성으로 두지 않는 이유는 화면이 미완성으로
       // 보이지 않게 하기 위해서고, 누른 사람에게는 사실대로 알린다.
       if (!receiptId) {
-        setMessage("본인인증 기능을 준비하고 있어요. 준비되면 알려드릴게요.");
+        setMessage(IDENTITY_NOT_READY_MESSAGE);
         return;
       }
       const next = await fetchWithAuth<IdentityStatus>("/api/members/me/identity-verification", {

@@ -92,6 +92,17 @@ export async function fetchNicknameSuggestion(): Promise<string> {
   return res.nickname;
 }
 
+/**
+ * 가입에 필요한 관문을 묻는다(#323). 가입 화면은 비로그인이라
+ * `/api/members/me/identity-verification`(로그인 필요)을 쓸 수 없다.
+ *
+ * 이 값을 프론트 환경변수로 두지 않는 이유: 게이트의 진실은 서버 설정 하나여야 한다.
+ * 두 곳에 두면 서버는 요구하는데 화면은 안 받는(또는 그 반대) 상태가 조용히 생긴다.
+ */
+export async function fetchSignupRequirements(): Promise<{ identityVerificationRequired: boolean }> {
+  return apiFetch<{ identityVerificationRequired: boolean }>("/api/members/signup/requirements");
+}
+
 
 
 

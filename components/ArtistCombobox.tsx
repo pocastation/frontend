@@ -11,7 +11,7 @@ export default function ArtistCombobox({
   options,
   value,
   onChange,
-  placeholder = "아티스트명 검색",
+  placeholder = "스타명 검색",
 }: {
   id: string;
   options: ArtistOption[];

@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import { apiFetch, ApiError, apiStreamUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { formatKRW, formatCountdown, formatRelativeTime, isBeforeEnd } from "@/lib/format";
+import { useDeliveryAddressGate } from "@/lib/use-delivery-address-gate";
+import { useToast } from "@/lib/toast-context";
+import { formatKRW, formatCountdown, formatRelativeTime, formatDateTimeKST, isBeforeEnd, isEndingSoon } from "@/lib/format";
 import {
   BID_MIN_INCREMENT,
   buyerFee,
@@ -26,6 +29,7 @@ type Props = {
   initialCurrentPrice: number;
   initialBidCount: number;
   initialEndAt: string;
+  maxEndAt: string | null;
   status: AuctionStatus;
   sellerNickname: string;
   startPrice: number;
@@ -47,12 +51,17 @@ export default function BidSection({
   initialCurrentPrice,
   initialBidCount,
   initialEndAt,
+  maxEndAt,
   status,
   sellerNickname,
   startPrice,
   viewCount,
 }: Props) {
   const { member, accessToken, fetchWithAuth } = useAuth();
+  const toast = useToast();
+  // 배송지 관문(#283) — 없으면 CTA 라벨이 바뀌고 누를 때 등록 모달이 뜬다.
+  const { needsAddress, markRegistered, isGateRejection } = useDeliveryAddressGate();
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
 
   const [currentPrice, setCurrentPrice] = useState(initialCurrentPrice);
   const [bidCount, setBidCount] = useState(initialBidCount);
@@ -62,26 +71,26 @@ export default function BidSection({
   const [bidTotalPages, setBidTotalPages] = useState(1);
   const [amount, setAmount] = useState(() => minNextBid(initialCurrentPrice, initialBidCount));
   const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  // 내가 현재 최고 입찰자인지 — 내 입찰 성공/서버 '이미 최고 입찰자' 응답으로 켜지고, 남이 추월(SSE)하면 꺼진다.
+  const [isTopBidder, setIsTopBidder] = useState(false);
+  const myTopBidRef = useRef<number | null>(null);
   // 카운트다운/상대시각을 1초마다 다시 그리기 위한 틱(값은 안 읽고 리렌더 트리거로만 쓴다).
   const [, setNowTick] = useState(0);
   // 다른 사람 입찰로 현재가가 오르면 입력값 하한도 따라 올려야 한다. 단 사용자가 사다리에서
   // 직접 고른 값은 존중한다.
   const amountTouchedRef = useRef(false);
+  // 모바일 하단 고정 입찰바 — 현재가 헤더(입찰 CTA)가 화면 밖일 때만 노출(스크롤로 도달하면 숨김).
+  const priceHeaderRef = useRef<HTMLDivElement>(null);
+  const [priceHeaderInView, setPriceHeaderInView] = useState(false);
 
   const isLive = status === "LIVE" && isBeforeEnd(endAt);
+  // 마감 임박일 때만 카운트다운을 주황(warn)으로 강조 — 그 외에는 뉴트럴로 둔다(색 절제).
+  const endingSoon = isLive && isEndingSoon(endAt);
   const isOwnAuction = member?.nickname != null && member.nickname === sellerNickname;
   const floor = minNextBid(currentPrice, bidCount);
   const ceil = maxNextBid(currentPrice);
   const outOfRange = amount < floor || amount > ceil;
   const total = useMemo(() => estimatedTotal(amount), [amount]);
-
-  // 호가 사다리 = 상한(+10호가)에서 최소 입찰가까지 1호가 간격으로 내려오는 가격들.
-  const rungs = useMemo(() => {
-    const list: number[] = [];
-    for (let p = ceil; p >= floor; p -= BID_MIN_INCREMENT) list.push(p);
-    return list;
-  }, [floor, ceil]);
 
   // 최신 순으로 첫 페이지를 다시 받아 교체한다(입찰 발생 시 authoritative하게 갱신).
   const fetchBids = useCallback(async () => {
@@ -132,7 +141,11 @@ export default function BidSection({
       setCurrentPrice(data.currentPrice);
       setBidCount(data.bidCount);
       setEndAt(data.endAt);
-      setMessage(null);
+      // 내 최고가보다 높은 입찰이 들어오면 추월된 것 — 내 SSE 에코(같은 금액)는 무시한다.
+      if (myTopBidRef.current != null && data.currentPrice > myTopBidRef.current) {
+        myTopBidRef.current = null;
+        setIsTopBidder(false);
+      }
       fetchBids();
     });
     source.onerror = () => {};
@@ -154,13 +167,37 @@ export default function BidSection({
     }
   }, [currentPrice, bidCount]);
 
-  function selectRung(price: number) {
+  // 현재가 헤더가 뷰포트에 보이는지 관찰 — 모바일 하단 고정바를 CTA가 화면 밖일 때만 띄우기 위함.
+  // rootMargin 하단 -76px는 고정바 높이만큼 미리 숨겨 겹침을 피한다.
+  useEffect(() => {
+    const el = priceHeaderRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setPriceHeaderInView(entry.isIntersecting),
+      { rootMargin: "0px 0px -76px 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // 입찰가 조정(스테퍼 ± · 빠른 가산) — 입찰 가능 범위[floor, ceil]로 클램프하고,
+  // 사용자가 직접 조정했음을 표시해 현재가 상승 시 자동 rebase가 값을 덮어쓰지 않게 한다.
+  function adjustAmount(next: number) {
     amountTouchedRef.current = true;
-    setAmount(price);
+    setAmount(Math.max(floor, Math.min(ceil, next)));
+  }
+
+  function scrollToBid() {
+    priceHeaderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   async function handleBid() {
-    setMessage(null);
+    // 배송지가 없으면 입찰을 보내지 않고 등록부터 받는다(#283). 서버도 같은 조건으로 막지만,
+    // 여기서 잡아야 사용자가 오류 대신 다음 행동을 본다.
+    if (needsAddress) {
+      setAddressModalOpen(true);
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetchWithAuth<BidResponse>(`/api/auctions/${auctionId}/bids`, {
@@ -170,21 +207,38 @@ export default function BidSection({
       setCurrentPrice(res.currentPrice);
       setBidCount(res.bidCount);
       setEndAt(res.endAt);
+      // 내가 방금 최고가가 됐다 — 버튼을 잠그고, 추월 감지를 위해 내 금액을 기록한다.
+      myTopBidRef.current = res.currentPrice;
+      setIsTopBidder(true);
       // 내 입찰 성공 시 다음 최소 입찰가로 즉시 올려둔다. rebase 효과에만 맡기면, 서버가 커밋
       // 직후 쏘는 SSE가 POST 응답보다 먼저 도착해 currentPrice를 갱신할 때 amountTouchedRef가
       // 아직 true라 스킵되고, 이후 값이 안 바뀌어 재실행도 안 돼 옛 입찰가에 갇히는 레이스가 있다.
       amountTouchedRef.current = false;
       setAmount(minNextBid(res.currentPrice, res.bidCount));
-      setMessage({
-        type: "ok",
-        text: res.extended ? "입찰 완료! 마감 임박으로 종료 시간이 연장됐어요." : "입찰 완료!",
+      toast.show({
+        variant: res.extended ? "warn" : "success",
+        text: res.extended
+          ? "입찰 완료 · 마감 임박으로 종료 시간이 연장됐어요."
+          : "입찰 완료! 현재 최고 입찰자가 되었어요.",
       });
       fetchBids();
     } catch (err) {
-      setMessage({
-        type: "err",
-        text: err instanceof ApiError ? err.message : "입찰에 실패했습니다. 잠시 후 다시 시도해주세요.",
-      });
+      const text = err instanceof ApiError ? err.message : "입찰에 실패했습니다. 잠시 후 다시 시도해주세요.";
+      // 서버 관문 거부 — 화면 상태가 낡았다는 뜻이다(다른 탭에서 배송지를 지웠거나 조회가 실패했다).
+      // 오류 토스트 대신 등록 모달로 이어 붙인다.
+      if (isGateRejection(err)) {
+        setAddressModalOpen(true);
+      } else if (err instanceof ApiError && err.message.includes("최고 입찰")) {
+        // '이미 최고 입찰자'는 에러가 아니라 정상 상태 — 정보 톤으로 안내하고 버튼도 잠근다.
+        setIsTopBidder(true);
+        toast.show({
+          variant: "info",
+          text: "이미 회원님이 최고 입찰자예요.",
+          sub: "더 높은 금액으로만 다시 입찰할 수 있어요.",
+        });
+      } else {
+        toast.show({ variant: "danger", text });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -192,26 +246,41 @@ export default function BidSection({
 
   return (
     <div className="mt-6">
-      {/* 현재가 헤더 */}
-      <div className={`rounded-r3 border border-border p-4 shadow-card ${isLive ? "bg-primary-soft" : "bg-surface"}`}>
+      {/* 입찰 박스 — 현재가·입찰 입력·예상 결제·CTA를 하나의 카드로 묶는다(그림자 없이 헤어라인). */}
+      <div ref={priceHeaderRef} className="rounded-r3 border border-border bg-surface p-5">
+        {/* 현재가 헤더 */}
         <div className="flex items-center justify-between text-xs font-semibold text-text-3">
           <span>현재가</span>
           <span>입찰 {bidCount}회</span>
         </div>
-        <div className="mt-1 flex items-baseline justify-between gap-2">
+        <div className="mt-1.5 flex items-center justify-between gap-2">
           <span className="font-display text-3xl font-extrabold text-text-1 tabular-nums" aria-live="polite">
             {formatKRW(currentPrice)}
           </span>
-          <span
-            className={`shrink-0 text-right text-sm font-bold tabular-nums ${isLive ? "text-accent" : "text-text-3"}`}
-          >
-            {isLive ? formatCountdown(endAt) : (STATUS_LABEL[status] ?? "종료")}
-            {isLive && <span className="block text-[10px] font-normal text-text-3">마감까지</span>}
+          <span className="flex shrink-0 flex-col items-end gap-1">
+            {isLive && <span className="text-[10px] font-medium text-text-3">마감까지</span>}
+            <span
+              className={`text-sm font-bold tabular-nums ${
+                !isLive
+                  ? "text-text-3"
+                  : endingSoon
+                    ? "rounded-r1 bg-warn-soft px-2 py-0.5 text-warn"
+                    : "text-text-1"
+              }`}
+            >
+              {isLive ? formatCountdown(endAt) : (STATUS_LABEL[status] ?? "종료")}
+            </span>
           </span>
         </div>
         {isLive && (
           <p className="mt-2 text-[10.5px] text-text-3">
             마감 3분 전 입찰 시 종료 시간이 자동 연장돼요(최대 3회).
+            {maxEndAt && (
+              <>
+                {" "}
+                최대 <span className="font-semibold text-text-2">{formatDateTimeKST(maxEndAt)}</span>까지 연장될 수 있어요.
+              </>
+            )}
           </p>
         )}
         <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-[11px] text-text-3">
@@ -222,113 +291,114 @@ export default function BidSection({
             조회 <span className="font-semibold text-text-2 tabular-nums">{viewCount.toLocaleString("ko-KR")}</span>
           </span>
         </div>
-      </div>
 
-      {/* 입찰 영역 (진행 중일 때만) */}
-      {isLive &&
-        (isOwnAuction ? (
-          <div className="mt-4 rounded-r2 border border-border bg-surface-2 p-4 text-center text-sm font-semibold text-text-2">
-            내 경매입니다. 직접 입찰할 수 없어요.
-          </div>
-        ) : !accessToken ? (
-          <Link
-            href={`/login?redirect=/auctions/${auctionId}`}
-            className={`mt-4 flex h-11 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
-          >
-            로그인하고 입찰하기
-          </Link>
-        ) : (
-          <div className="mt-4">
-            {/* 입찰 호가 — 현재가가 맨 아래, 위로 갈수록 높은 호가(최대 10호가 상한) */}
-            <div className="overflow-hidden rounded-r2 border border-border bg-surface">
-              <div className="flex items-center justify-between border-b border-border px-3.5 py-2.5 text-sm font-extrabold text-text-1">
-                <span>입찰 호가</span>
-                <span className="text-[11px] font-semibold text-text-3">현재가부터 상위 10호가</span>
-              </div>
-              <div role="group" aria-label="입찰가 선택">
-                {rungs.map((p, i) => {
-                  const selected = p === amount;
-                  const isNextBid = i === rungs.length - 1;
-                  const tag = isNextBid ? "다음 호가" : `${rungs.length - i}호가`;
-                  return (
-                    <button
-                      key={p}
-                      type="button"
-                      aria-pressed={selected}
-                      onClick={() => selectRung(p)}
-                      className={`flex w-full items-center justify-between px-3.5 py-1.5 text-sm tabular-nums transition-colors ${FOCUS_RING} ${
-                        selected ? "bg-accent-soft font-bold text-accent" : "text-text-2 hover:bg-surface-2"
-                      }`}
-                    >
-                      <span>{formatKRW(p)}</span>
-                      <span className={`text-[10px] font-semibold ${selected ? "text-accent" : "text-text-3"}`}>
-                        {tag}
-                      </span>
-                    </button>
-                  );
-                })}
-                {/* 현재가 행 — 사다리 맨 아래 */}
-                <div className="flex items-center justify-between bg-primary-soft px-3.5 py-2.5 text-[15px] font-extrabold tabular-nums text-primary">
-                  <span>현재가 {formatKRW(currentPrice)}</span>
-                  <span className="text-xs font-bold">{bids[0]?.bidderNicknameMasked ?? "-"}</span>
-                </div>
-              </div>
-              <div className="flex items-center justify-between border-t border-border px-3.5 py-2 text-[11px] text-text-3">
-                <span>입찰 단위 {formatKRW(BID_MIN_INCREMENT)}</span>
-                <span>실시간 갱신 · SSE</span>
-              </div>
+        {/* 입찰 영역 (진행 중일 때만) — 같은 카드 안, 헤어라인으로 구분 */}
+        {isLive &&
+          (isOwnAuction ? (
+            <div className="mt-4 rounded-r2 border border-border bg-surface-2 p-4 text-center text-sm font-semibold text-text-2">
+              내 경매입니다. 직접 입찰할 수 없어요.
             </div>
-
-            {/* 선택 요약 + 예상 결제 총액 */}
-            <div className="mt-3 rounded-r2 bg-surface-2 p-3 text-xs">
-              <div className="flex items-center justify-between text-text-3">
-                <span>입찰가</span>
-                <span className="font-semibold text-text-2 tabular-nums">{formatKRW(amount)}</span>
-              </div>
-              <div className="mt-1 flex items-center justify-between text-text-3">
-                <span>구매자 수수료</span>
-                <span className="font-semibold text-text-2 tabular-nums">{formatKRW(buyerFee(amount))}</span>
-              </div>
-              <div className="mt-2 flex items-center justify-between border-t border-border pt-2">
-                <span className="font-semibold text-text-2">예상 결제 총액</span>
-                <span className="font-display text-sm font-extrabold text-primary tabular-nums">
-                  {formatKRW(total)}
+          ) : !accessToken ? (
+            <Link
+              href={`/login?redirect=/auctions/${auctionId}`}
+              className={`mt-4 flex h-12 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
+            >
+              로그인하고 입찰하기
+            </Link>
+          ) : (
+            <div className="mt-4 border-t border-border pt-4">
+              {/* 입찰가 — v0 스테퍼(± · 빠른 가산). 호가 사다리를 대체하되 min/max·수수료 로직은 그대로 유지. */}
+              <div className="mb-2.5 flex items-baseline justify-between">
+                <span className="text-[13px] font-bold text-text-1">입찰가</span>
+                <span className="text-[11px] font-medium text-text-3 tabular-nums">
+                  가능 범위 {formatKRW(floor)} – {formatKRW(ceil)}
                 </span>
               </div>
-              <p className="mt-1 text-[10px] text-text-3">낙찰 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
-            </div>
+              <div className="flex h-[52px] items-stretch overflow-hidden rounded-r2 border border-border">
+                <button
+                  type="button"
+                  onClick={() => adjustAmount(amount - BID_MIN_INCREMENT)}
+                  disabled={amount <= floor}
+                  aria-label="입찰가 내리기"
+                  className={`w-[52px] text-xl text-text-2 transition-colors hover:bg-surface-2 hover:text-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-2 ${FOCUS_RING}`}
+                >
+                  −
+                </button>
+                <div
+                  className="flex flex-1 items-center justify-center border-x border-border font-display text-xl font-bold tabular-nums text-text-1"
+                  aria-live="polite"
+                >
+                  {formatKRW(amount)}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => adjustAmount(amount + BID_MIN_INCREMENT)}
+                  disabled={amount >= ceil}
+                  aria-label="입찰가 올리기"
+                  className={`w-[52px] text-xl text-text-2 transition-colors hover:bg-surface-2 hover:text-primary disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-text-2 ${FOCUS_RING}`}
+                >
+                  +
+                </button>
+              </div>
+              <div className="mt-2 flex gap-1.5">
+                {[BID_MIN_INCREMENT, 5000, 10000].map((delta) => (
+                  <button
+                    key={delta}
+                    type="button"
+                    onClick={() => adjustAmount(amount + delta)}
+                    disabled={amount >= ceil}
+                    className={`h-9 flex-1 rounded-r2 border border-border text-xs font-medium text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-40 disabled:hover:border-border disabled:hover:text-text-2 ${FOCUS_RING}`}
+                  >
+                    +{delta.toLocaleString("ko-KR")}
+                  </button>
+                ))}
+              </div>
 
-            <button
-              type="button"
-              onClick={handleBid}
-              disabled={submitting || outOfRange}
-              className={`mt-2 flex h-11 w-full items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
-            >
-              {submitting ? "처리 중..." : `${formatKRW(amount)} 입찰하기`}
-            </button>
+              {/* 예상 결제 총액 — 연회색 박스. 총액은 뉴트럴(보라 아님). */}
+              <div className="mt-4 rounded-r2 bg-surface-2 p-3.5 text-[13px]">
+                <div className="flex items-center justify-between py-0.5 text-text-3">
+                  <span>입찰가</span>
+                  <span className="font-medium tabular-nums text-text-2">{formatKRW(amount)}</span>
+                </div>
+                <div className="flex items-center justify-between py-0.5 text-text-3">
+                  <span>구매자 수수료</span>
+                  <span className="font-medium tabular-nums text-text-2">{formatKRW(buyerFee(amount))}</span>
+                </div>
+                <div className="mt-1.5 flex items-baseline justify-between border-t border-border pt-2.5">
+                  <span className="font-bold text-text-1">예상 결제 총액</span>
+                  <span className="font-display text-lg font-bold tabular-nums text-text-1">{formatKRW(total)}</span>
+                </div>
+                <p className="mt-1.5 text-[11px] text-text-3">낙찰 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
+              </div>
 
-            {outOfRange && (
-              <p className="mt-1 text-[11px] font-semibold text-accent">
-                입찰 가능 범위 {formatKRW(floor)} ~ {formatKRW(ceil)}
-              </p>
-            )}
-
-            {message && (
-              <p
-                role="alert"
-                aria-live="polite"
-                className={`mt-2 rounded-r2 px-3 py-2 text-xs font-semibold ${
-                  message.type === "ok" ? "bg-ok-soft text-ok" : "bg-accent-soft text-accent"
-                }`}
+              <button
+                type="button"
+                onClick={handleBid}
+                disabled={submitting || outOfRange || isTopBidder}
+                className={`mt-3.5 flex h-12 w-full items-center justify-center rounded-r2 bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-primary ${FOCUS_RING}`}
               >
-                {message.text}
-              </p>
-            )}
-          </div>
-        ))}
+                {isTopBidder
+                  ? "현재 최고 입찰자예요"
+                  : submitting
+                    ? "처리 중..."
+                    : needsAddress
+                      ? "배송지 등록하고 입찰하기"
+                      : `${formatKRW(amount)} 입찰하기`}
+              </button>
+              {/* 누르기 전에 알려준다(#283) — 마감 임박에 알게 되면 등록할 시간이 없다.
+                  버튼은 비활성화하지 않는다. 회색 버튼은 이유를 말해주지 않는다. */}
+              {needsAddress && (
+                <p className="mt-2 text-[11.5px] leading-[1.6] text-text-3">
+                  낙찰되면 바로 보내드릴 수 있게 받을 주소를 먼저 등록해요.{" "}
+                  <b className="font-bold text-text-2">한 번만 하면 다음부터는 물어보지 않아요.</b>
+                </p>
+              )}
+            </div>
+          ))}
+      </div>
 
-      {/* 입찰 이력 */}
-      <section className="mt-6 rounded-r3 border border-border bg-surface p-4 shadow-card">
+      {/* 입찰 이력 — 1위 행은 연보라 하이라이트 + 순번 배지, 나머지는 헤어라인 행 */}
+      <section className="mt-4 rounded-r3 border border-border bg-surface p-5">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-bold text-text-1">
             입찰 이력 {bidCount > 0 && <span className="text-text-3">({bidCount})</span>}
@@ -341,28 +411,41 @@ export default function BidSection({
           )}
         </div>
         {bids.length > 0 ? (
-          <ul className="mt-2 flex flex-col gap-1">
-            {bids.map((bid, index) => (
-              <li
-                key={bid.id}
-                className={`flex items-center justify-between rounded-r1 px-3 py-2 text-xs ${
-                  index === 0 ? "bg-ok-soft" : "bg-surface-2"
-                }`}
-              >
-                <span className={`font-semibold ${index === 0 ? "text-ok" : "text-text-2"}`}>
-                  {index === 0 && (
-                    <span className="mr-1.5 rounded-full bg-ok px-1.5 py-0.5 text-[10px] font-bold text-white">
-                      최고가
+          <ul className="mt-2 flex flex-col">
+            {bids.map((bid, index) => {
+              const isTop = index === 0;
+              return (
+                <li
+                  key={bid.id}
+                  className={`flex items-center justify-between px-3 py-2.5 text-xs ${
+                    isTop
+                      ? "mb-1 rounded-r2 bg-primary-soft"
+                      : "border-b border-border last:border-b-0"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <span
+                      className={
+                        isTop
+                          ? "flex h-5 w-5 items-center justify-center rounded-r1 border border-primary text-[11px] font-bold text-primary"
+                          : "w-5 text-center text-[11px] font-bold text-text-3"
+                      }
+                    >
+                      {index + 1}
                     </span>
-                  )}
-                  {bid.bidderNicknameMasked}
-                </span>
-                <span className="flex items-baseline gap-2">
-                  <span className="font-bold text-text-1 tabular-nums">{formatKRW(bid.amount)}</span>
-                  <span className="text-[10px] text-text-3">{formatRelativeTime(bid.createdAt)}</span>
-                </span>
-              </li>
-            ))}
+                    <span className={`font-semibold ${isTop ? "text-text-1" : "text-text-2"}`}>
+                      {bid.bidderNicknameMasked}
+                    </span>
+                  </span>
+                  <span className="flex items-baseline gap-2">
+                    <span className="text-[10px] text-text-3">{formatRelativeTime(bid.createdAt)}</span>
+                    <span className={`tabular-nums ${isTop ? "text-sm font-bold text-text-1" : "text-text-2"}`}>
+                      {formatKRW(bid.amount)}
+                    </span>
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         ) : (
           <p className="mt-2 text-xs text-text-3">아직 입찰이 없습니다.</p>
@@ -377,6 +460,68 @@ export default function BidSection({
           </button>
         )}
       </section>
+
+      {/* 모바일 하단 고정 입찰바 — 상세가 세로로 길어 입찰 CTA가 맨 아래라, 라이브일 때 현재가와
+          입찰 버튼을 항상 손닿는 곳에 둔다. 실제 입찰 영역이 보이면(스크롤로 도달) 숨겨 중복을 피한다. */}
+      {isLive && !priceHeaderInView && (
+        <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-border bg-surface px-4 py-3 shadow-[0_-2px_12px_rgba(0,0,0,0.08)] sm:hidden">
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] font-semibold text-text-3">현재가</div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="font-display text-lg font-extrabold text-text-1 tabular-nums">
+                {formatKRW(currentPrice)}
+              </span>
+              <span className={`truncate text-[11px] font-bold tabular-nums ${endingSoon ? "text-warn" : "text-text-3"}`}>
+                {formatCountdown(endAt)}
+              </span>
+            </div>
+          </div>
+          {isOwnAuction ? (
+            <span className="shrink-0 rounded-r2 bg-surface-2 px-4 py-2.5 text-sm font-bold text-text-3">
+              내 경매
+            </span>
+          ) : !accessToken ? (
+            <Link
+              href={`/login?redirect=/auctions/${auctionId}`}
+              className={`flex h-11 shrink-0 items-center justify-center px-5 ${PRIMARY_BUTTON_CLASS}`}
+            >
+              로그인하고 입찰
+            </Link>
+          ) : isTopBidder ? (
+            <span className="shrink-0 rounded-r2 bg-surface-2 px-4 py-2.5 text-sm font-bold text-text-3">
+              최고 입찰자
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={scrollToBid}
+              className={`flex h-11 shrink-0 items-center justify-center px-6 ${PRIMARY_BUTTON_CLASS}`}
+            >
+              입찰하기
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* 배송지 등록(#283). 저장해도 입찰을 대신 눌러주지 않는다 — 입찰은 취소할 수 없는 청약이라
+          사용자가 한 번 더 눌러야 한다(약관 §13조의2 ②). 대신 버튼이 정상 라벨로 돌아오고
+          입찰 박스로 스크롤해 흐름이 끊긴 느낌을 줄인다. */}
+      {addressModalOpen && (
+        <DeliveryAddressGateModal
+          action="입찰"
+          onClose={() => setAddressModalOpen(false)}
+          onSaved={() => {
+            setAddressModalOpen(false);
+            markRegistered();
+            toast.show({
+              variant: "success",
+              text: "배송지를 등록했어요.",
+              sub: "이제 입찰할 수 있어요.",
+            });
+            scrollToBid();
+          }}
+        />
+      )}
     </div>
   );
 }

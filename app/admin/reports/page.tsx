@@ -2,17 +2,19 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import ReportScopeTabs from "./ReportScopeTabs";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatRelativeTime } from "@/lib/format";
 import {
   REPORT_REASON_LABEL,
-  REPORT_STATUS_BADGE_CLASS,
+  REPORT_STATUS_TONE,
   REPORT_STATUS_LABEL,
   RESOLUTION_ACTION_LABEL,
 } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AdminReportDetailResponse, AdminReportListResponse, AdminReportSummary, ReportStatus, ResolutionAction } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
 
 const PAGE_SIZE = 20;
 
@@ -143,10 +145,11 @@ export default function AdminReportsPage() {
     <div>
       <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">신고 관리</h1>
       <p className="mt-1.5 text-sm text-text-3">접수된 신고 내역을 확인하고 필요한 조치를 취할 수 있습니다.</p>
+      <ReportScopeTabs />
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_340px]">
-        {/* 목록 */}
-        <div>
+        {/* 목록 — min-w-0로 테이블(min-w)이 그리드 컬럼을 늘려 페이지가 넘치는 걸 막는다. */}
+        <div className="min-w-0">
           <div className="mb-3 flex flex-wrap gap-1.5" role="group" aria-label="상태 필터">
             {STATUS_FILTERS.map((f) => (
               <button
@@ -165,7 +168,7 @@ export default function AdminReportsPage() {
 
           <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
-          <div className="overflow-x-auto rounded-r3 border border-border bg-surface shadow-card">
+          <div className="overflow-x-auto rounded-r3 border border-border bg-surface">
             <table className="w-full min-w-[640px] border-collapse">
               <thead>
                 <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
@@ -216,9 +219,9 @@ export default function AdminReportsPage() {
                       </td>
                       <td className="px-4 py-3 text-text-3">{formatRelativeTime(r.latestReportedAt)}</td>
                       <td className="px-4 py-3">
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${REPORT_STATUS_BADGE_CLASS[r.status]}`}>
+                        <StatusBadge tone={REPORT_STATUS_TONE[r.status]}>
                           {REPORT_STATUS_LABEL[r.status]}
-                        </span>
+                        </StatusBadge>
                       </td>
                     </tr>
                   ))
@@ -248,16 +251,16 @@ export default function AdminReportsPage() {
               신고를 선택하면 상세 내용과 처리 기능이 표시됩니다.
             </div>
           ) : detailLoading || !detail ? (
-            <div className="rounded-r3 border border-border bg-surface p-8 text-center text-sm text-text-3 shadow-card">
+            <div className="rounded-r3 border border-border bg-surface p-8 text-center text-sm text-text-3">
               {detailLoading ? "불러오는 중..." : "정보를 불러오지 못했습니다."}
             </div>
           ) : (
-            <div className="rounded-r3 border border-border bg-surface p-4 shadow-card">
+            <div className="rounded-r3 border border-border bg-surface p-4">
               <div className="flex items-start justify-between gap-2">
                 <h2 className="font-display text-base font-extrabold text-text-1">{detail.auctionTitle ?? "-"}</h2>
-                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-extrabold ${REPORT_STATUS_BADGE_CLASS[detail.reports[0]?.status ?? "RECEIVED"]}`}>
+                <StatusBadge tone={REPORT_STATUS_TONE[detail.reports[0]?.status ?? "RECEIVED"]} className="shrink-0">
                   {REPORT_STATUS_LABEL[detail.reports[0]?.status ?? "RECEIVED"]}
-                </span>
+                </StatusBadge>
               </div>
 
               <dl className="mt-3 flex flex-col gap-1.5 border-t border-border pt-3 text-[12.5px]">

@@ -6,13 +6,26 @@
  * bg-primary, text-text-2, rounded-r4, shadow-card, font-display 등.
  */
 @theme {
-  --color-primary: #5b3fe8;
-  --color-primary-dark: #4a30cc;
-  --color-primary-soft: #eee9fd;
+  --color-primary: #5326d9;
+  --color-primary-dark: #4420ae;
+  --color-primary-soft: #ede8fc;
   --color-accent: #f43f5e;
   --color-accent-soft: #fff0f2;
+  /* 브랜드 서사(포카+스테이션 = 우주 정거장) — 히어로/스플래시 딥스페이스 캔버스와 별빛 골드 */
+  --color-deepspace: #160c2e;
+  --color-star: #ebc06b;
+  /* 별빛 골드는 채우기(별·히어로)용 밝기라 흰 배경 위 텍스트·테두리로는 대비가 모자란다.
+     배지처럼 흰 지면에 얹는 자리에는 아래 두 단계를 쓴다(#275). */
+  --color-star-line: #c99a2e;
+  --color-star-ink: #a87d1a;
   --color-ok: #15803d;
   --color-ok-soft: #f0fdf4;
+  /* 대기·재시도 상태 표시용(주문 결제 상태 도트, #113) */
+  --color-warn: #d97706;
+  --color-warn-soft: #fdf2e3;
+  /* 에러 전용색(브랜드 accent와 분리) — 토스트·검증 등 danger 상태 */
+  --color-danger: #dc2626;
+  --color-danger-soft: #fef2f2;
 
   --color-bg: #ffffff;
   --color-surface: #ffffff;
@@ -32,7 +45,7 @@
   --radius-r5: 22px;
 
   --shadow-card: 0 1px 3px rgba(17, 17, 24, 0.06), 0 4px 16px rgba(17, 17, 24, 0.04);
-  --shadow-primary: 0 8px 32px rgba(91, 63, 232, 0.18);
+  /* --shadow-primary(보라 글로우)는 #277에서 제거했다. 장식 그림자라 남겨두면 다시 쓰인다. */
   --shadow-modal: 0 24px 64px rgba(17, 17, 24, 0.16);
 
   --font-sans: var(--font-noto-sans-kr), -apple-system, sans-serif;
@@ -64,6 +77,22 @@ body {
   }
 }
 
+/* 판매 등록 위저드 스텝 전환 — 다음=오른쪽에서, 이전=왼쪽에서 슬라이드 인. */
+@keyframes wizardInRight {
+  from { opacity: 0; transform: translateX(28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes wizardInLeft {
+  from { opacity: 0; transform: translateX(-28px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* 토스트 진입 — 하단에서 살짝 올라오며 페이드 인(reduced-motion에선 위 전역 규칙이 무력화). */
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 /* prefers-reduced-motion 사용자에게는 트랜지션/애니메이션을 사실상 없앤다(접근성). */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -82,6 +111,18 @@ html {
      좌우로 흔들리는 걸 방지 — 항상 스크롤바를 표시해 뷰포트 가용폭을 고정한다.
      (scrollbar-gutter: stable은 뷰포트 루트 요소에 온전히 적용되지 않는 브라우저 한계로 실측 후 폐기) */
   overflow-y: scroll;
+}
+
+/* 모바일(sm 미만)에선 스크롤바를 전부 숨긴다 — 스크롤 기능은 유지, 막대만 안 보이게.
+   데스크탑은 위 overflow-y: scroll로 레이아웃 시프트를 막으므로 그대로 둔다.
+   (모바일은 오버레이 스크롤바라 가용폭이 안 바뀌어 시프트 걱정이 없다.) */
+@media (max-width: 639px) {
+  * {
+    scrollbar-width: none; /* Firefox */
+  }
+  *::-webkit-scrollbar {
+    display: none; /* Chromium/Safari */
+  }
 }
 
 a {
@@ -116,45 +157,13 @@ button {
   gap: 1rem;
 }
 
+/* 로고는 이제 마크 없이 워드마크 글자뿐이다(#277) — 모양은 components/Wordmark.tsx가 갖고,
+   여기는 헤더 안에서의 자리만 잡는다. */
 .logo {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: 8px;
-  border-radius: var(--radius-r2);
-}
-
-.logo-i {
-  display: flex;
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-r2);
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 16px;
-}
-
-.logo-nm {
-  display: block;
-  color: var(--color-text-1);
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0;
-  line-height: 1.1;
-}
-
-.logo-ds {
-  display: block;
-  margin-top: 1px;
-  color: var(--color-text-3);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0;
-  line-height: 1.2;
+  border-radius: var(--radius-r1);
 }
 
 .srch {
@@ -219,10 +228,11 @@ button {
     background 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+/* 활성/hover는 연보라 알약이었다 — 보라는 상태를 말하는 자리에만 쓰고 배경에는 쓰지 않는다는
+   규칙과 어긋나, 배경을 걷고 글자만 잉크로 올린다(#277). 어디 있는지는 오히려 더 또렷하다. */
 .gnv a:hover,
 .gnv a.on {
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
+  color: var(--color-text-1);
 }
 
 .hdr-r {
@@ -278,13 +288,14 @@ button {
   background: var(--color-accent);
 }
 
+/* CTA 라운드는 알약이었다 — /guide가 쓰는 4px 계열에 맞춰 7px로 내린다(#277). */
 .btn {
   display: inline-flex;
   height: 36px;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  border-radius: 9999px;
+  border-radius: 7px;
   font-size: 13.5px;
   font-weight: 800;
   line-height: 1;
@@ -299,11 +310,12 @@ button {
   transform: translateY(-1px);
 }
 
+/* 보라 글로우(--shadow-primary)를 뺐다(#277) — 장식 그림자이고, 이 버튼은 전 페이지에 뜨므로
+   사이트 어디서나 보였다. */
 .btn-p {
   border: 1px solid var(--color-primary);
   background: var(--color-primary);
   color: #fff;
-  box-shadow: var(--shadow-primary);
   padding-inline: 18px;
 }
 
@@ -328,7 +340,7 @@ button {
 .auth-skel {
   width: 78px;
   height: 36px;
-  border-radius: 9999px;
+  border-radius: 7px;
   background: linear-gradient(90deg, var(--color-border) 0%, var(--color-surface-2) 50%, var(--color-border) 100%);
   background-size: 200% 100%;
   animation: fadeIn 180ms ease both;
@@ -420,5 +432,24 @@ button {
   .gnv,
   .hdr-r {
     display: none;
+  }
+}
+
+/* FAQ 아코디언 화살표(#298).
+ *
+ * Tailwind의 `group-open:-rotate-180`이 계산값 `0deg`로만 들어와 회전이 걸리지 않았다
+ * (브라우저에서 셀렉터는 매칭되는데 값이 안 붙는다). 유틸리티 변형 대신 명시 규칙으로 둔다 —
+ * 화살표 방향은 열림/닫힘을 말하는 유일한 신호라 조용히 깨지면 안 된다. */
+.faq-chevron {
+  transition: rotate 150ms ease;
+}
+
+details[open] > summary .faq-chevron {
+  rotate: 180deg;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-chevron {
+    transition: none;
   }
 }

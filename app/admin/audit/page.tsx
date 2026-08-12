@@ -4,9 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatRelativeTime } from "@/lib/format";
-import { AUDIT_ACTION_BADGE_CLASS, AUDIT_ACTION_LABEL, AUDIT_ACTION_OPTIONS, AUDIT_TARGET_TYPE_LABEL } from "@/lib/labels";
+import { AUDIT_ACTION_TONE, AUDIT_ACTION_LABEL, AUDIT_ACTION_OPTIONS, AUDIT_TARGET_TYPE_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AdminAuditLogListResponse, AdminAuditLogResponse, AuditAction, AuditTargetType } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
+import AdminNotice from "@/components/AdminNotice";
 
 const PAGE_SIZE = 20;
 const SELECT_CLASS =
@@ -85,9 +87,9 @@ export default function AdminAuditLogPage() {
       <p className="mt-1.5 text-sm text-text-3">어드민이 수행한 중대 조치의 기록입니다. 누가·언제·무엇을·왜 했는지 확인할 수 있습니다.</p>
 
       {error && (
-        <p role="alert" className="mt-5 rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
+        <AdminNotice kind="error" className="mt-5">
           {error}
-        </p>
+        </AdminNotice>
       )}
 
       <div className="mt-5 mb-3 flex flex-wrap gap-2.5">
@@ -118,7 +120,7 @@ export default function AdminAuditLogPage() {
 
       <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
-      <div className="overflow-x-auto rounded-r3 border border-border bg-surface shadow-card">
+      <div className="overflow-x-auto rounded-r3 border border-border bg-surface">
         <table className="w-full min-w-[720px] border-collapse">
           <thead>
             <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
@@ -142,9 +144,9 @@ export default function AdminAuditLogPage() {
                   <td className="whitespace-nowrap px-4 py-3 text-text-3">{formatRelativeTime(log.createdAt)}</td>
                   <td className="whitespace-nowrap px-4 py-3 font-semibold text-text-1">{log.actorNickname ?? "—"}</td>
                   <td className="whitespace-nowrap px-4 py-3">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${AUDIT_ACTION_BADGE_CLASS[log.action]}`}>
+                    <StatusBadge tone={AUDIT_ACTION_TONE[log.action]}>
                       {AUDIT_ACTION_LABEL[log.action]}
-                    </span>
+                    </StatusBadge>
                   </td>
                   <td className="px-4 py-3">
                     <span className="block max-w-[200px] truncate font-semibold text-text-1">{log.targetLabel ?? "—"}</span>

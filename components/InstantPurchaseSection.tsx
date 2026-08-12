@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useDeliveryAddressGate } from "@/lib/use-delivery-address-gate";
 import { buyerFee, estimatedTotal } from "@/lib/fees";
 import { formatKRW } from "@/lib/format";
 import { PRIMARY_BUTTON_CLASS } from "@/lib/ui";
@@ -33,12 +35,20 @@ export default function InstantPurchaseSection({
   const [currentStatus, setCurrentStatus] = useState(status);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  // 배송지 관문(#283) — 즉시구매는 누르는 즉시 낙찰이라 입찰보다 더 앞에서 잡아야 한다.
+  const { needsAddress, markRegistered, isGateRejection } = useDeliveryAddressGate();
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
 
   const isLive = currentStatus === "LIVE";
   const isOwnSale = member?.nickname != null && member.nickname === sellerNickname;
   const total = estimatedTotal(price);
 
   async function handlePurchase() {
+    // 배송지가 없으면 구매를 보내지 않는다(#283). 즉시구매는 되돌릴 여지가 없어 더 엄격하다.
+    if (needsAddress) {
+      setAddressModalOpen(true);
+      return;
+    }
     setMessage(null);
     setSubmitting(true);
     try {
@@ -48,10 +58,15 @@ export default function InstantPurchaseSection({
       setCurrentStatus(res.status);
       setMessage({ type: "ok", text: "즉시구매 요청이 완료됐어요." });
     } catch (err) {
-      setMessage({
-        type: "err",
-        text: err instanceof ApiError ? err.message : "즉시구매에 실패했습니다. 잠시 후 다시 시도해주세요.",
-      });
+      // 서버 관문 거부 — 화면 상태가 낡았다(다른 탭에서 지웠거나 조회가 실패했다). 모달로 이어 붙인다.
+      if (isGateRejection(err)) {
+        setAddressModalOpen(true);
+      } else {
+        setMessage({
+          type: "err",
+          text: err instanceof ApiError ? err.message : "즉시구매에 실패했습니다. 잠시 후 다시 시도해주세요.",
+        });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -99,14 +114,27 @@ export default function InstantPurchaseSection({
             로그인하고 즉시구매
           </Link>
         ) : (
-          <button
-            type="button"
-            onClick={handlePurchase}
-            disabled={submitting}
-            className={`mt-4 flex h-11 w-full items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
-          >
-            {submitting ? "처리 중..." : `${formatKRW(price)} 즉시구매`}
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={handlePurchase}
+              disabled={submitting}
+              className={`mt-4 flex h-11 w-full items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
+            >
+              {submitting
+                ? "처리 중..."
+                : needsAddress
+                  ? "배송지 등록하고 구매하기"
+                  : `${formatKRW(price)} 즉시구매`}
+            </button>
+            {/* 누르기 전에 알려준다(#283). 즉시구매는 누르는 즉시 계약이라 더 앞에서 말해야 한다. */}
+            {needsAddress && (
+              <p className="mt-2 text-[11.5px] leading-[1.6] text-text-3">
+                구매하면 바로 보내드릴 수 있게 받을 주소를 먼저 등록해요.{" "}
+                <b className="font-bold text-text-2">한 번만 하면 다음부터는 물어보지 않아요.</b>
+              </p>
+            )}
+          </>
         ))}
 
       {message && (
@@ -119,6 +147,19 @@ export default function InstantPurchaseSection({
         >
           {message.text}
         </p>
+      )}
+
+      {/* 저장해도 구매를 대신 눌러주지 않는다 — 즉시구매는 누르는 즉시 계약이라 더더욱 안 된다. */}
+      {addressModalOpen && (
+        <DeliveryAddressGateModal
+          action="구매"
+          onClose={() => setAddressModalOpen(false)}
+          onSaved={() => {
+            setAddressModalOpen(false);
+            markRegistered();
+            setMessage({ type: "ok", text: "배송지를 등록했어요. 이제 구매할 수 있어요." });
+          }}
+        />
       )}
     </div>
   );

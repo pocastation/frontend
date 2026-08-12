@@ -1,39 +1,90 @@
 "use client";
 
-import { useEffect, useId, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ArtistCombobox from "@/components/ArtistCombobox";
-import { apiFetch, ApiError, mediaUrl, uploadMediaImage } from "@/lib/api";
+import AuctionVerificationStep from "@/components/AuctionVerificationStep";
+import PhotoUploadGrid, { type PhotoItem } from "@/components/PhotoUploadGrid";
+import VideoUploadField, { type VideoItem } from "@/components/VideoUploadField";
+import { apiFetch, ApiError } from "@/lib/api";
+import { compressImage } from "@/lib/image-compress";
+import {
+  MAX_VIDEO_DURATION_SEC,
+  MIN_VIDEO_DURATION_SEC,
+  validateVideo,
+} from "@/lib/video-validate";
 import { useAuth } from "@/lib/auth-context";
 import { DURATION_OPTIONS, GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
-import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS } from "@/lib/ui";
+import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import type {
   ArtistListResponse,
   ArtistMemberResponse,
   AuctionSaleType,
+  AuctionStatus,
+  MediaUploadResponse,
   PhotocardGrade,
   PhotocardSource,
+  VideoFailureReason,
+  VideoStatusResponse,
+  VideoUploadResponse,
 } from "@/lib/types";
 
-const MAX_IMAGES = 12;
+// 사진 장수(#279) — 3장 미만이면 구매자가 상태를 판단할 근거가 없고(라이브에 1장짜리 매물이
+// 실제로 올라왔다), 상한을 6장으로 낮춘 건 "다 올릴 수 있다"보다 "무엇을 올려야 하는지"를
+// 말해주는 편이 사진의 질을 올리기 때문이다. 서버도 같은 값으로 막는다(backend #266).
+const MIN_IMAGES = 3;
+const MAX_IMAGES = 6;
+const AUCTION_VERIFICATION_ENABLED =
+  process.env.NEXT_PUBLIC_AUCTION_VERIFICATION_ENABLED === "true" ||
+  (process.env.NODE_ENV === "development" && process.env.NEXT_PUBLIC_AUCTION_VERIFICATION_ENABLED !== "false");
+// 검수영상은 기본 활성화하고, 긴급 롤백이 필요할 때만 환경변수로 명시적으로 끈다.
+const AUCTION_VIDEO_ENABLED = process.env.NEXT_PUBLIC_AUCTION_VIDEO_ENABLED !== "false";
 
-type UploadedImage = { url: string; thumbnailUrl: string };
+// 위저드 스텝 순서 — 사진·영상을 한 단계(media)에서 받고, 그다음 (옵션) 사진 인증.
+// 플래그로 스텝이 빠질 수 있어 인덱스 하드코딩(step === 4) 대신 키 배열로 관리한다
+// (중간 스텝 삽입 시 인덱스가 밀리는 버그 방지).
+//
+// 사진과 영상을 합친 이유(#279): 둘 다 "파일을 올리고 처리가 끝나기를 기다린다"는 같은 동작이라
+// 단계를 나눠도 사용자가 하는 일이 달라지지 않는다. 오히려 영상 트랜스코딩을 기다리는 동안
+// 앞뒤로 오갈 수 없어 폼이 멈춘 것처럼 보였다. 폼이 짧을수록 액세스 토큰 만료(#269)도 덜 겪는다.
+type StepKey = "saleType" | "info" | "product" | "price" | "media" | "verification";
+const STEP_KEYS: StepKey[] = [
+  "saleType",
+  "info",
+  "product",
+  "price",
+  "media",
+  ...(AUCTION_VERIFICATION_ENABLED ? (["verification"] as StepKey[]) : []),
+];
+const TOTAL_STEPS = STEP_KEYS.length;
 
-function SectionHeading({ step, children }: { step: number; children: React.ReactNode }) {
-  return (
-    <h2 className="mb-4 flex items-center gap-2.5 text-sm font-extrabold text-text-1">
-      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-extrabold text-white">
-        {step}
-      </span>
-      {children}
-    </h2>
-  );
+// 업로드 실패 사유를 사람이 읽을 문장으로 바꾼다(#269).
+// 401은 리프레시까지 실패했다는 뜻이라 "다시 시도"로 안내하면 사용자가 같은 실패를 반복한다 —
+// 재로그인이 필요하다는 것을 분명히 말해야 한다.
+// 영상이 서버에서 FAILED가 된 이유를 문장으로 바꾼다(backend #266).
+// 길이 위반은 **같은 파일을 다시 올려도 영원히 실패한다** — "다시 시도해주세요"로 안내하면
+// 판매자가 그 자리에서 무한히 막힌다. 사유를 모르는 경우(전환 이전 행)는 기존 문구를 유지한다.
+function videoFailureMessage(reason: VideoFailureReason | null): string {
+  if (reason === "DURATION_OUT_OF_RANGE") {
+    return `영상 길이가 ${MIN_VIDEO_DURATION_SEC}~${MAX_VIDEO_DURATION_SEC}초를 벗어났어요. 길이를 맞춰 다시 올려주세요.`;
+  }
+  return "영상 처리에 실패했어요. 다시 시도해주세요.";
+}
+
+function uploadErrorMessage(err: unknown, what: string): string {
+  if (err instanceof ApiError) {
+    if (err.status === 401) {
+      return `로그인이 만료돼 ${what}을 올리지 못했어요. 다시 로그인한 뒤 이어서 등록해 주세요.`;
+    }
+    return err.message;
+  }
+  return `${what} 업로드에 실패했어요. 잠시 후 다시 시도해 주세요.`;
 }
 
 export default function NewAuctionPage() {
   const router = useRouter();
-  const { accessToken, isLoading: isAuthLoading, fetchWithAuth } = useAuth();
+  const { accessToken, isLoading: isAuthLoading, fetchWithAuth, fetchMultipartWithAuth } = useAuth();
 
   const artistFieldId = useId();
   const idolFieldId = useId();
@@ -41,11 +92,9 @@ export default function NewAuctionPage() {
   const descriptionFieldId = useId();
   const sourceFieldId = useId();
   const gradeFieldId = useId();
-  const sourceDetailFieldId = useId();
-  const albumNameFieldId = useId();
   const unopenedFieldId = useId();
-  const conditionNoteFieldId = useId();
   const startPriceFieldId = useId();
+  const successionAllowedFieldId = useId();
 
   const [saleType, setSaleType] = useState<AuctionSaleType>("AUCTION");
   const [artists, setArtists] = useState<{ id: number; name: string }[]>([]);
@@ -56,19 +105,70 @@ export default function NewAuctionPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [source, setSource] = useState<PhotocardSource>("ALBUM");
-  const [sourceDetail, setSourceDetail] = useState("");
-  const [albumName, setAlbumName] = useState("");
   const [grade, setGrade] = useState<PhotocardGrade>("S");
   const [unopened, setUnopened] = useState(false);
-  const [conditionNote, setConditionNote] = useState("");
   const [startPrice, setStartPrice] = useState("");
   const [durationDays, setDurationDays] = useState<number>(3);
+  // 차순위 승계 seller opt-in(§7-3, 2026-07-19) — 판매 성사율 우선으로 기본 허용.
+  const [successionAllowed, setSuccessionAllowed] = useState(true);
 
-  const [images, setImages] = useState<UploadedImage[]>([]);
-  const [isUploading, setIsUploading] = useState(false);
+  const [items, setItems] = useState<PhotoItem[]>([]);
+  const [video, setVideo] = useState<(VideoItem & { videoId?: string }) | null>(null);
+  const [verificationId, setVerificationId] = useState<string | null>(null);
+
+  // 완료된 사진만 순서대로 제출한다(실패 격리 — 실패 타일은 화면엔 남되 제출에선 제외).
+  const uploadedImages = items.filter((i) => i.status === "done" && i.uploaded).map((i) => i.uploaded!);
+  const isUploading = items.some((i) => i.status === "uploading");
+
+  // 언마운트 시 로컬 object URL 정리(누수 방지). 최신 items/video를 ref로 참조.
+  const itemsRef = useRef(items);
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
+  useEffect(() => () => itemsRef.current.forEach((i) => URL.revokeObjectURL(i.previewUrl)), []);
+
+  const videoRef = useRef(video);
+  useEffect(() => {
+    videoRef.current = video;
+  }, [video]);
+  useEffect(() => () => {
+    if (videoRef.current) URL.revokeObjectURL(videoRef.current.previewUrl);
+  }, []);
+
+  // 트랜스코딩 지연 폴링 — 업로드 후 PROCESSING 동안 상태를 주기적으로 확인해 READY/FAILED로 전이.
+  // status/videoId/token 변화에만 재구독하도록 필요한 값만 의존성에 둔다(전체 video 객체 참조 회피).
+  const videoStatus = video?.status;
+  const videoId = video?.videoId;
+  useEffect(() => {
+    if (videoStatus !== "processing" || !videoId || !accessToken) return;
+    let cancelled = false;
+    const timer = setInterval(async () => {
+      try {
+        // 폴링도 갱신되는 경로로 간다 — catch가 오류를 삼키므로 토큰이 만료되면
+        // "처리 중"에서 영원히 멈춘 것처럼 보인다(#269).
+        const s = await fetchWithAuth<VideoStatusResponse>(`/api/media/videos/${videoId}`);
+        if (cancelled) return;
+        if (s.status === "READY") {
+          setVideo((v) => (v ? { ...v, status: "ready" } : v));
+        } else if (s.status === "FAILED") {
+          setVideo((v) => (v ? { ...v, status: "error", error: videoFailureMessage(s.failureReason) } : v));
+        }
+      } catch {
+        // 일시 오류는 다음 틱에 재시도
+      }
+    }, 2500);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [videoStatus, videoId, accessToken, fetchWithAuth]);
 
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // 위저드: 한 스텝씩 입력하며 넘어간다. dir는 슬라이드 방향(1=다음, -1=이전).
+  const [step, setStep] = useState(0);
+  const [dir, setDir] = useState<1 | -1>(1);
 
   // 비로그인 상태로 접근하면 로그인으로 돌려보낸다(닉네임 온보딩 페이지와 동일 패턴).
   useEffect(() => {
@@ -76,6 +176,28 @@ export default function NewAuctionPage() {
       router.replace("/login");
     }
   }, [isAuthLoading, accessToken, router]);
+
+  // 정산계좌가 없으면 폼을 채우게 두지 않는다(BE #260 게이트와 짝). 서버는 마지막 제출에서
+  // 409로 막는데, 그때는 사진까지 다 올린 뒤라 사용자가 한 번 더 처음부터 해야 한다.
+  // 여기서 먼저 세우면 "등록하러 갔다가 계좌부터 만들고 돌아오는" 한 번의 왕복으로 끝난다.
+  const [settlementReady, setSettlementReady] = useState<boolean | null>(null);
+  useEffect(() => {
+    if (isAuthLoading || !accessToken) return;
+    let alive = true;
+    fetchWithAuth<unknown>("/api/members/me/settlement-account")
+      .then(() => {
+        if (alive) setSettlementReady(true);
+      })
+      .catch((err: unknown) => {
+        if (!alive) return;
+        // 404 = 미등록(정상 상태). 그 외 오류로 등록을 막으면 서버가 잠깐 흔들릴 때
+        // 판매 자체가 멈춘다 — 판정은 서버의 409에 맡기고 여기선 통과시킨다.
+        setSettlementReady(!(err instanceof ApiError && err.status === 404));
+      });
+    return () => {
+      alive = false;
+    };
+  }, [isAuthLoading, accessToken, fetchWithAuth]);
 
   useEffect(() => {
     apiFetch<ArtistListResponse>("/api/artists?size=100")
@@ -95,48 +217,153 @@ export default function NewAuctionPage() {
       .catch(() => setIdols([]));
   }, [artistId]);
 
-  async function handleFilesSelected(fileList: FileList | null) {
-    if (!fileList || fileList.length === 0 || !accessToken) return;
-    const files = Array.from(fileList).slice(0, MAX_IMAGES - images.length);
+  // 여러 장을 병렬로 업로드한다 — 각 파일이 독립적으로 진행/실패하므로 한 장이 실패해도 나머지는 계속된다.
+  function addFiles(files: File[]) {
+    if (!accessToken) return;
+    const picked = files.slice(0, MAX_IMAGES - items.length);
+    if (picked.length === 0) return;
     setError(null);
-    setIsUploading(true);
+    const newItems: PhotoItem[] = picked.map((file) => ({
+      id: crypto.randomUUID(),
+      previewUrl: URL.createObjectURL(file),
+      status: "uploading",
+    }));
+    setItems((prev) => [...prev, ...newItems]);
+    newItems.forEach((it, i) => {
+      const file = picked[i];
+      void (async () => {
+        try {
+          const compressed = await compressImage(file); // 업로드 전 상한 리사이즈(대역폭 절감)
+          // fetchMultipartWithAuth를 쓰는 이유: 401이면 리프레시 후 재시도한다(#269).
+          // 액세스 토큰은 30분인데 이 폼은 5단계라, 사진 단계에 도달할 때쯤 만료돼 있기 쉽다.
+          const formData = new FormData();
+          formData.append("file", compressed);
+          const uploaded = await fetchMultipartWithAuth<MediaUploadResponse>("/api/media/images", formData);
+          setItems((prev) => prev.map((x) => (x.id === it.id ? { ...x, status: "done", uploaded } : x)));
+        } catch (err) {
+          const message = uploadErrorMessage(err, "사진");
+          setItems((prev) => prev.map((x) => (x.id === it.id ? { ...x, status: "error", error: message } : x)));
+          // 타일은 좁아서 사유를 다 못 보여준다 — 폼 상단에 한 번 띄운다. 이게 없으면
+          // 사용자도 우리도 "업로드 실패" 네 글자만 보고 원인을 추측하게 된다.
+          setError(message);
+        }
+      })();
+    });
+  }
+
+  function removeItem(id: string) {
+    setItems((prev) => {
+      const found = prev.find((x) => x.id === id);
+      if (found) URL.revokeObjectURL(found.previewUrl);
+      return prev.filter((x) => x.id !== id);
+    });
+  }
+
+  // 영상은 1개만 — 새로 고르면 클라 검증 후 업로드하고, PROCESSING이 되면 위 폴링 effect가 완료를 감지한다.
+  async function addVideo(file: File) {
+    if (!accessToken) return;
+    setError(null);
+    const result = await validateVideo(file);
+    if (!result.ok) {
+      setError(result.reason);
+      return;
+    }
+    const previewUrl = URL.createObjectURL(file);
+    setVideo({ previewUrl, status: "uploading" });
     try {
-      for (const file of files) {
-        const uploaded = await uploadMediaImage(file, accessToken);
-        setImages((prev) => [...prev, uploaded]);
-      }
+      const formData = new FormData();
+      formData.append("file", file);
+      const uploaded = await fetchMultipartWithAuth<VideoUploadResponse>("/api/media/videos", formData);
+      setVideo((v) => (v ? { ...v, status: "processing", videoId: uploaded.videoId } : v));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "이미지 업로드에 실패했습니다.");
-    } finally {
-      setIsUploading(false);
+      const message = uploadErrorMessage(err, "영상");
+      setVideo((v) => (v ? { ...v, status: "error", error: message } : v));
+      setError(message);
     }
   }
 
-  function removeImage(index: number) {
-    setImages((prev) => prev.filter((_, i) => i !== index));
+  function removeVideo() {
+    setVideo((v) => {
+      if (v) URL.revokeObjectURL(v.previewUrl);
+      return null;
+    });
+  }
+
+  // 각 스텝의 필수값이 채워졌는지 — 안 채워지면 "다음"/"등록" 비활성.
+  // 시작가·즉시판매가: 최저 5,000원 + 1,000원 단위(§12.1, BE #146과 동일 규칙).
+  const priceValid =
+    startPrice.trim() !== "" &&
+    Number.isFinite(Number(startPrice)) &&
+    Number(startPrice) >= 5000 &&
+    Number(startPrice) % 1000 === 0;
+  function isStepValid(s: number): boolean {
+    switch (STEP_KEYS[s]) {
+      case "info":
+        return artistId !== "" && title.trim().length > 0;
+      case "price":
+        return priceValid;
+      // 사진·영상이 한 단계라 둘 다 충족해야 넘어간다. 영상은 처리 완료된 것만 통과(필수).
+      case "media":
+        return (
+          uploadedImages.length >= MIN_IMAGES &&
+          !isUploading &&
+          (!AUCTION_VIDEO_ENABLED || video?.status === "ready")
+        );
+      case "verification":
+        return verificationId !== null;
+      default:
+        return true; // 판매 방식 · 상품 정보는 기본값이 있어 항상 통과
+    }
+  }
+
+  function goNext() {
+    if (step < TOTAL_STEPS - 1 && isStepValid(step)) {
+      setDir(1);
+      setStep((s) => s + 1);
+      setError(null);
+    }
+  }
+
+  function goBack() {
+    if (step > 0) {
+      setDir(-1);
+      setStep((s) => s - 1);
+      setError(null);
+    }
   }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    // 마지막 스텝이 아니면 제출하지 않는다(입력 중 Enter로 조기 제출 방지).
+    if (step !== TOTAL_STEPS - 1) return;
     setError(null);
 
     if (artistId === "") {
-      setError("아티스트를 선택해주세요.");
+      setError("스타를 선택해주세요.");
       return;
     }
-    if (images.length === 0) {
-      setError("사진을 1장 이상 등록해주세요.");
+    if (uploadedImages.length < MIN_IMAGES) {
+      setError(`사진을 ${MIN_IMAGES}장 이상 등록해주세요.`);
+      return;
+    }
+    if (AUCTION_VIDEO_ENABLED && video?.status !== "ready") {
+      setError("검수영상 처리가 완료된 뒤 등록할 수 있어요.");
+      return;
+    }
+    if (AUCTION_VERIFICATION_ENABLED && !verificationId) {
+      setError("판매 물품 소유 인증을 완료해주세요.");
       return;
     }
     const price = Number(startPrice);
-    if (!Number.isFinite(price) || price < 0) {
-      setError(saleType === "INSTANT" ? "즉시판매가를 입력해주세요." : "시작가를 입력해주세요.");
+    if (!Number.isFinite(price) || price < 5000 || price % 1000 !== 0) {
+      const label = saleType === "INSTANT" ? "즉시판매가" : "시작가";
+      setError(`${label}는 최저 5,000원부터 1,000원 단위로 입력해주세요.`);
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const created = await fetchWithAuth<{ id: number }>("/api/auctions", {
+      const created = await fetchWithAuth<{ id: number; status: AuctionStatus }>("/api/auctions", {
         method: "POST",
         body: {
           artistId,
@@ -144,33 +371,87 @@ export default function NewAuctionPage() {
           title,
           description: description || undefined,
           source,
-          sourceDetail: sourceDetail || undefined,
-          albumName: albumName || undefined,
           grade,
           unopened,
-          conditionNote: conditionNote || undefined,
           saleType,
           startPrice: price,
           buyNowPrice: saleType === "INSTANT" ? price : undefined,
           durationDays: saleType === "AUCTION" ? durationDays : undefined,
-          images,
+          successionAllowed: saleType === "AUCTION" ? successionAllowed : undefined,
+          images: uploadedImages,
+          videoId: AUCTION_VIDEO_ENABLED ? (video?.videoId ?? undefined) : undefined,
+          verificationId: AUCTION_VERIFICATION_ENABLED ? (verificationId ?? undefined) : undefined,
         },
       });
-      router.push(`/auctions/${created.id}`);
+      // 목적지는 빌드타임 플래그가 아니라 **서버가 알려준 실제 상태**로 정한다. 자동 승인이면
+      // 바로 내 경매를 보여주고, 검수 대기면 안내 화면으로 보낸다(거기서 홈으로 자동 이동).
+      router.push(
+        created.status === "PENDING_REVIEW"
+          ? `/auctions/submitted?id=${created.id}`
+          : `/auctions/${created.id}`,
+      );
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "판매 등록에 실패했습니다.");
+      if (err instanceof ApiError && err.errorCode === "VERIFICATION_EXPIRED") {
+        setVerificationId(null);
+        setError("인증 코드가 만료되었습니다. 입력한 판매 정보는 유지되니 새 코드를 발급해주세요.");
+      } else {
+        setError(err instanceof ApiError ? err.message : "판매 등록에 실패했습니다.");
+      }
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  if (isAuthLoading || !accessToken) {
+  if (isAuthLoading || !accessToken || settlementReady === null) {
     return (
       <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3" aria-live="polite">
         불러오는 중...
       </div>
     );
   }
+
+  // 정산계좌 미등록 — 폼을 아예 열지 않는다. 판매 대금을 보낼 곳이 없는 상태로 낙찰되면
+  // 대금은 묶이고 구매자는 영문도 모른 채 기다린다.
+  if (!settlementReady) {
+    return (
+      <div className="mx-auto max-w-[520px] px-5 pt-16 pb-20">
+        <p className="text-[11px] font-extrabold tracking-[0.08em] text-primary">등록 전 한 가지</p>
+        <h1 className="mt-2 font-display text-[24px] font-extrabold tracking-[-0.035em] text-text-1">
+          정산계좌를 먼저 등록해 주세요
+        </h1>
+        <p className="mt-3 text-[13.5px] leading-[1.8] text-text-2">
+          판매 대금은 구매확정 후 등록하신 계좌로 들어와요. 계좌 없이 낙찰되면 대금을 보내드릴 수 없어
+          거래가 그대로 멈춥니다.
+        </p>
+        <p className="mt-2 text-[12.5px] leading-relaxed text-text-3">1분이면 끝나고, 한 번만 등록하면 돼요.</p>
+        <div className="mt-7 flex flex-wrap items-center gap-3">
+          <Link
+            href="/mypage?tab=settlement"
+            className={`inline-flex h-12 items-center rounded-[4px] bg-primary px-7 text-[14.5px] font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+          >
+            정산계좌 등록하러 가기
+          </Link>
+          <Link
+            href="/"
+            className={`inline-flex h-12 items-center rounded-[4px] border border-border-2 px-6 text-[14px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+          >
+            나중에 하기
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const stepKey = STEP_KEYS[step];
+  const stepTitle: Record<StepKey, string> = {
+    saleType: "판매 방식",
+    info: "카테고리 · 소개",
+    product: "상품 정보",
+    price: saleType === "INSTANT" ? "가격" : "가격 · 경매 기간",
+    media: AUCTION_VIDEO_ENABLED ? "사진 · 영상" : "사진",
+    verification: "사진 인증",
+  };
+  const isLastStep = step === TOTAL_STEPS - 1;
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:py-10">
@@ -180,332 +461,329 @@ export default function NewAuctionPage() {
           <p className="mt-1 text-xs text-text-3">정확한 정보와 실물 사진일수록 거래 신뢰도가 올라가요.</p>
         </div>
         <Link
-          href="/guide"
+          href="/guide/sell"
           className={`flex shrink-0 items-center gap-1 rounded-full border border-border-2 px-3 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
         >
-          <span aria-hidden="true">?</span> 판매 가이드
+          판매 가이드
         </Link>
       </div>
 
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="flex flex-col gap-8 rounded-r4 border border-border bg-surface p-5 shadow-card sm:p-7"
+        className="rounded-r4 border border-border bg-surface p-5 shadow-card sm:p-7"
       >
-        <section>
-          <SectionHeading step={1}>판매 방식</SectionHeading>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {[
-              { type: "AUCTION" as const, title: "경매판매", desc: "정한 기간 동안 입찰을 받아 판매해요." },
-              { type: "INSTANT" as const, title: "즉시판매", desc: "정한 가격으로 바로 구매할 수 있게 올려요." },
-            ].map((option) => {
-              const selected = saleType === option.type;
-              return (
-                <button
-                  key={option.type}
-                  type="button"
-                  aria-pressed={selected}
-                  onClick={() => setSaleType(option.type)}
-                  className={`rounded-r3 border p-4 text-left transition-colors ${FOCUS_RING} ${
-                    selected
-                      ? "border-primary bg-primary-soft text-primary"
-                      : "border-border bg-white text-text-2 hover:border-primary"
-                  }`}
-                >
-                  <span className="block text-sm font-extrabold">{option.title}</span>
-                  <span className={`mt-1 block text-xs ${selected ? "text-primary" : "text-text-3"}`}>
-                    {option.desc}
-                  </span>
-                </button>
-              );
-            })}
+        {/* 진행 표시 */}
+        <div className="mb-6">
+          <div className="flex items-baseline justify-between">
+            <h2 className="text-sm font-extrabold text-text-1">{stepTitle[stepKey]}</h2>
+            <span className="text-xs font-bold text-text-3">
+              {step + 1} / {TOTAL_STEPS}
+            </span>
           </div>
-        </section>
-
-        <section className="border-t border-border pt-8">
-          <SectionHeading step={2}>카테고리 · 소개</SectionHeading>
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor={artistFieldId} className="text-xs font-bold text-text-2">
-                아티스트 <span className="text-accent">*</span>
-              </label>
-              <ArtistCombobox id={artistFieldId} options={artists} value={artistId} onChange={setArtistId} />
-            </div>
-
-            {idols.length > 0 && (
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor={idolFieldId} className="text-xs font-bold text-text-2">
-                  멤버 (선택)
-                </label>
-                <select
-                  id={idolFieldId}
-                  value={idolId}
-                  onChange={(e) => setIdolId(e.target.value ? Number(e.target.value) : "")}
-                  className={INPUT_CLASS}
-                >
-                  <option value="">단체 포카 / 미지정</option>
-                  {idols.map((idol) => (
-                    <option key={idol.idolId} value={idol.idolId}>
-                      {idol.stageName}
-                      {!idol.active ? " (탈퇴)" : ""}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor={titleFieldId} className="text-xs font-bold text-text-2">
-                제목 <span className="text-accent">*</span>
-              </label>
-              <input
-                id={titleFieldId}
-                type="text"
-                required
-                maxLength={200}
-                placeholder="예: 정국 Proof 위버스 특전 포카"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className={INPUT_CLASS}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor={descriptionFieldId} className="text-xs font-bold text-text-2">
-                상세 설명 (선택)
-              </label>
-              <textarea
-                id={descriptionFieldId}
-                maxLength={2000}
-                rows={3}
-                placeholder="구매 경로, 보관 방식 등 참고할 내용을 적어주세요."
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                className={INPUT_CLASS}
-              />
-            </div>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-300"
+              style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
+            />
           </div>
-        </section>
+        </div>
 
-        <section className="border-t border-border pt-8">
-          <SectionHeading step={3}>상품 정보</SectionHeading>
-          <div className="flex flex-col gap-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor={sourceFieldId} className="text-xs font-bold text-text-2">
-                  출처
-                </label>
-                <select
-                  id={sourceFieldId}
-                  value={source}
-                  onChange={(e) => setSource(e.target.value as PhotocardSource)}
-                  className={INPUT_CLASS}
-                >
-                  {SOURCE_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {SOURCE_LABEL[option]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <label htmlFor={gradeFieldId} className="text-xs font-bold text-text-2">
-                  상태 등급
-                </label>
-                <select
-                  id={gradeFieldId}
-                  value={grade}
-                  onChange={(e) => setGrade(e.target.value as PhotocardGrade)}
-                  className={INPUT_CLASS}
-                >
-                  {GRADE_OPTIONS.map((option) => (
-                    <option key={option} value={option}>
-                      {GRADE_LABEL[option]}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor={sourceDetailFieldId} className="text-xs font-bold text-text-2">
-                출처 상세 (선택)
-              </label>
-              <input
-                id={sourceDetailFieldId}
-                type="text"
-                maxLength={100}
-                placeholder="예: 알라딘 예약특전, 3차 팬사인회 등"
-                value={sourceDetail}
-                onChange={(e) => setSourceDetail(e.target.value)}
-                className={INPUT_CLASS}
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor={albumNameFieldId} className="text-xs font-bold text-text-2">
-                앨범명 (선택)
-              </label>
-              <input
-                id={albumNameFieldId}
-                type="text"
-                maxLength={100}
-                placeholder="예: Proof"
-                value={albumName}
-                onChange={(e) => setAlbumName(e.target.value)}
-                className={INPUT_CLASS}
-              />
-            </div>
-
-            <label htmlFor={unopenedFieldId} className="flex w-fit items-center gap-2 text-sm text-text-2">
-              <input
-                id={unopenedFieldId}
-                type="checkbox"
-                checked={unopened}
-                onChange={(e) => setUnopened(e.target.checked)}
-                className={`h-4 w-4 accent-primary ${FOCUS_RING}`}
-              />
-              미개봉 상품입니다
-            </label>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor={conditionNoteFieldId} className="text-xs font-bold text-text-2">
-                하자/상태 상세 고지 (선택)
-              </label>
-              <textarea
-                id={conditionNoteFieldId}
-                maxLength={2000}
-                rows={2}
-                placeholder="스크래치, 눌림, 화이트 등 있는 그대로 적어주세요."
-                value={conditionNote}
-                onChange={(e) => setConditionNote(e.target.value)}
-                className={INPUT_CLASS}
-              />
-            </div>
-          </div>
-        </section>
-
-        <section className="border-t border-border pt-8">
-          <SectionHeading step={4}>{saleType === "INSTANT" ? "가격" : "가격 · 경매 기간"}</SectionHeading>
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor={startPriceFieldId} className="text-xs font-bold text-text-2">
-                {saleType === "INSTANT" ? "즉시판매가(원)" : "시작가(원)"} <span className="text-accent">*</span>
-              </label>
-              <input
-                id={startPriceFieldId}
-                type="number"
-                required
-                min={0}
-                step={1000}
-                inputMode="numeric"
-                placeholder="10000"
-                value={startPrice}
-                onChange={(e) => setStartPrice(e.target.value)}
-                className={INPUT_CLASS}
-              />
-              <p className="text-[11px] text-text-3">
-                {saleType === "INSTANT"
-                  ? "배송비는 판매자 부담이에요. 배송비를 감안해 판매가를 정해주세요."
-                  : "배송비는 판매자 부담이에요. 배송비를 감안해 시작가를 정해주세요."}
-              </p>
-            </div>
-
-            {saleType === "AUCTION" && (
-            <fieldset>
-              <legend className="mb-1.5 text-xs font-bold text-text-2">경매 기간</legend>
-              <div className="flex gap-2">
-                {DURATION_OPTIONS.map((days) => (
+        {/* 스텝 콘텐츠 — key로 스텝이 바뀔 때마다 슬라이드 인 애니메이션이 재생된다. */}
+        <div
+          key={step}
+          className={`min-h-[260px] ${
+            dir === 1
+              ? "animate-[wizardInRight_240ms_ease-out]"
+              : "animate-[wizardInLeft_240ms_ease-out]"
+          }`}
+        >
+          {stepKey === "saleType" && (
+            <div className="grid gap-2 sm:grid-cols-2">
+              {[
+                { type: "AUCTION" as const, title: "경매판매", desc: "정한 기간 동안 입찰을 받아 판매해요." },
+                { type: "INSTANT" as const, title: "즉시판매", desc: "정한 가격으로 바로 구매할 수 있게 올려요." },
+              ].map((option) => {
+                const selected = saleType === option.type;
+                return (
                   <button
-                    key={days}
+                    key={option.type}
                     type="button"
-                    aria-pressed={durationDays === days}
-                    onClick={() => setDurationDays(days)}
-                    className={`flex-1 rounded-r2 border py-2.5 text-sm font-bold transition-all active:scale-[0.97] ${FOCUS_RING} ${
-                      durationDays === days
+                    aria-pressed={selected}
+                    onClick={() => setSaleType(option.type)}
+                    className={`rounded-r3 border p-4 text-left transition-colors ${FOCUS_RING} ${
+                      selected
                         ? "border-primary bg-primary-soft text-primary"
-                        : "border-border text-text-2 hover:border-border-2"
+                        : "border-border bg-white text-text-2 hover:border-primary"
                     }`}
                   >
-                    {days}일
+                    <span className="block text-sm font-extrabold">{option.title}</span>
+                    <span className={`mt-1 block text-xs ${selected ? "text-primary" : "text-text-3"}`}>
+                      {option.desc}
+                    </span>
                   </button>
-                ))}
+                );
+              })}
+            </div>
+          )}
+
+          {stepKey === "info" && (
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor={artistFieldId} className="text-xs font-bold text-text-2">
+                  스타 <span className="text-accent">*</span>
+                </label>
+                <ArtistCombobox id={artistFieldId} options={artists} value={artistId} onChange={setArtistId} />
               </div>
-            </fieldset>
-            )}
-          </div>
-        </section>
 
-        <section className="border-t border-border pt-8">
-          <SectionHeading step={5}>사진</SectionHeading>
-          <p className="mb-2 text-xs text-text-3">1~{MAX_IMAGES}장, 첫 장이 대표사진으로 노출돼요.</p>
+              {idols.length > 0 && (
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor={idolFieldId} className="text-xs font-bold text-text-2">
+                    멤버 (선택)
+                  </label>
+                  <select
+                    id={idolFieldId}
+                    value={idolId}
+                    onChange={(e) => setIdolId(e.target.value ? Number(e.target.value) : "")}
+                    className={INPUT_CLASS}
+                  >
+                    <option value="">단체 포카 / 미지정</option>
+                    {idols.map((idol) => (
+                      <option key={idol.idolId} value={idol.idolId}>
+                        {idol.stageName}
+                        {!idol.active ? " (탈퇴)" : ""}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
-          <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
-            {images.map((image, index) => (
-              <div key={image.url} className="relative">
-                {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일 */}
-                <img
-                  src={mediaUrl(image.thumbnailUrl)}
-                  alt={`업로드 사진 ${index + 1}`}
-                  className="aspect-square rounded-r2 border border-border object-cover"
-                />
-                {index === 0 && (
-                  <span className="absolute left-1 top-1 rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold text-white">
-                    대표
-                  </span>
-                )}
-                <button
-                  type="button"
-                  aria-label={`${index + 1}번째 사진 삭제`}
-                  onClick={() => removeImage(index)}
-                  className={`absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-xs text-white transition-transform hover:scale-110 active:scale-95 ${FOCUS_RING}`}
-                >
-                  ×
-                </button>
-              </div>
-            ))}
-
-            {images.length < MAX_IMAGES && (
-              <label
-                className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-r2 border-2 border-dashed border-border-2 text-text-3 transition-colors hover:border-primary hover:text-primary ${
-                  isUploading ? "pointer-events-none opacity-60" : ""
-                } ${FOCUS_RING}`}
-              >
-                <span className="text-xl leading-none" aria-hidden="true">
-                  {isUploading ? "…" : "+"}
-                </span>
-                <span className="text-[10px] font-semibold">
-                  {isUploading ? "업로드 중" : "사진 추가"}
-                </span>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor={titleFieldId} className="text-xs font-bold text-text-2">
+                  제목 <span className="text-accent">*</span>
+                </label>
                 <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp"
-                  multiple
-                  disabled={isUploading}
-                  onChange={(e) => {
-                    handleFilesSelected(e.target.files);
-                    e.target.value = "";
-                  }}
-                  className="sr-only"
+                  id={titleFieldId}
+                  type="text"
+                  maxLength={200}
+                  placeholder="예: 정국 Proof 위버스 특전 포카"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  className={INPUT_CLASS}
                 />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor={descriptionFieldId} className="text-xs font-bold text-text-2">
+                  상세 설명 (선택)
+                </label>
+                <textarea
+                  id={descriptionFieldId}
+                  maxLength={2000}
+                  rows={3}
+                  placeholder="구매 경로·앨범·보관 방식과 함께, 하자·상태(스크래치·눌림·화이트 등)를 있는 그대로 적어주세요."
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className={INPUT_CLASS}
+                />
+              </div>
+            </div>
+          )}
+
+          {stepKey === "product" && (
+            <div className="flex flex-col gap-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor={sourceFieldId} className="text-xs font-bold text-text-2">
+                    출처
+                  </label>
+                  <select
+                    id={sourceFieldId}
+                    value={source}
+                    onChange={(e) => setSource(e.target.value as PhotocardSource)}
+                    className={INPUT_CLASS}
+                  >
+                    {SOURCE_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {SOURCE_LABEL[option]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor={gradeFieldId} className="text-xs font-bold text-text-2">
+                    상태 등급
+                  </label>
+                  <select
+                    id={gradeFieldId}
+                    value={grade}
+                    onChange={(e) => setGrade(e.target.value as PhotocardGrade)}
+                    className={INPUT_CLASS}
+                  >
+                    {GRADE_OPTIONS.map((option) => (
+                      <option key={option} value={option}>
+                        {GRADE_LABEL[option]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <label htmlFor={unopenedFieldId} className="flex w-fit items-center gap-2 text-sm text-text-2">
+                <input
+                  id={unopenedFieldId}
+                  type="checkbox"
+                  checked={unopened}
+                  onChange={(e) => setUnopened(e.target.checked)}
+                  className={`h-4 w-4 accent-primary ${FOCUS_RING}`}
+                />
+                미개봉 상품입니다
               </label>
-            )}
-          </div>
-        </section>
+            </div>
+          )}
+
+          {stepKey === "price" && (
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor={startPriceFieldId} className="text-xs font-bold text-text-2">
+                  {saleType === "INSTANT" ? "즉시판매가(원)" : "시작가(원)"} <span className="text-accent">*</span>
+                </label>
+                <input
+                  id={startPriceFieldId}
+                  type="number"
+                  min={5000}
+                  step={1000}
+                  inputMode="numeric"
+                  placeholder="10000"
+                  value={startPrice}
+                  onChange={(e) => setStartPrice(e.target.value)}
+                  className={INPUT_CLASS}
+                />
+                <p className="text-[11px] text-text-3">최저 5,000원부터 1,000원 단위로 입력해요.</p>
+                <p className="text-[11px] text-text-3">
+                  {saleType === "INSTANT"
+                    ? "배송비는 판매자 부담이에요. 배송비를 감안해 판매가를 정해주세요."
+                    : "배송비는 판매자 부담이에요. 배송비를 감안해 시작가를 정해주세요."}
+                </p>
+              </div>
+
+              {saleType === "AUCTION" && (
+                <fieldset>
+                  <legend className="mb-1.5 text-xs font-bold text-text-2">경매 기간</legend>
+                  <div className="flex gap-2">
+                    {DURATION_OPTIONS.map((days) => (
+                      <button
+                        key={days}
+                        type="button"
+                        aria-pressed={durationDays === days}
+                        onClick={() => setDurationDays(days)}
+                        className={`flex-1 rounded-r2 border py-2.5 text-sm font-bold transition-all active:scale-[0.97] ${FOCUS_RING} ${
+                          durationDays === days
+                            ? "border-primary bg-primary-soft text-primary"
+                            : "border-border text-text-2 hover:border-border-2"
+                        }`}
+                      >
+                        {days}일
+                      </button>
+                    ))}
+                  </div>
+                </fieldset>
+              )}
+
+              {saleType === "AUCTION" && (
+                <div>
+                  <label
+                    htmlFor={successionAllowedFieldId}
+                    className="flex w-fit items-center gap-2 text-sm text-text-2"
+                  >
+                    <input
+                      id={successionAllowedFieldId}
+                      type="checkbox"
+                      checked={successionAllowed}
+                      onChange={(e) => setSuccessionAllowed(e.target.checked)}
+                      className={`h-4 w-4 accent-primary ${FOCUS_RING}`}
+                    />
+                    차순위 승계 허용
+                  </label>
+                  <p className="mt-1 text-[11px] text-text-3">
+                    낙찰자가 결제하지 않으면 차순위 입찰자에게 구매 기회를 제안해요(24시간 내 수락, 1단계까지만).
+                    해제하면 낙찰자 미결제 시 곧바로 거래가 종료돼요.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {stepKey === "media" && (
+            <div>
+              <p className="mb-2 text-xs text-text-3">
+                {MIN_IMAGES}~{MAX_IMAGES}장, 첫 장이 대표사진으로 노출돼요.
+              </p>
+              <PhotoUploadGrid
+                items={items}
+                max={MAX_IMAGES}
+                onAddFiles={addFiles}
+                onRemove={removeItem}
+                onReorder={setItems}
+              />
+              {/* 슬리브 안내(#279) — 경고가 아니라 촬영 요령이라 규칙선 강조 없이 helper로 둔다.
+                  사진·영상 양쪽에 걸리는 이야기라 두 슬롯 사이가 아니라 사진 아래에 한 번만 쓴다. */}
+              <p className="mt-2 text-xs leading-5 text-text-3">
+                포토카드는 <b className="font-bold text-text-2">슬리브·탑로더에서 꺼내고 촬영</b>해 주세요.
+                비닐의 반사와 흠집이 카드 자체의 상태로 오해받아 문의와 분쟁이 생겨요.
+              </p>
+
+              {AUCTION_VIDEO_ENABLED && (
+                <div className="mt-6 border-t border-border pt-5">
+                  <p className="mb-2 text-xs text-text-3">
+                    포카를 손에 들고 앞뒤로 천천히 돌리는 틸팅 영상 1개를 올려주세요. 홀로그램·코팅
+                    상태처럼 사진으로는 판단하기 어려운 부분이 영상에서 드러나요.
+                  </p>
+                  <VideoUploadField video={video} onSelect={addVideo} onRemove={removeVideo} />
+                </div>
+              )}
+            </div>
+          )}
+          {stepKey === "verification" && (
+            <AuctionVerificationStep
+              verificationId={verificationId}
+              onVerified={setVerificationId}
+            />
+          )}
+        </div>
 
         {error && (
-          <p role="alert" aria-live="polite" className="-mt-4 text-xs text-accent">
+          <p role="alert" aria-live="polite" className="mt-4 text-xs text-accent">
             {error}
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={isSubmitting || isUploading}
-          className={`py-3 ${PRIMARY_BUTTON_CLASS}`}
-        >
-          {isSubmitting ? "등록 중..." : saleType === "INSTANT" ? "즉시판매 등록" : "경매 등록"}
-        </button>
+        {/* 이동/등록 */}
+        <div className="mt-6 flex gap-2">
+          {step > 0 && (
+            <button type="button" onClick={goBack} className={`h-12 px-6 ${SECONDARY_BUTTON_CLASS}`}>
+              이전
+            </button>
+          )}
+          {isLastStep ? (
+            <button
+              type="submit"
+              disabled={!isStepValid(step) || isSubmitting || isUploading}
+              className={`h-12 flex-1 ${PRIMARY_BUTTON_CLASS}`}
+            >
+              {isSubmitting ? "등록 중..." : saleType === "INSTANT" ? "즉시판매 등록" : "경매 등록"}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={!isStepValid(step)}
+              className={`h-12 flex-1 ${PRIMARY_BUTTON_CLASS}`}
+            >
+              다음
+            </button>
+          )}
+        </div>
       </form>
     </div>
   );

@@ -1,5 +1,4 @@
 import AuctionExplorer from "@/components/AuctionExplorer";
-import AuctionRankSidebar from "@/components/AuctionRankSidebar";
 import AuctionTicker from "@/components/AuctionTicker";
 import Hero from "@/components/Hero";
 import { apiFetch } from "@/lib/api";
@@ -26,6 +25,16 @@ async function getPopularAuctions(): Promise<AuctionListResponse | null> {
   }
 }
 
+// 홈 배너(Hero) — 관리자가 지정(featured)한 LIVE 경매. 배너는 단일 슬롯이라 1건만 가져온다.
+// 지정이 없으면 빈 목록이 오고, 아래에서 인기 경매로 폴백한다(#150).
+async function getFeaturedAuctions(): Promise<AuctionListResponse | null> {
+  try {
+    return await apiFetch<AuctionListResponse>("/api/auctions/featured?size=1", { cache: "no-store" });
+  } catch {
+    return null;
+  }
+}
+
 async function getInstantSales(): Promise<AuctionListResponse | null> {
   try {
     return await apiFetch<AuctionListResponse>("/api/auctions?saleType=INSTANT&size=60", { cache: "no-store" });
@@ -35,22 +44,24 @@ async function getInstantSales(): Promise<AuctionListResponse | null> {
 }
 
 export default async function Home() {
-  const [auctions, popular, instantSales] = await Promise.all([
+  const [auctions, featured, popular, instantSales] = await Promise.all([
     getAuctions(),
+    getFeaturedAuctions(),
     getPopularAuctions(),
     getInstantSales(),
   ]);
   const content = auctions?.content ?? [];
   const instantContent = instantSales?.content ?? [];
+  // 배너는 한 자리다 — 관리자 지정(featured) 1건 우선 → 없으면 인기 1위 → 그것도 없으면 최신 1건.
+  // 여러 건을 넘기면 Hero가 캐러셀이 되어, 지정하지 않았는데도 네비 버튼이 뜨는 상태가 됐었다.
+  const heroFeatured =
+    featured?.content?.[0] ?? popular?.content?.[0] ?? content[0] ?? null;
 
   return (
     <div>
-      <Hero liveCount={content.length} featured={content.slice(0, 3)} />
+      <Hero liveCount={content.length} featured={heroFeatured} />
       <AuctionTicker />
-      <AuctionExplorer
-        initialAuctions={content}
-        sidebar={<AuctionRankSidebar auctions={popular?.content ?? []} />}
-      />
+      <AuctionExplorer initialAuctions={content} />
       <AuctionExplorer
         initialAuctions={instantContent}
         saleType="INSTANT"

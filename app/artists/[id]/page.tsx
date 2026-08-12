@@ -1,13 +1,18 @@
+import { cache } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import ArtistAuctionGrid from "@/components/ArtistAuctionGrid";
+import AuctionGrid from "@/components/AuctionGrid";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
-import { ARTIST_STATUS_BADGE_CLASS, ARTIST_STATUS_LABEL, ARTIST_TYPE_LABEL } from "@/lib/labels";
+import { ARTIST_STATUS_TONE, ARTIST_STATUS_LABEL, ARTIST_TYPE_LABEL } from "@/lib/labels";
+import { DEFAULT_OG_IMAGE } from "@/lib/site";
 import { FOCUS_RING } from "@/lib/ui";
 import type { ArtistDetailResponse, AuctionListResponse } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
 
-async function getArtist(id: string): Promise<ArtistDetailResponse | null> {
+// cache()로 감싸 generateMetadata와 본문이 한 번만 페치하도록 dedup.
+const getArtist = cache(async (id: string): Promise<ArtistDetailResponse | null> => {
   try {
     return await apiFetch<ArtistDetailResponse>(`/api/artists/${id}`, { cache: "no-store" });
   } catch (err) {
@@ -16,6 +21,30 @@ async function getArtist(id: string): Promise<ArtistDetailResponse | null> {
     }
     throw err;
   }
+});
+
+// 링크 미리보기 — 스타명·설명. 스타 공식 이미지는 저작권으로 쓰지 않으므로(§9.1) 브랜드 기본 카드를 쓴다.
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const artist = await getArtist(id);
+  if (!artist) {
+    return { title: "스타를 찾을 수 없어요 — Pocastation" };
+  }
+  const description = `${artist.name} 포토카드 경매·즉시판매 — Pocastation`;
+  return {
+    title: `${artist.name} — Pocastation`,
+    description,
+    // images를 명시하지 않으면 루트 OG 이미지 자동 주입이 끊겨 og:image가 통째로 빠진다
+    // (twitter:card가 summary_large_image라 미리보기가 비어 보인다). 스타 공식 이미지는
+    // 저작권으로 쓰지 않으므로(§9.1) 브랜드 기본 카드를 쓴다.
+    openGraph: {
+      title: `${artist.name} — Pocastation`,
+      description,
+      type: "website",
+      images: [DEFAULT_OG_IMAGE],
+    },
+    twitter: { card: "summary_large_image", title: `${artist.name} — Pocastation`, description },
+  };
 }
 
 // 아티스트id로 직접 필터하는 경매 API가 없어, 경매 상세의 "다른 경매 보기"(SearchLink)와 같은
@@ -61,7 +90,7 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
         href="/artists"
         className={`mb-4 inline-flex items-center gap-1 rounded-r2 px-1 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
       >
-        <span aria-hidden="true">←</span> 아티스트 목록으로
+        <span aria-hidden="true">←</span> 스타 목록으로
       </Link>
 
       <div className="flex flex-col gap-6 rounded-r4 border border-border bg-surface p-6 shadow-card sm:flex-row sm:items-center sm:p-8">
@@ -73,11 +102,9 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
         </span>
 
         <div className="min-w-0 flex-1 text-center sm:text-left">
-          <span
-            className={`mb-2.5 inline-block rounded-full px-2.5 py-1 text-xs font-extrabold ${ARTIST_STATUS_BADGE_CLASS[artist.status]}`}
-          >
+          <StatusBadge tone={ARTIST_STATUS_TONE[artist.status]} className="mb-2.5">
             {ARTIST_STATUS_LABEL[artist.status]}
-          </span>
+          </StatusBadge>
           <div className="mb-4 flex flex-wrap items-center justify-center gap-2.5 sm:justify-start">
             <h1 className="font-display text-[26px] font-extrabold tracking-tight text-text-1">{artist.name}</h1>
             {artist.nameEn && <span className="text-sm font-semibold text-text-3">{artist.nameEn}</span>}
@@ -171,7 +198,7 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="font-display text-[17px] font-extrabold text-text-1">{artist.name}의 진행 중인 경매</h2>
         </div>
-        <ArtistAuctionGrid auctions={auctions?.content ?? []} />
+        <AuctionGrid auctions={auctions?.content ?? []} />
       </section>
     </div>
   );

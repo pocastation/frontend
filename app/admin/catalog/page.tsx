@@ -11,6 +11,7 @@ import type {
   ArtistStatus,
   ArtistType,
   MemberResponse,
+  ParentAgency,
 } from "@/lib/types";
 
 type IdolResponse = {
@@ -35,6 +36,20 @@ const ARTIST_STATUS_LABEL: Record<ArtistStatus, string> = {
   ACTIVE: "활동",
   HIATUS: "휴식",
   DISBANDED: "해체",
+};
+const ARTIST_STATUS_OPTIONS: ArtistStatus[] = ["ACTIVE", "HIATUS", "DISBANDED"];
+const PARENT_AGENCY_OPTIONS: ParentAgency[] = ["HYBE", "SM", "JYP", "YG"];
+
+type EditForm = {
+  name: string;
+  nameEn: string;
+  agency: string;
+  fandomName: string;
+  debutDate: string;
+  imageUrl: string;
+  status: ArtistStatus;
+  visible: boolean;
+  parentAgency: "" | ParentAgency;
 };
 
 const initialArtistForm = {
@@ -96,12 +111,16 @@ export default function AdminCatalogPage() {
   const [artistForm, setArtistForm] = useState(initialArtistForm);
   const [idolForm, setIdolForm] = useState(initialIdolForm);
   const [membershipForm, setMembershipForm] = useState(initialMembershipForm);
+  const [editing, setEditing] = useState<ArtistResponse | null>(null);
+  const [editForm, setEditForm] = useState<EditForm | null>(null);
+  const [editSubmitting, setEditSubmitting] = useState(false);
 
   const loadOverview = useCallback(async () => {
     setIsDataLoading(true);
     setNotice(null);
     try {
-      const artistRes = await apiFetch<ArtistListResponse>("/api/artists?size=120", { cache: "no-store" });
+      // 관리자 목록은 숨김(visible=false) 스타도 포함하고 편집에 필요한 전 필드를 담는다(#148).
+      const artistRes = await fetchWithAuth<ArtistListResponse>("/api/admin/artists?size=300");
       setArtists(artistRes.content);
       setArtistTotal(artistRes.totalElements);
     } catch (err) {
@@ -109,7 +128,7 @@ export default function AdminCatalogPage() {
     } finally {
       setIsDataLoading(false);
     }
-  }, []);
+  }, [fetchWithAuth]);
 
   const loadArtistMembers = useCallback(async (artistId: number) => {
     try {
@@ -119,7 +138,7 @@ export default function AdminCatalogPage() {
       setArtistMembers(res.content);
     } catch (err) {
       setArtistMembers([]);
-      setNotice({ kind: "error", text: getErrorMessage(err, "아티스트 멤버를 불러오지 못했습니다.") });
+      setNotice({ kind: "error", text: getErrorMessage(err, "스타 멤버를 불러오지 못했습니다.") });
     }
   }, []);
 
@@ -131,7 +150,7 @@ export default function AdminCatalogPage() {
 
   useEffect(() => {
     if (selectedArtistId === "") return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 선택된 아티스트가 바뀔 때 서버 멤버 목록을 동기화한다.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 선택된 스타가 바뀔 때 서버 멤버 목록을 동기화한다.
     void loadArtistMembers(selectedArtistId);
   }, [loadArtistMembers, selectedArtistId]);
 
@@ -164,11 +183,60 @@ export default function AdminCatalogPage() {
       setArtistForm(initialArtistForm);
       setArtists((prev) => [created, ...prev]);
       setArtistTotal((prev) => prev + 1);
-      setNotice({ kind: "success", text: `${created.name} 아티스트를 등록했습니다.` });
+      setNotice({ kind: "success", text: `${created.name} 스타를 등록했습니다.` });
     } catch (err) {
-      setNotice({ kind: "error", text: getErrorMessage(err, "아티스트 등록에 실패했습니다.") });
+      setNotice({ kind: "error", text: getErrorMessage(err, "스타 등록에 실패했습니다.") });
     } finally {
       setSubmitting(null);
+    }
+  }
+
+  // 편집 모달 열기 — 전 필드 프리필(updateProfile이 전체 덮어쓰기라 현재값 보존이 필수).
+  function openEdit(artist: ArtistResponse) {
+    setEditing(artist);
+    setEditForm({
+      name: artist.name,
+      nameEn: artist.nameEn ?? "",
+      agency: artist.agency ?? "",
+      fandomName: artist.fandomName ?? "",
+      debutDate: artist.debutDate ?? "",
+      imageUrl: artist.imageUrl ?? "",
+      status: artist.status,
+      visible: artist.visible,
+      parentAgency: artist.parentAgency ?? "",
+    });
+    setNotice(null);
+  }
+
+  async function handleUpdateArtist(e: FormEvent) {
+    e.preventDefault();
+    if (!canUseAdmin || !accessToken || !editing || !editForm) return;
+
+    setEditSubmitting(true);
+    setNotice(null);
+    try {
+      const updated = await fetchWithAuth<ArtistResponse>(`/api/admin/artists/${editing.id}`, {
+        method: "PATCH",
+        body: {
+          name: editForm.name.trim(),
+          nameEn: optionalText(editForm.nameEn),
+          agency: optionalText(editForm.agency),
+          fandomName: optionalText(editForm.fandomName),
+          debutDate: optionalText(editForm.debutDate),
+          imageUrl: optionalText(editForm.imageUrl),
+          status: editForm.status,
+          visible: editForm.visible,
+          parentAgency: editForm.parentAgency || null,
+        },
+      });
+      setArtists((prev) => prev.map((x) => (x.id === updated.id ? updated : x)));
+      setEditing(null);
+      setEditForm(null);
+      setNotice({ kind: "success", text: `${updated.name} 정보를 수정했습니다.` });
+    } catch (err) {
+      setNotice({ kind: "error", text: getErrorMessage(err, "스타 수정에 실패했습니다.") });
+    } finally {
+      setEditSubmitting(false);
     }
   }
 
@@ -207,7 +275,7 @@ export default function AdminCatalogPage() {
     const artistId = Number(membershipForm.artistId);
     const idolId = Number(membershipForm.idolId);
     if (!artistId || !idolId) {
-      setNotice({ kind: "error", text: "아티스트와 멤버 ID를 모두 입력해주세요." });
+      setNotice({ kind: "error", text: "스타와 멤버 ID를 모두 입력해주세요." });
       return;
     }
 
@@ -221,7 +289,7 @@ export default function AdminCatalogPage() {
           joinedAt: optionalText(membershipForm.joinedAt),
         },
       });
-      setNotice({ kind: "success", text: "아티스트와 멤버를 연결했습니다." });
+      setNotice({ kind: "success", text: "스타와 멤버를 연결했습니다." });
       setMembershipForm((prev) => ({ ...prev, joinedAt: "" }));
       if (selectedArtistId === artistId) {
         await loadArtistMembers(artistId);
@@ -238,7 +306,7 @@ export default function AdminCatalogPage() {
       <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">카탈로그 관리</h1>
-          <p className="mt-1.5 text-sm text-text-3">아티스트·멤버 마스터데이터를 등록하고 관리합니다.</p>
+          <p className="mt-1.5 text-sm text-text-3">스타·멤버 마스터데이터를 등록하고 관리합니다.</p>
         </div>
         <button
           type="button"
@@ -263,13 +331,13 @@ export default function AdminCatalogPage() {
         </div>
       )}
 
-      <section className="mt-6 rounded-r2 border border-border bg-white p-4 shadow-card">
+      <section className="mt-6 rounded-r2 border border-border bg-white p-4">
         <h2 className="font-display text-base font-extrabold text-text-1">카탈로그 요약</h2>
-        <p className="mt-1 text-xs text-text-3">등록된 아티스트와 운영 상태입니다.</p>
+        <p className="mt-1 text-xs text-text-3">등록된 스타와 운영 상태입니다.</p>
 
         <div className="mt-4 grid grid-cols-2 gap-2 sm:max-w-xs">
           <div className="rounded-r2 bg-surface-2 p-3">
-            <p className="text-xs text-text-3">아티스트</p>
+            <p className="text-xs text-text-3">스타</p>
             <p className="mt-1 font-display text-xl font-extrabold text-text-1">
               {artistTotal.toLocaleString("ko-KR")}
             </p>
@@ -283,38 +351,52 @@ export default function AdminCatalogPage() {
         </div>
 
         <div className="mt-4 grid gap-x-4 gap-y-0.5 sm:grid-cols-2 lg:grid-cols-3">
-          {artists.slice(0, 30).map((artist) => (
-              <button
+          {artists.map((artist) => (
+              <div
                 key={artist.id}
-                type="button"
-                onClick={() => {
-                  handleArtistSelect(String(artist.id));
-                  setMembershipForm((prev) => ({ ...prev, artistId: String(artist.id) }));
-                }}
-                className={`flex w-full items-center justify-between gap-3 border-b border-border py-2.5 text-left ${FOCUS_RING}`}
+                className="flex items-center justify-between gap-2 border-b border-border py-2.5"
               >
-                <span>
-                  <span className="block text-sm font-bold text-text-1">{artist.name}</span>
-                  <span className="text-xs text-text-3">
-                    {ARTIST_TYPE_LABEL[artist.type]} · {artist.agency ?? "소속사 미입력"}
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleArtistSelect(String(artist.id));
+                    setMembershipForm((prev) => ({ ...prev, artistId: String(artist.id) }));
+                  }}
+                  className={`flex flex-1 items-center justify-between gap-3 text-left ${FOCUS_RING}`}
+                >
+                  <span>
+                    <span className="block text-sm font-bold text-text-1">
+                      {artist.name}
+                      {!artist.visible && <span className="ml-1 text-[11px] font-semibold text-text-3">· 숨김</span>}
+                    </span>
+                    <span className="text-xs text-text-3">
+                      {ARTIST_TYPE_LABEL[artist.type]} · {artist.agency ?? "소속사 미입력"}
+                    </span>
                   </span>
-                </span>
-                <span className="shrink-0 rounded-full bg-surface-3 px-2 py-1 text-[11px] font-bold text-text-2">
-                  {ARTIST_STATUS_LABEL[artist.status]}
-                </span>
-              </button>
+                  <span className="shrink-0 rounded-full bg-surface-3 px-2 py-1 text-[11px] font-bold text-text-2">
+                    {ARTIST_STATUS_LABEL[artist.status]}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => openEdit(artist)}
+                  className={`shrink-0 rounded-full border border-border-2 px-2.5 py-1 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+                >
+                  편집
+                </button>
+              </div>
           ))}
         </div>
       </section>
 
       <section className="mt-6 grid gap-4 lg:grid-cols-3">
-        <form onSubmit={handleCreateArtist} className="rounded-r2 border border-border bg-white p-4 shadow-card">
-          <h2 className="font-display text-base font-extrabold text-text-1">아티스트 등록</h2>
+        <form onSubmit={handleCreateArtist} className="rounded-r2 border border-border bg-white p-4">
+          <h2 className="font-display text-base font-extrabold text-text-1">스타 등록</h2>
           <div className="mt-4 flex flex-col gap-3">
             <input
               required
               maxLength={100}
-              placeholder="아티스트명 *"
+              placeholder="스타명 *"
               value={artistForm.name}
               onChange={(e) => setArtistForm((prev) => ({ ...prev, name: e.target.value }))}
               className={INPUT_CLASS}
@@ -361,7 +443,7 @@ export default function AdminCatalogPage() {
             />
             <input
               inputMode="numeric"
-              placeholder="상위 아티스트 ID"
+              placeholder="상위 스타 ID"
               value={artistForm.parentArtistId}
               onChange={(e) => setArtistForm((prev) => ({ ...prev, parentArtistId: e.target.value }))}
               className={INPUT_CLASS}
@@ -374,12 +456,12 @@ export default function AdminCatalogPage() {
               className={INPUT_CLASS}
             />
             <button type="submit" disabled={submitting === "artist"} className={`mt-1 h-11 ${PRIMARY_BUTTON_CLASS}`}>
-              {submitting === "artist" ? "등록 중..." : "아티스트 등록"}
+              {submitting === "artist" ? "등록 중..." : "스타 등록"}
             </button>
           </div>
         </form>
 
-        <form onSubmit={handleCreateIdol} className="rounded-r2 border border-border bg-white p-4 shadow-card">
+        <form onSubmit={handleCreateIdol} className="rounded-r2 border border-border bg-white p-4">
           <h2 className="font-display text-base font-extrabold text-text-1">멤버 등록</h2>
           <div className="mt-4 flex flex-col gap-3">
             <input
@@ -428,8 +510,8 @@ export default function AdminCatalogPage() {
           </div>
         </form>
 
-        <form onSubmit={handleAddMembership} className="rounded-r2 border border-border bg-white p-4 shadow-card">
-          <h2 className="font-display text-base font-extrabold text-text-1">아티스트-멤버 연결</h2>
+        <form onSubmit={handleAddMembership} className="rounded-r2 border border-border bg-white p-4">
+          <h2 className="font-display text-base font-extrabold text-text-1">스타-멤버 연결</h2>
           <div className="mt-4 flex flex-col gap-3">
             <select
               required
@@ -440,7 +522,7 @@ export default function AdminCatalogPage() {
               }}
               className={INPUT_CLASS}
             >
-              <option value="">아티스트 선택 *</option>
+              <option value="">스타 선택 *</option>
               {artists.map((artist) => (
                 <option key={artist.id} value={artist.id}>
                   {artist.name} · #{artist.id}
@@ -471,7 +553,7 @@ export default function AdminCatalogPage() {
           </div>
 
           <div className="mt-5 border-t border-border pt-4">
-            <h3 className="text-xs font-extrabold text-text-3">선택 아티스트 멤버</h3>
+            <h3 className="text-xs font-extrabold text-text-3">선택 스타 멤버</h3>
             <div className="mt-2 max-h-[160px] overflow-y-auto">
               {artistMembers.length > 0 ? (
                 <div className="divide-y divide-border">
@@ -486,12 +568,145 @@ export default function AdminCatalogPage() {
                   ))}
                 </div>
               ) : (
-                <p className="py-4 text-sm text-text-3">아티스트를 선택하면 연결된 멤버가 표시됩니다.</p>
+                <p className="py-4 text-sm text-text-3">스타를 선택하면 연결된 멤버가 표시됩니다.</p>
               )}
             </div>
           </div>
         </form>
       </section>
+
+      {editing && editForm && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label="스타 편집"
+        >
+          <form
+            onSubmit={handleUpdateArtist}
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-r3 bg-surface p-5 shadow-modal"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-base font-extrabold text-text-1">
+                스타 편집 · {editing.name}
+              </h2>
+              <button
+                type="button"
+                aria-label="닫기"
+                onClick={() => {
+                  setEditing(null);
+                  setEditForm(null);
+                }}
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-text-3 hover:text-text-1 ${FOCUS_RING}`}
+              >
+                ×
+              </button>
+            </div>
+            <p className="mt-1 text-[11px] text-text-3">
+              타입({ARTIST_TYPE_LABEL[editing.type]})은 여기서 바꿀 수 없어요. 이미지는 자체제작·라이선스 보유분만 권장.
+            </p>
+
+            <div className="mt-4 flex flex-col gap-3">
+              <input
+                required
+                maxLength={100}
+                placeholder="이름 *"
+                value={editForm.name}
+                onChange={(e) => setEditForm((p) => (p ? { ...p, name: e.target.value } : p))}
+                className={INPUT_CLASS}
+              />
+              <input
+                maxLength={100}
+                placeholder="영문명"
+                value={editForm.nameEn}
+                onChange={(e) => setEditForm((p) => (p ? { ...p, nameEn: e.target.value } : p))}
+                className={INPUT_CLASS}
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  maxLength={100}
+                  placeholder="소속사"
+                  value={editForm.agency}
+                  onChange={(e) => setEditForm((p) => (p ? { ...p, agency: e.target.value } : p))}
+                  className={INPUT_CLASS}
+                />
+                <input
+                  maxLength={50}
+                  placeholder="팬덤명"
+                  value={editForm.fandomName}
+                  onChange={(e) => setEditForm((p) => (p ? { ...p, fandomName: e.target.value } : p))}
+                  className={INPUT_CLASS}
+                />
+              </div>
+              <input
+                type="date"
+                value={editForm.debutDate}
+                onChange={(e) => setEditForm((p) => (p ? { ...p, debutDate: e.target.value } : p))}
+                className={INPUT_CLASS}
+              />
+              <input
+                maxLength={500}
+                placeholder="이미지 URL"
+                value={editForm.imageUrl}
+                onChange={(e) => setEditForm((p) => (p ? { ...p, imageUrl: e.target.value } : p))}
+                className={INPUT_CLASS}
+              />
+              <div className="grid grid-cols-2 gap-2">
+                <select
+                  value={editForm.status}
+                  onChange={(e) => setEditForm((p) => (p ? { ...p, status: e.target.value as ArtistStatus } : p))}
+                  className={INPUT_CLASS}
+                >
+                  {ARTIST_STATUS_OPTIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {ARTIST_STATUS_LABEL[s]}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={editForm.parentAgency}
+                  onChange={(e) =>
+                    setEditForm((p) => (p ? { ...p, parentAgency: e.target.value as "" | ParentAgency } : p))
+                  }
+                  className={INPUT_CLASS}
+                >
+                  <option value="">빅4 미분류</option>
+                  {PARENT_AGENCY_OPTIONS.map((a) => (
+                    <option key={a} value={a}>
+                      {a}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <label className="flex w-fit items-center gap-2 text-sm text-text-2">
+                <input
+                  type="checkbox"
+                  checked={editForm.visible}
+                  onChange={(e) => setEditForm((p) => (p ? { ...p, visible: e.target.checked } : p))}
+                  className={`h-4 w-4 accent-primary ${FOCUS_RING}`}
+                />
+                공개(노출)
+              </label>
+            </div>
+
+            <div className="mt-5 flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEditing(null);
+                  setEditForm(null);
+                }}
+                className={`h-11 flex-1 ${SECONDARY_BUTTON_CLASS}`}
+              >
+                취소
+              </button>
+              <button type="submit" disabled={editSubmitting} className={`h-11 flex-1 ${PRIMARY_BUTTON_CLASS}`}>
+                {editSubmitting ? "저장 중..." : "저장"}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

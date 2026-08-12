@@ -84,23 +84,83 @@ function ClipboardListIcon() {
     </svg>
   );
 }
+function LightbulbIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1V17h6v-.2c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2Z" />
+    </svg>
+  );
+}
+function MailBanIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M22 12V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9" />
+      <path d="m2 7 10 6 10-6" />
+      <circle cx="18" cy="18" r="4" />
+      <path d="m15.5 20.5 5-5" />
+    </svg>
+  );
+}
 
-// 지금 쓸 수 있는 메뉴 / 준비 중인 메뉴를 구분해 보여준다(어드민 기능 지도 §2026-07-06 기준).
-const OPERATION_NAV: NavItem[] = [
-  { href: "/admin", label: "대시보드", icon: <GridIcon />, ready: true },
-  { href: "/admin/members", label: "회원 관리", icon: <UsersIcon />, ready: true },
-  { href: "/admin/catalog", label: "카탈로그 관리", icon: <CardIcon />, ready: true },
-  { href: "/admin/auctions", label: "경매 관리", icon: <GavelIcon />, ready: true },
-  { href: "/admin/reports", label: "신고 관리", icon: <FlagIcon />, ready: true },
-  { href: "/admin/audit", label: "감사 로그", icon: <ClipboardListIcon />, ready: true },
-  { href: "/admin/notices", label: "공지사항", icon: <MegaphoneIcon />, ready: false },
+function MessageIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-5.5 4v-4.5A2.5 2.5 0 0 1 4 13.5Z" />
+    </svg>
+  );
+}
+
+// 한 덩어리로 11개가 늘어서 있어 원하는 메뉴를 찾기 어려웠다 — 성격별로 묶고,
+// '리뷰 신고'는 '신고 관리' 안의 하위 탭(ReportScopeTabs)으로 흡수했다.
+// 사이드바에 없어도 /admin/reviews 는 그대로 접근 가능하고, 활성 표시는 '신고 관리'가 받는다.
+type NavGroup = { title: string; items: NavItem[] };
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    title: "운영",
+    items: [
+      { href: "/admin", label: "대시보드", icon: <GridIcon />, ready: true },
+      { href: "/admin/members", label: "회원 관리", icon: <UsersIcon />, ready: true },
+      { href: "/admin/catalog", label: "카탈로그 관리", icon: <CardIcon />, ready: true },
+      { href: "/admin/auctions", label: "경매 관리", icon: <GavelIcon />, ready: true },
+    ],
+  },
+  {
+    title: "검토·조치",
+    items: [
+      { href: "/admin/reports", label: "신고 관리", icon: <FlagIcon />, ready: true },
+      { href: "/admin/disputes", label: "분쟁·중재", icon: <ScaleIcon />, ready: true },
+    ],
+  },
+  {
+    title: "고객 지원",
+    items: [
+      { href: "/admin/inquiries", label: "문의 관리", icon: <MessageIcon />, ready: true },
+      { href: "/admin/suggestions", label: "건의 관리", icon: <LightbulbIcon />, ready: true },
+    ],
+  },
+  {
+    title: "기록",
+    items: [{ href: "/admin/audit", label: "감사 로그", icon: <ClipboardListIcon />, ready: true }],
+  },
+  {
+    title: "메일",
+    items: [
+      { href: "/admin/email-suppressions", label: "발송 금지 목록", icon: <MailBanIcon />, ready: true },
+    ],
+  },
+  {
+    title: "준비 중",
+    items: [
+      { href: "/admin/notices", label: "공지사항", icon: <MegaphoneIcon />, ready: false },
+      { href: "/admin/settlement", label: "결제·정산", icon: <TagIcon />, ready: false },
+      { href: "/admin/notifications", label: "알림 발송", icon: <BellIcon />, ready: false },
+    ],
+  },
 ];
 
-const COMING_NAV: NavItem[] = [
-  { href: "/admin/settlement", label: "결제·정산", icon: <TagIcon />, ready: false },
-  { href: "/admin/disputes", label: "분쟁·중재", icon: <ScaleIcon />, ready: false },
-  { href: "/admin/notifications", label: "알림 발송", icon: <BellIcon />, ready: false },
-];
+// 모바일 탭바·활성 판정에 쓰는 평탄화 목록.
+const READY_NAV: NavItem[] = NAV_GROUPS.flatMap((group) => group.items).filter((item) => item.ready);
 
 function NavLink({ item, active }: { item: NavItem; active: boolean }) {
   const base = "flex items-center gap-2.5 rounded-r2 px-2.5 py-2 text-sm font-bold transition-colors";
@@ -165,30 +225,64 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   }
 
   function isActive(href: string) {
-    return href === "/admin" ? pathname === "/admin" : pathname.startsWith(href);
+    if (href === "/admin") return pathname === "/admin";
+    // 리뷰 신고는 사이드바 항목이 없고 '신고 관리'의 하위 탭이라, 활성 표시를 신고 관리가 대신 받는다.
+    if (href === "/admin/reports" && pathname.startsWith("/admin/reviews")) return true;
+    return pathname.startsWith(href);
   }
 
+  // 지면 상한 1240 → 1720(#291). 1240은 **읽기 편한 줄 길이**를 위한 값인데, 관리자는 읽는
+  // 화면이 아니라 여러 건을 한눈에 비교하는 화면이라 같은 상한을 쓸 이유가 없었다. 그 결과
+  // 콘텐츠 영역이 964px(1240 − px-4 32 − 사이드바 220 − gap 24)로 고정돼, 경매 표의
+  // min-w-[980px]가 **어떤 모니터에서도** 16px 모자라 항상 가로 스크롤이 났다.
+  //
+  // 무제한으로 풀지는 않는다 — 2560 울트라와이드에서 표가 2300px로 늘어나면 눈이 좌우로 너무
+  // 멀리 가 밀도가 아니라 피로가 된다. 마이페이지는 사용자 화면이라 1160px 상한을 그대로 둔다.
   return (
-    <div className="mx-auto flex max-w-[1240px] gap-6 px-4 py-6 sm:py-8">
-      <aside className="hidden w-[220px] shrink-0 lg:block">
-        <div className="sticky top-20 rounded-r3 border border-border bg-surface p-2 shadow-card">
-          <p className="px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold tracking-wide text-primary">POCASTATION ADMIN</p>
-          <p className="px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold text-text-3">운영</p>
-          <nav aria-label="운영 메뉴" className="flex flex-col">
-            {OPERATION_NAV.map((item) => (
-              <NavLink key={item.href} item={item} active={isActive(item.href)} />
-            ))}
-          </nav>
-          <p className="mt-2 px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold text-text-3">준비 중</p>
-          <nav aria-label="준비 중 메뉴" className="flex flex-col">
-            {COMING_NAV.map((item) => (
-              <NavLink key={item.href} item={item} active={false} />
-            ))}
-          </nav>
-        </div>
-      </aside>
+    <div className="mx-auto max-w-[1720px] px-4 py-6 sm:py-8">
+      {/* 모바일 내비 — 사이드바가 lg 미만에서 숨겨지므로, 사용 가능한 운영 메뉴를 가로 스크롤
+          탭바로 제공해 모바일에서도 섹션 이동이 되게 한다. */}
+      <nav
+        aria-label="관리자 메뉴"
+        className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden"
+      >
+        {READY_NAV.map((item) => {
+          const active = isActive(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold transition-colors ${FOCUS_RING} ${
+                active ? "border-primary bg-primary text-white" : "border-border bg-surface text-text-2"
+              }`}
+            >
+              {item.icon}
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
 
-      <div className="min-w-0 flex-1">{children}</div>
+      <div className="flex gap-6">
+        <aside className="hidden w-[220px] shrink-0 lg:block">
+          <div className="sticky top-20 rounded-r3 border border-border bg-surface p-2">
+            <p className="px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold tracking-wide text-primary">POCASTATION ADMIN</p>
+            {NAV_GROUPS.map((group) => (
+              <div key={group.title}>
+                <p className="px-2.5 pb-1.5 pt-2.5 text-[11px] font-extrabold text-text-3">{group.title}</p>
+                <nav aria-label={`${group.title} 메뉴`} className="flex flex-col">
+                  {group.items.map((item) => (
+                    <NavLink key={item.href} item={item} active={item.ready && isActive(item.href)} />
+                  ))}
+                </nav>
+              </div>
+            ))}
+          </div>
+        </aside>
+
+        <div className="min-w-0 flex-1">{children}</div>
+      </div>
     </div>
   );
 }

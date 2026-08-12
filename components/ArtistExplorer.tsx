@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import ArtistCard from "@/components/ArtistCard";
-import { CardSkeletonGrid, ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
+import { ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
 import { apiFetch } from "@/lib/api";
 import { ARTIST_TYPE_LABEL, ARTIST_TYPE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
@@ -41,23 +41,28 @@ export default function ArtistExplorer({
   const [error, setError] = useState(false);
   const [moreError, setMoreError] = useState(false);
   const isFirstRun = useRef(true);
+  // 빠른 연속 검색/필터 시 옛 응답이 최신 결과를 덮어쓰는 걸 막는 요청 시퀀스 가드.
+  const reqIdRef = useRef(0);
 
   // 검색어·타입 필터가 바뀌면 첫 페이지부터 다시 조회(목록 전체 교체).
   const fetchFirstPage = useCallback(async () => {
+    const reqId = ++reqIdRef.current;
     setLoading(true);
     setError(false);
     try {
       const res = await apiFetch<ArtistListResponse>(`/api/artists?${buildParams(query, type, 0)}`, {
         cache: "no-store",
       });
+      if (reqId !== reqIdRef.current) return; // 더 최신 요청에 밀렸으면 무시
       setArtists(res.content);
       setPage(0);
       setTotalElements(res.totalElements);
       setTotalPages(res.totalPages);
     } catch {
+      if (reqId !== reqIdRef.current) return;
       setError(true);
     } finally {
-      setLoading(false);
+      if (reqId === reqIdRef.current) setLoading(false);
     }
   }, [query, type]);
 
@@ -109,7 +114,7 @@ export default function ArtistExplorer({
           />
         </label>
 
-        <div className="flex shrink-0 gap-1.5" role="group" aria-label="아티스트 타입 필터">
+        <div className="flex shrink-0 gap-1.5" role="group" aria-label="스타 타입 필터">
           <button
             type="button"
             aria-pressed={type === null}
@@ -143,18 +148,22 @@ export default function ArtistExplorer({
 
       {error && (
         <div className="mb-4">
-          <ExploreError title="아티스트를 불러오지 못했어요" onRetry={fetchFirstPage} />
+          <ExploreError title="스타를 불러오지 못했어요" onRetry={fetchFirstPage} />
         </div>
       )}
 
-      {loading ? (
-        <div className={GRID_CLASS}>
-          <CardSkeletonGrid count={12} variant="artist" />
+      {artists.length > 0 ? (
+        // 재검색·필터 변경 중에도 기존 카드를 유지하고 dim만 준다(스켈레톤으로 통째 교체 X).
+        <div className={`${GRID_CLASS} transition-opacity ${loading ? "opacity-60" : error ? "opacity-45" : ""}`}>
+          {artists.map((artist) => (
+            <ArtistCard key={artist.id} artist={artist} />
+          ))}
         </div>
-      ) : artists.length === 0 ? (
-        error ? null : (
+      ) : error ? null : (
+        // 빈 목록도 로딩 중 높이가 다른 스피너로 교체하지 않고 dim만(레이아웃 시프트 방지).
+        <div className={loading ? "opacity-60 transition-opacity" : undefined}>
           <ExploreEmpty
-            title={filtered ? "조건에 맞는 아티스트가 없어요" : "등록된 아티스트가 없습니다"}
+            title={filtered ? "조건에 맞는 스타가 없어요" : "등록된 스타가 없습니다"}
             hint={filtered ? "다른 키워드로 검색하거나 필터를 바꿔보세요." : undefined}
             onClear={
               filtered
@@ -166,12 +175,6 @@ export default function ArtistExplorer({
             }
             clearLabel="필터 초기화"
           />
-        )
-      ) : (
-        <div className={`${GRID_CLASS} ${error ? "opacity-45" : ""}`}>
-          {artists.map((artist) => (
-            <ArtistCard key={artist.id} artist={artist} />
-          ))}
         </div>
       )}
 

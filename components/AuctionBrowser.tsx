@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import AuctionCard from "@/components/AuctionCard";
 import { SORT_OPTIONS, type SortKey } from "@/components/AuctionExplorer";
-import { CardSkeletonGrid, ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
+import { ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
 import { apiFetch } from "@/lib/api";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import { FOCUS_RING } from "@/lib/ui";
@@ -11,11 +11,21 @@ import type { AuctionListResponse, AuctionResponse, AuctionSaleType } from "@/li
 
 const PAGE_SIZE = 20;
 const DEBOUNCE_MS = 300;
-const DEFAULT_SORT: SortKey = "latest";
-const GRID_CLASS = "grid grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))] gap-3.5";
+// 모바일은 2열(카드가 화면폭을 꽉 채우지 않게), sm 이상은 auto-fill로 데스크탑 밀도 유지.
+const GRID_CLASS =
+  "grid grid-cols-2 gap-3 sm:gap-3.5 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
 
-function buildParams(query: string, sort: SortKey, page: number, saleType: AuctionSaleType) {
-  const params = new URLSearchParams({ saleType, sort, size: String(PAGE_SIZE), page: String(page) });
+// 종료 목록 엔드포인트(/api/auctions/ended)는 saleType 파라미터를 받지 않으므로(항상 AUCTION),
+// 진행중 목록일 때만 saleType을 붙인다.
+function buildParams(
+  query: string,
+  sort: SortKey,
+  page: number,
+  saleType: AuctionSaleType,
+  includeSaleType: boolean,
+) {
+  const params = new URLSearchParams({ sort, size: String(PAGE_SIZE), page: String(page) });
+  if (includeSaleType) params.set("saleType", saleType);
   if (query.trim()) params.set("q", query.trim());
   return params;
 }
@@ -29,14 +39,29 @@ export default function AuctionBrowser({
   initialTotalElements,
   initialTotalPages,
   saleType = "AUCTION",
+  initialQuery = "",
+  endpoint = "/api/auctions",
+  sortOptions = SORT_OPTIONS,
+  defaultSort = "latest",
+  emptyTitle,
+  searchPlaceholder,
 }: {
   initialAuctions: AuctionResponse[];
   initialTotalElements: number;
   initialTotalPages: number;
   saleType?: AuctionSaleType;
+  initialQuery?: string;
+  // 종료 목록(/api/auctions/ended)처럼 다른 엔드포인트·정렬옵션을 쓰는 목록도 이 컴포넌트를 재사용한다.
+  endpoint?: string;
+  sortOptions?: readonly { key: SortKey; label: string }[];
+  defaultSort?: SortKey;
+  emptyTitle?: string;
+  searchPlaceholder?: string;
 }) {
-  const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortKey>(DEFAULT_SORT);
+  // 종료 목록은 saleType 파라미터가 없다(엔드포인트가 AUCTION 고정) — 진행중 목록에서만 붙인다.
+  const includeSaleType = endpoint === "/api/auctions";
+  const [query, setQuery] = useState(initialQuery);
+  const [sort, setSort] = useState<SortKey>(defaultSort);
   const [auctions, setAuctions] = useState(initialAuctions);
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(initialTotalElements);
@@ -46,26 +71,32 @@ export default function AuctionBrowser({
   const [error, setError] = useState(false);
   const [moreError, setMoreError] = useState(false);
   const isFirstRun = useRef(true);
+  // 빠른 연속 정렬/검색 시 옛 응답이 최신 결과를 덮어쓰는 걸 막는 요청 시퀀스 가드.
+  const reqIdRef = useRef(0);
   const { wishlisted, toggle } = useWishlistStatus(auctions.map((a) => a.id));
 
   // 검색어·정렬이 바뀌면 첫 페이지부터 다시 조회(목록 전체 교체).
   const fetchFirstPage = useCallback(async () => {
+    const reqId = ++reqIdRef.current;
     setLoading(true);
     setError(false);
     try {
-      const res = await apiFetch<AuctionListResponse>(`/api/auctions?${buildParams(query, sort, 0, saleType)}`, {
-        cache: "no-store",
-      });
+      const res = await apiFetch<AuctionListResponse>(
+        `${endpoint}?${buildParams(query, sort, 0, saleType, includeSaleType)}`,
+        { cache: "no-store" },
+      );
+      if (reqId !== reqIdRef.current) return; // 더 최신 요청에 밀렸으면 무시
       setAuctions(res.content);
       setPage(0);
       setTotalElements(res.totalElements);
       setTotalPages(res.totalPages);
     } catch {
+      if (reqId !== reqIdRef.current) return;
       setError(true);
     } finally {
-      setLoading(false);
+      if (reqId === reqIdRef.current) setLoading(false);
     }
-  }, [query, saleType, sort]);
+  }, [query, saleType, sort, endpoint, includeSaleType]);
 
   useEffect(() => {
     if (isFirstRun.current) {
@@ -81,9 +112,10 @@ export default function AuctionBrowser({
     setLoadingMore(true);
     setMoreError(false);
     try {
-      const res = await apiFetch<AuctionListResponse>(`/api/auctions?${buildParams(query, sort, nextPage, saleType)}`, {
-        cache: "no-store",
-      });
+      const res = await apiFetch<AuctionListResponse>(
+        `${endpoint}?${buildParams(query, sort, nextPage, saleType, includeSaleType)}`,
+        { cache: "no-store" },
+      );
       setAuctions((prev) => [...prev, ...res.content]);
       setPage(nextPage);
       setTotalPages(res.totalPages);
@@ -95,10 +127,10 @@ export default function AuctionBrowser({
   }
 
   const hasMore = page + 1 < totalPages;
-  const searchPlaceholder = saleType === "INSTANT"
-    ? "즉시판매 제목, 아티스트명, 멤버명으로 검색"
-    : "경매 제목, 아티스트명, 멤버명으로 검색";
-  const emptyTitle = saleType === "INSTANT" ? "등록된 즉시판매가 없습니다" : "진행 중인 경매가 없습니다";
+  const resolvedPlaceholder = searchPlaceholder ?? (saleType === "INSTANT"
+    ? "즉시판매 제목, 스타명, 멤버명으로 검색"
+    : "경매 제목, 스타명, 멤버명으로 검색");
+  const resolvedEmptyTitle = emptyTitle ?? (saleType === "INSTANT" ? "등록된 즉시판매가 없습니다" : "진행 중인 경매가 없습니다");
 
   return (
     <div>
@@ -107,10 +139,10 @@ export default function AuctionBrowser({
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
         </svg>
-        <span className="sr-only">{searchPlaceholder}</span>
+        <span className="sr-only">{resolvedPlaceholder}</span>
         <input
           type="search"
-          placeholder={searchPlaceholder}
+          placeholder={resolvedPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="w-full border-0 bg-transparent text-[13.5px] text-text-1 outline-none placeholder:text-text-3"
@@ -125,7 +157,7 @@ export default function AuctionBrowser({
           {loading && <InlineSpinner />}
         </span>
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="정렬 기준">
-          {SORT_OPTIONS.map((option) => (
+          {sortOptions.map((option) => (
             <button
               key={option.key}
               type="button"
@@ -149,20 +181,9 @@ export default function AuctionBrowser({
         </div>
       )}
 
-      {loading ? (
-        <div className={GRID_CLASS}>
-          <CardSkeletonGrid count={10} variant="auction" />
-        </div>
-      ) : auctions.length === 0 ? (
-        error ? null : (
-          <ExploreEmpty
-            title={query ? `"${query}" 검색 결과가 없어요` : emptyTitle}
-            hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
-            onClear={query ? () => setQuery("") : undefined}
-          />
-        )
-      ) : (
-        <div className={`${GRID_CLASS} ${error ? "opacity-45" : ""}`}>
+      {auctions.length > 0 ? (
+        // 재정렬·재검색 중에도 기존 카드를 유지하고 dim만 준다(스켈레톤으로 통째 교체 X).
+        <div className={`${GRID_CLASS} transition-opacity ${loading ? "opacity-60" : error ? "opacity-45" : ""}`}>
           {auctions.map((auction) => (
             <AuctionCard
               key={auction.id}
@@ -171,6 +192,15 @@ export default function AuctionBrowser({
               onToggleWishlist={(next) => toggle(auction.id, next)}
             />
           ))}
+        </div>
+      ) : error ? null : (
+        // 빈 목록도 로딩 중 높이가 다른 스피너로 교체하지 않고 dim만(레이아웃 시프트 방지).
+        <div className={loading ? "opacity-60 transition-opacity" : undefined}>
+          <ExploreEmpty
+            title={query ? `"${query}" 검색 결과가 없어요` : resolvedEmptyTitle}
+            hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
+            onClear={query ? () => setQuery("") : undefined}
+          />
         </div>
       )}
 

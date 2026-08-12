@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { MEMBER_ROLE_LABEL, MEMBER_STATUS_BADGE_CLASS, MEMBER_STATUS_LABEL, PROVIDER_LABEL } from "@/lib/labels";
+import { MEMBER_ROLE_LABEL, MEMBER_STATUS_TONE, MEMBER_STATUS_LABEL, PROVIDER_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
   AdminMemberDetailResponse,
@@ -13,6 +13,8 @@ import type {
   MemberStatus,
   MemberStatusAction,
 } from "@/lib/types";
+import StatusBadge from "@/components/StatusBadge";
+import AdminNotice from "@/components/AdminNotice";
 
 const PAGE_SIZE = 20;
 const DEBOUNCE_MS = 300;
@@ -24,11 +26,13 @@ const STATUS_FILTERS: { key: MemberStatus | "ALL"; label: string }[] = [
   { key: "WITHDRAWN", label: "탈퇴" },
 ];
 
-function buildParams(q: string, status: MemberStatus | "ALL", page: number) {
-  const params = new URLSearchParams({ size: String(PAGE_SIZE), page: String(page) });
+function buildParams(q: string, status: MemberStatus | "ALL", unverifiedOnly: boolean, page: number) {
+  const params = new URLSearchParams({ page: String(page), size: String(PAGE_SIZE) });
   if (q.trim()) params.set("q", q.trim());
-  if (status !== "ALL") params.set("status", status);
-  return params;
+  // 미인증 필터를 켜면 서버가 status를 무시한다(BE #256) — 화면에서도 함께 보내지 않는다.
+  if (unverifiedOnly) params.set("emailVerified", "false");
+  else if (status !== "ALL") params.set("status", status);
+  return params.toString();
 }
 
 function formatDate(iso: string) {
@@ -40,6 +44,8 @@ export default function AdminMembersPage() {
 
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<MemberStatus | "ALL">("ALL");
+  // 전환 이전 잔여 미인증 회원을 찾는 필터(BE #256). 이 결과가 0이 되면 레거시 정리가 끝난 것이다.
+  const [unverifiedOnly, setUnverifiedOnly] = useState(false);
   const [members, setMembers] = useState<AdminMemberSummary[]>([]);
   const [page, setPage] = useState(0);
   const [totalElements, setTotalElements] = useState(0);
@@ -60,13 +66,21 @@ export default function AdminMembersPage() {
   const [roleError, setRoleError] = useState<string | null>(null);
   const [roleToast, setRoleToast] = useState<string | null>(null);
 
+  // 파기(BE #250) — 되돌릴 수 없어 정지·탈퇴와 분리된 상태로 관리한다.
+  const [purging, setPurging] = useState(false);
+  const [purgeReason, setPurgeReason] = useState("");
+  const [purgeSubmitting, setPurgeSubmitting] = useState(false);
+  const [purgeError, setPurgeError] = useState<string | null>(null);
+
   const isFirstRun = useRef(true);
 
   const fetchList = useCallback(
-    async (q: string, status: MemberStatus | "ALL") => {
+    async (q: string, status: MemberStatus | "ALL", unverified: boolean) => {
       setLoading(true);
       try {
-        const res = await fetchWithAuth<AdminMemberListResponse>(`/api/admin/members?${buildParams(q, status, 0)}`);
+        const res = await fetchWithAuth<AdminMemberListResponse>(
+          `/api/admin/members?${buildParams(q, status, unverified, 0)}`,
+        );
         setMembers(res.content);
         setPage(0);
         setTotalElements(res.totalElements);
@@ -83,19 +97,19 @@ export default function AdminMembersPage() {
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
-      void fetchList("", "ALL");
+      void fetchList("", "ALL", false);
       return;
     }
-    const timer = setTimeout(() => void fetchList(query, statusFilter), DEBOUNCE_MS);
+    const timer = setTimeout(() => void fetchList(query, statusFilter, unverifiedOnly), DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [query, statusFilter, fetchList]);
+  }, [query, statusFilter, unverifiedOnly, fetchList]);
 
   async function loadMore() {
     const nextPage = page + 1;
     setLoadingMore(true);
     try {
       const res = await fetchWithAuth<AdminMemberListResponse>(
-        `/api/admin/members?${buildParams(query, statusFilter, nextPage)}`,
+        `/api/admin/members?${buildParams(query, statusFilter, unverifiedOnly, nextPage)}`,
       );
       setMembers((prev) => [...prev, ...res.content]);
       setPage(nextPage);
@@ -148,7 +162,7 @@ export default function AdminMembersPage() {
       };
       setNotice({ kind: "success", text: `${detail.nickname} 회원을 ${labels[action]}했습니다.` });
       setReason("");
-      await Promise.all([openDetail(detail.id), fetchList(query, statusFilter)]);
+      await Promise.all([openDetail(detail.id), fetchList(query, statusFilter, unverifiedOnly)]);
     } catch (err) {
       setNotice({ kind: "error", text: err instanceof ApiError ? err.message : "상태 변경에 실패했습니다." });
     } finally {
@@ -174,11 +188,37 @@ export default function AdminMembersPage() {
       setTimeout(() => setRoleToast(null), 4000);
       setRoleTarget(null);
       setRoleReason("");
-      await Promise.all([openDetail(detail.id), fetchList(query, statusFilter)]);
+      await Promise.all([openDetail(detail.id), fetchList(query, statusFilter, unverifiedOnly)]);
     } catch (err) {
       setRoleError(err instanceof ApiError ? err.message : "역할 변경에 실패했습니다.");
     } finally {
       setRoleSubmitting(false);
+    }
+  }
+
+  // 파기(BE #250) — 자발 탈퇴와 같은 경로다. 배송지·OAuth·결제수단·본인인증·인증토큰을 지우고
+  // 프로필을 가명화하며, 그 주소의 발송 금지도 함께 푼다. 되돌릴 수 없다.
+  async function purge() {
+    if (!detail || purgeSubmitting) return;
+    if (!purgeReason.trim()) {
+      setPurgeError("파기 사유를 입력해야 합니다.");
+      return;
+    }
+    setPurgeSubmitting(true);
+    setPurgeError(null);
+    try {
+      await fetchWithAuth<void>(`/api/admin/members/${detail.id}/purge`, {
+        method: "POST",
+        body: { reason: purgeReason.trim() },
+      });
+      setPurging(false);
+      setPurgeReason("");
+      setNotice({ kind: "success", text: "개인정보를 파기했습니다." });
+      await Promise.all([openDetail(detail.id), fetchList(query, statusFilter, unverifiedOnly)]);
+    } catch (err) {
+      setPurgeError(err instanceof ApiError ? err.message : "파기에 실패했습니다.");
+    } finally {
+      setPurgeSubmitting(false);
     }
   }
 
@@ -190,8 +230,9 @@ export default function AdminMembersPage() {
       <p className="mt-1.5 text-sm text-text-3">회원 정보를 검색하고 계정 상태를 관리합니다.</p>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_320px]">
-        {/* 목록 */}
-        <div>
+        {/* 목록 — min-w-0로 그리드 컬럼이 테이블(min-w) 너비만큼 늘어나 페이지가 넘치는 걸 막고,
+            테이블은 내부(overflow-x-auto)에서만 가로 스크롤되게 한다. */}
+        <div className="min-w-0">
           <div className="mb-3 flex flex-wrap items-center gap-2.5">
             <label className="flex h-10 min-w-[200px] flex-1 items-center gap-2 rounded-full border border-border px-4">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
@@ -213,24 +254,43 @@ export default function AdminMembersPage() {
                   type="button"
                   aria-pressed={statusFilter === f.key}
                   onClick={() => setStatusFilter(f.key)}
-                  className={`h-10 rounded-full border px-3 text-xs font-bold transition-colors ${FOCUS_RING} ${
-                    statusFilter === f.key ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+                  disabled={unverifiedOnly}
+                  className={`h-10 rounded-full border px-3 text-xs font-bold transition-colors disabled:opacity-40 ${FOCUS_RING} ${
+                    statusFilter === f.key && !unverifiedOnly ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
                   }`}
                 >
                   {f.label}
                 </button>
               ))}
             </div>
+            {/* 미인증은 상태와 다른 축이라 따로 둔다. 서버가 이 필터를 켜면 status를 무시하므로(BE #256)
+                화면에서도 상태 버튼을 잠가 "걸었는데 안 먹는" 상태를 만들지 않는다. */}
+            <button
+              type="button"
+              aria-pressed={unverifiedOnly}
+              onClick={() => setUnverifiedOnly((v) => !v)}
+              className={`h-10 rounded-full border px-3 text-xs font-bold transition-colors ${FOCUS_RING} ${
+                unverifiedOnly ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+              }`}
+            >
+              미인증만
+            </button>
           </div>
 
           <p className="mb-2 text-xs text-text-3">총 {totalElements}명{loading && " · 불러오는 중..."}</p>
+          {unverifiedOnly && (
+            <p className="mb-3 border-l-[3px] border-border-2 pl-3 text-[12px] leading-relaxed text-text-3">
+              인증 후 가입으로 바꾼 뒤로는 미인증 회원이 새로 생기지 않아요. 여기 남은 건 전환 이전
+              가입자이고, <b className="font-bold text-text-2">이 수가 0이 되면 정리가 끝난 거예요.</b>
+            </p>
+          )}
 
-          <div className="overflow-x-auto rounded-r3 border border-border bg-surface shadow-card">
+          <div className="overflow-x-auto rounded-r3 border border-border bg-surface">
             <table className="w-full min-w-[560px] border-collapse">
               <thead>
                 <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
-                  <th className="px-4 py-2.5">닉네임</th>
-                  <th className="px-4 py-2.5">이메일 / 가입</th>
+                  <th className="px-4 py-2.5">회원</th>
+                  <th className="px-4 py-2.5">이메일</th>
                   <th className="whitespace-nowrap px-4 py-2.5">상태</th>
                   <th className="whitespace-nowrap px-4 py-2.5">역할</th>
                   <th className="whitespace-nowrap px-4 py-2.5">가입일</th>
@@ -248,19 +308,36 @@ export default function AdminMembersPage() {
                     <tr
                       key={m.id}
                       onClick={() => openDetail(m.id)}
+                      // 선택 상태(연보라)는 규칙상 허용되는 「선택」이라 남긴다. 정지 행만
+                      // 전체 배경 워시에서 좌측 규칙선으로 바꿨다(#294).
                       className={`cursor-pointer border-b border-border text-[13px] transition-colors last:border-0 hover:bg-surface-2 ${
                         selectedId === m.id ? "bg-primary-soft/50" : ""
-                      } ${m.status === "SUSPENDED" ? "bg-accent-soft/40" : ""}`}
+                      }`}
                     >
-                      <td className="px-4 py-3 font-bold text-text-1">{m.nickname}</td>
-                      <td className="px-4 py-3 text-text-2">
-                        <span className="block truncate">{m.email ?? "—"}</span>
-                        <span className="text-[11px] text-text-3">{PROVIDER_LABEL[m.provider] ?? m.provider}</span>
-                      </td>
-                      <td className="whitespace-nowrap px-4 py-3">
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${MEMBER_STATUS_BADGE_CLASS[m.status]}`}>
-                          {MEMBER_STATUS_LABEL[m.status]}
+                      {/* 가입 방식을 이메일 칸에서 여기로 옮겼다(#291) — 이메일에 온전한 폭을 주기 위해서다. */}
+                      <td
+                        className={`px-4 py-3 font-bold text-text-1 ${
+                          m.status === "SUSPENDED" ? "border-l-2 border-l-accent" : "border-l-2 border-l-transparent"
+                        }`}
+                      >
+                        <span className="block">{m.nickname}</span>
+                        {/* 변하지 않는 짧은 식별자(UUID 앞 8자리) — 닉 변경·동명이인과 무관하게 특정용. */}
+                        <span className="font-mono text-[11px] font-normal text-text-3">#{m.id.slice(0, 8)}</span>
+                        <span className="block text-[11px] font-normal text-text-3">
+                          {PROVIDER_LABEL[m.provider] ?? m.provider}
+                          {/* 소셜은 인증 개념이 없어 항상 null이다 — 이메일 가입자만 미인증으로 읽는다. */}
+                          {m.provider === "EMAIL" && m.emailVerifiedAt === null && m.email !== null && (
+                            <span className="ml-1.5 font-bold text-accent">미인증</span>
+                          )}
                         </span>
+                      </td>
+                      {/* 자르지 않고 줄바꿈한다 — 이메일은 관리자가 계정을 특정하는 식별 정보라
+                          잘리면 누구인지 알 수 없다. 잘린 이메일보다 두 줄 이메일이 낫다. */}
+                      <td className="px-4 py-3 text-text-2 [word-break:break-all]">{m.email ?? "—"}</td>
+                      <td className="whitespace-nowrap px-4 py-3">
+                        <StatusBadge tone={MEMBER_STATUS_TONE[m.status]}>
+                          {MEMBER_STATUS_LABEL[m.status]}
+                        </StatusBadge>
                       </td>
                       <td className="whitespace-nowrap px-4 py-3 text-text-2">{m.role === "ADMIN" ? "관리자" : "일반"}</td>
                       <td className="whitespace-nowrap px-4 py-3 tabular-nums text-text-3">{formatDate(m.createdAt)}</td>
@@ -292,16 +369,20 @@ export default function AdminMembersPage() {
               회원을 선택하면 상세 정보와 관리 기능이 표시됩니다.
             </div>
           ) : detailLoading || !detail ? (
-            <div className="rounded-r3 border border-border bg-surface p-8 text-center text-sm text-text-3 shadow-card">
+            <div className="rounded-r3 border border-border bg-surface p-8 text-center text-sm text-text-3">
               {detailLoading ? "불러오는 중..." : "정보를 불러오지 못했습니다."}
             </div>
           ) : (
-            <div className="rounded-r3 border border-border bg-surface p-4 shadow-card">
-              <div className="flex items-center justify-between">
-                <h2 className="font-display text-base font-extrabold text-text-1">{detail.nickname}</h2>
-                <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${MEMBER_STATUS_BADGE_CLASS[detail.status]}`}>
+            <div className="rounded-r3 border border-border bg-surface p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <h2 className="font-display text-base font-extrabold text-text-1">{detail.nickname}</h2>
+                  {/* 변하지 않는 짧은 식별자(UUID 앞 8자리). 전체 UUID는 조치 API 경로에 그대로 쓰인다. */}
+                  <span className="font-mono text-[11px] text-text-3">#{detail.id.slice(0, 8)}</span>
+                </div>
+                <StatusBadge tone={MEMBER_STATUS_TONE[detail.status]} className="shrink-0">
                   {MEMBER_STATUS_LABEL[detail.status]}
-                </span>
+                </StatusBadge>
               </div>
 
               <dl className="mt-3 flex flex-col gap-1.5 border-t border-border pt-3 text-[12.5px]">
@@ -321,6 +402,14 @@ export default function AdminMembersPage() {
                   <dt className="text-text-3">가입일</dt>
                   <dd className="font-semibold text-text-1">{formatDate(detail.createdAt)}</dd>
                 </div>
+                {detail.provider === "EMAIL" && detail.email !== null && (
+                  <div className="flex justify-between gap-2">
+                    <dt className="text-text-3">이메일 인증</dt>
+                    <dd className={`font-semibold ${detail.emailVerifiedAt ? "text-text-1" : "text-accent"}`}>
+                      {detail.emailVerifiedAt ? formatDate(detail.emailVerifiedAt) : "미인증"}
+                    </dd>
+                  </div>
+                )}
               </dl>
 
               <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3">
@@ -427,7 +516,8 @@ export default function AdminMembersPage() {
                   <button
                     type="button"
                     onClick={() => { setRoleTarget("USER"); setRoleReason(""); setRoleError(null); }}
-                    className={`h-10 w-full rounded-r2 border border-[#fbdca8] bg-[#fff7ed] text-sm font-bold text-[#b45309] transition-opacity hover:opacity-90 ${FOCUS_RING}`}
+                    // 하드코딩 주황을 별빛 골드 토큰으로(#294). 배경 필 대신 테두리.
+                    className={`h-10 w-full rounded-r2 border border-[var(--color-star-line)] text-sm font-bold text-[var(--color-star-ink)] transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
                   >
                     관리자 권한 회수
                   </button>
@@ -445,10 +535,87 @@ export default function AdminMembersPage() {
                   </p>
                 )}
               </div>
+
+              {/* 개인정보 파기 — 정지·탈퇴와 다른 조치다. 그쪽은 되돌릴 수 있고 이건 아니다.
+                  처리방침 제6조 "삭제 요구"를 이행하는 경로이기도 하다. */}
+              <div className="mt-4 border-t border-border pt-4">
+                <p className="mb-2 text-[11px] font-extrabold text-text-3">개인정보</p>
+                {detail.email === null ? (
+                  <p className="rounded-r2 bg-surface-2 px-3 py-2 text-center text-[11.5px] leading-relaxed text-text-3">
+                    이미 파기된 계정이에요
+                  </p>
+                ) : (
+                  <>
+                    <p className="mb-2 text-[11.5px] leading-relaxed text-text-3">
+                      이메일·비밀번호·배송지·결제수단을 지우고 프로필을 가명화해요.{" "}
+                      <b className="font-bold text-text-2">되돌릴 수 없어요.</b>
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPurging(true);
+                        setPurgeReason("");
+                        setPurgeError(null);
+                      }}
+                      className={`h-10 w-full rounded-r2 border border-accent bg-white text-sm font-bold text-accent transition-colors hover:bg-accent hover:text-white ${FOCUS_RING}`}
+                    >
+                      개인정보 파기
+                    </button>
+                  </>
+                )}
+              </div>
             </div>
           )}
         </aside>
       </div>
+
+      {purging && detail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
+          <div className="w-full max-w-sm rounded-r3 bg-surface p-5 shadow-modal">
+            <h2 className="font-display text-base font-extrabold text-text-1">개인정보 파기</h2>
+            <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
+              &quot;{detail.nickname}&quot;님의 이메일·비밀번호·배송지·결제수단·본인인증 결과를 지우고
+              프로필을 가명화합니다. 그 주소의 발송 금지도 함께 풀립니다.
+            </p>
+            <p className="mt-2 border-l-[3px] border-accent pl-3 text-[12.5px] leading-relaxed text-text-2">
+              <b className="font-extrabold text-text-1">되돌릴 수 없습니다.</b> 진행 중인 거래가 있으면
+              거절되니, 거래를 먼저 정리한 뒤 다시 시도하세요.
+            </p>
+            <label className="sr-only" htmlFor="purge-reason">파기 사유</label>
+            <textarea
+              id="purge-reason"
+              value={purgeReason}
+              onChange={(e) => setPurgeReason(e.target.value)}
+              placeholder="예) 정보주체 파기 요구 접수"
+              rows={3}
+              autoFocus
+              maxLength={200}
+              className={`mt-3 w-full resize-none rounded-r2 border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+            />
+            {purgeError && (
+              <p role="alert" className="mt-2 text-[12px] font-bold text-danger">{purgeError}</p>
+            )}
+            <div className="mt-4 flex gap-2">
+              <button
+                type="button"
+                onClick={() => setPurging(false)}
+                disabled={purgeSubmitting}
+                className={`h-10 flex-1 rounded-r2 border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={purge}
+                disabled={purgeSubmitting}
+                className={`h-10 flex-1 rounded-r2 bg-accent text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+              >
+                {purgeSubmitting ? "파기 중..." : "파기"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {roleTarget && detail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
@@ -472,9 +639,9 @@ export default function AdminMembersPage() {
               className={`mt-3 w-full resize-none rounded-r2 border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
             />
             {roleError && (
-              <p role="alert" className="mt-2 rounded-r2 bg-accent-soft px-3 py-2 text-[12px] font-semibold text-accent">
-                {roleError}
-              </p>
+              <AdminNotice kind="error" className="mt-2">
+          {roleError}
+        </AdminNotice>
             )}
             <div className="mt-3 flex gap-2">
               <button
@@ -499,7 +666,9 @@ export default function AdminMembersPage() {
       )}
 
       {roleToast && (
-        <div className="fixed bottom-6 left-1/2 z-50 flex max-w-sm -translate-x-1/2 items-start gap-2.5 rounded-r3 border border-[#bfe8d2] bg-ok-soft px-4 py-3 shadow-modal">
+        // 떠 있는 토스트는 지면 위에 얹히므로 배경·그림자를 남긴다 — 인라인 알림과 성격이 다르다.
+        // 하드코딩 테두리만 토큰으로 바꿨다(#294).
+        <div className="fixed bottom-6 left-1/2 z-50 flex max-w-sm -translate-x-1/2 items-start gap-2.5 rounded-r3 border border-ok/30 bg-ok-soft px-4 py-3 shadow-modal">
           <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ok text-[11px] font-bold text-white">✓</span>
           <p className="text-[12.5px] font-semibold leading-relaxed text-ok">{roleToast}</p>
         </div>

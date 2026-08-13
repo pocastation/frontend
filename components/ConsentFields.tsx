@@ -9,6 +9,7 @@ export type ConsentValues = {
   termsAgreed: boolean;
   personalInfoAgreed: boolean;
   ageOver14Confirmed: boolean;
+  personalInfoOptionalAgreed: boolean;
   marketingAgreed: boolean;
 };
 
@@ -16,13 +17,14 @@ export const EMPTY_CONSENTS: ConsentValues = {
   termsAgreed: false,
   personalInfoAgreed: false,
   ageOver14Confirmed: false,
+  personalInfoOptionalAgreed: false,
   marketingAgreed: false,
 };
 
-// 필수는 약관과 연령 확인 둘뿐이다(2026-08-13). 선택 동의를 거부했다고 가입을 막으면
-// 그것 자체가 §16③ 위반이다.
+// 필수는 약관·수집이용 동의·연령 확인 3건이다. 선택 동의(맞춤형·마케팅)는 여기 들어오지 않는다 —
+// 거부했다고 가입을 막으면 그것 자체가 §16③ 위반이다.
 export function hasAllRequiredConsents(values: ConsentValues): boolean {
-  return values.termsAgreed && values.ageOver14Confirmed;
+  return values.termsAgreed && values.personalInfoAgreed && values.ageOver14Confirmed;
 }
 
 type Item = {
@@ -36,24 +38,28 @@ type Item = {
  * 가입 동의 항목(#217). 이메일 가입·소셜 온보딩 공용 — 경로마다 항목이 갈리면 한쪽에 구멍이 생긴다.
  *
  * ⚠️ **개인정보 처리방침은 동의 항목이 아니다**(2026-08-13, 법무법인 미션 코멘트 #0).
- * 처리방침은 법 §30에 따라 **공개하는** 문서이지 동의를 받는 문서가 아니고, 동의를 받아야 하는
- * 것은 개인정보 수집·이용 동의서다. 그마저도 우리가 필수로 수집하는 항목은 전부 §15①4
- * (계약의 이행)가 근거라 애초에 동의 대상이 아니었다.
+ * 처리방침은 법 §30에 따라 **공개하는** 문서이지 동의를 받는 문서가 아니다. 동의를 받아야 하는
+ * 것은 **수집·이용 동의서**(항목·목적·기간)이고, 그것이 아래 `personalInfoAgreed`다.
  *
- * 그래서 체크박스에서 빼고 아래 열람 링크로 내렸다. **다시 체크박스로 올리지 말 것.**
+ * 즉 처리방침 체크박스를 없앤 것이지 **필수 동의를 없앤 것이 아니다.**
+ * 처리방침은 하단 열람 링크로 내렸다 — 다시 체크박스로 올리지 말 것.
+ *
+ * ⚠️ **필수 수집을 계약 이행(§15①4)에 기대지 않는다.** 그 조항은 「계약 이행에 필요한 경우」만
+ * 커버하는데 범위를 다투게 되면 근거 없는 수집이 되고 입증책임은 우리에게 있다. 동의를 받아두면
+ * §15①1로 명확히 방어된다 — 국내 주요 서비스가 예외 없이 이 항목을 필수 동의로 두는 이유다.
  *
  * 연령은 생년월일이 아니라 체크로 확인한다(§9 최소수집) — 자기신고인 건 생년월일 입력과 같고,
  * 받지 않으면 개인정보를 화면에서조차 다루지 않게 된다.
  */
 const ITEMS: Item[] = [
   { key: "termsAgreed", label: "이용약관 동의", required: true, href: "/terms" },
+  { key: "personalInfoAgreed", label: "개인정보 수집·이용 동의", required: true, href: "/privacy" },
   { key: "ageOver14Confirmed", label: "만 14세 이상입니다", required: true },
-  // ⚠️ **범위를 앞에 둔다.** 「개인정보 수집·이용 동의」로 시작하면 *모든* 개인정보에 대한
-  // 동의처럼 읽힌다 — 실제로 그렇게 오해한 사례가 있었다. 이 동의가 가리키는 것은 맞춤형
-  // 서비스뿐이고, 회원가입·주문·배송에 필요한 정보는 계약 이행(§15①4)이 근거라 여기에
-  // 포함되지 않는다. 거부해도 잃는 것은 추천·개인화뿐이다.
+  // ⚠️ **범위를 앞에 둔다.** 「개인정보 수집·이용 동의」로 시작하면 위의 필수 항목과 구분되지
+  // 않는다. 이쪽이 가리키는 것은 서비스 제공에 필요하지 않은 처리(추천·개인화)뿐이라,
+  // 거부해도 가입·경매·구매는 그대로 된다.
   {
-    key: "personalInfoAgreed",
+    key: "personalInfoOptionalAgreed",
     label: "맞춤형 서비스를 위한 개인정보 수집·이용 동의",
     required: false,
     href: "/privacy",
@@ -79,6 +85,7 @@ export default function ConsentFields({
       termsAgreed: checked,
       personalInfoAgreed: checked,
       ageOver14Confirmed: checked,
+      personalInfoOptionalAgreed: checked,
       marketingAgreed: checked,
     });
   }
@@ -136,10 +143,10 @@ export default function ConsentFields({
       {/* 처리방침은 '동의'가 아니라 '열람'이다. 체크박스 묶음 밖에 두어 성격이 다르다는 것을
           배치로 드러낸다 — 같은 목록에 넣으면 다시 동의 항목처럼 읽힌다.
 
-          첫 문장이 **필수 항목의 근거**를 밝힌다. 체크박스에 없는 정보(이메일·주소 등)를 어떻게
-          처리하는지 화면 어디에도 없으면, 위의 선택 동의가 그 전부를 가리키는 것처럼 읽힌다. */}
+          선택 항목을 거부해도 가입이 된다는 사실을 여기서 한 번 더 밝힌다 — 필수·선택이 같은
+          목록에 나란히 있으면 전부 동의해야 하는 것처럼 읽힌다. */}
       <p className="border-t border-border px-3.5 py-2.5 text-xs leading-[1.7] text-text-3">
-        회원가입·주문·배송에 필요한 개인정보는 계약 이행을 위해 처리되며, 처리 목적·항목·보유기간은{" "}
+        선택 항목에 동의하지 않아도 회원가입과 서비스 이용에 제한이 없어요. 처리 목적·항목·보유기간은{" "}
         <Link
           href="/privacy"
           target="_blank"

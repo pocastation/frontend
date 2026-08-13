@@ -7,20 +7,22 @@ import { FOCUS_RING } from "@/lib/ui";
 // 가입 동의 값(#217, BE #183). 이메일 가입과 소셜 온보딩이 같은 모양을 쓴다.
 export type ConsentValues = {
   termsAgreed: boolean;
-  privacyAgreed: boolean;
+  personalInfoAgreed: boolean;
   ageOver14Confirmed: boolean;
   marketingAgreed: boolean;
 };
 
 export const EMPTY_CONSENTS: ConsentValues = {
   termsAgreed: false,
-  privacyAgreed: false,
+  personalInfoAgreed: false,
   ageOver14Confirmed: false,
   marketingAgreed: false,
 };
 
+// 필수는 약관과 연령 확인 둘뿐이다(2026-08-13). 선택 동의를 거부했다고 가입을 막으면
+// 그것 자체가 §16③ 위반이다.
 export function hasAllRequiredConsents(values: ConsentValues): boolean {
-  return values.termsAgreed && values.privacyAgreed && values.ageOver14Confirmed;
+  return values.termsAgreed && values.ageOver14Confirmed;
 }
 
 type Item = {
@@ -30,17 +32,32 @@ type Item = {
   href?: string;
 };
 
-// 연령은 생년월일이 아니라 체크로 확인한다(§9 최소수집) — 자기신고인 건 생년월일 입력과 같고,
-// 받지 않으면 개인정보를 화면에서조차 다루지 않게 된다.
+/**
+ * 가입 동의 항목(#217). 이메일 가입·소셜 온보딩 공용 — 경로마다 항목이 갈리면 한쪽에 구멍이 생긴다.
+ *
+ * ⚠️ **개인정보 처리방침은 동의 항목이 아니다**(2026-08-13, 법무법인 미션 코멘트 #0).
+ * 처리방침은 법 §30에 따라 **공개하는** 문서이지 동의를 받는 문서가 아니고, 동의를 받아야 하는
+ * 것은 개인정보 수집·이용 동의서다. 그마저도 우리가 필수로 수집하는 항목은 전부 §15①4
+ * (계약의 이행)가 근거라 애초에 동의 대상이 아니었다.
+ *
+ * 그래서 체크박스에서 빼고 아래 열람 링크로 내렸다. **다시 체크박스로 올리지 말 것.**
+ *
+ * 연령은 생년월일이 아니라 체크로 확인한다(§9 최소수집) — 자기신고인 건 생년월일 입력과 같고,
+ * 받지 않으면 개인정보를 화면에서조차 다루지 않게 된다.
+ */
 const ITEMS: Item[] = [
   { key: "termsAgreed", label: "이용약관 동의", required: true, href: "/terms" },
-  { key: "privacyAgreed", label: "개인정보 처리방침 동의", required: true, href: "/privacy" },
   { key: "ageOver14Confirmed", label: "만 14세 이상입니다", required: true },
-  { key: "marketingAgreed", label: "마케팅 정보 수신 동의", required: false },
+  {
+    key: "personalInfoAgreed",
+    label: "개인정보 수집·이용 동의 (맞춤형 서비스)",
+    required: false,
+    href: "/privacy",
+  },
+  // 채널을 문구에 적는다 — 이메일 동의가 알림톡 동의를 겸하지 않는다(정보통신망법 §50).
+  { key: "marketingAgreed", label: "이메일·알림톡 수신 동의", required: false },
 ];
 
-// 가입 동의 항목(#217). 이메일 가입·소셜 온보딩 공용 — 경로마다 항목이 갈리면 한쪽에 구멍이 생긴다.
-//
 // 전체 동의는 개별 항목의 파생 상태로만 다룬다(별도 state를 두지 않는다) —
 // 두 상태를 따로 관리하면 개별 해제 시 전체 체크가 남는 어긋남이 생긴다.
 export default function ConsentFields({
@@ -56,7 +73,7 @@ export default function ConsentFields({
   function toggleAll(checked: boolean) {
     onChange({
       termsAgreed: checked,
-      privacyAgreed: checked,
+      personalInfoAgreed: checked,
       ageOver14Confirmed: checked,
       marketingAgreed: checked,
     });
@@ -111,6 +128,21 @@ export default function ConsentFields({
           </div>
         ))}
       </div>
+
+      {/* 처리방침은 '동의'가 아니라 '열람'이다. 체크박스 묶음 밖에 두어 성격이 다르다는 것을
+          배치로 드러낸다 — 같은 목록에 넣으면 다시 동의 항목처럼 읽힌다. */}
+      <p className="border-t border-border px-3.5 py-2.5 text-xs leading-[1.7] text-text-3">
+        개인정보의 처리 목적·항목·보유기간은{" "}
+        <Link
+          href="/privacy"
+          target="_blank"
+          rel="noreferrer"
+          className={`font-semibold text-text-2 underline underline-offset-2 hover:text-primary ${FOCUS_RING}`}
+        >
+          개인정보 처리방침
+        </Link>
+        에서 확인하실 수 있어요.
+      </p>
     </fieldset>
   );
 }

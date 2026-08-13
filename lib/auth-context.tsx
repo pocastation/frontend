@@ -35,7 +35,7 @@ type AuthContextValue = {
 export type OnboardingPayload = {
   nickname: string;
   termsAgreed: boolean;
-  privacyAgreed: boolean;
+  personalInfoAgreed: boolean;
   ageOver14Confirmed: boolean;
   marketingAgreed: boolean;
 };

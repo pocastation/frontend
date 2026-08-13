@@ -48,9 +48,13 @@ type Item = {
 const ITEMS: Item[] = [
   { key: "termsAgreed", label: "이용약관 동의", required: true, href: "/terms" },
   { key: "ageOver14Confirmed", label: "만 14세 이상입니다", required: true },
+  // ⚠️ **범위를 앞에 둔다.** 「개인정보 수집·이용 동의」로 시작하면 *모든* 개인정보에 대한
+  // 동의처럼 읽힌다 — 실제로 그렇게 오해한 사례가 있었다. 이 동의가 가리키는 것은 맞춤형
+  // 서비스뿐이고, 회원가입·주문·배송에 필요한 정보는 계약 이행(§15①4)이 근거라 여기에
+  // 포함되지 않는다. 거부해도 잃는 것은 추천·개인화뿐이다.
   {
     key: "personalInfoAgreed",
-    label: "개인정보 수집·이용 동의 (맞춤형 서비스)",
+    label: "맞춤형 서비스를 위한 개인정보 수집·이용 동의",
     required: false,
     href: "/privacy",
   },
@@ -130,9 +134,12 @@ export default function ConsentFields({
       </div>
 
       {/* 처리방침은 '동의'가 아니라 '열람'이다. 체크박스 묶음 밖에 두어 성격이 다르다는 것을
-          배치로 드러낸다 — 같은 목록에 넣으면 다시 동의 항목처럼 읽힌다. */}
+          배치로 드러낸다 — 같은 목록에 넣으면 다시 동의 항목처럼 읽힌다.
+
+          첫 문장이 **필수 항목의 근거**를 밝힌다. 체크박스에 없는 정보(이메일·주소 등)를 어떻게
+          처리하는지 화면 어디에도 없으면, 위의 선택 동의가 그 전부를 가리키는 것처럼 읽힌다. */}
       <p className="border-t border-border px-3.5 py-2.5 text-xs leading-[1.7] text-text-3">
-        개인정보의 처리 목적·항목·보유기간은{" "}
+        회원가입·주문·배송에 필요한 개인정보는 계약 이행을 위해 처리되며, 처리 목적·항목·보유기간은{" "}
         <Link
           href="/privacy"
           target="_blank"

@@ -969,3 +969,29 @@ export type BankOption = {
   code: string;
   name: string;
 };
+
+// 결제창(가상계좌·실시간 계좌이체) 경로(BE #326, FE #333 — A안).
+// 카드 빌링키(PaymentMethod)와 별개 축이다. 카드는 보류 상태라 코드만 남아 있다.
+export type PaymentWindowPreparation = {
+  paymentId: string;
+  orderName: string;
+  // 서버가 정한 청구액. 프론트가 계산하거나 바꾸지 않는다 — 위조 차단의 핵심.
+  amount: number;
+  customerName: string;
+  customerEmail: string | null;
+};
+
+// 결제 상태 + 발급된 가상계좌. status가 PAYMENT_PENDING이면서 계좌가 있으면 "입금 대기"다
+// (가상계좌 발급은 결제 완료가 아니다 — 입금 확정은 입금통보 웹훅의 몫이며 미구현).
+export type PaymentWindowResult = {
+  status: OrderStatus;
+  orderName: string;
+  // 서버가 계산한 청구액(구매자 수수료 포함). 프론트가 낙찰가로 다시 계산하지 않는다.
+  amount: number;
+  paymentMethod: "VIRTUAL_ACCOUNT" | "TRANSFER" | "CARD" | null;
+  bank: string | null;
+  accountNumber: string | null;
+  holder: string | null;
+  expiresAt: string | null;
+  failReason: string | null;
+};

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -31,6 +32,7 @@ export default function InstantPurchaseSection({
   sellerNickname,
   viewCount,
 }: Props) {
+  const router = useRouter();
   const { member, accessToken, fetchWithAuth } = useAuth();
   const [currentStatus, setCurrentStatus] = useState(status);
   const [submitting, setSubmitting] = useState(false);
@@ -56,7 +58,10 @@ export default function InstantPurchaseSection({
         method: "POST",
       });
       setCurrentStatus(res.status);
-      setMessage({ type: "ok", text: "즉시구매 요청이 완료됐어요." });
+      // 구매 성공 = 주문 생성이지 결제 완료가 아니다(A안). 결제 페이지로 곧바로 넘긴다 —
+      // 여기서 멈추면 "구매했는데 돈 낼 곳이 없는" 상태로 보인다(FE #333).
+      router.push(`/orders/${saleId}/payment`);
+      return;
     } catch (err) {
       // 서버 관문 거부 — 화면 상태가 낡았다(다른 탭에서 지웠거나 조회가 실패했다). 모달로 이어 붙인다.
       if (isGateRejection(err)) {

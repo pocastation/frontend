@@ -998,5 +998,7 @@ export type PaymentWindowResult = {
   accountNumber: string | null;
   holder: string | null;
   expiresAt: string | null;
-  failReason: string | null;
+  // 🔴 실패 **사유 문자열**은 내려받지 않는다 — PG 원문에 내부 파라미터 구조가 담겨 있어
+  // 화면에 안 그려도 개발자도구에서 보인다(BE #328 전수점검). 여부만 있으면 충분하다.
+  previousAttemptFailed: boolean;
 };

@@ -229,7 +229,7 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
           onChange={setMethod}
           onPay={handlePay}
           busy={busy}
-          failReason={result?.failReason ?? null}
+          previousAttemptFailed={result?.previousAttemptFailed ?? false}
         />
       )}
 
@@ -253,13 +253,13 @@ function MethodChooser({
   onChange,
   onPay,
   busy,
-  failReason,
+  previousAttemptFailed,
 }: {
   method: MethodValue;
   onChange: (v: MethodValue) => void;
   onPay: () => void;
   busy: boolean;
-  failReason: string | null;
+  previousAttemptFailed: boolean;
 }) {
   return (
     <>
@@ -298,7 +298,7 @@ function MethodChooser({
         })}
       </fieldset>
 
-      {failReason ? (
+      {previousAttemptFailed ? (
         <p className="mt-4 border-l-2 border-danger pl-3 text-[13px] leading-relaxed text-text-2">
           지난 결제가 완료되지 않았어요. 다시 시도해 주세요.
         </p>

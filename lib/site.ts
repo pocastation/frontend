@@ -1,9 +1,11 @@
+import { envValue } from "./env";
+
 // 사이트 정체성 상수. layout(메타데이터)·robots·sitemap이 같은 값을 봐야 해서 한곳에 모은다
 // — 세 곳에 각각 두면 도메인이 바뀔 때 하나만 고쳐 sitemap의 URL이 어긋나는 식으로 조용히 틀어진다.
 
 // 배포 환경별 절대 URL 기준. Vercel에 NEXT_PUBLIC_SITE_URL을 주입하고, 없으면 폴백한다.
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ||
+  envValue(process.env.NEXT_PUBLIC_SITE_URL) ||
   (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://pocastation.com");
 
 export const SITE_NAME = "Pocastation";

@@ -5,12 +5,15 @@ import Link from "next/link";
 import * as PortOne from "@portone/browser-sdk/v2";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { envValue } from "@/lib/env";
 import { formatKRW } from "@/lib/format";
 import { FOCUS_RING, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import type { PaymentWindowPreparation, PaymentWindowResult } from "@/lib/types";
 
-const STORE_ID = process.env.NEXT_PUBLIC_PORTONE_STORE_ID ?? "";
-const CHANNEL_KEY = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "";
+// ⚠️ envValue로 감싸는 이유는 lib/env.ts 참고 — 붙여넣기에 섞인 공백 하나로 결제가 통째로
+// 막힌 적이 있다(2026-08-15, 채널키 앞 탭 문자).
+const STORE_ID = envValue(process.env.NEXT_PUBLIC_PORTONE_STORE_ID);
+const CHANNEL_KEY = envValue(process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY);
 
 // A안(2026-08-10 확정)의 결제수단은 이 둘뿐이다. **카드는 추가하지 않는다** — 폐기가 아니라
 // 보류이며, 통신판매업 신고 완료 후 포트원에 결제수단 추가 신청이 가능해지면 그때 되살린다.

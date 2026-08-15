@@ -40,13 +40,69 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
 
   const load = useCallback(async () => {
     try {
+      // 🔁 모바일은 결제창이 iframe이 아니라 **페이지 이동**이라, 결제가 끝나면 PG가
+      // redirectUrl로 302를 보내며 결과를 쿼리에 실어 돌려준다. 그 경우 이 화면은 "새로 진입"이
+      // 아니라 "결제를 마치고 돌아온" 상태다 — 결과를 이어받아 서버 대사까지 마쳐야 한다.
+      // 이걸 안 하면 모바일 사용자는 결제를 끝내고도 화면이 그대로인 것을 본다.
+      const params = new URLSearchParams(window.location.search);
+      const returnedPaymentId = params.get("paymentId");
+      const failCode = params.get("code");
+
+      if (returnedPaymentId || failCode) {
+        // 쿼리를 지워 새로고침이 같은 처리를 반복하지 않게 한다.
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+      if (failCode) {
+        // PG가 실패 사유를 준 경우 — 뭉개지 않고 그대로 보여준다.
+        setError(params.get("message") ?? "결제가 완료되지 않았어요.");
+      } else if (returnedPaymentId) {
+        setResult(await confirmPayment(returnedPaymentId));
+        return;
+      }
       setResult(await fetchWithAuth<PaymentWindowResult>(`/api/members/me/orders/${auctionId}/payment`));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "결제 정보를 불러오지 못했어요.");
     } finally {
       setLoading(false);
     }
+    // confirmPayment는 auctionId·fetchWithAuth에만 의존해 매 렌더 동일하다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auctionId, fetchWithAuth]);
+
+  /**
+   * 결제창 호출 실패 사유를 서버에 남긴다(BE #328).
+   *
+   * 실패는 브라우저에서 일어나 서버에 아무 기록이 남지 않는다. 상세를 사용자에게 보여주지
+   * 않기로 했으므로 **이 경로가 원인을 아는 유일한 통로**다.
+   *
+   * 보고가 실패해도 삼킨다 — 실패를 못 남긴 것 때문에 사용자 흐름까지 막을 이유는 없다.
+   */
+  async function reportFailure(err: unknown, paymentId: string | null) {
+    try {
+      const detail =
+        err && typeof err === "object" && "message" in err
+          ? String((err as { message?: unknown }).message ?? "")
+          : String(err ?? "");
+      await fetchWithAuth(`/api/auctions/${auctionId}/order/payment/failure`, {
+        method: "POST",
+        body: {
+          code: err instanceof ApiError ? `API_${err.status}` : "SDK_THROW",
+          message: `${detail}${paymentId ? ` (paymentId=${paymentId})` : ""}`.slice(0, 1000),
+        },
+      });
+    } catch {
+      // 보고 실패는 무시한다.
+    }
+  }
+
+  // 🔴 결제창 응답을 근거로 쓰지 않는다. 브라우저에서 오는 값이라 위조가 가능하다 —
+  // 서버가 PG에 직접 물어본 결과만 화면에 반영한다. PC(iframe)·모바일(리디렉션) 공용.
+  async function confirmPayment(paymentId: string) {
+    return fetchWithAuth<PaymentWindowResult>(`/api/auctions/${auctionId}/order/payment/confirm`, {
+      method: "POST",
+      body: { paymentId },
+    });
+  }
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 진입 시 결제 상태 1회 복원.
@@ -61,6 +117,9 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
     }
     setBusy(true);
     setError(null);
+    // 실패 보고와 참조 코드에 쓰려고 try 밖에 둔다 — prepare 이후에 실패하면 이 값이 있어야
+    // 서버 기록과 사용자가 말한 코드를 맞출 수 있다.
+    let paymentId: string | null = null;
     try {
       // 금액·주문명·결제 식별자는 **서버가 정한다.** 프론트가 만들면 결제창 파라미터를 고쳐
       // 싸게 결제하는 경로가 열린다.
@@ -68,6 +127,7 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         `/api/auctions/${auctionId}/order/payment/prepare`,
         { method: "POST" },
       );
+      paymentId = prep.paymentId;
 
       const res = await PortOne.requestPayment({
         storeId: STORE_ID,
@@ -97,23 +157,39 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         ...(method === "VIRTUAL_ACCOUNT"
           ? { virtualAccount: { accountExpiry: { validHours: prep.virtualAccountValidHours } } }
           : {}),
+        // 🔴 모바일에서 **필수**다. 포트원 갤럭시아 V2 가이드: 「갤럭시아머니트리의 경우 모바일
+        // 환경에서 필수 입력」. PC는 iframe으로 떠서 없어도 되지만, 모바일은 페이지가 이동하므로
+        // 돌아올 주소가 없으면 결제창 호출 자체가 실패한다.
+        //
+        // ⚠️ 이걸 빼놓고 데스크톱에서만 검증해 "된다"고 판단했다가 실사용자 모바일 결제가
+        // 통째로 막혔다(2026-08-15). 결제 경로는 **반드시 모바일에서도 확인**할 것.
+        redirectUrl: `${window.location.origin}/orders/${auctionId}/payment`,
       });
 
-      // 사용자가 창을 닫았거나 PG가 거절 — 이 응답만으로 실패를 단정하지 않고 서버 대사로 넘긴다.
+      // 결제창이 정상 동작했고 PG가 거절·취소를 알린 경우다. 이 메시지는 **사용자에게 보여줄
+      // 목적으로 만들어진 문장**이고(잔액 부족, 창 닫음 등) 읽으면 다음 행동이 달라진다.
+      // Stripe가 card_error를 「사용자에게 보여줘도 된다」고 안내하는 것과 같은 구분이다.
       if (res?.code !== undefined) {
         setError(res.message ?? "결제가 취소됐어요.");
         return;
       }
-
-      // 🔴 결제창 응답을 근거로 쓰지 않는다. 브라우저에서 오는 값이라 위조가 가능하다 —
-      // 서버가 PG에 직접 물어본 결과만 화면에 반영한다.
-      const confirmed = await fetchWithAuth<PaymentWindowResult>(
-        `/api/auctions/${auctionId}/order/payment/confirm`,
-        { method: "POST", body: { paymentId: prep.paymentId } },
-      );
-      setResult(confirmed);
+      setResult(await confirmPayment(prep.paymentId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "결제에 실패했어요. 잠시 후 다시 시도해 주세요.");
+      // 🔴 여기 오는 건 결제창 **호출 자체가 실패**한 경우 — 사실상 우리 버그다(파라미터·설정 오류).
+      //
+      // PG 원문에는 내부 파라미터 구조가 그대로 담긴다(예:
+      // `data.virtualAccount.accountExpiry 파라미터는 필수 입력입니다`). 구매자에게는 아무 의미가
+      // 없고 우리 구현만 노출하므로 **화면에 내지 않는다.**
+      //
+      // 대신 상세는 서버로 보낸다 — 실패가 브라우저에서 일어나 서버에는 아무 기록이 남지 않기
+      // 때문에, 이걸 안 보내면 원인을 아는 방법이 아예 사라진다(2026-08-15에 실제로 그랬다).
+      // 사용자에게는 일반 문구 + 참조 코드(paymentId)만 준다.
+      void reportFailure(err, paymentId);
+      setError(
+        paymentId
+          ? `결제를 시작하지 못했어요. 잠시 후 다시 시도해 주세요. (오류 코드: ${paymentId})`
+          : "결제를 시작하지 못했어요. 잠시 후 다시 시도해 주세요.",
+      );
     } finally {
       setBusy(false);
     }
@@ -153,7 +229,7 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
           onChange={setMethod}
           onPay={handlePay}
           busy={busy}
-          failReason={result?.failReason ?? null}
+          previousAttemptFailed={result?.previousAttemptFailed ?? false}
         />
       )}
 
@@ -177,13 +253,13 @@ function MethodChooser({
   onChange,
   onPay,
   busy,
-  failReason,
+  previousAttemptFailed,
 }: {
   method: MethodValue;
   onChange: (v: MethodValue) => void;
   onPay: () => void;
   busy: boolean;
-  failReason: string | null;
+  previousAttemptFailed: boolean;
 }) {
   return (
     <>
@@ -222,7 +298,7 @@ function MethodChooser({
         })}
       </fieldset>
 
-      {failReason ? (
+      {previousAttemptFailed ? (
         <p className="mt-4 border-l-2 border-danger pl-3 text-[13px] leading-relaxed text-text-2">
           지난 결제가 완료되지 않았어요. 다시 시도해 주세요.
         </p>

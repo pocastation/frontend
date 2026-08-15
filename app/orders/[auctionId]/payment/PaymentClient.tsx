@@ -40,13 +40,43 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
 
   const load = useCallback(async () => {
     try {
+      // 🔁 모바일은 결제창이 iframe이 아니라 **페이지 이동**이라, 결제가 끝나면 PG가
+      // redirectUrl로 302를 보내며 결과를 쿼리에 실어 돌려준다. 그 경우 이 화면은 "새로 진입"이
+      // 아니라 "결제를 마치고 돌아온" 상태다 — 결과를 이어받아 서버 대사까지 마쳐야 한다.
+      // 이걸 안 하면 모바일 사용자는 결제를 끝내고도 화면이 그대로인 것을 본다.
+      const params = new URLSearchParams(window.location.search);
+      const returnedPaymentId = params.get("paymentId");
+      const failCode = params.get("code");
+
+      if (returnedPaymentId || failCode) {
+        // 쿼리를 지워 새로고침이 같은 처리를 반복하지 않게 한다.
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+      if (failCode) {
+        // PG가 실패 사유를 준 경우 — 뭉개지 않고 그대로 보여준다.
+        setError(params.get("message") ?? "결제가 완료되지 않았어요.");
+      } else if (returnedPaymentId) {
+        setResult(await confirmPayment(returnedPaymentId));
+        return;
+      }
       setResult(await fetchWithAuth<PaymentWindowResult>(`/api/members/me/orders/${auctionId}/payment`));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "결제 정보를 불러오지 못했어요.");
     } finally {
       setLoading(false);
     }
+    // confirmPayment는 auctionId·fetchWithAuth에만 의존해 매 렌더 동일하다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auctionId, fetchWithAuth]);
+
+  // 🔴 결제창 응답을 근거로 쓰지 않는다. 브라우저에서 오는 값이라 위조가 가능하다 —
+  // 서버가 PG에 직접 물어본 결과만 화면에 반영한다. PC(iframe)·모바일(리디렉션) 공용.
+  async function confirmPayment(paymentId: string) {
+    return fetchWithAuth<PaymentWindowResult>(`/api/auctions/${auctionId}/order/payment/confirm`, {
+      method: "POST",
+      body: { paymentId },
+    });
+  }
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 진입 시 결제 상태 1회 복원.
@@ -97,6 +127,13 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         ...(method === "VIRTUAL_ACCOUNT"
           ? { virtualAccount: { accountExpiry: { validHours: prep.virtualAccountValidHours } } }
           : {}),
+        // 🔴 모바일에서 **필수**다. 포트원 갤럭시아 V2 가이드: 「갤럭시아머니트리의 경우 모바일
+        // 환경에서 필수 입력」. PC는 iframe으로 떠서 없어도 되지만, 모바일은 페이지가 이동하므로
+        // 돌아올 주소가 없으면 결제창 호출 자체가 실패한다.
+        //
+        // ⚠️ 이걸 빼놓고 데스크톱에서만 검증해 "된다"고 판단했다가 실사용자 모바일 결제가
+        // 통째로 막혔다(2026-08-15). 결제 경로는 **반드시 모바일에서도 확인**할 것.
+        redirectUrl: `${window.location.origin}/orders/${auctionId}/payment`,
       });
 
       // 사용자가 창을 닫았거나 PG가 거절 — 이 응답만으로 실패를 단정하지 않고 서버 대사로 넘긴다.
@@ -104,16 +141,15 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         setError(res.message ?? "결제가 취소됐어요.");
         return;
       }
-
-      // 🔴 결제창 응답을 근거로 쓰지 않는다. 브라우저에서 오는 값이라 위조가 가능하다 —
-      // 서버가 PG에 직접 물어본 결과만 화면에 반영한다.
-      const confirmed = await fetchWithAuth<PaymentWindowResult>(
-        `/api/auctions/${auctionId}/order/payment/confirm`,
-        { method: "POST", body: { paymentId: prep.paymentId } },
-      );
-      setResult(confirmed);
+      setResult(await confirmPayment(prep.paymentId));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "결제에 실패했어요. 잠시 후 다시 시도해 주세요.");
+      // 🔴 PG 오류를 「결제에 실패했어요」로 덮지 않는다.
+      //
+      // 예전에는 전부 같은 문구로 뭉갰는데, 그 탓에 실사용자 결제 실패의 원인을 **알 방법이
+      // 없었다**(서버 로그에도 남지 않는다 — 실패가 브라우저에서 일어나기 때문이다).
+      // 개발 중에는 fetch를 가로채 원문을 봤지만 운영에서는 쓸 수 없는 방법이다.
+      // PG가 준 문장을 그대로 보여줘야 사용자가 그걸 전달해 원인을 특정할 수 있다.
+      setError(pgErrorMessage(err));
     } finally {
       setBusy(false);
     }
@@ -169,6 +205,26 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
       </div>
     </main>
   );
+}
+
+/**
+ * 결제 실패 사유를 사람이 읽을 문장으로 만든다.
+ *
+ * <p>포트원 SDK는 실패를 두 가지 방식으로 알린다 — 응답의 {@code code}/{@code message}로 주기도
+ * 하고, 파라미터가 규격에 안 맞으면 **throw** 한다. 던져지는 값도 보통 {@code message}를 갖고
+ * 있어서 그걸 꺼내 쓴다(예: `data.virtualAccount.accountExpiry 파라미터는 필수 입력입니다`).
+ */
+function pgErrorMessage(err: unknown): string {
+  if (err instanceof ApiError) {
+    return err.message;
+  }
+  if (err && typeof err === "object" && "message" in err) {
+    const message = (err as { message?: unknown }).message;
+    if (typeof message === "string" && message.trim()) {
+      return message;
+    }
+  }
+  return "결제에 실패했어요. 잠시 후 다시 시도해 주세요.";
 }
 
 // 결제수단 선택 — 이 페이지의 유일한 강조 패널이다(테두리). 나머지 지면은 규칙선·여백으로 가른다.

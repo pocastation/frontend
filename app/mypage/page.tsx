@@ -1173,13 +1173,16 @@ function OrderStatusFooter({
           ),
           action: null,
         };
+      // A안(가상계좌·계좌이체)에서 이 상태는 "서버가 알아서 결제 중"이 아니라 **구매자가 결제할
+      // 차례**다(FE #333). 예전 문구("등록된 카드로 자동 결제돼요")는 카드 자동캡처 시절의 것이고,
+      // 카드 등록 화면이 은닉된 지금은 실행할 수도 없는 안내였다.
       case "PAYMENT_PENDING":
         return {
-          pill: pill("clock", "primary", "결제 진행 중"),
+          pill: pill("clock", "primary", "결제 대기"),
           message: (
-            <>등록된 카드로 자동 결제돼요 · 예상 <b className="font-bold text-text-1">{formatKRW(order.chargeAmount)}</b></>
+            <>가상계좌·계좌이체로 결제해요 · <b className="font-bold text-text-1">{formatKRW(order.chargeAmount)}</b></>
           ),
-          action: null,
+          action: { label: "결제하기", solid: true, href: `/orders/${order.auctionId}/payment` },
         };
       case "PAYMENT_RETRYING":
         return {
@@ -1241,19 +1244,28 @@ function OrderStatusFooter({
     <div className="flex flex-wrap items-center gap-2.5 border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
       {body.pill}
       <span className="min-w-0 flex-1">{body.message}</span>
-      {body.action && (
-        <button
-          type="button"
-          onClick={onGoPayment}
-          className={`shrink-0 rounded-r2 px-3 py-1.5 text-[11px] font-bold transition-colors ${FOCUS_RING} ${
-            body.action.solid
-              ? "bg-text-1 text-white hover:bg-text-2"
-              : "border border-border-2 bg-surface text-text-2 hover:border-text-3 hover:text-text-1"
-          }`}
-        >
-          {body.action.label}
-        </button>
-      )}
+      {body.action &&
+        // 결제창 경로는 별도 페이지라 링크로 나간다. 나머지(카드 등록·변경)는 기존처럼 탭 전환이다.
+        (body.action.href ? (
+          <Link
+            href={body.action.href}
+            className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+          >
+            {body.action.label}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={onGoPayment}
+            className={`shrink-0 rounded-r2 px-3 py-1.5 text-[11px] font-bold transition-colors ${FOCUS_RING} ${
+              body.action.solid
+                ? "bg-text-1 text-white hover:bg-text-2"
+                : "border border-border-2 bg-surface text-text-2 hover:border-text-3 hover:text-text-1"
+            }`}
+          >
+            {body.action.label}
+          </button>
+        ))}
     </div>
   );
 }

@@ -246,7 +246,9 @@ function VirtualAccountNotice({ result }: { result: PaymentWindowResult }) {
       <dl className="mt-6 border-t border-border">
         <Row label="은행" value={result.bank ?? "-"} />
         <Row label="계좌번호" value={result.accountNumber ?? "-"} emphasis />
-        <Row label="예금주" value={result.holder ?? "-"} />
+        {/* 예금주는 PG가 안 주는 경우가 있다(갤럭시아 가상계좌 실응답에 remitteeName이 없다).
+            빈 행을 "-"로 남기면 값이 누락된 것처럼 보이므로 아예 감춘다. */}
+        {result.holder ? <Row label="예금주" value={result.holder} /> : null}
         {result.expiresAt ? <Row label="입금 기한" value={formatDeadline(result.expiresAt)} /> : null}
       </dl>
 

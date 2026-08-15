@@ -78,6 +78,9 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         currency: "KRW",
         payMethod: method,
         customer: {
+          // customerId를 안 넘기면 포트원이 53자짜리를 자동 생성하는데 갤럭시아 상한이 20자라
+          // 거절된다(2026-08-14 실측). 서버가 회원 식별자를 규격에 맞게 줄여 내려준다.
+          customerId: prep.customerId,
           fullName: prep.customerName || member?.nickname || "회원",
           ...(prep.customerEmail ? { email: prep.customerEmail } : {}),
         },

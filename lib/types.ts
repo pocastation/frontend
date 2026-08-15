@@ -980,6 +980,8 @@ export type PaymentWindowPreparation = {
   // 가상계좌 입금 기한(시간). 갤럭시아는 결제창 호출 시 필수 파라미터이며, 우리 결제 기한과
   // 반드시 같아야 한다 — 어긋나면 「계좌는 살아 있는데 낙찰은 취소된」 구간이 생긴다.
   virtualAccountValidHours: number;
+  // PG에 넘기는 구매자 식별자. 갤럭시아 상한이 20자라 서버가 회원 UUID를 줄여서 내려준다.
+  customerId: string;
   customerName: string;
   customerEmail: string | null;
 };

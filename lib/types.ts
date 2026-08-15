@@ -977,6 +977,9 @@ export type PaymentWindowPreparation = {
   orderName: string;
   // 서버가 정한 청구액. 프론트가 계산하거나 바꾸지 않는다 — 위조 차단의 핵심.
   amount: number;
+  // 가상계좌 입금 기한(시간). 갤럭시아는 결제창 호출 시 필수 파라미터이며, 우리 결제 기한과
+  // 반드시 같아야 한다 — 어긋나면 「계좌는 살아 있는데 낙찰은 취소된」 구간이 생긴다.
+  virtualAccountValidHours: number;
   customerName: string;
   customerEmail: string | null;
 };

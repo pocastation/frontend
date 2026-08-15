@@ -81,9 +81,19 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
           fullName: prep.customerName || member?.nickname || "회원",
           ...(prep.customerEmail ? { email: prep.customerEmail } : {}),
         },
-        // ⚠️ accountExpiry(가상계좌 만료 지정)는 넣지 않는다. SDK 타입 문서상 토스페이먼츠·
-        // KG이니시스·NHN KCP만 지원하고 **갤럭시아는 목록에 없다.** 즉 우리 결제 기한과 계좌
-        // 유효기간을 맞추지 못할 수 있다(consultation Q17) — 심사 담당자 확인 대기 항목이다.
+        // 가상계좌는 `virtualAccount.accountExpiry`가 **둘 다 필수**다. 2026-08-14 갤럭시아
+        // 테스트 채널 실측으로 확인했다 — 객체를 빼면 `data.virtualAccount 파라미터는 필수
+        // 입력입니다`, 안을 비우면 `data.virtualAccount.accountExpiry 파라미터는 필수 입력입니다`.
+        //
+        // ⚠️ SDK 타입 문서는 accountExpiry를 「토스페이먼츠·KG이니시스·NHN KCP에서 지원」이라
+        // 적어 갤럭시아가 빠져 있지만 **문서가 낡았다.** 이 실측이 consultation **Q17**(가상계좌
+        // 만료 시각을 우리가 지정할 수 있는가)의 답이다 — 지정 가능하며 오히려 필수다.
+        //
+        // 기한 값은 서버가 준 것을 그대로 쓴다. 약관 제13조의2 ④의 「회사가 정한 기간」이라
+        // 정책값이고, 프론트가 정하면 결제창 파라미터를 고쳐 기한을 늘릴 수 있다.
+        ...(method === "VIRTUAL_ACCOUNT"
+          ? { virtualAccount: { accountExpiry: { validHours: prep.virtualAccountValidHours } } }
+          : {}),
       });
 
       // 사용자가 창을 닫았거나 PG가 거절 — 이 응답만으로 실패를 단정하지 않고 서버 대사로 넘긴다.

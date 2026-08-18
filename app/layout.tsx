@@ -1,10 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR, Plus_Jakarta_Sans } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import InstallPrompt from "@/components/pwa/InstallPrompt";
+import ServiceWorkerRegistrar from "@/components/pwa/ServiceWorkerRegistrar";
 import { AuthProvider } from "@/lib/auth-context";
 import { WishlistProvider } from "@/lib/wishlist-context";
 import { NotificationProvider } from "@/lib/notification-context";
@@ -46,6 +48,27 @@ export const metadata: Metadata = {
     title: SITE_TITLE,
     description: SITE_DESCRIPTION,
   },
+  // PWA — 매니페스트는 app/manifest.ts가 만든다.
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    // iOS에서 «홈 화면에 추가»로 열었을 때 주소창 없이 뜨게 한다(안드로이드는 매니페스트가 맡는다).
+    capable: true,
+    title: "포카스테이션",
+    // 상태바를 흰 지면 위에 얹는다. black-translucent는 콘텐츠가 상태바 아래로 파고들어
+    // 우리 상단바 48px과 겹친다.
+    statusBarStyle: "default",
+  },
+  other: {
+    // Next 16은 `capable: true`에 대해 표준 이름(`mobile-web-app-capable`)만 내보낸다. 구형 iOS는
+    // 애플 접두어 메타만 읽기 때문에, 이게 없으면 홈 화면에서 열어도 주소창이 남는 기기가 생긴다.
+    // 최신 iOS는 매니페스트의 display를 보므로 둘을 같이 두면 전 구간이 덮인다.
+    "apple-mobile-web-app-capable": "yes",
+  },
+};
+
+export const viewport: Viewport = {
+  // 상태바 색. 모바일 상단바가 흰색이라 보라로 두면 화면 위쪽에만 보라 띠가 생긴다.
+  themeColor: "#ffffff",
 };
 
 export default function RootLayout({
@@ -73,6 +96,8 @@ export default function RootLayout({
             </WishlistProvider>
           </NotificationProvider>
         </AuthProvider>
+        <ServiceWorkerRegistrar />
+        <InstallPrompt />
         <Analytics />
         <SpeedInsights />
       </body>

@@ -1,39 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
 import AuctionCard from "@/components/AuctionCard";
 import { SORT_OPTIONS, type SortKey } from "@/components/AuctionExplorer";
 import { ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
-import { apiFetch } from "@/lib/api";
-import { useWishlistStatus } from "@/lib/use-wishlist-status";
+import { useAuctionBrowse } from "@/lib/use-auction-browse";
 import { FOCUS_RING } from "@/lib/ui";
-import type { AuctionListResponse, AuctionResponse, AuctionSaleType } from "@/lib/types";
+import type { AuctionResponse, AuctionSaleType } from "@/lib/types";
 
-const PAGE_SIZE = 20;
-const DEBOUNCE_MS = 300;
 // 모바일은 2열(카드가 화면폭을 꽉 채우지 않게), sm 이상은 auto-fill로 데스크탑 밀도 유지.
 const GRID_CLASS =
   "grid grid-cols-2 gap-3 sm:gap-3.5 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
-
-// 종료 목록 엔드포인트(/api/auctions/ended)는 saleType 파라미터를 받지 않으므로(항상 AUCTION),
-// 진행중 목록일 때만 saleType을 붙인다.
-function buildParams(
-  query: string,
-  sort: SortKey,
-  page: number,
-  saleType: AuctionSaleType,
-  includeSaleType: boolean,
-) {
-  const params = new URLSearchParams({ sort, size: String(PAGE_SIZE), page: String(page) });
-  if (includeSaleType) params.set("saleType", saleType);
-  if (query.trim()) params.set("q", query.trim());
-  return params;
-}
 
 // 홈 화면 임베드(AuctionExplorer)와 달리 /auctions 전용 페이지 — 검색은 헤더 전역검색과
 // 별개의 로컬 입력(ArtistExplorer와 같은 이유: 헤더검색은 홈으로 리다이렉트하므로 이 페이지
 // 안에서 바로 필터링되려면 독립된 입력이 필요)이고, 결과는 60건 전체로드가 아니라 "더보기"로
 // 누적한다(ArtistExplorer와 같은 페이지네이션 패턴 재사용, 사이트 전체 일관성).
+//
+// 조회·정렬·검색·더보기 상태는 `useAuctionBrowse`가 갖는다 — 모바일 목록 화면(MobileBrowse)과
+// 같은 훅을 쓴다. 이 컴포넌트는 데스크탑 지면을 그리기만 한다.
 export default function AuctionBrowser({
   initialAuctions,
   initialTotalElements,
@@ -58,75 +42,32 @@ export default function AuctionBrowser({
   emptyTitle?: string;
   searchPlaceholder?: string;
 }) {
-  // 종료 목록은 saleType 파라미터가 없다(엔드포인트가 AUCTION 고정) — 진행중 목록에서만 붙인다.
-  const includeSaleType = endpoint === "/api/auctions";
-  const [query, setQuery] = useState(initialQuery);
-  const [sort, setSort] = useState<SortKey>(defaultSort);
-  const [auctions, setAuctions] = useState(initialAuctions);
-  const [page, setPage] = useState(0);
-  const [totalElements, setTotalElements] = useState(initialTotalElements);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
-  const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [error, setError] = useState(false);
-  const [moreError, setMoreError] = useState(false);
-  const isFirstRun = useRef(true);
-  // 빠른 연속 정렬/검색 시 옛 응답이 최신 결과를 덮어쓰는 걸 막는 요청 시퀀스 가드.
-  const reqIdRef = useRef(0);
-  const { wishlisted, toggle } = useWishlistStatus(auctions.map((a) => a.id));
+  const {
+    query,
+    setQuery,
+    sort,
+    setSort,
+    auctions,
+    totalElements,
+    loading,
+    loadingMore,
+    error,
+    moreError,
+    hasMore,
+    loadMore,
+    retry,
+    wishlisted,
+    toggle,
+  } = useAuctionBrowse({
+    initialAuctions,
+    initialTotalElements,
+    initialTotalPages,
+    saleType,
+    initialQuery,
+    endpoint,
+    defaultSort,
+  });
 
-  // 검색어·정렬이 바뀌면 첫 페이지부터 다시 조회(목록 전체 교체).
-  const fetchFirstPage = useCallback(async () => {
-    const reqId = ++reqIdRef.current;
-    setLoading(true);
-    setError(false);
-    try {
-      const res = await apiFetch<AuctionListResponse>(
-        `${endpoint}?${buildParams(query, sort, 0, saleType, includeSaleType)}`,
-        { cache: "no-store" },
-      );
-      if (reqId !== reqIdRef.current) return; // 더 최신 요청에 밀렸으면 무시
-      setAuctions(res.content);
-      setPage(0);
-      setTotalElements(res.totalElements);
-      setTotalPages(res.totalPages);
-    } catch {
-      if (reqId !== reqIdRef.current) return;
-      setError(true);
-    } finally {
-      if (reqId === reqIdRef.current) setLoading(false);
-    }
-  }, [query, saleType, sort, endpoint, includeSaleType]);
-
-  useEffect(() => {
-    if (isFirstRun.current) {
-      isFirstRun.current = false;
-      return;
-    }
-    const timer = setTimeout(fetchFirstPage, DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [fetchFirstPage]);
-
-  async function loadMore() {
-    const nextPage = page + 1;
-    setLoadingMore(true);
-    setMoreError(false);
-    try {
-      const res = await apiFetch<AuctionListResponse>(
-        `${endpoint}?${buildParams(query, sort, nextPage, saleType, includeSaleType)}`,
-        { cache: "no-store" },
-      );
-      setAuctions((prev) => [...prev, ...res.content]);
-      setPage(nextPage);
-      setTotalPages(res.totalPages);
-    } catch {
-      setMoreError(true);
-    } finally {
-      setLoadingMore(false);
-    }
-  }
-
-  const hasMore = page + 1 < totalPages;
   const resolvedPlaceholder = searchPlaceholder ?? (saleType === "INSTANT"
     ? "즉시판매 제목, 스타명, 멤버명으로 검색"
     : "경매 제목, 스타명, 멤버명으로 검색");
@@ -177,7 +118,7 @@ export default function AuctionBrowser({
 
       {error && (
         <div className="mb-4">
-          <ExploreError onRetry={fetchFirstPage} />
+          <ExploreError onRetry={retry} />
         </div>
       )}
 

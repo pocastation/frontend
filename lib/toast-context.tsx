@@ -101,7 +101,7 @@ function VariantIcon({ variant }: { variant: ToastVariant }) {
 function ToastViewport({ toasts, onDismiss }: { toasts: ToastItem[]; onDismiss: (id: number) => void }) {
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-4 z-[100] flex flex-col items-center gap-2 px-4 sm:bottom-6"
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(1rem_+_var(--mobile-tabbar-h,0px))] z-[100] flex flex-col items-center gap-2 px-4 sm:bottom-6"
       aria-live="polite"
       aria-atomic="false"
     >

@@ -1,26 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CRITICAL_MS, formatRemaining } from "@/lib/countdown";
 
 // 마감까지 1시간 이내면 칩이 accent로 바뀐다. 문구는 그대로 두고 **색 하나로만** 급함을 말한다 —
 // "마감 임박" 같은 라벨을 따로 띄우면 시계와 같은 말을 두 번 하게 된다.
-const URGENT_MS = 60 * 60 * 1000;
-
-// 목록에서는 **초를 그리지 않는다**(#277). 격자에 수십 장이 깔릴 때 초 단위로 흔들리는 숫자가
-// 사진보다 먼저 눈에 들어왔다. 정확한 초는 상세 페이지가 계속 보여준다 — 안티 스나이핑(마감 3분
-// 내 입찰 시 연장)이 걸리는 곳은 상세이지 목록이 아니다.
-function computeLabel(diffMs: number): string {
-  const totalMinutes = Math.floor(diffMs / 60000);
-  const days = Math.floor(totalMinutes / 1440);
-  const hours = Math.floor((totalMinutes % 1440) / 60);
-  const minutes = totalMinutes % 60;
-
-  if (days > 0) return `${days}일 ${hours}시간`;
-  if (hours > 0) return `${hours}시간 ${minutes}분`;
-  if (minutes > 0) return `${minutes}분`;
-  // 1분 미만. 초를 안 쓰기로 했으므로 남은 시간을 숫자 대신 말로 알린다.
-  return "곧 마감";
-}
+// 표기·판정 규칙은 lib/countdown.ts 하나를 모바일 홈 배너와 공유한다.
 
 export default function AuctionCountdown({ endAt }: { endAt: string }) {
   // 서버 시각으로 SSR한 값은 클라이언트 하이드레이션 시점과 어긋나 미스매치를 일으킨다 —
@@ -35,7 +20,7 @@ export default function AuctionCountdown({ endAt }: { endAt: string }) {
         setState(null);
         return;
       }
-      setState({ label: computeLabel(diffMs), urgent: diffMs <= URGENT_MS });
+      setState({ label: formatRemaining(diffMs), urgent: diffMs <= CRITICAL_MS });
     };
     const raf = requestAnimationFrame(update);
     // 분까지만 그리므로 1초마다 재계산할 이유가 없다. 격자에 수십 장이 깔리면 그 차이가 커진다.

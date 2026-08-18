@@ -4,6 +4,7 @@ import { useId, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Wordmark from "@/components/Wordmark";
+import { isMobileShellRoute } from "@/components/mobile/shell-routes";
 import { useAuth } from "@/lib/auth-context";
 import { useNotifications } from "@/lib/notification-context";
 
@@ -75,6 +76,10 @@ export default function Header() {
     setSearchInput("");
   }
 
+  // 모바일 앱 셸이 적용된 라우트에서는 모바일 폭에서만 이 헤더를 접는다 — 셸의 상단바 48px이
+  // 대신한다. 데스크탑 폭에서는 그대로 나오고, 셸을 쓰지 않는 경로도 그대로다.
+  const foldOnMobile = isMobileShellRoute(pathname);
+
   const isAdminMember = member?.role === "ADMIN" || member?.role === "ROLE_ADMIN";
   const navLinks = isAdminMember ? [...NAV_LINKS, { href: "/admin", label: "관리자" }] : NAV_LINKS;
 
@@ -98,7 +103,7 @@ export default function Header() {
   }
 
   return (
-    <header className="hdr">
+    <header className={foldOnMobile ? "hdr max-sm:hidden" : "hdr"}>
       <div className="pg hdr-in">
         <Link href="/" onClick={closeMenu} className="logo" aria-label="포카스테이션 홈">
           <Wordmark className="text-[19px] leading-none" />

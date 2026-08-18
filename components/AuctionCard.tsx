@@ -64,6 +64,10 @@ export default function AuctionCard({
               ref={syncImageState}
               src={mediaUrl(auction.representativeThumbnailUrl!)}
               alt={auction.title}
+              // 화면 밖 카드의 사진은 받지 않는다. 목록이 길 때 데이터를 아끼고, 모바일에서는
+              // CSS로 접혀 있는 데스크탑 트리(app/page.tsx)의 사진까지 내려받던 것을 막는다 —
+              // display:none 안의 lazy 이미지는 뷰포트에 들어올 일이 없어 요청 자체가 안 나간다.
+              loading="lazy"
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.03] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
               onLoad={() => setImageLoaded(true)}
               onError={() => setImageFailed(true)}

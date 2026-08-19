@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import MobileDetailGallery from "@/components/mobile/MobileDetailGallery";
 import { apiFetch } from "@/lib/api";
@@ -74,15 +75,30 @@ function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: string 
 
 /** 입찰 바텀시트 — 하단 고정바의 «입찰하기»가 연다. 스테퍼·수수료·CTA는 데스크탑과 같은 규칙이다. */
 function BidSheet({ onClose }: { onClose: () => void }) {
-  const { amount, floor, ceil, adjustAmount, outOfRange, submitting, isTopBidder, needsAddress, handleBid } =
-    useAuctionBidding();
+  const {
+    amount, floor, ceil, adjustAmount, outOfRange, submitting, isTopBidder, needsAddress, handleBid,
+    currentPrice, endAt, isLive, endingSoon,
+  } = useAuctionBidding();
   const total = estimatedTotal(amount);
 
   return (
     <div className="fixed inset-0 z-[500] sm:hidden" role="dialog" aria-label="입찰하기" aria-modal="true">
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
       <div className="absolute inset-x-0 bottom-0 rounded-t-r4 bg-white px-[14px] pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
-        <div className="mb-3 flex items-baseline justify-between">
+        {/* 시트 머리에 현재가·마감 — 하단 바에서 뺀 정보가 여기 있다(킷과 같은 자리). */}
+        <div className="flex items-baseline justify-between border-b border-border pb-2.5">
+          <span className="flex items-baseline gap-2">
+            <span className="text-[11px] font-semibold text-text-3">현재가</span>
+            <span className="font-display text-lg font-extrabold tabular-nums text-text-1">{formatKRW(currentPrice)}</span>
+          </span>
+          {isLive && (
+            <span className={`text-[11.5px] font-bold tabular-nums ${endingSoon ? "text-warn" : "text-text-2"}`}>
+              마감까지 {formatCountdown(endAt)}
+            </span>
+          )}
+        </div>
+
+        <div className="mb-3 mt-3 flex items-baseline justify-between">
           <span className="text-[13px] font-extrabold text-text-1">입찰가</span>
           <span className="text-[11px] tabular-nums text-text-3">
             가능 범위 {formatKRW(floor)} – {formatKRW(ceil)}
@@ -387,43 +403,37 @@ export default function MobileAuctionDetail({
         )}
       </div>
 
-      {/* 하단 고정 입찰바 — 상세가 세로로 길어 CTA를 손닿는 곳에 붙여 둔다. */}
+      {/* 하단 고정 바 — 킷과 같은 구성: 관심 44×44 + 입찰 CTA(남은 폭 전부).
+          현재가·마감은 위 가격 패널과 입찰 시트가 말하므로 바에서는 반복하지 않는다. */}
       {isLive && (
         <div
-          className="fixed inset-x-0 bottom-0 z-[400] flex items-center gap-3 border-t border-border bg-white px-[14px] py-2.5 sm:hidden"
+          className="fixed inset-x-0 bottom-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 sm:hidden"
           style={{ paddingBottom: "calc(10px + env(safe-area-inset-bottom))" }}
         >
-          <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-semibold text-text-3">현재가</p>
-            <p className="flex items-baseline gap-1.5">
-              <span className="font-display text-lg font-extrabold tabular-nums text-text-1">
-                {formatKRW(currentPrice)}
-              </span>
-              <span className={`truncate text-[11px] font-bold tabular-nums ${endingSoon ? "text-warn" : "text-text-3"}`}>
-                {formatCountdown(endAt)}
-              </span>
-            </p>
-          </div>
+          <AuctionWishlistButton
+            auctionId={auctionId}
+            className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[7px] border border-border-2 bg-white text-text-2 ${FOCUS_RING}`}
+          />
           {isOwnAuction ? (
-            <span className="flex-shrink-0 rounded-[7px] bg-surface-2 px-4 py-2.5 text-[13px] font-bold text-text-3">
-              내 경매
+            <span className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-bold text-text-3">
+              내 경매입니다
             </span>
           ) : !accessToken ? (
             <Link
               href={`/login?redirect=/auctions/${auctionId}`}
-              className={`flex h-11 flex-shrink-0 items-center rounded-[7px] bg-primary px-5 text-[13px] font-extrabold text-white ${FOCUS_RING}`}
+              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
             >
-              로그인하고 입찰
+              로그인하고 입찰하기
             </Link>
           ) : isTopBidder ? (
-            <span className="flex-shrink-0 rounded-[7px] bg-surface-2 px-4 py-2.5 text-[13px] font-bold text-text-3">
-              최고 입찰자
+            <span className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-bold text-text-3">
+              현재 최고 입찰자예요
             </span>
           ) : (
             <button
               type="button"
               onClick={() => setSheetOpen(true)}
-              className={`flex h-11 flex-shrink-0 items-center rounded-[7px] bg-primary px-6 text-[13px] font-extrabold text-white ${FOCUS_RING}`}
+              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
             >
               입찰하기
             </button>

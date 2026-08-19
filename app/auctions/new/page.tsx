@@ -455,9 +455,49 @@ export default function NewAuctionPage() {
   };
   const isLastStep = step === TOTAL_STEPS - 1;
 
+  const progress = `${((step + 1) / TOTAL_STEPS) * 100}%`;
+
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8 sm:py-10">
-      <div className="mb-5 flex items-start justify-between gap-4">
+    // 모바일은 위저드가 화면 전체를 쓴다(전역 헤더·푸터는 접힌다). 하단 고정 바 높이만큼 아래를 비운다.
+    <div className="mx-auto max-w-2xl sm:px-4 sm:py-10 max-sm:pb-[92px]">
+      {/* 모바일 머리 — 스크롤해도 "어느 단계인지"가 화면에 남아 있어야 한다(킷과 같은 구성). */}
+      <div className="sticky top-0 z-[260] border-b border-border bg-white px-[14px] pb-2.5 pt-3 sm:hidden">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h1 className="font-display text-[17px] font-extrabold text-text-1">판매 등록</h1>
+            <p className="mt-0.5 text-[11px] text-text-3">정확한 정보와 실물 사진일수록 거래 신뢰도가 올라가요.</p>
+          </div>
+          <div className="flex flex-shrink-0 items-center gap-0.5">
+            <Link
+              href="/guide/sell"
+              className={`flex min-h-[30px] items-center whitespace-nowrap rounded-full border border-border-2 px-2.5 text-[11.5px] font-bold text-text-2 ${FOCUS_RING}`}
+            >
+              판매 가이드
+            </Link>
+            <Link
+              href="/"
+              aria-label="닫기"
+              className={`flex h-[30px] w-[30px] items-center justify-center text-text-3 ${FOCUS_RING}`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </Link>
+          </div>
+        </div>
+        <div className="mt-2.5 flex items-baseline justify-between">
+          <span className="text-[13px] font-extrabold text-text-1">{stepTitle[stepKey]}</span>
+          <span className="font-display text-[11.5px] font-bold tabular-nums text-text-3">
+            {step + 1} / {TOTAL_STEPS}
+          </span>
+        </div>
+        <div className="mt-[7px] h-[5px] overflow-hidden rounded-full bg-surface-2">
+          <div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: progress }} />
+        </div>
+      </div>
+
+      <div className="mb-5 flex items-start justify-between gap-4 max-sm:hidden">
         <div>
           <h1 className="font-display text-xl font-extrabold text-text-1">판매 등록</h1>
           <p className="mt-1 text-xs text-text-3">정확한 정보와 실물 사진일수록 거래 신뢰도가 올라가요.</p>
@@ -473,10 +513,13 @@ export default function NewAuctionPage() {
       <form
         onSubmit={handleSubmit}
         noValidate
-        className="rounded-r4 border border-border bg-surface p-5 shadow-card sm:p-7"
+        // 모바일 우선 — 기본이 모바일 지면(전체폭)이고 `sm:`가 데스크탑 카드를 얹는다.
+        // **임의값(px-[14px])을 쓰지 않는다**: Tailwind가 임의값 유틸리티를 `sm:` 변형보다 뒤에
+        // 배치해 데스크탑에서 모바일 패딩이 이겨버린다(양방향으로 실측해 확인). 표준 스케일만 쓴다.
+        className="bg-surface px-3.5 pt-4.5 sm:rounded-r4 sm:border sm:border-border sm:px-7 sm:py-7 sm:shadow-card"
       >
-        {/* 진행 표시 */}
-        <div className="mb-6">
+        {/* 진행 표시 — 모바일은 sticky 머리가 대신한다. */}
+        <div className="mb-6 max-sm:hidden">
           <div className="flex items-baseline justify-between">
             <h2 className="text-sm font-extrabold text-text-1">{stepTitle[stepKey]}</h2>
             <span className="text-xs font-bold text-text-3">
@@ -486,7 +529,7 @@ export default function NewAuctionPage() {
           <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-2">
             <div
               className="h-full rounded-full bg-primary transition-all duration-300"
-              style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
+              style={{ width: progress }}
             />
           </div>
         </div>
@@ -761,7 +804,7 @@ export default function NewAuctionPage() {
         )}
 
         {/* 이동/등록 */}
-        <div className="mt-6 flex gap-2">
+        <div className="mt-6 flex gap-2 max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:z-[400] max-sm:mt-0 max-sm:border-t max-sm:border-border max-sm:bg-white max-sm:px-[14px] max-sm:pt-2.5 max-sm:pb-[calc(10px_+_env(safe-area-inset-bottom))]">
           {step > 0 && (
             <button type="button" onClick={goBack} className={`h-12 px-6 ${SECONDARY_BUTTON_CLASS}`}>
               이전

@@ -1,37 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
-import { apiFetch, ApiError, apiStreamUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { useDeliveryAddressGate } from "@/lib/use-delivery-address-gate";
-import { useToast } from "@/lib/toast-context";
-import { formatKRW, formatCountdown, formatRelativeTime, formatDateTimeKST, isBeforeEnd, isEndingSoon } from "@/lib/format";
-import {
-  BID_MIN_INCREMENT,
-  buyerFee,
-  estimatedTotal,
-  maxNextBid,
-  minNextBid,
-} from "@/lib/fees";
+import { useAuctionBidding } from "@/lib/auction-bidding-context";
+import { formatKRW, formatCountdown, formatRelativeTime, formatDateTimeKST } from "@/lib/format";
+import { BID_MIN_INCREMENT, buyerFee, estimatedTotal } from "@/lib/fees";
 import { FOCUS_RING, PRIMARY_BUTTON_CLASS } from "@/lib/ui";
-import type {
-  AuctionStatus,
-  BidHistoryItem,
-  BidListResponse,
-  BidResponse,
-  BidStreamEvent,
-} from "@/lib/types";
+import type { AuctionStatus } from "@/lib/types";
 
+// 살아 움직이는 값(현재가·입찰수·마감시각·이력·입찰 요청)은 전부 AuctionBiddingProvider가 갖는다.
+// 여기 props로 남은 것은 변하지 않는 표시용 값뿐이다.
 type Props = {
-  auctionId: number;
-  initialCurrentPrice: number;
-  initialBidCount: number;
-  initialEndAt: string;
   maxEndAt: string | null;
-  status: AuctionStatus;
-  sellerNickname: string;
   startPrice: number;
   viewCount: number;
 };
@@ -46,126 +28,39 @@ const STATUS_LABEL: Partial<Record<AuctionStatus, string>> = {
 // 경매 상세의 "호가창" — 영어경매는 양방향 잔량(매도측)이 없으므로 주식 호가창을 그대로 옮기지
 // 않고, ① 입찰 가능 구간을 보여주는 호가 사다리(현재가+1호가 ~ +10호가 상한) ② 체결창처럼 흐르는
 // 실시간 입찰 테이프로 재해석한다(§1 신뢰 — 없는 시장구조를 지어내지 않음).
-export default function BidSection({
-  auctionId,
-  initialCurrentPrice,
-  initialBidCount,
-  initialEndAt,
-  maxEndAt,
-  status,
-  sellerNickname,
-  startPrice,
-  viewCount,
-}: Props) {
-  const { member, accessToken, fetchWithAuth } = useAuth();
-  const toast = useToast();
-  // 배송지 관문(#283) — 없으면 CTA 라벨이 바뀌고 누를 때 등록 모달이 뜬다.
-  const { needsAddress, markRegistered, isGateRejection } = useDeliveryAddressGate();
-  const [addressModalOpen, setAddressModalOpen] = useState(false);
+export default function BidSection({ maxEndAt, startPrice, viewCount }: Props) {
+  const { accessToken } = useAuth();
+  const {
+    auctionId,
+    currentPrice,
+    bidCount,
+    endAt,
+    status,
+    isLive,
+    endingSoon,
+    isOwnAuction,
+    bids,
+    hasMoreBids,
+    loadMoreBids,
+    amount,
+    floor,
+    ceil,
+    outOfRange,
+    adjustAmount,
+    submitting,
+    isTopBidder,
+    handleBid,
+    needsAddress,
+    addressModalOpen,
+    closeAddressModal,
+    onAddressSaved,
+  } = useAuctionBidding();
 
-  const [currentPrice, setCurrentPrice] = useState(initialCurrentPrice);
-  const [bidCount, setBidCount] = useState(initialBidCount);
-  const [endAt, setEndAt] = useState(initialEndAt);
-  const [bids, setBids] = useState<BidHistoryItem[]>([]);
-  const [bidPage, setBidPage] = useState(0);
-  const [bidTotalPages, setBidTotalPages] = useState(1);
-  const [amount, setAmount] = useState(() => minNextBid(initialCurrentPrice, initialBidCount));
-  const [submitting, setSubmitting] = useState(false);
-  // 내가 현재 최고 입찰자인지 — 내 입찰 성공/서버 '이미 최고 입찰자' 응답으로 켜지고, 남이 추월(SSE)하면 꺼진다.
-  const [isTopBidder, setIsTopBidder] = useState(false);
-  const myTopBidRef = useRef<number | null>(null);
-  // 카운트다운/상대시각을 1초마다 다시 그리기 위한 틱(값은 안 읽고 리렌더 트리거로만 쓴다).
-  const [, setNowTick] = useState(0);
-  // 다른 사람 입찰로 현재가가 오르면 입력값 하한도 따라 올려야 한다. 단 사용자가 사다리에서
-  // 직접 고른 값은 존중한다.
-  const amountTouchedRef = useRef(false);
   // 모바일 하단 고정 입찰바 — 현재가 헤더(입찰 CTA)가 화면 밖일 때만 노출(스크롤로 도달하면 숨김).
   const priceHeaderRef = useRef<HTMLDivElement>(null);
   const [priceHeaderInView, setPriceHeaderInView] = useState(false);
 
-  const isLive = status === "LIVE" && isBeforeEnd(endAt);
-  // 마감 임박일 때만 카운트다운을 주황(warn)으로 강조 — 그 외에는 뉴트럴로 둔다(색 절제).
-  const endingSoon = isLive && isEndingSoon(endAt);
-  const isOwnAuction = member?.nickname != null && member.nickname === sellerNickname;
-  const floor = minNextBid(currentPrice, bidCount);
-  const ceil = maxNextBid(currentPrice);
-  const outOfRange = amount < floor || amount > ceil;
   const total = useMemo(() => estimatedTotal(amount), [amount]);
-
-  // 최신 순으로 첫 페이지를 다시 받아 교체한다(입찰 발생 시 authoritative하게 갱신).
-  const fetchBids = useCallback(async () => {
-    try {
-      const res = await apiFetch<BidListResponse>(
-        `/api/auctions/${auctionId}/bids?page=0&size=20`,
-        { cache: "no-store" },
-      );
-      setBids(res.content);
-      setBidPage(0);
-      setBidTotalPages(res.totalPages);
-    } catch {
-      // 내역 조회 실패는 입찰 흐름을 막지 않는다(가격/카운트다운은 SSE로 계속 갱신).
-    }
-  }, [auctionId]);
-
-  // "더보기" — 다음 페이지를 이어 붙인다. 그 사이 새 입찰이 들어와도 이미 받은 앞쪽 페이지와
-  // 겹치지 않게, 첫 페이지 교체(fetchBids)와는 분리된 흐름으로 둔다.
-  async function loadMoreBids() {
-    const nextPage = bidPage + 1;
-    try {
-      const res = await apiFetch<BidListResponse>(
-        `/api/auctions/${auctionId}/bids?page=${nextPage}&size=20`,
-        { cache: "no-store" },
-      );
-      setBids((prev) => [...prev, ...res.content]);
-      setBidPage(nextPage);
-      setBidTotalPages(res.totalPages);
-    } catch {
-      // 실패해도 이미 보이는 내역은 유지한다.
-    }
-  }
-
-  // 초기 입찰 내역 로드.
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- 마운트 시 서버에서 입찰내역 1회 로드(동기 setState 아님, await 후 갱신)
-    fetchBids();
-  }, [fetchBids]);
-
-  // 실시간 호가 구독(공개 SSE) — 새 입찰이 오면 가격/입찰수/마감시각을 즉시 반영하고
-  // 내역은 재조회로 authoritative하게 갱신한다. 종료된 경매는 구독하지 않는다.
-  useEffect(() => {
-    if (status !== "LIVE") return;
-
-    const source = new EventSource(apiStreamUrl(`/api/auctions/${auctionId}/bids/stream`));
-    source.addEventListener("bid", (e) => {
-      const data: BidStreamEvent = JSON.parse((e as MessageEvent).data);
-      setCurrentPrice(data.currentPrice);
-      setBidCount(data.bidCount);
-      setEndAt(data.endAt);
-      // 내 최고가보다 높은 입찰이 들어오면 추월된 것 — 내 SSE 에코(같은 금액)는 무시한다.
-      if (myTopBidRef.current != null && data.currentPrice > myTopBidRef.current) {
-        myTopBidRef.current = null;
-        setIsTopBidder(false);
-      }
-      fetchBids();
-    });
-    source.onerror = () => {};
-
-    return () => source.close();
-  }, [auctionId, status, fetchBids]);
-
-  // 라이브 카운트다운/상대시각을 1초마다 갱신. 종료된 경매는 틱 불필요.
-  useEffect(() => {
-    if (!isLive) return;
-    const timer = setInterval(() => setNowTick((n) => n + 1), 1000);
-    return () => clearInterval(timer);
-  }, [isLive]);
-
-  // 현재가가 오르면 아직 사용자가 직접 안 고른 입력값을 새 하한으로 끌어올린다.
-  useEffect(() => {
-    if (!amountTouchedRef.current) {
-      setAmount(minNextBid(currentPrice, bidCount));
-    }
-  }, [currentPrice, bidCount]);
 
   // 현재가 헤더가 뷰포트에 보이는지 관찰 — 모바일 하단 고정바를 CTA가 화면 밖일 때만 띄우기 위함.
   // rootMargin 하단 -76px는 고정바 높이만큼 미리 숨겨 겹침을 피한다.
@@ -180,68 +75,8 @@ export default function BidSection({
     return () => observer.disconnect();
   }, []);
 
-  // 입찰가 조정(스테퍼 ± · 빠른 가산) — 입찰 가능 범위[floor, ceil]로 클램프하고,
-  // 사용자가 직접 조정했음을 표시해 현재가 상승 시 자동 rebase가 값을 덮어쓰지 않게 한다.
-  function adjustAmount(next: number) {
-    amountTouchedRef.current = true;
-    setAmount(Math.max(floor, Math.min(ceil, next)));
-  }
-
   function scrollToBid() {
     priceHeaderRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  async function handleBid() {
-    // 배송지가 없으면 입찰을 보내지 않고 등록부터 받는다(#283). 서버도 같은 조건으로 막지만,
-    // 여기서 잡아야 사용자가 오류 대신 다음 행동을 본다.
-    if (needsAddress) {
-      setAddressModalOpen(true);
-      return;
-    }
-    setSubmitting(true);
-    try {
-      const res = await fetchWithAuth<BidResponse>(`/api/auctions/${auctionId}/bids`, {
-        method: "POST",
-        body: { amount },
-      });
-      setCurrentPrice(res.currentPrice);
-      setBidCount(res.bidCount);
-      setEndAt(res.endAt);
-      // 내가 방금 최고가가 됐다 — 버튼을 잠그고, 추월 감지를 위해 내 금액을 기록한다.
-      myTopBidRef.current = res.currentPrice;
-      setIsTopBidder(true);
-      // 내 입찰 성공 시 다음 최소 입찰가로 즉시 올려둔다. rebase 효과에만 맡기면, 서버가 커밋
-      // 직후 쏘는 SSE가 POST 응답보다 먼저 도착해 currentPrice를 갱신할 때 amountTouchedRef가
-      // 아직 true라 스킵되고, 이후 값이 안 바뀌어 재실행도 안 돼 옛 입찰가에 갇히는 레이스가 있다.
-      amountTouchedRef.current = false;
-      setAmount(minNextBid(res.currentPrice, res.bidCount));
-      toast.show({
-        variant: res.extended ? "warn" : "success",
-        text: res.extended
-          ? "입찰 완료 · 마감 임박으로 종료 시간이 연장됐어요."
-          : "입찰 완료! 현재 최고 입찰자가 되었어요.",
-      });
-      fetchBids();
-    } catch (err) {
-      const text = err instanceof ApiError ? err.message : "입찰에 실패했습니다. 잠시 후 다시 시도해주세요.";
-      // 서버 관문 거부 — 화면 상태가 낡았다는 뜻이다(다른 탭에서 배송지를 지웠거나 조회가 실패했다).
-      // 오류 토스트 대신 등록 모달로 이어 붙인다.
-      if (isGateRejection(err)) {
-        setAddressModalOpen(true);
-      } else if (err instanceof ApiError && err.message.includes("최고 입찰")) {
-        // '이미 최고 입찰자'는 에러가 아니라 정상 상태 — 정보 톤으로 안내하고 버튼도 잠근다.
-        setIsTopBidder(true);
-        toast.show({
-          variant: "info",
-          text: "이미 회원님이 최고 입찰자예요.",
-          sub: "더 높은 금액으로만 다시 입찰할 수 있어요.",
-        });
-      } else {
-        toast.show({ variant: "danger", text });
-      }
-    } finally {
-      setSubmitting(false);
-    }
   }
 
   return (
@@ -450,7 +285,7 @@ export default function BidSection({
         ) : (
           <p className="mt-2 text-xs text-text-3">아직 입찰이 없습니다.</p>
         )}
-        {bidPage + 1 < bidTotalPages && (
+        {hasMoreBids && (
           <button
             type="button"
             onClick={loadMoreBids}
@@ -509,17 +344,8 @@ export default function BidSection({
       {addressModalOpen && (
         <DeliveryAddressGateModal
           action="입찰"
-          onClose={() => setAddressModalOpen(false)}
-          onSaved={() => {
-            setAddressModalOpen(false);
-            markRegistered();
-            toast.show({
-              variant: "success",
-              text: "배송지를 등록했어요.",
-              sub: "이제 입찰할 수 있어요.",
-            });
-            scrollToBid();
-          }}
+          onClose={closeAddressModal}
+          onSaved={() => onAddressSaved(scrollToBid)}
         />
       )}
     </div>

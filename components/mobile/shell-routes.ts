@@ -8,3 +8,12 @@ export const MOBILE_SHELL_ROUTES: readonly string[] = ["/", "/auctions", "/insta
 export function isMobileShellRoute(pathname: string): boolean {
   return MOBILE_SHELL_ROUTES.includes(pathname);
 }
+
+// 모바일에서 **전역 헤더·푸터를 접는** 화면. 셸 라우트(홈·목록)는 상단바 48px + 하단 5탭이
+// 대신하고, 경매 상세는 킷대로 사진 위 뒤로가기 하나로 들어가고 나온다 — 상세에 헤더와
+// 푸터가 함께 뜨면 사진이 화면 위에서 밀리고, 하단 입찰바 아래로 푸터가 끌려 나온다.
+const MOBILE_DETAIL_PATTERN = /^\/auctions\/\d+$/;
+
+export function isMobileChromeHiddenRoute(pathname: string): boolean {
+  return isMobileShellRoute(pathname) || MOBILE_DETAIL_PATTERN.test(pathname);
+}

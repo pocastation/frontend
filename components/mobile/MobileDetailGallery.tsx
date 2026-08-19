@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { mediaUrl } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionImageResponse, AuctionVideoResponse } from "@/lib/types";
@@ -37,6 +38,7 @@ export default function MobileDetailGallery({
     ...images.map((image) => ({ kind: "image" as const, src: mediaUrl(image.displayUrl ?? image.url) })),
     ...(video ? [{ kind: "video" as const, src: mediaUrl(video.url), poster: video.posterUrl ? mediaUrl(video.posterUrl) : null }] : []),
   ];
+  const router = useRouter();
   const [index, setIndex] = useState(0);
   const touchStartX = useRef<number | null>(null);
 
@@ -84,6 +86,18 @@ export default function MobileDetailGallery({
         />
       )}
 
+      {/* 사진 위 뒤로가기 — 상세에서는 전역 헤더를 접으므로 나가는 길이 여기 하나다(킷과 같은 자리). */}
+      <button
+        type="button"
+        aria-label="뒤로"
+        onClick={() => router.back()}
+        className={`absolute left-3 top-3 z-[3] flex h-[34px] w-[34px] items-center justify-center rounded-full bg-white/90 text-text-1 backdrop-blur-[4px] ${FOCUS_RING}`}
+      >
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+      </button>
+
       {actions && (
         // 사진 위에 아이콘만 얹으면 밝은 사진에서 묻힌다(연회색 아이콘 + 배경 없음). 공유·찜·신고
         // 컴포넌트를 고치지 않고 여기서만 흰 반투명 원을 깐다 — 데스크탑 액션 줄은 흰 지면 위라
@@ -99,20 +113,6 @@ export default function MobileDetailGallery({
           <span className="absolute bottom-3 right-3 z-[3] rounded-r1 bg-black/50 px-2 py-0.5 font-display text-[11px] text-white backdrop-blur-[2px]">
             {current.kind === "video" ? "검수영상" : `${index + 1} / ${images.length}`}
           </span>
-          <div className="absolute bottom-3 left-0 right-0 z-[3] flex justify-center gap-1.5">
-            {slides.map((slide, i) => (
-              <button
-                key={i}
-                type="button"
-                aria-label={slide.kind === "video" ? "검수영상 보기" : `${i + 1}번째 사진 보기`}
-                aria-current={i === index}
-                onClick={() => setIndex(i)}
-                className={`h-1.5 rounded-full transition-all duration-200 ${FOCUS_RING} ${
-                  i === index ? "w-4 bg-white" : "w-1.5 bg-white/50"
-                }`}
-              />
-            ))}
-          </div>
         </>
       )}
     </div>

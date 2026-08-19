@@ -72,7 +72,7 @@ export default function MobileBrowse({
     <div>
       {/* 상단바 48px 바로 아래에 붙어 함께 고정된다 — 스크롤해도 어느 목록인지 놓치지 않게. */}
       <div className="sticky top-12 z-[250] border-b border-border bg-white">
-        <div className="flex gap-4 px-[14px]">
+        <div role="tablist" className="flex gap-1 px-2.5">
           {TABS.map((tab) => {
             const on = tab.saleType === saleType;
             return (
@@ -80,8 +80,10 @@ export default function MobileBrowse({
                 key={tab.href}
                 href={tab.href}
                 aria-current={on ? "page" : undefined}
-                className={`flex-shrink-0 whitespace-nowrap border-b-2 pb-2.5 pt-2 text-sm ${FOCUS_RING} ${
-                  on ? "border-text-1 font-extrabold text-text-1" : "border-transparent font-semibold text-text-3"
+                role="tab"
+                aria-selected={on}
+                className={`flex-shrink-0 whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm transition-colors ${FOCUS_RING} ${
+                  on ? "border-primary font-extrabold text-text-1" : "border-transparent font-medium text-text-2"
                 }`}
               >
                 {tab.label}

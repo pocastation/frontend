@@ -58,7 +58,7 @@ function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: string 
       href={`/sellers/${sellerId}`}
       className={`mt-3.5 flex items-center gap-2.5 rounded-r3 border border-border p-3 ${FOCUS_RING}`}
     >
-      <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-surface-2 text-[13px] font-bold text-text-2">
+      <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary-soft font-display text-sm font-extrabold text-primary">
         {nickname.slice(0, 1).toUpperCase()}
       </span>
       <span className="min-w-0 flex-1">
@@ -213,7 +213,7 @@ export default function MobileAuctionDetail({
     <div className={isLive ? "pb-[76px]" : undefined}>
       <MobileDetailGallery images={auction.images} video={auction.video} title={auction.title} actions={actions} />
 
-      <div className="px-[14px] pt-4">
+      <div className="px-4 pt-4">
         <div className="flex items-center gap-2">
           <span className={`text-[11.5px] font-bold ${isLive ? (endingSoon ? "text-warn" : "text-ok") : "text-text-3"}`}>
             {isLive ? (endingSoon ? "마감임박" : "진행 중") : "종료"}
@@ -272,17 +272,18 @@ export default function MobileAuctionDetail({
         <SellerRow sellerId={auction.sellerId} nickname={auction.sellerNickname} />
 
         {/* 탭 — 상품 정보 / 입찰 이력 */}
-        <div className="mt-5 flex gap-4 border-b border-border">
+        <div role="tablist" className="mt-5 flex gap-1 border-b border-border">
           {[TAB_PRODUCT, TAB_BIDS, TAB_DELIVERY].map((name) => {
             const on = tab === name;
             return (
               <button
                 key={name}
                 type="button"
-                aria-pressed={on}
                 onClick={() => setPickedTab(name)}
-                className={`-mb-px border-b-2 pb-2.5 text-sm ${FOCUS_RING} ${
-                  on ? "border-text-1 font-extrabold text-text-1" : "border-transparent font-semibold text-text-3"
+                role="tab"
+                aria-selected={on}
+                className={`-mb-px whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm transition-colors ${FOCUS_RING} ${
+                  on ? "border-primary font-extrabold text-text-1" : "border-transparent font-medium text-text-2"
                 }`}
               >
                 {name}
@@ -345,14 +346,7 @@ export default function MobileAuctionDetail({
                 </div>
               ))}
             </dl>
-            {auction.conditionNote && (
-              <>
-                <p className="mt-4 text-[12px] font-extrabold text-text-1">하자 안내</p>
-                <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-text-2">
-                  {auction.conditionNote}
-                </p>
-              </>
-            )}
+
           </div>
         ) : (
           <div className="pt-1.5">

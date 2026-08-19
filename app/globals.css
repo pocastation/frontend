@@ -18,6 +18,10 @@
      배지처럼 흰 지면에 얹는 자리에는 아래 두 단계를 쓴다(#275). */
   --color-star-line: #c99a2e;
   --color-star-ink: #a87d1a;
+  /* 딥스페이스 위 보조색 — 별 산포와 브랜드 면 강조 텍스트에 쓴다(디자인 시스템 tokens/colors.css).
+     밝은 지면에는 대비가 모자라 올리지 않는다. 토큰이 없어 모바일 배너의 "포카스테이션" 줄이
+     잉크색으로 떨어져 딥스페이스에 묻혔었다(#341). */
+  --color-nebula: #c8bcff;
   --color-ok: #15803d;
   --color-ok-soft: #f0fdf4;
   /* 대기·재시도 상태 표시용(주문 결제 상태 도트, #113) */
@@ -453,3 +457,4 @@ details[open] > summary .faq-chevron {
     transition: none;
   }
 }
+

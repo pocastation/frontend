@@ -21,6 +21,16 @@ const FAILURE_MESSAGE: Record<VerificationFailureReason, string> = {
   ANALYSIS_UNAVAILABLE: "사진 분석 중 일시적인 문제가 발생했습니다. 같은 사진으로 다시 시도해주세요.",
 };
 
+// 분석은 보통 1~2초에 끝난다(추론 자체는 0.25초, 나머지는 큐 대기·이미지 로드 — BE #304 계측).
+// 2초 고정 간격이면 결과가 준비된 뒤에도 평균 1초를 더 기다리게 되므로 초반을 촘촘히 본다.
+// 오래 걸리는 분석(최대 60초)에서는 2초로 수렴시켜 요청 수를 늘리지 않는다.
+const POLL_DELAYS_MS = [400, 400, 600, 800, 1000, 1500];
+const POLL_DELAY_MAX_MS = 2000;
+
+export function verificationPollDelayMs(attempt: number): number {
+  return POLL_DELAYS_MS[attempt] ?? POLL_DELAY_MAX_MS;
+}
+
 type Props = {
   verificationId: string | null;
   onVerified: (verificationId: string | null) => void;
@@ -67,6 +77,12 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
     const challengeId = challenge.id;
     let cancelled = false;
     let timer: number | undefined;
+    let attempt = 0;
+
+    function scheduleNextPoll() {
+      timer = window.setTimeout(poll, verificationPollDelayMs(attempt));
+      attempt += 1;
+    }
 
     async function poll() {
       try {
@@ -77,7 +93,7 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
         setResult(status);
         setError(null);
         if (status.status === "QUEUED" || status.status === "ANALYZING") {
-          timer = window.setTimeout(poll, 2000);
+          scheduleNextPoll();
           return;
         }
         setAnalyzing(false);
@@ -86,11 +102,12 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
       } catch {
         if (cancelled) return;
         setError("분석 상태를 다시 확인하고 있습니다.");
-        timer = window.setTimeout(poll, 2000);
+        // 오류는 백오프를 유지한다 — 실패하는 요청을 촘촘히 두드리지 않는다.
+        timer = window.setTimeout(poll, POLL_DELAY_MAX_MS);
       }
     }
 
-    timer = window.setTimeout(poll, 1000);
+    scheduleNextPoll();
     return () => {
       cancelled = true;
       if (timer !== undefined) window.clearTimeout(timer);

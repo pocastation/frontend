@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import * as PortOne from "@portone/browser-sdk/v2";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { envValue } from "@/lib/env";
 import { getCardBrandStyle } from "@/lib/cardBrand";
 import { formatCardNumber } from "@/lib/cardNumber";
 import { FOCUS_RING, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
@@ -11,8 +12,8 @@ import type { PaymentMethod } from "@/lib/types";
 
 const MAX_METHODS = 3;
 const PATH = "/api/members/me/payment-methods";
-const STORE_ID = process.env.NEXT_PUBLIC_PORTONE_STORE_ID ?? "";
-const CHANNEL_KEY = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY ?? "";
+const STORE_ID = envValue(process.env.NEXT_PUBLIC_PORTONE_STORE_ID);
+const CHANNEL_KEY = envValue(process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY);
 
 // 결제수단(카드 빌링키) 관리 — §7 "카드 사전등록 → 낙찰 자동결제"의 사전등록 UI. 회원당 최대
 // MAX_METHODS장, 기본카드가 청구 대상(#152). 포트원 SDK(결제창)로 빌링키를 발급받아 백엔드에

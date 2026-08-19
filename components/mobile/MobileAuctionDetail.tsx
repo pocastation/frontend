@@ -1,0 +1,457 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import AuctionWishlistButton from "@/components/AuctionWishlistButton";
+import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
+import MobileDetailGallery from "@/components/mobile/MobileDetailGallery";
+import { apiFetch } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
+import { useAuctionBidding } from "@/lib/auction-bidding-context";
+import { useHasMyBid } from "@/lib/use-has-my-bid";
+import { BID_MIN_INCREMENT, buyerFee, estimatedTotal } from "@/lib/fees";
+import { formatCountdown, formatKRW, formatRelativeTime } from "@/lib/format";
+import { INTERMEDIARY_NOTICE } from "@/lib/business";
+import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
+import { FOCUS_RING } from "@/lib/ui";
+import type { AuctionDetailResponse, SellerRatingResponse } from "@/lib/types";
+
+/**
+ * 모바일 경매 상세.
+ *
+ * <p>입찰과 관련된 값은 전부 `AuctionBiddingProvider`에서 온다 — 데스크탑 `BidSection`과 **같은
+ * 상태·같은 SSE 연결**을 읽는다(상세 하나에 EventSource가 둘 열리지 않게).
+ *
+ * <p>탭은 두 개다. **이 경매에 입찰한 사람에게는 «입찰 이력»이 먼저 열린다** — 이미 판에 들어온
+ * 사람이 알고 싶은 건 상품 설명이 아니라 지금 얼마까지 올라왔는지다.
+ */
+
+const TAB_PRODUCT = "상품 정보";
+const TAB_BIDS = "입찰 이력";
+const TAB_DELIVERY = "배송·환불";
+
+// BE가 내려주는 등급 라벨에는 이모지가 붙어 온다("덕린이 🌱"). 제품 화면은 이모지를 쓰지 않으므로
+// 글자만 남긴다 — 등급 이름 자체는 BE 값을 그대로 쓴다(우리가 새로 짓지 않는다).
+function plainLevelLabel(label: string): string {
+  return label.replace(/[\p{Extended_Pictographic}️]/gu, "").trim();
+}
+
+function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: string }) {
+  const [levelLabel, setLevelLabel] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await apiFetch<SellerRatingResponse>(`/api/sellers/${sellerId}/rating`, { cache: "no-store" });
+        if (!cancelled) setLevelLabel(plainLevelLabel(res.trustLevelLabel));
+      } catch {
+        // 등급을 못 받으면 줄 자체를 비운다 — 틀린 등급을 보여주느니 안 보여준다.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [sellerId]);
+
+  return (
+    <Link
+      href={`/sellers/${sellerId}`}
+      className={`mt-3.5 flex items-center gap-2.5 rounded-r3 border border-border p-3 ${FOCUS_RING}`}
+    >
+      <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary-soft font-display text-sm font-extrabold text-primary">
+        {nickname.slice(0, 1).toUpperCase()}
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[13.5px] font-extrabold text-text-1">{nickname}</span>
+        {levelLabel && <span className="mt-0.5 block text-[11.5px] text-text-3">{levelLabel}</span>}
+      </span>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 text-text-3" aria-hidden="true">
+        <polyline points="9 18 15 12 9 6" />
+      </svg>
+    </Link>
+  );
+}
+
+/** 입찰 바텀시트 — 하단 고정바의 «입찰하기»가 연다. 스테퍼·수수료·CTA는 데스크탑과 같은 규칙이다. */
+function BidSheet({ onClose }: { onClose: () => void }) {
+  const {
+    amount, floor, ceil, adjustAmount, outOfRange, submitting, isTopBidder, needsAddress, handleBid,
+    currentPrice, endAt, isLive, endingSoon,
+  } = useAuctionBidding();
+  const total = estimatedTotal(amount);
+
+  return (
+    <div className="fixed inset-0 z-[500] sm:hidden" role="dialog" aria-label="입찰하기" aria-modal="true">
+      <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
+      <div className="absolute inset-x-0 bottom-0 rounded-t-r4 bg-white px-[14px] pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
+        {/* 시트 머리에 현재가·마감 — 하단 바에서 뺀 정보가 여기 있다(킷과 같은 자리). */}
+        <div className="flex items-baseline justify-between border-b border-border pb-2.5">
+          <span className="flex items-baseline gap-2">
+            <span className="text-[11px] font-semibold text-text-3">현재가</span>
+            <span className="font-display text-lg font-extrabold tabular-nums text-text-1">{formatKRW(currentPrice)}</span>
+          </span>
+          {isLive && (
+            <span className={`text-[11.5px] font-bold tabular-nums ${endingSoon ? "text-warn" : "text-text-2"}`}>
+              마감까지 {formatCountdown(endAt)}
+            </span>
+          )}
+        </div>
+
+        <div className="mb-3 mt-3 flex items-baseline justify-between">
+          <span className="text-[13px] font-extrabold text-text-1">입찰가</span>
+          <span className="text-[11px] tabular-nums text-text-3">
+            가능 범위 {formatKRW(floor)} – {formatKRW(ceil)}
+          </span>
+        </div>
+
+        <div className="flex h-[52px] items-stretch overflow-hidden rounded-r2 border border-border">
+          <button
+            type="button"
+            onClick={() => adjustAmount(amount - BID_MIN_INCREMENT)}
+            disabled={amount <= floor}
+            aria-label="입찰가 내리기"
+            className={`w-[52px] text-xl text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
+          >
+            −
+          </button>
+          <div className="flex flex-1 items-center justify-center border-x border-border font-display text-xl font-bold tabular-nums text-text-1" aria-live="polite">
+            {formatKRW(amount)}
+          </div>
+          <button
+            type="button"
+            onClick={() => adjustAmount(amount + BID_MIN_INCREMENT)}
+            disabled={amount >= ceil}
+            aria-label="입찰가 올리기"
+            className={`w-[52px] text-xl text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
+          >
+            +
+          </button>
+        </div>
+
+        <div className="mt-2 flex gap-1.5">
+          {[BID_MIN_INCREMENT, 5000, 10000].map((delta) => (
+            <button
+              key={delta}
+              type="button"
+              onClick={() => adjustAmount(amount + delta)}
+              disabled={amount >= ceil}
+              className={`h-9 flex-1 rounded-r2 border border-border text-xs font-medium text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
+            >
+              +{delta.toLocaleString("ko-KR")}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-3.5 rounded-r2 bg-surface-2 p-3 text-[12.5px]">
+          <div className="flex items-center justify-between py-0.5 text-text-3">
+            <span>입찰가</span>
+            <span className="font-medium tabular-nums text-text-2">{formatKRW(amount)}</span>
+          </div>
+          <div className="flex items-center justify-between py-0.5 text-text-3">
+            <span>구매자 수수료</span>
+            <span className="font-medium tabular-nums text-text-2">{formatKRW(buyerFee(amount))}</span>
+          </div>
+          <div className="mt-1.5 flex items-baseline justify-between border-t border-border pt-2">
+            <span className="font-bold text-text-1">예상 결제 총액</span>
+            <span className="font-display text-base font-bold tabular-nums text-text-1">{formatKRW(total)}</span>
+          </div>
+          <p className="mt-1.5 text-[11px] text-text-3">낙찰 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={handleBid}
+          disabled={submitting || outOfRange || isTopBidder}
+          className={`mt-3 flex h-12 w-full items-center justify-center rounded-[7px] bg-primary text-sm font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
+        >
+          {isTopBidder
+            ? "현재 최고 입찰자예요"
+            : submitting
+              ? "처리 중..."
+              : needsAddress
+                ? "배송지 등록하고 입찰하기"
+                : `${formatKRW(amount)} 입찰하기`}
+        </button>
+        {needsAddress && (
+          <p className="mt-2 text-[11.5px] leading-[1.6] text-text-3">
+            낙찰되면 바로 보내드릴 수 있게 받을 주소를 먼저 등록해요.{" "}
+            <b className="font-bold text-text-2">한 번만 하면 다음부터는 물어보지 않아요.</b>
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export default function MobileAuctionDetail({
+  auction,
+  actions,
+}: {
+  auction: AuctionDetailResponse;
+  actions?: React.ReactNode;
+}) {
+  const { accessToken } = useAuth();
+  const {
+    auctionId,
+    currentPrice,
+    bidCount,
+    endAt,
+    isLive,
+    endingSoon,
+    isOwnAuction,
+    bids,
+    hasMoreBids,
+    loadMoreBids,
+    isTopBidder,
+    addressModalOpen,
+    closeAddressModal,
+    onAddressSaved,
+  } = useAuctionBidding();
+
+  const hasMyBid = useHasMyBid(auctionId);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  // 사용자가 탭을 직접 고르면 그 선택이 이긴다. 고르기 전까지는 "내가 입찰했는가"가 정한다 —
+  // 상태를 효과로 덮어쓰지 않고 파생값으로 두어야, 확인 응답이 늦게 와도 보던 탭을 빼앗지 않는다.
+  const [pickedTab, setPickedTab] = useState<string | null>(null);
+  const tab = pickedTab ?? (hasMyBid ? TAB_BIDS : TAB_PRODUCT);
+
+  const specRows: { label: string; value: string }[] = [
+    { label: "그룹", value: auction.artistName ?? "-" },
+    ...(auction.idolName ? [{ label: "멤버", value: auction.idolName }] : []),
+    ...(auction.albumName ? [{ label: "앨범", value: auction.albumName }] : []),
+    { label: "출처", value: SOURCE_LABEL[auction.source] ?? auction.source },
+    { label: "상태 등급", value: GRADE_LABEL[auction.grade] ?? auction.grade },
+    { label: "미개봉", value: auction.unopened ? "예" : "아니오" },
+  ];
+
+  return (
+    <div className={isLive ? "pb-[76px]" : undefined}>
+      <MobileDetailGallery images={auction.images} video={auction.video} title={auction.title} actions={actions} />
+
+      <div className="px-4 pt-4">
+        <div className="flex items-center gap-2">
+          <span className={`text-[11.5px] font-bold ${isLive ? (endingSoon ? "text-warn" : "text-ok") : "text-text-3"}`}>
+            {isLive ? (endingSoon ? "마감임박" : "진행 중") : "종료"}
+          </span>
+          {/* 스타 이름을 누르면 그 스타의 페이지로 간다 — 같은 스타 매물을 이어 보는 가장 짧은 길이다. */}
+          {auction.artistName && (
+            <Link
+              href={`/artists/${auction.artistId}`}
+              className={`min-w-0 truncate text-[11.5px] font-extrabold text-text-2 ${FOCUS_RING}`}
+            >
+              {auction.artistName}
+            </Link>
+          )}
+        </div>
+
+        <h1 className="mt-2 text-[19px] font-extrabold leading-[1.4] tracking-[-0.01em] text-text-1">
+          {auction.title}
+        </h1>
+
+        <div className="mt-2.5 flex flex-wrap gap-1.5">
+          <span className="rounded-chip border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+            {GRADE_LABEL[auction.grade] ?? auction.grade}
+          </span>
+          <span className="rounded-chip border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+            {SOURCE_LABEL[auction.source] ?? auction.source}
+          </span>
+          {auction.unopened && (
+            <span className="rounded-chip border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+              미개봉
+            </span>
+          )}
+        </div>
+
+        {/* 가격 패널 — 한 페이지에 강조 패널은 하나면 충분하다. 여기가 그 자리다. */}
+        <div className="mt-4 rounded-r3 border border-border p-3.5">
+          <div className="flex items-baseline justify-between">
+            <span className="text-[11px] font-semibold text-text-3">현재가</span>
+            <span className="text-[11.5px] tabular-nums text-text-3">{bidCount}회 입찰</span>
+          </div>
+          <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1" aria-live="polite">
+            {formatKRW(currentPrice)}
+          </p>
+          <div className="mt-2.5 flex items-center justify-between border-t border-border pt-2.5 text-[11.5px]">
+            <span className={`font-bold tabular-nums ${endingSoon ? "text-warn" : "text-text-1"}`}>
+              {isLive ? `마감까지 ${formatCountdown(endAt)}` : "종료된 경매"}
+            </span>
+            <span className="tabular-nums text-text-3">시작가 {formatKRW(auction.startPrice)}</span>
+          </div>
+          {isLive && (
+            <p className="mt-2 text-[10.5px] leading-relaxed text-text-3">
+              마감 3분 전 입찰 시 종료 시간이 자동 연장돼요(최대 3회).
+            </p>
+          )}
+        </div>
+
+        <SellerRow sellerId={auction.sellerId} nickname={auction.sellerNickname} />
+
+        {/* 탭 — 상품 정보 / 입찰 이력 */}
+        <div role="tablist" className="mt-5 flex gap-1 border-b border-border">
+          {[TAB_PRODUCT, TAB_BIDS, TAB_DELIVERY].map((name) => {
+            const on = tab === name;
+            return (
+              <button
+                key={name}
+                type="button"
+                onClick={() => setPickedTab(name)}
+                role="tab"
+                aria-selected={on}
+                className={`-mb-px whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm transition-colors ${FOCUS_RING} ${
+                  on ? "border-primary font-extrabold text-text-1" : "border-transparent font-medium text-text-2"
+                }`}
+              >
+                {name}
+                {name === TAB_BIDS && bidCount > 0 && <span className="ml-1 text-text-3">{bidCount}</span>}
+              </button>
+            );
+          })}
+        </div>
+
+        {tab === TAB_DELIVERY ? (
+          <div className="pt-3.5">
+            {/* 확정된 사실만 적는다 — 기간·조건 같은 숫자는 운영정책이 정본이라 여기서 새로 만들지 않는다. */}
+            <dl className="divide-y divide-border border-y border-border">
+              <div className="py-2.5">
+                <dt className="text-[12.5px] font-extrabold text-text-1">배송비</dt>
+                <dd className="mt-1 text-[13px] leading-relaxed text-text-2">
+                  판매자가 부담해요. 구매자가 따로 낼 배송비는 없어요.
+                </dd>
+              </div>
+              <div className="py-2.5">
+                <dt className="text-[12.5px] font-extrabold text-text-1">받는 주소</dt>
+                <dd className="mt-1 text-[13px] leading-relaxed text-text-2">
+                  입찰 전에 등록해요. 낙찰되면 등록한 주소로 판매자가 보내드려요.
+                </dd>
+              </div>
+              <div className="py-2.5">
+                <dt className="text-[12.5px] font-extrabold text-text-1">환불·분쟁</dt>
+                <dd className="mt-1 text-[13px] leading-relaxed text-text-2">
+                  기준과 절차는 운영정책을 따라요.
+                </dd>
+              </div>
+            </dl>
+            <div className="mt-3 flex gap-3">
+              <Link href="/policy" className={`text-[12.5px] font-bold text-text-2 underline ${FOCUS_RING}`}>
+                운영정책 보기
+              </Link>
+              <Link href="/guide" className={`text-[12.5px] font-bold text-text-2 underline ${FOCUS_RING}`}>
+                이용 방법
+              </Link>
+            </div>
+            <p className="mt-4 text-[11px] leading-relaxed text-text-3">{INTERMEDIARY_NOTICE}</p>
+            {/* 문의는 신고와 성격이 다르다 — 사진 위 아이콘으로 올리지 않고 여기 조용히 둔다. */}
+            <Link
+              href="/inquiries/new"
+              className={`mt-3 inline-block text-[12.5px] font-bold text-text-3 underline ${FOCUS_RING}`}
+            >
+              이 매물 문의하기
+            </Link>
+          </div>
+        ) : tab === TAB_PRODUCT ? (
+          <div className="pt-3.5">
+            {auction.description && (
+              <p className="whitespace-pre-wrap text-sm leading-[1.75] text-text-2">{auction.description}</p>
+            )}
+            <dl className={`${auction.description ? "mt-4" : ""} divide-y divide-border border-y border-border`}>
+              {specRows.map((row) => (
+                <div key={row.label} className="flex items-center justify-between gap-3 py-2.5 text-[13px]">
+                  <dt className="text-text-3">{row.label}</dt>
+                  <dd className="text-right font-semibold text-text-1">{row.value}</dd>
+                </div>
+              ))}
+            </dl>
+
+          </div>
+        ) : (
+          <div className="pt-1.5">
+            {bids.length > 0 ? (
+              <ul>
+                {bids.map((bid, index) => (
+                  <li key={bid.id} className="flex items-center justify-between border-b border-border py-2.5">
+                    <span className="flex items-center gap-2">
+                      <span className={`w-4 text-center font-display text-[11px] font-extrabold ${index === 0 ? "text-ok" : "text-text-3"}`}>
+                        {index + 1}
+                      </span>
+                      <span className={`text-[12.5px] ${index === 0 ? "font-bold text-text-1" : "text-text-2"}`}>
+                        {bid.bidderNicknameMasked}
+                      </span>
+                    </span>
+                    <span className="flex items-baseline gap-2">
+                      <span className="text-[10.5px] text-text-3">{formatRelativeTime(bid.createdAt)}</span>
+                      <span className={`font-display text-[13px] tabular-nums ${index === 0 ? "font-extrabold text-text-1" : "text-text-2"}`}>
+                        {formatKRW(bid.amount)}
+                      </span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="py-6 text-center text-[12.5px] text-text-3">아직 입찰이 없어요.</p>
+            )}
+            {hasMoreBids && (
+              <button
+                type="button"
+                onClick={loadMoreBids}
+                className={`mt-3 flex h-10 w-full items-center justify-center rounded-[7px] border border-border-2 text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
+              >
+                더 보기
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* 하단 고정 바 — 킷과 같은 구성: 관심 44×44 + 입찰 CTA(남은 폭 전부).
+          현재가·마감은 위 가격 패널과 입찰 시트가 말하므로 바에서는 반복하지 않는다. */}
+      {isLive && (
+        <div
+          className="fixed inset-x-0 bottom-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 sm:hidden"
+          style={{ paddingBottom: "calc(10px + env(safe-area-inset-bottom))" }}
+        >
+          <AuctionWishlistButton
+            auctionId={auctionId}
+            className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[7px] border border-border-2 bg-white text-text-2 ${FOCUS_RING}`}
+          />
+          {isOwnAuction ? (
+            <span className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-bold text-text-3">
+              내 경매입니다
+            </span>
+          ) : !accessToken ? (
+            <Link
+              href={`/login?redirect=/auctions/${auctionId}`}
+              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+            >
+              로그인하고 입찰하기
+            </Link>
+          ) : isTopBidder ? (
+            <span className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-bold text-text-3">
+              현재 최고 입찰자예요
+            </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setSheetOpen(true)}
+              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+            >
+              입찰하기
+            </button>
+          )}
+        </div>
+      )}
+
+      {sheetOpen && <BidSheet onClose={() => setSheetOpen(false)} />}
+
+      {/* 배송지 등록(#283) — 저장해도 입찰을 대신 눌러주지 않는다. 입찰은 취소할 수 없는 청약이라
+          사용자가 한 번 더 눌러야 한다(약관 §13조의2 ②). 대신 시트를 열어 흐름을 이어 준다. */}
+      {addressModalOpen && (
+        <DeliveryAddressGateModal
+          action="입찰"
+          onClose={closeAddressModal}
+          onSaved={() => onAddressSaved(() => setSheetOpen(true))}
+        />
+      )}
+    </div>
+  );
+}

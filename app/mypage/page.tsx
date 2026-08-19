@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useWishlist } from "@/lib/wishlist-context";
 import DeliveryAddressBook from "@/components/DeliveryAddressBook";
 import PaymentMethodManager from "@/components/PaymentMethodManager";
 import SettlementAccountManager from "@/components/SettlementAccountManager";
@@ -41,6 +42,17 @@ import type {
 } from "@/lib/types";
 import StatusBadge from "@/components/StatusBadge";
 import IdentityVerificationPanel from "@/components/IdentityVerificationPanel";
+import AuctionCard from "@/components/AuctionCard";
+import MobileShell from "@/components/mobile/MobileShell";
+import MobilePageHead from "@/components/mobile/MobilePageHead";
+import MobileMypageMenu from "@/components/mobile/MobileMypageMenu";
+import {
+  TAB_TITLE,
+  resolveTabQuery,
+  type BiddingFilter,
+  type MypageTab,
+  type PurchaseFilter,
+} from "@/lib/mypage-tabs";
 
 const SELLING_TAB_STATUSES = new Set<AuctionResponse["status"]>([
   "PENDING_REVIEW",
@@ -48,6 +60,14 @@ const SELLING_TAB_STATUSES = new Set<AuctionResponse["status"]>([
   "SCHEDULED",
   "LIVE",
   "REJECTED",
+]);
+
+// 구매자가 직접 손봐야 결제가 굴러가는 주문 상태 — 모바일 메뉴 배지의 근거.
+const PURCHASE_ACTION_STATUSES = new Set<MyOrderStatusResponse["status"]>([
+  "PAYMENT_PENDING",
+  "PAYMENT_RETRYING",
+  "PAYMENT_FAILED",
+  "SECOND_CHANCE_OFFERED",
 ]);
 
 const PUBLIC_DETAIL_STATUSES = new Set<AuctionResponse["status"]>([
@@ -59,27 +79,8 @@ const PUBLIC_DETAIL_STATUSES = new Set<AuctionResponse["status"]>([
 
 type SellingListItem = AuctionResponse | MySellingAuctionResponse;
 
-// 메뉴가 13개까지 늘어나 스캔이 어려워져, 같은 성격의 화면을 한 탭 + 내부 필터로 합쳤다.
-// - bidding("입찰"): 예전 participating(진행 중) + bidHistory(전체)
-// - purchases("구매 내역"): 예전 won(경매 낙찰) + instantPurchases(즉시구매)
-// 예전 키로 들어오는 딥링크(/mypage?tab=won 등)는 LEGACY_TAB_ALIAS로 흡수한다.
-type Tab =
-  | "dashboard"
-  | "bidding"
-  | "purchases"
-  | "selling"
-  | "sellHistory"
-  | "wishlist"
-  | "profile"
-  | "notifications"
-  | "shipping"
-  | "payment"
-  | "settlement"
-  | "settings";
-
-// 합쳐진 탭 안에서 어느 묶음을 보고 있는지.
-type BiddingFilter = "live" | "all";
-type PurchaseFilter = "auction" | "instant";
+// 탭 키·제목·딥링크 해석은 lib/mypage-tabs.ts에 있다 — 모바일 메뉴 목록이 같은 정의를 읽는다.
+type Tab = MypageTab;
 
 function DashboardIcon() {
   return (
@@ -218,34 +219,23 @@ const ACCOUNT_NAV: { key: Tab; label: string; icon: () => ReactNode; hidden?: bo
   { key: "settings", label: "계정 설정", icon: GearIcon },
 ];
 
-const TAB_TITLE: Record<Tab, string> = {
-  dashboard: "대시보드",
-  bidding: "입찰",
-  purchases: "구매 내역",
-  selling: "판매 중인 경매",
-  sellHistory: "판매 내역",
-  wishlist: "관심 목록",
-  profile: "내 정보",
-  notifications: "알림 설정",
-  shipping: "배송지 관리",
-  payment: "결제수단",
-  settlement: "정산계좌",
-  settings: "계정 설정",
-};
-
 // 아직 준비 중인 탭만 안내를 보여준다 — 현재 남은 스텁 없음(계정 설정은 회원 탈퇴로 실구현됨).
 const STUB_TABS = new Set<Tab>([]);
 
-// /mypage?tab= 쿼리 검증용 — 존재하는 탭 키만 허용.
-const TAB_KEYS = new Set<Tab>([...TRADE_NAV, ...ACCOUNT_NAV].map((item) => item.key));
-
-// 탭을 합치기 전 키로 들어오는 기존 링크·북마크를 새 탭(+내부 필터)으로 흘려보낸다.
-const LEGACY_TAB_ALIAS: Record<string, { tab: Tab; bidding?: BiddingFilter; purchase?: PurchaseFilter }> = {
-  participating: { tab: "bidding", bidding: "live" },
-  bidHistory: { tab: "bidding", bidding: "all" },
-  won: { tab: "purchases", purchase: "auction" },
-  instantPurchases: { tab: "purchases", purchase: "instant" },
-};
+/**
+ * 탭 본문의 제목 줄.
+ *
+ * <p>모바일에서는 접는다 — 서브 화면 앱바가 이미 같은 제목을 들고 있어, 화면 안에서 h1으로
+ * 한 번 더 반복하면 같은 말이 두 줄 연달아 나온다(모바일 킷 규칙).
+ */
+function TabHead({ title, sub }: { title: string; sub: ReactNode }) {
+  return (
+    <div className="hidden sm:block">
+      <h1 className="font-display text-xl font-extrabold text-text-1">{title}</h1>
+      <p className="mt-1 text-sm text-text-3">{sub}</p>
+    </div>
+  );
+}
 
 // 합쳐진 탭 안의 세그먼트 필터 — 사이드바 메뉴를 늘리지 않고 묶음을 전환한다.
 function FilterChips<T extends string>({
@@ -282,22 +272,41 @@ function FilterChips<T extends string>({
 }
 
 // 당근식 통합 마이페이지 — 판매자/구매자 계정 구분 없이 "내 활동" = 판매 + 입찰.
-export default function MyPage() {
+//
+// 데스크탑과 모바일이 **같은 탭 콘텐츠를 공유하고 내비게이션만 갈린다.** 데스크탑은 좌 사이드바
+// 240px + 우 콘텐츠로 한 화면이고, 모바일은 `/mypage`가 메뉴 목록이며 `?tab=X`가 서브 화면으로
+// 열린다. 그래서 선택된 탭을 URL 쿼리에 두고(useSearchParams) 양쪽이 그걸 읽는다 — 로컬 state로만
+// 두면 모바일에서 뒤로가기·하단탭 이동이 화면과 어긋난다.
+function MyPageBody() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { accessToken, member, isLoading, fetchWithAuth, logout } = useAuth();
+  const { toggle: toggleWishlistCache } = useWishlist();
 
-  const [tab, setTab] = useState<Tab>("dashboard");
+  // null = 쿼리 없음. 모바일은 메뉴 목록, 데스크탑은 대시보드다(한 화면이라 늘 무언가를 보여준다).
+  const requested = resolveTabQuery(searchParams.get("tab"));
+  const tab = requested?.tab ?? null;
+  const activeTab: Tab = tab ?? "dashboard";
   const [biddingFilter, setBiddingFilter] = useState<BiddingFilter>("live");
   const [purchaseFilter, setPurchaseFilter] = useState<PurchaseFilter>("auction");
+
+  // 탭 전환은 쿼리를 바꾸는 것으로 통일한다 — 그래야 모바일 앱바 뒤로·브라우저 뒤로가 살아 있고,
+  // 지금 보고 있는 화면을 그대로 공유·북마크할 수 있다.
+  const selectTab = useCallback(
+    (next: Tab) => {
+      router.push(`/mypage?tab=${next}`, { scroll: false });
+    },
+    [router],
+  );
 
   // 대시보드 패널의 "전체 보기"는 합쳐진 탭으로 가되, 그 패널이 보여주던 묶음이 선택된 채로 열려야 한다.
   function goToBidding(filter: BiddingFilter) {
     setBiddingFilter(filter);
-    setTab("bidding");
+    selectTab("bidding");
   }
   function goToPurchases(filter: PurchaseFilter) {
     setPurchaseFilter(filter);
-    setTab("purchases");
+    selectTab("purchases");
   }
   // 모바일에선 메뉴(aside)가 콘텐츠 위에 쌓여, 탭을 눌러도 콘텐츠가 화면 밖 아래에서 바뀌어
   // "아무 반응 없어" 보인다. 탭이 바뀌면(초기 진입 제외) 콘텐츠로 스크롤해준다(lg 미만).
@@ -321,27 +330,24 @@ export default function MyPage() {
   const [reviewable, setReviewable] = useState<ReviewableOrderResponse[]>([]);
   const [reviewModalOrder, setReviewModalOrder] = useState<ReviewableOrderResponse | null>(null);
 
-  // 알림·주문 상태 푸터의 CTA가 /mypage?tab=payment 로 진입할 수 있게 쿼리를 1회 반영한다.
-  // (탭이 로컬 state뿐이라 SSR 초기값으로 읽으면 하이드레이션이 어긋난다 — 마운트 후 전환.)
+  // 탭 자체는 쿼리에서 읽지만, 예전 키 딥링크(/mypage?tab=won 등)가 함께 지정하는 **내부 필터**는
+  // 그 뒤 사용자가 칩으로 바꿀 수 있어야 하므로 state다 — 진입 시 1회만 반영한다.
+  const aliasBidding = requested?.bidding;
+  const aliasPurchase = requested?.purchase;
   useEffect(() => {
-    const requested = new URLSearchParams(window.location.search).get("tab");
-    if (!requested) return;
-    if (TAB_KEYS.has(requested as Tab)) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- URL 쿼리는 마운트 후에만 읽을 수 있다.
-      setTab(requested as Tab);
-      return;
-    }
-    const alias = LEGACY_TAB_ALIAS[requested];
-    if (alias) {
-      setTab(alias.tab);
-      if (alias.bidding) setBiddingFilter(alias.bidding);
-      if (alias.purchase) setPurchaseFilter(alias.purchase);
-    }
-  }, []);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 딥링크가 지정한 초기 묶음 반영.
+    if (aliasBidding) setBiddingFilter(aliasBidding);
+    if (aliasPurchase) setPurchaseFilter(aliasPurchase);
+  }, [aliasBidding, aliasPurchase]);
 
   useEffect(() => {
     if (firstTabRender.current) {
       firstTabRender.current = false;
+      return;
+    }
+    // 모바일은 메뉴 목록 ↔ 서브 화면이 통째로 갈리므로 문서 맨 위로 올린다(앱바가 그 자리에 있다).
+    if (window.innerWidth < 640) {
+      window.scrollTo({ top: 0 });
       return;
     }
     if (window.innerWidth < 1024) {
@@ -469,6 +475,18 @@ export default function MyPage() {
     }
   }
 
+  // 모바일 관심 목록은 카드 하트(WishlistHeart)가 API를 직접 부른다 — 여기서는 결과만 반영한다.
+  // 데스크탑 리스트의 handleRemoveWishlist와 달리 DELETE를 또 보내면 안 된다.
+  function handleWishlistToggled(auctionId: number, next: boolean) {
+    toggleWishlistCache(auctionId, next);
+    if (!next) {
+      setWishlist((prev) => prev.filter((a) => a.id !== auctionId));
+      return;
+    }
+    // next=true는 하트가 실패를 되돌린 경우다 — 목록에서 이미 뺐으니 서버 상태로 다시 맞춘다.
+    void loadMyActivity();
+  }
+
   // 관심목록 해제 — 실패하면(드묾) 전체를 다시 불러와 서버 상태와 어긋나지 않게 한다.
   async function handleRemoveWishlist(auctionId: number) {
     setWishlist((prev) => prev.filter((a) => a.id !== auctionId));
@@ -507,8 +525,29 @@ export default function MyPage() {
   const liveBidding = bidding.filter((b) => b.status === "LIVE");
   const wonBidding = bidding.filter((b) => b.status === "ENDED_SOLD" && b.isTopBidder);
 
-  return (
-    <div className="mx-auto grid max-w-[1160px] gap-6 px-4 py-8 sm:py-10 lg:grid-cols-[240px_1fr]">
+  // 모바일 메뉴의 빨간 배지 = "지금 내가 손봐야 하는 건수". 단순 개수(회색 값)와 구분한다.
+  const needsAddress = (o: MyOrderStatusResponse) =>
+    o.status === "PAID" && o.fulfillmentStatus === "AWAITING_SHIPMENT" && !o.hasDeliveryAddress;
+  const purchaseActionCount = Object.values(orders).filter(
+    (o) => needsAddress(o) || PURCHASE_ACTION_STATUSES.has(o.status),
+  ).length;
+  const shipmentActionCount = Object.values(soldOrders).filter(
+    (o) => o.orderStatus === "PAID" && o.fulfillmentStatus === "AWAITING_SHIPMENT",
+  ).length;
+  // 배송지가 비어 있는 결제완료 주문 — 모바일 메뉴에서 목록보다 먼저 세운다. 자동 팝업을 "나중에"로
+  // 닫은 뒤에도 남아 있어야 하므로 dismissed 여부는 보지 않는다.
+  const pendingAddressOrder = Object.values(orders).find(needsAddress) ?? null;
+  const pendingAddress = pendingAddressOrder
+    ? {
+        auctionId: pendingAddressOrder.auctionId,
+        title:
+          [...bidding, ...instantPurchases].find((a) => a.id === pendingAddressOrder.auctionId)?.title
+          ?? "낙찰 상품",
+      }
+    : null;
+
+  const body = (
+    <div className="mx-auto grid max-w-[1160px] gap-0 px-0 py-0 sm:gap-6 sm:px-4 sm:py-10 lg:grid-cols-[240px_1fr]">
       {addressModalOrder && (
         <DeliveryAddressModal
           auctionId={addressModalOrder.auctionId}
@@ -526,7 +565,32 @@ export default function MyPage() {
           onSaved={handleReviewSaved}
         />
       )}
-      <aside>
+      {/* 모바일 메뉴 목록 — `?tab=`이 없을 때만. 있으면 그 탭이 서브 화면으로 열린다. */}
+      {tab === null && (
+        <MobileMypageMenu
+          nickname={member?.nickname ?? ""}
+          trustLevel={member?.trustLevel ?? null}
+          trustLevelLabel={member?.trustLevelLabel ?? null}
+          tradeCount={member?.tradeCount ?? null}
+          counts={{
+            liveBidding: liveBidding.length,
+            bidding: bidding.length,
+            won: wonBidding.length,
+            purchases: wonBidding.length + instantPurchases.length,
+            selling: activeSelling.length,
+            sellHistory: sellingHistory.length,
+            wishlist: wishlist.length,
+          }}
+          purchaseActionCount={purchaseActionCount}
+          shipmentActionCount={shipmentActionCount}
+          pendingAddress={pendingAddress}
+          onSelectTab={selectTab}
+          onOpenAddress={openAddressModal}
+          onLogout={handleLogout}
+        />
+      )}
+
+      <aside className="hidden sm:block">
         <div className="rounded-r3 border border-border bg-surface p-5 text-center">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary-soft text-xl font-extrabold text-primary">
             {member?.nickname.slice(0, 1).toUpperCase()}
@@ -554,9 +618,9 @@ export default function MyPage() {
               <button
                 key={key}
                 type="button"
-                onClick={() => setTab(key)}
+                onClick={() => selectTab(key)}
                 className={`flex items-center gap-2.5 rounded-r2 px-2.5 py-2 text-left text-sm font-bold transition-colors ${FOCUS_RING} ${
-                  tab === key ? "bg-primary-soft text-primary" : "text-text-2 hover:bg-surface-2"
+                  activeTab === key ? "bg-primary-soft text-primary" : "text-text-2 hover:bg-surface-2"
                 }`}
               >
                 <Icon />
@@ -571,9 +635,9 @@ export default function MyPage() {
               <button
                 key={key}
                 type="button"
-                onClick={() => setTab(key)}
+                onClick={() => selectTab(key)}
                 className={`flex items-center gap-2.5 rounded-r2 px-2.5 py-2 text-left text-sm font-bold transition-colors ${FOCUS_RING} ${
-                  tab === key ? "bg-primary-soft text-primary" : "text-text-2 hover:bg-surface-2"
+                  activeTab === key ? "bg-primary-soft text-primary" : "text-text-2 hover:bg-surface-2"
                 }`}
               >
                 <Icon />
@@ -593,24 +657,27 @@ export default function MyPage() {
         </button>
       </aside>
 
-      <div ref={contentRef} className="scroll-mt-4">
+      {/* 탭 본문 — 데스크탑은 늘, 모바일은 `?tab=`으로 열렸을 때만 보인다(트리는 한 벌). */}
+      <div
+        ref={contentRef}
+        className={`scroll-mt-4 px-3.5 pt-3.5 sm:px-0 sm:pt-0 ${tab === null ? "hidden sm:block" : ""}`}
+      >
         {error && (
           <p role="alert" className="mb-4 rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
             {error}
           </p>
         )}
 
-        {STUB_TABS.has(tab) ? (
+        {STUB_TABS.has(activeTab) ? (
           <div className="flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-24 text-center">
-            <h1 className="font-display text-lg font-extrabold text-text-1">{TAB_TITLE[tab]}</h1>
+            <h1 className="font-display text-lg font-extrabold text-text-1">{TAB_TITLE[activeTab]}</h1>
             <p className="text-sm text-text-3">
-              {tab === "wishlist" ? "관심 목록 기능은 준비 중이에요." : "이 메뉴는 아직 준비 중이에요."}
+              {activeTab === "wishlist" ? "관심 목록 기능은 준비 중이에요." : "이 메뉴는 아직 준비 중이에요."}
             </p>
           </div>
-        ) : tab === "dashboard" ? (
+        ) : activeTab === "dashboard" ? (
           <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">대시보드</h1>
-            <p className="mt-1 text-sm text-text-3">{member?.nickname}님, 좋은 포토카드와의 만남이 가득하길 바라요.</p>
+            <TabHead title="대시보드" sub={<>{member?.nickname}님, 좋은 포토카드와의 만남이 가득하길 바라요.</>} />
 
             {/* 위아래 규칙선 안에서 세로선으로만 나눈다 — 다섯 값이 한 덩어리로 읽혀야 비교가 된다. */}
             <div className="mt-5 flex flex-wrap gap-y-4 border-y border-border py-4">
@@ -676,7 +743,7 @@ export default function MyPage() {
               </DashboardPanel>
 
               <DashboardPanel title="낙찰/구매 내역" onSeeAll={() => goToPurchases("auction")}>
-                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
+                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => selectTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
               </DashboardPanel>
 
               <DashboardPanel title="즉시구매 내역" onSeeAll={() => goToPurchases("instant")}>
@@ -686,14 +753,14 @@ export default function MyPage() {
                   emptyText="구매한 즉시판매가 없습니다."
                   endedLabel="구매 완료"
                   orders={orders}
-                  onGoPayment={() => setTab("payment")}
+                  onGoPayment={() => selectTab("payment")}
                   onRefresh={loadMyActivity}
                   onOpenAddressModal={openAddressModal}
                   onConfirmed={handleConfirmed}
                 />
               </DashboardPanel>
 
-              <DashboardPanel title="판매 중인 경매" onSeeAll={() => setTab("selling")}>
+              <DashboardPanel title="판매 중인 경매" onSeeAll={() => selectTab("selling")}>
                 <SellingList
                   items={activeSelling.slice(0, 3)}
                   loading={loading}
@@ -705,10 +772,9 @@ export default function MyPage() {
               </DashboardPanel>
             </div>
           </>
-        ) : tab === "bidding" ? (
+        ) : activeTab === "bidding" ? (
           <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">입찰</h1>
-            <p className="mt-1 text-sm text-text-3">입찰에 참여한 경매를 모아서 봐요.</p>
+            <TabHead title="입찰" sub={<>입찰에 참여한 경매를 모아서 봐요.</>} />
             <FilterChips
               label="입찰 목록 필터"
               value={biddingFilter}
@@ -726,10 +792,9 @@ export default function MyPage() {
               />
             </div>
           </>
-        ) : tab === "purchases" ? (
+        ) : activeTab === "purchases" ? (
           <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">구매 내역</h1>
-            <p className="mt-1 text-sm text-text-3">경매 낙찰과 즉시구매를 한곳에서 봐요.</p>
+            <TabHead title="구매 내역" sub={<>경매 낙찰과 즉시구매를 한곳에서 봐요.</>} />
             <FilterChips
               label="구매 내역 필터"
               value={purchaseFilter}
@@ -741,7 +806,7 @@ export default function MyPage() {
             />
             <div className="mt-5">
               {purchaseFilter === "auction" ? (
-                <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => setTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
+                <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => selectTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
               ) : (
                 <SellingList
                   items={instantPurchases}
@@ -749,7 +814,7 @@ export default function MyPage() {
                   emptyText="구매한 즉시판매가 없습니다."
                   endedLabel="구매 완료"
                   orders={orders}
-                  onGoPayment={() => setTab("payment")}
+                  onGoPayment={() => selectTab("payment")}
                   onRefresh={loadMyActivity}
                   onOpenAddressModal={openAddressModal}
                   onConfirmed={handleConfirmed}
@@ -757,10 +822,9 @@ export default function MyPage() {
               )}
             </div>
           </>
-        ) : tab === "selling" ? (
+        ) : activeTab === "selling" ? (
           <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">판매 중인 경매</h1>
-            <p className="mt-1 text-sm text-text-3">등록한 경매와 검수 상태 {activeSelling.length}건</p>
+            <TabHead title="판매 중인 경매" sub={<>등록한 경매와 검수 상태 {activeSelling.length}건</>} />
             {loading ? (
               <p className="mt-6 text-sm text-text-3">불러오는 중...</p>
             ) : activeSelling.length === 0 ? (
@@ -783,10 +847,9 @@ export default function MyPage() {
               </div>
             )}
           </>
-        ) : tab === "profile" ? (
+        ) : activeTab === "profile" ? (
           <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">내 정보</h1>
-            <p className="mt-1 text-sm text-text-3">닉네임과 계정 정보를 확인하고 관리해요.</p>
+            <TabHead title="내 정보" sub={<>닉네임과 계정 정보를 확인하고 관리해요.</>} />
             <div className="mt-5">
               <ProfileTab />
             </div>
@@ -802,51 +865,70 @@ export default function MyPage() {
               <IdentityVerificationPanel className="mt-3" />
             </div>
           </>
-        ) : tab === "shipping" ? (
+        ) : activeTab === "shipping" ? (
           <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">배송지 관리</h1>
-            <p className="mt-1 text-sm text-text-3">낙찰 상품을 받을 배송지를 관리해요.</p>
+            <TabHead title="배송지 관리" sub={<>낙찰 상품을 받을 배송지를 관리해요.</>} />
             <div className="mt-5">
               <DeliveryAddressBook />
             </div>
           </>
-        ) : tab === "payment" ? (
+        ) : activeTab === "payment" ? (
           <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">결제수단</h1>
-            <p className="mt-1 text-sm text-text-3">낙찰 시 자동 결제에 사용할 카드를 관리해요.</p>
+            <TabHead title="결제수단" sub={<>낙찰 시 자동 결제에 사용할 카드를 관리해요.</>} />
             <div className="mt-5">
               <PaymentMethodManager />
             </div>
           </>
-        ) : tab === "settlement" ? (
+        ) : activeTab === "settlement" ? (
           <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">정산계좌</h1>
-            <p className="mt-1 text-sm text-text-3">판매 대금을 받을 계좌를 등록해요.</p>
+            <TabHead title="정산계좌" sub={<>판매 대금을 받을 계좌를 등록해요.</>} />
             <div className="mt-5">
               <SettlementAccountManager />
             </div>
           </>
-        ) : tab === "notifications" ? (
+        ) : activeTab === "notifications" ? (
           <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">알림 설정</h1>
-            <p className="mt-1 text-sm text-text-3">어떤 알림을 받을지 설정해요.</p>
+            <TabHead title="알림 설정" sub={<>어떤 알림을 받을지 설정해요.</>} />
             <div className="mt-5">
               <NotificationSettings />
             </div>
           </>
-        ) : tab === "settings" ? (
+        ) : activeTab === "settings" ? (
           <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">계정 설정</h1>
-            <p className="mt-1 text-sm text-text-3">계정을 관리해요.</p>
+            <TabHead title="계정 설정" sub={<>계정을 관리해요.</>} />
             <div className="mt-5">
               <SettingsTab />
             </div>
           </>
-        ) : tab === "wishlist" ? (
+        ) : activeTab === "wishlist" ? (
           <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">관심 목록</h1>
-            <p className="mt-1 text-sm text-text-3">찜한 경매 {wishlist.length}건</p>
-            <div className="mt-5">
+            <TabHead title="관심 목록" sub={<>찜한 경매 {wishlist.length}건</>} />
+            {/* 관심 목록은 하단탭의 루트 화면이라 모바일에서도 제목을 갖는다(서브 화면 앱바가 없다). */}
+            <div className="flex items-baseline gap-2 pt-0.5 sm:hidden">
+              <h1 className="font-display text-xl font-extrabold text-text-1">관심 목록</h1>
+              <span className="text-[12.5px] tabular-nums text-text-3">{wishlist.length}개</span>
+            </div>
+            {/* 지면이 갈리는 자리라 트리를 둘로 둔다 — 모바일은 킷대로 2열 카드, 데스크탑은 줄 목록. */}
+            {wishlist.length > 0 ? (
+              <div className="mt-3.5 grid grid-cols-2 gap-x-2 gap-y-[18px] sm:hidden">
+                {wishlist.map((auction) => (
+                  <AuctionCard
+                    key={auction.id}
+                    auction={auction}
+                    wishlisted
+                    onToggleWishlist={(next) => handleWishlistToggled(auction.id, next)}
+                    variant="compact"
+                  />
+                ))}
+              </div>
+            ) : (
+              !loading && (
+                <p className="mt-8 text-center text-[13px] text-text-3 sm:hidden">
+                  아직 찜한 경매가 없어요.
+                </p>
+              )
+            )}
+            <div className="mt-5 hidden sm:block">
               <WishlistTabList
                 items={wishlist}
                 loading={loading}
@@ -857,8 +939,7 @@ export default function MyPage() {
           </>
         ) : (
           <>
-            <h1 className="font-display text-xl font-extrabold text-text-1">판매 내역</h1>
-            <p className="mt-1 text-sm text-text-3">종료되거나 취소된 경매 {sellingHistory.length}건</p>
+            <TabHead title="판매 내역" sub={<>종료되거나 취소된 경매 {sellingHistory.length}건</>} />
             <div className="mt-5">
               <SellingList
                 items={sellingHistory}
@@ -874,14 +955,46 @@ export default function MyPage() {
       </div>
     </div>
   );
+
+  // 모바일 크롬은 두 갈래다. 하단탭이 직접 가리키는 화면(마이 목록·관심)은 **루트**라 앱 셸(상단
+  // 워드마크 바 + 하단 5탭)을 쓰고, 나머지 탭은 **서브 화면**이라 앱바 하나로 들어가고 나온다.
+  // 데스크탑에서는 둘 다 `sm:hidden`으로 접히므로 본문 트리는 그대로 하나다.
+  if (tab === null || tab === "wishlist") {
+    return <MobileShell active={tab === "wishlist" ? "관심" : "마이"}>{body}</MobileShell>;
+  }
+  return (
+    <>
+      {/* 뒤로는 히스토리가 아니라 목록 고정이다 — 알림·배너 딥링크로 곧장 들어온 경우에도
+          나가는 길이 사이트 밖이 아니라 마이 목록이어야 한다. */}
+      <MobilePageHead title={TAB_TITLE[activeTab]} backHref="/mypage" />
+      {body}
+    </>
+  );
+}
+
+// useSearchParams()는 Suspense 경계 안에서만 쓸 수 있다(빌드 시 정적 최적화 요구사항).
+export default function MyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">
+          마이페이지를 불러오는 중...
+        </div>
+      }
+    >
+      <MyPageBody />
+    </Suspense>
+  );
 }
 
 function Thumb({ url, alt }: { url: string | null; alt: string }) {
   return (
     <span className="block h-12 w-12 shrink-0 overflow-hidden rounded-r2 bg-surface-2">
       {url && (
+        // loading="lazy"는 목록 스크롤만을 위한 게 아니다. 모바일에서는 이 목록들이 통째로
+        // 접혀 있는데(메뉴 화면), eager면 화면에 없는 썸네일 6장이 그대로 내려온다(#341과 같은 함정).
         // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
-        <img src={mediaUrl(url)} alt={alt} className="h-full w-full object-cover" />
+        <img src={mediaUrl(url)} alt={alt} loading="lazy" className="h-full w-full object-cover" />
       )}
     </span>
   );
@@ -1173,13 +1286,16 @@ function OrderStatusFooter({
           ),
           action: null,
         };
+      // A안(가상계좌·계좌이체)에서 이 상태는 "서버가 알아서 결제 중"이 아니라 **구매자가 결제할
+      // 차례**다(FE #333). 예전 문구("등록된 카드로 자동 결제돼요")는 카드 자동캡처 시절의 것이고,
+      // 카드 등록 화면이 은닉된 지금은 실행할 수도 없는 안내였다.
       case "PAYMENT_PENDING":
         return {
-          pill: pill("clock", "primary", "결제 진행 중"),
+          pill: pill("clock", "primary", "결제 대기"),
           message: (
-            <>등록된 카드로 자동 결제돼요 · 예상 <b className="font-bold text-text-1">{formatKRW(order.chargeAmount)}</b></>
+            <>가상계좌·계좌이체로 결제해요 · <b className="font-bold text-text-1">{formatKRW(order.chargeAmount)}</b></>
           ),
-          action: null,
+          action: { label: "결제하기", solid: true, href: `/orders/${order.auctionId}/payment` },
         };
       case "PAYMENT_RETRYING":
         return {
@@ -1241,19 +1357,28 @@ function OrderStatusFooter({
     <div className="flex flex-wrap items-center gap-2.5 border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
       {body.pill}
       <span className="min-w-0 flex-1">{body.message}</span>
-      {body.action && (
-        <button
-          type="button"
-          onClick={onGoPayment}
-          className={`shrink-0 rounded-r2 px-3 py-1.5 text-[11px] font-bold transition-colors ${FOCUS_RING} ${
-            body.action.solid
-              ? "bg-text-1 text-white hover:bg-text-2"
-              : "border border-border-2 bg-surface text-text-2 hover:border-text-3 hover:text-text-1"
-          }`}
-        >
-          {body.action.label}
-        </button>
-      )}
+      {body.action &&
+        // 결제창 경로는 별도 페이지라 링크로 나간다. 나머지(카드 등록·변경)는 기존처럼 탭 전환이다.
+        (body.action.href ? (
+          <Link
+            href={body.action.href}
+            className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+          >
+            {body.action.label}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={onGoPayment}
+            className={`shrink-0 rounded-r2 px-3 py-1.5 text-[11px] font-bold transition-colors ${FOCUS_RING} ${
+              body.action.solid
+                ? "bg-text-1 text-white hover:bg-text-2"
+                : "border border-border-2 bg-surface text-text-2 hover:border-text-3 hover:text-text-1"
+            }`}
+          >
+            {body.action.label}
+          </button>
+        ))}
     </div>
   );
 }

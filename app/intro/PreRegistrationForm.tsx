@@ -269,7 +269,13 @@ export default function PreRegistrationForm() {
       </div>
 
       {/* 동의 — 체크박스 옆에서 바로 수집 항목을 펼쳐볼 수 있어야 한다.
-          "동의합니다"만 두고 내용을 다른 페이지에만 두면 동의를 받았다고 보기 어렵다. */}
+          "동의합니다"만 두고 내용을 다른 페이지에만 두면 동의를 받았다고 보기 어렵다.
+
+          ⚠️ **중요한 내용은 접거나 작게 쓰면 안 된다**(법 §22, 시행령 §17, 처리방침 고시 §4).
+          「보유·이용기간」과 「홍보 목적 연락 사실」 두 가지가 여기 해당하고, 요건은
+          9포인트(=12px) 이상이면서 **다른 내용보다 20% 이상 크게**다. 본문이 13px이므로
+          13 × 1.2 = 15.6 → **16px**을 쓴다. 굵기·좌측 규칙선으로 한 번 더 구분한다.
+          접이식(`openConsent`)에는 이 둘을 넣지 않는다 — 펼쳐야 보이면 "명확히 표시"가 아니다. */}
       <div className="mt-5 border-t border-border pt-4">
         <label className="flex cursor-pointer items-start gap-2.5">
           <input
@@ -279,44 +285,59 @@ export default function PreRegistrationForm() {
             className={`mt-0.5 h-[18px] w-[18px] shrink-0 accent-primary ${FOCUS_RING}`}
           />
           <span className="text-[13px] leading-[1.6] text-text-1">
-            <b className="font-extrabold text-primary">[필수]</b> 개인정보 수집·이용에 동의합니다.
+            <b className="font-extrabold text-primary">[필수]</b>{" "}
+            {PRE_REGISTRATION_CONSENT.controller}의 개인정보 수집·이용에 동의합니다.
           </span>
         </label>
+
+        <div className="mt-3 border-l-2 border-primary pl-3.5">
+          <p className="text-[16px] font-extrabold leading-[1.5] tracking-[-0.01em] text-text-1">
+            보유·이용기간 — {PRE_REGISTRATION_CONSENT.retention}
+          </p>
+          <p className="mt-1.5 text-[16px] font-extrabold leading-[1.5] tracking-[-0.01em] text-text-1">
+            {PRE_REGISTRATION_CONSENT.marketingNotice}
+          </p>
+        </div>
 
         <button
           type="button"
           onClick={() => setOpenConsent((v) => !v)}
           aria-expanded={openConsent}
-          className={`mt-2 rounded-r1 text-[12px] font-bold text-text-3 underline underline-offset-4 transition-colors hover:text-text-1 ${FOCUS_RING}`}
+          className={`mt-2.5 rounded-r1 text-[12px] font-bold text-text-3 underline underline-offset-4 transition-colors hover:text-text-1 ${FOCUS_RING}`}
         >
-          {openConsent ? "수집 내용 접기" : "수집 내용 보기"}
+          {openConsent ? "수집 항목 접기" : "수집 항목 보기"}
         </button>
 
         {openConsent && (
           <dl className="mt-2.5 flex flex-col gap-1.5 border-l-2 border-border-2 pl-3.5 text-[12px] leading-[1.7] text-text-3">
             <div className="flex gap-2">
-              <dt className="w-[52px] shrink-0 font-bold text-text-2">수집 항목</dt>
-              <dd>{PRE_REGISTRATION_CONSENT.items}</dd>
+              <dt className="w-[52px] shrink-0 font-bold text-text-2">필수 항목</dt>
+              <dd>{PRE_REGISTRATION_CONSENT.itemsRequired}</dd>
+            </div>
+            <div className="flex gap-2">
+              <dt className="w-[52px] shrink-0 font-bold text-text-2">선택 항목</dt>
+              <dd>{PRE_REGISTRATION_CONSENT.itemsOptional}</dd>
             </div>
             <div className="flex gap-2">
               <dt className="w-[52px] shrink-0 font-bold text-text-2">이용 목적</dt>
               <dd>{PRE_REGISTRATION_CONSENT.purpose}</dd>
             </div>
             <div className="flex gap-2">
-              <dt className="w-[52px] shrink-0 font-bold text-text-2">보유 기간</dt>
-              <dd>{PRE_REGISTRATION_CONSENT.retention}</dd>
+              <dt className="w-[52px] shrink-0 font-bold text-text-2">동의 철회</dt>
+              <dd>{PRE_REGISTRATION_CONSENT.withdrawal}</dd>
             </div>
-            <p className="mt-1">
-              동의를 거부하실 수 있으며, 이 경우 사전 신청이 제한돼요.{" "}
-              <Link
-                href="/privacy"
-                className={`font-bold text-primary underline underline-offset-4 ${FOCUS_RING}`}
-              >
-                전문 보기
-              </Link>
-            </p>
           </dl>
         )}
+
+        <p className="mt-2.5 text-[12px] leading-[1.7] text-text-3">
+          동의를 거부하실 수 있으며, 이 경우 사전 신청이 제한돼요.{" "}
+          <Link
+            href="/privacy"
+            className={`font-bold text-primary underline underline-offset-4 ${FOCUS_RING}`}
+          >
+            전문 보기
+          </Link>
+        </p>
       </div>
 
       {/* aria-live로 두어 스크린리더 사용자도 제출 실패를 알 수 있게 한다. */}

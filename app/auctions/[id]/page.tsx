@@ -6,6 +6,7 @@ import AuctionImageGallery from "@/components/AuctionImageGallery";
 import AuctionOutbidToggle from "@/components/AuctionOutbidToggle";
 import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import BidSection from "@/components/BidSection";
+import MobileAuctionDetail from "@/components/mobile/MobileAuctionDetail";
 import InstantPurchaseSection from "@/components/InstantPurchaseSection";
 import ReportButton from "@/components/ReportButton";
 import SearchLink from "@/components/SearchLink";
@@ -13,6 +14,7 @@ import SellerReviewSummary from "@/components/SellerReviewSummary";
 import SellerShipPanel from "@/components/SellerShipPanel";
 import ShareButton from "@/components/ShareButton";
 import SuccessionOfferBanner from "@/components/SuccessionOfferBanner";
+import { AuctionBiddingProvider } from "@/lib/auction-bidding-context";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { INTERMEDIARY_NOTICE } from "@/lib/business";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
@@ -81,6 +83,9 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
   const isInstantSale = auction.saleType === "INSTANT";
+  // 경매(즉시판매 아님)이고 마감시각이 있을 때만 입찰 상태를 띄운다. 모바일 상세는 이 컨텍스트를
+  // 데스크탑 BidSection과 함께 읽는다 — 상세 하나에 SSE 연결이 둘 열리지 않게.
+  const biddable = !isInstantSale && auction.endAt != null;
 
   // 표 형태 상품 정보 — 우리가 실제로 수집하는 필드만(발매연도·수량 등은 미보유라 제외).
   const specRows: { label: string; value: string }[] = [
@@ -95,11 +100,25 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
     { label: "미개봉", value: auction.unopened ? "예" : "아니오" },
   ];
 
-  return (
-    // 라이브 경매는 모바일 하단 고정 입찰바가 뜨므로, 그 높이만큼 하단 여백을 줘 마지막 콘텐츠가
-    // 바에 가리지 않게 한다(모바일에서만, 즉시판매·종료 건에는 불필요).
+  const actions = (
+    <>
+      <ShareButton title={auction.title} hashtag={auction.artistName?.replace(/\s+/g, "") || undefined} />
+      <AuctionWishlistButton auctionId={auction.id} className={ACTION_ICON_BUTTON} />
+      <ReportButton auctionId={auction.id} />
+    </>
+  );
+
+  const body = (
+    <>
+      {/* 모바일 전용 상세 — 갤러리가 화면폭을 꽉 채우므로 데스크탑 컨테이너 밖에 둔다. */}
+      {biddable && (
+        <div className="sm:hidden">
+          <MobileAuctionDetail auction={auction} actions={actions} />
+        </div>
+      )}
+
     <div
-      className={`mx-auto max-w-[1160px] px-4 py-6 sm:py-8 ${
+      className={`mx-auto max-w-[1160px] px-4 py-6 sm:py-8 ${biddable ? "max-sm:hidden" : ""} ${
         !isInstantSale && auction.status === "LIVE" ? "max-sm:pb-24" : ""
       }`}
     >
@@ -245,13 +264,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
           ) : auction.endAt ? (
             <>
               <BidSection
-                auctionId={auction.id}
-                initialCurrentPrice={auction.currentPrice}
-                initialBidCount={auction.bidCount}
-                initialEndAt={auction.endAt}
                 maxEndAt={auction.maxEndAt}
-                status={auction.status}
-                sellerNickname={auction.sellerNickname}
                 startPrice={auction.startPrice}
                 viewCount={auction.viewCount}
               />
@@ -277,5 +290,21 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
         </Link>
       </div>
     </div>
+    </>
+  );
+
+  if (!biddable) return body;
+
+  return (
+    <AuctionBiddingProvider
+      auctionId={auction.id}
+      initialCurrentPrice={auction.currentPrice}
+      initialBidCount={auction.bidCount}
+      initialEndAt={auction.endAt!}
+      status={auction.status}
+      sellerNickname={auction.sellerNickname}
+    >
+      {body}
+    </AuctionBiddingProvider>
   );
 }

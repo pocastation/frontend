@@ -1,10 +1,11 @@
+import { envValue } from "./env";
 import type { ApiResponse } from "./types";
 
 // 이 fetch는 서버 컴포넌트(Node)에서도 실행될 수 있는데, 그 환경은 브라우저 쿠키를
 // 실을 수 없어 NEXT_PUBLIC_API_URL 누락을 눈치채기 어렵다 — 프로덕션에서는 로컬호스트로
 // 조용히 폴백하는 대신 실제로 요청이 나가는 시점에 크게 실패시킨다.
 export function resolveApiUrl(): string {
-  const configured = process.env.NEXT_PUBLIC_API_URL;
+  const configured = envValue(process.env.NEXT_PUBLIC_API_URL);
   if (configured) {
     return configured;
   }

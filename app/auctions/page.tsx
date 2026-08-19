@@ -1,5 +1,7 @@
 import Link from "next/link";
 import AuctionBrowser from "@/components/AuctionBrowser";
+import MobileBrowse from "@/components/mobile/MobileBrowse";
+import MobileShell from "@/components/mobile/MobileShell";
 import { apiFetch } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionListResponse } from "@/lib/types";
@@ -27,8 +29,26 @@ export default async function AuctionsPage({
   const query = (q ?? "").trim();
   const auctions = await getAuctions(query);
 
+  const content = auctions?.content ?? [];
+  const totalElements = auctions?.totalElements ?? 0;
+  const totalPages = auctions?.totalPages ?? 0;
+
   return (
-    <div className="mx-auto max-w-[1160px] px-4 py-8 sm:py-10">
+    // 모바일과 데스크탑은 지면 구성이 다르다 — 상단 언더라인 탭·정렬 칩 가로스크롤은 모바일만,
+    // 큰 제목·넓은 그리드는 데스크탑만. 데이터는 위에서 한 번만 가져와 양쪽에 넘긴다.
+    <MobileShell active="거래">
+      <div className="sm:hidden">
+        <MobileBrowse
+          key={query}
+          initialAuctions={content}
+          initialTotalElements={totalElements}
+          initialTotalPages={totalPages}
+          saleType="AUCTION"
+          initialQuery={query}
+        />
+      </div>
+
+      <div className="mx-auto hidden max-w-[1160px] px-4 py-8 sm:block sm:py-10">
       <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">경매</h1>
@@ -44,11 +64,12 @@ export default async function AuctionsPage({
 
       <AuctionBrowser
         key={query}
-        initialAuctions={auctions?.content ?? []}
-        initialTotalElements={auctions?.totalElements ?? 0}
-        initialTotalPages={auctions?.totalPages ?? 0}
+        initialAuctions={content}
+        initialTotalElements={totalElements}
+        initialTotalPages={totalPages}
         initialQuery={query}
       />
-    </div>
+      </div>
+    </MobileShell>
   );
 }

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR, Plus_Jakarta_Sans } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import MobileChromeGate from "@/components/MobileChromeGate";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -91,7 +92,10 @@ export default function RootLayout({
                 {/* 이메일 미인증 안내(#244) — 스스로 조건을 판단해 해당 없으면 아무것도 렌더하지 않는다. */}
                 <EmailVerificationBanner />
                 <main className="flex-1">{children}</main>
-                <Footer />
+                {/* 모바일 화면을 갖춘 라우트(홈·목록·경매 상세)에서는 모바일 폭에서만 접힌다. */}
+                <MobileChromeGate>
+                  <Footer />
+                </MobileChromeGate>
               </ToastProvider>
             </WishlistProvider>
           </NotificationProvider>

@@ -3,16 +3,15 @@
 import { useEffect, useState } from "react";
 import { countdownLevel, formatRemaining, type CountdownLevel } from "@/lib/countdown";
 
-// 칩 지면은 항상 잉크(검정)이고 **글자 색만** 급함을 말한다. 12시간 이내부터 "마감임박"이 붙는다.
+// 칩 지면은 흰색이고 **글자 색만** 급함을 말한다. 12시간 이내부터 "마감임박"이 붙는다.
 //
-// 색은 흰 지면용 토큰을 그대로 쓰지 않는다 — 잉크 칩 위에서 `danger`(#DC2626)는 대비 3.9:1로
-// 기준(4.5:1)에 미달하고 `warn`(#D97706)도 5.9:1로 아슬아슬하다. 다크 지면용 밝은 단계를 쓴다
-// (디자인 시스템이 딥스페이스 지면에 규정한 값과 같은 계열, 모바일 홈 배너와도 일치).
+// 흰 칩 위 대비를 계산해 고른 값이다 — `warn`(#D97706)은 3.19:1로 기준(4.5:1)에 미달해
+// 한 단계 짙은 주황을 쓰고, 빨강은 `danger`(#DC2626)가 4.83:1로 통과해 토큰을 그대로 쓴다.
 const LEVEL_TEXT: Record<CountdownLevel, string> = {
-  normal: "#ffffff",
-  soon: "#fba94c", // 9.7:1
-  critical: "#ff8a8a", // 8.3:1
-  ended: "#ffffff",
+  normal: "#111118", // 잉크 18.8:1
+  soon: "#b45309", // 5.02:1
+  critical: "#dc2626", // 4.83:1
+  ended: "#111118",
 };
 
 export default function AuctionCountdown({ endAt }: { endAt: string }) {
@@ -41,12 +40,11 @@ export default function AuctionCountdown({ endAt }: { endAt: string }) {
 
   if (!state) return null;
 
-  // 잉크 칩 — 사진 위에 얹혀도 지면을 빼앗지 않는다. 어두운 사진에서는 칩 경계가 녹고 글자만
-  // 남아 포카가 먼저 보인다. 배경은 늘 잉크이고, 변하는 건 글자 색과 "마감임박" 유무뿐이다.
+  // 흰 칩 — 배경은 늘 흰색이고, 변하는 건 글자 색과 "마감임박" 유무뿐이다(킷의 칩과 같은 지면).
   const urgent = state.level === "soon" || state.level === "critical";
   return (
     <span
-      className="absolute left-1.5 top-1.5 z-[2] rounded-[4px] bg-text-1/80 px-1.5 py-0.5 text-[9.5px] font-extrabold leading-[1.35] tabular-nums tracking-[-0.01em]"
+      className="absolute left-1.5 top-1.5 z-[2] rounded-[4px] bg-white/95 px-1.5 py-0.5 text-[9.5px] font-extrabold leading-[1.35] tabular-nums tracking-[-0.01em]"
       style={{ color: LEVEL_TEXT[state.level] }}
     >
       {urgent ? `마감임박 ${state.label}` : state.label}

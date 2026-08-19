@@ -19,8 +19,9 @@ import { formatKRW } from "@/lib/format";
 //
 // 상태 표시는 좌상단 칩 하나뿐이다. "진행 중" 배지는 없앴다 — 시계가 돌고 있다는 것이 곧 진행
 // 중이라는 뜻이라, 배지를 함께 띄우면 같은 사실을 두 번 말하게 된다.
+// 칩 지면은 흰색 하나로 통일한다 — 카운트다운 칩과 언어가 갈리면 같은 카드에서 두 말을 하게 된다.
 const OVERLAY_CHIP =
-  "absolute left-1.5 top-1.5 z-[2] rounded-[4px] bg-text-1/80 px-1.5 py-0.5 text-[9.5px] font-extrabold leading-[1.35] text-white";
+  "absolute left-1.5 top-1.5 z-[2] rounded-[4px] bg-white/95 px-1.5 py-0.5 text-[9.5px] font-extrabold leading-[1.35] text-text-1";
 
 export default function AuctionCard({
   auction,

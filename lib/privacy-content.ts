@@ -33,7 +33,7 @@ export const PRIVACY_EFFECTIVE_DATE = "2026년 8월 20일";
  * "그때 동의한 방침이 무엇이었는지"를 답할 수 있어야 한다.
  */
 export const PRIVACY_HISTORY: { period: string }[] = [
-  { period: "2026년 8월 4일 ~ 2026년 8월 19일" },
+  { period: "2026년 8월 4일 ~ 2026년 8월 16일" },
 ];
 
 export type PrivacyTable = { head: string[]; rows: string[][] };

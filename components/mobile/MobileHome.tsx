@@ -80,6 +80,7 @@ export default function MobileHome({
                 auction={auction}
                 wishlisted={wishlisted.has(auction.id)}
                 onToggleWishlist={(next) => toggle(auction.id, next)}
+                variant="compact"
               />
             ))}
           </Grid>
@@ -102,6 +103,7 @@ export default function MobileHome({
                 auction={auction}
                 wishlisted={wishlisted.has(auction.id)}
                 onToggleWishlist={(next) => toggle(auction.id, next)}
+                variant="compact"
               />
             ))}
           </Grid>

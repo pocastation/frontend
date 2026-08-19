@@ -153,6 +153,7 @@ export default function MobileBrowse({
               auction={auction}
               wishlisted={wishlisted.has(auction.id)}
               onToggleWishlist={(next) => toggle(auction.id, next)}
+              variant="compact"
             />
           ))}
         </div>

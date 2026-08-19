@@ -26,11 +26,18 @@ export default function AuctionCard({
   auction,
   wishlisted,
   onToggleWishlist,
+  variant = "default",
 }: {
   auction: AuctionResponse;
   wishlisted: boolean;
   onToggleWishlist: (next: boolean) => void;
+  /**
+   * `compact`는 디자인 시스템 모바일 킷의 카드 리듬이다 — 스타명 → 상품명(2줄) → 가격 → 메타.
+   * 기본형(데스크탑)은 가격을 먼저 읽히게 두는 #277 결정을 그대로 유지한다.
+   */
+  variant?: "default" | "compact";
 }) {
+  const compact = variant === "compact";
   const isLive = auction.status === "LIVE";
   const isInstantSale = auction.saleType === "INSTANT";
   const isEnded = auction.status === "ENDED_SOLD" || auction.status === "ENDED_NO_BIDS";
@@ -53,7 +60,7 @@ export default function AuctionCard({
     <Link href={`/auctions/${auction.id}`} className={`group block ${FOCUS_RING}`}>
       {/* 라운드는 이 이미지 타일에만 있다. 로딩 전 지면은 단색이다 — 회색 그라디언트는
           이미지가 없다는 사실을 굳이 장식하던 것이라 걷어냈다. */}
-      <div className="relative aspect-[4/5] overflow-hidden rounded-[12px] bg-surface-2">
+      <div className={`relative overflow-hidden bg-surface-2 ${compact ? "aspect-[1/1.18] rounded-r1" : "aspect-[4/5] rounded-[12px]"}`}>
         {showImage ? (
           <>
             {/* 로딩 중에는 shimmer가 이미지 뒤에서 비친다. 이미지는 항상 불투명하게 두어
@@ -102,14 +109,40 @@ export default function AuctionCard({
             auctionId={auction.id}
             active={wishlisted}
             onToggle={onToggleWishlist}
-            className={`absolute right-1.5 bottom-1.5 z-[2] flex h-7 w-7 items-center justify-center rounded-full text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] transition-colors hover:text-accent ${FOCUS_RING}`}
+            className={`absolute z-[2] flex items-center justify-center rounded-full text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] transition-colors hover:text-accent ${
+              compact ? "bottom-0.5 right-0.5 h-8 w-8" : "bottom-1.5 right-1.5 h-7 w-7"
+            } ${FOCUS_RING}`}
           />
         )}
       </div>
 
-      {/* 가격이 첫 줄이다. 경매에서 가장 먼저 읽는 수치가 카드 바닥에서 입찰 횟수와 같은 크기로
-          눌려 있었다 — 번개장터가 가격을 제목 위에 두는 순서를 따른다. */}
-      <div className="px-0.5 pt-2.5">
+      {compact ? (
+        // 킷 리듬 — 스타명(11.5/800) → 상품명(12.5, 2줄) → 가격(현재/즉시 라벨 + 15.5/800) → 메타(11)
+        <div className="pt-[7px]">
+          {auction.artistName && (
+            <p className="truncate text-[11.5px] font-extrabold text-text-1">{auction.artistName}</p>
+          )}
+          <p className="mt-0.5 line-clamp-2 text-[12.5px] leading-[1.4] text-text-2">{auction.title}</p>
+          <p className="mt-[5px] flex items-baseline gap-1">
+            <span className={`text-[11px] font-extrabold ${isInstantSale ? "text-text-3" : "text-primary"}`}>
+              {isInstantSale ? "즉시" : "현재"}
+            </span>
+            <span className={`font-display text-[15.5px] font-extrabold tracking-[-0.02em] tabular-nums ${isEnded ? "text-text-3" : "text-text-1"}`}>
+              {formatKRW(displayPrice)}
+            </span>
+          </p>
+          <p className="mt-[3px] text-[11px] tabular-nums text-text-3">
+            {isInstantSale
+              ? "즉시구매"
+              : auction.status === "ENDED_NO_BIDS"
+                ? "입찰 없음"
+                : `입찰 ${auction.bidCount}`}
+          </p>
+        </div>
+      ) : (
+        // 기본형(데스크탑) — 가격이 첫 줄이다. 경매에서 가장 먼저 읽는 수치가 카드 바닥에서
+        // 입찰 횟수와 같은 크기로 눌려 있었다(#277). 이 순서는 그대로 둔다.
+        <div className="px-0.5 pt-2.5">
         <p className={`font-display text-[17px] font-extrabold tracking-[-0.03em] tabular-nums ${isEnded ? "text-text-3" : "text-text-1"}`}>
           {formatKRW(displayPrice)}
         </p>
@@ -124,6 +157,7 @@ export default function AuctionCard({
               : `${auction.bidCount}회 입찰`}
         </p>
       </div>
+      )}
     </Link>
   );
 }

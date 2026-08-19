@@ -84,7 +84,14 @@ export default function MobileDetailGallery({
         />
       )}
 
-      {actions && <div className="absolute right-3 top-3 z-[3] flex gap-1.5">{actions}</div>}
+      {actions && (
+        // 사진 위에 아이콘만 얹으면 밝은 사진에서 묻힌다(연회색 아이콘 + 배경 없음). 공유·찜·신고
+        // 컴포넌트를 고치지 않고 여기서만 흰 반투명 원을 깐다 — 데스크탑 액션 줄은 흰 지면 위라
+        // 지금 그대로다. `>*>button`은 공유·신고의 트리거만 잡는다(펼친 메뉴는 한 단계 더 깊다).
+        <div className="absolute right-3 top-3 z-[3] flex gap-1.5 [&>*>button]:!rounded-full [&>*>button]:!bg-white/90 [&>*>button]:!text-text-1 [&>*>button]:backdrop-blur-[4px] [&>button]:!rounded-full [&>button]:!bg-white/90 [&>button]:!text-text-1 [&>button]:backdrop-blur-[4px]">
+          {actions}
+        </div>
+      )}
 
       {slides.length > 1 && (
         <>

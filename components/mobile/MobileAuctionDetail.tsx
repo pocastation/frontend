@@ -10,6 +10,7 @@ import { useAuctionBidding } from "@/lib/auction-bidding-context";
 import { useHasMyBid } from "@/lib/use-has-my-bid";
 import { BID_MIN_INCREMENT, buyerFee, estimatedTotal } from "@/lib/fees";
 import { formatCountdown, formatKRW, formatRelativeTime } from "@/lib/format";
+import { INTERMEDIARY_NOTICE } from "@/lib/business";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionDetailResponse, SellerRatingResponse } from "@/lib/types";
@@ -26,6 +27,7 @@ import type { AuctionDetailResponse, SellerRatingResponse } from "@/lib/types";
 
 const TAB_PRODUCT = "상품 정보";
 const TAB_BIDS = "입찰 이력";
+const TAB_DELIVERY = "배송·환불";
 
 // BE가 내려주는 등급 라벨에는 이모지가 붙어 온다("덕린이 🌱"). 제품 화면은 이모지를 쓰지 않으므로
 // 글자만 남긴다 — 등급 이름 자체는 BE 값을 그대로 쓴다(우리가 새로 짓지 않는다).
@@ -213,14 +215,8 @@ export default function MobileAuctionDetail({
 
       <div className="px-[14px] pt-4">
         <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1.5 text-[11.5px] font-bold">
-            <span
-              aria-hidden="true"
-              className={`h-1.5 w-1.5 rounded-full ${isLive ? (endingSoon ? "bg-warn" : "bg-ok") : "bg-text-3"}`}
-            />
-            <span className={isLive ? (endingSoon ? "text-warn" : "text-ok") : "text-text-3"}>
-              {isLive ? (endingSoon ? "마감임박" : "진행 중") : "종료"}
-            </span>
+          <span className={`text-[11.5px] font-bold ${isLive ? (endingSoon ? "text-warn" : "text-ok") : "text-text-3"}`}>
+            {isLive ? (endingSoon ? "마감임박" : "진행 중") : "종료"}
           </span>
           {/* 스타 이름을 누르면 그 스타의 페이지로 간다 — 같은 스타 매물을 이어 보는 가장 짧은 길이다. */}
           {auction.artistName && (
@@ -277,7 +273,7 @@ export default function MobileAuctionDetail({
 
         {/* 탭 — 상품 정보 / 입찰 이력 */}
         <div className="mt-5 flex gap-4 border-b border-border">
-          {[TAB_PRODUCT, TAB_BIDS].map((name) => {
+          {[TAB_PRODUCT, TAB_BIDS, TAB_DELIVERY].map((name) => {
             const on = tab === name;
             return (
               <button
@@ -296,7 +292,47 @@ export default function MobileAuctionDetail({
           })}
         </div>
 
-        {tab === TAB_PRODUCT ? (
+        {tab === TAB_DELIVERY ? (
+          <div className="pt-3.5">
+            {/* 확정된 사실만 적는다 — 기간·조건 같은 숫자는 운영정책이 정본이라 여기서 새로 만들지 않는다. */}
+            <dl className="divide-y divide-border border-y border-border">
+              <div className="py-2.5">
+                <dt className="text-[12.5px] font-extrabold text-text-1">배송비</dt>
+                <dd className="mt-1 text-[13px] leading-relaxed text-text-2">
+                  판매자가 부담해요. 구매자가 따로 낼 배송비는 없어요.
+                </dd>
+              </div>
+              <div className="py-2.5">
+                <dt className="text-[12.5px] font-extrabold text-text-1">받는 주소</dt>
+                <dd className="mt-1 text-[13px] leading-relaxed text-text-2">
+                  입찰 전에 등록해요. 낙찰되면 등록한 주소로 판매자가 보내드려요.
+                </dd>
+              </div>
+              <div className="py-2.5">
+                <dt className="text-[12.5px] font-extrabold text-text-1">환불·분쟁</dt>
+                <dd className="mt-1 text-[13px] leading-relaxed text-text-2">
+                  기준과 절차는 운영정책을 따라요.
+                </dd>
+              </div>
+            </dl>
+            <div className="mt-3 flex gap-3">
+              <Link href="/policy" className={`text-[12.5px] font-bold text-text-2 underline ${FOCUS_RING}`}>
+                운영정책 보기
+              </Link>
+              <Link href="/guide" className={`text-[12.5px] font-bold text-text-2 underline ${FOCUS_RING}`}>
+                이용 방법
+              </Link>
+            </div>
+            <p className="mt-4 text-[11px] leading-relaxed text-text-3">{INTERMEDIARY_NOTICE}</p>
+            {/* 문의는 신고와 성격이 다르다 — 사진 위 아이콘으로 올리지 않고 여기 조용히 둔다. */}
+            <Link
+              href="/inquiries/new"
+              className={`mt-3 inline-block text-[12.5px] font-bold text-text-3 underline ${FOCUS_RING}`}
+            >
+              이 매물 문의하기
+            </Link>
+          </div>
+        ) : tab === TAB_PRODUCT ? (
           <div className="pt-3.5">
             {auction.description && (
               <p className="whitespace-pre-wrap text-sm leading-[1.75] text-text-2">{auction.description}</p>
@@ -310,12 +346,12 @@ export default function MobileAuctionDetail({
               ))}
             </dl>
             {auction.conditionNote && (
-              <div className="mt-4 border-l-2 border-warn pl-3">
-                <p className="text-[12px] font-extrabold text-text-1">하자 안내</p>
+              <>
+                <p className="mt-4 text-[12px] font-extrabold text-text-1">하자 안내</p>
                 <p className="mt-1 whitespace-pre-wrap text-[13px] leading-relaxed text-text-2">
                   {auction.conditionNote}
                 </p>
-              </div>
+              </>
             )}
           </div>
         ) : (

@@ -1,4 +1,6 @@
 import AuctionBrowser from "@/components/AuctionBrowser";
+import MobileBrowse from "@/components/mobile/MobileBrowse";
+import MobileShell from "@/components/mobile/MobileShell";
 import type { SortKey } from "@/components/AuctionExplorer";
 import { apiFetch } from "@/lib/api";
 import type { AuctionListResponse } from "@/lib/types";
@@ -28,20 +30,35 @@ async function getInstantSales(): Promise<AuctionListResponse | null> {
 export default async function InstantSalesPage() {
   const sales = await getInstantSales();
 
+  const content = sales?.content ?? [];
+  const totalElements = sales?.totalElements ?? 0;
+  const totalPages = sales?.totalPages ?? 0;
+
   return (
-    <div className="mx-auto max-w-[1160px] px-4 py-8 sm:py-10">
+    <MobileShell active="거래">
+      <div className="sm:hidden">
+        <MobileBrowse
+          initialAuctions={content}
+          initialTotalElements={totalElements}
+          initialTotalPages={totalPages}
+          saleType="INSTANT"
+        />
+      </div>
+
+      <div className="mx-auto hidden max-w-[1160px] px-4 py-8 sm:block sm:py-10">
       <div className="mb-7">
         <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">즉시판매</h1>
         <p className="mt-1.5 text-sm text-text-3">마감까지 기다리지 않고 바로 구매할 수 있는 포토카드를 확인해보세요.</p>
       </div>
 
       <AuctionBrowser
-        initialAuctions={sales?.content ?? []}
-        initialTotalElements={sales?.totalElements ?? 0}
-        initialTotalPages={sales?.totalPages ?? 0}
+        initialAuctions={content}
+        initialTotalElements={totalElements}
+        initialTotalPages={totalPages}
         saleType="INSTANT"
         sortOptions={INSTANT_SORT_OPTIONS}
       />
-    </div>
+      </div>
+    </MobileShell>
   );
 }

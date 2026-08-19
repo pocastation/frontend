@@ -13,7 +13,13 @@ export function isMobileShellRoute(pathname: string): boolean {
 // 대신하고, 경매 상세는 킷대로 사진 위 뒤로가기 하나로 들어가고 나온다 — 상세에 헤더와
 // 푸터가 함께 뜨면 사진이 화면 위에서 밀리고, 하단 입찰바 아래로 푸터가 끌려 나온다.
 const MOBILE_DETAIL_PATTERN = /^\/auctions\/\d+$/;
+// 판매 등록도 같다 — 킷은 위저드 머리에 닫기(X)를 두고 전역 크롬을 걷는다.
+const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new"];
 
 export function isMobileChromeHiddenRoute(pathname: string): boolean {
-  return isMobileShellRoute(pathname) || MOBILE_DETAIL_PATTERN.test(pathname);
+  return (
+    isMobileShellRoute(pathname) ||
+    MOBILE_DETAIL_PATTERN.test(pathname) ||
+    MOBILE_FULLSCREEN_ROUTES.includes(pathname)
+  );
 }

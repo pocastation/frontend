@@ -8,6 +8,14 @@ export const SITE_URL =
   envValue(process.env.NEXT_PUBLIC_SITE_URL) ||
   (process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://pocastation.com");
 
+// 상용 지면인지. `NEXT_PUBLIC_SITE_URL`이 상용 도메인일 때만 참이다.
+//
+// 배포 게이트를 세우면서 `staging.pocastation.com`이 `develop`을 미리 보여주는 자리가 됐다.
+// 그 지면은 **상용과 같은 내용을 서빙하고 실 DB를 본다** — 그래서 두 가지를 갈라야 한다.
+// ① 크롤러에게 통째로 닫는다(중복 콘텐츠 + 검색으로 프리프로덕션에 유입되는 것을 막는다)
+// ② 화면 맨 위에 여기가 어디인지 띄운다(거기서 만든 입찰·주문은 진짜다)
+export const IS_PRODUCTION_SITE = SITE_URL === "https://pocastation.com";
+
 export const SITE_NAME = "Pocastation";
 export const SITE_TITLE = "Pocastation — K-POP 포카 경매";
 export const SITE_DESCRIPTION = "K-pop 포토카드 특화 경매 플랫폼";

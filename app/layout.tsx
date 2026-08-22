@@ -3,6 +3,7 @@ import { Noto_Sans_KR, Plus_Jakarta_Sans } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MobileChromeGate from "@/components/MobileChromeGate";
+import PreProductionBar from "@/components/PreProductionBar";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -88,6 +89,8 @@ export default function RootLayout({
           <NotificationProvider>
             <WishlistProvider>
               <ToastProvider>
+                {/* 상용에서는 아무것도 렌더하지 않는다. staging·로컬에서만 맨 위에 띠가 붙는다. */}
+                <PreProductionBar />
                 <Header />
                 {/* 이메일 미인증 안내(#244) — 스스로 조건을 판단해 해당 없으면 아무것도 렌더하지 않는다. */}
                 <EmailVerificationBanner />

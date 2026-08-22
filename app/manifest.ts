@@ -15,7 +15,7 @@ import { SITE_DESCRIPTION } from "@/lib/site";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "포카스테이션 — K-POP 포카 경매",
+    name: "포카스테이션 — K-POP 포카 거래",
     // 홈 화면 아이콘 아래에 붙는 이름. 길면 잘리므로 서비스명만 둔다.
     short_name: "포카스테이션",
     description: SITE_DESCRIPTION,
@@ -37,7 +37,7 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
     shortcuts: [
-      { name: "진행 중인 경매", url: "/auctions" },
+      { name: "진행 중인 매물", url: "/auctions" },
       { name: "즉시판매", url: "/instant-sales" },
       { name: "관심 목록", url: "/mypage?tab=wishlist" },
     ],

@@ -10,7 +10,7 @@ import type { AuctionResponse, PopularSellerResponse } from "@/lib/types";
 /**
  * 홈 랭킹 프리뷰 — 종류별로 1~3위만 보여주고 좌우로 넘겨 본다.
  *
- * <p>**집계가 실제로 있는 것만 올린다.** 지금은 포카(입찰 수)와 판매자(신뢰 등급)뿐이고,
+ * <p>**집계가 실제로 있는 것만 올린다.** 지금은 포카(제안 수)와 판매자(신뢰 등급)뿐이고,
  * 스타 랭킹은 매물 수 집계 API가 없어서 넣지 않았다 — 없는 실적을 그럴듯하게 채우지 않는다는
  * 원칙(신뢰가 서비스의 핵심 가치)이 우선이다. 집계가 생기면 페이지를 한 장 더 붙이면 된다.
  *
@@ -92,7 +92,7 @@ export default function MobileRankTop3({
   const pages = [
     auctions.length > 0 && {
       key: "포카",
-      note: "입찰 많은 순",
+      note: "제안 많은 순",
       href: "/auctions?sort=popular",
       body: auctions.slice(0, 3).map((auction, i) => <AuctionRow key={auction.id} auction={auction} index={i} />),
     },

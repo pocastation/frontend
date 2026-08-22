@@ -33,7 +33,7 @@ async function getEndingSoonAuctions(): Promise<AuctionListResponse | null> {
   }
 }
 
-// "실시간 인기 경매" 사이드바 — 새 집계를 만들지 않고 기존 인기순(sort=popular=입찰수 desc) API를
+// "실시간 인기 매물" 사이드바 — 새 집계를 만들지 않고 기존 인기순(sort=popular=제안수 desc) API를
 // 그대로 재사용한다. 모바일 홈의 포카 랭킹도 같은 응답을 쓴다.
 async function getPopularAuctions(): Promise<AuctionListResponse | null> {
   try {
@@ -43,9 +43,9 @@ async function getPopularAuctions(): Promise<AuctionListResponse | null> {
   }
 }
 
-// 홈 배너 — 관리자가 지정(featured)한 LIVE 경매. 데스크탑 Hero는 단일 슬롯이라 첫 건만 쓰고,
+// 홈 배너 — 관리자가 지정(featured)한 LIVE 매물. 데스크탑 Hero는 단일 슬롯이라 첫 건만 쓰고,
 // 모바일 배너는 캐러셀이라 여러 건을 슬라이드로 넘긴다. 지정이 없으면 빈 목록이 오고,
-// 데스크탑은 아래에서 인기 경매로 폴백한다(#150). 모바일은 브랜드 카피 한 장만 남는다.
+// 데스크탑은 아래에서 인기 매물로 폴백한다(#150). 모바일은 브랜드 카피 한 장만 남는다.
 async function getFeaturedAuctions(): Promise<AuctionListResponse | null> {
   try {
     return await apiFetch<AuctionListResponse>("/api/auctions/featured?size=5", { cache: "no-store" });

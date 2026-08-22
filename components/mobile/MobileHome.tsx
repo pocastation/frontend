@@ -85,7 +85,7 @@ export default function MobileHome({
             ))}
           </Grid>
         ) : (
-          <Empty message="진행 중인 경매가 아직 없어요" />
+          <Empty message="진행 중인 매물이 아직 없어요" />
         )}
       </section>
 
@@ -121,7 +121,7 @@ export default function MobileHome({
         href="/auctions/ended"
         className={`mt-1.5 block border-t border-border px-[14px] py-4 text-center text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
       >
-        종료된 경매로 시세 확인하기
+        종료된 거래로 시세 확인하기
       </Link>
     </>
   );

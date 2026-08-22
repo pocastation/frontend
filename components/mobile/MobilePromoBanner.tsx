@@ -11,7 +11,7 @@ import type { AuctionResponse } from "@/lib/types";
 /**
  * 모바일 홈 메인 배너 — 딥스페이스 지면 위 플랫 캐러셀.
  *
- * <p>**1장은 브랜드 확정 카피 고정**, 2장부터 관리자가 지정(featured)한 홍보 경매다. 지정이
+ * <p>**1장은 브랜드 확정 카피 고정**, 2장부터 관리자가 지정(featured)한 홍보 매물이다. 지정이
  * 없으면 브랜드 한 장만 남고 도트도 뜨지 않는다 — 없는 매물을 채워 넣지 않는다.
  *
  * <p>딥스페이스(#160C2E)와 별빛 골드는 **브랜드 면 전용**이라 이 배너 밖으로 나가지 않는다.
@@ -43,7 +43,7 @@ const LEVEL_COLOR: Record<CountdownLevel, string> = {
   ended: "rgba(255,255,255,0.4)",
 };
 const LEVEL_LABEL: Record<CountdownLevel, string> = {
-  normal: "지금 경매 중",
+  normal: "지금 판매 중",
   soon: "마감임박",
   critical: "마감임박",
   ended: "종료",
@@ -109,7 +109,7 @@ function BrandSlide() {
         href="/auctions"
         className={`mt-[18px] flex h-11 w-full items-center justify-center rounded-[7px] bg-primary text-sm font-extrabold text-white ${FOCUS_RING}`}
       >
-        진행 중인 경매 보기 →
+        진행 중인 매물 보기 →
       </Link>
       <Link
         href="/guide"
@@ -144,7 +144,7 @@ function AuctionSlide({ auction }: { auction: AuctionResponse }) {
           </span>
         </p>
         <p className="mt-1.5 flex items-center gap-2 whitespace-nowrap text-[11.5px] text-white/55">
-          <span className="tabular-nums">{auction.bidCount}회 입찰</span>
+          <span className="tabular-nums">제안 {auction.bidCount}회</span>
           {auction.endAt && <span aria-hidden="true" className="h-0.5 w-0.5 rounded-full bg-white/30" />}
           {auction.endAt && <DarkCountdown endAt={auction.endAt} />}
         </p>
@@ -152,7 +152,7 @@ function AuctionSlide({ auction }: { auction: AuctionResponse }) {
           href={`/auctions/${auction.id}`}
           className={`mt-3.5 inline-flex h-11 items-center justify-center whitespace-nowrap rounded-[7px] bg-primary px-4 text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
         >
-          입찰하러 가기 →
+          제안하러 가기 →
         </Link>
       </div>
       <div className="aspect-[4/5] w-[108px] flex-shrink-0 overflow-hidden rounded-[12px] border border-white/15 bg-white/[0.06]">
@@ -179,7 +179,7 @@ function AuctionSlide({ auction }: { auction: AuctionResponse }) {
 }
 
 export default function MobilePromoBanner({ featured }: { featured: AuctionResponse[] }) {
-  // 홍보 경매는 최대 3건 — 그 이상 넘기면 아무도 끝까지 보지 않는다.
+  // 홍보 매물은 최대 3건 — 그 이상 넘기면 아무도 끝까지 보지 않는다.
   const promoted = featured.slice(0, 3);
   const total = promoted.length + 1;
   const [index, setIndex] = useState(0);

@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth-context";
 import ToggleSwitch from "@/components/ToggleSwitch";
 import type { NotificationSettings as Settings } from "@/lib/types";
 
-// 마이페이지 "알림 설정" 탭 — 1단계는 추월 알림 on/off만. 낙찰·유찰 같은 거래성(정보성) 알림은
+// 마이페이지 "알림 설정" 탭 — 1단계는 추월 알림 on/off만. 거래 성사 같은 거래성(정보성) 알림은
 // 끌 수 없다(§12.5).
 export default function NotificationSettings() {
   const { fetchWithAuth } = useAuth();
@@ -70,14 +70,14 @@ export default function NotificationSettings() {
       )}
       <section className="rounded-r3 border border-border bg-surface p-5">
         <ToggleRow
-          title="입찰 추월 알림"
-          description="내가 최고 입찰자에서 밀렸을 때 알려드려요."
+          title="제안 추월 알림"
+          description="내가 최고가 제안자에서 밀렸을 때 알려드려요."
           checked={settings.outbidEnabled}
           disabled={saving}
           onChange={toggleOutbid}
         />
         <div className="mt-4 border-t border-border pt-4">
-          <p className="text-sm font-bold text-text-2">낙찰·유찰 알림</p>
+          <p className="text-sm font-bold text-text-2">거래 결과 알림</p>
           <p className="mt-0.5 text-xs text-text-3">
             거래에 꼭 필요한 알림이라 항상 받아요. (끌 수 없어요)
           </p>

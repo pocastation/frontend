@@ -8,7 +8,7 @@ import { FOCUS_RING, INPUT_CLASS } from "@/lib/ui";
 type Carrier = { code: string; name: string };
 
 // 판매자 발송 처리(운송장 입력, #119). 택배사는 드롭다운(#134) — 선택 시 표시명(carrier)과
-// 배송추적용 코드(carrierCode)를 함께 보낸다. 경매 상세·마이페이지 판매 내역 두 곳에서 재사용한다.
+// 배송추적용 코드(carrierCode)를 함께 보낸다. 매물 상세·마이페이지 판매 내역 두 곳에서 재사용한다.
 export default function OrderShipForm({
   auctionId,
   onShipped,

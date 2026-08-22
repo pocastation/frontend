@@ -12,12 +12,12 @@ import { FOCUS_RING } from "@/lib/ui";
 import type { NotificationListResponse, NotificationResponse, NotificationType } from "@/lib/types";
 
 // 타입별 표기 — 카테고리 아이콘(공용 StatusIcon) + 의미색 톤.
-// 톤: 진행성=primary, 완료·낙찰=ok(그린), 실패·지연=accent(레드), 종료·취소=중립.
+// 톤: 진행성=primary, 완료·거래 성사=ok(그린), 실패·지연=accent(레드), 종료·취소=중립.
 const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; icon: string }> = {
-  OUTBID: { label: "입찰 추월", tone: "primary", icon: "trendingUp" },
-  AUCTION_WON: { label: "낙찰", tone: "ok", icon: "award" },
+  OUTBID: { label: "제안 추월", tone: "primary", icon: "trendingUp" },
+  AUCTION_WON: { label: "거래 성사", tone: "ok", icon: "award" },
   AUCTION_LOST: { label: "패찰", tone: "neutral", icon: "minus" },
-  AUCTION_ENDED_NO_BIDS: { label: "유찰", tone: "neutral", icon: "minus" },
+  AUCTION_ENDED_NO_BIDS: { label: "제안 없음", tone: "neutral", icon: "minus" },
   AUCTION_REJECTED: { label: "보완 필요", tone: "accent", icon: "alertCircle" },
   AUCTION_CANCELLED: { label: "매물 취소", tone: "accent", icon: "xCircle" },
   PAYMENT_COMPLETED: { label: "결제 완료", tone: "ok", icon: "card" },
@@ -119,7 +119,7 @@ export default function NotificationsPage() {
     }
   }
 
-  // 알림 클릭 — 읽음 처리 후 연결된 경매로 이동. 읽음 API 실패는 이동을 막지 않는다(뱃지만 지연 반영).
+  // 알림 클릭 — 읽음 처리 후 연결된 매물로 이동. 읽음 API 실패는 이동을 막지 않는다(뱃지만 지연 반영).
   async function handleClick(notification: NotificationResponse) {
     if (!notification.isRead) {
       setNotifications((prev) => prev.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n)));
@@ -135,7 +135,7 @@ export default function NotificationsPage() {
       router.push("/inquiries");
       return;
     }
-    // 배송지 입력은 경매 상세가 아니라 구매 내역에서 한다 — 상품 페이지로 보내면
+    // 배송지 입력은 매물 상세가 아니라 구매 내역에서 한다 — 상품 페이지로 보내면
     // "입력하라"는 알림을 받고 입력할 곳이 없는 화면에 도착한다.
     // 마이페이지에 들어가면 미입력 주문의 배송지 팝업이 자동으로 열린다.
     if (notification.type === "DELIVERY_ADDRESS_REQUIRED") {
@@ -158,7 +158,7 @@ export default function NotificationsPage() {
       <div className="mb-6 flex items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">알림</h1>
-          <p className="mt-1.5 text-sm text-text-3">입찰 추월·거래 소식을 모아봐요.</p>
+          <p className="mt-1.5 text-sm text-text-3">제안 추월·거래 소식을 모아봐요.</p>
         </div>
         {hasUnread && (
           <button
@@ -183,7 +183,7 @@ export default function NotificationsPage() {
         <div className="flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-20 text-center text-text-3">
           <BellIcon />
           <p className="text-sm font-bold text-text-2">아직 받은 알림이 없어요.</p>
-          <p className="text-xs">입찰 추월·낙찰·유찰 소식을 여기서 받아볼 수 있어요.</p>
+          <p className="text-xs">제안 추월·거래 성사 소식을 여기서 받아볼 수 있어요.</p>
         </div>
       ) : (
         // 승인 시안 B — 카테고리 리딩 아이콘(의미색 톤) + 안읽음은 우측 단일 닷. 읽음 행은 배경·아이콘을 가라앉힌다.

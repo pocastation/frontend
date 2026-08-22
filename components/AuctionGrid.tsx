@@ -4,13 +4,13 @@ import AuctionCard from "@/components/AuctionCard";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import type { AuctionResponse } from "@/lib/types";
 
-// 서버 컴포넌트(아티스트 상세·판매자 프로필)는 위시리스트 훅을 못 쓰므로, 경매 목록만 감싸는
+// 서버 컴포넌트(아티스트 상세·판매자 프로필)는 위시리스트 훅을 못 쓰므로, 매물 목록만 감싸는
 // 클라이언트 조각으로 분리했다(AuctionExplorer/Hero와 같은 이유).
 // 빈 상태 문구는 호출부마다 달라서 프롭으로 받는다(기본값은 아티스트 상세 기준).
 export default function AuctionGrid({
   auctions,
-  emptyTitle = "아직 등록된 경매가 없어요",
-  emptyDescription = "이 스타의 경매가 등록되면 여기에 표시돼요.",
+  emptyTitle = "아직 등록된 매물이 없어요",
+  emptyDescription = "이 스타의 매물이 등록되면 여기에 표시돼요.",
 }: {
   auctions: AuctionResponse[];
   emptyTitle?: string;

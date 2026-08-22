@@ -5,7 +5,7 @@ const FOOTER_COLUMNS = [
   {
     title: "서비스",
     links: [
-      { label: "경매 둘러보기", href: "/" },
+      { label: "매물 둘러보기", href: "/" },
       { label: "이용 방법", href: "/guide" },
     ],
   },
@@ -63,7 +63,7 @@ export default function Footer() {
             <Wordmark tone="inverse" className="text-[22px] leading-none" />
           </div>
           <p className="max-w-[22ch] text-xs leading-relaxed">
-            K-pop 포토카드 특화 경매 플랫폼
+            K-pop 포토카드 특화 거래 플랫폼
           </p>
         </div>
         {FOOTER_COLUMNS.map((column) => (

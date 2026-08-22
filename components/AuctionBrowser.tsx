@@ -70,8 +70,8 @@ export default function AuctionBrowser({
 
   const resolvedPlaceholder = searchPlaceholder ?? (saleType === "INSTANT"
     ? "즉시판매 제목, 스타명, 멤버명으로 검색"
-    : "경매 제목, 스타명, 멤버명으로 검색");
-  const resolvedEmptyTitle = emptyTitle ?? (saleType === "INSTANT" ? "등록된 즉시판매가 없습니다" : "진행 중인 경매가 없습니다");
+    : "매물 제목, 스타명, 멤버명으로 검색");
+  const resolvedEmptyTitle = emptyTitle ?? (saleType === "INSTANT" ? "등록된 즉시판매가 없습니다" : "진행 중인 매물이 없습니다");
 
   return (
     <div>

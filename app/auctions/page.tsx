@@ -6,7 +6,7 @@ import { apiFetch } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionListResponse } from "@/lib/types";
 
-export const metadata = { title: "경매 — Pocastation" };
+export const metadata = { title: "제안판매 — Pocastation" };
 
 async function getAuctions(query: string): Promise<AuctionListResponse | null> {
   const params = new URLSearchParams({ saleType: "AUCTION", sort: "latest", size: "20" });
@@ -51,14 +51,14 @@ export default async function AuctionsPage({
       <div className="mx-auto hidden max-w-[1160px] px-4 py-8 sm:block sm:py-10">
       <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">경매</h1>
-          <p className="mt-1.5 text-sm text-text-3">진행 중인 K-pop 포토카드 경매를 확인하고 입찰해보세요.</p>
+          <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">제안판매</h1>
+          <p className="mt-1.5 text-sm text-text-3">진행 중인 K-pop 포토카드 매물을 확인하고 가격을 제안해보세요.</p>
         </div>
         <Link
           href="/auctions/ended"
           className={`shrink-0 text-sm font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}
         >
-          종료된 경매 보기 →
+          종료된 거래 보기 →
         </Link>
       </div>
 

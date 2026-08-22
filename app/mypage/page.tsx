@@ -1255,12 +1255,6 @@ function WishlistTabList({
   );
 }
 
-const BID_STATUS_LABEL: Record<string, string> = {
-  ENDED_SOLD: "낙찰 종료",
-  ENDED_NO_BIDS: "유찰",
-  SCHEDULED: "시작 예정",
-};
-
 // 주문 결제 상태 푸터(#113, 승인 시안 v2) — 도트 인디케이터 + 안내문 + (필요 시) 액션 버튼.
 // 색은 의미로만: 완료=ok, 조치 필요=accent, 재시도 대기=warn, 진행=primary, 취소=중립.
 function OrderStatusFooter({
@@ -1891,7 +1885,7 @@ function MyBiddingList({
                     {formatKRW(item.currentPrice)}
                   </span>
                   <span className="block text-[10.5px] text-text-3">
-                    {isLive ? formatTimeLeft(item.endAt) : (BID_STATUS_LABEL[item.status] ?? "종료")}
+                    {isLive ? formatTimeLeft(item.endAt) : (AUCTION_STATUS_LABEL[item.status] ?? "종료")}
                   </span>
                 </span>
               </Link>

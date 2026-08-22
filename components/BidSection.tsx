@@ -8,7 +8,7 @@ import { useAuctionBidding } from "@/lib/auction-bidding-context";
 import { formatKRW, formatCountdown, formatRelativeTime, formatDateTimeKST } from "@/lib/format";
 import { BID_MIN_INCREMENT, buyerFee, estimatedTotal } from "@/lib/fees";
 import { FOCUS_RING, PRIMARY_BUTTON_CLASS } from "@/lib/ui";
-import type { AuctionStatus } from "@/lib/types";
+import { AUCTION_STATUS_LABEL } from "@/lib/labels";
 
 // 살아 움직이는 값(현재가·입찰수·마감시각·이력·입찰 요청)은 전부 AuctionBiddingProvider가 갖는다.
 // 여기 props로 남은 것은 변하지 않는 표시용 값뿐이다.
@@ -16,13 +16,6 @@ type Props = {
   maxEndAt: string | null;
   startPrice: number;
   viewCount: number;
-};
-
-// 마감/유찰 등 종료 상태를 한국어로. LIVE는 카운트다운이 대신 표시된다.
-const STATUS_LABEL: Partial<Record<AuctionStatus, string>> = {
-  ENDED_SOLD: "낙찰 종료",
-  ENDED_NO_BIDS: "유찰 종료",
-  SCHEDULED: "시작 전",
 };
 
 // 경매 상세의 "호가창" — 영어경매는 양방향 잔량(매도측)이 없으므로 주식 호가창을 그대로 옮기지
@@ -103,7 +96,7 @@ export default function BidSection({ maxEndAt, startPrice, viewCount }: Props) {
                     : "text-text-1"
               }`}
             >
-              {isLive ? formatCountdown(endAt) : (STATUS_LABEL[status] ?? "종료")}
+              {isLive ? formatCountdown(endAt) : (AUCTION_STATUS_LABEL[status] ?? "종료")}
             </span>
           </span>
         </div>

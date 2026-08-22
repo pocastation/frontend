@@ -8,6 +8,7 @@ import { mediaUrl } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionResponse } from "@/lib/types";
 import { formatKRW } from "@/lib/format";
+import { AUCTION_STATUS_LABEL } from "@/lib/labels";
 
 // 매물은 카드가 아니다(#277). 번개장터·KREAM 실측 결과 두 서비스 모두 상품 목록에 테두리·그림자·
 // 카드 배경이 없고, 라운드는 카드가 아니라 **이미지에** 붙는다. 테두리를 두르면 격자에 수십 장이
@@ -93,7 +94,7 @@ export default function AuctionCard({
           </span>
         )}
 
-        {/* 경매는 남은 시간, 즉시판매는 마감이 없으므로 라벨. 둘 다 같은 잉크 칩이라
+        {/* 제안판매는 남은 시간, 즉시판매는 마감이 없으므로 라벨. 둘 다 같은 잉크 칩이라
             오버레이 언어가 하나다. */}
         {isLive && !isInstantSale && auction.endAt && <AuctionCountdown endAt={auction.endAt} />}
         {isLive && isInstantSale && <span className={OVERLAY_CHIP}>즉시구매</span>}
@@ -101,7 +102,7 @@ export default function AuctionCard({
         {/* 거래가 끝난 매물은 칩이 아니라 지면 전체가 상태를 말한다. */}
         {isEnded && (
           <span className="absolute inset-0 z-[2] grid place-items-center bg-white/70 text-xs font-extrabold text-text-2">
-            {auction.status === "ENDED_NO_BIDS" ? "유찰" : isInstantSale ? "판매 완료" : "종료"}
+            {isInstantSale ? "판매 완료" : AUCTION_STATUS_LABEL[auction.status]}
           </span>
         )}
 
@@ -136,13 +137,13 @@ export default function AuctionCard({
             {isInstantSale
               ? "즉시구매"
               : auction.status === "ENDED_NO_BIDS"
-                ? "입찰 없음"
-                : `입찰 ${auction.bidCount}`}
+                ? "제안 없음"
+                : `제안 ${auction.bidCount}`}
           </p>
         </div>
       ) : (
-        // 기본형(데스크탑) — 가격이 첫 줄이다. 경매에서 가장 먼저 읽는 수치가 카드 바닥에서
-        // 입찰 횟수와 같은 크기로 눌려 있었다(#277). 이 순서는 그대로 둔다.
+        // 기본형(데스크탑) — 가격이 첫 줄이다. 제안판매에서 가장 먼저 읽는 수치가 카드 바닥에서
+        // 제안 횟수와 같은 크기로 눌려 있었다(#277). 이 순서는 그대로 둔다.
         <div className="px-0.5 pt-2.5">
         <p className={`font-display text-[17px] font-extrabold tracking-[-0.03em] tabular-nums ${isEnded ? "text-text-3" : "text-text-1"}`}>
           {formatKRW(displayPrice)}
@@ -154,8 +155,8 @@ export default function AuctionCard({
           {isInstantSale
             ? "즉시구매"
             : auction.status === "ENDED_NO_BIDS"
-              ? "입찰 없음"
-              : `${auction.bidCount}회 입찰`}
+              ? "제안 없음"
+              : `제안 ${auction.bidCount}회`}
         </p>
       </div>
       )}

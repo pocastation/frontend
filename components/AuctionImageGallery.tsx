@@ -56,7 +56,7 @@ export default function AuctionImageGallery({
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  // ── 경매 상세 브라우징 뷰: 가로 scroll-snap 페이저 ──
+  // ── 매물 상세 브라우징 뷰: 가로 scroll-snap 페이저 ──
   // 모바일=스와이프로 넘김(화살표 없음), 데스크탑=화살표(끝에선 숨김). 루프 없음 — 양끝에서 멈춘다.
   const browsePagerRef = useRef<HTMLDivElement>(null);
   const browseNavLock = useRef(false);

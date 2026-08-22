@@ -10,12 +10,12 @@ import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS }
 /**
  * 첫 거래 전 배송지 등록 모달(#283) — 서버 관문(backend #269)의 짝이다.
  *
- * <p>낙찰 후 배송지를 확정하는 {@code DeliveryAddressModal}과 목적이 다르다. 저건 이미 성립한
+ * <p>거래 성사 후 배송지를 확정하는 {@code DeliveryAddressModal}과 목적이 다르다. 저건 이미 성립한
  * 주문에 주소를 박는 것이고, 이건 <b>거래가 성립하기 전에</b> 주소록을 하나 만드는 것이다.
  * 그래서 저장된 배송지를 고르는 선택지가 없다 — 하나도 없어서 여기까지 온 것이다.
  *
- * <p><b>저장해도 입찰을 대신 눌러주지 않는다.</b> 약관 §13조의2 ②상 입찰은 청약이고 취소할 수
- * 없다. 사용자가 누른 것은 「저장하고 계속」이지 「입찰」이 아니라, 자동으로 이어 붙이면 동의한 적
+ * <p><b>저장해도 제안을 대신 눌러주지 않는다.</b> 약관 §13조의2 ②상 가격 제안은 청약이고 취소할 수
+ * 없다. 사용자가 누른 것은 「저장하고 계속」이지 「가격 제안」이 아니라, 자동으로 이어 붙이면 동의한 적
  * 없는 의사표시가 나간다. 호출부는 {@code onSaved}에서 모달만 닫고 원래 버튼을 되살린다.
  */
 export default function DeliveryAddressGateModal({
@@ -23,7 +23,7 @@ export default function DeliveryAddressGateModal({
   onClose,
   onSaved,
 }: {
-  /** "입찰" · "구매" — 안내 문구에 그대로 들어간다. */
+  /** "가격 제안" · "구매" — 안내 문구에 그대로 들어간다. */
   action: string;
   onClose: () => void;
   onSaved: () => void;
@@ -74,7 +74,7 @@ export default function DeliveryAddressGateModal({
 
     setSaving(true);
     try {
-      // 첫 배송지는 서버가 자동으로 기본 배송지로 잡는다 — 그래야 다음 낙찰부터 자동 확정된다.
+      // 첫 배송지는 서버가 자동으로 기본 배송지로 잡는다 — 그래야 다음 거래부터 자동 확정된다.
       await fetchWithAuth<unknown>("/api/members/me/delivery-addresses", {
         method: "POST",
         body: {
@@ -115,7 +115,7 @@ export default function DeliveryAddressGateModal({
           받을 주소를 먼저 등록해 주세요
         </p>
         <p className="mt-2 text-[12.5px] leading-[1.7] text-text-3">
-          낙찰되면 판매자가 바로 보낼 수 있게 주소가 필요해요.{" "}
+          거래가 성사되면 판매자가 바로 보낼 수 있게 주소가 필요해요.{" "}
           <b className="font-bold text-text-2">한 번만 등록하면 다음부터는 물어보지 않아요.</b>
         </p>
 

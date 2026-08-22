@@ -54,7 +54,7 @@ export default function WishlistHeart({
     <button
       type="button"
       aria-pressed={active}
-      aria-label={active ? "관심 경매에서 제외" : "관심 경매로 등록"}
+      aria-label={active ? "관심 목록에서 제외" : "관심 목록에 추가"}
       onClick={handleClick}
       className={className}
     >

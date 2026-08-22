@@ -6,9 +6,9 @@ import ToggleSwitch from "@/components/ToggleSwitch";
 
 type Setting = { outbidEnabled: boolean };
 
-// 경매 상세의 "이 경매 추월 알림" 토글(§12.5 경매별 설정). 개인 기본(마이페이지)을 오버라이드한다.
+// 상세의 "이 매물 추월 알림" 토글(§12.5 매물별 설정). 개인 기본(마이페이지)을 오버라이드한다.
 // 비로그인·비LIVE에서는 렌더하지 않고(상위에서 LIVE만 전달), 로그인 확정 후 현재 해석값을 불러온다.
-// 판매자 본인(내 경매)에게는 노출하지 않는다 — 본인 경매엔 입찰이 불가해 추월 알림이 무의미하다.
+// 판매자 본인(내 매물)에게는 노출하지 않는다 — 본인 매물엔 제안이 불가해 추월 알림이 무의미하다.
 export default function AuctionOutbidToggle({
   auctionId,
   sellerNickname,
@@ -52,16 +52,16 @@ export default function AuctionOutbidToggle({
     }
   }
 
-  // 비로그인·본인 경매·아직 로드 전이면 렌더하지 않는다.
+  // 비로그인·본인 매물·아직 로드 전이면 렌더하지 않는다.
   if (!accessToken || isOwnAuction || enabled === null) return null;
 
   return (
     <div className="mt-3 flex items-center justify-between gap-4 rounded-r2 border border-border bg-surface px-3.5 py-2.5">
       <div className="min-w-0">
-        <p className="text-xs font-bold text-text-1">이 경매 추월 알림</p>
-        <p className="mt-0.5 text-[11px] text-text-3">더 높은 입찰로 밀리면 알려드려요.</p>
+        <p className="text-xs font-bold text-text-1">이 매물 추월 알림</p>
+        <p className="mt-0.5 text-[11px] text-text-3">더 높은 제안으로 밀리면 알려드려요.</p>
       </div>
-      <ToggleSwitch checked={enabled} disabled={saving} onChange={toggle} label="이 경매 추월 알림" />
+      <ToggleSwitch checked={enabled} disabled={saving} onChange={toggle} label="이 매물 추월 알림" />
     </div>
   );
 }

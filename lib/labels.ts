@@ -103,10 +103,28 @@ export const PROVIDER_LABEL: Record<string, string> = {
   GOOGLE: "구글",
 };
 
-// 어드민 화면 기준 경매 상태 라벨.
+// ─── 용어 정본 (2026-08-22 확정) ───
+//
+// PG 심사가 **경매 구조**를 문제 삼아 화면에서 경매 어휘를 걷어낸다. 코드 식별자·API 필드는
+// 그대로 둔다 — 서버 계약이 `auction`·`bid`라 이름을 바꾸면 매핑이 두 겹이 된다. **바꾸는 건
+// 사람이 읽는 문자열뿐**이고, 그 단일 진실원이 이 파일이다.
+//
+//   입찰        → 가격 제안 · 제안        낙찰    → 거래 성사
+//   유찰        → 제안 없음               호가    → 제안 단위
+//   최고 입찰자 → 최고가 제안자           시작가  → 시작 제안가
+//   경매        → 문맥에 따라 **매물**(목록·관리) · **판매**(판매자 화면) · **제안판매**(판매 방식)
+//
+// 「거래」를 경매의 대체어로 쓰지 않는다. 하단탭의 「거래」는 제안판매 + 즉시판매를 **묶는 상위
+// 개념**이라, 경매를 거래로 바꾸면 층위가 무너진다(거래 탭 안에 거래와 즉시판매가 생긴다).
+// 즉시판매·즉시구매는 경매 함의가 없어 그대로 둔다 — 「제안판매 ↔ 즉시판매」로 짝이 맞는다.
+
+// 어드민 화면 기준 매물 상태 라벨.
 // REJECTED는 보는 사람에 따라 문구를 달리한다 — 관리자에게는 자기가 내린 조치가 명확해야 하고
 // (승인 거절), 판매자에게는 "고쳐서 다시 올리면 된다"가 읽혀야 한다(보완 필요, 아래 SELLER_ 맵).
 // 상태값 자체(REJECTED)는 그대로 두고 표시 문구만 나눈다.
+//
+// ENDED_NO_BIDS를 「제안 없이 종료」가 아니라 **「제안 없음」**으로 둔 건 이 값이 카드 좌상단
+// 칩처럼 좁은 자리에 들어가기 때문이다 — 문장이 필요한 지면에서는 각 화면이 풀어 쓴다.
 export const AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
   DRAFT: "임시저장",
   PENDING_REVIEW: "승인 대기중",
@@ -114,12 +132,12 @@ export const AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
   REJECTED: "승인 거절",
   SCHEDULED: "시작 예정",
   LIVE: "진행 중",
-  ENDED_SOLD: "낙찰 종료",
-  ENDED_NO_BIDS: "유찰",
+  ENDED_SOLD: "거래 성사",
+  ENDED_NO_BIDS: "제안 없음",
   CANCELLED: "취소됨",
 };
 
-// 판매자(마이페이지)에게 보여줄 경매 상태 문구 — 위 맵과 다른 항목만 덮어쓴다.
+// 판매자(마이페이지)에게 보여줄 매물 상태 문구 — 위 맵과 다른 항목만 덮어쓴다.
 export const SELLER_AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
   ...AUCTION_STATUS_LABEL,
   REJECTED: "보완 필요",
@@ -140,7 +158,7 @@ export const AUCTION_STATUS_TONE: Record<AuctionStatus, StatusTone> = {
 };
 
 export const AUCTION_SALE_TYPE_LABEL: Record<AuctionSaleType, string> = {
-  AUCTION: "경매판매",
+  AUCTION: "제안판매",
   INSTANT: "즉시판매",
 };
 
@@ -208,13 +226,13 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   MEMBER_SUSPENDED: "회원 정지",
   MEMBER_UNSUSPENDED: "회원 정지해제",
   MEMBER_WITHDRAWN: "회원 탈퇴처리",
-  AUCTION_CANCELLED: "경매 강제취소",
+  AUCTION_CANCELLED: "매물 강제취소",
   REPORT_RESOLVED: "신고 처리(매물취소)",
   REPORT_REJECTED: "신고 반려",
   MEMBER_ROLE_GRANTED: "관리자 승격",
   MEMBER_ROLE_REVOKED: "관리자 권한회수",
-  AUCTION_APPROVED: "인증 경매 승인",
-  AUCTION_REJECTED: "인증 경매 반려",
+  AUCTION_APPROVED: "인증 매물 승인",
+  AUCTION_REJECTED: "인증 매물 반려",
 };
 
 export const AUDIT_ACTION_OPTIONS: AuditAction[] = [
@@ -247,7 +265,7 @@ export const AUDIT_ACTION_TONE: Record<AuditAction, StatusTone> = {
 
 export const AUDIT_TARGET_TYPE_LABEL: Record<AuditTargetType, string> = {
   MEMBER: "회원",
-  AUCTION: "경매",
+  AUCTION: "매물",
 };
 
 export const MEMBER_ROLE_LABEL: Record<MemberRole, string> = {
@@ -255,7 +273,7 @@ export const MEMBER_ROLE_LABEL: Record<MemberRole, string> = {
   USER: "일반",
 };
 
-// ─── 경매 모더레이션 사유 템플릿 ───
+// ─── 매물 모더레이션 사유 템플릿 ───
 // 관리자는 자유 텍스트 대신 이 목록에서 하나를 고른다. 판매자에게 나가는 실제 문구는 서버가
 // 소유하고(AuctionRejectionReason·AuctionCancellationReason), 여기는 관리자용 요약 라벨과
 // 판매자에게 어떤 문구가 나가는지 확인용 미리보기다. 두 목록의 순서·코드는 서버 enum과 맞춘다.

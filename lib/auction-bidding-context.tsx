@@ -223,10 +223,12 @@ export function AuctionBiddingProvider({
       // 오류 토스트 대신 등록 모달로 이어 붙인다.
       if (isGateRejection(err)) {
         setAddressModalOpen(true);
-      } else if (err instanceof ApiError && err.message.includes("최고 입찰")) {
-        // '이미 최고 입찰자'는 에러가 아니라 정상 상태 — 정보 톤으로 안내하고 버튼도 잠근다.
-        // ⚠️ **서버 문구에 문자열로 결합돼 있다.** 백엔드 용어 교체(BE) 때 이 조건을 함께 고쳐야
-        // 하고, 안 고치면 이 분기가 조용히 죽어 정상 상태가 빨간 에러로 보인다.
+      } else if (err instanceof ApiError && err.errorCode === "ALREADY_HIGHEST_BIDDER") {
+        // '이미 최고가 제안자'는 에러가 아니라 정상 상태 — 정보 톤으로 안내하고 버튼도 잠근다.
+        //
+        // **문구가 아니라 에러 코드로 판별한다.** 전에는 `err.message.includes("최고 입찰")`이라
+        // 서버가 문구를 한 글자만 바꿔도 이 분기가 조용히 죽어 정상 상태가 빨간 에러로 보였다.
+        // 코드는 계약이고 문구는 카피다 — 카피에 로직을 걸지 않는다.
         setIsTopBidder(true);
         toast.show({
           variant: "info",

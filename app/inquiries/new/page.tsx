@@ -150,7 +150,7 @@ function NewInquiryForm() {
             rows={12}
             value={content}
             onChange={(event) => setContent(event.target.value)}
-            placeholder={"문의 상황과 궁금한 점을 자세히 적어주세요.\n경매 관련 문의라면 상품명이나 경매 번호를 함께 남겨주세요."}
+            placeholder={"문의 상황과 궁금한 점을 자세히 적어주세요.\n매물 관련 문의라면 상품명이나 매물 번호를 함께 남겨주세요."}
             className={
               "min-h-[240px] w-full resize-y rounded-r2 border border-border-2 bg-white p-3.5 text-sm leading-relaxed text-text-1 outline-none placeholder:text-text-3 transition-colors hover:border-primary focus:border-primary " +
               FOCUS_RING

@@ -85,7 +85,7 @@ export default function ReportButton({ auctionId }: { auctionId: number }) {
           <div className="w-full max-w-sm rounded-r3 bg-surface p-5 shadow-modal">
             <h2 className="font-display text-base font-extrabold text-text-1">신고하기</h2>
             <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
-              이 경매의 어떤 점이 문제인지 알려주세요. 접수된 신고는 운영팀이 검토 후 필요한 조치를 취합니다.
+              이 매물의 어떤 점이 문제인지 알려주세요. 접수된 신고는 운영팀이 검토 후 필요한 조치를 취합니다.
             </p>
 
             <fieldset className="mt-3.5">

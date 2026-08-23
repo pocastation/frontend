@@ -14,7 +14,7 @@ export const INQUIRY_STATUS_CLASS: Record<InquiryStatus, string> = {
 
 export const INQUIRY_CATEGORY_LABEL: Record<InquiryCategory, string> = {
   ACCOUNT: "회원·계정",
-  AUCTION: "경매·판매",
+  AUCTION: "매물·판매",
   PAYMENT: "결제·정산",
   DELIVERY: "배송",
   ETC: "기타",

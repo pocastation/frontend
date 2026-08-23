@@ -42,7 +42,7 @@ type Props = {
   onReorder: (next: PhotoItem[]) => void;
 };
 
-// 경매 등록 사진 단계 그리드: 파일 드래그앤드롭 + 다중 선택 업로드 + 드래그로 순서 변경(첫 장=대표).
+// 판매 등록 사진 단계 그리드: 파일 드래그앤드롭 + 다중 선택 업로드 + 드래그로 순서 변경(첫 장=대표).
 export default function PhotoUploadGrid({ items, max, onAddFiles, onRemove, onReorder }: Props) {
   const [dragActive, setDragActive] = useState(false);
   const canAdd = items.length < max;

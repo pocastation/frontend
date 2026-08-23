@@ -269,7 +269,7 @@ export default function AdminReportsPage() {
                   <dd className="font-semibold text-text-1">{detail.sellerNickname}</dd>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <dt className="text-text-3">경매</dt>
+                  <dt className="text-text-3">매물</dt>
                   <dd className="font-semibold">
                     <Link href={`/auctions/${detail.auctionId}`} className={`text-primary hover:underline ${FOCUS_RING}`}>
                       바로가기 →

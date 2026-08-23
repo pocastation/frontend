@@ -37,7 +37,7 @@ export default function InstantPurchaseSection({
   const [currentStatus, setCurrentStatus] = useState(status);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "ok" | "err"; text: string } | null>(null);
-  // 배송지 관문(#283) — 즉시구매는 누르는 즉시 낙찰이라 입찰보다 더 앞에서 잡아야 한다.
+  // 배송지 관문(#283) — 즉시구매는 누르는 즉시 거래가 성사돼 가격 제안보다 더 앞에서 잡아야 한다.
   const { needsAddress, markRegistered, isGateRejection } = useDeliveryAddressGate();
   const [addressModalOpen, setAddressModalOpen] = useState(false);
 

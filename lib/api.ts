@@ -1,4 +1,5 @@
 import { envValue } from "./env";
+import { SITE_URL } from "./site";
 import type { ApiResponse } from "./types";
 
 // 이 fetch는 서버 컴포넌트(Node)에서도 실행될 수 있는데, 그 환경은 브라우저 쿠키를
@@ -23,6 +24,21 @@ export function resolveApiUrl(): string {
   // 브라우저가 보는 출처가 하나가 되어 쿠키가 1st-party가 되고 CORS도 발생하지 않는다.
   // staging에 붙여 보려면 NEXT_PUBLIC_API_URL을 명시하면 이 분기를 지나가지 않는다.
   return "";
+}
+
+/**
+ * 소셜 로그인 시작 주소.
+ *
+ * `origin`을 붙이는 이유 — 소셜 로그인은 브라우저가 통째로 백엔드로 이동했다가 돌아오는데,
+ * 백엔드가 아는 복귀 주소가 **하나뿐이라 어디서 시작했든 상용으로 돌려보냈다**(프리프로덕션에서
+ * 로그인하면 pocastation.com으로 튕겼다). 시작한 지면을 알려주면 백엔드가 허용 목록과 대조해
+ * 그쪽으로 돌려보낸다(BE #369). 상용에서는 값이 같아 동작이 바뀌지 않는다.
+ *
+ * `window.location.origin`이 아니라 빌드 타임 상수 {@link SITE_URL}을 쓴다 — 서버에서 그린 href와
+ * 브라우저에서 그린 href가 달라지면 하이드레이션이 어긋난다.
+ */
+export function socialLoginUrl(provider: "kakao" | "naver" | "google"): string {
+  return `${resolveApiUrl()}/oauth2/authorization/${provider}?origin=${encodeURIComponent(SITE_URL)}`;
 }
 
 // 저장 방식에 따라 미디어 경로 형태가 다르다:

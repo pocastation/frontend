@@ -9,7 +9,7 @@ import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionResponse, AuctionSaleType } from "@/lib/types";
 
 /**
- * 모바일 거래 목록 — 경매·즉시판매 두 화면이 공유한다.
+ * 모바일 거래 목록 — 제안판매·즉시판매 두 화면이 공유한다.
  *
  * <p>상단 언더라인 탭은 **두 라우트를 오가는 내비게이션**이다(한 화면에 상태로 품지 않는다).
  * 상태로 품으면 URL이 하나가 되어 공유 링크·뒤로가기·SSR을 전부 잃는다.
@@ -24,7 +24,7 @@ import type { AuctionResponse, AuctionSaleType } from "@/lib/types";
 const INSTANT_SORTS = SORT_OPTIONS.filter((option) => option.key !== "ending_soon");
 
 const TABS: { label: string; href: string; saleType: AuctionSaleType }[] = [
-  { label: "경매", href: "/auctions", saleType: "AUCTION" },
+  { label: "제안판매", href: "/auctions", saleType: "AUCTION" },
   { label: "즉시판매", href: "/instant-sales", saleType: "INSTANT" },
 ];
 
@@ -99,7 +99,7 @@ export default function MobileBrowse({
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
           </svg>
-          <span className="sr-only">{isInstant ? "즉시판매 검색" : "경매 검색"}</span>
+          <span className="sr-only">{isInstant ? "즉시판매 검색" : "제안판매 검색"}</span>
           <input
             type="search"
             placeholder="스타, 멤버, 앨범 검색"
@@ -160,7 +160,7 @@ export default function MobileBrowse({
       ) : error ? null : (
         <div className={`px-[14px] ${loading ? "opacity-60 transition-opacity" : ""}`}>
           <ExploreEmpty
-            title={query ? `"${query}" 검색 결과가 없어요` : isInstant ? "등록된 즉시판매가 아직 없어요" : "진행 중인 경매가 아직 없어요"}
+            title={query ? `"${query}" 검색 결과가 없어요` : isInstant ? "등록된 즉시판매가 아직 없어요" : "진행 중인 매물이 아직 없어요"}
             hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
             onClear={query ? () => setQuery("") : undefined}
           />
@@ -181,13 +181,13 @@ export default function MobileBrowse({
         </div>
       )}
 
-      {/* 종료 경매는 매물이 아니라 시세 자료다 — 목록과 성격이 달라 조용한 링크 한 줄로 둔다. */}
+      {/* 종료된 거래는 매물이 아니라 시세 자료다 — 목록과 성격이 달라 조용한 링크 한 줄로 둔다. */}
       {!isInstant && (
         <Link
           href="/auctions/ended"
           className={`mt-6 block border-t border-border px-[14px] py-4 text-center text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
         >
-          종료된 경매로 시세 확인하기
+          종료된 거래로 시세 확인하기
         </Link>
       )}
     </div>

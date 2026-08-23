@@ -4,6 +4,7 @@ import Link from "next/link";
 import AuctionCountdown from "@/components/AuctionCountdown";
 import { mediaUrl } from "@/lib/api";
 import { formatKRW } from "@/lib/format";
+import { BRAND_HEADLINE_LINES, BRAND_SUBHEAD } from "@/lib/site";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import type { AuctionResponse } from "@/lib/types";
 import WishlistHeart from "@/components/WishlistHeart";
@@ -76,27 +77,34 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
         <div className="max-w-[560px] text-center sm:text-left">
           <div className="mb-5 inline-flex items-center gap-2 rounded-r1 border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold tracking-wide text-white/90">
             <span className="h-2 w-2 animate-pulse rounded-full bg-ok" aria-hidden="true" />
-            LIVE 지금 <strong className="text-white">{liveCount.toLocaleString()}개</strong> 경매 진행 중
+            LIVE 지금 <strong className="text-white">{liveCount.toLocaleString()}개</strong> 거래 진행 중
           </div>
 
+          {/* 브랜드 문장은 모바일 홍보 배너 1장과 **같은 것을 쓴다**(lib/site.ts). 지면 크기만
+              여기서 키우고, 줄 나눔과 «마지막 줄만 강조»는 공유한다. */}
           <h1 className="font-display text-[clamp(28px,4.5vw,42px)] font-extrabold leading-[1.25] tracking-[-0.02em] text-white">
-            <span className="font-sans font-black">K-POP 포토카드</span>
-            <br />
-            <span style={{ color: "#c8bcff" }}>우주에서 만나는</span>
-            <br />
-            <span className="font-sans font-black">경매 플랫폼</span>
+            {BRAND_HEADLINE_LINES.map((line, i) => (
+              <span
+                key={line}
+                className={
+                  i === BRAND_HEADLINE_LINES.length - 1
+                    ? "block font-sans font-black text-nebula"
+                    : "block"
+                }
+              >
+                {line}
+              </span>
+            ))}
           </h1>
 
-          <p className="mt-4 text-base leading-relaxed" style={{ color: "#c8bcff" }}>
-            희귀 포카부터 한정판 굿즈까지 — 공정한 경매로 진짜 가치를 찾아드립니다.
-          </p>
+          <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-white/60">{BRAND_SUBHEAD}</p>
 
           <div className="mt-8 flex justify-center gap-3 sm:justify-start">
             <Link
               href="#auctions"
               className="inline-flex h-12 items-center justify-center rounded-r2 bg-primary px-7 text-sm font-bold text-white transition-colors hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace"
             >
-              진행 중인 경매 보기 →
+              진행 중인 매물 보기 →
             </Link>
             <Link
               href="/guide"
@@ -150,11 +158,11 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
               <p className="mt-0.5 truncate text-xs text-white/60">{current.title}</p>
               <div className="mt-3 flex items-end justify-between border-t border-white/20 pt-3">
                 <div>
-                  <p className="text-[10px] text-white/60">현재 입찰가</p>
+                  <p className="text-[10px] text-white/60">현재 제안가</p>
                   <p className="font-display text-lg font-bold">{formatKRW(current.currentPrice)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] text-white/60">입찰</p>
+                  <p className="text-[10px] text-white/60">제안</p>
                   <p className="font-display text-sm font-bold">{current.bidCount}회</p>
                 </div>
               </div>

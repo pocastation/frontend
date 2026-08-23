@@ -9,10 +9,10 @@ import { useAuth } from "@/lib/auth-context";
 import { useNotifications } from "@/lib/notification-context";
 
 // 상단 메뉴는 리디자인 검토 과정에서 일단 비웠었고, 콘텐츠를 갖춘 페이지가 생길 때마다 되살렸음
-// (아티스트·경매 목록·즉시판매). 종료된 경매는 실페이지가 있지만 경매의 하위 뷰라 주 네비 대신
+// (아티스트·매물 목록·즉시판매). 종료된 거래는 실페이지가 있지만 매물 목록의 하위 뷰라 주 네비 대신
 // /auctions 상단 링크로만 진입시킨다(주 네비 과밀 방지).
 const NAV_LINKS: { href: string; label: string }[] = [
-  { href: "/auctions", label: "경매" },
+  { href: "/auctions", label: "제안판매" },
   { href: "/instant-sales", label: "즉시판매" },
   { href: "/artists", label: "스타" },
   { href: "/sellers", label: "인기 판매자" },
@@ -93,7 +93,7 @@ export default function Header() {
     setIsMenuOpen(false);
   }
 
-  // 헤더 검색은 "제출(Enter/돋보기) 시 경매 목록에서 검색". 타이핑 중에는 아무 페이지도
+  // 헤더 검색은 "제출(Enter/돋보기) 시 매물 목록에서 검색". 타이핑 중에는 아무 페이지도
   // 이동하지 않고, 제출하면 /auctions?q=로 넘겨 그 페이지의 검색으로 이어받는다.
   function handleSearchSubmit(e: React.FormEvent) {
     e.preventDefault();

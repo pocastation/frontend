@@ -418,7 +418,7 @@ export default function AdminMembersPage() {
                   <p className="font-display text-sm font-extrabold text-text-1">{detail.sellingCount}건</p>
                 </div>
                 <div className="rounded-r2 bg-surface-2 px-3 py-2 text-center">
-                  <p className="text-[11px] text-text-3">입찰</p>
+                  <p className="text-[11px] text-text-3">제안</p>
                   <p className="font-display text-sm font-extrabold text-text-1">{detail.biddingCount}건</p>
                 </div>
               </div>
@@ -625,7 +625,7 @@ export default function AdminMembersPage() {
             </h2>
             <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
               {roleTarget === "ADMIN"
-                ? <>&quot;{detail.nickname}&quot;님을 관리자로 승격합니다. 회원 정지·경매 취소·신고 처리 권한이 부여됩니다.</>
+                ? <>&quot;{detail.nickname}&quot;님을 관리자로 승격합니다. 회원 정지·매물 취소·신고 처리 권한이 부여됩니다.</>
                 : <>&quot;{detail.nickname}&quot;님의 관리자 권한을 회수합니다. 더 이상 관리 기능을 사용할 수 없습니다.</>}
             </p>
             <label className="sr-only" htmlFor="role-reason">사유</label>

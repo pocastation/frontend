@@ -13,12 +13,24 @@ export const SITE_URL =
 // 배포 게이트를 세우면서 `staging.pocastation.com`이 `develop`을 미리 보여주는 자리가 됐다.
 // 그 지면은 **상용과 같은 내용을 서빙하고 실 DB를 본다** — 그래서 두 가지를 갈라야 한다.
 // ① 크롤러에게 통째로 닫는다(중복 콘텐츠 + 검색으로 프리프로덕션에 유입되는 것을 막는다)
-// ② 화면 맨 위에 여기가 어디인지 띄운다(거기서 만든 입찰·주문은 진짜다)
+// ② 화면 맨 위에 여기가 어디인지 띄운다(거기서 만든 제안·주문은 진짜다)
 export const IS_PRODUCTION_SITE = SITE_URL === "https://pocastation.com";
 
+/**
+ * 브랜드 확정 카피(디자인 시스템 CONTENT FUNDAMENTALS). **임의로 고쳐 쓰지 않는다.**
+ *
+ * <p>모바일 홍보 배너 1장과 데스크탑 히어로가 **같은 문장을 쓴다.** 각자 들고 있던 시절에
+ * 두 지면이 서로 다른 말을 했다 — 모바일은 «포카 한 장에도 확인이 필요하니까», 데스크탑은
+ * «우주에서 만나는 …». 브랜드 문장은 지면마다 다를 이유가 없어 한곳으로 모았다.
+ *
+ * <p>마지막 줄만 강조색(nebula)을 받는다. 지면 크기는 각자 정하되 **줄 나눔과 강조 위치는 공유**한다.
+ */
+export const BRAND_HEADLINE_LINES = ["포카 한 장에도", "확인이 필요하니까,", "포카스테이션"];
+export const BRAND_SUBHEAD = "안전결제와 판매자 상태 등급 고지로,\n처음 거래해도 걱정 없이";
+
 export const SITE_NAME = "Pocastation";
-export const SITE_TITLE = "Pocastation — K-POP 포카 경매";
-export const SITE_DESCRIPTION = "K-pop 포토카드 특화 경매 플랫폼";
+export const SITE_TITLE = "Pocastation — K-POP 포카 거래";
+export const SITE_DESCRIPTION = "K-pop 포토카드 특화 거래 플랫폼";
 
 /**
  * 공식 X(구 트위터) 계정 핸들. `@`를 포함해 적는다(예: `"@pocastation"`).

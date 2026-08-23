@@ -133,8 +133,8 @@ export default function MobileMypageMenu({
 }) {
   // 숫자 4칸 — 대시보드 통계와 같은 값이지만 여기서는 "바로 가는 문"으로 쓴다.
   const quick: { label: string; value: number; tab: MypageTab }[] = [
-    { label: "입찰 중", value: counts.liveBidding, tab: "bidding" },
-    { label: "낙찰", value: counts.won, tab: "purchases" },
+    { label: "제안 중", value: counts.liveBidding, tab: "bidding" },
+    { label: "성사", value: counts.won, tab: "purchases" },
     { label: "판매 중", value: counts.selling, tab: "selling" },
     { label: "찜", value: counts.wishlist, tab: "wishlist" },
   ];
@@ -198,7 +198,7 @@ export default function MobileMypageMenu({
 
       <GroupHead>구매</GroupHead>
       <Group>
-        <TabRow label="입찰 내역" value={`${counts.bidding}건`} onClick={() => onSelectTab("bidding")} />
+        <TabRow label="제안 내역" value={`${counts.bidding}건`} onClick={() => onSelectTab("bidding")} />
         <TabRow label="구매 내역" value={`${counts.purchases}건`} badge={purchaseActionCount} onClick={() => onSelectTab("purchases")} />
         <TabRow label="찜한 상품" value={`${counts.wishlist}개`} onClick={() => onSelectTab("wishlist")} last />
       </Group>
@@ -206,7 +206,7 @@ export default function MobileMypageMenu({
       <Band />
       <GroupHead>판매</GroupHead>
       <Group>
-        <TabRow label="판매 중인 경매" value={`${counts.selling}건`} onClick={() => onSelectTab("selling")} />
+        <TabRow label="판매 중인 매물" value={`${counts.selling}건`} onClick={() => onSelectTab("selling")} />
         <TabRow label="판매 내역" value={`${counts.sellHistory}건`} badge={shipmentActionCount} onClick={() => onSelectTab("sellHistory")} />
         <TabRow label="정산 계좌" onClick={() => onSelectTab("settlement")} last />
       </Group>

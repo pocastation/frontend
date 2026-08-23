@@ -243,7 +243,7 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
             <div className="border border-ok/30 bg-ok-soft px-4 py-3" role="status">
               <p className="text-sm font-extrabold text-ok">사진 인증 완료</p>
               <p className="mt-1 text-xs text-text-2">
-                위 남은 시간 안에 등록을 완료해주세요. 이후 관리자 검수를 거쳐 경매가 공개됩니다.
+                위 남은 시간 안에 등록을 완료해주세요. 이후 관리자 검수를 거쳐 매물이 공개됩니다.
               </p>
             </div>
           ) : expired ? (

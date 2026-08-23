@@ -38,14 +38,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const auction = await getAuction(id);
   if (!auction) {
-    return { title: "경매를 찾을 수 없어요 — Pocastation" };
+    return { title: "매물을 찾을 수 없어요 — Pocastation" };
   }
   const cover = auction.images?.[0];
   const image = cover ? mediaUrl(cover.displayUrl ?? cover.url) : undefined;
   const description = [
     auction.artistName,
     auction.idolName,
-    auction.saleType === "INSTANT" ? "즉시판매" : "경매",
+    auction.saleType === "INSTANT" ? "즉시판매" : "제안판매",
     `현재가 ${auction.currentPrice.toLocaleString("ko-KR")}원`,
   ]
     .filter(Boolean)
@@ -83,7 +83,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
   const isInstantSale = auction.saleType === "INSTANT";
-  // 경매(즉시판매 아님)이고 마감시각이 있을 때만 입찰 상태를 띄운다. 모바일 상세는 이 컨텍스트를
+  // 제안판매(즉시판매 아님)이고 마감시각이 있을 때만 제안 상태를 띄운다. 모바일 상세는 이 컨텍스트를
   // 데스크탑 BidSection과 함께 읽는다 — 상세 하나에 SSE 연결이 둘 열리지 않게.
   const biddable = !isInstantSale && auction.endAt != null;
 
@@ -209,7 +209,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
                     query={auction.artistName}
                     className={`text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
                   >
-                    {auction.artistName} 다른 경매 보기 →
+                    {auction.artistName} 다른 매물 보기 →
                   </SearchLink>
                 )}
               </div>
@@ -219,7 +219,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
           </section>
         </div>
 
-        {/* 오른쪽: 제목 · 배지 · 입찰 */}
+        {/* 오른쪽: 제목 · 배지 · 가격 제안 */}
         <div>
           {/* pill의 좌측 안쪽 여백만큼 라벨 줄을 아웃덴트해, 라벨 텍스트 좌측을 제목(h1)과 맞춘다. */}
           <div className="-ml-2 flex flex-wrap gap-1.5">
@@ -241,7 +241,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
 
           <div className="-ml-2 mt-3 flex flex-wrap gap-1.5">
             <span className={BADGE_CLASS}>
-              {isInstantSale ? "즉시판매" : "경매"}
+              {isInstantSale ? "즉시판매" : "제안판매"}
             </span>
             <span className={BADGE_CLASS}>
               {SOURCE_LABEL[auction.source] ?? auction.source}
@@ -271,11 +271,11 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
               {auction.status === "LIVE" && (
                 <AuctionOutbidToggle auctionId={auction.id} sellerNickname={auction.sellerNickname} />
               )}
-              {/* 낙찰(ENDED_SOLD) 후 미결제 확정 시 차순위에게만 승계 제안 배너가 뜬다(대상자 아니면 미노출). */}
+              {/* 거래 성사(ENDED_SOLD) 후 미결제 확정 시 차순위에게만 승계 배너가 뜬다(대상자 아니면 미노출). */}
               {auction.status === "ENDED_SOLD" && <SuccessionOfferBanner auctionId={auction.id} />}
             </>
           ) : null}
-          {/* 전자상거래법 §20 — 중개자 고지는 "입찰·구매 전"에 보여야 해서 결제 영역 바로 아래에 둔다. */}
+          {/* 전자상거래법 §20 — 중개자 고지는 "가격 제안·구매 전"에 보여야 해서 결제 영역 바로 아래에 둔다. */}
           <p className="mt-3 text-xs leading-relaxed text-text-3">{INTERMEDIARY_NOTICE}</p>
 
           {/* 판매자 본인에게만(자체 게이팅) 발송 관리 패널 — 마이페이지 판매내역과 동일 발송 폼을 상세에서도 노출. */}

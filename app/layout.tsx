@@ -95,7 +95,7 @@ export default function RootLayout({
                 {/* 이메일 미인증 안내(#244) — 스스로 조건을 판단해 해당 없으면 아무것도 렌더하지 않는다. */}
                 <EmailVerificationBanner />
                 <main className="flex-1">{children}</main>
-                {/* 모바일 화면을 갖춘 라우트(홈·목록·경매 상세)에서는 모바일 폭에서만 접힌다. */}
+                {/* 모바일 화면을 갖춘 라우트(홈·목록·매물 상세)에서는 모바일 폭에서만 접힌다. */}
                 <MobileChromeGate>
                   <Footer />
                 </MobileChromeGate>

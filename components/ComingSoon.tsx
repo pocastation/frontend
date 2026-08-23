@@ -22,7 +22,7 @@ export default function ComingSoon({ title, description }: Props) {
         {description ?? "이 페이지는 아직 준비 중이에요. 곧 찾아뵐게요."}
       </p>
       <Link href="/" className={`mt-6 flex h-11 items-center justify-center px-6 ${PRIMARY_BUTTON_CLASS}`}>
-        경매 둘러보기
+        매물 둘러보기
       </Link>
     </div>
   );

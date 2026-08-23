@@ -9,9 +9,9 @@ import { formatDateTimeKST, formatKRW } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
 import type { SuccessionOfferResponse } from "@/lib/types";
 
-// 차순위 승계 제안 배너(§7-3, backend #106). 낙찰(ENDED_SOLD) 상세에서 제안 대상자 본인에게만
+// 차순위 승계 배너(§7-3, backend #106). 거래 성사(ENDED_SOLD) 상세에서 대상자 본인에게만
 // 노출된다 — GET이 대상자에게만 200을 주므로(타인 404) 조회 성공 자체가 노출 게이트다.
-// 수락하면 등록 카드로 자동 결제(없으면 마이페이지에서 등록 → 자동 재개)되고 재낙찰이 반영된다.
+// 수락하면 등록 카드로 자동 결제(없으면 마이페이지에서 등록 → 자동 재개)되고 거래 상대 변경이 반영된다.
 export default function SuccessionOfferBanner({ auctionId }: { auctionId: number }) {
   const router = useRouter();
   const { accessToken, isLoading, fetchWithAuth } = useAuth();
@@ -48,7 +48,7 @@ export default function SuccessionOfferBanner({ auctionId }: { auctionId: number
         { method: "POST" },
       );
       setOutcome(action === "accept" ? "accepted" : "declined");
-      // 수락은 재낙찰(낙찰자·체결가 변경)을 서버 컴포넌트에서 다시 읽어와 반영한다.
+      // 수락은 거래 상대·체결가 변경을 서버 컴포넌트에서 다시 읽어와 반영한다.
       if (action === "accept") router.refresh();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "요청을 처리하지 못했어요. 잠시 후 다시 시도해 주세요.");
@@ -99,7 +99,7 @@ export default function SuccessionOfferBanner({ auctionId }: { auctionId: number
         구매 기회가 왔어요
       </p>
       <p className="mt-1.5 text-[13px] leading-relaxed text-text-2">
-        이전 낙찰자의 미결제로 회원님께 차례가 왔어요.{" "}
+        이전 구매자의 미결제로 회원님께 차례가 왔어요.{" "}
         <b className="font-bold text-text-1">{formatKRW(offer.amount)}</b>에 구매할 수 있어요.
       </p>
       <p className="mt-1 text-[12px] text-text-3">

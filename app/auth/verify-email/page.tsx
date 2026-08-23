@@ -126,7 +126,7 @@ function VerifyEmailContent() {
           <p className="mt-3 text-[13.5px] leading-[1.8] text-text-2">
             {identityNeeded
               ? "이메일 인증이 끝나 바로 로그인됐어요. 마지막으로 휴대폰 본인인증만 마치면 돼요."
-              : "인증이 끝나 바로 로그인됐어요. 이제 입찰 · 구매 · 판매를 시작할 수 있어요."}
+              : "인증이 끝나 바로 로그인됐어요. 이제 가격 제안 · 구매 · 판매를 시작할 수 있어요."}
           </p>
 
           {/* 조용히 바꿔놓으면 나중에 "내 닉네임이 왜 이래"가 된다. 이건 진짜 알려야 하는 사실이라
@@ -172,7 +172,7 @@ function VerifyEmailContent() {
             이메일 인증이 끝났어요
           </h1>
           <p aria-live="polite" className="mt-3 text-[13.5px] leading-[1.8] text-text-2">
-            이제 입찰 · 구매 · 판매를 시작할 수 있어요.
+            이제 가격 제안 · 구매 · 판매를 시작할 수 있어요.
           </p>
           <div className="mt-7">
             <Link href="/" className={`${PRIMARY} ${FOCUS_RING}`}>

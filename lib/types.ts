@@ -633,7 +633,7 @@ export type NotificationType =
   | "PAYMENT_COMPLETED" // 결제 완료 — 구매자(청구 확인)·판매자(발송 준비)
   | "PAYMENT_FAILED" // 결제 실패 — 결제수단 확인·자동 재시도 안내
   | "ORDER_DEFAULTED" // 미결제 확정 — 주문 취소(구매자)·재등록 안내(판매자)
-  | "AUCTION_SUCCEEDED" // 차순위 승계 — 구매 기회 제안(차순위)·낙찰자 변경(판매자)
+  | "AUCTION_SUCCEEDED" // 차순위 승계 — 구매 기회 제안(차순위)·구매자 변경(판매자)
   | "ORDER_SHIPPED" // 발송 — 구매자에게 운송장 안내
   | "ORDER_CONFIRMED" // 구매확정 — 판매자에게 정산 대기 안내
   | "DELIVERY_ADDRESS_REQUIRED" // 배송지 미입력 — 구매자에게. 결제는 됐는데 보낼 곳이 없어 거래가 멈춘 상태

@@ -292,7 +292,7 @@ export default function NewAuctionPage() {
   }
 
   // 각 스텝의 필수값이 채워졌는지 — 안 채워지면 "다음"/"등록" 비활성.
-  // 시작가·즉시판매가: 최저 5,000원 + 1,000원 단위(§12.1, BE #146과 동일 규칙).
+  // 시작 제안가·즉시판매가: 최저 5,000원 + 1,000원 단위(§12.1, BE #146과 동일 규칙).
   const priceValid =
     startPrice.trim() !== "" &&
     Number.isFinite(Number(startPrice)) &&
@@ -358,7 +358,7 @@ export default function NewAuctionPage() {
     }
     const price = Number(startPrice);
     if (!Number.isFinite(price) || price < 5000 || price % 1000 !== 0) {
-      const label = saleType === "INSTANT" ? "즉시판매가" : "시작가";
+      const label = saleType === "INSTANT" ? "즉시판매가" : "시작 제안가";
       setError(`${label}는 최저 5,000원부터 1,000원 단위로 입력해주세요.`);
       return;
     }
@@ -386,7 +386,7 @@ export default function NewAuctionPage() {
         },
       });
       // 목적지는 빌드타임 플래그가 아니라 **서버가 알려준 실제 상태**로 정한다. 자동 승인이면
-      // 바로 내 경매를 보여주고, 검수 대기면 안내 화면으로 보낸다(거기서 홈으로 자동 이동).
+      // 바로 내 매물을 보여주고, 검수 대기면 안내 화면으로 보낸다(거기서 홈으로 자동 이동).
       router.push(
         created.status === "PENDING_REVIEW"
           ? `/auctions/submitted?id=${created.id}`
@@ -412,7 +412,7 @@ export default function NewAuctionPage() {
     );
   }
 
-  // 정산계좌 미등록 — 폼을 아예 열지 않는다. 판매 대금을 보낼 곳이 없는 상태로 낙찰되면
+  // 정산계좌 미등록 — 폼을 아예 열지 않는다. 판매 대금을 보낼 곳이 없는 상태로 거래가 성사되면
   // 대금은 묶이고 구매자는 영문도 모른 채 기다린다.
   if (!settlementReady) {
     return (
@@ -422,7 +422,7 @@ export default function NewAuctionPage() {
           정산계좌를 먼저 등록해 주세요
         </h1>
         <p className="mt-3 text-[13.5px] leading-[1.8] text-text-2">
-          판매 대금은 구매확정 후 등록하신 계좌로 들어와요. 계좌 없이 낙찰되면 대금을 보내드릴 수 없어
+          판매 대금은 구매확정 후 등록하신 계좌로 들어와요. 계좌 없이 거래가 성사되면 대금을 보내드릴 수 없어
           거래가 그대로 멈춥니다.
         </p>
         <p className="mt-2 text-[12.5px] leading-relaxed text-text-3">1분이면 끝나고, 한 번만 등록하면 돼요.</p>
@@ -449,7 +449,7 @@ export default function NewAuctionPage() {
     saleType: "판매 방식",
     info: "카테고리 · 소개",
     product: "상품 정보",
-    price: saleType === "INSTANT" ? "가격" : "가격 · 경매 기간",
+    price: saleType === "INSTANT" ? "가격" : "가격 · 판매 기간",
     media: AUCTION_VIDEO_ENABLED ? "사진 · 영상" : "사진",
     verification: "사진 인증",
   };
@@ -546,7 +546,7 @@ export default function NewAuctionPage() {
           {stepKey === "saleType" && (
             <div className="grid gap-2 sm:grid-cols-2">
               {[
-                { type: "AUCTION" as const, title: "경매판매", desc: "정한 기간 동안 입찰을 받아 판매해요." },
+                { type: "AUCTION" as const, title: "제안판매", desc: "정한 기간 동안 가격 제안을 받아 판매해요." },
                 { type: "INSTANT" as const, title: "즉시판매", desc: "정한 가격으로 바로 구매할 수 있게 올려요." },
               ].map((option) => {
                 const selected = saleType === option.type;
@@ -691,7 +691,7 @@ export default function NewAuctionPage() {
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
                 <label htmlFor={startPriceFieldId} className="text-xs font-bold text-text-2">
-                  {saleType === "INSTANT" ? "즉시판매가(원)" : "시작가(원)"} <span className="text-accent">*</span>
+                  {saleType === "INSTANT" ? "즉시판매가(원)" : "시작 제안가(원)"} <span className="text-accent">*</span>
                 </label>
                 <input
                   id={startPriceFieldId}
@@ -708,13 +708,13 @@ export default function NewAuctionPage() {
                 <p className="text-[11px] text-text-3">
                   {saleType === "INSTANT"
                     ? "배송비는 판매자 부담이에요. 배송비를 감안해 판매가를 정해주세요."
-                    : "배송비는 판매자 부담이에요. 배송비를 감안해 시작가를 정해주세요."}
+                    : "배송비는 판매자 부담이에요. 배송비를 감안해 시작 제안가를 정해주세요."}
                 </p>
               </div>
 
               {saleType === "AUCTION" && (
                 <fieldset>
-                  <legend className="mb-1.5 text-xs font-bold text-text-2">경매 기간</legend>
+                  <legend className="mb-1.5 text-xs font-bold text-text-2">판매 기간</legend>
                   <div className="flex gap-2">
                     {DURATION_OPTIONS.map((days) => (
                       <button
@@ -751,8 +751,8 @@ export default function NewAuctionPage() {
                     차순위 승계 허용
                   </label>
                   <p className="mt-1 text-[11px] text-text-3">
-                    낙찰자가 결제하지 않으면 차순위 입찰자에게 구매 기회를 제안해요(24시간 내 수락, 1단계까지만).
-                    해제하면 낙찰자 미결제 시 곧바로 거래가 종료돼요.
+                    구매자가 결제하지 않으면 차순위 제안자에게 구매 기회를 넘겨요(24시간 내 수락, 1단계까지만).
+                    해제하면 구매자 미결제 시 곧바로 거래가 종료돼요.
                   </p>
                 </div>
               )}
@@ -816,7 +816,7 @@ export default function NewAuctionPage() {
               disabled={!isStepValid(step) || isSubmitting || isUploading}
               className={`h-12 flex-1 ${PRIMARY_BUTTON_CLASS}`}
             >
-              {isSubmitting ? "등록 중..." : saleType === "INSTANT" ? "즉시판매 등록" : "경매 등록"}
+              {isSubmitting ? "등록 중..." : saleType === "INSTANT" ? "즉시판매 등록" : "제안판매 등록"}
             </button>
           ) : (
             <button

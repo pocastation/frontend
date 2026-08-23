@@ -79,7 +79,7 @@ export default function NicknameOnboardingPage() {
         가입을 마무리해주세요
       </h1>
       <p className="mb-6 text-center text-xs text-text-3">
-        닉네임은 경매·거래에서 다른 사용자에게 보여지는 이름이에요. 나중에도 바꿀 수 있어요.
+        닉네임은 매물·거래에서 다른 사용자에게 보여지는 이름이에요. 나중에도 바꿀 수 있어요.
       </p>
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
         <label htmlFor={nicknameId} className="sr-only">

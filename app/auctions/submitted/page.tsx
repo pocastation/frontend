@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FOCUS_RING } from "@/lib/ui";
 
-// 검수 대기로 등록된 직후 안내 화면. 자동 승인이면 여기 오지 않고 곧바로 경매 상세로 간다
+// 검수 대기로 등록된 직후 안내 화면. 자동 승인이면 여기 오지 않고 곧바로 매물 상세로 간다
 // (목적지는 등록 API가 돌려준 status로 정한다 — app/auctions/new/page.tsx).
 const REDIRECT_SECONDS = 10;
 
@@ -57,7 +57,7 @@ function AuctionSubmittedContent() {
         <p className="mt-2.5 text-sm leading-relaxed text-text-3">
           사진 인증을 함께 제출한 매물은 관리자 검수를 거쳐 공개돼요.
           <br />
-          <strong className="font-bold text-text-2">보통 1영업일 이내</strong>에 검수가 끝나고, 승인되면 그때부터 경매가 시작됩니다.
+          <strong className="font-bold text-text-2">보통 1영업일 이내</strong>에 검수가 끝나고, 승인되면 그때부터 판매가 시작됩니다.
         </p>
 
         <dl className="mt-6 border-t border-border pt-5 text-left">

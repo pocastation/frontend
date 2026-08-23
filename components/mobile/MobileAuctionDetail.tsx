@@ -17,17 +17,17 @@ import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionDetailResponse, SellerRatingResponse } from "@/lib/types";
 
 /**
- * 모바일 경매 상세.
+ * 모바일 매물 상세.
  *
- * <p>입찰과 관련된 값은 전부 `AuctionBiddingProvider`에서 온다 — 데스크탑 `BidSection`과 **같은
+ * <p>가격 제안과 관련된 값은 전부 `AuctionBiddingProvider`에서 온다 — 데스크탑 `BidSection`과 **같은
  * 상태·같은 SSE 연결**을 읽는다(상세 하나에 EventSource가 둘 열리지 않게).
  *
- * <p>탭은 두 개다. **이 경매에 입찰한 사람에게는 «입찰 이력»이 먼저 열린다** — 이미 판에 들어온
+ * <p>탭은 두 개다. **이 매물에 제안한 사람에게는 «제안 내역»이 먼저 열린다** — 이미 판에 들어온
  * 사람이 알고 싶은 건 상품 설명이 아니라 지금 얼마까지 올라왔는지다.
  */
 
 const TAB_PRODUCT = "상품 정보";
-const TAB_BIDS = "입찰 이력";
+const TAB_BIDS = "제안 내역";
 const TAB_DELIVERY = "배송·환불";
 
 // BE가 내려주는 등급 라벨에는 이모지가 붙어 온다("덕린이 🌱"). 제품 화면은 이모지를 쓰지 않으므로
@@ -73,7 +73,7 @@ function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: string 
   );
 }
 
-/** 입찰 바텀시트 — 하단 고정바의 «입찰하기»가 연다. 스테퍼·수수료·CTA는 데스크탑과 같은 규칙이다. */
+/** 제안 바텀시트 — 하단 고정바의 «제안하기»가 연다. 스테퍼·수수료·CTA는 데스크탑과 같은 규칙이다. */
 function BidSheet({ onClose }: { onClose: () => void }) {
   const {
     amount, floor, ceil, adjustAmount, outOfRange, submitting, isTopBidder, needsAddress, handleBid,
@@ -82,7 +82,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
   const total = estimatedTotal(amount);
 
   return (
-    <div className="fixed inset-0 z-[500] sm:hidden" role="dialog" aria-label="입찰하기" aria-modal="true">
+    <div className="fixed inset-0 z-[500] sm:hidden" role="dialog" aria-label="가격 제안하기" aria-modal="true">
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
       <div className="absolute inset-x-0 bottom-0 rounded-t-r4 bg-white px-[14px] pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
         {/* 시트 머리에 현재가·마감 — 하단 바에서 뺀 정보가 여기 있다(킷과 같은 자리). */}
@@ -99,7 +99,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="mb-3 mt-3 flex items-baseline justify-between">
-          <span className="text-[13px] font-extrabold text-text-1">입찰가</span>
+          <span className="text-[13px] font-extrabold text-text-1">제안가</span>
           <span className="text-[11px] tabular-nums text-text-3">
             가능 범위 {formatKRW(floor)} – {formatKRW(ceil)}
           </span>
@@ -110,7 +110,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
             type="button"
             onClick={() => adjustAmount(amount - BID_MIN_INCREMENT)}
             disabled={amount <= floor}
-            aria-label="입찰가 내리기"
+            aria-label="제안가 내리기"
             className={`w-[52px] text-xl text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
           >
             −
@@ -122,7 +122,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
             type="button"
             onClick={() => adjustAmount(amount + BID_MIN_INCREMENT)}
             disabled={amount >= ceil}
-            aria-label="입찰가 올리기"
+            aria-label="제안가 올리기"
             className={`w-[52px] text-xl text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
           >
             +
@@ -145,7 +145,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
 
         <div className="mt-3.5 rounded-r2 bg-surface-2 p-3 text-[12.5px]">
           <div className="flex items-center justify-between py-0.5 text-text-3">
-            <span>입찰가</span>
+            <span>제안가</span>
             <span className="font-medium tabular-nums text-text-2">{formatKRW(amount)}</span>
           </div>
           <div className="flex items-center justify-between py-0.5 text-text-3">
@@ -156,7 +156,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
             <span className="font-bold text-text-1">예상 결제 총액</span>
             <span className="font-display text-base font-bold tabular-nums text-text-1">{formatKRW(total)}</span>
           </div>
-          <p className="mt-1.5 text-[11px] text-text-3">낙찰 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
+          <p className="mt-1.5 text-[11px] text-text-3">거래 성사 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
         </div>
 
         <button
@@ -166,16 +166,16 @@ function BidSheet({ onClose }: { onClose: () => void }) {
           className={`mt-3 flex h-12 w-full items-center justify-center rounded-[7px] bg-primary text-sm font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
         >
           {isTopBidder
-            ? "현재 최고 입찰자예요"
+            ? "현재 최고가 제안자예요"
             : submitting
               ? "처리 중..."
               : needsAddress
-                ? "배송지 등록하고 입찰하기"
-                : `${formatKRW(amount)} 입찰하기`}
+                ? "배송지 등록하고 제안하기"
+                : `${formatKRW(amount)} 제안하기`}
         </button>
         {needsAddress && (
           <p className="mt-2 text-[11.5px] leading-[1.6] text-text-3">
-            낙찰되면 바로 보내드릴 수 있게 받을 주소를 먼저 등록해요.{" "}
+            거래가 성사되면 바로 보내드릴 수 있게 받을 주소를 먼저 등록해요.{" "}
             <b className="font-bold text-text-2">한 번만 하면 다음부터는 물어보지 않아요.</b>
           </p>
         )}
@@ -211,7 +211,7 @@ export default function MobileAuctionDetail({
 
   const hasMyBid = useHasMyBid(auctionId);
   const [sheetOpen, setSheetOpen] = useState(false);
-  // 사용자가 탭을 직접 고르면 그 선택이 이긴다. 고르기 전까지는 "내가 입찰했는가"가 정한다 —
+  // 사용자가 탭을 직접 고르면 그 선택이 이긴다. 고르기 전까지는 "내가 제안했는가"가 정한다 —
   // 상태를 효과로 덮어쓰지 않고 파생값으로 두어야, 확인 응답이 늦게 와도 보던 탭을 빼앗지 않는다.
   const [pickedTab, setPickedTab] = useState<string | null>(null);
   const tab = pickedTab ?? (hasMyBid ? TAB_BIDS : TAB_PRODUCT);
@@ -267,27 +267,27 @@ export default function MobileAuctionDetail({
         <div className="mt-4 rounded-r3 border border-border p-3.5">
           <div className="flex items-baseline justify-between">
             <span className="text-[11px] font-semibold text-text-3">현재가</span>
-            <span className="text-[11.5px] tabular-nums text-text-3">{bidCount}회 입찰</span>
+            <span className="text-[11.5px] tabular-nums text-text-3">제안 {bidCount}회</span>
           </div>
           <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1" aria-live="polite">
             {formatKRW(currentPrice)}
           </p>
           <div className="mt-2.5 flex items-center justify-between border-t border-border pt-2.5 text-[11.5px]">
             <span className={`font-bold tabular-nums ${endingSoon ? "text-warn" : "text-text-1"}`}>
-              {isLive ? `마감까지 ${formatCountdown(endAt)}` : "종료된 경매"}
+              {isLive ? `마감까지 ${formatCountdown(endAt)}` : "종료된 매물"}
             </span>
-            <span className="tabular-nums text-text-3">시작가 {formatKRW(auction.startPrice)}</span>
+            <span className="tabular-nums text-text-3">시작 제안가 {formatKRW(auction.startPrice)}</span>
           </div>
           {isLive && (
             <p className="mt-2 text-[10.5px] leading-relaxed text-text-3">
-              마감 3분 전 입찰 시 종료 시간이 자동 연장돼요(최대 3회).
+              마감 3분 전 제안 시 종료 시간이 자동 연장돼요(최대 3회).
             </p>
           )}
         </div>
 
         <SellerRow sellerId={auction.sellerId} nickname={auction.sellerNickname} />
 
-        {/* 탭 — 상품 정보 / 입찰 이력 */}
+        {/* 탭 — 상품 정보 / 제안 내역 */}
         <div role="tablist" className="mt-5 flex gap-1 border-b border-border">
           {[TAB_PRODUCT, TAB_BIDS, TAB_DELIVERY].map((name) => {
             const on = tab === name;
@@ -322,7 +322,7 @@ export default function MobileAuctionDetail({
               <div className="py-2.5">
                 <dt className="text-[12.5px] font-extrabold text-text-1">받는 주소</dt>
                 <dd className="mt-1 text-[13px] leading-relaxed text-text-2">
-                  입찰 전에 등록해요. 낙찰되면 등록한 주소로 판매자가 보내드려요.
+                  가격 제안 전에 등록해요. 거래가 성사되면 등록한 주소로 판매자가 보내드려요.
                 </dd>
               </div>
               <div className="py-2.5">
@@ -388,7 +388,7 @@ export default function MobileAuctionDetail({
                 ))}
               </ul>
             ) : (
-              <p className="py-6 text-center text-[12.5px] text-text-3">아직 입찰이 없어요.</p>
+              <p className="py-6 text-center text-[12.5px] text-text-3">아직 제안이 없어요.</p>
             )}
             {hasMoreBids && (
               <button
@@ -403,8 +403,8 @@ export default function MobileAuctionDetail({
         )}
       </div>
 
-      {/* 하단 고정 바 — 킷과 같은 구성: 관심 44×44 + 입찰 CTA(남은 폭 전부).
-          현재가·마감은 위 가격 패널과 입찰 시트가 말하므로 바에서는 반복하지 않는다. */}
+      {/* 하단 고정 바 — 킷과 같은 구성: 관심 44×44 + 제안 CTA(남은 폭 전부).
+          현재가·마감은 위 가격 패널과 제안 시트가 말하므로 바에서는 반복하지 않는다. */}
       {isLive && (
         <div
           className="fixed inset-x-0 bottom-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 sm:hidden"
@@ -416,18 +416,18 @@ export default function MobileAuctionDetail({
           />
           {isOwnAuction ? (
             <span className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-bold text-text-3">
-              내 경매입니다
+              내 매물입니다
             </span>
           ) : !accessToken ? (
             <Link
               href={`/login?redirect=/auctions/${auctionId}`}
               className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
             >
-              로그인하고 입찰하기
+              로그인하고 제안하기
             </Link>
           ) : isTopBidder ? (
             <span className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-bold text-text-3">
-              현재 최고 입찰자예요
+              현재 최고가 제안자예요
             </span>
           ) : (
             <button
@@ -435,7 +435,7 @@ export default function MobileAuctionDetail({
               onClick={() => setSheetOpen(true)}
               className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
             >
-              입찰하기
+              제안하기
             </button>
           )}
         </div>
@@ -443,11 +443,11 @@ export default function MobileAuctionDetail({
 
       {sheetOpen && <BidSheet onClose={() => setSheetOpen(false)} />}
 
-      {/* 배송지 등록(#283) — 저장해도 입찰을 대신 눌러주지 않는다. 입찰은 취소할 수 없는 청약이라
+      {/* 배송지 등록(#283) — 저장해도 제안을 대신 눌러주지 않는다. 가격 제안은 취소할 수 없는 청약이라
           사용자가 한 번 더 눌러야 한다(약관 §13조의2 ②). 대신 시트를 열어 흐름을 이어 준다. */}
       {addressModalOpen && (
         <DeliveryAddressGateModal
-          action="입찰"
+          action="가격 제안"
           onClose={closeAddressModal}
           onSaved={() => onAddressSaved(() => setSheetOpen(true))}
         />

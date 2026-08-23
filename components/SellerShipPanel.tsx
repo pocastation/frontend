@@ -6,8 +6,8 @@ import { formatKRW } from "@/lib/format";
 import OrderShipForm from "@/components/OrderShipForm";
 import type { SoldOrderResponse } from "@/lib/types";
 
-// 경매 상세의 판매자 발송 패널(#119) — 낙찰(ENDED_SOLD) 상세에서 판매자 본인에게만 노출된다.
-// sold-orders 조회가 대상자(판매자)에게만 이 경매 주문을 주므로, 조회 성공 자체가 노출 게이트.
+// 매물 상세의 판매자 발송 패널(#119) — 거래 성사(ENDED_SOLD) 상세에서 판매자 본인에게만 노출된다.
+// sold-orders 조회가 대상자(판매자)에게만 이 매물 주문을 주므로, 조회 성공 자체가 노출 게이트.
 export default function SellerShipPanel({ auctionId }: { auctionId: number }) {
   const { accessToken, isLoading, fetchWithAuth } = useAuth();
   const [order, setOrder] = useState<SoldOrderResponse | null>(null);

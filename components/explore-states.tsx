@@ -1,6 +1,6 @@
 import { FOCUS_RING } from "@/lib/ui";
 
-// 홈 그리드(AuctionExplorer)·경매목록(AuctionBrowser)·아티스트(ArtistExplorer) 세 탐색
+// 홈 그리드(AuctionExplorer)·매물 목록(AuctionBrowser)·아티스트(ArtistExplorer) 세 탐색
 // 화면이 공유하는 UX 상태 컴포넌트를 한곳에 모은다 — 로딩 스켈레톤·빈 상태·에러 배너.
 // 세 화면의 검색/정렬 패턴이 동일하므로 상태 UI도 여기서 통일해 일관성을 유지한다.
 

@@ -30,7 +30,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   if (!artist) {
     return { title: "스타를 찾을 수 없어요 — Pocastation" };
   }
-  const description = `${artist.name} 포토카드 경매·즉시판매 — Pocastation`;
+  const description = `${artist.name} 포토카드 제안판매·즉시판매 — Pocastation`;
   return {
     title: `${artist.name} — Pocastation`,
     description,
@@ -196,7 +196,7 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
 
       <section className="mt-8">
         <div className="mb-3 flex items-baseline justify-between">
-          <h2 className="font-display text-[17px] font-extrabold text-text-1">{artist.name}의 진행 중인 경매</h2>
+          <h2 className="font-display text-[17px] font-extrabold text-text-1">{artist.name}의 진행 중인 매물</h2>
         </div>
         <AuctionGrid auctions={auctions?.content ?? []} />
       </section>

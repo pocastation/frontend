@@ -195,9 +195,9 @@ function LogoutIcon() {
 
 const TRADE_NAV: { key: Tab; label: string; icon: () => ReactNode }[] = [
   { key: "dashboard", label: "대시보드", icon: DashboardIcon },
-  { key: "bidding", label: "입찰", icon: TicketIcon },
+  { key: "bidding", label: "가격 제안", icon: TicketIcon },
   { key: "purchases", label: "구매 내역", icon: BadgeCheckIcon },
-  { key: "selling", label: "판매 중인 경매", icon: TagIcon },
+  { key: "selling", label: "판매 중인 매물", icon: TagIcon },
   { key: "sellHistory", label: "판매 내역", icon: ArchiveIcon },
   { key: "wishlist", label: "관심 목록", icon: HeartIcon },
 ];
@@ -211,8 +211,8 @@ const ACCOUNT_NAV: { key: Tab; label: string; icon: () => ReactNode; hidden?: bo
   // 결정 전이다. 결정도 안 난 수단을 스스로 등록하러 오게 둘 이유는 없다.
   //
   // ⚠️ 목록에서 빼되 **항목은 남긴다.** 지우면 TAB_KEYS에서도 빠져 `?tab=payment` 진입이
-  // 검증에서 튕기고, 그 순간 카드 미등록 낙찰자의 [카드 등록] CTA(SECOND_CHANCE_OFFERED)와
-  // 승계 배너 링크가 통째로 죽는다 — 낙찰됐는데 결제할 방법이 사라진다.
+  // 검증에서 튕기고, 그 순간 카드 미등록 구매자의 [카드 등록] CTA(SECOND_CHANCE_OFFERED)와
+  // 승계 배너 링크가 통째로 죽는다 — 거래가 성사됐는데 결제할 방법이 사라진다.
   // 되살릴 때는 hidden만 지우면 된다.
   { key: "payment", label: "결제수단", icon: CardIcon, hidden: true },
   { key: "settlement", label: "정산계좌", icon: BankIcon },
@@ -271,7 +271,7 @@ function FilterChips<T extends string>({
   );
 }
 
-// 당근식 통합 마이페이지 — 판매자/구매자 계정 구분 없이 "내 활동" = 판매 + 입찰.
+// 당근식 통합 마이페이지 — 판매자/구매자 계정 구분 없이 "내 활동" = 판매 + 가격 제안.
 //
 // 데스크탑과 모바일이 **같은 탭 콘텐츠를 공유하고 내비게이션만 갈린다.** 데스크탑은 좌 사이드바
 // 240px + 우 콘텐츠로 한 화면이고, 모바일은 `/mypage`가 메뉴 목록이며 `?tab=X`가 서브 화면으로
@@ -316,13 +316,13 @@ function MyPageBody() {
   const [bidding, setBidding] = useState<MyBiddingResponse[]>([]);
   const [instantPurchases, setInstantPurchases] = useState<AuctionResponse[]>([]);
   const [wishlist, setWishlist] = useState<AuctionResponse[]>([]);
-  // 구매(낙찰·즉시구매) 건의 주문 결제 상태 — auctionId 키(#113, wishlist 하트 배치 채움 패턴).
+  // 구매(거래 성사·즉시구매) 건의 주문 결제 상태 — auctionId 키(#113, wishlist 하트 배치 채움 패턴).
   const [orders, setOrders] = useState<Record<number, MyOrderStatusResponse>>({});
   // 판매 건의 주문(판매자 관점, #119) — auctionId 키. 발송 UI가 소비.
   const [soldOrders, setSoldOrders] = useState<Record<number, SoldOrderResponse>>({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // 낙찰 후 배송지 입력 팝업(§13 "배송지 자동채움") — 기본배송지가 없어 자동확정 못한 주문을
+  // 거래 성사 후 배송지 입력 팝업(§13 "배송지 자동채움") — 기본배송지가 없어 자동확정 못한 주문을
   // 마이페이지 진입 즉시 모달로 띄운다. 사용자가 "나중에"로 닫으면 이번 세션에선 다시 안 띄운다.
   const [addressModalOrder, setAddressModalOrder] = useState<{ auctionId: number; title: string } | null>(null);
   const dismissedAddressIds = useRef<Set<number>>(new Set());
@@ -370,7 +370,7 @@ function MyPageBody() {
       setInstantPurchases(instantPurchasesRes.content);
       setWishlist(wishlistRes.content);
 
-      // 구매 확정 건(낙찰 + 즉시구매)의 주문 상태를 배치로 채운다 — 주문이 없는 경매는 응답에 안 온다.
+      // 구매 확정 건(거래 성사 + 즉시구매)의 주문 상태를 배치로 채운다 — 주문이 없는 매물은 응답에 안 온다.
       // 배치 채움 실패는 non-fatal: 목록은 그대로 보여주고 상태 푸터만 생략한다(wishlist 하트와 동일 원칙).
       const purchasedIds = [
         ...biddingRes.content.filter((b) => b.status === "ENDED_SOLD" && b.isTopBidder).map((b) => b.id),
@@ -389,7 +389,7 @@ function MyPageBody() {
         setOrders({});
       }
 
-      // 판매 건의 주문(발송 UI) — 판매자 관점. 주문이 없는(미낙찰·미결제) 경매는 응답에 안 온다.
+      // 판매 건의 주문(발송 UI) — 판매자 관점. 주문이 없는(미성사·미결제) 매물은 응답에 안 온다.
       const sellingIds = sellingRes.content.map((a) => a.id);
       try {
         if (sellingIds.length > 0) {
@@ -417,7 +417,7 @@ function MyPageBody() {
     }
   }, [fetchWithAuth]);
 
-  // 배송지 미확정(기본배송지 없이 낙찰) 주문이 있으면 진입 즉시 팝업 — 이미 열려있거나 이번
+  // 배송지 미확정(기본배송지 없이 거래 성사) 주문이 있으면 진입 즉시 팝업 — 이미 열려있거나 이번
   // 세션에 "나중에"로 닫은 주문은 다시 띄우지 않는다.
   useEffect(() => {
     if (addressModalOrder) return;
@@ -430,7 +430,7 @@ function MyPageBody() {
     );
     if (!pending) return;
     const auction = [...bidding, ...instantPurchases].find((a) => a.id === pending.auctionId);
-    setAddressModalOrder({ auctionId: pending.auctionId, title: auction?.title ?? "낙찰 상품" });
+    setAddressModalOrder({ auctionId: pending.auctionId, title: auction?.title ?? "구매 상품" });
   }, [orders, bidding, instantPurchases, addressModalOrder]);
 
   function openAddressModal(auctionId: number, title: string) {
@@ -542,7 +542,7 @@ function MyPageBody() {
         auctionId: pendingAddressOrder.auctionId,
         title:
           [...bidding, ...instantPurchases].find((a) => a.id === pendingAddressOrder.auctionId)?.title
-          ?? "낙찰 상품",
+          ?? "구매 상품",
       }
     : null;
 
@@ -681,11 +681,11 @@ function MyPageBody() {
 
             {/* 위아래 규칙선 안에서 세로선으로만 나눈다 — 다섯 값이 한 덩어리로 읽혀야 비교가 된다. */}
             <div className="mt-5 flex flex-wrap gap-y-4 border-y border-border py-4">
-              <DashboardStat label="참여 중인 경매" value={`${liveBidding.length}건`} />
-              <DashboardStat label="입찰한 경매" value={`${bidding.length}건`} />
-              <DashboardStat label="낙찰 성공" value={`${wonBidding.length}건`} />
+              <DashboardStat label="참여 중인 거래" value={`${liveBidding.length}건`} />
+              <DashboardStat label="제안한 매물" value={`${bidding.length}건`} />
+              <DashboardStat label="거래 성사" value={`${wonBidding.length}건`} />
               <DashboardStat label="즉시구매" value={`${instantPurchases.length}건`} />
-              <DashboardStat label="판매 중인 경매" value={`${activeSelling.length}건`} />
+              <DashboardStat label="판매 중인 매물" value={`${activeSelling.length}건`} />
             </div>
 
             {/* 내 신뢰 레벨 진행도(§12.7) — 레벨·배지는 왼쪽 사용자 카드로 옮겼고(#275)
@@ -734,16 +734,16 @@ function MyPageBody() {
             )}
 
             <div className="mt-8 grid gap-5 sm:grid-cols-2">
-              <DashboardPanel title="참여 중인 경매" onSeeAll={() => goToBidding("live")}>
-                <MyBiddingList items={liveBidding.slice(0, 3)} loading={loading} emptyText="참여 중인 경매가 없습니다." />
+              <DashboardPanel title="참여 중인 거래" onSeeAll={() => goToBidding("live")}>
+                <MyBiddingList items={liveBidding.slice(0, 3)} loading={loading} emptyText="참여 중인 거래가 없습니다." />
               </DashboardPanel>
 
-              <DashboardPanel title="입찰 내역" onSeeAll={() => goToBidding("all")}>
-                <MyBiddingList items={bidding.slice(0, 3)} loading={loading} emptyText="아직 입찰한 경매가 없어요." />
+              <DashboardPanel title="제안 내역" onSeeAll={() => goToBidding("all")}>
+                <MyBiddingList items={bidding.slice(0, 3)} loading={loading} emptyText="아직 제안한 매물이 없어요." />
               </DashboardPanel>
 
-              <DashboardPanel title="낙찰/구매 내역" onSeeAll={() => goToPurchases("auction")}>
-                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => selectTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
+              <DashboardPanel title="구매 내역" onSeeAll={() => goToPurchases("auction")}>
+                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="거래가 성사된 매물이 없습니다." orders={orders} onGoPayment={() => selectTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
               </DashboardPanel>
 
               <DashboardPanel title="즉시구매 내역" onSeeAll={() => goToPurchases("instant")}>
@@ -760,11 +760,11 @@ function MyPageBody() {
                 />
               </DashboardPanel>
 
-              <DashboardPanel title="판매 중인 경매" onSeeAll={() => selectTab("selling")}>
+              <DashboardPanel title="판매 중인 매물" onSeeAll={() => selectTab("selling")}>
                 <SellingList
                   items={activeSelling.slice(0, 3)}
                   loading={loading}
-                  emptyText="등록한 경매가 없습니다."
+                  emptyText="등록한 매물이 없습니다."
                   showReviewStatus
                   soldOrders={soldOrders}
                   onRefresh={loadMyActivity}
@@ -774,9 +774,9 @@ function MyPageBody() {
           </>
         ) : activeTab === "bidding" ? (
           <>
-            <TabHead title="입찰" sub={<>입찰에 참여한 경매를 모아서 봐요.</>} />
+            <TabHead title="가격 제안" sub={<>가격을 제안한 매물을 모아서 봐요.</>} />
             <FilterChips
-              label="입찰 목록 필터"
+              label="제안 목록 필터"
               value={biddingFilter}
               onChange={setBiddingFilter}
               options={[
@@ -788,25 +788,25 @@ function MyPageBody() {
               <MyBiddingList
                 items={biddingFilter === "live" ? liveBidding : bidding}
                 loading={loading}
-                emptyText={biddingFilter === "live" ? "참여 중인 경매가 없습니다." : "아직 입찰한 경매가 없어요."}
+                emptyText={biddingFilter === "live" ? "참여 중인 거래가 없습니다." : "아직 제안한 매물이 없어요."}
               />
             </div>
           </>
         ) : activeTab === "purchases" ? (
           <>
-            <TabHead title="구매 내역" sub={<>경매 낙찰과 즉시구매를 한곳에서 봐요.</>} />
+            <TabHead title="구매 내역" sub={<>제안으로 성사된 거래와 즉시구매를 한곳에서 봐요.</>} />
             <FilterChips
               label="구매 내역 필터"
               value={purchaseFilter}
               onChange={setPurchaseFilter}
               options={[
-                { key: "auction", label: "경매 낙찰", count: wonBidding.length },
+                { key: "auction", label: "제안 거래", count: wonBidding.length },
                 { key: "instant", label: "즉시구매", count: instantPurchases.length },
               ]}
             />
             <div className="mt-5">
               {purchaseFilter === "auction" ? (
-                <MyBiddingList items={wonBidding} loading={loading} emptyText="낙찰한 경매가 없습니다." orders={orders} onGoPayment={() => selectTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
+                <MyBiddingList items={wonBidding} loading={loading} emptyText="거래가 성사된 매물이 없습니다." orders={orders} onGoPayment={() => selectTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
               ) : (
                 <SellingList
                   items={instantPurchases}
@@ -824,12 +824,12 @@ function MyPageBody() {
           </>
         ) : activeTab === "selling" ? (
           <>
-            <TabHead title="판매 중인 경매" sub={<>등록한 경매와 검수 상태 {activeSelling.length}건</>} />
+            <TabHead title="판매 중인 매물" sub={<>등록한 매물과 검수 상태 {activeSelling.length}건</>} />
             {loading ? (
               <p className="mt-6 text-sm text-text-3">불러오는 중...</p>
             ) : activeSelling.length === 0 ? (
               <p className="mt-6 text-sm text-text-3">
-                아직 등록한 경매가 없어요.{" "}
+                아직 등록한 매물이 없어요.{" "}
                 <Link href="/auctions/new" className={`font-bold text-primary hover:underline ${FOCUS_RING}`}>
                   판매 등록하기 →
                 </Link>
@@ -839,7 +839,7 @@ function MyPageBody() {
                 <SellingList
                   items={activeSelling}
                   loading={loading}
-                  emptyText="등록한 경매가 없습니다."
+                  emptyText="등록한 매물이 없습니다."
                   showReviewStatus
                   soldOrders={soldOrders}
                   onRefresh={loadMyActivity}
@@ -867,14 +867,14 @@ function MyPageBody() {
           </>
         ) : activeTab === "shipping" ? (
           <>
-            <TabHead title="배송지 관리" sub={<>낙찰 상품을 받을 배송지를 관리해요.</>} />
+            <TabHead title="배송지 관리" sub={<>구매한 상품을 받을 배송지를 관리해요.</>} />
             <div className="mt-5">
               <DeliveryAddressBook />
             </div>
           </>
         ) : activeTab === "payment" ? (
           <>
-            <TabHead title="결제수단" sub={<>낙찰 시 자동 결제에 사용할 카드를 관리해요.</>} />
+            <TabHead title="결제수단" sub={<>거래 성사 시 자동 결제에 사용할 카드를 관리해요.</>} />
             <div className="mt-5">
               <PaymentMethodManager />
             </div>
@@ -902,7 +902,7 @@ function MyPageBody() {
           </>
         ) : activeTab === "wishlist" ? (
           <>
-            <TabHead title="관심 목록" sub={<>찜한 경매 {wishlist.length}건</>} />
+            <TabHead title="관심 목록" sub={<>찜한 매물 {wishlist.length}건</>} />
             {/* 관심 목록은 하단탭의 루트 화면이라 모바일에서도 제목을 갖는다(서브 화면 앱바가 없다). */}
             <div className="flex items-baseline gap-2 pt-0.5 sm:hidden">
               <h1 className="font-display text-xl font-extrabold text-text-1">관심 목록</h1>
@@ -924,7 +924,7 @@ function MyPageBody() {
             ) : (
               !loading && (
                 <p className="mt-8 text-center text-[13px] text-text-3 sm:hidden">
-                  아직 찜한 경매가 없어요.
+                  아직 찜한 매물이 없어요.
                 </p>
               )
             )}
@@ -932,14 +932,14 @@ function MyPageBody() {
               <WishlistTabList
                 items={wishlist}
                 loading={loading}
-                emptyText="아직 찜한 경매가 없어요."
+                emptyText="아직 찜한 매물이 없어요."
                 onRemove={handleRemoveWishlist}
               />
             </div>
           </>
         ) : (
           <>
-            <TabHead title="판매 내역" sub={<>종료되거나 취소된 경매 {sellingHistory.length}건</>} />
+            <TabHead title="판매 내역" sub={<>종료되거나 취소된 매물 {sellingHistory.length}건</>} />
             <div className="mt-5">
               <SellingList
                 items={sellingHistory}
@@ -1007,7 +1007,7 @@ function Thumb({ url, alt }: { url: string | null; alt: string }) {
  * 없고, 모바일 2열에서는 카드 패딩 탓에 숫자가 잘렸다.
  *
  * <p>색 스와치도 뺐다 — 다섯 개에 서로 다른 파스텔을 물려 놨는데 <b>그 색이 아무 뜻도 없었다.</b>
- * 「참여 중인 경매」와 「즉시구매」가 같은 연보라였다.
+ * 「참여 중인 거래」와 「즉시구매」가 같은 연보라였다.
  */
 function DashboardStat({ label, value }: { label: string; value: string }) {
   return (
@@ -1617,7 +1617,7 @@ function BuyerDisputeFooter({
   );
 }
 
-// 판매자 관점 발송 푸터(#119) — 판매 내역. sold-order가 있으면(=결제 완료된 낙찰) 발송/상태 표시.
+// 판매자 관점 발송 푸터(#119) — 판매 내역. sold-order가 있으면(=결제 완료된 거래) 발송/상태 표시.
 function SellerFulfillmentFooter({
   soldOrder,
   onRefresh,
@@ -1841,7 +1841,7 @@ function MyBiddingList({
   items: MyBiddingResponse[];
   loading: boolean;
   emptyText: string;
-  // 낙찰 건의 주문 상태(auctionId 키) — 넘기면 카드 하단에 결제 상태 푸터가 붙는다(#113).
+  // 성사된 거래의 주문 상태(auctionId 키) — 넘기면 카드 하단에 결제 상태 푸터가 붙는다(#113).
   orders?: Record<number, MyOrderStatusResponse>;
   onGoPayment?: () => void;
   onRefresh?: () => void;
@@ -1871,12 +1871,12 @@ function MyBiddingList({
                   )}
                   <span className="block truncate text-sm font-bold text-text-1">{item.title}</span>
                   <span className="mt-1 flex items-center gap-1.5 text-[11px] text-text-3">
-                    <span>내 입찰가 {formatKRW(item.myBidAmount)}</span>
+                    <span>내 제안가 {formatKRW(item.myBidAmount)}</span>
                     {item.isTopBidder && item.status === "LIVE" && (
-                      <span className="rounded-full bg-ok-soft px-1.5 py-0.5 font-bold text-ok">최고 입찰가</span>
+                      <span className="rounded-full bg-ok-soft px-1.5 py-0.5 font-bold text-ok">최고 제안가</span>
                     )}
                     {item.isTopBidder && item.status === "ENDED_SOLD" && (
-                      <span className="rounded-full bg-ok-soft px-1.5 py-0.5 font-bold text-ok">낙찰 완료</span>
+                      <span className="rounded-full bg-ok-soft px-1.5 py-0.5 font-bold text-ok">거래 성사</span>
                     )}
                   </span>
                 </span>
@@ -1889,7 +1889,7 @@ function MyBiddingList({
                   </span>
                 </span>
               </Link>
-              {/* 낙찰 건도 PAID면 배송지 입력·구매확정 푸터, 그 전이면 결제 상태 푸터(#113/#119). */}
+              {/* 성사된 거래도 PAID면 배송지 입력·구매확정 푸터, 그 전이면 결제 상태 푸터(#113/#119). */}
               {order &&
                 (order.status === "PAID" && onRefresh ? (
                   <BuyerFulfillmentFooter

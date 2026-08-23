@@ -8,7 +8,7 @@ import { formatPhoneInput } from "@/lib/phone";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import type { DeliveryAddress } from "@/lib/types";
 
-// 낙찰 즉시 배송지 입력 팝업(§13 "배송지 자동채움"과 연결) — 기본배송지가 없어 자동 확정되지
+// 거래 성사 즉시 배송지 입력 팝업(§13 "배송지 자동채움"과 연결) — 기본배송지가 없어 자동 확정되지
 // 못한 주문에 저장된 배송지가 있으면 선택만으로, 없으면 새 배송지 입력으로 즉시 확정을 유도한다.
 // 강제 모달이 아니다 — 확정 전까지는(§12.2 24시간 유예) 닫고 마이페이지에서 나중에 다시 열 수 있다.
 export default function DeliveryAddressModal({
@@ -125,7 +125,7 @@ export default function DeliveryAddressModal({
       });
       // 주문 배송지는 그 주문에 박제되는 스냅샷이라(발송 후 주소가 바뀌면 안 된다) 주소록에는
       // 아무것도 남지 않는다. 그래서 여기서 새로 입력한 주소는 주소록에도 넣어준다 —
-      // 안 그러면 "입력했는데 배송지 탭에 없다"가 되고, 다음 낙찰 때 또 처음부터 입력해야 한다.
+      // 안 그러면 "입력했는데 배송지 탭에 없다"가 되고, 다음 거래 때 또 처음부터 입력해야 한다.
       // 첫 주소면 서버가 자동으로 기본 배송지로 잡아줘서 그다음부터는 자동 확정된다.
       if (selectedId === "new" && saveToBook) {
         try {
@@ -260,7 +260,7 @@ export default function DeliveryAddressModal({
                     onChange={(e) => setSaveToBook(e.target.checked)}
                     className={`h-4 w-4 accent-[var(--color-primary)] ${FOCUS_RING}`}
                   />
-                  이 주소를 배송지로 저장 — 다음 낙찰부터 자동으로 확정돼요
+                  이 주소를 배송지로 저장 — 다음 거래부터 자동으로 확정돼요
                 </label>
               </div>
             )}

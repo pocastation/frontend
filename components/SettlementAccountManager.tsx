@@ -281,7 +281,7 @@ export default function SettlementAccountManager() {
       <div>
         <p className="text-sm font-bold text-text-2">등록된 정산계좌가 없어요.</p>
         <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
-          판매 대금은 구매확정 후 이 계좌로 들어와요. 등록해 두지 않으면 낙찰돼도 대금을 보내드릴 수 없어요.
+          판매 대금은 구매확정 후 이 계좌로 들어와요. 등록해 두지 않으면 거래가 성사돼도 대금을 보내드릴 수 없어요.
         </p>
         <button
           type="button"

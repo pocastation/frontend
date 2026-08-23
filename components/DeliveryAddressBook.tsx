@@ -150,7 +150,7 @@ export default function DeliveryAddressBook() {
           {addresses.length === 0 ? (
             <div className="flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-16 text-center">
               <p className="text-sm font-bold text-text-2">등록된 배송지가 없어요.</p>
-              <p className="text-xs text-text-3">낙찰 후 배송받을 주소를 미리 등록해두세요.</p>
+              <p className="text-xs text-text-3">거래 성사 후 배송받을 주소를 미리 등록해두세요.</p>
             </div>
           ) : (
             <ul className="flex flex-col gap-3">

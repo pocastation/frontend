@@ -15,7 +15,7 @@ const PATH = "/api/members/me/payment-methods";
 const STORE_ID = envValue(process.env.NEXT_PUBLIC_PORTONE_STORE_ID);
 const CHANNEL_KEY = envValue(process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY);
 
-// 결제수단(카드 빌링키) 관리 — §7 "카드 사전등록 → 낙찰 자동결제"의 사전등록 UI. 회원당 최대
+// 결제수단(카드 빌링키) 관리 — §7 "카드 사전등록 → 거래 성사 시 자동결제"의 사전등록 UI. 회원당 최대
 // MAX_METHODS장, 기본카드가 청구 대상(#152). 포트원 SDK(결제창)로 빌링키를 발급받아 백엔드에
 // 등록한다. 카드번호는 우리 서버·프론트 어디에도 원문이 남지 않는다(PG 결제창에서만 입력,
 // 표시는 PG가 내려준 마스킹 값).
@@ -68,7 +68,7 @@ export default function PaymentMethodManager() {
         return;
       }
       await fetchWithAuth(PATH, { method: "POST", body: { billingKey: res.billingKey } });
-      setMessage({ type: "ok", text: "카드가 등록됐어요. 낙찰 시 이 카드로 자동 결제돼요." });
+      setMessage({ type: "ok", text: "카드가 등록됐어요. 거래 성사 시 이 카드로 자동 결제돼요." });
       await load();
     } catch (err) {
       setMessage({
@@ -130,7 +130,7 @@ export default function PaymentMethodManager() {
         <div className="flex flex-col items-start gap-3 rounded-r3 border border-dashed border-border-2 p-6">
           <p className="text-sm font-bold text-text-2">등록된 카드가 없어요.</p>
           <p className="text-xs text-text-3">
-            경매 낙찰 시 자동 결제에 사용할 카드를 미리 등록해 두세요. 카드번호는 결제사(PG) 창에서만
+            거래 성사 시 자동 결제에 사용할 카드를 미리 등록해 두세요. 카드번호는 결제사(PG) 창에서만
             입력되고 서버에 저장되지 않아요.
           </p>
           <button

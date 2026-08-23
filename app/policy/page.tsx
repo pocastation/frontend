@@ -83,7 +83,7 @@ export default function PolicyPage() {
       <header>
         <h1 className="font-display text-2xl font-extrabold text-text-1 sm:text-3xl">운영정책</h1>
         <p className="mt-2 text-sm text-text-3">
-          포카스테이션(Poca Station) · 경매 · 즉시판매 거래 세부 기준
+          포카스테이션(Poca Station) · 제안판매 · 즉시판매 거래 세부 기준
         </p>
         <p className="mt-1 text-xs text-text-3">시행일 {POLICY_EFFECTIVE_DATE}</p>
       </header>

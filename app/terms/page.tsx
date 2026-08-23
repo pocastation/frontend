@@ -37,7 +37,7 @@ export default function TermsPage() {
           서비스 이용약관
         </h1>
         <p className="mt-2 text-sm text-text-3">
-          포카스테이션(Poca Station) · K-POP 포토카드 경매 · 중고거래 중개 플랫폼
+          포카스테이션(Poca Station) · K-POP 포토카드 중고거래 중개 플랫폼
         </p>
         <p className="mt-1 text-xs text-text-3">시행일 {TERMS_EFFECTIVE_DATE}</p>
       </header>

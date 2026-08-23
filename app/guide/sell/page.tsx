@@ -118,14 +118,14 @@ const PERIODS = ["1일", "3일", "7일"];
 const AFTER = [
   {
     k: "매물이 올라가요",
-    v: "등록을 마치면 경매 목록과 검색에 바로 노출돼요. 사진 인증 결과에 따라 관리자 확인을 거치는 경우가 있고, 그때는 검수가 끝난 뒤 올라가요.",
+    v: "등록을 마치면 매물 목록과 검색에 바로 노출돼요. 사진 인증 결과에 따라 관리자 확인을 거치는 경우가 있고, 그때는 검수가 끝난 뒤 올라가요.",
   },
   {
-    k: "입찰을 받아요",
-    v: "마감 3분 안에 입찰이 들어오면 3분씩 자동 연장돼요(최대 3회). 마감 시각의 최고 입찰자에게 낙찰돼요.",
+    k: "가격 제안을 받아요",
+    v: "마감 3분 안에 제안이 들어오면 3분씩 자동 연장돼요(최대 3회). 마감 시각에 가장 높은 금액을 제안한 구매자와 거래가 성사돼요.",
   },
   {
-    k: "낙찰되면 자동 결제돼요",
+    k: "거래가 성사되면 자동 결제돼요",
     v: "구매자가 미리 등록한 카드로 결제가 진행되고, 배송지가 확정되면 발송을 준비하면 돼요.",
   },
   {
@@ -198,11 +198,11 @@ export default function SellGuidePage() {
                   <span className="h-[7px] w-[7px] rounded-full bg-primary" />
                 </span>
                 <b className="text-[14.5px] font-extrabold tracking-[-0.02em] text-primary">
-                  경매판매
+                  제안판매
                 </b>
               </div>
               <p className="mt-2 text-[12.5px] leading-[1.7] text-text-2">
-                정한 기간 동안 입찰을 받아 판매해요. 희소성 있는 포카라면 시세보다 높게 낙찰될 수
+                정한 기간 동안 가격 제안을 받아 판매해요. 희소성 있는 포카라면 시세보다 높은 금액에 거래될 수
                 있어요.
               </p>
             </div>
@@ -340,17 +340,17 @@ export default function SellGuidePage() {
           </p>
         </section>
 
-        {/* ── 04 가격 · 경매 기간 ── 판매자가 가장 신경 쓰는 단계라 이 페이지에서 유일하게
+        {/* ── 04 가격 · 판매 기간 ── 판매자가 가장 신경 쓰는 단계라 이 페이지에서 유일하게
             테두리 패널로 세운다. 카드를 아예 안 쓰는 게 목적이 아니라, 카드가 값을 하는
             자리에만 쓰는 게 목적이다. */}
         <section id="step-4" className="mt-14 scroll-mt-24">
-          <StepHead n={4} title="가격 · 경매 기간" />
+          <StepHead n={4} title="가격 · 판매 기간" />
           <div className="mt-5 rounded-[6px] border border-border-2 bg-white p-5 sm:p-6">
-            <p className="text-[11px] font-extrabold tracking-[0.06em] text-text-3">경매판매</p>
+            <p className="text-[11px] font-extrabold tracking-[0.06em] text-text-3">제안판매</p>
 
             <div className="mt-4 flex flex-col gap-5">
               <div>
-                <Label required>시작가</Label>
+                <Label required>시작 제안가</Label>
                 <div
                   aria-hidden="true"
                   className="mt-2 flex h-12 items-center justify-between rounded-[4px] border border-border-2 px-4"
@@ -362,13 +362,13 @@ export default function SellGuidePage() {
                 </div>
                 <Help>
                   최저 <span className="tabular-nums">5,000원</span>부터{" "}
-                  <span className="tabular-nums">1,000원</span> 단위로 넣어요. 너무 높으면 유찰될 수
+                  <span className="tabular-nums">1,000원</span> 단위로 넣어요. 너무 높으면 제안 없이 끝날 수
                   있어 시세보다 살짝 낮게 잡는 편이 유리해요.
                 </Help>
               </div>
 
               <div>
-                <Label>경매 기간</Label>
+                <Label>판매 기간</Label>
                 <div aria-hidden="true" className="mt-2 flex gap-1.5">
                   {PERIODS.map((p, i) => (
                     <span
@@ -381,7 +381,7 @@ export default function SellGuidePage() {
                     </span>
                   ))}
                 </div>
-                <Help>기간이 끝나면 최고 입찰자에게 낙찰돼요.</Help>
+                <Help>기간이 끝나면 가장 높은 금액을 제안한 구매자와 거래가 성사돼요.</Help>
               </div>
 
               <div className="border-t border-border pt-5">
@@ -389,7 +389,7 @@ export default function SellGuidePage() {
                   <div>
                     <Label>차순위 승계</Label>
                     <p className="mt-1.5 text-[12px] leading-[1.65] text-text-3">
-                      낙찰자가 결제하지 않으면 차순위 입찰자에게 기회를 넘겨요. 24시간 내 수락,
+                      구매자가 결제하지 않으면 차순위 제안자에게 기회를 넘겨요. 24시간 내 수락,
                       1단계까지만 이어져요.
                     </p>
                   </div>
@@ -408,7 +408,7 @@ export default function SellGuidePage() {
               <div className="mt-3">
                 <Label required>즉시판매가</Label>
                 <Help>
-                  구매자가 바로 결제하는 확정 가격이에요. 단위 규칙은 시작가와 같고, 경매 기간과
+                  구매자가 바로 결제하는 확정 가격이에요. 단위 규칙은 시작 제안가와 같고, 판매 기간과
                   차순위 승계는 입력하지 않아요.
                 </Help>
               </div>

@@ -29,8 +29,8 @@ const STATUS_FILTERS: { key: AuctionStatus | "ALL"; label: string }[] = [
   { key: "ALL", label: "전체" },
   { key: "PENDING_REVIEW", label: "검수 대기" },
   { key: "LIVE", label: "진행 중" },
-  { key: "ENDED_SOLD", label: "낙찰 종료" },
-  { key: "ENDED_NO_BIDS", label: "유찰" },
+  { key: "ENDED_SOLD", label: "거래 성사" },
+  { key: "ENDED_NO_BIDS", label: "제안 없음" },
   { key: "REJECTED", label: "승인 거절" },
   { key: "CANCELLED", label: "취소됨" },
 ];
@@ -43,7 +43,7 @@ const PUBLIC_AUCTION_STATUSES = new Set<AuctionStatus>([
 
 const SALE_TYPE_FILTERS: { key: AuctionSaleType | "ALL"; label: string }[] = [
   { key: "ALL", label: "전체 판매" },
-  { key: "AUCTION", label: "경매판매" },
+  { key: "AUCTION", label: "제안판매" },
   { key: "INSTANT", label: "즉시판매" },
 ];
 
@@ -121,7 +121,7 @@ export default function AdminAuctionsPage() {
   useEffect(() => {
     if (isFirstRun.current) {
       isFirstRun.current = false;
-      // 대시보드의 "최근 등록 경매"가 검수 대기 건을 이 목록으로 보낼 때 필터를 실어 보낸다
+      // 대시보드의 "최근 등록 매물"이 검수 대기 건을 이 목록으로 보낼 때 필터를 실어 보낸다
       // (?status=PENDING_REVIEW). 알 수 없는 값이면 무시하고 전체로 연다.
       const requested = new URLSearchParams(window.location.search).get("status");
       const initial = requested && STATUS_FILTERS.some((f) => f.key === requested)
@@ -192,7 +192,7 @@ export default function AdminAuctionsPage() {
   }
 
   // 홈 배너(Hero) 노출 토글(#150) — 배너는 단일 슬롯이라 새로 켜면 기존 지정이 자동 해제된다.
-  // 홈 배너 조회는 '진행 중인 경매' 매물만 대상이라 즉시판매는 애초에 지정할 수 없다(서버도 409로 막는다).
+  // 홈 배너 조회는 '진행 중인 제안판매' 매물만 대상이라 즉시판매는 애초에 지정할 수 없다(서버도 409로 막는다).
   async function toggleFeatured(auction: AdminAuctionSummary) {
     try {
       await fetchWithAuth<void>(`/api/admin/auctions/${auction.id}/featured`, {
@@ -224,8 +224,8 @@ export default function AdminAuctionsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">경매 관리</h1>
-      <p className="mt-1.5 text-sm text-text-3">인증사진을 검수해 경매를 승인하거나 거절하고, 공개된 매물을 관리합니다.</p>
+      <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">매물 관리</h1>
+      <p className="mt-1.5 text-sm text-text-3">인증사진을 검수해 매물을 승인하거나 거절하고, 공개된 매물을 관리합니다.</p>
 
       {notice && (
         <p
@@ -243,10 +243,10 @@ export default function AdminAuctionsPage() {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
             <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
           </svg>
-          <span className="sr-only">경매 제목 검색</span>
+          <span className="sr-only">매물 제목 검색</span>
           <input
             type="search"
-            placeholder="경매 제목 검색"
+            placeholder="매물 제목 검색"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full border-0 bg-transparent text-[13.5px] text-text-1 outline-none placeholder:text-text-3"
@@ -292,10 +292,10 @@ export default function AdminAuctionsPage() {
         <table className="w-full min-w-[900px] border-collapse">
           <thead>
             <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
-              <th className="whitespace-nowrap px-4 py-2.5">경매</th>
+              <th className="whitespace-nowrap px-4 py-2.5">매물</th>
               <th className="whitespace-nowrap px-4 py-2.5">판매자</th>
               <th className="whitespace-nowrap px-4 py-2.5">현재가</th>
-              <th className="whitespace-nowrap px-4 py-2.5">입찰</th>
+              <th className="whitespace-nowrap px-4 py-2.5">제안</th>
               <th className="whitespace-nowrap px-4 py-2.5">상태</th>
               <th className="whitespace-nowrap px-4 py-2.5">마감</th>
               <th className="whitespace-nowrap px-4 py-2.5">관리</th>
@@ -305,7 +305,7 @@ export default function AdminAuctionsPage() {
             {auctions.length === 0 && !loading ? (
               <tr>
                 <td colSpan={7} className="px-4 py-12 text-center text-sm text-text-3">
-                  {query ? "검색 결과가 없습니다." : "경매가 없습니다."}
+                  {query ? "검색 결과가 없습니다." : "매물이 없습니다."}
                 </td>
               </tr>
             ) : (
@@ -374,7 +374,7 @@ export default function AdminAuctionsPage() {
                       </button>
                     ) : a.status === "LIVE" ? (
                       <div className="flex items-center gap-1.5">
-                        {/* 즉시판매는 홈 배너 대상이 아니다(홈 조회가 경매 매물만 본다) — 눌러도 안 되는 버튼 대신
+                        {/* 즉시판매는 홈 배너 대상이 아니다(홈 조회가 제안판매 매물만 본다) — 눌러도 안 되는 버튼 대신
                             비활성 상태로 이유를 노출한다. */}
                         <button
                           type="button"
@@ -384,7 +384,7 @@ export default function AdminAuctionsPage() {
                           title={
                             a.saleType === "AUCTION"
                               ? "홈 배너 노출 토글 (배너는 한 건만 지정됩니다)"
-                              : "홈 배너에는 경매 매물만 지정할 수 있습니다"
+                              : "홈 배너에는 제안판매 매물만 지정할 수 있습니다"
                           }
                           className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-3 py-1 text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING} ${
                             a.featured
@@ -441,7 +441,7 @@ export default function AdminAuctionsPage() {
       {cancelTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-sm rounded-r3 bg-surface p-5 shadow-modal">
-            <h2 className="font-display text-base font-extrabold text-text-1">경매 취소</h2>
+            <h2 className="font-display text-base font-extrabold text-text-1">매물 취소</h2>
             <p className="mt-1.5 text-[13px] text-text-3">
               &quot;{cancelTarget.title}&quot;을(를) 취소합니다. 이 작업은 되돌릴 수 없고, 선택한 사유가 판매자에게 알림으로 전달됩니다.
             </p>

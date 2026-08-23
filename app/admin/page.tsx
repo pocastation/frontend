@@ -38,9 +38,9 @@ function formatDate(iso: string) {
   return iso.slice(0, 10).replace(/-/g, ".");
 }
 
-// "최근 등록 경매"는 상태를 가리지 않고 최신순으로 가져오므로 검수 대기·거절 건도 섞인다.
+// "최근 등록 매물"은 상태를 가리지 않고 최신순으로 가져오므로 검수 대기·거절 건도 섞인다.
 // 공개 상세(/auctions/{id})는 비공개 상태를 404로 막으니, 공개된 것만 상세로 보내고
-// 나머지는 경매 관리 화면으로 보낸다(경매 관리 목록이 이미 쓰는 것과 같은 기준).
+// 나머지는 매물 관리 화면으로 보낸다(매물 관리 목록이 이미 쓰는 것과 같은 기준).
 const PUBLIC_AUCTION_STATUSES = new Set<AuctionStatus>([
   "LIVE",
   "ENDED_SOLD",
@@ -92,7 +92,7 @@ export default function AdminDashboardPage() {
       <div className="mt-6 flex flex-wrap gap-y-4 border-y border-border py-4">
         <Stat label="전체 회원 수" value={loading ? "—" : `${data?.totalMembers ?? 0}명`} />
         <Stat label="오늘 신규 가입" value={loading ? "—" : `${data?.todaySignups ?? 0}명`} />
-        <Stat label="진행 중인 경매" value={loading ? "—" : `${data?.liveAuctions ?? 0}건`} />
+        <Stat label="진행 중인 매물" value={loading ? "—" : `${data?.liveAuctions ?? 0}건`} />
         <Stat label="처리 대기 신고" value={loading ? "—" : `${data?.pendingReportCount ?? 0}건`} />
         <Stat label="처리 대기 건의" value={loading ? "—" : `${data?.pendingSuggestionCount ?? 0}건`} />
       </div>
@@ -132,7 +132,7 @@ export default function AdminDashboardPage() {
 
         <section className="rounded-r3 border border-border bg-surface p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-sm font-extrabold text-text-1">최근 등록 경매</h2>
+            <h2 className="font-display text-sm font-extrabold text-text-1">최근 등록 매물</h2>
             <Link href="/auctions" className={`text-xs font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
               전체 보기 →
             </Link>
@@ -140,7 +140,7 @@ export default function AdminDashboardPage() {
           {loading ? (
             <p className="py-6 text-center text-sm text-text-3">불러오는 중...</p>
           ) : !data || data.recentAuctions.length === 0 ? (
-            <p className="py-6 text-center text-sm text-text-3">등록된 경매가 없습니다.</p>
+            <p className="py-6 text-center text-sm text-text-3">등록된 매물이 없습니다.</p>
           ) : (
             <ul className="flex flex-col divide-y divide-border">
               {data.recentAuctions.map((a) => (

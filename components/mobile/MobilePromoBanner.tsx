@@ -5,6 +5,7 @@ import Link from "next/link";
 import { mediaUrl } from "@/lib/api";
 import { countdownLevel, countdownLevelAt, formatRemaining, type CountdownLevel } from "@/lib/countdown";
 import { formatKRW } from "@/lib/format";
+import { BRAND_HEADLINE_LINES, BRAND_SUBHEAD } from "@/lib/site";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionResponse } from "@/lib/types";
 
@@ -20,10 +21,6 @@ import type { AuctionResponse } from "@/lib/types";
 
 const AUTO_MS = 5000;
 const SWIPE_PX = 40;
-
-// 브랜드 확정 카피(디자인 시스템 CONTENT FUNDAMENTALS). 임의로 고쳐 쓰지 않는다.
-const BRAND_LINES = ["포카 한 장에도", "확인이 필요하니까,", "포카스테이션"];
-const BRAND_SUB = "안전결제와 판매자 상태 등급 고지로,\n처음 거래해도 걱정 없이";
 
 // 별 산포 — 순장식(aria-hidden). 플랫하게 점만 찍는다(그라데이션·글로우 금지).
 const STARS: { top: string; left: string; size: number; color: string }[] = [
@@ -91,11 +88,11 @@ function BrandSlide() {
     <div className="relative">
       <Stars />
       <h2 className="text-[27px] leading-[1.3] tracking-[-0.01em]">
-        {BRAND_LINES.map((line, i) => (
+        {BRAND_HEADLINE_LINES.map((line, i) => (
           <span
             key={line}
             className={
-              i === BRAND_LINES.length - 1
+              i === BRAND_HEADLINE_LINES.length - 1
                 ? "block font-sans font-black text-nebula"
                 : "block font-display font-bold text-white"
             }
@@ -104,7 +101,7 @@ function BrandSlide() {
           </span>
         ))}
       </h2>
-      <p className="mt-2.5 whitespace-pre-line text-[13px] leading-[1.65] text-white/60">{BRAND_SUB}</p>
+      <p className="mt-2.5 whitespace-pre-line text-[13px] leading-[1.65] text-white/60">{BRAND_SUBHEAD}</p>
       <Link
         href="/auctions"
         className={`mt-[18px] flex h-11 w-full items-center justify-center rounded-[7px] bg-primary text-sm font-extrabold text-white ${FOCUS_RING}`}

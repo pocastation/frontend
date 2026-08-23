@@ -5,7 +5,7 @@ import { FOCUS_RING } from "@/lib/ui";
 export const metadata = {
   title: "자주 묻는 질문 — Pocastation",
   description:
-    "입찰·판매 등록·배송·수수료까지 — 포카스테이션 이용 중 자주 나오는 질문과 답을 모았습니다.",
+    "가격 제안·판매 등록·배송·수수료까지 — 포카스테이션 이용 중 자주 나오는 질문과 답을 모았습니다.",
 };
 
 /**

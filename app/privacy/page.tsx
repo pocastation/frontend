@@ -122,7 +122,7 @@ export default function PrivacyPage() {
           개인정보 처리방침
         </h1>
         <p className="mt-2 text-sm text-text-3">
-          {BUSINESS_INFO.companyName}(Poca Station) · K-POP 포토카드 경매 · 중고거래 중개 플랫폼
+          {BUSINESS_INFO.companyName}(Poca Station) · K-POP 포토카드 중고거래 중개 플랫폼
         </p>
         <dl className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-3">
           <div className="flex gap-1.5">

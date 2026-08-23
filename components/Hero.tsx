@@ -4,6 +4,7 @@ import Link from "next/link";
 import AuctionCountdown from "@/components/AuctionCountdown";
 import { mediaUrl } from "@/lib/api";
 import { formatKRW } from "@/lib/format";
+import { BRAND_HEADLINE_LINES, BRAND_SUBHEAD } from "@/lib/site";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import type { AuctionResponse } from "@/lib/types";
 import WishlistHeart from "@/components/WishlistHeart";
@@ -79,17 +80,24 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
             LIVE 지금 <strong className="text-white">{liveCount.toLocaleString()}개</strong> 거래 진행 중
           </div>
 
+          {/* 브랜드 문장은 모바일 홍보 배너 1장과 **같은 것을 쓴다**(lib/site.ts). 지면 크기만
+              여기서 키우고, 줄 나눔과 «마지막 줄만 강조»는 공유한다. */}
           <h1 className="font-display text-[clamp(28px,4.5vw,42px)] font-extrabold leading-[1.25] tracking-[-0.02em] text-white">
-            <span className="font-sans font-black">K-POP 포토카드</span>
-            <br />
-            <span style={{ color: "#c8bcff" }}>우주에서 만나는</span>
-            <br />
-            <span className="font-sans font-black">거래 플랫폼</span>
+            {BRAND_HEADLINE_LINES.map((line, i) => (
+              <span
+                key={line}
+                className={
+                  i === BRAND_HEADLINE_LINES.length - 1
+                    ? "block font-sans font-black text-nebula"
+                    : "block"
+                }
+              >
+                {line}
+              </span>
+            ))}
           </h1>
 
-          <p className="mt-4 text-base leading-relaxed" style={{ color: "#c8bcff" }}>
-            희귀 포카부터 한정판 굿즈까지 — 공정한 가격으로 진짜 가치를 찾아드립니다.
-          </p>
+          <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-white/60">{BRAND_SUBHEAD}</p>
 
           <div className="mt-8 flex justify-center gap-3 sm:justify-start">
             <Link

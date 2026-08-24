@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { STATUS_TONE_CLASS, StatusGlyph, type StatusTone } from "@/components/StatusIcon";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,7 +17,7 @@ import type { NotificationListResponse, NotificationResponse, NotificationType }
 const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; icon: string }> = {
   OUTBID: { label: "제안 추월", tone: "primary", icon: "trendingUp" },
   AUCTION_WON: { label: "거래 성사", tone: "ok", icon: "award" },
-  AUCTION_LOST: { label: "패찰", tone: "neutral", icon: "minus" },
+  AUCTION_LOST: { label: "미성사", tone: "neutral", icon: "minus" },
   AUCTION_ENDED_NO_BIDS: { label: "제안 없음", tone: "neutral", icon: "minus" },
   AUCTION_REJECTED: { label: "보완 필요", tone: "accent", icon: "alertCircle" },
   AUCTION_CANCELLED: { label: "매물 취소", tone: "accent", icon: "xCircle" },
@@ -153,98 +154,105 @@ export default function NotificationsPage() {
     );
   }
 
+  // 데스크탑 헤더와 모바일 앱바가 같은 버튼을 쓴다 — 한쪽만 고쳐 동작이 갈리는 일을 막는다.
+  const markAllReadButton = hasUnread ? (
+    <button
+      type="button"
+      onClick={handleMarkAllRead}
+      className={`shrink-0 rounded-full border border-border-2 bg-white px-3.5 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+    >
+      모두 읽음
+    </button>
+  ) : null;
+
   return (
-    <div className="mx-auto max-w-[720px] px-4 py-8 sm:py-10">
-      <div className="mb-6 flex items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">알림</h1>
-          <p className="mt-1.5 text-sm text-text-3">제안 추월·거래 소식을 모아봐요.</p>
+    <>
+      {/* 모바일은 상단바의 종이 데려오는 서브 화면이다 — 앱바가 제목을 갖고, 본문은 제목을 반복하지 않는다. */}
+      <MobilePageHead title="알림" action={markAllReadButton} />
+      <div className="mx-auto max-w-[720px] px-0 py-0 sm:px-4 sm:py-10">
+        <div className="mb-6 hidden items-end justify-between gap-3 sm:flex">
+          <div>
+            <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">알림</h1>
+            <p className="mt-1.5 text-sm text-text-3">제안 추월·거래 소식을 모아봐요.</p>
+          </div>
+          {markAllReadButton}
         </div>
-        {hasUnread && (
-          <button
-            type="button"
-            onClick={handleMarkAllRead}
-            className={`shrink-0 rounded-full border border-border-2 bg-white px-3.5 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
-          >
-            모두 읽음
-          </button>
+
+        {error && (
+          <p role="alert" className="mx-4 mb-4 mt-4 rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent sm:mx-0 sm:mt-0">
+            {error}
+          </p>
         )}
-      </div>
 
-      {error && (
-        <p role="alert" className="mb-4 rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
-          {error}
-        </p>
-      )}
-
-      {loading ? (
-        <p className="py-16 text-center text-sm text-text-3">불러오는 중...</p>
-      ) : notifications.length === 0 ? (
-        <div className="flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-20 text-center text-text-3">
-          <BellIcon />
-          <p className="text-sm font-bold text-text-2">아직 받은 알림이 없어요.</p>
-          <p className="text-xs">제안 추월·거래 성사 소식을 여기서 받아볼 수 있어요.</p>
-        </div>
-      ) : (
-        // 승인 시안 B — 카테고리 리딩 아이콘(의미색 톤) + 안읽음은 우측 단일 닷. 읽음 행은 배경·아이콘을 가라앉힌다.
-        <ul className="overflow-hidden rounded-r3 border border-border">
-          {notifications.map((notification) => {
-            const meta = TYPE_META[notification.type] ?? UNKNOWN_META;
-            const unread = !notification.isRead;
-            return (
-              <li key={notification.id} className="border-b border-border/60 last:border-b-0">
-                <button
-                  type="button"
-                  onClick={() => handleClick(notification)}
-                  className={`flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-2/60 ${FOCUS_RING} ${
-                    unread ? "bg-surface" : "bg-surface-2/40"
-                  }`}
-                >
-                  <span
-                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[20px] ${STATUS_TONE_CLASS[meta.tone]} ${unread ? "" : "opacity-70"}`}
-                    aria-label={meta.label}
+        {loading ? (
+          <p className="py-16 text-center text-sm text-text-3">불러오는 중...</p>
+        ) : notifications.length === 0 ? (
+          <div className="mx-4 mt-4 flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-20 text-center text-text-3 sm:mx-0 sm:mt-0">
+            <BellIcon />
+            <p className="text-sm font-bold text-text-2">아직 받은 알림이 없어요.</p>
+            <p className="text-xs">제안 추월·거래 성사 소식을 여기서 받아볼 수 있어요.</p>
+          </div>
+        ) : (
+          // 승인 시안 B — 카테고리 리딩 아이콘(의미색 톤) + 안읽음은 우측 단일 닷. 읽음 행은 배경·아이콘을 가라앉힌다.
+          <ul className="sm:overflow-hidden sm:rounded-r3 sm:border sm:border-border">
+            {notifications.map((notification) => {
+              const meta = TYPE_META[notification.type] ?? UNKNOWN_META;
+              const unread = !notification.isRead;
+              return (
+                <li key={notification.id} className="border-b border-border/60 last:border-b-0">
+                  <button
+                    type="button"
+                    onClick={() => handleClick(notification)}
+                    className={`flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-2/60 ${FOCUS_RING} ${
+                      unread ? "bg-surface" : "bg-surface-2/40"
+                    }`}
                   >
-                    <StatusGlyph name={meta.icon} />
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="flex items-baseline gap-2">
-                      <span className={`min-w-0 flex-1 truncate text-sm ${unread ? "font-bold text-text-1" : "text-text-2"}`}>
-                        {notification.title}
+                    <span
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[20px] ${STATUS_TONE_CLASS[meta.tone]} ${unread ? "" : "opacity-70"}`}
+                      aria-label={meta.label}
+                    >
+                      <StatusGlyph name={meta.icon} />
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex items-baseline gap-2">
+                        <span className={`min-w-0 flex-1 truncate text-sm ${unread ? "font-bold text-text-1" : "text-text-2"}`}>
+                          {notification.title}
+                        </span>
+                        <span className="shrink-0 text-[11px] tabular-nums text-text-3">
+                          {formatRelativeTime(notification.createdAt)}
+                        </span>
                       </span>
-                      <span className="shrink-0 text-[11px] tabular-nums text-text-3">
-                        {formatRelativeTime(notification.createdAt)}
+                      <span className={`mt-0.5 block truncate text-[13px] leading-relaxed ${unread ? "text-text-2" : "text-text-3"}`}>
+                        {notification.message}
                       </span>
                     </span>
-                    <span className={`mt-0.5 block truncate text-[13px] leading-relaxed ${unread ? "text-text-2" : "text-text-3"}`}>
-                      {notification.message}
-                    </span>
-                  </span>
-                  {unread && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />}
-                </button>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+                    {unread && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
 
-      {hasMore && (
-        <div className="mt-5 flex justify-center">
-          <button
-            type="button"
-            onClick={handleLoadMore}
-            disabled={loadingMore}
-            className={`rounded-full border border-border-2 bg-white px-5 py-2 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-50 ${FOCUS_RING}`}
-          >
-            {loadingMore ? "불러오는 중..." : "더 보기"}
-          </button>
-        </div>
-      )}
+        {hasMore && (
+          <div className="mb-6 mt-5 flex justify-center sm:mb-0">
+            <button
+              type="button"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className={`rounded-full border border-border-2 bg-white px-5 py-2 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-50 ${FOCUS_RING}`}
+            >
+              {loadingMore ? "불러오는 중..." : "더 보기"}
+            </button>
+          </div>
+        )}
 
-      <p className="mt-6 text-center text-xs text-text-3">
-        <Link href="/mypage" className={`font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
-          마이페이지로 돌아가기 →
-        </Link>
-      </p>
-    </div>
+        <p className="mt-6 hidden text-center text-xs text-text-3 sm:block">
+          <Link href="/mypage" className={`font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
+            마이페이지로 돌아가기 →
+          </Link>
+        </p>
+      </div>
+    </>
   );
 }

@@ -124,6 +124,10 @@ export default function SignupPage() {
       // "비밀번호가 규칙에 안 맞아요"를 보여주면, 이미 끝낸 인증을 다시 하게 된다.
       let identityReceiptId: string | undefined;
       if (identityRequired) {
+        // ⚠️ 여기서는 복귀 주소를 넘기지 않는다. 모바일 리다이렉트로 페이지를 떠나면 지금까지
+        // 채운 폼(비밀번호 포함)이 사라지는데, 비밀번호는 어디에도 임시 저장할 수 없다.
+        // 가입 흐름의 인증 배치를 바꾸는 일은 별도 이슈(#387)로 분리했다 —
+        // IDENTITY_VERIFICATION_REQUIRED가 켜지기 전까지 이 분기는 실행되지 않는다.
         const receiptId = await openIdentityWindow();
         if (!receiptId) {
           setError(IDENTITY_NOT_READY_MESSAGE);

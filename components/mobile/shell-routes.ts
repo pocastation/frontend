@@ -18,7 +18,10 @@ const MOBILE_DETAIL_PATTERN = /^\/auctions\/\d+$/;
 // 푸터는 접혀야 해서 경로 단위 목록에 그대로 둔다(분기는 페이지가 쿼리를 보고 한다).
 //
 // 판매 등록도 같다 — 킷은 위저드 머리에 닫기(X)를 두고 전역 크롬을 걷는다.
-const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new"];
+//
+// 알림함(`/notifications`)은 하단탭이 가리키는 루트가 아니라 **상단바의 종이 가리키는 서브 화면**이다.
+// 셸(상단바+하단탭)이 아니라 MobilePageHead 앱바 하나로 들어가고 나온다(#393).
+const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/notifications"];
 
 export function isMobileChromeHiddenRoute(pathname: string): boolean {
   return (

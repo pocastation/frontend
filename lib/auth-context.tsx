@@ -53,6 +53,46 @@ export const EMAIL_NOT_VERIFIED = "EMAIL_NOT_VERIFIED";
 // 재동의 화면 경로. 동의를 마치면 원래 있던 화면으로 돌려보내기 위해 현재 경로를 붙인다.
 export const CONSENT_PATH = "/onboarding/consents";
 
+// 본인인증 화면 경로(#390). 동의와 같은 방식으로 원래 화면을 next에 붙인다.
+export const IDENTITY_PATH = "/onboarding/identity";
+
+/**
+ * 본인인증 게이트가 **비켜 가는** 경로(#390).
+ *
+ * <p>소셜 가입은 인증 없이 회원이 만들어진다(OAuth 콜백은 서버 리다이렉트라 그 사이에
+ * 인증창을 끼울 수 없다). 그래서 프론트가 미인증 회원을 인증 화면으로 되돌리는데,
+ * <b>전부 막으면 인증을 못 하는 사람이 갇힌다.</b>
+ *
+ * <p>세 부류를 연다 —
+ * <ul>
+ *   <li><b>흐름 자체</b>: 온보딩·로그인·가입·인증 콜백. 여기까지 막으면 무한 리다이렉트가 된다.
+ *   <li><b>법적 문서</b>: 인증 화면이 개인정보 처리방침을 링크한다. 그 링크가 다시 인증 화면으로
+ *       밀리면 <b>무엇에 동의하는지 확인할 수 없다.</b> 약관·운영정책·FAQ·공지도 같다.
+ *   <li><b>문의</b>: 인증이 안 되는 사람이 물어볼 창구다. 막으면 갇힌 사람이 연락할 방법이 없다.
+ * </ul>
+ */
+const IDENTITY_GATE_EXEMPT_PREFIXES = [
+  "/onboarding",
+  "/login",
+  "/signup",
+  "/auth",
+  "/terms",
+  "/privacy",
+  "/policy",
+  "/faq",
+  "/notices",
+  "/inquiries",
+] as const;
+
+function isIdentityGateExempt(pathname: string | null): boolean {
+  if (!pathname) {
+    return true;
+  }
+  return IDENTITY_GATE_EXEMPT_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -102,6 +142,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     refresh().finally(() => setIsLoading(false));
   }, [refresh]);
+
+  // 본인인증 게이트(#390) — 미인증 회원을 인증 화면으로 되돌린다.
+  //
+  // **소셜 가입만 이 상태에 도달한다.** 이메일 가입은 서버가 인증 없이는 대기 행조차
+  // 만들지 않아(BE PendingSignupService) 미인증 회원이 생기지 않는다. 소셜은 OAuth 콜백이
+  // 서버 리다이렉트라 그 사이에 인증창을 끼울 수 없어 회원이 먼저 만들어진다.
+  //
+  // `/auth/callback`이 신규 회원을 인증 화면으로 보내지만 **거기서 이탈하면 다시 요구하지
+  // 않는다** — 다음 로그인은 `new=true`가 아니라 홈으로 간다. 그 구멍을 여기서 막는다.
+  //
+  // 동의 게이트와 달리 **서버 응답값을 보고 프론트가 판단한다.** 동의는 서버가 403을 주는
+  // 진입점이 정해져 있지만, 본인인증의 서버 게이트는 거래 진입점에만 걸려 있어
+  // 403을 기다리면 "거래를 눌러야 비로소 안내받는" 지금 동작이 그대로 남는다.
+  // 대신 판정 근거는 서버가 내려준 값(`identityVerificationRequired`)이라,
+  // 서버 플래그를 끄면 이 게이트도 함께 꺼진다.
+  useEffect(() => {
+    if (isLoading || !member) {
+      return;
+    }
+    if (!member.identityVerificationRequired || member.identityVerified) {
+      return;
+    }
+    if (isIdentityGateExempt(pathname)) {
+      return;
+    }
+    router.replace(`${IDENTITY_PATH}?next=${encodeURIComponent(pathname ?? "/")}`);
+  }, [isLoading, member, pathname, router]);
 
   const login = useCallback(
     async (email: string, password: string) => {

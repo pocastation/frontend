@@ -40,6 +40,12 @@ export type MemberResponse = {
   // 서버의 거래 차단 게이트가 켜져 있는지. 배너 문구를 "인증해 주세요"와 "인증해야 거래할 수
   // 있어요" 중에 고르는 데 쓴다 — 켜지지도 않은 제한을 예고하면 거짓 안내가 된다.
   emailVerificationRequired?: boolean;
+  // 본인인증(BE #244) — GET /me 에서만 채워진다.
+  // 이메일 인증과 달리 소셜/이메일 구분이 없다 — 사람 한 명당 한 번이다.
+  identityVerified?: boolean;
+  // 서버 게이트가 켜져 있는지. AuthProvider가 이 값으로 미인증 회원을 인증 화면으로 보낸다.
+  // 켜지지 않았는데 프론트가 먼저 막으면, 인증을 완료할 수단이 없는 채로 갇힌다.
+  identityVerificationRequired?: boolean;
   // 배지(BE #264) — GET /me 에서만 채워진다. 없으면 빈 배열이다.
   badges?: BadgeView[];
 };

@@ -43,7 +43,7 @@ export default function IdentityVerificationPanel({
   onStatusLoaded?: (status: IdentityStatus) => void;
   className?: string;
 }) {
-  const { accessToken, fetchWithAuth } = useAuth();
+  const { accessToken, fetchWithAuth, refresh } = useAuth();
   const [status, setStatus] = useState<IdentityStatus | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -84,9 +84,13 @@ export default function IdentityVerificationPanel({
         body: { receiptId },
       });
       setStatus(next);
+      // 회원 정보를 다시 읽는다(#390). AuthProvider의 본인인증 게이트가 `member.identityVerified`를
+      // 보는데, 여기서 갱신하지 않으면 **인증을 마치고 돌아간 화면에서 곧바로 다시 밀려난다.**
+      // 실패해도 인증 자체는 성립했으므로 흐름을 멈추지 않는다 — 다음 요청에서 따라온다.
+      await refresh().catch(() => null);
       onVerified?.();
     },
-    [fetchWithAuth, onVerified],
+    [fetchWithAuth, onVerified, refresh],
   );
 
   // 모바일 리다이렉트 복귀. 다날 인증창은 모바일에서 페이지를 떠났다 돌아오므로 promise가 아니라

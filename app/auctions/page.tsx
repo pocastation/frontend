@@ -58,7 +58,7 @@ export default async function AuctionsPage({
           href="/auctions/ended"
           className={`shrink-0 text-sm font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}
         >
-          종료된 거래 보기 →
+          거래 완료 보기 →
         </Link>
       </div>
 

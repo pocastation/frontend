@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useNotifications } from "@/lib/notification-context";
 
 // 상단 메뉴는 리디자인 검토 과정에서 일단 비웠었고, 콘텐츠를 갖춘 페이지가 생길 때마다 되살렸음
-// (아티스트·매물 목록·즉시판매). 종료된 거래는 실페이지가 있지만 매물 목록의 하위 뷰라 주 네비 대신
+// (아티스트·매물 목록·즉시판매). 거래 완료 목록은 실페이지가 있지만 매물 목록의 하위 뷰라 주 네비 대신
 // /auctions 상단 링크로만 진입시킨다(주 네비 과밀 방지).
 const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/auctions", label: "제안판매" },

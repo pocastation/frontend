@@ -6,7 +6,6 @@ import { useAuth } from "@/lib/auth-context";
 import { useDeliveryAddressGate } from "@/lib/use-delivery-address-gate";
 import { useToast } from "@/lib/toast-context";
 import { isBeforeEnd, isEndingSoon } from "@/lib/format";
-import { minNextBid, maxNextBid } from "@/lib/fees";
 import type { AuctionStatus, BidHistoryItem, BidListResponse, BidResponse, BidStreamEvent } from "@/lib/types";
 
 /**
@@ -25,6 +24,7 @@ type AuctionBiddingValue = {
   auctionId: number;
   currentPrice: number;
   bidCount: number;
+  wishlistCount: number;
   endAt: string;
   status: AuctionStatus;
   isLive: boolean;
@@ -34,9 +34,6 @@ type AuctionBiddingValue = {
   hasMoreBids: boolean;
   loadMoreBids: () => Promise<void>;
   amount: number;
-  floor: number;
-  ceil: number;
-  outOfRange: boolean;
   adjustAmount: (next: number) => void;
   submitting: boolean;
   isTopBidder: boolean;
@@ -59,6 +56,7 @@ export function useAuctionBidding(): AuctionBiddingValue {
 export function AuctionBiddingProvider({
   auctionId,
   initialCurrentPrice,
+  minimumPrice,
   initialBidCount,
   initialEndAt,
   status,
@@ -67,6 +65,7 @@ export function AuctionBiddingProvider({
 }: {
   auctionId: number;
   initialCurrentPrice: number;
+  minimumPrice: number;
   initialBidCount: number;
   initialEndAt: string;
   status: AuctionStatus;
@@ -81,27 +80,37 @@ export function AuctionBiddingProvider({
 
   const [currentPrice, setCurrentPrice] = useState(initialCurrentPrice);
   const [bidCount, setBidCount] = useState(initialBidCount);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const [endAt, setEndAt] = useState(initialEndAt);
   const [bids, setBids] = useState<BidHistoryItem[]>([]);
   const [bidPage, setBidPage] = useState(0);
   const [bidTotalPages, setBidTotalPages] = useState(1);
-  const [amount, setAmount] = useState(() => minNextBid(initialCurrentPrice, initialBidCount));
+  const [amount, setAmount] = useState(minimumPrice);
   const [submitting, setSubmitting] = useState(false);
   // 내가 현재 최고가 제안자인지 — 내 제안 성공/서버 '이미 최고 입찰자' 응답으로 켜지고, 남이 추월(SSE)하면 꺼진다.
   const [isTopBidder, setIsTopBidder] = useState(false);
   const myTopBidRef = useRef<number | null>(null);
   // 카운트다운/상대시각을 1초마다 다시 그리기 위한 틱(값은 안 읽고 리렌더 트리거로만 쓴다).
   const [, setNowTick] = useState(0);
-  // 다른 사람 제안으로 현재가가 오르면 입력값 하한도 따라 올려야 한다. 단 사용자가 직접 고른 값은 존중한다.
-  const amountTouchedRef = useRef(false);
-
   const isLive = status === "LIVE" && isBeforeEnd(endAt);
   // 마감 임박일 때만 카운트다운을 주황(warn)으로 강조 — 그 외에는 뉴트럴로 둔다(색 절제).
   const endingSoon = isLive && isEndingSoon(endAt);
   const isOwnAuction = member?.nickname != null && member.nickname === sellerNickname;
-  const floor = minNextBid(currentPrice, bidCount);
-  const ceil = maxNextBid(currentPrice);
-  const outOfRange = amount < floor || amount > ceil;
+
+  // 관심 수는 비로그인 구매자도 볼 수 있는 공개 집계값이다. 실패해도 가격 제안 흐름은 막지 않는다.
+  useEffect(() => {
+    let cancelled = false;
+    apiFetch<number>(`/api/auctions/${auctionId}/wishlist/count`, { cache: "no-store" })
+      .then((count) => {
+        if (!cancelled) setWishlistCount(count);
+      })
+      .catch(() => {
+        // 백엔드가 아직 집계를 지원하지 않는 환경에서는 0으로 조용히 유지한다.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [auctionId]);
 
   // 최신 순으로 첫 페이지를 다시 받아 교체한다(제안 발생 시 authoritative하게 갱신).
   const fetchBids = useCallback(async () => {
@@ -169,21 +178,12 @@ export function AuctionBiddingProvider({
     return () => clearInterval(timer);
   }, [isLive]);
 
-  // 현재가가 오르면 아직 사용자가 직접 안 고른 입력값을 새 하한으로 끌어올린다.
-  useEffect(() => {
-    if (!amountTouchedRef.current) {
-      setAmount(minNextBid(currentPrice, bidCount));
-    }
-  }, [currentPrice, bidCount]);
-
-  // 제안가 조정(스테퍼 ± · 빠른 가산) — 제안 가능 범위[floor, ceil]로 클램프하고,
-  // 사용자가 직접 조정했음을 표시해 현재가 상승 시 자동 rebase가 값을 덮어쓰지 않게 한다.
+  // 공개되지 않는 현재가와 무관하게 판매자가 정한 최소 금액만 하한으로 사용한다.
   const adjustAmount = useCallback(
     (next: number) => {
-      amountTouchedRef.current = true;
-      setAmount(Math.max(floor, Math.min(ceil, next)));
+      setAmount(Math.max(minimumPrice, next));
     },
-    [floor, ceil],
+    [minimumPrice],
   );
 
   const handleBid = useCallback(async () => {
@@ -205,17 +205,7 @@ export function AuctionBiddingProvider({
       // 내가 방금 최고가가 됐다 — 버튼을 잠그고, 추월 감지를 위해 내 금액을 기록한다.
       myTopBidRef.current = res.currentPrice;
       setIsTopBidder(true);
-      // 내 제안 성공 시 다음 최소 제안가로 즉시 올려둔다. rebase 효과에만 맡기면, 서버가 커밋
-      // 직후 쏘는 SSE가 POST 응답보다 먼저 도착해 currentPrice를 갱신할 때 amountTouchedRef가
-      // 아직 true라 스킵되고, 이후 값이 안 바뀌어 재실행도 안 돼 옛 제안가에 갇히는 레이스가 있다.
-      amountTouchedRef.current = false;
-      setAmount(minNextBid(res.currentPrice, res.bidCount));
-      toast.show({
-        variant: res.extended ? "warn" : "success",
-        text: res.extended
-          ? "제안 완료 · 마감 임박으로 종료 시간이 연장됐어요."
-          : "제안 완료! 현재 최고가 제안자가 되었어요.",
-      });
+      toast.show({ variant: "success", text: "가격 제안을 보냈어요." });
       fetchBids();
     } catch (err) {
       const text = err instanceof ApiError ? err.message : "가격 제안에 실패했습니다. 잠시 후 다시 시도해주세요.";
@@ -232,8 +222,8 @@ export function AuctionBiddingProvider({
         setIsTopBidder(true);
         toast.show({
           variant: "info",
-          text: "이미 회원님이 최고가 제안자예요.",
-          sub: "더 높은 금액으로만 다시 제안할 수 있어요.",
+          text: "현재 가격으로는 다시 제안할 수 없어요.",
+          sub: "금액을 확인한 뒤 다시 시도해주세요.",
         });
       } else {
         toast.show({ variant: "danger", text });
@@ -258,6 +248,7 @@ export function AuctionBiddingProvider({
       auctionId,
       currentPrice,
       bidCount,
+      wishlistCount,
       endAt,
       status,
       isLive,
@@ -267,9 +258,6 @@ export function AuctionBiddingProvider({
       hasMoreBids: bidPage + 1 < bidTotalPages,
       loadMoreBids,
       amount,
-      floor,
-      ceil,
-      outOfRange,
       adjustAmount,
       submitting,
       isTopBidder,
@@ -281,8 +269,8 @@ export function AuctionBiddingProvider({
       onAddressSaved,
     }),
     [
-      auctionId, currentPrice, bidCount, endAt, status, isLive, endingSoon, isOwnAuction,
-      bids, bidPage, bidTotalPages, loadMoreBids, amount, floor, ceil, outOfRange, adjustAmount,
+      auctionId, currentPrice, bidCount, wishlistCount, endAt, status, isLive, endingSoon, isOwnAuction,
+      bids, bidPage, bidTotalPages, loadMoreBids, amount, adjustAmount,
       submitting, isTopBidder, handleBid, needsAddress, addressModalOpen, onAddressSaved,
     ],
   );

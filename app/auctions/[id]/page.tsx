@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import AuctionImageGallery from "@/components/AuctionImageGallery";
-import AuctionOutbidToggle from "@/components/AuctionOutbidToggle";
 import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import BidSection from "@/components/BidSection";
 import MobileAuctionDetail from "@/components/mobile/MobileAuctionDetail";
@@ -263,14 +262,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             />
           ) : auction.endAt ? (
             <>
-              <BidSection
-                maxEndAt={auction.maxEndAt}
-                startPrice={auction.startPrice}
-                viewCount={auction.viewCount}
-              />
-              {auction.status === "LIVE" && (
-                <AuctionOutbidToggle auctionId={auction.id} sellerNickname={auction.sellerNickname} />
-              )}
+              <BidSection minimumPrice={auction.startPrice} />
               {/* 거래 성사(ENDED_SOLD) 후 미결제 확정 시 차순위에게만 승계 배너가 뜬다(대상자 아니면 미노출). */}
               {auction.status === "ENDED_SOLD" && <SuccessionOfferBanner auctionId={auction.id} />}
             </>
@@ -299,6 +291,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
     <AuctionBiddingProvider
       auctionId={auction.id}
       initialCurrentPrice={auction.currentPrice}
+      minimumPrice={auction.startPrice}
       initialBidCount={auction.bidCount}
       initialEndAt={auction.endAt!}
       status={auction.status}

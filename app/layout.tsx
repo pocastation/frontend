@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR, Plus_Jakarta_Sans } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import MobileChromeGate from "@/components/MobileChromeGate";
 import PreProductionBar from "@/components/PreProductionBar";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import { Analytics } from "@vercel/analytics/next";
@@ -95,10 +94,12 @@ export default function RootLayout({
                 {/* 이메일 미인증 안내(#244) — 스스로 조건을 판단해 해당 없으면 아무것도 렌더하지 않는다. */}
                 <EmailVerificationBanner />
                 <main className="flex-1">{children}</main>
-                {/* 모바일 화면을 갖춘 라우트(홈·목록·매물 상세)에서는 모바일 폭에서만 접힌다. */}
-                <MobileChromeGate>
-                  <Footer />
-                </MobileChromeGate>
+                {/* 🔴 푸터는 모든 화면에 노출한다(#399). 모바일 이행 때 홈·목록·매물 상세에서
+                    접었다가, 전자상거래법 §10 표시사항이 모바일 주요 화면에서 사라진 것을 발견해
+                    되돌렸다. 조문은 「초기화면」이지만 실제 서비스는 전 화면에 둔다 — 무신사는
+                    우리보다 3.6배 긴 푸터(모바일 1,961px)를 전 화면에 단다.
+                    모바일에서 지면을 아끼는 일은 Footer 자신이 한다(사이트맵 링크를 감춘다). */}
+                <Footer />
               </ToastProvider>
             </WishlistProvider>
           </NotificationProvider>

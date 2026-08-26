@@ -181,13 +181,16 @@ export default function MobileBrowse({
         </div>
       )}
 
-      {/* 종료된 거래는 매물이 아니라 시세 자료다 — 목록과 성격이 달라 조용한 링크 한 줄로 둔다. */}
+      {/* 완료된 거래는 지금 살 수 있는 매물이 아니라 지난 기록이다 — 목록과 성격이 달라
+          조용한 링크 한 줄로 둔다.
+          🔴 라벨이 「시세 확인하기」였다. §1.7·§9.4로 성사가를 감추면서 **누르면 시세가
+          없는 화면**이 됐다(T40 패턴). 그 화면이 실제로 보여주는 것만 말한다. */}
       {!isInstant && (
         <Link
           href="/auctions/ended"
           className={`mt-6 block border-t border-border px-[14px] py-4 text-center text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
         >
-          종료된 거래로 시세 확인하기
+          거래 완료된 매물 보기
         </Link>
       )}
     </div>

@@ -116,12 +116,14 @@ export default function MobileHome({
 
       <MobileRankTop3 auctions={popularAuctions} sellers={popularSellers} />
 
-      {/* 시세 확인 진입 — 순위·목록과 성격이 달라 조용한 텍스트 링크 한 줄로 둔다. */}
+      {/* 완료된 거래 진입 — 순위·목록과 성격이 달라 조용한 텍스트 링크 한 줄로 둔다.
+          🔴 라벨이 「시세 확인하기」였다. §1.7·§9.4로 성사가를 감추면서 **누르면 시세가
+          없는 화면**이 됐다(T40 패턴). MobileBrowse의 같은 링크와 문구를 맞춘다. */}
       <Link
         href="/auctions/ended"
         className={`mt-1.5 block border-t border-border px-[14px] py-4 text-center text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
       >
-        종료된 거래로 시세 확인하기
+        거래 완료된 매물 보기
       </Link>
     </>
   );

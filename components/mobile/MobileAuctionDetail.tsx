@@ -5,14 +5,14 @@ import Link from "next/link";
 import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import MobileDetailGallery from "@/components/mobile/MobileDetailGallery";
+import OfferCounts from "@/components/OfferCounts";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useAuctionBidding } from "@/lib/auction-bidding-context";
-
 import { OFFER_UNIT, buyerFee, estimatedTotal } from "@/lib/fees";
 import { formatKRW } from "@/lib/format";
 import { INTERMEDIARY_NOTICE } from "@/lib/business";
-import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
+import { GRADE_LABEL, OFFER_EMPTY_HINT, SOURCE_LABEL } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionDetailResponse, SellerRatingResponse } from "@/lib/types";
 
@@ -22,8 +22,9 @@ import type { AuctionDetailResponse, SellerRatingResponse } from "@/lib/types";
  * <p>가격 제안과 관련된 값은 전부 `AuctionBiddingProvider`에서 온다 — 데스크탑 `BidSection`과 **같은
  * 상태·같은 SSE 연결**을 읽는다(상세 하나에 EventSource가 둘 열리지 않게).
  *
- * <p>탭은 두 개다. **이 매물에 제안한 사람에게는 «제안 내역»이 먼저 열린다** — 이미 판에 들어온
- * 사람이 알고 싶은 건 상품 설명이 아니라 지금 얼마까지 올라왔는지다.
+ * <p>탭은 두 개(상품 정보 · 배송·환불)다. ⚠️ 예전에는 «제안 내역» 탭이 있었고 이미 제안한
+ * 사람에게 그 탭이 먼저 열렸는데(「알고 싶은 건 지금 얼마까지 올라왔는지다」), §1.7로 그 내역이
+ * 통째로 사라지면서 탭도 함께 없앴다.
  */
 
 const TAB_PRODUCT = "상품 정보";
@@ -268,27 +269,33 @@ export default function MobileAuctionDetail({
           )}
         </div>
 
-        {/* 가격 패널 — 경매 진행 정보 대신 판매 상태·참여 수·판매자 최소 금액만 표시한다. */}
+        {/* 가격 패널 — 참여 수 → 금액 → 안내 세 층.
+            🔴 판매 상태를 여기서 말하지 않는다(#404). 초록 도트가 있던 자리인데, 바로 위 제목
+            머리줄이 이미 「판매 중」을 말하고 있어 **한 화면에 같은 말이 두 번** 나왔다. */}
         <div className="mt-4 rounded-r3 border border-border p-3.5">
-          <div className="flex items-start justify-between gap-4">
-            <span className={`inline-flex items-center gap-1.5 text-[11.5px] font-bold ${isLive ? "text-ok" : "text-text-3"}`}>
-              <span className={`h-1.5 w-1.5 rounded-full ${isLive ? "bg-ok" : "bg-text-3"}`} aria-hidden="true" />
-              {isLive ? "판매 중" : "판매 종료"}
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-[11px] font-semibold text-text-3">판매자 최소 제안 금액</p>
+            <span aria-live="polite">
+              <OfferCounts offerCount={offerCount} wishlistCount={wishlistCount} />
             </span>
-            <dl className="flex divide-x divide-border text-right">
-              <div className="pr-3">
-                <dt className="text-[10.5px] text-text-3">가격 제안</dt>
-                <dd className="mt-0.5 text-sm font-extrabold tabular-nums text-text-1" aria-live="polite">{offerCount}회</dd>
-              </div>
-              <div className="pl-3">
-                <dt className="text-[10.5px] text-text-3">관심</dt>
-                <dd className="mt-0.5 text-sm font-extrabold tabular-nums text-text-1">{wishlistCount}</dd>
-              </div>
-            </dl>
           </div>
-          <p className="mt-5 text-[11px] font-semibold text-text-3">판매자 최소 제안 금액</p>
           <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1">
             {formatKRW(auction.startPrice)}
+          </p>
+          {/* 0건일 때만 — 아이콘 줄에서 뺀 자리를 여기서 채운다(§2.9 D1). */}
+          {offerCount === 0 && (
+            <p className="mt-3 border-t border-border pt-2.5 text-[11.5px] font-bold text-text-2">
+              {OFFER_EMPTY_HINT}
+            </p>
+          )}
+          {/* 구매자가 처음 보는 메커니즘이라 「왜 최고가가 안 보이지」에 여기서 답한다.
+              마감을 표시하지 않기로 하면서 더 중요해졌다. */}
+          <p
+            className={`text-[10.5px] leading-relaxed text-text-3 ${
+              offerCount === 0 ? "mt-1.5" : "mt-3 border-t border-border pt-2.5"
+            }`}
+          >
+            판매자가 제안을 보고 거래 상대를 직접 선택해요. 다른 사람의 제안 금액은 공개되지 않아요.
           </p>
         </div>
 

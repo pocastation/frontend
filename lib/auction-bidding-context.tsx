@@ -171,9 +171,13 @@ export function AuctionBiddingProvider({
       setAlreadyOffered(true);
       // 인원수는 SSE로도 오지만, 내 제안 직후만큼은 즉시 반영돼야 「보냈는데 안 늘었다」로 보이지 않는다.
       setOfferCount((prev) => (prev === 0 ? 1 : prev));
+      // 🔴 부연을 붙인다(#404). 구매자가 제안 직후 「이제 뭘 기다리면 되나」를 아는 유일한
+      // 문장이다 — 자동 낙찰이던 시절엔 「마감까지 기다린다」가 자명했지만 이제 아니고,
+      // 마감을 화면에 표시하지 않기로 하면서 더 중요해졌다.
       toast.show({
         variant: "success",
         text: "가격 제안을 보냈어요.",
+        sub: "판매자가 제안을 확인하고 거래 상대를 선택해요.",
       });
     } catch (err) {
       const text = err instanceof ApiError ? err.message : "가격 제안에 실패했습니다. 잠시 후 다시 시도해주세요.";

@@ -82,6 +82,9 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
   const isInstantSale = auction.saleType === "INSTANT";
+  // 제목 위 상태 줄(#404) — 서버 컴포넌트라 마감 시각 비교 없이 상태값만 본다. 마감을 화면에
+  // 표시하지 않기로 했으므로(경매성 제거) 초 단위 정확도가 필요하지 않다.
+  const isLive = auction.status === "LIVE";
   // 제안판매(즉시판매 아님)이고 마감시각이 있을 때만 제안 상태를 띄운다. 모바일 상세는 이 컨텍스트를
   // 데스크탑 BidSection과 함께 읽는다 — 상세 하나에 SSE 연결이 둘 열리지 않게.
   const biddable = !isInstantSale && auction.endAt != null;
@@ -220,8 +223,15 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
 
         {/* 오른쪽: 제목 · 배지 · 가격 제안 */}
         <div>
+          {/* 🔴 판매 상태(#404) — 모바일은 제목 위 한 줄이 이 역할을 하는데 데스크탑에는 없었다.
+              제안 패널 안 초록 도트가 대신하고 있었으나 그건 「AI 티」라 걷어냈고, 지우기만 하면
+              데스크탑에서 상태가 통째로 사라진다. 모바일과 같은 자리·같은 문구로 맞춘다. */}
+          <p className={`text-[11.5px] font-bold ${isLive ? "text-ok" : "text-text-3"}`}>
+            {isLive ? "판매 중" : auction.status === "ENDED_SOLD" ? "거래 완료" : "판매 종료"}
+          </p>
+
           {/* pill의 좌측 안쪽 여백만큼 라벨 줄을 아웃덴트해, 라벨 텍스트 좌측을 제목(h1)과 맞춘다. */}
-          <div className="-ml-2 flex flex-wrap gap-1.5">
+          <div className="-ml-2 mt-1.5 flex flex-wrap gap-1.5">
             {auction.artistName && (
               <SearchLink query={auction.artistName} className={CHIP_CLASS}>
                 #{auction.artistName}

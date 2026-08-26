@@ -3,10 +3,12 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
+import OfferCounts from "@/components/OfferCounts";
 import { useAuth } from "@/lib/auth-context";
 import { useAuctionBidding } from "@/lib/auction-bidding-context";
 import { formatKRW } from "@/lib/format";
 import { OFFER_UNIT, buyerFee, estimatedTotal } from "@/lib/fees";
+import { OFFER_EMPTY_HINT } from "@/lib/labels";
 import { FOCUS_RING, PRIMARY_BUTTON_CLASS } from "@/lib/ui";
 
 type Props = {
@@ -32,7 +34,6 @@ export default function BidSection({ startPrice }: Props) {
     auctionId,
     offerCount,
     wishlistCount,
-    status,
     isLive,
     isOwnAuction,
     amount,
@@ -86,31 +87,32 @@ export default function BidSection({ startPrice }: Props) {
   return (
     <div className="mt-6">
       <section className="rounded-r3 border border-border bg-surface p-5">
-        <div className="flex items-start justify-between gap-6">
-          <span
-            className={`inline-flex items-center gap-2 text-sm font-bold ${isLive ? "text-ok" : "text-text-3"}`}
-          >
-            <span className={`h-2 w-2 rounded-full ${isLive ? "bg-ok" : "bg-text-3"}`} aria-hidden="true" />
-            {isLive ? "판매 중" : status === "ENDED_SOLD" ? "거래 성사" : "판매 종료"}
-          </span>
-          <dl className="flex shrink-0 divide-x divide-border text-right">
-            <div className="pr-4">
-              <dt className="text-[11px] font-semibold text-text-3">가격 제안</dt>
-              <dd className="mt-0.5 font-display text-xl font-extrabold tabular-nums text-text-1">{offerCount}회</dd>
-            </div>
-            <div className="pl-4">
-              <dt className="text-[11px] font-semibold text-text-3">관심</dt>
-              <dd className="mt-0.5 font-display text-xl font-extrabold tabular-nums text-text-1">{wishlistCount}</dd>
-            </div>
-          </dl>
-        </div>
-
-        <div className="mt-7">
+        {/* 🔴 판매 상태를 여기서 말하지 않는다. 초록 도트가 있던 자리인데, 상태는 제목 위 한 줄이
+            전담한다(`app/auctions/[id]/page.tsx`) — 두 곳에서 말하면 「판매 중」이 두 번 나온다.
+            패널은 참여 수 → 금액 → 안내 세 층으로만 둔다. */}
+        <div className="flex items-center justify-between gap-4">
           <p className="text-xs font-semibold text-text-3">판매자 최소 제안 금액</p>
-          <p className="mt-2 font-display text-3xl font-extrabold tabular-nums text-text-1">
-            {formatKRW(minimumProposalAmount)}
-          </p>
+          <OfferCounts offerCount={offerCount} wishlistCount={wishlistCount} size="md" />
         </div>
+        <p className="mt-1.5 font-display text-3xl font-extrabold tabular-nums text-text-1">
+          {formatKRW(minimumProposalAmount)}
+        </p>
+        {/* 0건일 때만 — 아이콘 줄에서 뺀 자리를 여기서 채운다(§2.9 D1). */}
+        {offerCount === 0 && (
+          <p className="mt-3.5 border-t border-border pt-3 text-[12.5px] font-bold text-text-2">
+            {OFFER_EMPTY_HINT}
+          </p>
+        )}
+        {/* 구매자가 처음 보는 메커니즘이라 「왜 최고가가 안 보이지」에 여기서 답한다.
+            마감을 표시하지 않기로 하면서 더 중요해졌다 — 시간도 안 보이는데 설명까지 없으면
+            무엇을 기다리는지 알 길이 없다. */}
+        <p
+          className={`text-[11px] leading-relaxed text-text-3 ${
+            offerCount === 0 ? "mt-1.5" : "mt-3.5 border-t border-border pt-3"
+          }`}
+        >
+          판매자가 제안을 보고 거래 상대를 직접 선택해요. 다른 사람의 제안 금액은 공개되지 않아요.
+        </p>
 
         {isLive &&
           (isOwnAuction ? (

@@ -1,20 +1,15 @@
-// 가격 제안 정책 상수(§12.1 확정) — 백엔드 Auction 도메인과 동일 값. 프론트는 입력 UX(±버튼·범위 클램프)
-// 용도로만 쓰고, 실제 검증·확정은 백엔드가 단일 진실원으로 수행한다.
-export const BID_MIN_INCREMENT = 1000; // 제안 1단위
-export const BID_MAX_JUMP = 10000; // 현재가 + 최대 10단위
-
 /**
- * 다음 제안 최소가. 첫 제안(bidCount 0)은 시작 제안가(=현재가) 그대로 허용(A안),
- * 이후는 현재가 + 1단위부터.
+ * 제안 금액의 단위(원) — 백엔드 `Auction.AMOUNT_UNIT`과 같은 값.
+ *
+ * 프론트는 입력 UX(± 버튼·클램프) 용도로만 쓰고, 실제 검증은 백엔드가 단일 진실원으로 한다.
+ *
+ * 🔴 **「최소 증분」이 아니다.** 거래 개편 §2.3이 폐기한 것은 **현재가를 기준으로 한** 하한
+ * (「현재가 + 1단위 이상」)과 상한(「현재가 + 10단위까지」)이다 — 호가가 비공개가 된 마당에
+ * 보이지도 않는 값을 기준으로 삼으면 눈 감고 과녁 맞히기가 된다.
+ *
+ * 지금 남은 금액 규칙은 하나다 — **최소가 이상이면 어떤 금액이든.** 단위만 1,000원으로 맞춘다.
  */
-export function minNextBid(currentPrice: number, bidCount: number): number {
-  return bidCount === 0 ? currentPrice : currentPrice + BID_MIN_INCREMENT;
-}
-
-/** 이번 제안의 상한 = 현재가 + 10단위. */
-export function maxNextBid(currentPrice: number): number {
-  return currentPrice + BID_MAX_JUMP;
-}
+export const OFFER_UNIT = 1000;
 
 // 구매자 수수료율(거래가 구간별, §12.2 확정). 경계는 ≤30,000 / ≤100,000 / >100,000.
 function buyerFeeRate(hammerPrice: number): number {

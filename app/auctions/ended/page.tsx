@@ -5,14 +5,16 @@ import type { AuctionListResponse } from "@/lib/types";
 
 export const metadata = { title: "종료된 거래 — Pocastation" };
 
-// 종료 목록은 진행중과 정렬 의미가 달라 전용 옵션을 쓴다 — 기본은 최근 종료순(백엔드 endAt DESC),
-// 가격은 최종 거래가(currentPrice) 기준. 백엔드 sort 키(latest/price_desc/price_asc)와 1:1.
+// 종료 목록은 진행중과 정렬 의미가 달라 전용 옵션을 쓴다 — 기본은 최근 종료순(백엔드 endAt DESC).
 // 키는 리터럴로 둔다 — SORT_OPTIONS는 "use client" 모듈 export라 서버 컴포넌트에서 값으로
 // 참조하면 런타임에 실제 배열이 아니라 클라이언트 참조 스텁이 넘어온다.
+//
+// 🔴 가격 정렬(높은/낮은 거래가)을 뺐다(거래 개편 §1.7·§9.4). 종료 목록의 currentPrice는
+// 최종 성사가라, 정렬로 노출하면 §9.4가 막기로 한 「개별 거래가 공개」가 뒷문으로 성립한다.
+// 최종 성사가 표시 자체도 함께 사라졌다 — 가격 발견은 훗날 SKU 카탈로그 기반 집계로 대체한다.
 const ENDED_SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: "latest", label: "최근 종료순" },
-  { key: "price_desc", label: "높은 거래가" },
-  { key: "price_asc", label: "낮은 거래가" },
+  { key: "popular", label: "제안 많은 순" },
 ];
 
 async function getEndedAuctions(query: string): Promise<AuctionListResponse | null> {
@@ -38,7 +40,9 @@ export default async function EndedAuctionsPage({
     <div className="mx-auto max-w-[1160px] px-4 py-8 sm:py-10">
       <div className="mb-7">
         <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">종료된 거래</h1>
-        <p className="mt-1.5 text-sm text-text-3">거래 성사·미성사로 종료된 매물과 최종 거래가를 확인해보세요.</p>
+        {/* 🔴 「최종 거래가를 확인해보세요」였다. §1.7·§9.4로 성사가를 더 이상 노출하지 않으므로
+            그대로 두면 화면이 지키지 못하는 약속이 된다(T40 패턴). 하는 일만 적는다. */}
+        <p className="mt-1.5 text-sm text-text-3">거래 성사·미성사로 종료된 매물을 확인해보세요.</p>
       </div>
 
       <AuctionBrowser

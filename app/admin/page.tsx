@@ -157,7 +157,7 @@ export default function AdminDashboardPage() {
                       <span className="block truncate text-sm font-bold text-text-1">{a.title}</span>
                     </span>
                     <span className="shrink-0 text-right">
-                      <span className="block font-display text-xs font-extrabold text-text-1">{formatKRW(a.currentPrice)}</span>
+                      <span className="block font-display text-xs font-extrabold text-text-1">{formatKRW(a.startPrice)}</span>
                       {/* 공개 전 상태는 눌러도 상세가 안 열리므로, 왜 그런지 상태로 알려준다. */}
                       {!PUBLIC_AUCTION_STATUSES.has(a.status) && (
                         <StatusBadge tone={AUCTION_STATUS_TONE[a.status]} className="mt-1">

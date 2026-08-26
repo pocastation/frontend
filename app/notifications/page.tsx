@@ -15,6 +15,9 @@ import type { NotificationListResponse, NotificationResponse, NotificationType }
 // 타입별 표기 — 카테고리 아이콘(공용 StatusIcon) + 의미색 톤.
 // 톤: 진행성=primary, 완료·거래 성사=ok(그린), 실패·지연=accent(레드), 종료·취소=중립.
 const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; icon: string }> = {
+  // ⚠️ 폐기된 알림이다(§2.3) — 새로 생기지 않는다. 라벨을 남기는 이유는 **과거에 받은 알림이
+  // 이 타입으로 저장돼 있기 때문**이다. 지우면 그 행들이 라벨 없이 깨진다(백엔드도 같은 이유로
+  // NotificationType.OUTBID enum 값을 남겼다 — 알림 이력은 그 시점의 사실 기록이다).
   OUTBID: { label: "제안 추월", tone: "primary", icon: "trendingUp" },
   AUCTION_WON: { label: "거래 성사", tone: "ok", icon: "award" },
   AUCTION_LOST: { label: "미성사", tone: "neutral", icon: "minus" },
@@ -173,7 +176,7 @@ export default function NotificationsPage() {
         <div className="mb-6 hidden items-end justify-between gap-3 sm:flex">
           <div>
             <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">알림</h1>
-            <p className="mt-1.5 text-sm text-text-3">제안 추월·거래 소식을 모아봐요.</p>
+            <p className="mt-1.5 text-sm text-text-3">거래 소식을 모아봐요.</p>
           </div>
           {markAllReadButton}
         </div>
@@ -190,7 +193,7 @@ export default function NotificationsPage() {
           <div className="mx-4 mt-4 flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-20 text-center text-text-3 sm:mx-0 sm:mt-0">
             <BellIcon />
             <p className="text-sm font-bold text-text-2">아직 받은 알림이 없어요.</p>
-            <p className="text-xs">제안 추월·거래 성사 소식을 여기서 받아볼 수 있어요.</p>
+            <p className="text-xs">거래 성사·결제·발송 소식을 여기서 받아볼 수 있어요.</p>
           </div>
         ) : (
           // 승인 시안 B — 카테고리 리딩 아이콘(의미색 톤) + 안읽음은 우측 단일 닷. 읽음 행은 배경·아이콘을 가라앉힌다.

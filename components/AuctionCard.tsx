@@ -43,7 +43,10 @@ export default function AuctionCard({
   const isLive = auction.status === "LIVE";
   const isInstantSale = auction.saleType === "INSTANT";
   const isEnded = auction.status === "ENDED_SOLD" || auction.status === "ENDED_NO_BIDS";
-  const displayPrice = isInstantSale ? (auction.buyNowPrice ?? auction.currentPrice) : auction.currentPrice;
+  // 🔴 제안판매 카드는 최소가를 보여준다(§1.7). 예전에는 현재가(=최고 제안가)였는데
+  // 그 값이 응답에서 사라졌다 — 목록에 실리면 상세를 열지 않고도 호가를 훑을 수 있다.
+  // 즉시판매는 판매자가 정한 고정가라 그대로 노출한다.
+  const displayPrice = isInstantSale ? (auction.buyNowPrice ?? auction.startPrice) : auction.startPrice;
 
   const [imageFailed, setImageFailed] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);

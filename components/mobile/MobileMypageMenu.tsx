@@ -216,7 +216,6 @@ export default function MobileMypageMenu({
       <Group>
         <TabRow label="내 정보" onClick={() => onSelectTab("profile")} />
         <TabRow label="배송지 관리" onClick={() => onSelectTab("shipping")} />
-        <TabRow label="알림 설정" onClick={() => onSelectTab("notifications")} />
         <TabRow label="계정 설정" onClick={() => onSelectTab("settings")} />
         <LinkRow label="문의하기" href="/inquiries" />
         <LinkRow label="공지사항" href="/notices" />

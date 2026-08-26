@@ -8,11 +8,11 @@ import MobileDetailGallery from "@/components/mobile/MobileDetailGallery";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useAuctionBidding } from "@/lib/auction-bidding-context";
-import { useHasMyBid } from "@/lib/use-has-my-bid";
-import { BID_MIN_INCREMENT, buyerFee, estimatedTotal } from "@/lib/fees";
-import { formatCountdown, formatKRW, formatRelativeTime } from "@/lib/format";
+
+import { OFFER_UNIT, buyerFee, estimatedTotal } from "@/lib/fees";
+import { formatCountdown, formatKRW } from "@/lib/format";
 import { INTERMEDIARY_NOTICE } from "@/lib/business";
-import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
+import { GRADE_LABEL, SOURCE_LABEL, offerCountLabel } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionDetailResponse, SellerRatingResponse } from "@/lib/types";
 
@@ -27,7 +27,6 @@ import type { AuctionDetailResponse, SellerRatingResponse } from "@/lib/types";
  */
 
 const TAB_PRODUCT = "상품 정보";
-const TAB_BIDS = "제안 내역";
 const TAB_DELIVERY = "배송·환불";
 
 // BE가 내려주는 등급 라벨에는 이모지가 붙어 온다("덕린이 🌱"). 제품 화면은 이모지를 쓰지 않으므로
@@ -76,8 +75,8 @@ function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: string 
 /** 제안 바텀시트 — 하단 고정바의 «제안하기»가 연다. 스테퍼·수수료·CTA는 데스크탑과 같은 규칙이다. */
 function BidSheet({ onClose }: { onClose: () => void }) {
   const {
-    amount, floor, ceil, adjustAmount, outOfRange, submitting, isTopBidder, needsAddress, handleBid,
-    currentPrice, endAt, isLive, endingSoon,
+    amount, floor, adjustAmount, outOfRange, submitting, alreadyOffered, needsAddress, handleBid,
+    endAt, isLive, endingSoon,
   } = useAuctionBidding();
   const total = estimatedTotal(amount);
 
@@ -85,11 +84,12 @@ function BidSheet({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-[500] sm:hidden" role="dialog" aria-label="가격 제안하기" aria-modal="true">
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
       <div className="absolute inset-x-0 bottom-0 rounded-t-r4 bg-white px-[14px] pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
-        {/* 시트 머리에 현재가·마감 — 하단 바에서 뺀 정보가 여기 있다(킷과 같은 자리). */}
+        {/* 시트 머리에 최소가·마감 — 하단 바에서 뺀 정보가 여기 있다(킷과 같은 자리). */}
         <div className="flex items-baseline justify-between border-b border-border pb-2.5">
           <span className="flex items-baseline gap-2">
-            <span className="text-[11px] font-semibold text-text-3">현재가</span>
-            <span className="font-display text-lg font-extrabold tabular-nums text-text-1">{formatKRW(currentPrice)}</span>
+            {/* 🔴 현재가(=최고 제안가)가 §1.7로 사라져 최소가가 유일한 기준점이 됐다. */}
+            <span className="text-[11px] font-semibold text-text-3">최소가</span>
+            <span className="font-display text-lg font-extrabold tabular-nums text-text-1">{formatKRW(floor)}</span>
           </span>
           {isLive && (
             <span className={`text-[11.5px] font-bold tabular-nums ${endingSoon ? "text-warn" : "text-text-2"}`}>
@@ -100,15 +100,16 @@ function BidSheet({ onClose }: { onClose: () => void }) {
 
         <div className="mb-3 mt-3 flex items-baseline justify-between">
           <span className="text-[13px] font-extrabold text-text-1">제안가</span>
+          {/* 🔴 상한이 없어져(§2.3) 「가능 범위 A–B」를 「최소가 이상」으로 바꿨다. */}
           <span className="text-[11px] tabular-nums text-text-3">
-            가능 범위 {formatKRW(floor)} – {formatKRW(ceil)}
+            {formatKRW(floor)} 이상 · {OFFER_UNIT.toLocaleString("ko-KR")}원 단위
           </span>
         </div>
 
         <div className="flex h-[52px] items-stretch overflow-hidden rounded-r2 border border-border">
           <button
             type="button"
-            onClick={() => adjustAmount(amount - BID_MIN_INCREMENT)}
+            onClick={() => adjustAmount(amount - OFFER_UNIT)}
             disabled={amount <= floor}
             aria-label="제안가 내리기"
             className={`w-[52px] text-xl text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
@@ -120,8 +121,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
           </div>
           <button
             type="button"
-            onClick={() => adjustAmount(amount + BID_MIN_INCREMENT)}
-            disabled={amount >= ceil}
+            onClick={() => adjustAmount(amount + OFFER_UNIT)}
             aria-label="제안가 올리기"
             className={`w-[52px] text-xl text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
           >
@@ -130,12 +130,11 @@ function BidSheet({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="mt-2 flex gap-1.5">
-          {[BID_MIN_INCREMENT, 5000, 10000].map((delta) => (
+          {[OFFER_UNIT, 5000, 10000].map((delta) => (
             <button
               key={delta}
               type="button"
               onClick={() => adjustAmount(amount + delta)}
-              disabled={amount >= ceil}
               className={`h-9 flex-1 rounded-r2 border border-border text-xs font-medium text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
             >
               +{delta.toLocaleString("ko-KR")}
@@ -162,11 +161,13 @@ function BidSheet({ onClose }: { onClose: () => void }) {
         <button
           type="button"
           onClick={handleBid}
-          disabled={submitting || outOfRange || isTopBidder}
+          disabled={submitting || outOfRange || alreadyOffered}
           className={`mt-3 flex h-12 w-full items-center justify-center rounded-[7px] bg-primary text-sm font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
         >
-          {isTopBidder
-            ? "현재 최고가 제안자예요"
+          {/* 🔴 예전 라벨 「현재 최고가 제안자예요」는 남의 제안 상태를 알려주는 문장이라
+              §1.7이 감추기로 한 정보 그 자체였다. 데스크탑 BidSection과 같은 문구를 쓴다. */}
+          {alreadyOffered
+            ? "이미 제안했어요"
             : submitting
               ? "처리 중..."
               : needsAddress
@@ -194,27 +195,23 @@ export default function MobileAuctionDetail({
   const { accessToken } = useAuth();
   const {
     auctionId,
-    currentPrice,
-    bidCount,
+    offerCount,
     endAt,
     isLive,
     endingSoon,
     isOwnAuction,
-    bids,
-    hasMoreBids,
-    loadMoreBids,
-    isTopBidder,
+    alreadyOffered,
     addressModalOpen,
     closeAddressModal,
     onAddressSaved,
   } = useAuctionBidding();
 
-  const hasMyBid = useHasMyBid(auctionId);
   const [sheetOpen, setSheetOpen] = useState(false);
-  // 사용자가 탭을 직접 고르면 그 선택이 이긴다. 고르기 전까지는 "내가 제안했는가"가 정한다 —
-  // 상태를 효과로 덮어쓰지 않고 파생값으로 두어야, 확인 응답이 늦게 와도 보던 탭을 빼앗지 않는다.
+  // 🔴 예전에는 「제안 내역」 탭이 있었고, 이미 제안한 사람에게는 그 탭이 먼저 열렸다
+  // (「이미 판에 들어온 사람이 알고 싶은 건 지금 얼마까지 올라왔는지다」). §1.7로 그 내역이
+  // 통째로 사라져 탭도 함께 없앴다 — useHasMyBid로 첫 탭을 고르던 분기도 함께 걷어냈다.
   const [pickedTab, setPickedTab] = useState<string | null>(null);
-  const tab = pickedTab ?? (hasMyBid ? TAB_BIDS : TAB_PRODUCT);
+  const tab = pickedTab ?? TAB_PRODUCT;
 
   const specRows: { label: string; value: string }[] = [
     { label: "그룹", value: auction.artistName ?? "-" },
@@ -266,30 +263,32 @@ export default function MobileAuctionDetail({
         {/* 가격 패널 — 한 페이지에 강조 패널은 하나면 충분하다. 여기가 그 자리다. */}
         <div className="mt-4 rounded-r3 border border-border p-3.5">
           <div className="flex items-baseline justify-between">
-            <span className="text-[11px] font-semibold text-text-3">현재가</span>
-            <span className="text-[11.5px] tabular-nums text-text-3">제안 {bidCount}회</span>
+            <span className="text-[11px] font-semibold text-text-3">최소가</span>
+            {/* 제안 "건수"가 아니라 인원수다(§2.9) — 데스크탑과 같은 문구 함수를 쓴다. */}
+            <span className="text-[11.5px] text-text-3" aria-live="polite">{offerCountLabel(offerCount)}</span>
           </div>
-          <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1" aria-live="polite">
-            {formatKRW(currentPrice)}
+          <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1">
+            {formatKRW(auction.startPrice)}
           </p>
           <div className="mt-2.5 flex items-center justify-between border-t border-border pt-2.5 text-[11.5px]">
             <span className={`font-bold tabular-nums ${endingSoon ? "text-warn" : "text-text-1"}`}>
               {isLive ? `마감까지 ${formatCountdown(endAt)}` : "종료된 매물"}
             </span>
-            <span className="tabular-nums text-text-3">시작 제안가 {formatKRW(auction.startPrice)}</span>
           </div>
+          {/* 🔴 안티스나이핑 안내는 §2.3으로 폐기됐다. 대신 새 거래 방식을 한 줄로 알린다 —
+              구매자가 처음 보는 메커니즘이라 「왜 최고가가 안 보이지」를 여기서 답한다. */}
           {isLive && (
             <p className="mt-2 text-[10.5px] leading-relaxed text-text-3">
-              마감 3분 전 제안 시 종료 시간이 자동 연장돼요(최대 3회).
+              판매자가 제안을 보고 거래 상대를 직접 선택해요. 다른 사람의 제안 금액은 공개되지 않아요.
             </p>
           )}
         </div>
 
         <SellerRow sellerId={auction.sellerId} nickname={auction.sellerNickname} />
 
-        {/* 탭 — 상품 정보 / 제안 내역 */}
+        {/* 탭 — 상품 정보 / 배송·환불. 「제안 내역」 탭은 §1.7로 없앴다. */}
         <div role="tablist" className="mt-5 flex gap-1 border-b border-border">
-          {[TAB_PRODUCT, TAB_BIDS, TAB_DELIVERY].map((name) => {
+          {[TAB_PRODUCT, TAB_DELIVERY].map((name) => {
             const on = tab === name;
             return (
               <button
@@ -303,7 +302,6 @@ export default function MobileAuctionDetail({
                 }`}
               >
                 {name}
-                {name === TAB_BIDS && bidCount > 0 && <span className="ml-1 text-text-3">{bidCount}</span>}
               </button>
             );
           })}
@@ -349,7 +347,7 @@ export default function MobileAuctionDetail({
               이 매물 문의하기
             </Link>
           </div>
-        ) : tab === TAB_PRODUCT ? (
+        ) : (
           <div className="pt-3.5">
             {auction.description && (
               <p className="whitespace-pre-wrap text-sm leading-[1.75] text-text-2">{auction.description}</p>
@@ -364,47 +362,11 @@ export default function MobileAuctionDetail({
             </dl>
 
           </div>
-        ) : (
-          <div className="pt-1.5">
-            {bids.length > 0 ? (
-              <ul>
-                {bids.map((bid, index) => (
-                  <li key={bid.id} className="flex items-center justify-between border-b border-border py-2.5">
-                    <span className="flex items-center gap-2">
-                      <span className={`w-4 text-center font-display text-[11px] font-extrabold ${index === 0 ? "text-ok" : "text-text-3"}`}>
-                        {index + 1}
-                      </span>
-                      <span className={`text-[12.5px] ${index === 0 ? "font-bold text-text-1" : "text-text-2"}`}>
-                        {bid.bidderNicknameMasked}
-                      </span>
-                    </span>
-                    <span className="flex items-baseline gap-2">
-                      <span className="text-[10.5px] text-text-3">{formatRelativeTime(bid.createdAt)}</span>
-                      <span className={`font-display text-[13px] tabular-nums ${index === 0 ? "font-extrabold text-text-1" : "text-text-2"}`}>
-                        {formatKRW(bid.amount)}
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="py-6 text-center text-[12.5px] text-text-3">아직 제안이 없어요.</p>
-            )}
-            {hasMoreBids && (
-              <button
-                type="button"
-                onClick={loadMoreBids}
-                className={`mt-3 flex h-10 w-full items-center justify-center rounded-[7px] border border-border-2 text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
-              >
-                더 보기
-              </button>
-            )}
-          </div>
         )}
       </div>
 
       {/* 하단 고정 바 — 킷과 같은 구성: 관심 44×44 + 제안 CTA(남은 폭 전부).
-          현재가·마감은 위 가격 패널과 제안 시트가 말하므로 바에서는 반복하지 않는다. */}
+          최소가·마감은 위 가격 패널과 제안 시트가 말하므로 바에서는 반복하지 않는다. */}
       {isLive && (
         <div
           className="fixed inset-x-0 bottom-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 sm:hidden"
@@ -425,9 +387,9 @@ export default function MobileAuctionDetail({
             >
               로그인하고 제안하기
             </Link>
-          ) : isTopBidder ? (
+          ) : alreadyOffered ? (
             <span className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-bold text-text-3">
-              현재 최고가 제안자예요
+              이미 제안했어요
             </span>
           ) : (
             <button

@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { ApiError, apiStreamUrl } from "@/lib/api";
+import { ApiError, apiFetch, apiStreamUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useDeliveryAddressGate } from "@/lib/use-delivery-address-gate";
 import { useToast } from "@/lib/toast-context";
@@ -32,6 +32,7 @@ type AuctionBiddingValue = {
   auctionId: number;
   /** 취소를 뺀 distinct 제안자 수(§2.9). 제안 "건수"가 아니다 — 한 사람이 여러 번 내도 1이다. */
   offerCount: number;
+  wishlistCount: number;
   endAt: string;
   status: AuctionStatus;
   isLive: boolean;
@@ -85,6 +86,7 @@ export function AuctionBiddingProvider({
   const [addressModalOpen, setAddressModalOpen] = useState(false);
 
   const [offerCount, setOfferCount] = useState(initialOfferCount);
+  const [wishlistCount, setWishlistCount] = useState(0);
   const [endAt, setEndAt] = useState(initialEndAt);
   // 제안가의 출발값은 최소가다. 예전에는 「현재가 + 1단위」였는데 그 현재가가 비공개가 됐다(§1.7).
   const [amount, setAmount] = useState(startPrice);
@@ -101,6 +103,19 @@ export function AuctionBiddingProvider({
   const floor = startPrice;
   // 상한이 없어졌으므로 범위 이탈은 「최소가 미만」과 「단위 어긋남」 둘뿐이다.
   const outOfRange = amount < floor || amount % OFFER_UNIT !== 0;
+
+  // 관심 수는 로그인 여부와 무관한 공개 집계다. 실패해도 가격 제안 흐름은 막지 않는다.
+  useEffect(() => {
+    let cancelled = false;
+    apiFetch<number>(`/api/auctions/${auctionId}/wishlist/count`, { cache: "no-store" })
+      .then((count) => {
+        if (!cancelled) setWishlistCount(count);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [auctionId]);
 
   /**
    * 제안 인원수 실시간 구독(공개 SSE).
@@ -159,7 +174,6 @@ export function AuctionBiddingProvider({
       toast.show({
         variant: "success",
         text: "가격 제안을 보냈어요.",
-        sub: "판매자가 제안을 확인하고 거래 상대를 선택해요.",
       });
     } catch (err) {
       const text = err instanceof ApiError ? err.message : "가격 제안에 실패했습니다. 잠시 후 다시 시도해주세요.";
@@ -206,6 +220,7 @@ export function AuctionBiddingProvider({
     () => ({
       auctionId,
       offerCount,
+      wishlistCount,
       endAt,
       status,
       isLive,
@@ -225,7 +240,7 @@ export function AuctionBiddingProvider({
       onAddressSaved,
     }),
     [
-      auctionId, offerCount, endAt, status, isLive, endingSoon, isOwnAuction,
+      auctionId, offerCount, wishlistCount, endAt, status, isLive, endingSoon, isOwnAuction,
       amount, floor, outOfRange, adjustAmount, submitting, alreadyOffered, handleBid,
       needsAddress, addressModalOpen, onAddressSaved,
     ],

@@ -262,7 +262,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             />
           ) : auction.endAt ? (
             <>
-              <BidSection startPrice={auction.startPrice} viewCount={auction.viewCount} />
+              <BidSection startPrice={auction.startPrice} />
               {/* 🔴 추월 알림 토글은 폐기했다(§2.3) — 「더 높은 제안이 들어왔어요」는 감추기로 한
                   금액을 흘리고 되받아치라는 신호라 경쟁 호가를 유도한다. 백엔드는 설정 API와
                   테이블까지 걷어냈다(BE #360). */}

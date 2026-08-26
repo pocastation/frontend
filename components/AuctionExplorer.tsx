@@ -10,15 +10,17 @@ import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionListResponse, AuctionResponse, AuctionSaleType } from "@/lib/types";
 
 // /auctions 전용 페이지(AuctionBrowser)도 같은 정렬 기준을 쓰므로 여기서 export해 재사용한다.
-export type SortKey = "latest" | "ending_soon" | "popular" | "views" | "price_asc" | "price_desc";
+// 🔴 가격 정렬(price_asc·price_desc)을 뺐다(거래 개편 §1.7). 응답에서 currentPrice를 지워도
+// 이 정렬이 남으면 **오름차순·내림차순을 번갈아 불러 호가 서열을 그대로 복원할 수 있다** —
+// 필드를 막는 것만으로는 비공개가 성립하지 않는다.
+// 「인기순」(popular)은 제안 건수 기준이라 남는다 — 인원수는 어차피 공개하는 값이다(§2.9).
+export type SortKey = "latest" | "ending_soon" | "popular" | "views";
 
 export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: "latest", label: "최신순" },
   { key: "ending_soon", label: "마감임박" },
   { key: "popular", label: "인기순" },
   { key: "views", label: "조회순" },
-  { key: "price_asc", label: "낮은 가격" },
-  { key: "price_desc", label: "높은 가격" },
 ];
 
 // 즉시판매는 마감이 없으므로 "마감임박" 정렬이 성립하지 않는다. 전용 페이지(/instant-sales)는

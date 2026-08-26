@@ -263,6 +263,9 @@ export type AuctionCancellationReasonCode =
   | "POLICY_VIOLATION"
   | "SUSPECTED_ABUSE";
 
+// 🔴 거래 개편 §1.7 — currentPrice(=최고 제안가)가 응답에서 빠졌다. 목록에 실려 있으면
+// 상세를 열지 않고도 호가를 훑을 수 있다. 종료 목록의 최종 성사가도 같은 이유로 함께 사라졌다
+// (이 타입이 진행·종료 공용이고, §9.4가 개별 거래가를 노출하지 않기로 확정했다).
 export type AuctionResponse = {
   id: number;
   title: string;
@@ -270,7 +273,6 @@ export type AuctionResponse = {
   representativeThumbnailUrl: string | null;
   saleType: AuctionSaleType;
   startPrice: number;
-  currentPrice: number;
   buyNowPrice: number | null;
   status: AuctionStatus;
   endAt: string | null;
@@ -336,13 +338,14 @@ export type AuctionDetailResponse = {
   conditionNote: string | null;
   saleType: AuctionSaleType;
   startPrice: number;
-  currentPrice: number;
   buyNowPrice: number | null;
   durationDays: number | null;
   status: AuctionStatus;
   startAt: string | null;
   endAt: string | null;
-  maxEndAt: string | null;
+  // 취소를 뺀 distinct 제안자 수(§2.9). 제안 "건수"(bidCount)와 다르다 —
+  // 한 사람이 금액을 여러 번 바꿔도 1이고, 화면의 「N명이 제안했어요」는 이 값이다.
+  offerCount: number;
   bidCount: number;
   viewCount: number;
   images: AuctionImageResponse[];
@@ -467,16 +470,18 @@ export type AdminAuctionVerificationResponse = {
   imageAvailable: boolean;
 };
 
-// POST /api/auctions/{id}/bids 응답 — 입찰 직후 갱신된 경매 상태.
+// POST /api/auctions/{id}/bids 응답.
+// 🔴 currentPrice를 뺐다(§1.7) — 본인이 방금 낸 금액은 본인이 알고 있고, 여기에 최고가를 실으면
+// **제안을 한 번 내보는 것만으로 남의 호가를 알아낼 수 있는 구멍**이 된다.
+// extended(안티스나이핑 연장)도 함께 폐기됐다(§2.3 — 연장 자체가 없어졌다).
 export type BidResponse = {
   auctionId: number;
-  currentPrice: number;
   bidCount: number;
   endAt: string;
-  extended: boolean;
 };
 
-// GET /api/auctions/{id}/bids 항목 — 입찰자 닉네임은 마스킹되어 내려온다.
+// GET /api/auctions/{id}/bids 항목 — 🔴 판매자 전용 응답이다(§1.7).
+// 구매자가 부르면 403(NOT_AUCTION_SELLER)이다. 판매자 선택 화면(Stage 3)이 쓴다.
 export type BidHistoryItem = {
   id: number;
   bidderNicknameMasked: string;
@@ -484,20 +489,22 @@ export type BidHistoryItem = {
   createdAt: string;
 };
 
-// 마이페이지 "입찰" 탭 항목 — 목록 조회 항목에 내 최고 입찰액·현재 최고가 여부가 더해진다.
+// 마이페이지 "가격 제안" 탭 항목 — 목록 조회 항목에 **내가 낸 금액**이 더해진다.
+// 🔴 currentPrice·isTopBidder를 뺐다(§1.7, BE #362). 설계 문서가 누출 경로로 다섯 곳을 적어
+// 뒀는데 이 응답이 빠져 있었다 — 제안 한 번만 내면 마이페이지에서 남의 호가를 계속 볼 수 있었고,
+// isTopBidder는 「아무도 나보다 높게 내지 않았다」는 남의 제안 상태 그 자체였다.
+// myBidAmount는 남는다 — 본인 정보라 §1.7이 명시적으로 허용한다.
 export type MyBiddingResponse = {
   id: number;
   title: string;
   artistName: string | null;
   representativeThumbnailUrl: string | null;
   startPrice: number;
-  currentPrice: number;
   status: AuctionStatus;
   endAt: string;
   bidCount: number;
   viewCount: number;
   myBidAmount: number;
-  isTopBidder: boolean;
 };
 
 export type MyBiddingListResponse = {
@@ -526,14 +533,13 @@ export type BidListResponse = {
   totalPages: number;
 };
 
-// SSE(/api/auctions/{id}/bids/stream)로 밀어주는 실시간 호가 이벤트.
+// SSE(/api/auctions/{id}/bids/stream)로 밀어주는 실시간 이벤트.
+// 🔴 실을 수 있는 것이 인원수 하나로 줄었다(§1.7). 예전에는 현재가·최고제안자 닉네임·연장 여부를
+// 함께 보냈는데, 이 스트림은 **인증 없이 구독할 수 있어**(EventSource가 Authorization 헤더를
+// 실을 수 없다) 화면에서 지운 값이 그대로 새어나가는 경로였다.
 export type BidStreamEvent = {
   auctionId: number;
-  currentPrice: number;
-  bidCount: number;
-  topBidderNicknameMasked: string;
-  endAt: string;
-  extended: boolean;
+  offerCount: number;
 };
 
 export type ArtistType = "GROUP" | "SOLO" | "UNIT";
@@ -774,10 +780,6 @@ export type NotificationListResponse = {
   totalPages: number;
 };
 
-// GET/PATCH /api/members/me/notification-settings — 마이페이지 알림 설정.
-export type NotificationSettings = {
-  outbidEnabled: boolean;
-};
 
 // ─── 1:1 문의 ───
 

@@ -53,7 +53,7 @@ function AuctionRow({ auction, index }: { auction: AuctionResponse; index: numbe
         <span className="block truncate text-[12.5px] text-text-1">{auction.title}</span>
       </span>
       <span className="flex-shrink-0 font-display text-[13px] font-extrabold tabular-nums text-text-1">
-        {formatKRW(auction.currentPrice)}
+        {formatKRW(auction.startPrice)}
       </span>
     </Link>
   );

@@ -14,7 +14,6 @@ export type MypageTab =
   | "sellHistory"
   | "wishlist"
   | "profile"
-  | "notifications"
   | "shipping"
   | "payment"
   | "settlement"
@@ -33,7 +32,6 @@ export const TAB_TITLE: Record<MypageTab, string> = {
   sellHistory: "판매 내역",
   wishlist: "관심 목록",
   profile: "내 정보",
-  notifications: "알림 설정",
   shipping: "배송지 관리",
   payment: "결제수단",
   settlement: "정산계좌",

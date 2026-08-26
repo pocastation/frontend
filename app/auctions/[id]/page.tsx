@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     auction.artistName,
     auction.idolName,
     auction.saleType === "INSTANT" ? "즉시판매" : "제안판매",
-    `현재가 ${auction.currentPrice.toLocaleString("ko-KR")}원`,
+    `최소가 ${auction.startPrice.toLocaleString("ko-KR")}원`,
   ]
     .filter(Boolean)
     .join(" · ");
@@ -255,14 +255,17 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
           {isInstantSale ? (
             <InstantPurchaseSection
               saleId={auction.id}
-              price={auction.buyNowPrice ?? auction.currentPrice}
+              price={auction.buyNowPrice ?? auction.startPrice}
               status={auction.status}
               sellerNickname={auction.sellerNickname}
               viewCount={auction.viewCount}
             />
           ) : auction.endAt ? (
             <>
-              <BidSection minimumPrice={auction.startPrice} />
+              <BidSection startPrice={auction.startPrice} />
+              {/* 🔴 추월 알림 토글은 폐기했다(§2.3) — 「더 높은 제안이 들어왔어요」는 감추기로 한
+                  금액을 흘리고 되받아치라는 신호라 경쟁 호가를 유도한다. 백엔드는 설정 API와
+                  테이블까지 걷어냈다(BE #360). */}
               {/* 거래 성사(ENDED_SOLD) 후 미결제 확정 시 차순위에게만 승계 배너가 뜬다(대상자 아니면 미노출). */}
               {auction.status === "ENDED_SOLD" && <SuccessionOfferBanner auctionId={auction.id} />}
             </>
@@ -290,9 +293,8 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
   return (
     <AuctionBiddingProvider
       auctionId={auction.id}
-      initialCurrentPrice={auction.currentPrice}
-      minimumPrice={auction.startPrice}
-      initialBidCount={auction.bidCount}
+      startPrice={auction.startPrice}
+      initialOfferCount={auction.offerCount}
       initialEndAt={auction.endAt!}
       status={auction.status}
       sellerNickname={auction.sellerNickname}

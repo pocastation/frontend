@@ -1,9 +1,15 @@
 import Wordmark from "@/components/Wordmark";
 import { BUSINESS_INFO, INTERMEDIARY_NOTICE } from "@/lib/business";
 
+// 🔴 `mobileHidden`은 모바일 폭에서 그 그룹을 감춘다(#399).
+//
+// 푸터는 이제 모든 화면에 뜨는데, 모바일 375px에서 통째로 그리면 538px(화면의 66%)이고
+// 그 절반이 사이트맵이다. **하단 5탭이 이미 내비게이션을 하므로 중복**이라 감춘다.
+// 감추지 않는 것은 「약관」 그룹과 사업자 정보 — 그쪽이 법정 표시사항이다.
 const FOOTER_COLUMNS = [
   {
     title: "서비스",
+    mobileHidden: true,
     links: [
       { label: "매물 둘러보기", href: "/" },
       { label: "이용 방법", href: "/guide" },
@@ -11,6 +17,7 @@ const FOOTER_COLUMNS = [
   },
   {
     title: "고객지원",
+    mobileHidden: true,
     links: [
       { label: "공지사항", href: "/notices" },
       { label: "문의하기", href: "/inquiries" },
@@ -56,7 +63,11 @@ export default function Footer() {
   const rows = businessRows();
 
   return (
-    <footer className="bg-text-1 px-4 pb-7 pt-12 text-white/40">
+    // 🔴 모바일 하단 여백(#399) — 홈·목록의 5탭(56px + safe-area)과 매물 상세의 제안 CTA가
+    // position: fixed라, 문서 끝까지 스크롤하면 푸터 마지막 줄이 그 아래로 가린다.
+    // 화면별로 값을 갈라 두면 새 고정 요소가 생길 때마다 여기를 고쳐야 해서, 둘 중 큰 쪽에
+    // 맞춘 한 값으로 둔다(번개장터도 「앱에서 구매하기」 고정바와 푸터가 이렇게 공존한다).
+    <footer className="bg-text-1 px-4 pb-7 pt-12 text-white/40 max-sm:pb-[calc(76px+env(safe-area-inset-bottom))]">
       <div className="mx-auto grid max-w-[1160px] grid-cols-2 gap-10 sm:grid-cols-4">
         <div>
           <div className="mb-3">
@@ -67,7 +78,7 @@ export default function Footer() {
           </p>
         </div>
         {FOOTER_COLUMNS.map((column) => (
-          <div key={column.title}>
+          <div key={column.title} className={"mobileHidden" in column && column.mobileHidden ? "max-sm:hidden" : undefined}>
             <h4 className="mb-3 text-[11px] font-extrabold tracking-wide text-white/70">
               {column.title}
             </h4>
@@ -89,7 +100,11 @@ export default function Footer() {
           </div>
         ))}
       </div>
-      {/* 전자상거래법 §10 — 사업자정보 상시 노출. root layout에 있어 메인·상세·결제 화면 전부 커버된다. */}
+      {/* 전자상거래법 §10 — 사업자정보 상시 노출.
+          ⚠️ 이 주석은 한때 틀린 말이었다(#399). root layout에 있는 건 맞지만 모바일 이행 때
+          MobileChromeGate가 홈·목록·매물 상세에서 이걸 접었고, 그 사이 §10 표시사항이 모바일
+          주요 화면에서 사라져 있었다. 게이트를 걷어내 지금은 실제로 전 화면에 뜬다 —
+          **모바일에서 접는 처리를 다시 넣지 말 것.** */}
       <address className="mx-auto mt-10 max-w-[1160px] border-t border-white/10 pt-5 text-[11px] not-italic leading-relaxed">
         <dl className="flex flex-wrap gap-x-3 gap-y-1">
           {rows.map((row) => (

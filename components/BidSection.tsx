@@ -6,12 +6,11 @@ import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import { useAuth } from "@/lib/auth-context";
 import { useAuctionBidding } from "@/lib/auction-bidding-context";
 import { formatKRW } from "@/lib/format";
-import { BID_MIN_INCREMENT, buyerFee, estimatedTotal } from "@/lib/fees";
+import { OFFER_UNIT, buyerFee, estimatedTotal } from "@/lib/fees";
 import { FOCUS_RING, PRIMARY_BUTTON_CLASS } from "@/lib/ui";
 
 type Props = {
-  minimumPrice: number;
-  preview?: boolean;
+  startPrice: number;
 };
 
 function formatInputAmount(amount: number): string {
@@ -27,11 +26,11 @@ function parseInputAmount(value: string): number | null {
 
 // 데스크톱 상세의 가격 제안 영역. 경매의 진행 정보 대신 판매자가 정한 최소 금액과
 // 구매자의 직접 입력만 전면에 둔다. 제안 API·배송지 관문은 기존 계약을 그대로 사용한다.
-export default function BidSection({ minimumPrice, preview = false }: Props) {
+export default function BidSection({ startPrice }: Props) {
   const { accessToken } = useAuth();
   const {
     auctionId,
-    bidCount,
+    offerCount,
     wishlistCount,
     status,
     isLive,
@@ -39,7 +38,7 @@ export default function BidSection({ minimumPrice, preview = false }: Props) {
     amount,
     adjustAmount,
     submitting,
-    isTopBidder,
+    alreadyOffered,
     handleBid,
     needsAddress,
     addressModalOpen,
@@ -49,10 +48,10 @@ export default function BidSection({ minimumPrice, preview = false }: Props) {
   const [proposalValue, setProposalValue] = useState(() => formatInputAmount(amount));
   const [isEditing, setIsEditing] = useState(false);
 
-  const minimumProposalAmount = minimumPrice;
+  const minimumProposalAmount = startPrice;
   const typedAmount = parseInputAmount(proposalValue);
   const isBelowMinimum = typedAmount !== null && typedAmount < minimumProposalAmount;
-  const isNotUnit = typedAmount !== null && typedAmount % BID_MIN_INCREMENT !== 0;
+  const isNotUnit = typedAmount !== null && typedAmount % OFFER_UNIT !== 0;
   const hasValidAmount = typedAmount !== null && !isBelowMinimum && !isNotUnit;
   const total = useMemo(() => estimatedTotal(amount), [amount]);
 
@@ -66,7 +65,7 @@ export default function BidSection({ minimumPrice, preview = false }: Props) {
     const normalized = value.replace(/[^0-9]/g, "");
     setProposalValue(normalized ? Number(normalized).toLocaleString("ko-KR") : "");
     const next = parseInputAmount(normalized);
-    if (next !== null && next >= minimumProposalAmount && next % BID_MIN_INCREMENT === 0) {
+    if (next !== null && next >= minimumProposalAmount && next % OFFER_UNIT === 0) {
       adjustAmount(next);
     }
   }
@@ -77,12 +76,12 @@ export default function BidSection({ minimumPrice, preview = false }: Props) {
     const normalized =
       next === null
         ? minimumProposalAmount
-        : Math.max(minimumProposalAmount, Math.floor(next / BID_MIN_INCREMENT) * BID_MIN_INCREMENT);
+        : Math.max(minimumProposalAmount, Math.floor(next / OFFER_UNIT) * OFFER_UNIT);
     adjustAmount(normalized);
     setProposalValue(formatInputAmount(normalized));
   }
 
-  const submitDisabled = submitting || isTopBidder || !hasValidAmount;
+  const submitDisabled = submitting || alreadyOffered || !hasValidAmount;
 
   return (
     <div className="mt-6">
@@ -97,7 +96,7 @@ export default function BidSection({ minimumPrice, preview = false }: Props) {
           <dl className="flex shrink-0 divide-x divide-border text-right">
             <div className="pr-4">
               <dt className="text-[11px] font-semibold text-text-3">가격 제안</dt>
-              <dd className="mt-0.5 font-display text-xl font-extrabold tabular-nums text-text-1">{bidCount}회</dd>
+              <dd className="mt-0.5 font-display text-xl font-extrabold tabular-nums text-text-1">{offerCount}회</dd>
             </div>
             <div className="pl-4">
               <dt className="text-[11px] font-semibold text-text-3">관심</dt>
@@ -118,7 +117,7 @@ export default function BidSection({ minimumPrice, preview = false }: Props) {
             <p className="mt-6 border-t border-border pt-5 text-center text-sm font-semibold text-text-2">
               내 매물입니다. 직접 가격을 제안할 수 없어요.
             </p>
-          ) : !accessToken && !preview ? (
+          ) : !accessToken ? (
             <Link
               href={`/login?redirect=/auctions/${auctionId}`}
               className={`mt-6 flex h-12 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
@@ -138,7 +137,7 @@ export default function BidSection({ minimumPrice, preview = false }: Props) {
                   {isBelowMinimum
                     ? `${formatKRW(minimumProposalAmount)} 이상 입력해주세요.`
                     : isNotUnit
-                      ? `${BID_MIN_INCREMENT.toLocaleString("ko-KR")}원 단위로 입력해주세요.`
+                      ? `${OFFER_UNIT.toLocaleString("ko-KR")}원 단위로 입력해주세요.`
                       : "최소 제안 금액 이상으로 입력해주세요"}
                 </span>
               </div>
@@ -183,13 +182,11 @@ export default function BidSection({ minimumPrice, preview = false }: Props) {
 
               <button
                 type="button"
-                onClick={() => {
-                  if (!preview) void handleBid();
-                }}
+                onClick={() => void handleBid()}
                 disabled={submitDisabled}
                 className={`mt-4 flex h-12 w-full items-center justify-center rounded-r2 bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-primary ${FOCUS_RING}`}
               >
-                {isTopBidder
+                {alreadyOffered
                   ? "가격 제안을 보냈어요"
                   : submitting
                     ? "처리 중..."

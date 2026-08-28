@@ -10,6 +10,7 @@ import PhotoUploadGrid, { type PhotoItem } from "@/components/PhotoUploadGrid";
 import VideoUploadField, { type VideoItem } from "@/components/VideoUploadField";
 import { apiFetch, ApiError } from "@/lib/api";
 import { compressImage } from "@/lib/image-compress";
+import { MIN_LISTING_PRICE, PRICE_UNIT } from "@/lib/fees";
 import {
   MAX_VIDEO_DURATION_SEC,
   MIN_VIDEO_DURATION_SEC,
@@ -289,12 +290,12 @@ export default function NewAuctionPage() {
   }
 
   // 각 스텝의 필수값이 채워졌는지 — 안 채워지면 "다음"/"등록" 비활성.
-  // 최소 제안가·즉시판매가: 최저 5,000원 + 500원 단위.
+  // 최소 제안가·즉시판매가: 최저 5,000원 + 500원 단위(§12.1, BE와 동일 규칙).
   const priceValid =
     startPrice.trim() !== "" &&
     Number.isFinite(Number(startPrice)) &&
-    Number(startPrice) >= 5000 &&
-    Number(startPrice) % 500 === 0;
+    Number(startPrice) >= MIN_LISTING_PRICE &&
+    Number(startPrice) % PRICE_UNIT === 0;
   function isStepValid(s: number): boolean {
     switch (STEP_KEYS[s]) {
       case "info":
@@ -354,9 +355,12 @@ export default function NewAuctionPage() {
       return;
     }
     const price = Number(startPrice);
-    if (!Number.isFinite(price) || price < 5000 || price % 500 !== 0) {
+    if (!Number.isFinite(price) || price < MIN_LISTING_PRICE || price % PRICE_UNIT !== 0) {
       const label = saleType === "INSTANT" ? "즉시판매가" : "최소 제안가";
-      setError(`${label}는 최저 5,000원부터 500원 단위로 입력해주세요.`);
+      setError(
+        `${label}는 최저 ${MIN_LISTING_PRICE.toLocaleString("ko-KR")}원부터 ` +
+          `${PRICE_UNIT.toLocaleString("ko-KR")}원 단위로 입력해주세요.`,
+      );
       return;
     }
 
@@ -700,7 +704,10 @@ export default function NewAuctionPage() {
                   onChange={(e) => setStartPrice(e.target.value)}
                   className={INPUT_CLASS}
                 />
-                <p className="text-[11px] text-text-3">최저 5,000원부터 500원 단위로 입력해요.</p>
+                <p className="text-[11px] text-text-3">
+                  최저 {MIN_LISTING_PRICE.toLocaleString("ko-KR")}원부터{" "}
+                  {PRICE_UNIT.toLocaleString("ko-KR")}원 단위로 입력해요.
+                </p>
                 <p className="text-[11px] text-text-3">
                   {saleType === "INSTANT"
                     ? "배송비는 판매자 부담이에요. 배송비를 감안해 판매가를 정해주세요."

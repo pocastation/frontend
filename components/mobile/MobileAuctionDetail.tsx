@@ -85,7 +85,7 @@ function parseInputAmount(value: string): number | null {
   return Number.isSafeInteger(amount) ? amount : null;
 }
 
-/** 제안 바텀시트 — 데스크톱과 같은 직접 입력·최소 금액·1,000원 단위 규칙을 사용한다. */
+/** 제안 바텀시트 — 데스크톱과 같은 직접 입력·최소 금액·단위(OFFER_UNIT) 규칙을 사용한다. */
 function BidSheet({ onClose }: { onClose: () => void }) {
   const { amount, floor, adjustAmount, submitting, alreadyOffered, needsAddress, handleBid } = useAuctionBidding();
   const [proposalValue, setProposalValue] = useState(() => formatInputAmount(amount));

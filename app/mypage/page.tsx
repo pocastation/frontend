@@ -365,8 +365,15 @@ function MyPageBody() {
       // 🔴 예전에는 isTopBidder로 「내가 성사된 건」만 골라 보냈는데, 그 필드가 사라졌다(§1.7 —
       // 「내가 1등이다」는 남의 제안 상태다). 성사된 매물 전체를 보내고 **주문이 돌아오는지로
       // 판정**한다 — 이 API는 내 주문만 돌려주므로 오히려 더 정확하다(승계로 성사된 건도 잡힌다).
+      //
+      // 🔴 **MATCHED를 반드시 포함한다**(#419). 거래 개편으로 결제 대기 상태가 ENDED_SOLD에서
+      // MATCHED로 바뀌었는데(BE #368) 여기가 ENDED_SOLD만 보고 있었다 — 결제해야 할 주문을
+      // **조회조차 하지 않아** 선택된 구매자가 결제 화면에 닿을 수 없었다. 알림은 「48시간 안에
+      // 결제해 주세요」라고 하는데 그 화면이 없는 상태였다.
       const purchasedIds = [
-        ...biddingRes.content.filter((b) => b.status === "ENDED_SOLD").map((b) => b.id),
+        ...biddingRes.content
+          .filter((b) => b.status === "MATCHED" || b.status === "ENDED_SOLD")
+          .map((b) => b.id),
         ...instantPurchasesRes.content.map((a) => a.id),
       ];
       try {
@@ -515,10 +522,17 @@ function MyPageBody() {
 
   const activeSelling = selling.filter((auction) => SELLING_TAB_STATUSES.has(auction.status));
   const sellingHistory = selling.filter((auction) => !SELLING_TAB_STATUSES.has(auction.status));
-  const liveBidding = bidding.filter((b) => b.status === "LIVE");
-  // 성사 판정은 「주문이 있는가」로 한다 — isTopBidder가 §1.7로 사라졌고, 주문 존재는 내가
-  // 구매자라는 사실 그 자체라 더 정확하다. orders가 채워지기 전에는 비어 있다(로딩 상태).
-  const wonBidding = bidding.filter((b) => b.status === "ENDED_SOLD" && orders[b.id] != null);
+  // 「진행 중」 = 아직 결과가 나오지 않은 내 제안. MATCHED라도 **내 주문이 없으면** 다른 분이
+  // 선택된 것이고, 미결제 시 매물이 다시 열려 내 제안이 다시 후보가 되므로(§1.4) 여기 남는다.
+  const liveBidding = bidding.filter(
+    (b) => b.status === "LIVE" || (b.status === "MATCHED" && orders[b.id] == null),
+  );
+  // 🔴 상태가 아니라 **주문 존재**로 판정한다(#419). isTopBidder가 §1.7로 사라졌고, 내 주문이
+  // 있다는 것은 내가 구매자라는 사실 그 자체다. 상태로 가르면 결제 대기(MATCHED)가 빠져
+  // **결제하기 버튼에 닿을 수 없다** — 실제로 그렇게 끊겨 있었다.
+  const wonBidding = bidding.filter(
+    (b) => (b.status === "MATCHED" || b.status === "ENDED_SOLD") && orders[b.id] != null,
+  );
 
   // 모바일 메뉴의 빨간 배지 = "지금 내가 손봐야 하는 건수". 단순 개수(회색 값)와 구분한다.
   const needsAddress = (o: MyOrderStatusResponse) =>
@@ -730,11 +744,11 @@ function MyPageBody() {
 
             <div className="mt-8 grid gap-5 sm:grid-cols-2">
               <DashboardPanel title="참여 중인 거래" onSeeAll={() => goToBidding("live")}>
-                <MyBiddingList items={liveBidding.slice(0, 3)} loading={loading} emptyText="참여 중인 거래가 없습니다." />
+                <MyBiddingList items={liveBidding.slice(0, 3)} loading={loading} emptyText="참여 중인 거래가 없습니다." orders={orders} />
               </DashboardPanel>
 
               <DashboardPanel title="제안 내역" onSeeAll={() => goToBidding("all")}>
-                <MyBiddingList items={bidding.slice(0, 3)} loading={loading} emptyText="아직 제안한 매물이 없어요." />
+                <MyBiddingList items={bidding.slice(0, 3)} loading={loading} emptyText="아직 제안한 매물이 없어요." orders={orders} />
               </DashboardPanel>
 
               <DashboardPanel title="구매 내역" onSeeAll={() => goToPurchases("auction")}>
@@ -784,6 +798,8 @@ function MyPageBody() {
                 items={biddingFilter === "live" ? liveBidding : bidding}
                 loading={loading}
                 emptyText={biddingFilter === "live" ? "참여 중인 거래가 없습니다." : "아직 제안한 매물이 없어요."}
+                orders={orders}
+                onGoPayment={() => selectTab("payment")}
               />
             </div>
           </>
@@ -1844,6 +1860,14 @@ function MyBiddingList({
       {items.map((item) => {
         const isLive = item.status === "LIVE";
         const order = orders?.[item.id];
+        // 🔴 MATCHED 하나로는 「내가 선택됐다」와 「다른 분이 선택됐다」가 갈리지 않는다(#419).
+        // 주문이 있으면 내가 구매자이고, 없으면 남이 골라진 것이다 — 그때 내 제안은 아직 살아
+        // 있어서 미결제 시 다시 후보가 되므로(§1.4) 「끝났다」로 읽히면 안 된다.
+        const stateLabel = isLive
+          ? formatTimeLeft(item.endAt)
+          : item.status === "MATCHED" && !order
+            ? "다른 제안이 선택됨"
+            : (AUCTION_STATUS_LABEL[item.status] ?? "종료");
         return (
           <li key={item.id}>
             {/* 푸터에 버튼이 들어가므로 카드 전체를 Link로 감싸지 않는다(중첩 인터랙티브 방지). */}
@@ -1872,7 +1896,7 @@ function MyBiddingList({
                     {formatKRW(item.myBidAmount)}
                   </span>
                   <span className="block text-[10.5px] text-text-3">
-                    {isLive ? formatTimeLeft(item.endAt) : (AUCTION_STATUS_LABEL[item.status] ?? "종료")}
+                    {stateLabel}
                   </span>
                 </span>
               </Link>

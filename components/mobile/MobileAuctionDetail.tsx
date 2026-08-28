@@ -6,6 +6,7 @@ import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import MobileDetailGallery from "@/components/mobile/MobileDetailGallery";
 import OfferCounts from "@/components/OfferCounts";
+import SellerOfferPanel from "@/components/SellerOfferPanel";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useAuctionBidding } from "@/lib/auction-bidding-context";
@@ -207,6 +208,7 @@ export default function MobileAuctionDetail({
     auctionId,
     offerCount,
     wishlistCount,
+    status,
     isLive,
     isOwnAuction,
     alreadyOffered,
@@ -237,8 +239,8 @@ export default function MobileAuctionDetail({
 
       <div className="px-4 pt-4">
         <div className="flex items-center gap-2">
-          <span className={`text-[11.5px] font-bold ${isLive ? "text-ok" : "text-text-3"}`}>
-            {isLive ? "판매 중" : "판매 종료"}
+          <span className={`text-[11.5px] font-bold ${isLive || status === "MATCHED" ? "text-ok" : "text-text-3"}`}>
+            {isLive ? "판매 중" : status === "MATCHED" ? "거래 성사 대기 중" : status === "ENDED_SOLD" ? "거래 완료" : "판매 종료"}
           </span>
           {/* 스타 이름을 누르면 그 스타의 페이지로 간다 — 같은 스타 매물을 이어 보는 가장 짧은 길이다. */}
           {auction.artistName && (
@@ -272,32 +274,44 @@ export default function MobileAuctionDetail({
         {/* 가격 패널 — 참여 수 → 금액 → 안내 세 층.
             🔴 판매 상태를 여기서 말하지 않는다(#404). 초록 도트가 있던 자리인데, 바로 위 제목
             머리줄이 이미 「판매 중」을 말하고 있어 **한 화면에 같은 말이 두 번** 나왔다. */}
-        <div className="mt-4 rounded-r3 border border-border p-3.5">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-[11px] font-semibold text-text-3">판매자 최소 제안 금액</p>
-            <span aria-live="polite">
-              <OfferCounts offerCount={offerCount} wishlistCount={wishlistCount} />
-            </span>
+        {isOwnAuction && (status === "LIVE" || status === "MATCHED") ? (
+          <div className="mt-4">
+            <SellerOfferPanel
+              startPrice={auction.startPrice}
+              offerCount={offerCount}
+              wishlistCount={wishlistCount}
+              status={status}
+              viewport="mobile"
+            />
           </div>
-          <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1">
-            {formatKRW(auction.startPrice)}
-          </p>
-          {/* 0건일 때만 — 아이콘 줄에서 뺀 자리를 여기서 채운다(§2.9 D1). */}
-          {offerCount === 0 && (
-            <p className="mt-3 border-t border-border pt-2.5 text-[11.5px] font-bold text-text-2">
-              {OFFER_EMPTY_HINT}
+        ) : (
+          <div className="mt-4 rounded-r3 border border-border p-3.5">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] font-semibold text-text-3">판매자 최소 제안 금액</p>
+              <span aria-live="polite">
+                <OfferCounts offerCount={offerCount} wishlistCount={wishlistCount} />
+              </span>
+            </div>
+            <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1">
+              {formatKRW(auction.startPrice)}
             </p>
-          )}
-          {/* 구매자가 처음 보는 메커니즘이라 「왜 최고가가 안 보이지」에 여기서 답한다.
-              마감을 표시하지 않기로 하면서 더 중요해졌다. */}
-          <p
-            className={`text-[10.5px] leading-relaxed text-text-3 ${
-              offerCount === 0 ? "mt-1.5" : "mt-3 border-t border-border pt-2.5"
-            }`}
-          >
-            판매자가 제안을 보고 거래 상대를 직접 선택해요. 다른 사람의 제안 금액은 공개되지 않아요.
-          </p>
-        </div>
+            {/* 0건일 때만 — 아이콘 줄에서 뺀 자리를 여기서 채운다(§2.9 D1). */}
+            {offerCount === 0 && (
+              <p className="mt-3 border-t border-border pt-2.5 text-[11.5px] font-bold text-text-2">
+                {OFFER_EMPTY_HINT}
+              </p>
+            )}
+            {/* 구매자가 처음 보는 메커니즘이라 「왜 최고가가 안 보이지」에 여기서 답한다.
+                마감을 표시하지 않기로 하면서 더 중요해졌다. */}
+            <p
+              className={`text-[10.5px] leading-relaxed text-text-3 ${
+                offerCount === 0 ? "mt-1.5" : "mt-3 border-t border-border pt-2.5"
+              }`}
+            >
+              판매자가 제안을 보고 거래 상대를 직접 선택해요. 다른 사람의 제안 금액은 공개되지 않아요.
+            </p>
+          </div>
+        )}
 
         <SellerRow sellerId={auction.sellerId} nickname={auction.sellerNickname} />
 
@@ -400,9 +414,12 @@ export default function MobileAuctionDetail({
             className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[7px] border border-border-2 bg-white text-text-2 ${FOCUS_RING}`}
           />
           {isOwnAuction ? (
-            <span className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-bold text-text-3">
-              내 매물입니다
-            </span>
+            <a
+              href="#seller-offer-list-mobile"
+              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+            >
+              제안 목록 보기
+            </a>
           ) : !accessToken ? (
             <Link
               href={`/login?redirect=/auctions/${auctionId}`}

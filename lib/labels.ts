@@ -145,8 +145,10 @@ export const AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
   REJECTED: "승인 거절",
   SCHEDULED: "시작 예정",
   LIVE: "진행 중",
+  MATCHED: "거래 성사 대기 중",
   ENDED_SOLD: "거래 성사",
   ENDED_NO_BIDS: "제안 없음",
+  ENDED_NOT_SELECTED: "미선택 종료",
   CANCELLED: "취소됨",
 };
 
@@ -165,8 +167,10 @@ export const AUCTION_STATUS_TONE: Record<AuctionStatus, StatusTone> = {
   REJECTED: "danger",
   SCHEDULED: "neutral",
   LIVE: "ok",
+  MATCHED: "ok",
   ENDED_SOLD: "muted",
   ENDED_NO_BIDS: "muted",
+  ENDED_NOT_SELECTED: "muted",
   CANCELLED: "danger",
 };
 

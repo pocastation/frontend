@@ -41,15 +41,36 @@ export function socialLoginUrl(provider: "kakao" | "naver" | "google"): string {
   return `${resolveApiUrl()}/oauth2/authorization/${provider}?origin=${encodeURIComponent(SITE_URL)}`;
 }
 
+/**
+ * 미디어 오리진. **{@link resolveApiUrl}과 달리 서버/클라이언트 분기가 없다(FE #406).**
+ *
+ * <p>`resolveApiUrl()`의 `typeof window` 분기는 **fetch 대상 주소**를 고르는 장치다 —
+ * Node fetch는 절대 URL만 받고, 브라우저는 쿠키를 1st-party로 만들려고 같은 출처를 써야 한다.
+ * 그 분기를 {@link mediaUrl}이 같이 쓰면 **결과가 `<img src>`로 마크업에 박히기 때문에**
+ * 서버가 그린 HTML(`http://localhost:8080/media/…`)과 브라우저가 그린 값(`/media/…`)이
+ * 어긋나 하이드레이션이 깨진다. 실제로 홈·매물 상세에서 React가
+ * «A server/client branch `if (typeof window !== 'undefined')`» 경고를 계속 뱉었다.
+ *
+ * <p>그래서 **빌드 타임에 인라인되는 값만** 본다 — 양쪽에서 같은 문자열이 나온다.
+ * 비어 있으면 같은 출처 상대경로가 되고, 로컬은 next.config의 `/media` rewrite가 백엔드로 넘긴다.
+ * 브라우저가 실제로 그 주소를 받아오므로 서버에서 절대 URL로 만들어 둘 이유가 없다.
+ *
+ * <p>{@link socialLoginUrl}이 `window.location.origin` 대신 빌드 타임 상수 {@link SITE_URL}을
+ * 쓰는 것과 같은 이유다. **렌더 결과에 들어가는 값은 런타임 환경을 물어보면 안 된다.**
+ */
+function mediaOrigin(): string {
+  return envValue(process.env.NEXT_PUBLIC_API_URL);
+}
+
 // 저장 방식에 따라 미디어 경로 형태가 다르다:
 //  - S3StorageClient(배포): 절대 URL(https://{cloudfront}/photos/…)을 통째로 저장 → 그대로 쓴다.
-//  - LocalStorageClient(로컬): /media/** 상대경로 → 프론트(3000)가 아니라 백엔드(8080) 기준으로 조합.
+//  - LocalStorageClient(로컬): /media/** 상대경로 → 같은 출처 기준으로 조합(위 mediaOrigin 주석).
 // 절대 URL에 API 주소를 덧붙이면 "https://api…https://cloudfront…"로 깨지므로 반드시 분기한다.
 export function mediaUrl(path: string): string {
   if (/^https?:\/\//i.test(path)) {
     return path;
   }
-  return `${resolveApiUrl()}${path}`;
+  return `${mediaOrigin()}${path}`;
 }
 
 // SSE는 EventSource가 fetch 래퍼(apiFetch)를 안 거치므로 절대 URL을 직접 조합해준다.

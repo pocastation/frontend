@@ -11,7 +11,6 @@ import PaymentMethodManager from "@/components/PaymentMethodManager";
 import SettlementAccountManager from "@/components/SettlementAccountManager";
 import ProfileTab from "@/components/ProfileTab";
 import SettingsTab from "@/components/SettingsTab";
-import NotificationSettings from "@/components/NotificationSettings";
 import BadgeChips from "@/components/BadgeChips";
 import DeliveryAddressModal from "@/components/DeliveryAddressModal";
 import ReviewComposerModal from "@/components/ReviewComposerModal";
@@ -138,14 +137,6 @@ function UserIcon() {
     </svg>
   );
 }
-function BellIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-      <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-    </svg>
-  );
-}
 function PinIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -204,7 +195,6 @@ const TRADE_NAV: { key: Tab; label: string; icon: () => ReactNode }[] = [
 
 const ACCOUNT_NAV: { key: Tab; label: string; icon: () => ReactNode; hidden?: boolean }[] = [
   { key: "profile", label: "내 정보", icon: UserIcon },
-  { key: "notifications", label: "알림 설정", icon: BellIcon },
   { key: "shipping", label: "배송지 관리", icon: PinIcon },
   // 결제수단(카드 빌링키)은 목록에서만 감춘다(2026-08-07). 카드에 에스크로 상품이 없다는 것이
   // 확인돼(docs ⓪-1) 결제 흐름이 가상계좌 전환 / 카드 유지 + 정산보류 두 갈래로 갈렸고 아직
@@ -372,8 +362,11 @@ function MyPageBody() {
 
       // 구매 확정 건(거래 성사 + 즉시구매)의 주문 상태를 배치로 채운다 — 주문이 없는 매물은 응답에 안 온다.
       // 배치 채움 실패는 non-fatal: 목록은 그대로 보여주고 상태 푸터만 생략한다(wishlist 하트와 동일 원칙).
+      // 🔴 예전에는 isTopBidder로 「내가 성사된 건」만 골라 보냈는데, 그 필드가 사라졌다(§1.7 —
+      // 「내가 1등이다」는 남의 제안 상태다). 성사된 매물 전체를 보내고 **주문이 돌아오는지로
+      // 판정**한다 — 이 API는 내 주문만 돌려주므로 오히려 더 정확하다(승계로 성사된 건도 잡힌다).
       const purchasedIds = [
-        ...biddingRes.content.filter((b) => b.status === "ENDED_SOLD" && b.isTopBidder).map((b) => b.id),
+        ...biddingRes.content.filter((b) => b.status === "ENDED_SOLD").map((b) => b.id),
         ...instantPurchasesRes.content.map((a) => a.id),
       ];
       try {
@@ -523,7 +516,9 @@ function MyPageBody() {
   const activeSelling = selling.filter((auction) => SELLING_TAB_STATUSES.has(auction.status));
   const sellingHistory = selling.filter((auction) => !SELLING_TAB_STATUSES.has(auction.status));
   const liveBidding = bidding.filter((b) => b.status === "LIVE");
-  const wonBidding = bidding.filter((b) => b.status === "ENDED_SOLD" && b.isTopBidder);
+  // 성사 판정은 「주문이 있는가」로 한다 — isTopBidder가 §1.7로 사라졌고, 주문 존재는 내가
+  // 구매자라는 사실 그 자체라 더 정확하다. orders가 채워지기 전에는 비어 있다(로딩 상태).
+  const wonBidding = bidding.filter((b) => b.status === "ENDED_SOLD" && orders[b.id] != null);
 
   // 모바일 메뉴의 빨간 배지 = "지금 내가 손봐야 하는 건수". 단순 개수(회색 값)와 구분한다.
   const needsAddress = (o: MyOrderStatusResponse) =>
@@ -886,13 +881,6 @@ function MyPageBody() {
               <SettlementAccountManager />
             </div>
           </>
-        ) : activeTab === "notifications" ? (
-          <>
-            <TabHead title="알림 설정" sub={<>어떤 알림을 받을지 설정해요.</>} />
-            <div className="mt-5">
-              <NotificationSettings />
-            </div>
-          </>
         ) : activeTab === "settings" ? (
           <>
             <TabHead title="계정 설정" sub={<>계정을 관리해요.</>} />
@@ -1105,7 +1093,7 @@ function SellingList({
     <ul className="flex flex-col gap-2">
       {items.map((item) => {
         const isLive = item.status === "LIVE";
-        const displayPrice = item.saleType === "INSTANT" ? (item.buyNowPrice ?? item.currentPrice) : item.currentPrice;
+        const displayPrice = item.saleType === "INSTANT" ? (item.buyNowPrice ?? item.startPrice) : item.startPrice;
         const timeLabel = isLive
           ? item.saleType === "INSTANT" ? "즉시판매" : item.endAt ? formatTimeLeft(item.endAt) : "진행 중"
           : endedLabel;
@@ -1212,7 +1200,7 @@ function WishlistTabList({
     <ul className="flex flex-col gap-2">
       {items.map((item) => {
         const isLive = item.status === "LIVE";
-        const displayPrice = item.saleType === "INSTANT" ? (item.buyNowPrice ?? item.currentPrice) : item.currentPrice;
+        const displayPrice = item.saleType === "INSTANT" ? (item.buyNowPrice ?? item.startPrice) : item.startPrice;
         const timeLabel = isLive
           ? item.saleType === "INSTANT" ? "즉시판매" : item.endAt ? formatTimeLeft(item.endAt) : "진행 중"
           : "종료";
@@ -1870,19 +1858,18 @@ function MyBiddingList({
                     <span className="block truncate text-[11px] font-extrabold text-primary">{item.artistName}</span>
                   )}
                   <span className="block truncate text-sm font-bold text-text-1">{item.title}</span>
+                  {/* 🔴 「최고 제안가」·「거래 성사」 칩은 isTopBidder로 그렸는데 그 필드가
+                      사라졌다(§1.7 — 「내가 1등이다」는 남의 제안 상태다). 성사 여부는 주문이
+                      있는지로 판정하므로 이 목록의 상위(wonBidding)에서 이미 갈라져 있다. */}
                   <span className="mt-1 flex items-center gap-1.5 text-[11px] text-text-3">
-                    <span>내 제안가 {formatKRW(item.myBidAmount)}</span>
-                    {item.isTopBidder && item.status === "LIVE" && (
-                      <span className="rounded-full bg-ok-soft px-1.5 py-0.5 font-bold text-ok">최고 제안가</span>
-                    )}
-                    {item.isTopBidder && item.status === "ENDED_SOLD" && (
-                      <span className="rounded-full bg-ok-soft px-1.5 py-0.5 font-bold text-ok">거래 성사</span>
-                    )}
+                    <span>최소가 {formatKRW(item.startPrice)}</span>
                   </span>
                 </span>
                 <span className="shrink-0 text-right">
+                  {/* 오른쪽 큰 숫자를 「내 제안가」로 올렸다 — 예전에는 현재가(=최고 제안가)였는데
+                      그 값이 사라졌고, 이 화면에서 사용자가 가장 알고 싶은 건 자기가 낸 금액이다. */}
                   <span className="block font-display text-sm font-extrabold text-text-1">
-                    {formatKRW(item.currentPrice)}
+                    {formatKRW(item.myBidAmount)}
                   </span>
                   <span className="block text-[10.5px] text-text-3">
                     {isLive ? formatTimeLeft(item.endAt) : (AUCTION_STATUS_LABEL[item.status] ?? "종료")}

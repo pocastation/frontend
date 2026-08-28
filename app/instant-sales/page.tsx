@@ -13,8 +13,6 @@ const INSTANT_SORT_OPTIONS: { key: SortKey; label: string }[] = [
   { key: "latest", label: "최신순" },
   { key: "popular", label: "인기순" },
   { key: "views", label: "조회순" },
-  { key: "price_asc", label: "낮은 가격" },
-  { key: "price_desc", label: "높은 가격" },
 ];
 
 async function getInstantSales(): Promise<AuctionListResponse | null> {

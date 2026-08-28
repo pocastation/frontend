@@ -159,7 +159,7 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
               <div className="mt-3 flex items-end justify-between border-t border-white/20 pt-3">
                 <div>
                   <p className="text-[10px] text-white/60">현재 제안가</p>
-                  <p className="font-display text-lg font-bold">{formatKRW(current.currentPrice)}</p>
+                  <p className="font-display text-lg font-bold">{formatKRW(current.startPrice)}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] text-white/60">제안</p>

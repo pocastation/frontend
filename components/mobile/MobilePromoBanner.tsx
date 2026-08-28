@@ -135,9 +135,9 @@ function AuctionSlide({ auction }: { auction: AuctionResponse }) {
           {auction.title}
         </h2>
         <p className="mt-2.5 flex items-baseline gap-2">
-          <span className="text-[11px] font-semibold text-white/50">현재가</span>
+          <span className="text-[11px] font-semibold text-white/50">최소가</span>
           <span className="font-display text-xl font-extrabold leading-tight tabular-nums text-white">
-            {formatKRW(auction.currentPrice)}
+            {formatKRW(auction.startPrice)}
           </span>
         </p>
         <p className="mt-1.5 flex items-center gap-2 whitespace-nowrap text-[11.5px] text-white/55">

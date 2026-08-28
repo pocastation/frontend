@@ -59,6 +59,17 @@ function businessRows() {
   return rows;
 }
 
+// 🔴 지면이 먹색에서 밝은 색(--color-footer)으로 바뀌었다(#406).
+//
+// 다크에서 쓰던 흰색 알파 계층(white/40·/30·/70)을 그대로 뒤집으면 대비가 무너진다 —
+// text-3(#9896b2)를 밝은 지면의 본문에 쓰면 2.7:1이라 법정 표시사항이 읽히지 않는다.
+// 그래서 **읽어야 하는 것은 text-2, 라벨·부가정보만 text-3**으로 다시 매핑했다.
+// 「개인정보 처리방침」 강조(법 §30② 다른 고지와 구분되게 표시)는 밝은 지면에서도
+// 크기·굵기·명도 세 축을 그대로 유지한다.
+//
+// 🔴 **법정 표시사항은 전부 4.5:1 이상**으로 맞췄다(실측). 사업자정보 라벨과 중개자 고지를
+// text-3(#9896b2)로 두면 2.73:1이라 밝은 지면에서 읽히지 않는다 — 「상호」가 안 읽히면
+// 그 값이 무엇인지 알 수 없다. 톤을 낮춰도 되는 것은 태그라인·카피라이트뿐이다.
 export default function Footer() {
   const rows = businessRows();
 
@@ -67,31 +78,31 @@ export default function Footer() {
     // position: fixed라, 문서 끝까지 스크롤하면 푸터 마지막 줄이 그 아래로 가린다.
     // 화면별로 값을 갈라 두면 새 고정 요소가 생길 때마다 여기를 고쳐야 해서, 둘 중 큰 쪽에
     // 맞춘 한 값으로 둔다(번개장터도 「앱에서 구매하기」 고정바와 푸터가 이렇게 공존한다).
-    <footer className="bg-text-1 px-4 pb-7 pt-12 text-white/40 max-sm:pb-[calc(76px+env(safe-area-inset-bottom))]">
+    <footer className="border-t border-border bg-footer px-4 pb-7 pt-12 text-text-2 max-sm:pb-[calc(76px+env(safe-area-inset-bottom))]">
       <div className="mx-auto grid max-w-[1160px] grid-cols-2 gap-10 sm:grid-cols-4">
         <div>
           <div className="mb-3">
-            <Wordmark tone="inverse" className="text-[22px] leading-none" />
+            <Wordmark className="text-[22px] leading-none" />
           </div>
-          <p className="max-w-[22ch] text-xs leading-relaxed">
+          <p className="max-w-[22ch] text-xs leading-relaxed text-text-3">
             K-pop 포토카드 특화 거래 플랫폼
           </p>
         </div>
         {FOOTER_COLUMNS.map((column) => (
           <div key={column.title} className={"mobileHidden" in column && column.mobileHidden ? "max-sm:hidden" : undefined}>
-            <h4 className="mb-3 text-[11px] font-extrabold tracking-wide text-white/70">
+            <h4 className="mb-3 text-[11px] font-extrabold tracking-wide text-text-1">
               {column.title}
             </h4>
             {column.links.map((link) => (
               <a
                 key={link.label}
                 href={link.href}
-                className={`block w-fit rounded-r1 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-text-1 ${
+                className={`block w-fit rounded-r1 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-footer ${
                   // 구분은 하되 과하지 않게 — 크기 반 포인트·굵기·명도 세 축을 조금씩만 쓴다.
                   // 푸터에서 혼자 튀면 법 요구를 넘어 디자인을 깨뜨린다.
                   "emphasis" in link && link.emphasis
-                    ? "text-[12.5px] font-bold text-white/70 hover:text-white/90"
-                    : "text-xs hover:text-white/85"
+                    ? "text-[12.5px] font-bold text-text-1 hover:text-primary"
+                    : "text-xs text-text-2 hover:text-text-1"
                 }`}
               >
                 {link.label}
@@ -105,23 +116,23 @@ export default function Footer() {
           MobileChromeGate가 홈·목록·매물 상세에서 이걸 접었고, 그 사이 §10 표시사항이 모바일
           주요 화면에서 사라져 있었다. 게이트를 걷어내 지금은 실제로 전 화면에 뜬다 —
           **모바일에서 접는 처리를 다시 넣지 말 것.** */}
-      <address className="mx-auto mt-10 max-w-[1160px] border-t border-white/10 pt-5 text-[11px] not-italic leading-relaxed">
+      <address className="mx-auto mt-10 max-w-[1160px] border-t border-border pt-5 text-[11px] not-italic leading-relaxed">
         <dl className="flex flex-wrap gap-x-3 gap-y-1">
           {rows.map((row) => (
             <div key={row.label} className="flex gap-1.5">
-              <dt className="text-white/30">{row.label}</dt>
-              <dd>{row.value}</dd>
+              <dt className="text-text-2">{row.label}</dt>
+              <dd className="font-medium text-text-1">{row.value}</dd>
             </div>
           ))}
         </dl>
       </address>
 
       {/* 전자상거래법 §20 — 통신판매중개자 고지. 미고지 시 판매자 채무불이행에 연대책임. */}
-      <p className="mx-auto mt-3 max-w-[1160px] text-[11px] leading-relaxed text-white/30">
+      <p className="mx-auto mt-3 max-w-[1160px] text-[11px] leading-relaxed text-text-2">
         {INTERMEDIARY_NOTICE}
       </p>
 
-      <div className="mx-auto mt-4 max-w-[1160px] text-[11px]">
+      <div className="mx-auto mt-4 max-w-[1160px] text-[11px] text-text-3">
         © {new Date().getFullYear()} Pocastation. All rights reserved.
       </div>
     </footer>

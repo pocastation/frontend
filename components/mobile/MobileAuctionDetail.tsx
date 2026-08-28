@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import Link from "next/link";
 import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
@@ -302,7 +302,10 @@ export default function MobileAuctionDetail({
         <SellerRow sellerId={auction.sellerId} nickname={auction.sellerNickname} />
 
         {/* 탭 — 상품 정보 / 배송·환불. 「제안 내역」 탭은 §1.7로 없앴다. */}
-        <div role="tablist" className="mt-5 flex gap-1 border-b border-border">
+        {/* 🔴 두 탭이 화면을 반씩 나눠 갖는다(#406). 좌측 정렬 auto 폭이던 시절엔 탭 두 개가
+            왼쪽에 몰려 오른쪽 절반이 비고, 밑줄 길이도 글자 수에 따라 들쭉날쭉했다.
+            밑줄은 보라 그대로다 — 디자인 절이 「보라는 활성 탭에」를 명시적으로 지정한다. */}
+        <div role="tablist" className="mt-5 grid grid-cols-2 border-b border-border">
           {[TAB_PRODUCT, TAB_DELIVERY].map((name) => {
             const on = tab === name;
             return (
@@ -312,7 +315,7 @@ export default function MobileAuctionDetail({
                 onClick={() => setPickedTab(name)}
                 role="tab"
                 aria-selected={on}
-                className={`-mb-px whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm transition-colors ${FOCUS_RING} ${
+                className={`-mb-px whitespace-nowrap border-b-2 px-3.5 py-3 text-sm transition-colors ${FOCUS_RING} ${
                   on ? "border-primary font-extrabold text-text-1" : "border-transparent font-medium text-text-2"
                 }`}
               >
@@ -367,12 +370,17 @@ export default function MobileAuctionDetail({
             {auction.description && (
               <p className="whitespace-pre-wrap text-sm leading-[1.75] text-text-2">{auction.description}</p>
             )}
-            <dl className={`${auction.description ? "mt-4" : ""} divide-y divide-border border-y border-border`}>
+            {/* 🔴 라벨 폭을 고정해 값이 모두 같은 자리에서 시작한다(#406). 양끝 정렬이던 시절엔
+                값이 오른쪽 끝에 붙어 라벨과 값 사이가 줄마다 다르게 벌어졌고, 「S급 (미개봉/신품급)」
+                처럼 긴 값은 두 줄로 접히며 정렬이 무너졌다. 줄마다 긋던 구분선은 행간이 대신한다. */}
+            <dl
+              className={`${auction.description ? "mt-4" : ""} grid grid-cols-[88px_1fr] gap-x-3 gap-y-3.5 text-[13px]`}
+            >
               {specRows.map((row) => (
-                <div key={row.label} className="flex items-center justify-between gap-3 py-2.5 text-[13px]">
+                <Fragment key={row.label}>
                   <dt className="text-text-3">{row.label}</dt>
-                  <dd className="text-right font-semibold text-text-1">{row.value}</dd>
-                </div>
+                  <dd className="font-semibold text-text-1">{row.value}</dd>
+                </Fragment>
               ))}
             </dl>
 

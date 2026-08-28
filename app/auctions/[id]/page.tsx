@@ -12,7 +12,6 @@ import SearchLink from "@/components/SearchLink";
 import SellerReviewSummary from "@/components/SellerReviewSummary";
 import SellerShipPanel from "@/components/SellerShipPanel";
 import ShareButton from "@/components/ShareButton";
-import SuccessionOfferBanner from "@/components/SuccessionOfferBanner";
 import { AuctionBiddingProvider } from "@/lib/auction-bidding-context";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { INTERMEDIARY_NOTICE } from "@/lib/business";
@@ -288,8 +287,10 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
               {/* 🔴 추월 알림 토글은 폐기했다(§2.3) — 「더 높은 제안이 들어왔어요」는 감추기로 한
                   금액을 흘리고 되받아치라는 신호라 경쟁 호가를 유도한다. 백엔드는 설정 API와
                   테이블까지 걷어냈다(BE #360). */}
-              {/* 거래 성사(ENDED_SOLD) 후 미결제 확정 시 차순위에게만 승계 배너가 뜬다(대상자 아니면 미노출). */}
-              {auction.status === "ENDED_SOLD" && <SuccessionOfferBanner auctionId={auction.id} />}
+              {/* 🔴 여기 있던 차순위 승계 배너는 지웠다(#418). BE #368이 승계 API를 삭제했는데
+                  배너가 남아 「거래 완료」 상세를 열 때마다 404 요청이 나가고 있었다 —
+                  catch로 조용히 감추는 구조라 화면은 멀쩡해 보였다.
+                  미결제 시에는 매물이 LIVE로 돌아오고 판매자가 남은 제안 중에서 다시 고른다(§1.4). */}
             </>
           ) : null}
           {/* 전자상거래법 §20 — 중개자 고지는 "가격 제안·구매 전"에 보여야 해서 결제 영역 바로 아래에 둔다.

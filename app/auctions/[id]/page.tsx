@@ -238,12 +238,12 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
           {/* 🔴 판매 상태(#404) — 모바일은 제목 위 한 줄이 이 역할을 하는데 데스크탑에는 없었다.
               제안 패널 안 초록 도트가 대신하고 있었으나 그건 「AI 티」라 걷어냈고, 지우기만 하면
               데스크탑에서 상태가 통째로 사라진다. 모바일과 같은 자리·같은 문구로 맞춘다. */}
-          <p className={`text-[11.5px] font-bold ${isLive ? "text-ok" : "text-text-3"}`}>
-            {isLive ? "판매 중" : auction.status === "ENDED_SOLD" ? "거래 완료" : "판매 종료"}
+          <p className={`text-[11.5px] font-bold ${isLive || auction.status === "MATCHED" ? "text-ok" : "text-text-3"}`}>
+            {isLive ? "판매 중" : auction.status === "MATCHED" ? "거래 성사 대기 중" : auction.status === "ENDED_SOLD" ? "거래 완료" : "판매 종료"}
           </p>
 
-          {/* pill의 좌측 안쪽 여백만큼 라벨 줄을 아웃덴트해, 라벨 텍스트 좌측을 제목(h1)과 맞춘다. */}
-          <div className="-ml-2 mt-1.5 flex flex-wrap gap-1.5">
+          {/* 좁은 오른쪽 열에서도 pill의 둥근 테두리가 열 밖으로 잘리지 않도록 컨테이너 안에서 정렬한다. */}
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
             {auction.artistName && (
               <SearchLink query={auction.artistName} className={CHIP_CLASS}>
                 #{auction.artistName}
@@ -260,7 +260,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             {auction.title}
           </h1>
 
-          <div className="-ml-2 mt-3 flex flex-wrap gap-1.5">
+          <div className="mt-3 flex flex-wrap gap-1.5">
             <span className={BADGE_CLASS}>
               {isInstantSale ? "즉시판매" : "제안판매"}
             </span>

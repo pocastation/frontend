@@ -232,8 +232,10 @@ export type AuctionStatus =
   | "REJECTED"
   | "SCHEDULED"
   | "LIVE"
+  | "MATCHED"
   | "ENDED_SOLD"
   | "ENDED_NO_BIDS"
+  | "ENDED_NOT_SELECTED"
   | "CANCELLED";
 
 export type AuctionSaleType = "AUCTION" | "INSTANT";
@@ -487,6 +489,16 @@ export type BidHistoryItem = {
   bidderNicknameMasked: string;
   amount: number;
   createdAt: string;
+};
+
+// POST /api/auctions/{id}/offers/{bidId}/accept 및 판매자 전용 선택 결과 조회 응답.
+// 공개 상세에는 넣지 않는다 — 성사 금액과 상대는 판매자 본인만 볼 수 있다.
+export type OfferSelectionResponse = {
+  auctionId: number;
+  bidId: number;
+  buyerNicknameMasked: string;
+  amount: number;
+  payoutAmount: number;
 };
 
 // 마이페이지 "가격 제안" 탭 항목 — 목록 조회 항목에 **내가 낸 금액**이 더해진다.

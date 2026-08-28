@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import OfferCounts from "@/components/OfferCounts";
+import SellerOfferPanel from "@/components/SellerOfferPanel";
 import { useAuth } from "@/lib/auth-context";
 import { useAuctionBidding } from "@/lib/auction-bidding-context";
 import { formatKRW } from "@/lib/format";
@@ -34,6 +35,7 @@ export default function BidSection({ startPrice }: Props) {
     auctionId,
     offerCount,
     wishlistCount,
+    status,
     isLive,
     isOwnAuction,
     amount,
@@ -84,6 +86,20 @@ export default function BidSection({ startPrice }: Props) {
 
   const submitDisabled = submitting || alreadyOffered || !hasValidAmount;
 
+  if (isOwnAuction && (status === "LIVE" || status === "MATCHED")) {
+    return (
+      <div className="mt-6">
+        <SellerOfferPanel
+          startPrice={startPrice}
+          offerCount={offerCount}
+          wishlistCount={wishlistCount}
+          status={status}
+          viewport="desktop"
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="mt-6">
       <section className="rounded-r3 border border-border bg-surface p-5">
@@ -115,11 +131,7 @@ export default function BidSection({ startPrice }: Props) {
         </p>
 
         {isLive &&
-          (isOwnAuction ? (
-            <p className="mt-6 border-t border-border pt-5 text-center text-sm font-semibold text-text-2">
-              내 매물입니다. 직접 가격을 제안할 수 없어요.
-            </p>
-          ) : !accessToken ? (
+          (!accessToken ? (
             <Link
               href={`/login?redirect=/auctions/${auctionId}`}
               className={`mt-6 flex h-12 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}

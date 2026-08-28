@@ -242,8 +242,8 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             {isLive ? "판매 중" : auction.status === "ENDED_SOLD" ? "거래 완료" : "판매 종료"}
           </p>
 
-          {/* pill의 좌측 안쪽 여백만큼 라벨 줄을 아웃덴트해, 라벨 텍스트 좌측을 제목(h1)과 맞춘다. */}
-          <div className="-ml-2 mt-1.5 flex flex-wrap gap-1.5">
+          {/* 좁은 오른쪽 열에서도 pill의 둥근 테두리가 열 밖으로 잘리지 않도록 컨테이너 안에서 정렬한다. */}
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
             {auction.artistName && (
               <SearchLink query={auction.artistName} className={CHIP_CLASS}>
                 #{auction.artistName}
@@ -260,7 +260,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             {auction.title}
           </h1>
 
-          <div className="-ml-2 mt-3 flex flex-wrap gap-1.5">
+          <div className="mt-3 flex flex-wrap gap-1.5">
             <span className={BADGE_CLASS}>
               {isInstantSale ? "즉시판매" : "제안판매"}
             </span>

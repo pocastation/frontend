@@ -350,7 +350,7 @@ export default function SellGuidePage() {
 
             <div className="mt-4 flex flex-col gap-5">
               <div>
-                <Label required>시작 제안가</Label>
+                <Label required>최소 제안가</Label>
                 <div
                   aria-hidden="true"
                   className="mt-2 flex h-12 items-center justify-between rounded-[4px] border border-border-2 px-4"
@@ -362,7 +362,7 @@ export default function SellGuidePage() {
                 </div>
                 <Help>
                   최저 <span className="tabular-nums">5,000원</span>부터{" "}
-                  <span className="tabular-nums">1,000원</span> 단위로 넣어요. 너무 높으면 제안 없이 끝날 수
+                  <span className="tabular-nums">500원</span> 단위로 넣어요. 너무 높으면 제안 없이 끝날 수
                   있어 시세보다 살짝 낮게 잡는 편이 유리해요.
                 </Help>
               </div>
@@ -384,23 +384,6 @@ export default function SellGuidePage() {
                 <Help>기간이 끝나면 가장 높은 금액을 제안한 구매자와 거래가 성사돼요.</Help>
               </div>
 
-              <div className="border-t border-border pt-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <Label>차순위 승계</Label>
-                    <p className="mt-1.5 text-[12px] leading-[1.65] text-text-3">
-                      구매자가 결제하지 않으면 차순위 제안자에게 기회를 넘겨요. 24시간 내 수락,
-                      1단계까지만 이어져요.
-                    </p>
-                  </div>
-                  <span
-                    aria-hidden="true"
-                    className="mt-0.5 flex h-[22px] w-10 shrink-0 items-center rounded-full bg-primary px-[3px]"
-                  >
-                    <span className="ml-auto h-4 w-4 rounded-full bg-white" />
-                  </span>
-                </div>
-              </div>
             </div>
 
             <div className="mt-6 border-t border-border pt-5">
@@ -408,8 +391,8 @@ export default function SellGuidePage() {
               <div className="mt-3">
                 <Label required>즉시판매가</Label>
                 <Help>
-                  구매자가 바로 결제하는 확정 가격이에요. 단위 규칙은 시작 제안가와 같고, 판매 기간과
-                  차순위 승계는 입력하지 않아요.
+                  구매자가 바로 결제하는 확정 가격이에요. 단위 규칙은 최소 제안가와 같고, 판매 기간은
+                  입력하지 않아요.
                 </Help>
               </div>
             </div>

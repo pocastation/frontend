@@ -17,7 +17,7 @@ import ReviewComposerModal from "@/components/ReviewComposerModal";
 import OrderShipForm from "@/components/OrderShipForm";
 import ReturnRequestModal from "@/components/ReturnRequestModal";
 import ReturnShipForm from "@/components/ReturnShipForm";
-import { StatusIconCircle, type StatusTone } from "@/components/StatusIcon";
+import { type StatusTone } from "@/components/StatusIcon";
 import { formatDateTimeKST, formatKRW, formatTimeLeft } from "@/lib/format";
 import {
   AUCTION_STATUS_TONE,
@@ -40,7 +40,6 @@ import type {
   SoldOrderResponse,
   WishlistListResponse,
 } from "@/lib/types";
-import StatusBadge from "@/components/StatusBadge";
 import IdentityVerificationPanel from "@/components/IdentityVerificationPanel";
 import AuctionCard from "@/components/AuctionCard";
 import MobileShell from "@/components/mobile/MobileShell";
@@ -1050,19 +1049,9 @@ function DashboardPanel({
   );
 }
 
-function getSellerReviewBadge(status: AuctionResponse["status"]) {
-  if (status === "PENDING_REVIEW") {
-    return { label: AUCTION_STATUS_LABEL.PENDING_REVIEW, tone: AUCTION_STATUS_TONE.PENDING_REVIEW };
-  }
-  if (status === "REJECTED") {
-    // 판매자에게는 "반려"가 아니라 "보완 필요" — 고쳐서 다시 등록할 수 있는 흐름이다.
-    return { label: SELLER_AUCTION_STATUS_LABEL.REJECTED, tone: AUCTION_STATUS_TONE.REJECTED };
-  }
-  if (status === "APPROVED" || status === "SCHEDULED" || status === "LIVE") {
-    return { label: "승인됨", tone: AUCTION_STATUS_TONE[status] };
-  }
-  return null;
-}
+// 🔴 여기 있던 getSellerReviewBadge는 지웠다(#422) — 도트 배지를 걷으면서 tone이 필요 없어졌고,
+// 「승인됨」이라는 라벨 자체가 사라졌다(남은 기간이 이미 그 말을 한다). 판매자에게 「반려」가 아니라
+// 「보완 필요」로 말하는 규칙은 SELLER_AUCTION_STATUS_LABEL이 그대로 들고 있다.
 
 function getSellerModerationReason(item: SellingListItem) {
   if (
@@ -1119,53 +1108,74 @@ function SellingList({
       {items.map((item) => {
         const isLive = item.status === "LIVE";
         const displayPrice = item.saleType === "INSTANT" ? (item.buyNowPrice ?? item.startPrice) : item.startPrice;
+        // 🔴 즉시판매를 「즉시판매」로 말하지 않는다(#422). 판매 유형은 바로 위 메타 줄이 이미
+        // 말하고 있어서 한 행에 같은 단어가 두 번 나왔다 — 여기는 **상태**를 말하는 자리다.
+        // 제안판매는 남은 기간이 곧 상태이고, 즉시판매는 기한이 없어 「판매 중」이 그 자리다.
         const timeLabel = isLive
-          ? item.saleType === "INSTANT" ? "즉시판매" : item.endAt ? formatTimeLeft(item.endAt) : "진행 중"
+          ? item.saleType === "INSTANT" || !item.endAt
+            ? "판매 중"
+            : formatTimeLeft(item.endAt)
           : endedLabel;
-        const reviewBadge = showReviewStatus ? getSellerReviewBadge(item.status) : null;
+        // 🔴 도트 배지를 걷고 한 줄 텍스트로(#422). 배지가 「승인됨」을 말하고 그 아래 「3일 남음」이
+        // 또 떠서 **같은 사실을 두 번** 말하고 있었다 — 승인된 매물은 판매 중이고, 남은 기간이
+        // 그걸 이미 말한다. 그래서 「승인됨」이라는 말 자체를 없앴다.
+        //
+        // 검수가 아직 진행 중이거나 보완이 필요할 때만 그 사실을 말한다. 그 둘은 **판매자가
+        // 손봐야 하는 상태**라 잉크색 굵게 올리고, 나머지는 회색으로 물러난다(제안 목록과 같은 규칙).
+        const needsAttention =
+          showReviewStatus && (item.status === "PENDING_REVIEW" || item.status === "REJECTED");
+        const stateLabel = !needsAttention
+          ? timeLabel
+          : item.status === "REJECTED"
+            ? SELLER_AUCTION_STATUS_LABEL.REJECTED
+            : AUCTION_STATUS_LABEL.PENDING_REVIEW;
         const canOpenDetail = PUBLIC_DETAIL_STATUSES.has(item.status);
         const order = orders?.[item.id];
         const soldOrder = soldOrders?.[item.id];
         const moderationReason = getSellerModerationReason(item);
+        // 🔴 제안 목록(MyBiddingList)과 같은 행 규칙을 쓴다(#422). 한 마이페이지 안에서 판매
+        // 목록만 카드로 남으면 같은 화면이 두 디자인으로 갈린다. 아티스트명은 보라 제목이 아니라
+        // 제목 아래 메타 줄이고, 상태는 오른쪽에서 금액 밑으로 붙는다.
         const summary = (
           <>
             <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
             <span className="min-w-0 flex-1">
-              {item.artistName && (
-                <span className="block truncate text-[11px] font-extrabold text-primary">{item.artistName}</span>
-              )}
-              <span className="block truncate text-sm font-bold text-text-1">{item.title}</span>
+              <span className="block truncate text-[13.5px] font-bold text-text-1">{item.title}</span>
+              <span className="mt-0.5 block truncate text-[11.5px] text-text-3">
+                {item.artistName ? `${item.artistName} · ` : ""}
+                {item.saleType === "INSTANT" ? "즉시판매" : "제안판매"}
+              </span>
             </span>
             <span className="shrink-0 text-right">
-              <span className="block font-display text-sm font-extrabold text-text-1">
+              <span className="block font-display text-[13.5px] font-bold tabular-nums text-text-1">
                 {formatKRW(displayPrice)}
               </span>
-              {reviewBadge ? (
-                <StatusBadge tone={reviewBadge.tone} className="mt-1">
-                  {reviewBadge.label}
-                </StatusBadge>
-              ) : (
-                <span className="block text-[10.5px] text-text-3">{timeLabel}</span>
-              )}
-              {reviewBadge && isLive && (
-                <span className="mt-0.5 block text-[10px] text-text-3">{timeLabel}</span>
-              )}
+              <span
+                className={`mt-0.5 block text-[11.5px] ${
+                  needsAttention ? "font-bold text-text-1" : "text-text-3"
+                }`}
+              >
+                {stateLabel}
+              </span>
             </span>
           </>
         );
         return (
-          <li key={item.id}>
-            <div className="overflow-hidden rounded-r2 border border-border bg-surface transition-colors hover:border-primary">
+          <li key={item.id} className="border-b border-border">
+            <div className="py-3.5">
               {canOpenDetail ? (
-                <Link href={`/auctions/${item.id}`} className={`flex items-center gap-3 p-2.5 ${FOCUS_RING}`}>
+                <Link href={`/auctions/${item.id}`} className={`flex items-start gap-3 rounded-r1 ${FOCUS_RING}`}>
                   {summary}
                 </Link>
               ) : (
-                <div className="flex items-center gap-3 p-2.5">{summary}</div>
+                <div className="flex items-start gap-3">{summary}</div>
               )}
               {moderationReason && (
-                <div className="border-t border-border bg-surface-2 px-3 py-2.5">
-                  <p className="text-[11px] font-extrabold text-text-2">{moderationReason.label}</p>
+                // 🔴 검수 반려 사유 — 목록에서 유일하게 「읽어야 하는」 블록이다(#422).
+                // 회색 채움 대신 들여쓰기 + 헤어라인으로 지면을 나눈다. 카드가 사라진 자리에
+                // 전폭 회색 블록이 남으면 행에서 떨어져 나온 것처럼 보인다.
+                <div className="mt-2.5 border-t border-border pl-[56px] pt-2.5">
+                  <p className="text-[11.5px] font-extrabold text-text-1">{moderationReason.label}</p>
                   <p className="mt-1 whitespace-pre-wrap break-words text-xs leading-5 text-text-2">
                     {moderationReason.text}
                   </p>
@@ -1584,7 +1594,8 @@ function BuyerDisputeFooter({
   })();
 
   return (
-    <div className="border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
+    // 회색 띠 없이 썸네일 폭만큼 들여 쓴 행동 줄(#422) — 목록 전체가 같은 지면 규칙을 쓴다.
+    <div className="mt-2.5 pl-[56px] text-xs text-text-2">
       <div className="flex flex-wrap items-center gap-2.5">
         {body.pill}
         <span className="min-w-0 flex-1">{body.message}</span>
@@ -1639,7 +1650,7 @@ function SellerFulfillmentFooter({
   // 환불로 끝난 거래는 발송 UI를 띄우지 않는다(취소·미발송 자동취소 포함).
   if (soldOrder.orderStatus === "REFUNDING" || soldOrder.orderStatus === "REFUNDED") {
     return (
-      <div className="flex flex-wrap items-center gap-2.5 border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
+      <div className="mt-2.5 flex flex-wrap items-center gap-3 pl-[56px] text-xs text-text-2">
         {fulfillmentPill("xCircle", "neutral", "거래 취소")}
         <span className="min-w-0 flex-1">거래가 취소돼 구매자에게 환불됐어요 · 정산 대상이 아니에요.</span>
       </div>
@@ -1647,7 +1658,8 @@ function SellerFulfillmentFooter({
   }
 
   return (
-    <div className="border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
+    // 회색 띠 없이 썸네일 폭만큼 들여 쓴 행동 줄(#422) — 목록 전체가 같은 지면 규칙을 쓴다.
+    <div className="mt-2.5 pl-[56px] text-xs text-text-2">
       <div className="flex flex-wrap items-center gap-2.5">
         {fs === "CONFIRMED" ? (
           <>
@@ -1815,7 +1827,8 @@ function SellerDisputeFooter({
   })();
 
   return (
-    <div className="border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
+    // 회색 띠 없이 썸네일 폭만큼 들여 쓴 행동 줄(#422) — 목록 전체가 같은 지면 규칙을 쓴다.
+    <div className="mt-2.5 pl-[56px] text-xs text-text-2">
       <div className="flex flex-wrap items-center gap-2.5">
         {body.pill}
         <span className="min-w-0 flex-1">{body.message}</span>
@@ -1855,7 +1868,7 @@ function MyBiddingList({
   if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
 
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="border-t border-border">
       {items.map((item) => {
         const isLive = item.status === "LIVE";
         const order = orders?.[item.id];

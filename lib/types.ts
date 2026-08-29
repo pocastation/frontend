@@ -374,7 +374,6 @@ export type AuctionRegisterRequest = {
   saleType?: AuctionSaleType;
   startPrice: number;
   buyNowPrice?: number;
-  durationDays?: number;
   images: { url: string; thumbnailUrl: string }[];
   verificationId?: string;
 };

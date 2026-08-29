@@ -59,8 +59,6 @@ export const GRADE_LABEL: Record<PhotocardGrade, string> = {
 
 export const GRADE_OPTIONS: PhotocardGrade[] = ["S", "A", "B", "C"];
 
-export const DURATION_OPTIONS = [1, 3, 7] as const;
-
 export const ARTIST_TYPE_LABEL: Record<ArtistType, string> = {
   GROUP: "그룹",
   SOLO: "솔로",

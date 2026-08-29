@@ -9,7 +9,7 @@ import type { AuctionListResponse } from "@/lib/types";
 export const metadata = { title: "제안판매 — Pocastation" };
 
 async function getAuctions(query: string): Promise<AuctionListResponse | null> {
-  const params = new URLSearchParams({ saleType: "AUCTION", sort: "latest", size: "20" });
+  const params = new URLSearchParams({ saleType: "AUCTION", sort: "recommended", size: "20" });
   if (query) params.set("q", query);
   try {
     return await apiFetch<AuctionListResponse>(`/api/auctions?${params}`, { cache: "no-store" });
@@ -62,8 +62,11 @@ export default async function AuctionsPage({
         </Link>
       </div>
 
+      {/* 🔴 제안판매 목록만 「추천순」이 기본이다(§2.4). 끌올이 반영되는 유일한 자리라 여기서만
+          넘긴다 — 종료 목록과 즉시판매는 연장·끌올이 없어 그대로 최신순이다. */}
       <AuctionBrowser
         key={query}
+        defaultSort="recommended"
         initialAuctions={content}
         initialTotalElements={totalElements}
         initialTotalPages={totalPages}

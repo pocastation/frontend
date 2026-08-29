@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import OfferCounts from "@/components/OfferCounts";
+import SellerOfferPanel from "@/components/SellerOfferPanel";
 import { useAuth } from "@/lib/auth-context";
 import { useAuctionBidding } from "@/lib/auction-bidding-context";
 import { formatKRW } from "@/lib/format";
@@ -34,12 +35,13 @@ export default function BidSection({ startPrice }: Props) {
     auctionId,
     offerCount,
     wishlistCount,
+    status,
     isLive,
     isOwnAuction,
     amount,
     adjustAmount,
     submitting,
-    alreadyOffered,
+    myOfferAmount,
     handleBid,
     needsAddress,
     addressModalOpen,
@@ -82,7 +84,23 @@ export default function BidSection({ startPrice }: Props) {
     setProposalValue(formatInputAmount(normalized));
   }
 
-  const submitDisabled = submitting || alreadyOffered || !hasValidAmount;
+  // 🔴 제안한 뒤에도 버튼을 잠그지 않는다(#428). 다시 제안하는 것이 곧 수정이라(§1.2·§2.1)
+  // 막을 이유가 없다 — 예전에는 잠겨 있어 금액을 바꿀 방법이 아예 없었다.
+  const submitDisabled = submitting || !hasValidAmount;
+
+  if (isOwnAuction && (status === "LIVE" || status === "MATCHED")) {
+    return (
+      <div className="mt-6">
+        <SellerOfferPanel
+          startPrice={startPrice}
+          offerCount={offerCount}
+          wishlistCount={wishlistCount}
+          status={status}
+          viewport="desktop"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="mt-6">
@@ -115,11 +133,7 @@ export default function BidSection({ startPrice }: Props) {
         </p>
 
         {isLive &&
-          (isOwnAuction ? (
-            <p className="mt-6 border-t border-border pt-5 text-center text-sm font-semibold text-text-2">
-              내 매물입니다. 직접 가격을 제안할 수 없어요.
-            </p>
-          ) : !accessToken ? (
+          (!accessToken ? (
             <Link
               href={`/login?redirect=/auctions/${auctionId}`}
               className={`mt-6 flex h-12 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
@@ -188,14 +202,25 @@ export default function BidSection({ startPrice }: Props) {
                 disabled={submitDisabled}
                 className={`mt-4 flex h-12 w-full items-center justify-center rounded-r2 bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-primary ${FOCUS_RING}`}
               >
-                {alreadyOffered
-                  ? "가격 제안을 보냈어요"
-                  : submitting
-                    ? "처리 중..."
-                    : needsAddress
-                      ? "배송지 등록하고 가격 제안하기"
+                {submitting
+                  ? "처리 중..."
+                  : needsAddress
+                    ? "배송지 등록하고 가격 제안하기"
+                    : myOfferAmount != null
+                      ? "제안 금액 바꾸기"
                       : "가격 제안하기"}
               </button>
+              {/* 지금 낸 금액을 말해 준다 — 바꾸려는 사람에게 필요한 정보는 「보냈다」가 아니라
+                  「얼마로 보냈나」다. 새로고침하면 모르므로(상세 응답이 내 제안을 싣지 않는다)
+                  이 줄은 있으면 더 친절한 안내이지 동작의 근거가 아니다. */}
+              {myOfferAmount != null && (
+                <div className="mt-3.5 border-t border-border pt-3">
+                  <p className="text-[11.5px] leading-relaxed text-text-3">
+                    <b className="font-bold text-text-2">{formatKRW(myOfferAmount)}</b>으로 제안하셨어요.
+                    새 금액으로 다시 보내면 이전 제안을 대신해요.
+                  </p>
+                </div>
+              )}
               {needsAddress && (
                 <p className="mt-2 text-[11.5px] leading-[1.6] text-text-3">
                   거래가 성사되면 바로 보내드릴 수 있게 받을 주소를 먼저 등록해요. {" "}

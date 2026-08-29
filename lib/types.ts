@@ -232,8 +232,10 @@ export type AuctionStatus =
   | "REJECTED"
   | "SCHEDULED"
   | "LIVE"
+  | "MATCHED"
   | "ENDED_SOLD"
   | "ENDED_NO_BIDS"
+  | "ENDED_NOT_SELECTED"
   | "CANCELLED";
 
 export type AuctionSaleType = "AUCTION" | "INSTANT";
@@ -284,6 +286,22 @@ export type AuctionResponse = {
 export type MySellingAuctionResponse = AuctionResponse & {
   cancellationReason: string | null;
   reviewReason: string | null;
+  /**
+   * 다음 연장에서 더할 일수 — 첫 연장 7일, 마지막 3일. 다 썼으면 null이다(§1.3).
+   *
+   * 🔴 서버가 알려준다. 화면이 `{7, 3}`을 복제해 세면 상한을 고칠 때 한쪽만 바뀌어
+   * 「7일 늘어요」를 눌렀는데 3일이 느는 상태가 된다.
+   */
+  nextExtensionDays: number | null;
+  /** 연장 버튼이 열리는 시각(종료 1일 전). 「종료 1일 전」을 화면이 다시 계산하지 않는다. */
+  extendableFrom: string | null;
+  /**
+   * 🔴 살아 있는 제안 인원수 — 최소가가 잠겼는지의 근거(§1.1).
+   *
+   * `bidCount`(누적 건수)와 다르다. 저건 취소·대체분까지 세서 전부 거둬들인 매물도
+   * 「3명이 제안했어요」로 보이고, 서버 판정(살아 있는 제안 0건 → 수정 가능)과 갈린다.
+   */
+  offerCount: number;
 };
 
 export type MySellingAuctionListResponse = Omit<AuctionListResponse, "content"> & {
@@ -372,7 +390,6 @@ export type AuctionRegisterRequest = {
   saleType?: AuctionSaleType;
   startPrice: number;
   buyNowPrice?: number;
-  durationDays?: number;
   images: { url: string; thumbnailUrl: string }[];
   verificationId?: string;
 };
@@ -487,6 +504,20 @@ export type BidHistoryItem = {
   bidderNicknameMasked: string;
   amount: number;
   createdAt: string;
+  // 🔴 판매자가 상대를 심사할 재료(BE #378). 닉네임과 금액만으로는 할 수 있는 판단이
+  // 「최고가 고르기」뿐이라, 자동 낙찰을 손으로 하는 것과 다르지 않다(§2.8 C1).
+  trustLevel: number;
+  tradeCount: number;
+};
+
+// POST /api/auctions/{id}/offers/{bidId}/accept 및 판매자 전용 선택 결과 조회 응답.
+// 공개 상세에는 넣지 않는다 — 성사 금액과 상대는 판매자 본인만 볼 수 있다.
+export type OfferSelectionResponse = {
+  auctionId: number;
+  bidId: number;
+  buyerNicknameMasked: string;
+  amount: number;
+  payoutAmount: number;
 };
 
 // 마이페이지 "가격 제안" 탭 항목 — 목록 조회 항목에 **내가 낸 금액**이 더해진다.
@@ -504,8 +535,19 @@ export type MyBiddingResponse = {
   endAt: string;
   bidCount: number;
   viewCount: number;
-  myBidAmount: number;
+  // 🔴 「내가 지금 걸어 둔 금액」이다. 예전 서버는 max(amount)를 내려줬는데, 하향 수정이
+  // 열리면서 거짓이 됐다(BE #389) — 5만원을 3만원으로 낮춘 사람에게 계속 5만원이 보였다.
+  // 제안을 전부 거둬들였으면 셋 다 null이다.
+  myBidAmount: number | null;
+  // 취소 버튼이 어느 제안을 지목할지, 그리고 그게 취소되는 제안인지.
+  // ACCEPTED는 선택돼 계약이 성립한 제안이라 구매자도 취소할 수 없다(§9.1).
+  myOfferId: number | null;
+  myOfferStatus: BidStatus | null;
 };
+
+// 가격 제안의 생애 상태(§2.1). SUPERSEDED는 「금액을 바꿔 대체된 옛 제안」이라 CANCELLED와
+// 다르다 — 목록에 남는 것은 언제나 ACTIVE 아니면 ACCEPTED다.
+export type BidStatus = "ACTIVE" | "CANCELLED" | "SUPERSEDED" | "ACCEPTED";
 
 export type MyBiddingListResponse = {
   content: MyBiddingResponse[];
@@ -653,14 +695,6 @@ export type NotificationType =
   | "SETTLEMENT_COMPLETED" // 정산 완료 — 판매자에게 실입금 예정 안내(실입금은 PG 사이클 시차)
   | "INQUIRY_ANSWERED"; // 1:1 문의 답변 완료
 
-// GET /api/members/me/succession-offers/{auctionId} — 제안 대상자 본인에게만 200(타인 404).
-export type SuccessionOfferResponse = {
-  auctionId: number;
-  amount: number;
-  status: "OFFERED" | "ACCEPTED" | "DECLINED" | "EXPIRED";
-  expiresAt: string;
-};
-
 // ─── 주문/결제 상태 ───
 
 // backend OrderStatus와 1:1. PAYMENT_FAILED는 예약값(현재 전이 없음)이지만 과거 행 호환으로 포함.
@@ -700,7 +734,18 @@ export type RefundReason =
   | "ADMIN_DECISION";
 
 // GET /api/members/me/orders/status?auctionIds= — 구매내역 주문 상태 배치 채움(wishlist 하트 패턴).
-export type FulfillmentStatus = "AWAITING_SHIPMENT" | "SHIPPED" | "CONFIRMED";
+/**
+ * 배송·구매확정 상태. 🔴 `PREPARING`은 <b>구매자 취소가 잠긴 뒤</b>다(§1.5, BE #393).
+ *
+ * 발송 전 구간이 둘(`AWAITING_SHIPMENT`·`PREPARING`)로 갈렸으므로, 「아직 발송 전인가」를
+ * 물을 때는 상태를 하나씩 비교하지 말고 `isBeforeShipment()`를 쓴다 — 서버도 같은 이유로
+ * 같은 이름의 판정을 둔다(빠뜨리면 발송 타이머에서 새는 사고가 T2였다).
+ */
+export type FulfillmentStatus = "AWAITING_SHIPMENT" | "PREPARING" | "SHIPPED" | "CONFIRMED";
+
+export function isBeforeShipment(status: FulfillmentStatus | null | undefined): boolean {
+  return status === "AWAITING_SHIPMENT" || status === "PREPARING";
+}
 
 export type MyOrderStatusResponse = {
   auctionId: number;
@@ -965,7 +1010,12 @@ export type AdminDisputeListResponse = {
 };
 
 // 판매자 정산계좌(BE #258). 서버는 뒤 4자리만 내려준다 — 평문 계좌번호는 응답에 없다.
-export type SettlementAccount = {
+/**
+ * 계좌 응답 — 정산계좌(#258)와 환불계좌(#390)가 같은 모양이다.
+ *
+ * 🔴 `maskedAccountNumber`는 뒤 4자리뿐이다. 평문 계좌번호는 어떤 응답에도 실리지 않는다.
+ */
+export type BankAccount = {
   bank: string;
   bankName: string;
   maskedAccountNumber: string;

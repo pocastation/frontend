@@ -21,6 +21,7 @@ type Props = {
 };
 
 const STATUS_LABEL: Partial<Record<AuctionStatus, string>> = {
+  MATCHED: "결제 대기",
   ENDED_SOLD: "판매완료",
   CANCELLED: "취소됨",
 };

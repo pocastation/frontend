@@ -59,8 +59,6 @@ export const GRADE_LABEL: Record<PhotocardGrade, string> = {
 
 export const GRADE_OPTIONS: PhotocardGrade[] = ["S", "A", "B", "C"];
 
-export const DURATION_OPTIONS = [1, 3, 7] as const;
-
 export const ARTIST_TYPE_LABEL: Record<ArtistType, string> = {
   GROUP: "그룹",
   SOLO: "솔로",
@@ -145,8 +143,10 @@ export const AUCTION_STATUS_LABEL: Record<AuctionStatus, string> = {
   REJECTED: "승인 거절",
   SCHEDULED: "시작 예정",
   LIVE: "진행 중",
+  MATCHED: "거래 성사 대기 중",
   ENDED_SOLD: "거래 성사",
   ENDED_NO_BIDS: "제안 없음",
+  ENDED_NOT_SELECTED: "미선택 종료",
   CANCELLED: "취소됨",
 };
 
@@ -165,8 +165,10 @@ export const AUCTION_STATUS_TONE: Record<AuctionStatus, StatusTone> = {
   REJECTED: "danger",
   SCHEDULED: "neutral",
   LIVE: "ok",
+  MATCHED: "ok",
   ENDED_SOLD: "muted",
   ENDED_NO_BIDS: "muted",
+  ENDED_NOT_SELECTED: "muted",
   CANCELLED: "danger",
 };
 
@@ -419,3 +421,14 @@ export const REFUND_REASON_LABEL: Record<RefundReason, string> = {
   RETURN_COMPLETED: "반품 완료",
   ADMIN_DECISION: "중재 결정",
 };
+
+/**
+ * 등급 라벨에서 이모지를 걷는다 — BE가 「덕린이 🌱」처럼 붙여 내려준다.
+ *
+ * 🔴 제품 화면은 이모지를 쓰지 않는다(디자인 절: 이모지 개수 → 0). **등급 이름 자체는 BE 값을
+ * 그대로 쓴다** — 우리가 새로 짓지 않는다. 예전에는 모바일 상세만 이걸 하고 있어서 같은 등급이
+ * 화면마다 다르게 보였다(#419).
+ */
+export function plainLevelLabel(label: string): string {
+  return label.replace(/[\p{Extended_Pictographic}️]/gu, "").trim();
+}

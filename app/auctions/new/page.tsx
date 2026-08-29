@@ -10,13 +10,14 @@ import PhotoUploadGrid, { type PhotoItem } from "@/components/PhotoUploadGrid";
 import VideoUploadField, { type VideoItem } from "@/components/VideoUploadField";
 import { apiFetch, ApiError } from "@/lib/api";
 import { compressImage } from "@/lib/image-compress";
+import { MIN_LISTING_PRICE, PRICE_UNIT } from "@/lib/fees";
 import {
   MAX_VIDEO_DURATION_SEC,
   MIN_VIDEO_DURATION_SEC,
   validateVideo,
 } from "@/lib/video-validate";
 import { useAuth } from "@/lib/auth-context";
-import { DURATION_OPTIONS, GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
+import { GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import type {
   ArtistListResponse,
@@ -96,7 +97,6 @@ export default function NewAuctionPage() {
   const gradeFieldId = useId();
   const unopenedFieldId = useId();
   const startPriceFieldId = useId();
-  const successionAllowedFieldId = useId();
 
   const [saleType, setSaleType] = useState<AuctionSaleType>("AUCTION");
   const [artists, setArtists] = useState<{ id: number; name: string }[]>([]);
@@ -110,9 +110,6 @@ export default function NewAuctionPage() {
   const [grade, setGrade] = useState<PhotocardGrade>("S");
   const [unopened, setUnopened] = useState(false);
   const [startPrice, setStartPrice] = useState("");
-  const [durationDays, setDurationDays] = useState<number>(3);
-  // 차순위 승계 seller opt-in(§7-3, 2026-07-19) — 판매 성사율 우선으로 기본 허용.
-  const [successionAllowed, setSuccessionAllowed] = useState(true);
 
   const [items, setItems] = useState<PhotoItem[]>([]);
   const [video, setVideo] = useState<(VideoItem & { videoId?: string }) | null>(null);
@@ -292,12 +289,12 @@ export default function NewAuctionPage() {
   }
 
   // 각 스텝의 필수값이 채워졌는지 — 안 채워지면 "다음"/"등록" 비활성.
-  // 시작 제안가·즉시판매가: 최저 5,000원 + 1,000원 단위(§12.1, BE #146과 동일 규칙).
+  // 최소 제안가·즉시판매가: 최저 5,000원 + 500원 단위(§12.1, BE와 동일 규칙).
   const priceValid =
     startPrice.trim() !== "" &&
     Number.isFinite(Number(startPrice)) &&
-    Number(startPrice) >= 5000 &&
-    Number(startPrice) % 1000 === 0;
+    Number(startPrice) >= MIN_LISTING_PRICE &&
+    Number(startPrice) % PRICE_UNIT === 0;
   function isStepValid(s: number): boolean {
     switch (STEP_KEYS[s]) {
       case "info":
@@ -357,9 +354,12 @@ export default function NewAuctionPage() {
       return;
     }
     const price = Number(startPrice);
-    if (!Number.isFinite(price) || price < 5000 || price % 1000 !== 0) {
-      const label = saleType === "INSTANT" ? "즉시판매가" : "시작 제안가";
-      setError(`${label}는 최저 5,000원부터 1,000원 단위로 입력해주세요.`);
+    if (!Number.isFinite(price) || price < MIN_LISTING_PRICE || price % PRICE_UNIT !== 0) {
+      const label = saleType === "INSTANT" ? "즉시판매가" : "최소 제안가";
+      setError(
+        `${label}는 최저 ${MIN_LISTING_PRICE.toLocaleString("ko-KR")}원부터 ` +
+          `${PRICE_UNIT.toLocaleString("ko-KR")}원 단위로 입력해주세요.`,
+      );
       return;
     }
 
@@ -378,8 +378,6 @@ export default function NewAuctionPage() {
           saleType,
           startPrice: price,
           buyNowPrice: saleType === "INSTANT" ? price : undefined,
-          durationDays: saleType === "AUCTION" ? durationDays : undefined,
-          successionAllowed: saleType === "AUCTION" ? successionAllowed : undefined,
           images: uploadedImages,
           videoId: AUCTION_VIDEO_ENABLED ? (video?.videoId ?? undefined) : undefined,
           verificationId: AUCTION_VERIFICATION_ENABLED ? (verificationId ?? undefined) : undefined,
@@ -449,7 +447,7 @@ export default function NewAuctionPage() {
     saleType: "판매 방식",
     info: "카테고리 · 소개",
     product: "상품 정보",
-    price: saleType === "INSTANT" ? "가격" : "가격 · 판매 기간",
+    price: "가격",
     media: AUCTION_VIDEO_ENABLED ? "사진 · 영상" : "사진",
     verification: "사진 인증",
   };
@@ -691,71 +689,46 @@ export default function NewAuctionPage() {
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
                 <label htmlFor={startPriceFieldId} className="text-xs font-bold text-text-2">
-                  {saleType === "INSTANT" ? "즉시판매가(원)" : "시작 제안가(원)"} <span className="text-accent">*</span>
+                  {saleType === "INSTANT" ? "즉시판매가(원)" : "최소 제안가(원)"} <span className="text-accent">*</span>
                 </label>
                 <input
                   id={startPriceFieldId}
                   type="number"
                   min={5000}
-                  step={1000}
+                  step={500}
                   inputMode="numeric"
                   placeholder="10000"
                   value={startPrice}
                   onChange={(e) => setStartPrice(e.target.value)}
                   className={INPUT_CLASS}
                 />
-                <p className="text-[11px] text-text-3">최저 5,000원부터 1,000원 단위로 입력해요.</p>
+                <p className="text-[11px] text-text-3">
+                  최저 {MIN_LISTING_PRICE.toLocaleString("ko-KR")}원부터{" "}
+                  {PRICE_UNIT.toLocaleString("ko-KR")}원 단위로 입력해요.
+                </p>
                 <p className="text-[11px] text-text-3">
                   {saleType === "INSTANT"
                     ? "배송비는 판매자 부담이에요. 배송비를 감안해 판매가를 정해주세요."
-                    : "배송비는 판매자 부담이에요. 배송비를 감안해 시작 제안가를 정해주세요."}
+                    : "배송비는 판매자 부담이에요. 배송비를 감안해 최소 제안가를 정해주세요."}
                 </p>
               </div>
 
+              {/* 🔴 판매 기간은 고르는 값이 아니라 정해진 값이다(거래 개편 §1.3 — 7일 고정).
+                  선택 UI를 지우기만 하면 판매자가 자기 매물이 언제 끝나는지 알 방법이 없어지므로,
+                  그 자리를 헤어라인 정보 행으로 대신한다. 입력이 아니라는 것이 형태로 읽혀야 해서
+                  상품 정보와 같은 어휘를 쓰고, 선택 상태가 아니므로 보라를 쓰지 않는다. */}
               {saleType === "AUCTION" && (
-                <fieldset>
-                  <legend className="mb-1.5 text-xs font-bold text-text-2">판매 기간</legend>
-                  <div className="flex gap-2">
-                    {DURATION_OPTIONS.map((days) => (
-                      <button
-                        key={days}
-                        type="button"
-                        aria-pressed={durationDays === days}
-                        onClick={() => setDurationDays(days)}
-                        className={`flex-1 rounded-r2 border py-2.5 text-sm font-bold transition-all active:scale-[0.97] ${FOCUS_RING} ${
-                          durationDays === days
-                            ? "border-primary bg-primary-soft text-primary"
-                            : "border-border text-text-2 hover:border-border-2"
-                        }`}
-                      >
-                        {days}일
-                      </button>
-                    ))}
+                <div className="mt-1 border-t border-border">
+                  <div className="flex items-baseline justify-between border-b border-border py-2.5">
+                    <span className="text-xs font-bold text-text-2">판매 기간</span>
+                    <span className="text-[13.5px] font-bold tabular-nums text-text-1">7일</span>
                   </div>
-                </fieldset>
-              )}
-
-              {saleType === "AUCTION" && (
-                <div>
-                  <label
-                    htmlFor={successionAllowedFieldId}
-                    className="flex w-fit items-center gap-2 text-sm text-text-2"
-                  >
-                    <input
-                      id={successionAllowedFieldId}
-                      type="checkbox"
-                      checked={successionAllowed}
-                      onChange={(e) => setSuccessionAllowed(e.target.checked)}
-                      className={`h-4 w-4 accent-primary ${FOCUS_RING}`}
-                    />
-                    차순위 승계 허용
-                  </label>
-                  <p className="mt-1 text-[11px] text-text-3">
-                    구매자가 결제하지 않으면 차순위 제안자에게 구매 기회를 넘겨요(24시간 내 수락, 1단계까지만).
-                    해제하면 구매자 미결제 시 곧바로 거래가 종료돼요.
+                  <p className="pt-2 text-[11px] leading-relaxed text-text-3">
+                    등록한 때부터 7일 동안 제안을 받아요. 기간이 끝나면 자동으로 판매가 종료돼요.
                   </p>
                 </div>
               )}
+
             </div>
           )}
 

@@ -6,13 +6,14 @@ import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import MobileDetailGallery from "@/components/mobile/MobileDetailGallery";
 import OfferCounts from "@/components/OfferCounts";
+import SellerOfferPanel from "@/components/SellerOfferPanel";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useAuctionBidding } from "@/lib/auction-bidding-context";
 import { OFFER_UNIT, buyerFee, estimatedTotal } from "@/lib/fees";
 import { formatKRW } from "@/lib/format";
 import { INTERMEDIARY_NOTICE } from "@/lib/business";
-import { GRADE_LABEL, OFFER_EMPTY_HINT, SOURCE_LABEL } from "@/lib/labels";
+import { GRADE_LABEL, OFFER_EMPTY_HINT, SOURCE_LABEL, plainLevelLabel } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionDetailResponse, SellerRatingResponse } from "@/lib/types";
 
@@ -29,12 +30,6 @@ import type { AuctionDetailResponse, SellerRatingResponse } from "@/lib/types";
 
 const TAB_PRODUCT = "상품 정보";
 const TAB_DELIVERY = "배송·환불";
-
-// BE가 내려주는 등급 라벨에는 이모지가 붙어 온다("덕린이 🌱"). 제품 화면은 이모지를 쓰지 않으므로
-// 글자만 남긴다 — 등급 이름 자체는 BE 값을 그대로 쓴다(우리가 새로 짓지 않는다).
-function plainLevelLabel(label: string): string {
-  return label.replace(/[\p{Extended_Pictographic}️]/gu, "").trim();
-}
 
 function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: string }) {
   const [levelLabel, setLevelLabel] = useState<string | null>(null);
@@ -84,9 +79,9 @@ function parseInputAmount(value: string): number | null {
   return Number.isSafeInteger(amount) ? amount : null;
 }
 
-/** 제안 바텀시트 — 데스크톱과 같은 직접 입력·최소 금액·1,000원 단위 규칙을 사용한다. */
+/** 제안 바텀시트 — 데스크톱과 같은 직접 입력·최소 금액·단위(OFFER_UNIT) 규칙을 사용한다. */
 function BidSheet({ onClose }: { onClose: () => void }) {
-  const { amount, floor, adjustAmount, submitting, alreadyOffered, needsAddress, handleBid } = useAuctionBidding();
+  const { amount, floor, adjustAmount, submitting, myOfferAmount, needsAddress, handleBid } = useAuctionBidding();
   const [proposalValue, setProposalValue] = useState(() => formatInputAmount(amount));
   const [isEditing, setIsEditing] = useState(false);
   const typedAmount = parseInputAmount(proposalValue);
@@ -170,18 +165,20 @@ function BidSheet({ onClose }: { onClose: () => void }) {
           <p className="mt-1.5 text-[11px] text-text-3">거래 성사 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
         </div>
 
+        {/* 🔴 제안 뒤에도 잠그지 않는다(#428) — 다시 제안하는 것이 곧 수정이다(§2.1).
+            예전에는 잠겨 있어 금액을 바꿀 방법이 아예 없었다. */}
         <button
           type="button"
           onClick={() => void handleBid()}
-          disabled={submitting || alreadyOffered || !hasValidAmount}
+          disabled={submitting || !hasValidAmount}
           className={`mt-3 flex h-12 w-full items-center justify-center rounded-[7px] bg-primary text-sm font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
         >
-          {alreadyOffered
-            ? "가격 제안을 보냈어요"
-            : submitting
-              ? "처리 중..."
-              : needsAddress
-                ? "배송지 등록하고 가격 제안하기"
+          {submitting
+            ? "처리 중..."
+            : needsAddress
+              ? "배송지 등록하고 가격 제안하기"
+              : myOfferAmount != null
+                ? "제안 금액 바꾸기"
                 : "가격 제안하기"}
         </button>
         {needsAddress && (
@@ -189,6 +186,14 @@ function BidSheet({ onClose }: { onClose: () => void }) {
             거래가 성사되면 바로 보내드릴 수 있게 받을 주소를 먼저 등록해요.{" "}
             <b className="font-bold text-text-2">한 번만 하면 다음부터는 물어보지 않아요.</b>
           </p>
+        )}
+        {myOfferAmount != null && (
+          <div className="mt-3 border-t border-border pt-2.5">
+            <p className="text-[11.5px] leading-[1.6] text-text-3">
+              <b className="font-bold text-text-2">{formatKRW(myOfferAmount)}</b>으로 제안하셨어요.
+              새 금액으로 다시 보내면 이전 제안을 대신해요.
+            </p>
+          </div>
         )}
       </div>
     </div>
@@ -207,9 +212,9 @@ export default function MobileAuctionDetail({
     auctionId,
     offerCount,
     wishlistCount,
+    status,
     isLive,
     isOwnAuction,
-    alreadyOffered,
     addressModalOpen,
     closeAddressModal,
     onAddressSaved,
@@ -237,8 +242,8 @@ export default function MobileAuctionDetail({
 
       <div className="px-4 pt-4">
         <div className="flex items-center gap-2">
-          <span className={`text-[11.5px] font-bold ${isLive ? "text-ok" : "text-text-3"}`}>
-            {isLive ? "판매 중" : "판매 종료"}
+          <span className={`text-[11.5px] font-bold ${isLive || status === "MATCHED" ? "text-ok" : "text-text-3"}`}>
+            {isLive ? "판매 중" : status === "MATCHED" ? "거래 성사 대기 중" : status === "ENDED_SOLD" ? "거래 완료" : "판매 종료"}
           </span>
           {/* 스타 이름을 누르면 그 스타의 페이지로 간다 — 같은 스타 매물을 이어 보는 가장 짧은 길이다. */}
           {auction.artistName && (
@@ -272,32 +277,44 @@ export default function MobileAuctionDetail({
         {/* 가격 패널 — 참여 수 → 금액 → 안내 세 층.
             🔴 판매 상태를 여기서 말하지 않는다(#404). 초록 도트가 있던 자리인데, 바로 위 제목
             머리줄이 이미 「판매 중」을 말하고 있어 **한 화면에 같은 말이 두 번** 나왔다. */}
-        <div className="mt-4 rounded-r3 border border-border p-3.5">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-[11px] font-semibold text-text-3">판매자 최소 제안 금액</p>
-            <span aria-live="polite">
-              <OfferCounts offerCount={offerCount} wishlistCount={wishlistCount} />
-            </span>
+        {isOwnAuction && (status === "LIVE" || status === "MATCHED") ? (
+          <div className="mt-4">
+            <SellerOfferPanel
+              startPrice={auction.startPrice}
+              offerCount={offerCount}
+              wishlistCount={wishlistCount}
+              status={status}
+              viewport="mobile"
+            />
           </div>
-          <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1">
-            {formatKRW(auction.startPrice)}
-          </p>
-          {/* 0건일 때만 — 아이콘 줄에서 뺀 자리를 여기서 채운다(§2.9 D1). */}
-          {offerCount === 0 && (
-            <p className="mt-3 border-t border-border pt-2.5 text-[11.5px] font-bold text-text-2">
-              {OFFER_EMPTY_HINT}
+        ) : (
+          <div className="mt-4 rounded-r3 border border-border p-3.5">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[11px] font-semibold text-text-3">판매자 최소 제안 금액</p>
+              <span aria-live="polite">
+                <OfferCounts offerCount={offerCount} wishlistCount={wishlistCount} />
+              </span>
+            </div>
+            <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1">
+              {formatKRW(auction.startPrice)}
             </p>
-          )}
-          {/* 구매자가 처음 보는 메커니즘이라 「왜 최고가가 안 보이지」에 여기서 답한다.
-              마감을 표시하지 않기로 하면서 더 중요해졌다. */}
-          <p
-            className={`text-[10.5px] leading-relaxed text-text-3 ${
-              offerCount === 0 ? "mt-1.5" : "mt-3 border-t border-border pt-2.5"
-            }`}
-          >
-            판매자가 제안을 보고 거래 상대를 직접 선택해요. 다른 사람의 제안 금액은 공개되지 않아요.
-          </p>
-        </div>
+            {/* 0건일 때만 — 아이콘 줄에서 뺀 자리를 여기서 채운다(§2.9 D1). */}
+            {offerCount === 0 && (
+              <p className="mt-3 border-t border-border pt-2.5 text-[11.5px] font-bold text-text-2">
+                {OFFER_EMPTY_HINT}
+              </p>
+            )}
+            {/* 구매자가 처음 보는 메커니즘이라 「왜 최고가가 안 보이지」에 여기서 답한다.
+                마감을 표시하지 않기로 하면서 더 중요해졌다. */}
+            <p
+              className={`text-[10.5px] leading-relaxed text-text-3 ${
+                offerCount === 0 ? "mt-1.5" : "mt-3 border-t border-border pt-2.5"
+              }`}
+            >
+              판매자가 제안을 보고 거래 상대를 직접 선택해요. 다른 사람의 제안 금액은 공개되지 않아요.
+            </p>
+          </div>
+        )}
 
         <SellerRow sellerId={auction.sellerId} nickname={auction.sellerNickname} />
 
@@ -400,9 +417,12 @@ export default function MobileAuctionDetail({
             className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[7px] border border-border-2 bg-white text-text-2 ${FOCUS_RING}`}
           />
           {isOwnAuction ? (
-            <span className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-bold text-text-3">
-              내 매물입니다
-            </span>
+            <a
+              href="#seller-offer-list-mobile"
+              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+            >
+              제안 목록 보기
+            </a>
           ) : !accessToken ? (
             <Link
               href={`/login?redirect=/auctions/${auctionId}`}
@@ -410,10 +430,6 @@ export default function MobileAuctionDetail({
             >
               로그인하고 제안하기
             </Link>
-          ) : alreadyOffered ? (
-            <span className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-bold text-text-3">
-              이미 제안했어요
-            </span>
           ) : (
             <button
               type="button"

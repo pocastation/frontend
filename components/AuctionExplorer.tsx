@@ -14,9 +14,15 @@ import type { AuctionListResponse, AuctionResponse, AuctionSaleType } from "@/li
 // 이 정렬이 남으면 **오름차순·내림차순을 번갈아 불러 호가 서열을 그대로 복원할 수 있다** —
 // 필드를 막는 것만으로는 비공개가 성립하지 않는다.
 // 「인기순」(popular)은 제안 건수 기준이라 남는다 — 인원수는 어차피 공개하는 값이다(§2.9).
-export type SortKey = "latest" | "ending_soon" | "popular" | "views";
+export type SortKey = "recommended" | "latest" | "ending_soon" | "popular" | "views";
 
 export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  // 🔴 기본이 「추천순」이다(§2.4, BE #397). 끌올이 반영되는 유일한 자리다.
+  //
+  // 「최신순」을 지우지 않고 두 번째로 옮긴 이유는 등록 순서로 보고 싶은 사람이 있어서이고,
+  // 끌올을 거기 넣지 않는 이유는 **신규 판매자의 첫 매물이 구조적으로 밀리기** 때문이다 —
+  // 무료 무제한 끌올이면 전원이 끌올해 정렬 자체가 무의미해진다.
+  { key: "recommended", label: "추천순" },
   { key: "latest", label: "최신순" },
   { key: "ending_soon", label: "마감임박" },
   { key: "popular", label: "인기순" },
@@ -25,9 +31,14 @@ export const SORT_OPTIONS: { key: SortKey; label: string }[] = [
 
 // 즉시판매는 마감이 없으므로 "마감임박" 정렬이 성립하지 않는다. 전용 페이지(/instant-sales)는
 // 이미 빼 뒀는데 홈 임베드만 SORT_OPTIONS 전체를 그대로 써서 이 항목이 홈에만 남아 있었다(#277).
-const INSTANT_SORT_OPTIONS = SORT_OPTIONS.filter((option) => option.key !== "ending_soon");
+// 즉시판매는 마감도 없고 연장·끌올도 없다 — 「마감임박」과 「추천순」이 둘 다 성립하지 않는다.
+const INSTANT_SORT_OPTIONS = SORT_OPTIONS.filter(
+  (option) => option.key !== "ending_soon" && option.key !== "recommended",
+);
 
-const DEFAULT_SORT: SortKey = "latest";
+// 판매 유형마다 기본이 다르다. 제안판매는 끌올이 반영되는 「추천순」이고, 즉시판매는 끌올
+// 자체가 없어 최신순이다.
+const DEFAULT_SORT: Record<AuctionSaleType, SortKey> = { AUCTION: "recommended", INSTANT: "latest" };
 const DEBOUNCE_MS = 300;
 // 모바일은 2열(카드가 화면폭을 꽉 채우지 않게), sm 이상은 auto-fill로 데스크탑 밀도 유지.
 const GRID_CLASS =
@@ -53,7 +64,7 @@ export default function AuctionExplorer({
   description?: string;
   viewAllHref?: string;
 }) {
-  const [sortBy, setSortBy] = useState<SortKey>(DEFAULT_SORT);
+  const [sortBy, setSortBy] = useState<SortKey>(DEFAULT_SORT[saleType]);
   const [results, setResults] = useState<AuctionResponse[]>(initialAuctions);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);

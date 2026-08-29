@@ -423,3 +423,14 @@ export const REFUND_REASON_LABEL: Record<RefundReason, string> = {
   RETURN_COMPLETED: "반품 완료",
   ADMIN_DECISION: "중재 결정",
 };
+
+/**
+ * 등급 라벨에서 이모지를 걷는다 — BE가 「덕린이 🌱」처럼 붙여 내려준다.
+ *
+ * 🔴 제품 화면은 이모지를 쓰지 않는다(디자인 절: 이모지 개수 → 0). **등급 이름 자체는 BE 값을
+ * 그대로 쓴다** — 우리가 새로 짓지 않는다. 예전에는 모바일 상세만 이걸 하고 있어서 같은 등급이
+ * 화면마다 다르게 보였다(#419).
+ */
+export function plainLevelLabel(label: string): string {
+  return label.replace(/[\p{Extended_Pictographic}️]/gu, "").trim();
+}

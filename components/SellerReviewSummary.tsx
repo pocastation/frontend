@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { REVIEW_REPORT_REASON_LABEL, REVIEW_REPORT_REASON_OPTIONS } from "@/lib/labels";
+import { REVIEW_REPORT_REASON_LABEL, REVIEW_REPORT_REASON_OPTIONS, plainLevelLabel } from "@/lib/labels";
 import { formatRelativeTime } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
 import BadgeChips from "@/components/BadgeChips";
@@ -48,7 +48,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
             reviewCount: 0,
             tags: [],
             trustLevel: 1,
-            trustLevelLabel: "덕린이 🌱",
+            trustLevelLabel: "덕린이",
             tradeCount: 0,
             badges: [],
           });
@@ -95,7 +95,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1">
           <span className="text-text-3">Lv.{rating.trustLevel}</span>
-          {rating.trustLevelLabel}
+          {plainLevelLabel(rating.trustLevelLabel)}
         </span>
         {/* 배지(#264)는 레벨 바로 뒤 — 레벨과 나란히 놓여야 "두 번째 자격"으로 읽힌다. */}
         <BadgeChips badges={rating.badges} />

@@ -25,6 +25,7 @@ import {
   SELLER_AUCTION_STATUS_LABEL,
   REFUND_REASON_LABEL,
   RETURN_REASON_LABEL,
+  plainLevelLabel,
 } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
@@ -240,21 +241,26 @@ function FilterChips<T extends string>({
   label: string;
 }) {
   return (
-    <div className="mt-4 flex flex-wrap gap-1.5" role="group" aria-label={label}>
+    // 🔴 알약 칩에서 밑줄 탭으로(#419). 활성 칩이 보라로 **채워져** 있어 필터가 아니라 눌린
+    // 버튼처럼 보였고, 알약이 같은 화면의 상태 표시와도 겹쳐 무엇이 조작 가능한지 흐려졌다.
+    // 매물 상세 모바일이 이미 쓰는 방식이라 같은 서비스로 읽힌다.
+    <div className="mt-4 flex gap-5 border-b border-border" role="group" aria-label={label}>
       {options.map((option) => (
         <button
           key={option.key}
           type="button"
           aria-pressed={value === option.key}
           onClick={() => onChange(option.key)}
-          className={`h-9 rounded-r2 border px-3.5 text-[13px] font-bold transition-colors ${FOCUS_RING} ${
+          className={`-mb-px border-b-2 pb-2.5 text-[13px] transition-colors ${FOCUS_RING} ${
             value === option.key
-              ? "border-primary bg-primary text-white"
-              : "border-border-2 bg-white text-text-2 hover:border-primary hover:text-primary"
+              ? "border-primary font-extrabold text-text-1"
+              : "border-transparent font-bold text-text-3 hover:text-text-2"
           }`}
         >
           {option.label}
-          <span className="ml-1.5 tabular-nums opacity-70">{option.count}</span>
+          <span className={`ml-1.5 text-xs tabular-nums ${value === option.key ? "text-text-2" : "text-text-3"}`}>
+            {option.count}
+          </span>
         </button>
       ))}
     </div>
@@ -365,8 +371,15 @@ function MyPageBody() {
       // 🔴 예전에는 isTopBidder로 「내가 성사된 건」만 골라 보냈는데, 그 필드가 사라졌다(§1.7 —
       // 「내가 1등이다」는 남의 제안 상태다). 성사된 매물 전체를 보내고 **주문이 돌아오는지로
       // 판정**한다 — 이 API는 내 주문만 돌려주므로 오히려 더 정확하다(승계로 성사된 건도 잡힌다).
+      //
+      // 🔴 **MATCHED를 반드시 포함한다**(#419). 거래 개편으로 결제 대기 상태가 ENDED_SOLD에서
+      // MATCHED로 바뀌었는데(BE #368) 여기가 ENDED_SOLD만 보고 있었다 — 결제해야 할 주문을
+      // **조회조차 하지 않아** 선택된 구매자가 결제 화면에 닿을 수 없었다. 알림은 「48시간 안에
+      // 결제해 주세요」라고 하는데 그 화면이 없는 상태였다.
       const purchasedIds = [
-        ...biddingRes.content.filter((b) => b.status === "ENDED_SOLD").map((b) => b.id),
+        ...biddingRes.content
+          .filter((b) => b.status === "MATCHED" || b.status === "ENDED_SOLD")
+          .map((b) => b.id),
         ...instantPurchasesRes.content.map((a) => a.id),
       ];
       try {
@@ -515,10 +528,17 @@ function MyPageBody() {
 
   const activeSelling = selling.filter((auction) => SELLING_TAB_STATUSES.has(auction.status));
   const sellingHistory = selling.filter((auction) => !SELLING_TAB_STATUSES.has(auction.status));
-  const liveBidding = bidding.filter((b) => b.status === "LIVE");
-  // 성사 판정은 「주문이 있는가」로 한다 — isTopBidder가 §1.7로 사라졌고, 주문 존재는 내가
-  // 구매자라는 사실 그 자체라 더 정확하다. orders가 채워지기 전에는 비어 있다(로딩 상태).
-  const wonBidding = bidding.filter((b) => b.status === "ENDED_SOLD" && orders[b.id] != null);
+  // 「진행 중」 = 아직 결과가 나오지 않은 내 제안. MATCHED라도 **내 주문이 없으면** 다른 분이
+  // 선택된 것이고, 미결제 시 매물이 다시 열려 내 제안이 다시 후보가 되므로(§1.4) 여기 남는다.
+  const liveBidding = bidding.filter(
+    (b) => b.status === "LIVE" || (b.status === "MATCHED" && orders[b.id] == null),
+  );
+  // 🔴 상태가 아니라 **주문 존재**로 판정한다(#419). isTopBidder가 §1.7로 사라졌고, 내 주문이
+  // 있다는 것은 내가 구매자라는 사실 그 자체다. 상태로 가르면 결제 대기(MATCHED)가 빠져
+  // **결제하기 버튼에 닿을 수 없다** — 실제로 그렇게 끊겨 있었다.
+  const wonBidding = bidding.filter(
+    (b) => (b.status === "MATCHED" || b.status === "ENDED_SOLD") && orders[b.id] != null,
+  );
 
   // 모바일 메뉴의 빨간 배지 = "지금 내가 손봐야 하는 건수". 단순 개수(회색 값)와 구분한다.
   const needsAddress = (o: MyOrderStatusResponse) =>
@@ -565,7 +585,7 @@ function MyPageBody() {
         <MobileMypageMenu
           nickname={member?.nickname ?? ""}
           trustLevel={member?.trustLevel ?? null}
-          trustLevelLabel={member?.trustLevelLabel ?? null}
+          trustLevelLabel={member?.trustLevelLabel ? plainLevelLabel(member.trustLevelLabel) : null}
           tradeCount={member?.tradeCount ?? null}
           counts={{
             liveBidding: liveBidding.length,
@@ -598,7 +618,7 @@ function MyPageBody() {
               {member?.trustLevel != null && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1">
                   <span className="text-text-3">Lv.{member.trustLevel}</span>
-                  {member.trustLevelLabel}
+                  {member.trustLevelLabel ? plainLevelLabel(member.trustLevelLabel) : null}
                 </span>
               )}
               <BadgeChips badges={member?.badges ?? []} />
@@ -730,11 +750,11 @@ function MyPageBody() {
 
             <div className="mt-8 grid gap-5 sm:grid-cols-2">
               <DashboardPanel title="참여 중인 거래" onSeeAll={() => goToBidding("live")}>
-                <MyBiddingList items={liveBidding.slice(0, 3)} loading={loading} emptyText="참여 중인 거래가 없습니다." />
+                <MyBiddingList items={liveBidding.slice(0, 3)} loading={loading} emptyText="참여 중인 거래가 없습니다." orders={orders} />
               </DashboardPanel>
 
               <DashboardPanel title="제안 내역" onSeeAll={() => goToBidding("all")}>
-                <MyBiddingList items={bidding.slice(0, 3)} loading={loading} emptyText="아직 제안한 매물이 없어요." />
+                <MyBiddingList items={bidding.slice(0, 3)} loading={loading} emptyText="아직 제안한 매물이 없어요." orders={orders} />
               </DashboardPanel>
 
               <DashboardPanel title="구매 내역" onSeeAll={() => goToPurchases("auction")}>
@@ -784,6 +804,8 @@ function MyPageBody() {
                 items={biddingFilter === "live" ? liveBidding : bidding}
                 loading={loading}
                 emptyText={biddingFilter === "live" ? "참여 중인 거래가 없습니다." : "아직 제안한 매물이 없어요."}
+                orders={orders}
+                onGoPayment={() => selectTab("payment")}
               />
             </div>
           </>
@@ -1089,8 +1111,11 @@ function SellingList({
   if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
   if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
 
+  // 🔴 카드에서 규칙선 행으로(#419). 항목마다 테두리를 두르면 열 개가 열 개의 상자가 되어
+  // 눈이 쉴 곳이 없다 — 목록은 원래 표에 가깝고, 규칙선만 남기면 썸네일·제목·금액이 세로로
+  // 정렬돼 훑기가 된다. 카드 131px → 행 72px(행동이 필요한 행만 108px).
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className="border-t border-border">
       {items.map((item) => {
         const isLive = item.status === "LIVE";
         const displayPrice = item.saleType === "INSTANT" ? (item.buyNowPrice ?? item.startPrice) : item.startPrice;
@@ -1252,17 +1277,10 @@ function OrderStatusFooter({
   order: MyOrderStatusResponse;
   onGoPayment: () => void;
 }) {
-  const pill = (icon: string, tone: StatusTone, label: string) => (
-    <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-surface py-1 pl-1 pr-2.5 text-[11px] font-bold text-text-2">
-      <StatusIconCircle name={icon} tone={tone} size="h-[18px] w-[18px]" glyph="text-[11px]" />
-      {label}
-    </span>
-  );
   const body = (() => {
     switch (order.status) {
       case "PAID":
         return {
-          pill: pill("card", "ok", "결제 완료"),
           message: (
             <>결제 금액 <b className="font-bold text-text-1">{formatKRW(order.chargeAmount)}</b> · 수수료 포함</>
           ),
@@ -1273,7 +1291,6 @@ function OrderStatusFooter({
       // 카드 등록 화면이 은닉된 지금은 실행할 수도 없는 안내였다.
       case "PAYMENT_PENDING":
         return {
-          pill: pill("clock", "primary", "결제 대기"),
           message: (
             <>가상계좌·계좌이체로 결제해요 · <b className="font-bold text-text-1">{formatKRW(order.chargeAmount)}</b></>
           ),
@@ -1281,7 +1298,6 @@ function OrderStatusFooter({
         };
       case "PAYMENT_RETRYING":
         return {
-          pill: pill("clock", "warn", "재시도 예정"),
           message: order.nextActionAt
             ? <>{formatDateTimeKST(order.nextActionAt)}에 다시 결제를 시도해요</>
             : <>잠시 후 다시 결제를 시도해요</>,
@@ -1289,7 +1305,6 @@ function OrderStatusFooter({
         };
       case "SECOND_CHANCE_OFFERED":
         return {
-          pill: pill("alertCircle", "accent", "카드 등록 필요"),
           message: order.nextActionAt
             ? <>{formatDateTimeKST(order.nextActionAt)}까지 등록하면 자동 결제돼요</>
             : <>카드를 등록하면 자동 결제돼요</>,
@@ -1297,14 +1312,12 @@ function OrderStatusFooter({
         };
       case "PAYMENT_DEFAULTED":
         return {
-          pill: pill("xCircle", "neutral", "주문 취소"),
           message: <>기한 내 결제가 완료되지 않았어요</>,
           action: null,
         };
       // 환불(#173) — 취소·반품이 확정된 뒤 PG 취소를 기다리는 구간과 완료 구간.
       case "REFUNDING":
         return {
-          pill: pill("clock", "primary", "환불 처리 중"),
           message: (
             <>
               {order.refundReason ? `${REFUND_REASON_LABEL[order.refundReason]} · ` : ""}
@@ -1316,7 +1329,6 @@ function OrderStatusFooter({
         };
       case "REFUNDED":
         return {
-          pill: pill("checkCircle", "ok", "환불 완료"),
           message: (
             <>
               <b className="font-bold text-text-1">{formatKRW(order.refundAmount ?? order.chargeAmount)}</b> 환불됐어요 ·
@@ -1328,7 +1340,6 @@ function OrderStatusFooter({
       default:
         // PAYMENT_FAILED(예약값) 등 — 과거 데이터 호환 폴백.
         return {
-          pill: pill("alertCircle", "neutral", "결제 확인 필요"),
           message: <>결제 상태를 확인해 주세요</>,
           action: null,
         };
@@ -1336,15 +1347,18 @@ function OrderStatusFooter({
   })();
 
   return (
-    <div className="flex flex-wrap items-center gap-2.5 border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
-      {body.pill}
+    // 🔴 회색 배경 띠와 상태 알약을 걷었다(#419). 알약 안에 원형 아이콘이 박혀 있어 상태 표시가
+    // **토글처럼** 보였고(조작할 수 있는 것처럼), 카드마다 회색 띠가 붙어 모든 안내가 alert box가
+    // 됐다. 상태는 위 행의 오른쪽 텍스트가 이미 말하므로 여기서는 **할 일과 버튼만** 남긴다 —
+    // 그 행에서 유일하게 채워진 요소라 장치를 더 붙이지 않아도 눈에 걸린다.
+    <div className="mt-2.5 flex flex-wrap items-center gap-3 pl-[56px] text-xs text-text-2">
       <span className="min-w-0 flex-1">{body.message}</span>
       {body.action &&
         // 결제창 경로는 별도 페이지라 링크로 나간다. 나머지(카드 등록·변경)는 기존처럼 탭 전환이다.
         (body.action.href ? (
           <Link
             href={body.action.href}
-            className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+            className={`shrink-0 rounded-r1 bg-primary px-4 py-2 text-[12.5px] font-extrabold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
           >
             {body.action.label}
           </Link>
@@ -1352,9 +1366,9 @@ function OrderStatusFooter({
           <button
             type="button"
             onClick={onGoPayment}
-            className={`shrink-0 rounded-r2 px-3 py-1.5 text-[11px] font-bold transition-colors ${FOCUS_RING} ${
+            className={`shrink-0 rounded-r1 px-4 py-2 text-[12.5px] font-extrabold transition-colors ${FOCUS_RING} ${
               body.action.solid
-                ? "bg-text-1 text-white hover:bg-text-2"
+                ? "bg-primary text-white hover:bg-primary-dark"
                 : "border border-border-2 bg-surface text-text-2 hover:border-text-3 hover:text-text-1"
             }`}
           >
@@ -1365,11 +1379,11 @@ function OrderStatusFooter({
   );
 }
 
-const fulfillmentPill = (icon: string, tone: StatusTone, label: string) => (
-  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-surface py-1 pl-1 pr-2.5 text-[11px] font-bold text-text-2">
-    <StatusIconCircle name={icon} tone={tone} size="h-[18px] w-[18px]" glyph="text-[11px]" />
-    {label}
-  </span>
+// 🔴 알약 + 원형 아이콘 배지를 걷었다(#419) — 상태 표시가 토글처럼 보였다.
+// 이름은 그대로 두어 호출부 20여 곳을 건드리지 않는다. 아이콘·톤 인자는 더 쓰지 않지만
+// 시그니처를 유지해 다음 사람이 「왜 인자가 사라졌지」를 되묻지 않게 한다.
+const fulfillmentPill = (_icon: string, _tone: StatusTone, label: string) => (
+  <span className="shrink-0 text-[11.5px] font-bold text-text-1">{label}</span>
 );
 
 // 구매자 관점 배송/확정 푸터(#119) — 결제 완료(PAID) 주문에만. 배송지 입력(모달 트리거)·구매확정 포함.
@@ -1429,7 +1443,8 @@ function BuyerFulfillmentFooter({
   }
 
   return (
-    <div className="border-t border-border/60 bg-surface-2/40 px-3 py-2.5 text-xs text-text-2">
+    // 결제 푸터와 같은 지면 규칙(#419) — 회색 띠 없이 썸네일 폭만큼 들여 쓴 행동 줄.
+    <div className="mt-2.5 pl-[56px] text-xs text-text-2">
       {returnOpen && (
         <ReturnRequestModal
           auctionId={order.auctionId}
@@ -1844,35 +1859,46 @@ function MyBiddingList({
       {items.map((item) => {
         const isLive = item.status === "LIVE";
         const order = orders?.[item.id];
+        // 🔴 MATCHED 하나로는 「내가 선택됐다」와 「다른 분이 선택됐다」가 갈리지 않는다(#419).
+        // 주문이 있으면 내가 구매자이고, 없으면 남이 골라진 것이다 — 그때 내 제안은 아직 살아
+        // 있어서 미결제 시 다시 후보가 되므로(§1.4) 「끝났다」로 읽히면 안 된다.
+        const stateLabel = isLive
+          ? formatTimeLeft(item.endAt)
+          : item.status === "MATCHED" && !order
+            ? "다른 제안이 선택됨"
+            : (AUCTION_STATUS_LABEL[item.status] ?? "종료");
         return (
-          <li key={item.id}>
-            {/* 푸터에 버튼이 들어가므로 카드 전체를 Link로 감싸지 않는다(중첩 인터랙티브 방지). */}
-            <div className="overflow-hidden rounded-r3 border border-border bg-surface transition-colors hover:border-primary">
+          <li key={item.id} className="border-b border-border">
+            {/* 행동 줄에 버튼이 들어가므로 행 전체를 Link로 감싸지 않는다(중첩 인터랙티브 방지). */}
+            <div className="group py-3.5">
               <Link
                 href={`/auctions/${item.id}`}
-                className={`flex items-center gap-3 p-3 ${FOCUS_RING}`}
+                className={`flex items-start gap-3 rounded-r1 ${FOCUS_RING}`}
               >
                 <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
                 <span className="min-w-0 flex-1">
-                  {item.artistName && (
-                    <span className="block truncate text-[11px] font-extrabold text-primary">{item.artistName}</span>
-                  )}
-                  <span className="block truncate text-sm font-bold text-text-1">{item.title}</span>
-                  {/* 🔴 「최고 제안가」·「거래 성사」 칩은 isTopBidder로 그렸는데 그 필드가
-                      사라졌다(§1.7 — 「내가 1등이다」는 남의 제안 상태다). 성사 여부는 주문이
-                      있는지로 판정하므로 이 목록의 상위(wonBidding)에서 이미 갈라져 있다. */}
-                  <span className="mt-1 flex items-center gap-1.5 text-[11px] text-text-3">
-                    <span>최소가 {formatKRW(item.startPrice)}</span>
+                  <span className="block truncate text-[13.5px] font-bold text-text-1">{item.title}</span>
+                  {/* 🔴 아티스트명을 보라 굵은 글씨에서 이 메타 줄로 내렸다(#419).
+                      「보라는 상태를 말하는 자리에만 — 제목에는 쓰지 않는다」는 규칙을 어기고
+                      있었고, 목록에서 가장 먼저 읽혀야 할 것은 매물 제목이지 아티스트가 아니다. */}
+                  <span className="mt-0.5 block truncate text-[11.5px] text-text-3">
+                    {item.artistName ? `${item.artistName} · ` : ""}
+                    최소가 {formatKRW(item.startPrice)}
                   </span>
                 </span>
                 <span className="shrink-0 text-right">
                   {/* 오른쪽 큰 숫자를 「내 제안가」로 올렸다 — 예전에는 현재가(=최고 제안가)였는데
                       그 값이 사라졌고, 이 화면에서 사용자가 가장 알고 싶은 건 자기가 낸 금액이다. */}
-                  <span className="block font-display text-sm font-extrabold text-text-1">
+                  <span className="block font-display text-[13.5px] font-bold tabular-nums text-text-1">
                     {formatKRW(item.myBidAmount)}
                   </span>
-                  <span className="block text-[10.5px] text-text-3">
-                    {isLive ? formatTimeLeft(item.endAt) : (AUCTION_STATUS_LABEL[item.status] ?? "종료")}
+                  {/* 손볼 것이 있는 상태만 잉크색으로 올린다 — 나머지는 회색으로 물러난다. */}
+                  <span
+                    className={`mt-0.5 block text-[11.5px] ${
+                      order || item.status === "MATCHED" ? "font-bold text-text-1" : "text-text-3"
+                    }`}
+                  >
+                    {stateLabel}
                   </span>
                 </span>
               </Link>

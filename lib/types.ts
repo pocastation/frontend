@@ -286,6 +286,22 @@ export type AuctionResponse = {
 export type MySellingAuctionResponse = AuctionResponse & {
   cancellationReason: string | null;
   reviewReason: string | null;
+  /**
+   * 다음 연장에서 더할 일수 — 첫 연장 7일, 마지막 3일. 다 썼으면 null이다(§1.3).
+   *
+   * 🔴 서버가 알려준다. 화면이 `{7, 3}`을 복제해 세면 상한을 고칠 때 한쪽만 바뀌어
+   * 「7일 늘어요」를 눌렀는데 3일이 느는 상태가 된다.
+   */
+  nextExtensionDays: number | null;
+  /** 연장 버튼이 열리는 시각(종료 1일 전). 「종료 1일 전」을 화면이 다시 계산하지 않는다. */
+  extendableFrom: string | null;
+  /**
+   * 🔴 살아 있는 제안 인원수 — 최소가가 잠겼는지의 근거(§1.1).
+   *
+   * `bidCount`(누적 건수)와 다르다. 저건 취소·대체분까지 세서 전부 거둬들인 매물도
+   * 「3명이 제안했어요」로 보이고, 서버 판정(살아 있는 제안 0건 → 수정 가능)과 갈린다.
+   */
+  offerCount: number;
 };
 
 export type MySellingAuctionListResponse = Omit<AuctionListResponse, "content"> & {

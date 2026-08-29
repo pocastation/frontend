@@ -21,7 +21,12 @@ import type { AuctionResponse, AuctionSaleType } from "@/lib/types";
  */
 
 // 즉시판매는 마감이 없으니 "마감임박" 정렬을 뺀다 — 눌러도 아무 일 없는 칩을 두지 않는다.
-const INSTANT_SORTS = SORT_OPTIONS.filter((option) => option.key !== "ending_soon");
+// 즉시판매는 마감도 없고 연장·끌올도 없다 — 「마감임박」과 「추천순」이 둘 다 성립하지 않는다.
+// 🔴 데스크탑(AuctionExplorer)과 같은 규칙을 여기서도 지켜야 한다. 한쪽만 고치면 같은 페이지가
+// 화면 크기에 따라 다른 정렬 목록을 보여준다.
+const INSTANT_SORTS = SORT_OPTIONS.filter(
+  (option) => option.key !== "ending_soon" && option.key !== "recommended",
+);
 
 const TABS: { label: string; href: string; saleType: AuctionSaleType }[] = [
   { label: "제안판매", href: "/auctions", saleType: "AUCTION" },
@@ -63,6 +68,9 @@ export default function MobileBrowse({
     initialTotalPages,
     saleType,
     initialQuery,
+    // 제안판매는 끌올이 반영되는 「추천순」이 기본이고, 즉시판매는 끌올 자체가 없어 최신순이다
+    // (데스크탑과 같은 규칙 — 화면 크기에 따라 첫 화면 순서가 달라지면 안 된다).
+    defaultSort: saleType === "INSTANT" ? "latest" : "recommended",
   });
 
   const isInstant = saleType === "INSTANT";

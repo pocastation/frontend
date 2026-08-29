@@ -45,7 +45,8 @@ type AuctionBiddingValue = {
   adjustAmount: (next: number) => void;
   submitting: boolean;
   /** 이 매물에 이미 유효한 제안을 냈다 — 서버가 중복 제안을 막는다. */
-  alreadyOffered: boolean;
+  /** 이번 세션에 내가 낸 제안 금액 — 없으면 아직(또는 새로고침 뒤라) 모른다. */
+  myOfferAmount: number | null;
   handleBid: () => Promise<void>;
   needsAddress: boolean;
   addressModalOpen: boolean;
@@ -91,7 +92,12 @@ export function AuctionBiddingProvider({
   // 제안가의 출발값은 최소가다. 예전에는 「현재가 + 1단위」였는데 그 현재가가 비공개가 됐다(§1.7).
   const [amount, setAmount] = useState(startPrice);
   const [submitting, setSubmitting] = useState(false);
-  const [alreadyOffered, setAlreadyOffered] = useState(false);
+  // 🔴 「제안했다」가 아니라 **지금 낸 금액**을 기억한다(#428). 다시 제안하는 것이 곧 수정이라
+  // (§2.1), 바꾸려는 사람에게 필요한 정보는 「보냈다」가 아니라 「얼마로 보냈나」다.
+  //
+  // ⚠️ 이번 세션에 제안한 경우에만 안다 — 상세 응답이 내 제안을 싣지 않아 새로고침하면
+  // 잊는다. 그래서 이 값은 안내를 **더할 때만** 쓰고, 버튼을 잠그는 데는 쓰지 않는다.
+  const [myOfferAmount, setMyOfferAmount] = useState<number | null>(null);
   // 카운트다운/상대시각을 1초마다 다시 그리기 위한 틱(값은 안 읽고 리렌더 트리거로만 쓴다).
   const [, setNowTick] = useState(0);
   const amountTouchedRef = useRef(false);
@@ -168,7 +174,7 @@ export function AuctionBiddingProvider({
         body: { amount },
       });
       setEndAt(res.endAt);
-      setAlreadyOffered(true);
+      setMyOfferAmount(amount);
       // 인원수는 SSE로도 오지만, 내 제안 직후만큼은 즉시 반영돼야 「보냈는데 안 늘었다」로 보이지 않는다.
       setOfferCount((prev) => (prev === 0 ? 1 : prev));
       // 🔴 부연을 붙인다(#404). 구매자가 제안 직후 「이제 뭘 기다리면 되나」를 아는 유일한
@@ -176,8 +182,11 @@ export function AuctionBiddingProvider({
       // 마감을 화면에 표시하지 않기로 하면서 더 중요해졌다.
       toast.show({
         variant: "success",
-        text: "가격 제안을 보냈어요.",
-        sub: "판매자가 제안을 확인하고 거래 상대를 선택해요.",
+        text: myOfferAmount == null ? "가격 제안을 보냈어요." : "제안 금액을 바꿨어요.",
+        sub:
+          myOfferAmount == null
+            ? "판매자가 제안을 확인하고 거래 상대를 선택해요."
+            : "이전 제안을 대신해요. 판매자에게는 바뀐 금액만 보여요.",
       });
     } catch (err) {
       const text = err instanceof ApiError ? err.message : "가격 제안에 실패했습니다. 잠시 후 다시 시도해주세요.";
@@ -185,30 +194,15 @@ export function AuctionBiddingProvider({
       // 오류 토스트 대신 등록 모달로 이어 붙인다.
       if (isGateRejection(err)) {
         setAddressModalOpen(true);
-      } else if (err instanceof ApiError && err.errorCode === "ALREADY_HIGHEST_BIDDER") {
-        // 🔴 문구가 남의 호가를 알려주면 안 된다(§1.7). 예전에는 「이미 회원님이 최고가
-        // 제안자예요 · 더 높은 금액으로만 다시 제안할 수 있어요」였는데, 그건 **아무도 나보다
-        // 높게 내지 않았다**는 사실을 그대로 알려주는 문장이다 — 화면에서 지운 정보를 에러
-        // 문구로 흘리는 셈이다.
-        //
-        // ⚠️ 이 분기는 임시다. 제안 수정·취소(Stage 3)가 들어오면 중복 제안 차단 자체가
-        // 「수정」으로 대체된다. 그전까지는 다시 제안할 수 없다는 사실만 담백하게 알린다.
-        //
-        // **문구가 아니라 에러 코드로 판별한다.** 전에는 `err.message.includes("최고 입찰")`이라
-        // 서버가 문구를 한 글자만 바꿔도 이 분기가 조용히 죽었다. 코드는 계약이고 문구는 카피다.
-        setAlreadyOffered(true);
-        toast.show({
-          variant: "info",
-          text: "이미 이 매물에 제안하셨어요.",
-          sub: "제안 수정은 곧 지원될 예정이에요.",
-        });
       } else {
         toast.show({ variant: "danger", text });
       }
     } finally {
       setSubmitting(false);
     }
-  }, [amount, auctionId, fetchWithAuth, isGateRejection, needsAddress, toast]);
+  // 🔴 myOfferAmount가 의존성에 있어야 한다 — 토스트 문구가 그 값을 읽는데 빠뜨리면 콜백이
+  // 옛 값(null)을 잡은 채 굳어, **두 번째 제안에도 「보냈어요」가 뜬다.**
+  }, [amount, auctionId, fetchWithAuth, isGateRejection, myOfferAmount, needsAddress, toast]);
 
   const onAddressSaved = useCallback(
     (afterSave?: () => void) => {
@@ -235,7 +229,7 @@ export function AuctionBiddingProvider({
       outOfRange,
       adjustAmount,
       submitting,
-      alreadyOffered,
+      myOfferAmount,
       handleBid,
       needsAddress,
       addressModalOpen,
@@ -245,7 +239,7 @@ export function AuctionBiddingProvider({
     }),
     [
       auctionId, offerCount, wishlistCount, endAt, status, isLive, endingSoon, isOwnAuction,
-      amount, floor, outOfRange, adjustAmount, submitting, alreadyOffered, handleBid,
+      amount, floor, outOfRange, adjustAmount, submitting, myOfferAmount, handleBid,
       needsAddress, addressModalOpen, onAddressSaved,
     ],
   );

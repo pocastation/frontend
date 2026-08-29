@@ -519,8 +519,19 @@ export type MyBiddingResponse = {
   endAt: string;
   bidCount: number;
   viewCount: number;
-  myBidAmount: number;
+  // 🔴 「내가 지금 걸어 둔 금액」이다. 예전 서버는 max(amount)를 내려줬는데, 하향 수정이
+  // 열리면서 거짓이 됐다(BE #389) — 5만원을 3만원으로 낮춘 사람에게 계속 5만원이 보였다.
+  // 제안을 전부 거둬들였으면 셋 다 null이다.
+  myBidAmount: number | null;
+  // 취소 버튼이 어느 제안을 지목할지, 그리고 그게 취소되는 제안인지.
+  // ACCEPTED는 선택돼 계약이 성립한 제안이라 구매자도 취소할 수 없다(§9.1).
+  myOfferId: number | null;
+  myOfferStatus: BidStatus | null;
 };
+
+// 가격 제안의 생애 상태(§2.1). SUPERSEDED는 「금액을 바꿔 대체된 옛 제안」이라 CANCELLED와
+// 다르다 — 목록에 남는 것은 언제나 ACTIVE 아니면 ACCEPTED다.
+export type BidStatus = "ACTIVE" | "CANCELLED" | "SUPERSEDED" | "ACCEPTED";
 
 export type MyBiddingListResponse = {
   content: MyBiddingResponse[];

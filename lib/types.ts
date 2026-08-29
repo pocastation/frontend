@@ -489,6 +489,10 @@ export type BidHistoryItem = {
   bidderNicknameMasked: string;
   amount: number;
   createdAt: string;
+  // 🔴 판매자가 상대를 심사할 재료(BE #378). 닉네임과 금액만으로는 할 수 있는 판단이
+  // 「최고가 고르기」뿐이라, 자동 낙찰을 손으로 하는 것과 다르지 않다(§2.8 C1).
+  trustLevel: number;
+  tradeCount: number;
 };
 
 // POST /api/auctions/{id}/offers/{bidId}/accept 및 판매자 전용 선택 결과 조회 응답.

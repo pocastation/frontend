@@ -718,7 +718,18 @@ export type RefundReason =
   | "ADMIN_DECISION";
 
 // GET /api/members/me/orders/status?auctionIds= — 구매내역 주문 상태 배치 채움(wishlist 하트 패턴).
-export type FulfillmentStatus = "AWAITING_SHIPMENT" | "SHIPPED" | "CONFIRMED";
+/**
+ * 배송·구매확정 상태. 🔴 `PREPARING`은 <b>구매자 취소가 잠긴 뒤</b>다(§1.5, BE #393).
+ *
+ * 발송 전 구간이 둘(`AWAITING_SHIPMENT`·`PREPARING`)로 갈렸으므로, 「아직 발송 전인가」를
+ * 물을 때는 상태를 하나씩 비교하지 말고 `isBeforeShipment()`를 쓴다 — 서버도 같은 이유로
+ * 같은 이름의 판정을 둔다(빠뜨리면 발송 타이머에서 새는 사고가 T2였다).
+ */
+export type FulfillmentStatus = "AWAITING_SHIPMENT" | "PREPARING" | "SHIPPED" | "CONFIRMED";
+
+export function isBeforeShipment(status: FulfillmentStatus | null | undefined): boolean {
+  return status === "AWAITING_SHIPMENT" || status === "PREPARING";
+}
 
 export type MyOrderStatusResponse = {
   auctionId: number;

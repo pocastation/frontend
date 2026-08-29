@@ -19,6 +19,7 @@ import ReturnRequestModal from "@/components/ReturnRequestModal";
 import ReturnShipForm from "@/components/ReturnShipForm";
 import { type StatusTone } from "@/components/StatusIcon";
 import { formatDateTimeKST, formatKRW, formatTimeLeft } from "@/lib/format";
+import { cancellationLocksAt } from "@/lib/fees";
 import {
   AUCTION_STATUS_TONE,
   AUCTION_STATUS_LABEL,
@@ -40,6 +41,8 @@ import type {
   SoldOrderResponse,
   WishlistListResponse,
 } from "@/lib/types";
+// 값이라 type import와 나눈다 — 「아직 발송 전인가」는 서버와 같은 이름의 판정이다.
+import { isBeforeShipment } from "@/lib/types";
 import IdentityVerificationPanel from "@/components/IdentityVerificationPanel";
 import OfferWithdrawModal from "@/components/OfferWithdrawModal";
 import AuctionCard from "@/components/AuctionCard";
@@ -440,7 +443,9 @@ function MyPageBody() {
     const pending = Object.values(orders).find(
       (o) =>
         o.status === "PAID" &&
-        o.fulfillmentStatus === "AWAITING_SHIPMENT" &&
+        // 준비 중이어도 주소가 없으면 여전히 입력해야 한다 — 주소가 없으면 판매자는 애초에
+        // 보낼 수 없다. 「발송 전 전체」로 보는 이유가 서버 쪽 T2와 같다.
+        isBeforeShipment(o.fulfillmentStatus) &&
         !o.hasDeliveryAddress &&
         !dismissedAddressIds.current.has(o.auctionId),
     );
@@ -564,12 +569,13 @@ function MyPageBody() {
 
   // 모바일 메뉴의 빨간 배지 = "지금 내가 손봐야 하는 건수". 단순 개수(회색 값)와 구분한다.
   const needsAddress = (o: MyOrderStatusResponse) =>
-    o.status === "PAID" && o.fulfillmentStatus === "AWAITING_SHIPMENT" && !o.hasDeliveryAddress;
+    o.status === "PAID" && isBeforeShipment(o.fulfillmentStatus) && !o.hasDeliveryAddress;
   const purchaseActionCount = Object.values(orders).filter(
     (o) => needsAddress(o) || PURCHASE_ACTION_STATUSES.has(o.status),
   ).length;
   const shipmentActionCount = Object.values(soldOrders).filter(
-    (o) => o.orderStatus === "PAID" && o.fulfillmentStatus === "AWAITING_SHIPMENT",
+    // 준비 중도 「손봐야 하는 건」이다 — 잠근 대가로 3영업일 발송 의무가 붙는다.
+    (o) => o.orderStatus === "PAID" && isBeforeShipment(o.fulfillmentStatus),
   ).length;
   // 배송지가 비어 있는 결제완료 주문 — 모바일 메뉴에서 목록보다 먼저 세운다. 자동 팝업을 "나중에"로
   // 닫은 뒤에도 남아 있어야 하므로 dismissed 여부는 보지 않는다.
@@ -1540,6 +1546,17 @@ function BuyerFulfillmentFooter({
               구매 확정
             </button>
           </>
+        ) : fs === "PREPARING" ? (
+          <>
+            {/* 🔴 잠긴 뒤에는 취소 버튼이 아예 없다 — 눌리지 않는 버튼을 남기지 않는다.
+                대신 「자동으로 환불돼요」를 말한다. 잠겼다는 사실만 남기면 「돈이 묶였는데
+                방법이 없다」로 읽힌다(B3 알림과 같은 내용이 화면에도 있어야 한다). */}
+            {fulfillmentPill("box", "primary", "물품 준비 중")}
+            <span className="min-w-0 flex-1">
+              판매자가 준비를 시작했어요 · <b className="font-bold text-text-1">3영업일</b> 안에 발송되지
+              않으면 자동으로 환불돼요
+            </span>
+          </>
         ) : !order.hasDeliveryAddress ? (
           <>
             {fulfillmentPill("alertCircle", "accent", "배송지 입력 필요")}
@@ -1555,8 +1572,14 @@ function BuyerFulfillmentFooter({
         ) : (
           <>
             {fulfillmentPill("clock", "primary", "발송 대기")}
-            <span className="min-w-0 flex-1">판매자의 발송을 기다리고 있어요.</span>
-            {/* 발송 전에는 구매자가 스스로 취소할 수 있다(약관 제13조 제2항). */}
+            {/* 🔴 남은 시간을 말한다(§1.5). 「지금은 취소된다」만 보여주면 내일 눌렀다가 안 되는
+                순간에야 알게 된다. 잠기는 시각은 paidAt에서 계산한다 — 응답에 새 필드를 싣지 않는다. */}
+            <span className="min-w-0 flex-1">
+              판매자의 발송을 기다리고 있어요
+              {order.cancellable && order.paidAt
+                ? ` · ${formatTimeLeft(cancellationLocksAt(order.paidAt)).replace("남음", "뒤")}부터는 취소할 수 없어요`
+                : ""}
+            </span>
             {order.cancellable && (
               <button
                 type="button"
@@ -1679,9 +1702,29 @@ function SellerFulfillmentFooter({
   soldOrder: SoldOrderResponse;
   onRefresh: () => void;
 }) {
+  const { fetchWithAuth } = useAuth();
   const [shipOpen, setShipOpen] = useState(false);
+  const [preparing, setPreparing] = useState(false);
   const fs = soldOrder.fulfillmentStatus;
   const addr = soldOrder.deliveryAddress;
+
+  /**
+   * 「물품 준비」 — 이 순간부터 구매자 취소가 잠긴다(§1.5).
+   *
+   * 성공하면 목록을 다시 읽는다. 잠금과 함께 구매자 알림·미선택 제안자 통지가 서버에서 나가므로
+   * 화면에서 상태를 흉내내지 않고 서버가 말하는 것을 그대로 받는다.
+   */
+  async function startPreparing() {
+    setPreparing(true);
+    try {
+      await fetchWithAuth<void>(`/api/auctions/${soldOrder.auctionId}/order/prepare`, { method: "POST" });
+      onRefresh();
+    } catch {
+      // 실패해도 화면을 흔들지 않는다 — 다시 누르면 된다(서버가 멱등이라 두 번 눌러도 안전하다).
+    } finally {
+      setPreparing(false);
+    }
+  }
 
   // 반품이 열려 있으면 발송 상태보다 반품 대응이 우선 — 판매자가 지금 눌러야 할 버튼이 여기 있다.
   if (soldOrder.disputeStatus !== "NONE" && soldOrder.disputeStatus !== "RESOLVED_DISMISSED") {
@@ -1717,10 +1760,32 @@ function SellerFulfillmentFooter({
           </>
         ) : addr ? (
           <>
-            {fulfillmentPill("clock", "accent", "발송 대기")}
+            {fulfillmentPill(fs === "PREPARING" ? "box" : "clock", "accent",
+              fs === "PREPARING" ? "물품 준비 중" : "발송 대기")}
             <span className="min-w-0 flex-1">
-              {addr.recipientName} · {addr.address1} {addr.address2 ?? ""}
+              {fs === "PREPARING" ? (
+                <>
+                  구매자 취소가 잠겼어요 · <b className="font-bold text-text-1">3영업일</b> 안에 보내주세요
+                </>
+              ) : (
+                <>
+                  {addr.recipientName} · {addr.address1} {addr.address2 ?? ""}
+                </>
+              )}
             </span>
+            {/* 🔴 준비는 보조, 발송이 주요 행동이다 — 준비는 건너뛰어도 되고 발송이 실제로
+                끝내는 일이다. 되돌리는 버튼은 두지 않는다: 풀 수 있게 만들면 구매자의
+                취소권이 판매자 손에 붙었다 떨어졌다 한다. */}
+            {fs !== "PREPARING" && (
+              <button
+                type="button"
+                disabled={preparing}
+                onClick={() => void startPreparing()}
+                className={`shrink-0 rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
+              >
+                물품 준비
+              </button>
+            )}
             <button
               type="button"
               onClick={() => setShipOpen((v) => !v)}
@@ -1736,7 +1801,7 @@ function SellerFulfillmentFooter({
           </>
         )}
       </div>
-      {shipOpen && fs === "AWAITING_SHIPMENT" && addr && (
+      {shipOpen && isBeforeShipment(fs) && addr && (
         <OrderShipForm
           auctionId={soldOrder.auctionId}
           onShipped={() => {

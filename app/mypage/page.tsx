@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useWishlist } from "@/lib/wishlist-context";
 import DeliveryAddressBook from "@/components/DeliveryAddressBook";
 import PaymentMethodManager from "@/components/PaymentMethodManager";
-import SettlementAccountManager from "@/components/SettlementAccountManager";
+import BankAccountManager from "@/components/BankAccountManager";
 import ProfileTab from "@/components/ProfileTab";
 import SettingsTab from "@/components/SettingsTab";
 import BadgeChips from "@/components/BadgeChips";
@@ -212,6 +212,9 @@ const ACCOUNT_NAV: { key: Tab; label: string; icon: () => ReactNode; hidden?: bo
   // 되살릴 때는 hidden만 지우면 된다.
   { key: "payment", label: "결제수단", icon: CardIcon, hidden: true },
   { key: "settlement", label: "정산계좌", icon: BankIcon },
+  // 환불계좌를 정산계좌 바로 아래 둔다 — 둘은 「돈이 오가는 계좌」로 같은 묶음이고, 나란히
+  // 있어야 「왜 둘이지?」에 화면이 스스로 답한다(#431).
+  { key: "refund", label: "환불계좌", icon: BankIcon },
   { key: "settings", label: "계정 설정", icon: GearIcon },
 ];
 
@@ -929,7 +932,14 @@ function MyPageBody() {
           <>
             <TabHead title="정산계좌" sub={<>판매 대금을 받을 계좌를 등록해요.</>} />
             <div className="mt-5">
-              <SettlementAccountManager />
+              <BankAccountManager purpose="settlement" />
+            </div>
+          </>
+        ) : activeTab === "refund" ? (
+          <>
+            <TabHead title="환불계좌" sub={<>거래가 취소되면 이 계좌로 돌려드려요.</>} />
+            <div className="mt-5">
+              <BankAccountManager purpose="refund" />
             </div>
           </>
         ) : activeTab === "settings" ? (

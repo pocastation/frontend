@@ -17,6 +17,7 @@ export type MypageTab =
   | "shipping"
   | "payment"
   | "settlement"
+  | "refund"
   | "settings";
 
 // 합쳐진 탭 안에서 어느 묶음을 보고 있는지.
@@ -35,6 +36,7 @@ export const TAB_TITLE: Record<MypageTab, string> = {
   shipping: "배송지 관리",
   payment: "결제수단",
   settlement: "정산계좌",
+  refund: "환불계좌",
   settings: "계정 설정",
 };
 

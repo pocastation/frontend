@@ -17,7 +17,7 @@ import {
   validateVideo,
 } from "@/lib/video-validate";
 import { useAuth } from "@/lib/auth-context";
-import { DURATION_OPTIONS, GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
+import { GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import type {
   ArtistListResponse,
@@ -110,7 +110,6 @@ export default function NewAuctionPage() {
   const [grade, setGrade] = useState<PhotocardGrade>("S");
   const [unopened, setUnopened] = useState(false);
   const [startPrice, setStartPrice] = useState("");
-  const [durationDays, setDurationDays] = useState<number>(3);
 
   const [items, setItems] = useState<PhotoItem[]>([]);
   const [video, setVideo] = useState<(VideoItem & { videoId?: string }) | null>(null);
@@ -379,7 +378,6 @@ export default function NewAuctionPage() {
           saleType,
           startPrice: price,
           buyNowPrice: saleType === "INSTANT" ? price : undefined,
-          durationDays: saleType === "AUCTION" ? durationDays : undefined,
           images: uploadedImages,
           videoId: AUCTION_VIDEO_ENABLED ? (video?.videoId ?? undefined) : undefined,
           verificationId: AUCTION_VERIFICATION_ENABLED ? (verificationId ?? undefined) : undefined,
@@ -449,7 +447,7 @@ export default function NewAuctionPage() {
     saleType: "판매 방식",
     info: "카테고리 · 소개",
     product: "상품 정보",
-    price: saleType === "INSTANT" ? "가격" : "가격 · 판매 기간",
+    price: "가격",
     media: AUCTION_VIDEO_ENABLED ? "사진 · 영상" : "사진",
     verification: "사진 인증",
   };
@@ -715,27 +713,20 @@ export default function NewAuctionPage() {
                 </p>
               </div>
 
+              {/* 🔴 판매 기간은 고르는 값이 아니라 정해진 값이다(거래 개편 §1.3 — 7일 고정).
+                  선택 UI를 지우기만 하면 판매자가 자기 매물이 언제 끝나는지 알 방법이 없어지므로,
+                  그 자리를 헤어라인 정보 행으로 대신한다. 입력이 아니라는 것이 형태로 읽혀야 해서
+                  상품 정보와 같은 어휘를 쓰고, 선택 상태가 아니므로 보라를 쓰지 않는다. */}
               {saleType === "AUCTION" && (
-                <fieldset>
-                  <legend className="mb-1.5 text-xs font-bold text-text-2">판매 기간</legend>
-                  <div className="flex gap-2">
-                    {DURATION_OPTIONS.map((days) => (
-                      <button
-                        key={days}
-                        type="button"
-                        aria-pressed={durationDays === days}
-                        onClick={() => setDurationDays(days)}
-                        className={`flex-1 rounded-r2 border py-2.5 text-sm font-bold transition-all active:scale-[0.97] ${FOCUS_RING} ${
-                          durationDays === days
-                            ? "border-primary bg-primary-soft text-primary"
-                            : "border-border text-text-2 hover:border-border-2"
-                        }`}
-                      >
-                        {days}일
-                      </button>
-                    ))}
+                <div className="mt-1 border-t border-border">
+                  <div className="flex items-baseline justify-between border-b border-border py-2.5">
+                    <span className="text-xs font-bold text-text-2">판매 기간</span>
+                    <span className="text-[13.5px] font-bold tabular-nums text-text-1">7일</span>
                   </div>
-                </fieldset>
+                  <p className="pt-2 text-[11px] leading-relaxed text-text-3">
+                    등록한 때부터 7일 동안 제안을 받아요. 기간이 끝나면 자동으로 판매가 종료돼요.
+                  </p>
+                </div>
               )}
 
             </div>

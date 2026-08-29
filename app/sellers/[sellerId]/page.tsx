@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import AuctionGrid from "@/components/AuctionGrid";
 import SellerReviewSummary from "@/components/SellerReviewSummary";
+import { plainLevelLabel } from "@/lib/labels";
 import { apiFetch, ApiError } from "@/lib/api";
 import { DEFAULT_OG_IMAGE } from "@/lib/site";
 import { FOCUS_RING } from "@/lib/ui";
@@ -38,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ sellerId:
     return { title: "판매자를 찾을 수 없어요 — Pocastation" };
   }
   const description = [
-    `Lv.${seller.trustLevel} ${seller.trustLevelLabel}`,
+    `Lv.${seller.trustLevel} ${plainLevelLabel(seller.trustLevelLabel)}`,
     `거래 ${seller.tradeCount}회`,
     seller.reviewCount > 0 && seller.averageRating !== null
       ? `후기 ${seller.reviewCount}개 · 평점 ${seller.averageRating.toFixed(1)}`

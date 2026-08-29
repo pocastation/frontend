@@ -13,7 +13,7 @@ import { useAuctionBidding } from "@/lib/auction-bidding-context";
 import { OFFER_UNIT, buyerFee, estimatedTotal } from "@/lib/fees";
 import { formatKRW } from "@/lib/format";
 import { INTERMEDIARY_NOTICE } from "@/lib/business";
-import { GRADE_LABEL, OFFER_EMPTY_HINT, SOURCE_LABEL } from "@/lib/labels";
+import { GRADE_LABEL, OFFER_EMPTY_HINT, SOURCE_LABEL, plainLevelLabel } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionDetailResponse, SellerRatingResponse } from "@/lib/types";
 
@@ -30,12 +30,6 @@ import type { AuctionDetailResponse, SellerRatingResponse } from "@/lib/types";
 
 const TAB_PRODUCT = "상품 정보";
 const TAB_DELIVERY = "배송·환불";
-
-// BE가 내려주는 등급 라벨에는 이모지가 붙어 온다("덕린이 🌱"). 제품 화면은 이모지를 쓰지 않으므로
-// 글자만 남긴다 — 등급 이름 자체는 BE 값을 그대로 쓴다(우리가 새로 짓지 않는다).
-function plainLevelLabel(label: string): string {
-  return label.replace(/[\p{Extended_Pictographic}️]/gu, "").trim();
-}
 
 function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: string }) {
   const [levelLabel, setLevelLabel] = useState<string | null>(null);

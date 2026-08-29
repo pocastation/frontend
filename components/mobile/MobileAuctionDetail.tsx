@@ -81,7 +81,7 @@ function parseInputAmount(value: string): number | null {
 
 /** 제안 바텀시트 — 데스크톱과 같은 직접 입력·최소 금액·단위(OFFER_UNIT) 규칙을 사용한다. */
 function BidSheet({ onClose }: { onClose: () => void }) {
-  const { amount, floor, adjustAmount, submitting, alreadyOffered, needsAddress, handleBid } = useAuctionBidding();
+  const { amount, floor, adjustAmount, submitting, myOfferAmount, needsAddress, handleBid } = useAuctionBidding();
   const [proposalValue, setProposalValue] = useState(() => formatInputAmount(amount));
   const [isEditing, setIsEditing] = useState(false);
   const typedAmount = parseInputAmount(proposalValue);
@@ -165,18 +165,20 @@ function BidSheet({ onClose }: { onClose: () => void }) {
           <p className="mt-1.5 text-[11px] text-text-3">거래 성사 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
         </div>
 
+        {/* 🔴 제안 뒤에도 잠그지 않는다(#428) — 다시 제안하는 것이 곧 수정이다(§2.1).
+            예전에는 잠겨 있어 금액을 바꿀 방법이 아예 없었다. */}
         <button
           type="button"
           onClick={() => void handleBid()}
-          disabled={submitting || alreadyOffered || !hasValidAmount}
+          disabled={submitting || !hasValidAmount}
           className={`mt-3 flex h-12 w-full items-center justify-center rounded-[7px] bg-primary text-sm font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
         >
-          {alreadyOffered
-            ? "가격 제안을 보냈어요"
-            : submitting
-              ? "처리 중..."
-              : needsAddress
-                ? "배송지 등록하고 가격 제안하기"
+          {submitting
+            ? "처리 중..."
+            : needsAddress
+              ? "배송지 등록하고 가격 제안하기"
+              : myOfferAmount != null
+                ? "제안 금액 바꾸기"
                 : "가격 제안하기"}
         </button>
         {needsAddress && (
@@ -184,6 +186,14 @@ function BidSheet({ onClose }: { onClose: () => void }) {
             거래가 성사되면 바로 보내드릴 수 있게 받을 주소를 먼저 등록해요.{" "}
             <b className="font-bold text-text-2">한 번만 하면 다음부터는 물어보지 않아요.</b>
           </p>
+        )}
+        {myOfferAmount != null && (
+          <div className="mt-3 border-t border-border pt-2.5">
+            <p className="text-[11.5px] leading-[1.6] text-text-3">
+              <b className="font-bold text-text-2">{formatKRW(myOfferAmount)}</b>으로 제안하셨어요.
+              새 금액으로 다시 보내면 이전 제안을 대신해요.
+            </p>
+          </div>
         )}
       </div>
     </div>
@@ -205,7 +215,6 @@ export default function MobileAuctionDetail({
     status,
     isLive,
     isOwnAuction,
-    alreadyOffered,
     addressModalOpen,
     closeAddressModal,
     onAddressSaved,
@@ -421,10 +430,6 @@ export default function MobileAuctionDetail({
             >
               로그인하고 제안하기
             </Link>
-          ) : alreadyOffered ? (
-            <span className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-bold text-text-3">
-              이미 제안했어요
-            </span>
           ) : (
             <button
               type="button"

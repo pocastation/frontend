@@ -41,6 +41,7 @@ import type {
   WishlistListResponse,
 } from "@/lib/types";
 import IdentityVerificationPanel from "@/components/IdentityVerificationPanel";
+import OfferWithdrawModal from "@/components/OfferWithdrawModal";
 import AuctionCard from "@/components/AuctionCard";
 import MobileShell from "@/components/mobile/MobileShell";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
@@ -77,6 +78,11 @@ const PUBLIC_DETAIL_STATUSES = new Set<AuctionResponse["status"]>([
 ]);
 
 type SellingListItem = AuctionResponse | MySellingAuctionResponse;
+
+// 제안 철회 줄의 버튼(#428). 판매 관리의 아웃라인 버튼과 같은 무게로 둔다 — 취소는 예외적인
+// 행동이 아니라 §1.2가 보장한 권리라, 눈에 띄게 만들 이유도 숨길 이유도 없다.
+const OFFER_ACTION_CLASS =
+  `shrink-0 rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`;
 
 // 탭 키·제목·딥링크 해석은 lib/mypage-tabs.ts에 있다 — 모바일 메뉴 목록이 같은 정의를 읽는다.
 type Tab = MypageTab;
@@ -320,6 +326,8 @@ function MyPageBody() {
   // 거래 성사 후 배송지 입력 팝업(§13 "배송지 자동채움") — 기본배송지가 없어 자동확정 못한 주문을
   // 마이페이지 진입 즉시 모달로 띄운다. 사용자가 "나중에"로 닫으면 이번 세션에선 다시 안 띄운다.
   const [addressModalOrder, setAddressModalOrder] = useState<{ auctionId: number; title: string } | null>(null);
+  const [withdrawTarget, setWithdrawTarget] =
+    useState<{ auctionId: number; bidId: number; title: string } | null>(null);
   const dismissedAddressIds = useRef<Set<number>>(new Set());
   // 거래 리뷰(§12.6) — 작성 가능한(구매확정 후 14일 내 미작성) 주문 목록 + 작성 모달 대상.
   const [reviewable, setReviewable] = useState<ReviewableOrderResponse[]>([]);
@@ -440,6 +448,18 @@ function MyPageBody() {
 
   function openAddressModal(auctionId: number, title: string) {
     setAddressModalOrder({ auctionId, title });
+  }
+
+  // 제안 철회 확인(#428). 되돌릴 수 없는 행동이라 한 번 묻고, 끝나면 목록을 다시 읽는다 —
+  // 인원수·금액·상태가 한꺼번에 바뀌므로 화면에서 지워 흉내내지 않는다.
+  function openWithdrawModal(item: MyBiddingResponse) {
+    if (item.myOfferId == null) return;
+    setWithdrawTarget({ auctionId: item.id, bidId: item.myOfferId, title: item.title });
+  }
+
+  async function handleOfferWithdrawn() {
+    setWithdrawTarget(null);
+    await loadMyActivity();
   }
 
   function closeAddressModal() {
@@ -568,6 +588,15 @@ function MyPageBody() {
           auctionTitle={addressModalOrder.title}
           onClose={closeAddressModal}
           onSaved={handleAddressSaved}
+        />
+      )}
+      {withdrawTarget && (
+        <OfferWithdrawModal
+          auctionId={withdrawTarget.auctionId}
+          bidId={withdrawTarget.bidId}
+          title={withdrawTarget.title}
+          onClose={() => setWithdrawTarget(null)}
+          onWithdrawn={handleOfferWithdrawn}
         />
       )}
       {reviewModalOrder && (
@@ -749,11 +778,11 @@ function MyPageBody() {
 
             <div className="mt-8 grid gap-5 sm:grid-cols-2">
               <DashboardPanel title="참여 중인 거래" onSeeAll={() => goToBidding("live")}>
-                <MyBiddingList items={liveBidding.slice(0, 3)} loading={loading} emptyText="참여 중인 거래가 없습니다." orders={orders} />
+                <MyBiddingList items={liveBidding.slice(0, 3)} loading={loading} emptyText="참여 중인 거래가 없습니다." orders={orders} onWithdrawOffer={openWithdrawModal} />
               </DashboardPanel>
 
               <DashboardPanel title="제안 내역" onSeeAll={() => goToBidding("all")}>
-                <MyBiddingList items={bidding.slice(0, 3)} loading={loading} emptyText="아직 제안한 매물이 없어요." orders={orders} />
+                <MyBiddingList items={bidding.slice(0, 3)} loading={loading} emptyText="아직 제안한 매물이 없어요." orders={orders} onWithdrawOffer={openWithdrawModal} />
               </DashboardPanel>
 
               <DashboardPanel title="구매 내역" onSeeAll={() => goToPurchases("auction")}>
@@ -805,6 +834,7 @@ function MyPageBody() {
                 emptyText={biddingFilter === "live" ? "참여 중인 거래가 없습니다." : "아직 제안한 매물이 없어요."}
                 orders={orders}
                 onGoPayment={() => selectTab("payment")}
+                onWithdrawOffer={openWithdrawModal}
               />
             </div>
           </>
@@ -1853,6 +1883,7 @@ function MyBiddingList({
   onRefresh,
   onOpenAddressModal,
   onConfirmed,
+  onWithdrawOffer,
 }: {
   items: MyBiddingResponse[];
   loading: boolean;
@@ -1863,6 +1894,7 @@ function MyBiddingList({
   onRefresh?: () => void;
   onOpenAddressModal?: (auctionId: number, title: string) => void;
   onConfirmed?: (auctionId: number) => void;
+  onWithdrawOffer?: (item: MyBiddingResponse) => void;
 }) {
   if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
   if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
@@ -1875,6 +1907,12 @@ function MyBiddingList({
         // 🔴 MATCHED 하나로는 「내가 선택됐다」와 「다른 분이 선택됐다」가 갈리지 않는다(#419).
         // 주문이 있으면 내가 구매자이고, 없으면 남이 골라진 것이다 — 그때 내 제안은 아직 살아
         // 있어서 미결제 시 다시 후보가 되므로(§1.4) 「끝났다」로 읽히면 안 된다.
+        // 취소는 「내 제안이 아직 살아 있고(ACTIVE) 매물이 그 철회를 받는 상태」일 때만이다.
+        // ACCEPTED면 계약이 성립해 취소가 막히고(§9.1), 종료된 매물은 바꿀 것이 없다.
+        const canWithdraw =
+          item.myOfferStatus === "ACTIVE" &&
+          item.myOfferId != null &&
+          (item.status === "LIVE" || item.status === "MATCHED");
         const stateLabel = isLive
           ? formatTimeLeft(item.endAt)
           : item.status === "MATCHED" && !order
@@ -1902,8 +1940,10 @@ function MyBiddingList({
                 <span className="shrink-0 text-right">
                   {/* 오른쪽 큰 숫자를 「내 제안가」로 올렸다 — 예전에는 현재가(=최고 제안가)였는데
                       그 값이 사라졌고, 이 화면에서 사용자가 가장 알고 싶은 건 자기가 낸 금액이다. */}
+                  {/* 전부 거둬들이면 금액이 없다 — 그때는 「취소함」이라고 말한다.
+                      0원을 그리면 「0원에 제안했다」로 읽힌다. */}
                   <span className="block font-display text-[13.5px] font-bold tabular-nums text-text-1">
-                    {formatKRW(item.myBidAmount)}
+                    {item.myBidAmount == null ? "취소함" : formatKRW(item.myBidAmount)}
                   </span>
                   {/* 손볼 것이 있는 상태만 잉크색으로 올린다 — 나머지는 회색으로 물러난다. */}
                   <span
@@ -1915,6 +1955,33 @@ function MyBiddingList({
                   </span>
                 </span>
               </Link>
+              {/* 🔴 제안 철회·수정 줄(§1.2, #428). 상태마다 할 수 있는 일이 다르다.
+                  · ACTIVE + 진행 중  → 금액 수정 · 제안 취소
+                  · ACTIVE + 성사대기 → 제안 취소만. 아직 유효해서 미결제 시 재선택된다(§1.8)
+                  · ACCEPTED         → 아무것도 없다. 선택된 제안은 취소할 수 없고(§9.1) 빠지는
+                                        길은 주문 취소다 — 아래 주문 푸터가 그 자리를 맡는다.
+                  버튼을 「눌리지만 서버가 거절하는」 상태로 두지 않는다. 그건 잘못된 안내다. */}
+              {canWithdraw && (
+                <div className="mt-2.5 flex items-center gap-2 pl-[56px]">
+                  <span className="flex-1 text-[11.5px] leading-relaxed text-text-3">
+                    {isLive
+                      ? "판매자가 선택하기 전까지 바꾸거나 거둬들일 수 있어요."
+                      : "아직 유효해요. 결제가 이뤄지지 않으면 다시 선택될 수 있어요."}
+                  </span>
+                  {isLive && (
+                    <Link href={`/auctions/${item.id}`} className={OFFER_ACTION_CLASS}>
+                      금액 수정
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => onWithdrawOffer?.(item)}
+                    className={`${OFFER_ACTION_CLASS} hover:!border-accent hover:!text-accent`}
+                  >
+                    제안 취소
+                  </button>
+                </div>
+              )}
               {/* 성사된 거래도 PAID면 배송지 입력·구매확정 푸터, 그 전이면 결제 상태 푸터(#113/#119). */}
               {order &&
                 (order.status === "PAID" && onRefresh ? (

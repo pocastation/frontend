@@ -76,3 +76,19 @@ export const PAYMENT_WINDOW_TEXT = "48시간";
 export function estimatedTotal(hammerPrice: number): number {
   return hammerPrice + buyerFee(hammerPrice);
 }
+
+/**
+ * 🔴 입금 후 구매자가 취소할 수 있는 최장 구간(§1.5) — 백엔드 `FulfillmentSweeper`의 복제본이다.
+ *
+ * <p>서버가 이 시간이 지난 주문을 자동으로 잠근다. 화면이 남은 시간을 말하려면 같은 값이
+ * 필요한데, 응답에 「언제 잠기는지」를 새로 싣는 대신 `paidAt`에서 계산한다 — 이미 있는 값으로
+ * 답할 수 있으면 필드를 늘리지 않는다.
+ *
+ * ⚠️ 갈리면 「18시간 남았다더니 지금 잠겼다」가 된다. 서버 상수를 고치면 여기도 함께 고칠 것.
+ */
+export const CANCELLATION_WINDOW_HOURS = 24;
+
+/** 취소가 잠기는 시각 — 입금 시각 + 최장 구간. */
+export function cancellationLocksAt(paidAt: string): string {
+  return new Date(new Date(paidAt).getTime() + CANCELLATION_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+}

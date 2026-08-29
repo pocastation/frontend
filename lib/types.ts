@@ -665,14 +665,6 @@ export type NotificationType =
   | "SETTLEMENT_COMPLETED" // 정산 완료 — 판매자에게 실입금 예정 안내(실입금은 PG 사이클 시차)
   | "INQUIRY_ANSWERED"; // 1:1 문의 답변 완료
 
-// GET /api/members/me/succession-offers/{auctionId} — 제안 대상자 본인에게만 200(타인 404).
-export type SuccessionOfferResponse = {
-  auctionId: number;
-  amount: number;
-  status: "OFFERED" | "ACCEPTED" | "DECLINED" | "EXPIRED";
-  expiresAt: string;
-};
-
 // ─── 주문/결제 상태 ───
 
 // backend OrderStatus와 1:1. PAYMENT_FAILED는 예약값(현재 전이 없음)이지만 과거 행 호환으로 포함.

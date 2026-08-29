@@ -983,7 +983,12 @@ export type AdminDisputeListResponse = {
 };
 
 // 판매자 정산계좌(BE #258). 서버는 뒤 4자리만 내려준다 — 평문 계좌번호는 응답에 없다.
-export type SettlementAccount = {
+/**
+ * 계좌 응답 — 정산계좌(#258)와 환불계좌(#390)가 같은 모양이다.
+ *
+ * 🔴 `maskedAccountNumber`는 뒤 4자리뿐이다. 평문 계좌번호는 어떤 응답에도 실리지 않는다.
+ */
+export type BankAccount = {
   bank: string;
   bankName: string;
   maskedAccountNumber: string;

@@ -45,6 +45,34 @@ export function buyerFee(hammerPrice: number): number {
 }
 
 /** 예상 결제 총액 = 거래가 + 구매자 수수료. 배송비는 판매자 부담이라 별도 청구하지 않는다. */
+/**
+ * 판매자 수수료율 — §12.2 확정값. 구간별인 구매자 수수료와 달리 **전 구간 3.5%**다.
+ *
+ * 🔴 백엔드 `FeePolicy`와 같은 값을 프론트가 들고 있다. 이중화지만, 판매자가 <b>되돌릴 수 없는
+ * 선택을 누르기 직전</b>에 실수령액을 보여주려면 수락 전에 계산할 수 있어야 한다 — 수락 응답의
+ * `payoutAmount`는 이미 계약이 성립한 뒤에 온다. 값이 갈리면 화면이 거짓말을 하므로
+ * **FeePolicy가 바뀌면 여기도 함께 바꿀 것.**
+ */
+const SELLER_FEE_RATE = 0.035;
+
+/** 판매자가 실제로 받는 금액(수수료 공제 후). 원 단위 절사는 백엔드와 같게 내림으로 맞춘다. */
+export function sellerPayout(hammerPrice: number): number {
+  return hammerPrice - Math.floor(hammerPrice * SELLER_FEE_RATE);
+}
+
+/**
+ * 결제 기한 표기 — 백엔드 `PaymentDeadlinePolicy.PAYMENT_WINDOW`와 같은 값(§3.1).
+ *
+ * 🔴 **문구에 숫자를 직접 쓰지 않는다.** 백엔드가 같은 함정을 이미 밟았다 — 상수는 72시간인데
+ * 알림 문구는 48시간이라 서로 다른 말을 하고 있었다(BE #381). 프론트도 문장마다 「48시간」을
+ * 박아 두면 정책이 바뀔 때 화면만 옛말을 한다.
+ *
+ * 이 값은 세 곳이 같아야 한다 — 주문의 결제 기한 · PG 가상계좌 유효기간 · 사용자 안내 문구.
+ * 어긋나면 「계좌는 살아 있는데 거래는 이미 취소된」 구간이 생긴다.
+ * **`PaymentDeadlinePolicy`가 바뀌면 여기도 함께 바꿀 것.**
+ */
+export const PAYMENT_WINDOW_TEXT = "48시간";
+
 export function estimatedTotal(hammerPrice: number): number {
   return hammerPrice + buyerFee(hammerPrice);
 }

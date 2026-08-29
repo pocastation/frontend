@@ -6,6 +6,7 @@ import OfferCounts from "@/components/OfferCounts";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useAuctionBidding } from "@/lib/auction-bidding-context";
+import { PAYMENT_WINDOW_TEXT, sellerPayout } from "@/lib/fees";
 import { formatKRW, formatRelativeTime } from "@/lib/format";
 import { useToast } from "@/lib/toast-context";
 import { FOCUS_RING } from "@/lib/ui";
@@ -75,36 +76,55 @@ function OfferConfirmation({
           </svg>
         </button>
 
-        <h2 id="offer-confirm-title" className="pr-9 font-display text-xl font-extrabold text-text-1">
-          이 제안을 수락할까요?
+        {/* 🔴 제목이 「누구와」를 말한다(#424) — 고르는 대상이 금액이 아니라 **사람**이라는 것이
+            이 개편의 서사이고, 제목이 그걸 먼저 말해야 한다. */}
+        <h2 id="offer-confirm-title" className="pr-9 font-display text-[19px] font-extrabold leading-snug text-text-1">
+          {offer.bidderNicknameMasked} 님의 제안을 선택할까요?
         </h2>
-        <p className="mt-3 text-[13px] leading-relaxed text-text-3">
-          수락하면 판매가 종료되고 구매자에게 결제 안내가 발송돼요.
+
+        {/* 🔴 「되돌릴 수 없다」가 제목 다음 첫 문장이다(#424). 예전에는 맨 아래 12px 회색이었고,
+            그 위에는 「수락하면 **판매가 종료되고**」라는 사실이 아닌 문장이 있었다 — 매물은
+            MATCHED로 가고 미결제면 다시 열린다(§1.4).
+            강조 장치를 쓰지 않는다: 색 띠나 회색 상자는 알림 상자처럼 읽히고, 작은 팝업에서는
+            그 자체가 장식이 된다. **읽는 순서**가 무게를 진다. */}
+        <p className="mt-2.5 text-[13.5px] font-bold leading-relaxed text-text-1">
+          선택하면 매매계약이 성립하고 되돌릴 수 없어요.
+        </p>
+        <p className="mt-1.5 text-[11.5px] leading-relaxed text-text-3">
+          사정이 생기면 관리자 중재를 거쳐야 하고, 제재가 적용될 수 있어요.
         </p>
 
-        <dl className="mt-5 bg-surface-2 px-4 py-3 text-sm">
-          <div className="flex items-center justify-between gap-4 py-1">
-            <dt className="text-text-3">구매자</dt>
-            <dd className="font-bold text-text-1">{offer.bidderNicknameMasked}</dd>
+        {/* 금액 블록 — 채운 상자 대신 헤어라인 분할. 결정 직전에 실수령액과 상대 이력을 한 번 더
+            보여준다: 목록에서 봤더라도 되돌릴 수 없는 버튼을 누르기 직전이 확인할 자리다. */}
+        <div className="mt-5 border-t border-border pt-4">
+          <p className="font-display text-3xl font-extrabold tabular-nums leading-none text-text-1">
+            {formatKRW(offer.amount)}
+          </p>
+          <p className="mt-1.5 text-xs text-text-2">
+            정산 예상 <b className="font-bold tabular-nums text-text-1">{formatKRW(sellerPayout(offer.amount))}</b>
+            {" · 수수료 3.5% 공제"}
+          </p>
+          <div className="mt-3 border-t border-border pt-2.5">
+            <p className="text-[12.5px] font-bold text-text-1">{offer.bidderNicknameMasked}</p>
+            <p className="mt-0.5 text-[11.5px] text-text-2">
+              Lv.{offer.trustLevel} · 거래 <span className="tabular-nums">{offer.tradeCount}회</span>
+            </p>
           </div>
-          <div className="flex items-center justify-between gap-4 py-1">
-            <dt className="text-text-3">제안 금액</dt>
-            <dd className="font-display text-base font-extrabold tabular-nums text-text-1">
-              {formatKRW(offer.amount)}
-            </dd>
-          </div>
-        </dl>
+        </div>
 
-        <p className="mt-4 text-[12px] leading-relaxed text-text-3">
-          수락한 제안은 변경하거나 취소할 수 없어요.
+        <p className="mt-4 border-t border-border pt-3 text-[11.5px] leading-relaxed text-text-3">
+          선택하면 구매자에게{" "}
+          <b className="font-bold text-text-2">{PAYMENT_WINDOW_TEXT} 안에 결제</b>하라는 안내가 갑니다.
+          그동안 다른 제안은 받지 않고, 결제가 확인되면 발송을 준비하시면 돼요.
+          기한이 지나면 다시 판매 중으로 돌아옵니다.
         </p>
 
-        <div className="mt-6 flex justify-end gap-2.5">
+        <div className="mt-5 flex gap-2">
           <button
             type="button"
             disabled={submitting}
             onClick={onCancel}
-            className={`h-11 rounded-r2 border border-border-2 bg-white px-5 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-50 ${FOCUS_RING}`}
+            className={`h-[46px] w-[84px] shrink-0 rounded-r1 border border-border-2 bg-white text-[13.5px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
           >
             취소
           </button>
@@ -113,9 +133,9 @@ function OfferConfirmation({
             autoFocus
             disabled={submitting}
             onClick={onConfirm}
-            className={`h-11 rounded-r2 bg-primary px-5 text-sm font-extrabold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+            className={`h-[46px] flex-1 rounded-r1 bg-primary text-[13.5px] font-extrabold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
-            {submitting ? "처리 중..." : "제안 수락"}
+            {submitting ? "처리 중..." : "이 제안 선택"}
           </button>
         </div>
       </section>
@@ -217,14 +237,14 @@ export default function SellerOfferPanel({
       setPendingOffer(null);
       toast.show({
         variant: "success",
-        text: "제안을 수락했어요.",
+        text: "제안을 선택했어요.",
         sub: "구매자에게 결제 안내가 발송됐어요.",
       });
       router.refresh();
     } catch (error) {
       const message = error instanceof ApiError
         ? error.message
-        : "제안을 수락하지 못했습니다. 잠시 후 다시 시도해주세요.";
+        : "제안을 선택하지 못했습니다. 잠시 후 다시 시도해주세요.";
       toast.show({ variant: "danger", text: message });
       if (error instanceof ApiError && ["BID_NOT_ACTIVE", "OFFER_NOT_FOUND"].includes(error.errorCode ?? "")) {
         setPendingOffer(null);
@@ -255,9 +275,10 @@ export default function SellerOfferPanel({
               <h2 className={`${viewport === "desktop" ? "text-base" : "text-sm"} font-extrabold text-text-1`}>
                 선택한 가격 제안
               </h2>
-              <span className="rounded-r2 border border-border-2 px-2.5 py-1 text-[11px] font-bold text-text-2">
-                결제 대기
-              </span>
+              {/* 🔴 테두리 칩을 걷었다(#424). 마이페이지 목록에서 같은 모양(도트 배지·알약)을
+                  이미 걷어냈는데 여기만 남아 있었다 — 상태는 텍스트가 말하고, 칩은 조작
+                  가능한 것처럼 읽힌다. 오른쪽 끝 잉크색 굵은 글씨가 목록의 상태 열과 같은 규칙이다. */}
+              <span className="shrink-0 text-[11.5px] font-bold text-text-1">결제 대기</span>
             </div>
 
             {loading && !selectedOffer ? (
@@ -279,6 +300,15 @@ export default function SellerOfferPanel({
                   <dt className="text-text-3">거래 금액</dt>
                   <dd className="font-display text-base font-extrabold tabular-nums text-text-1">
                     {formatKRW(selectedOffer.amount)}
+                  </dd>
+                </div>
+                {/* 🔴 응답으로 받고 있는데 화면이 쓰지 않던 값이다(#424). 마이페이지·발송 패널은
+                    이미 「정산 예정」을 보여주는데 이 화면만 빠져 있었다 — 판매자가 실제로 받는
+                    돈이 어디에도 없었다. */}
+                <div className="flex items-center justify-between gap-4 py-3">
+                  <dt className="text-text-3">정산 예상</dt>
+                  <dd className="font-bold tabular-nums text-text-1">
+                    {formatKRW(selectedOffer.payoutAmount)}
                   </dd>
                 </div>
               </dl>
@@ -316,25 +346,31 @@ export default function SellerOfferPanel({
             ) : (
               <ul className="divide-y divide-border border-y border-border">
                 {offers.map((offer) => (
-                  <li
-                    key={offer.id}
-                    className={viewport === "desktop"
-                      ? "grid grid-cols-[minmax(0,1fr)_92px_112px_68px] items-center gap-3 py-3"
-                      : "grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 py-3"}
-                  >
-                    <span className="truncate text-sm font-bold text-text-1">{offer.bidderNicknameMasked}</span>
-                    <span className={`${viewport === "desktop" ? "text-left" : "col-start-1 row-start-2"} text-[11px] text-text-3`}>
-                      {offerTime(offer.createdAt)}
+                  // 🔴 금액을 닉네임과 **같은 급**으로 낮췄다(#424). 예전에는 금액이 15px/800,
+                  // 닉네임이 14px/700이라 시선이 금액으로 먼저 갔다 — 금액을 키우면 화면이 여전히
+                  // 경매로 읽히고, PG 심사자도 이 화면을 본다.
+                  //
+                  // 그 아래 한 줄이 **상대를 심사할 재료**다(§2.8 C1, BE #378). 칩이나 배지로
+                  // 흩지 않고 가운뎃점으로 이어 숫자만 굵게 둔다 — 훑을 때 숫자가 걸린다.
+                  <li key={offer.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 py-3">
+                    <span className="truncate text-[13.5px] font-bold text-text-1">
+                      {offer.bidderNicknameMasked}
                     </span>
-                    <span className={`${viewport === "desktop" ? "text-right" : "col-start-2 row-start-1"} font-display text-[15px] font-extrabold tabular-nums text-text-1`}>
+                    <span className="text-right font-display text-[13.5px] font-bold tabular-nums text-text-1">
                       {formatKRW(offer.amount)}
+                    </span>
+                    <span className="col-start-1 truncate text-[11.5px] text-text-2">
+                      Lv.{offer.trustLevel} · 거래{" "}
+                      <b className="font-bold tabular-nums text-text-1">{offer.tradeCount}회</b>
+                      {" · "}
+                      <span className="text-text-3">{offerTime(offer.createdAt)}</span>
                     </span>
                     <button
                       type="button"
                       onClick={() => setPendingOffer(offer)}
-                      className={`${viewport === "desktop" ? "h-9" : "col-start-2 row-start-2 h-8"} rounded-r2 bg-primary px-3 text-xs font-extrabold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+                      className={`col-start-2 h-8 justify-self-end rounded-r1 border border-border-2 bg-white px-3 text-xs font-bold text-text-1 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
                     >
-                      수락
+                      선택
                     </button>
                   </li>
                 ))}
@@ -354,7 +390,7 @@ export default function SellerOfferPanel({
             )}
 
             <p className="mt-4 text-[11px] leading-relaxed text-text-3">
-              제안을 수락하면 구매자에게 결제 안내가 발송되며, 선택을 되돌릴 수 없어요.
+              제안을 선택하면 구매자에게 결제 안내가 발송되며, 되돌릴 수 없어요.
             </p>
           </div>
         )}

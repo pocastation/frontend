@@ -17,6 +17,16 @@ export function isBeforeEnd(endAt: string | null | undefined): boolean {
   return new Date(endAt).getTime() > Date.now();
 }
 
+/**
+ * 그 시각이 이미 지났는가.
+ *
+ * <p>🔴 {@code Date.now()}를 함수 뒤에 숨기는 이유는 다른 헬퍼와 같다 — 렌더 본문에서 직접
+ * 부르면 purity 린트가 막는다(같은 입력에 다른 결과를 내는 호출이라 렌더가 순수하지 않다).
+ */
+export function hasPassed(iso: string): boolean {
+  return Date.now() >= new Date(iso).getTime();
+}
+
 export function formatTimeLeft(endAt: string): string {
   const diffMs = new Date(endAt).getTime() - Date.now();
   if (diffMs <= 0) return "종료";

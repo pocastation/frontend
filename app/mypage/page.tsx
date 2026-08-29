@@ -45,6 +45,7 @@ import type {
 import { isBeforeShipment } from "@/lib/types";
 import IdentityVerificationPanel from "@/components/IdentityVerificationPanel";
 import OfferWithdrawModal from "@/components/OfferWithdrawModal";
+import SellingListingActions from "@/components/SellingListingActions";
 import AuctionCard from "@/components/AuctionCard";
 import MobileShell from "@/components/mobile/MobileShell";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
@@ -896,6 +897,7 @@ function MyPageBody() {
                   loading={loading}
                   emptyText="등록한 매물이 없습니다."
                   showReviewStatus
+                  showListingActions
                   soldOrders={soldOrders}
                   onRefresh={loadMyActivity}
                 />
@@ -1129,6 +1131,7 @@ function SellingList({
   onRefresh,
   onOpenAddressModal,
   onConfirmed,
+  showListingActions = false,
 }: {
   items: SellingListItem[];
   loading: boolean;
@@ -1142,6 +1145,9 @@ function SellingList({
   soldOrders?: Record<number, SoldOrderResponse>;
   onRefresh?: () => void;
   onConfirmed?: (auctionId: number) => void;
+  // 연장·최소가 수정은 「판매 중인 매물」 탭에서만 — 판매 내역(종료분)과 즉시구매 내역에는
+  // 손댈 것이 없다. 목록 컴포넌트를 셋이 공유하므로 켜는 쪽에서만 켠다.
+  showListingActions?: boolean;
 }) {
   if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
   if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
@@ -1239,6 +1245,14 @@ function SellingList({
                   </p>
                 </div>
               )}
+              {/* 연장·최소가 수정(§1.3·§1.1) — 판매 중인 제안판매에만. 즉시판매는 기간이 없고
+                  (마감 자체가 없다) 종료된 매물은 손댈 것이 없다. */}
+              {showListingActions
+                && isLive
+                && item.saleType === "AUCTION"
+                && "nextExtensionDays" in item && (
+                  <SellingListingActions auction={item} onChanged={() => onRefresh?.()} />
+                )}
               {/* 구매자(즉시구매) 관점: PAID면 배송/확정, 아니면 결제 상태. 판매자 관점: 발송 푸터. */}
               {order &&
                 (order.status === "PAID" && onRefresh ? (

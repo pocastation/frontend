@@ -159,9 +159,19 @@ export default function PolicyPage() {
         ))}
       </div>
 
-      <p className="mt-10 border-t border-border pt-5 text-sm font-semibold text-text-1">
-        {POLICY_ADDENDUM}
-      </p>
+      <section className="mt-10 border-t border-border pt-5">
+        <h2 className="text-sm font-bold text-text-1">부칙</h2>
+        <ul className="mt-2 space-y-1.5">
+          {POLICY_ADDENDUM.map((line, index) => (
+            <li key={index} className="flex gap-2 text-sm leading-relaxed text-text-2">
+              <span className="shrink-0 font-semibold text-text-3">
+                {["①", "②", "③", "④"][index] ?? ""}
+              </span>
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }

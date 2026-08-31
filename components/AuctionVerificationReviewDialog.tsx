@@ -223,6 +223,28 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
         </div>
 
         <div className="min-h-0 overflow-y-auto p-4 sm:p-5">
+          {readOnly && (
+            <dl className="mb-5 grid gap-3 rounded-r2 border border-border bg-surface-2 px-4 py-3 text-xs sm:grid-cols-3">
+              <div>
+                <dt className="text-text-3">검수 결과</dt>
+                <dd className={`mt-1 font-extrabold ${
+                  auction.status === "REJECTED" ? "text-accent" : auction.reviewedAt ? "text-ok" : "text-text-3"
+                }`}>
+                  {reviewResult}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-text-3">검수 일시</dt>
+                <dd className="mt-1 font-bold text-text-2">
+                  {auction.reviewedAt ? new Date(auction.reviewedAt).toLocaleString("ko-KR") : "기록 없음"}
+                </dd>
+              </div>
+              <div>
+                <dt className="text-text-3">검수 사유</dt>
+                <dd className="mt-1 font-bold text-text-2">{auction.reviewReason ?? "—"}</dd>
+              </div>
+            </dl>
+          )}
           {loading ? (
             <p className="py-16 text-center text-sm text-text-3">인증 자료를 불러오는 중...</p>
           ) : error && !verification ? (
@@ -231,28 +253,6 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
             <>
               {readOnly && error && (
                 <p className="mb-4 border-l-2 border-accent px-3 py-2 text-sm text-accent" role="alert">{error}</p>
-              )}
-              {readOnly && (
-                <dl className="mb-5 grid gap-3 rounded-r2 border border-border bg-surface-2 px-4 py-3 text-xs sm:grid-cols-3">
-                  <div>
-                    <dt className="text-text-3">검수 결과</dt>
-                    <dd className={`mt-1 font-extrabold ${
-                      auction.status === "REJECTED" ? "text-accent" : auction.reviewedAt ? "text-ok" : "text-text-3"
-                    }`}>
-                      {reviewResult}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-text-3">검수 일시</dt>
-                    <dd className="mt-1 font-bold text-text-2">
-                      {auction.reviewedAt ? new Date(auction.reviewedAt).toLocaleString("ko-KR") : "기록 없음"}
-                    </dd>
-                  </div>
-                  <div>
-                    <dt className="text-text-3">검수 사유</dt>
-                    <dd className="mt-1 font-bold text-text-2">{auction.reviewReason ?? "—"}</dd>
-                  </div>
-                </dl>
               )}
               <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.62fr)]">
                 <section>
@@ -454,7 +454,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                 </section>
               </div>
 
-              {!readOnly ? (
+              {!readOnly && (
                 /* 사유는 정해진 템플릿에서 고른다 — 판매자마다 다른 표현이 나가면 "무엇을 고치면 되는지"가
                     흔들리고, 사유별 집계도 불가능하다. 선택한 문구가 그대로 판매자에게 전달되므로
                     아래에 미리보기를 노출한다. */
@@ -522,19 +522,20 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                   </button>
                 </div>
                 </fieldset>
-              ) : (
-                <div className="mt-6 flex justify-end border-t border-border pt-5">
-                  <button
-                    type="button"
-                    onClick={onClose}
-                    className={`h-11 border border-border-2 px-5 text-sm font-extrabold text-text-2 hover:border-text-2 hover:bg-surface-2 ${FOCUS_RING}`}
-                  >
-                    닫기
-                  </button>
-                </div>
               )}
             </>
           ) : null}
+          {readOnly && !loading && (
+            <div className="mt-6 flex justify-end border-t border-border pt-5">
+              <button
+                type="button"
+                onClick={onClose}
+                className={`h-11 border border-border-2 px-5 text-sm font-extrabold text-text-2 hover:border-text-2 hover:bg-surface-2 ${FOCUS_RING}`}
+              >
+                닫기
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

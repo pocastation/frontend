@@ -432,3 +432,25 @@ export const REFUND_REASON_LABEL: Record<RefundReason, string> = {
 export function plainLevelLabel(label: string): string {
   return label.replace(/[\p{Extended_Pictographic}️]/gu, "").trim();
 }
+
+/**
+ * 거래 레벨 단계표(#464) — ⚠️ **BE `TrustLevel` enum과 함께 움직인다.** 이름·필요 거래 수가
+ * 그쪽이 정본이고, 여기는 설명 시트를 그리기 위한 사본이다. BE가 바뀌면 여기도 고친다
+ * (백엔드 enum 주석에도 같은 경고를 달아 뒀다).
+ *
+ * 산정 방식(TrustScorePolicy): 구매확정까지 끝난 거래 수로 진급하고, 받은 후기 평점·페널티가
+ * 신뢰점수로 들어가 낮으면 승급이 제한된다. 점수 자체는 노출하지 않는다(2026-08-31 확정) —
+ * 런칭 초기엔 리뷰 표본이 없어 보정값만 보여 변별력이 없다.
+ */
+export const TRUST_LEVELS: { level: number; label: string; minTrades: number }[] = [
+  { level: 1, label: "덕린이", minTrades: 0 },
+  { level: 2, label: "입덕생", minTrades: 1 },
+  { level: 3, label: "포카러", minTrades: 3 },
+  { level: 4, label: "거래장인", minTrades: 6 },
+  { level: 5, label: "굿즈헌터", minTrades: 10 },
+  { level: 6, label: "특전마스터", minTrades: 20 },
+  { level: 7, label: "팬싸단골", minTrades: 35 },
+  { level: 8, label: "팬싸지박령", minTrades: 60 },
+  { level: 9, label: "전설의컬렉터", minTrades: 100 },
+  { level: 10, label: "덕질의신", minTrades: 200 },
+];

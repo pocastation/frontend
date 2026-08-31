@@ -27,7 +27,10 @@ import {
 export default function GradeStandard() {
   return (
     <div className="mt-10">
-      <p className="border-l-2 border-text-1 pl-3 text-[13px] leading-[1.75] text-text-2">
+      {/* 검수·보증 안내. 이 페이지에서 유일한 강조 블록이라 형태를 따로 준다 —
+          다만 좌측 규칙선은 쓰지 않는다(#437 리뷰). 위아래 헤어라인으로 띠를 만들면
+          같은 「본문과 다른 성격」을 말하면서도 반복되는 세로 띠 모양이 되지 않는다. */}
+      <p className="border-y border-border py-3.5 text-[13px] leading-[1.75] text-text-2">
         {GRADE_NOTE}
       </p>
 
@@ -69,9 +72,12 @@ export default function GradeStandard() {
         <h2 className="font-display text-[12px] font-extrabold tracking-[0.06em] text-text-3">
           애매할 때의 3원칙
         </h2>
-        <div className="mt-3 flex flex-col gap-3">
+        {/* 🔴 셋 다 보라 좌측선을 달고 있었다(#437 리뷰). 규칙선이 세 번 반복되면 강조가
+            아니라 무늬가 된다. 원칙 하나가 이미 「이름 → 규칙 → 예시」의 3단 무게 차를
+            가지고 있으므로, 선을 걷고 간격만 벌려도 덩어리가 갈린다. */}
+        <div className="mt-3 flex flex-col gap-[22px]">
           {GRADE_PRINCIPLES.map(([name, rule, example]) => (
-            <div key={name} className="border-l-2 border-primary pl-3.5">
+            <div key={name}>
               <p className="text-[14px] font-extrabold tracking-[-0.02em] text-text-1">{name}</p>
               <p className="mt-1 break-keep text-[13.5px] leading-[1.75] text-text-2">{rule}</p>
               <p className="mt-1 break-keep text-[12.5px] leading-relaxed text-text-3">{example}</p>

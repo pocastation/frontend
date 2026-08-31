@@ -160,16 +160,21 @@ export default async function GuideDocPage({ params }: { params: Promise<{ topic
             </div>
           )}
 
-          {/* 소제목을 왼쪽 여백에 세워 본문 한 덩이가 눈에 바로 들어오게 한다 —
-              문단이 쌓인 벽이 되지 않는다. */}
-          <div className="mt-6 flex flex-col gap-[22px] border-t border-border pt-6">
+          {/* 🔴 소제목 앞에 보라 세로 띠(`w-[3px] bg-primary`)를 세웠었다. 문서마다 5~7번,
+              문서 7개에 걸쳐 같은 조각이 반복돼 **AI가 만든 화면**으로 읽혔다(#437 리뷰).
+              CLAUDE.md의 두 규칙을 동시에 어긴 자리이기도 하다 — 좌측 규칙선은 진짜 경고에만
+              쓰고, 보라는 상태를 말하는 자리에만 쓴다(제목에는 쓰지 않는다).
+
+              띠를 걷고 **크기·색 대비**로 묶는다. 라벨은 작고 흐리게, 본문은 크고 진하게 —
+              장식을 하나도 쓰지 않고도 「이 문장의 제목」이라는 관계가 읽힌다. 같은 페이지
+              아래쪽 GradeStandard의 절 제목과도 같은 형태가 된다. */}
+          <div className="mt-6 flex flex-col gap-7 border-t border-border pt-6">
             {doc.sections.map(([h, b]) => (
               <section key={h}>
-                <h2 className="flex items-center gap-[7px] text-[12.5px] font-extrabold text-text-2">
-                  <span aria-hidden="true" className="h-3 w-[3px] shrink-0 bg-primary" />
+                <h2 className="font-display text-[12px] font-extrabold tracking-[0.06em] text-text-3">
                   {h}
                 </h2>
-                <p className="mt-[7px] max-w-[36rem] break-keep pl-2.5 text-[16px] leading-[1.82] tracking-[-0.012em] text-text-1">
+                <p className="mt-2 max-w-[36rem] break-keep text-[16px] leading-[1.82] tracking-[-0.012em] text-text-1">
                   {b}
                 </p>
               </section>

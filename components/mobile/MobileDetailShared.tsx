@@ -8,6 +8,7 @@
 
 import { useEffect, useState, Fragment } from "react";
 import Link from "next/link";
+import TrustLevelBadge from "@/components/TrustLevelBadge";
 import { apiFetch } from "@/lib/api";
 import { INTERMEDIARY_NOTICE } from "@/lib/business";
 import { plainLevelLabel } from "@/lib/labels";
@@ -19,13 +20,17 @@ const TAB_DELIVERY = "배송·환불";
 
 export function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: string }) {
   const [levelLabel, setLevelLabel] = useState<string | null>(null);
+  const [level, setLevel] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const res = await apiFetch<SellerRatingResponse>(`/api/sellers/${sellerId}/rating`, { cache: "no-store" });
-        if (!cancelled) setLevelLabel(plainLevelLabel(res.trustLevelLabel));
+        if (!cancelled) {
+          setLevelLabel(plainLevelLabel(res.trustLevelLabel));
+          setLevel(res.trustLevel);
+        }
       } catch {
         // 등급을 못 받으면 줄 자체를 비운다 — 틀린 등급을 보여주느니 안 보여준다.
       }
@@ -45,7 +50,11 @@ export function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: 
       </span>
       <span className="min-w-0 flex-1">
         <span className="block truncate text-[13.5px] font-extrabold text-text-1">{nickname}</span>
-        {levelLabel && <span className="mt-0.5 block text-[11.5px] text-text-3">{levelLabel}</span>}
+        {levelLabel && (
+          <TrustLevelBadge level={level} className="mt-0.5 block w-fit text-[11.5px] text-text-3">
+            {levelLabel}
+          </TrustLevelBadge>
+        )}
       </span>
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 text-text-3" aria-hidden="true">
         <polyline points="9 18 15 12 9 6" />

@@ -7,6 +7,7 @@ import { REVIEW_REPORT_REASON_LABEL, REVIEW_REPORT_REASON_OPTIONS, plainLevelLab
 import { formatRelativeTime } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
 import BadgeChips from "@/components/BadgeChips";
+import TrustLevelBadge from "@/components/TrustLevelBadge";
 import type { ReviewReportReason, ReviewResponse, SellerRatingResponse, SellerReviewListResponse } from "@/lib/types";
 
 const PAGE_SIZE = 5;
@@ -93,10 +94,13 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
     <div className="mt-2">
       {/* 신뢰 레벨(덕력 등급, §12.7) — 거래 경험 기반이라 리뷰가 0건이어도 표시한다. */}
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1">
+        <TrustLevelBadge
+          level={rating.trustLevel}
+          className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1 decoration-transparent hover:decoration-text-3"
+        >
           <span className="text-text-3">Lv.{rating.trustLevel}</span>
           {plainLevelLabel(rating.trustLevelLabel)}
-        </span>
+        </TrustLevelBadge>
         {/* 배지(#264)는 레벨 바로 뒤 — 레벨과 나란히 놓여야 "두 번째 자격"으로 읽힌다. */}
         <BadgeChips badges={rating.badges} />
         {rating.tradeCount > 0 && (

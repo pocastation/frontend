@@ -46,6 +46,7 @@ import { isBeforeShipment } from "@/lib/types";
 import IdentityVerificationPanel from "@/components/IdentityVerificationPanel";
 import OfferWithdrawModal from "@/components/OfferWithdrawModal";
 import SellingListingActions from "@/components/SellingListingActions";
+import TrustLevelBadge from "@/components/TrustLevelBadge";
 import AuctionCard from "@/components/AuctionCard";
 import MobileShell from "@/components/mobile/MobileShell";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
@@ -654,10 +655,13 @@ function MyPageBody() {
           {(member?.trustLevel != null || (member?.badges?.length ?? 0) > 0) && (
             <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
               {member?.trustLevel != null && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1">
+                <TrustLevelBadge
+                  level={member.trustLevel}
+                  className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1 decoration-transparent hover:decoration-text-3"
+                >
                   <span className="text-text-3">Lv.{member.trustLevel}</span>
                   {member.trustLevelLabel ? plainLevelLabel(member.trustLevelLabel) : null}
-                </span>
+                </TrustLevelBadge>
               )}
               <BadgeChips badges={member?.badges ?? []} />
             </div>

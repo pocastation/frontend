@@ -35,6 +35,22 @@ const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; ico
   SHIPPING_OVERDUE: { label: "발송 지연", tone: "accent", icon: "clock" },
   SETTLEMENT_COMPLETED: { label: "정산 완료", tone: "ok", icon: "card" },
   INQUIRY_ANSWERED: { label: "문의 답변", tone: "ok", icon: "checkCircle" },
+  // ── 상용 BE가 이미 보내는데 여기 없어 UNKNOWN_META(무색 「알림」)로 뜨던 8종(#451).
+  //    특히 ORDER_PREPARING은 B3 **필수 고지**인데 회색 폴백으로 묻히고 있었다 —
+  //    「이제 취소할 수 없다」는 통지가 시각적으로 가장 조용한 알림이었던 셈이다. ──
+  AUCTION_EXTENDED: { label: "기간 연장", tone: "primary", icon: "clock" },
+  ORDER_PREPARING: { label: "취소 마감", tone: "accent", icon: "alertCircle" },
+  ORDER_REFUNDED: { label: "환불 완료", tone: "ok", icon: "card" },
+  RETURN_REQUESTED: { label: "반품 요청", tone: "accent", icon: "alertCircle" },
+  RETURN_ACCEPTED: { label: "반송 안내", tone: "accent", icon: "box" },
+  RETURN_SHIPPED: { label: "반송 도착", tone: "accent", icon: "box" },
+  DISPUTE_UNDER_MEDIATION: { label: "중재 진행", tone: "neutral", icon: "clock" },
+  DISPUTE_RESOLVED: { label: "분쟁 종결", tone: "neutral", icon: "checkCircle" },
+  // ── 정책 제21조 공백을 메운 신규 4종(BE 배포 전엔 도착하지 않는다 — 미리 채워 두는 값). ──
+  NEW_OFFER: { label: "새 제안", tone: "primary", icon: "tag" },
+  AUCTION_APPROVED: { label: "게시 승인", tone: "ok", icon: "checkCircle" },
+  AUCTION_EXPIRING: { label: "종료 임박", tone: "accent", icon: "clock" },
+  DELIVERY_COMPLETED: { label: "배송 완료", tone: "primary", icon: "box" },
 };
 
 // 배포 시점 차이로 프론트가 모르는 타입이 와도 렌더가 깨지지 않게 폴백.

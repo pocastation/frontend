@@ -243,10 +243,10 @@ export default function AdminAuctionsPage() {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
             <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
           </svg>
-          <span className="sr-only">매물 제목 검색</span>
+          <span className="sr-only">매물 제목, 스타, 판매자 검색</span>
           <input
             type="search"
-            placeholder="매물 제목 검색"
+            placeholder="매물 제목, 스타, 판매자 검색"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full border-0 bg-transparent text-[13.5px] text-text-1 outline-none placeholder:text-text-3"
@@ -359,21 +359,23 @@ export default function AdminAuctionsPage() {
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 text-text-3">{getEndLabel(a)}</td>
                   <td className="whitespace-nowrap px-4 py-3">
-                    {a.status === "PENDING_REVIEW" ? (
+                    <div className="flex items-center gap-1.5">
                       <button
                         type="button"
                         onClick={() => {
                           setReviewTarget(a);
                           setNotice(null);
                         }}
-                        // 하드코딩 주황 3색을 별빛 골드 토큰으로(#294). 배경 필 대신 테두리로 —
-                        // 조치 버튼이 상태 배지보다 강해 보이면 안 된다.
-                        className={`rounded-full border border-[var(--color-star-line)] px-3 py-1 text-xs font-bold text-[var(--color-star-ink)] transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+                        className={`rounded-full border px-3 py-1 text-xs font-bold transition-colors hover:bg-surface-2 ${FOCUS_RING} ${
+                          a.status === "PENDING_REVIEW"
+                            ? "border-[var(--color-star-line)] text-[var(--color-star-ink)]"
+                            : "border-border-2 text-text-2 hover:border-primary hover:text-primary"
+                        }`}
                       >
-                        검수
+                        검수 내용
                       </button>
-                    ) : a.status === "LIVE" ? (
-                      <div className="flex items-center gap-1.5">
+                      {a.status === "LIVE" && (
+                        <>
                         {/* 즉시판매는 홈 배너 대상이 아니다(홈 조회가 제안판매 매물만 본다) — 눌러도 안 되는 버튼 대신
                             비활성 상태로 이유를 노출한다. */}
                         <button
@@ -405,10 +407,9 @@ export default function AdminAuctionsPage() {
                         >
                           취소
                         </button>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-text-3">—</span>
-                    )}
+                        </>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))

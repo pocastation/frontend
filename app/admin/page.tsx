@@ -25,13 +25,19 @@ import AdminNotice from "@/components/AdminNotice";
  *
  * <p>색 스와치도 뺐다 — 다섯 개에 서로 다른 파스텔을 물려 놨는데 그 색이 아무 뜻도 없었다.
  */
-function Stat({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="min-w-0 flex-1 basis-[128px] border-l border-border px-4 first:border-l-0 first:pl-0">
+function Stat({ label, value, href }: { label: string; value: string; href?: string }) {
+  const content = (
+    <>
       <p className="text-xs font-bold text-text-3">{label}</p>
       <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1">{value}</p>
-    </div>
+    </>
   );
+
+  const className = `min-w-0 flex-1 basis-[128px] border-l border-border px-4 first:border-l-0 first:pl-0 ${
+    href ? `rounded-r2 bg-primary-soft/50 py-2 transition-colors hover:bg-primary-soft ${FOCUS_RING}` : ""
+  }`;
+
+  return href ? <Link href={href} className={className}>{content}</Link> : <div className={className}>{content}</div>;
 }
 
 function formatDate(iso: string) {
@@ -88,11 +94,16 @@ export default function AdminDashboardPage() {
         </AdminNotice>
       )}
 
-      {/* 위아래 규칙선 안에서 세로선으로만 나눈다 — 다섯 값이 한 덩어리로 읽혀야 비교가 된다. */}
+      {/* 위아래 규칙선 안에서 세로선으로만 나눈다. 검수 대기는 매물 운영 조치라 진행 중 매물 바로 뒤에 둔다. */}
       <div className="mt-6 flex flex-wrap gap-y-4 border-y border-border py-4">
         <Stat label="전체 회원 수" value={loading ? "—" : `${data?.totalMembers ?? 0}명`} />
         <Stat label="오늘 신규 가입" value={loading ? "—" : `${data?.todaySignups ?? 0}명`} />
         <Stat label="진행 중인 매물" value={loading ? "—" : `${data?.liveAuctions ?? 0}건`} />
+        <Stat
+          label="검수 대기 매물"
+          value={loading ? "—" : `${data?.pendingReviewAuctions ?? 0}건`}
+          href="/admin/auctions?status=PENDING_REVIEW"
+        />
         <Stat label="처리 대기 신고" value={loading ? "—" : `${data?.pendingReportCount ?? 0}건`} />
         <Stat label="처리 대기 건의" value={loading ? "—" : `${data?.pendingSuggestionCount ?? 0}건`} />
       </div>

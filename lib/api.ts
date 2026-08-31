@@ -169,6 +169,44 @@ export async function apiFetchMultipart<T>(
   return json.data as T;
 }
 
+/**
+ * 진행률이 필요한 멀티파트 업로드(#466) — fetch는 업로드 진행 이벤트가 없어 XHR을 쓴다.
+ * 응답 파싱·오류 규약은 apiFetchMultipart와 동일하게 맞춘다(호출부가 같은 catch를 쓴다).
+ */
+export function apiFetchMultipartWithProgress<T>(
+  path: string,
+  formData: FormData,
+  accessToken: string | null,
+  onProgress: (loaded: number, total: number) => void,
+): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${resolveApiUrl()}${path}`);
+    xhr.withCredentials = true;
+    if (accessToken) xhr.setRequestHeader("Authorization", `Bearer ${accessToken}`);
+    xhr.upload.onprogress = (event) => {
+      if (event.lengthComputable) onProgress(event.loaded, event.total);
+    };
+    xhr.onerror = () =>
+      reject(new ApiError("서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.", null, 0));
+    xhr.onload = () => {
+      let json: ApiResponse<T>;
+      try {
+        json = JSON.parse(xhr.responseText) as ApiResponse<T>;
+      } catch {
+        reject(new ApiError("서버와 통신할 수 없습니다. 잠시 후 다시 시도해주세요.", null, xhr.status));
+        return;
+      }
+      if (xhr.status < 200 || xhr.status >= 300 || !json.success) {
+        reject(new ApiError(json.message ?? "업로드에 실패했습니다.", json.errorCode, xhr.status));
+        return;
+      }
+      resolve(json.data as T);
+    };
+    xhr.send(formData);
+  });
+}
+
 export async function apiFetchBlob(path: string, accessToken: string | null): Promise<Blob> {
   const response = await fetch(`${resolveApiUrl()}${path}`, {
     method: "GET",

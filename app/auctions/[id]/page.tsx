@@ -6,6 +6,7 @@ import AuctionImageGallery from "@/components/AuctionImageGallery";
 import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import BidSection from "@/components/BidSection";
 import MobileAuctionDetail from "@/components/mobile/MobileAuctionDetail";
+import MobileInstantDetail from "@/components/mobile/MobileInstantDetail";
 import InstantPurchaseSection from "@/components/InstantPurchaseSection";
 import ReportButton from "@/components/ReportButton";
 import SearchLink from "@/components/SearchLink";
@@ -81,6 +82,8 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
     notFound();
   }
   const isInstantSale = auction.saleType === "INSTANT";
+  // 모바일 전용 상세를 태우는 조건 — 제안판매는 endAt이 있는 전부, 즉시판매는 전부(#461).
+  const hasMobileDetail = isInstantSale || auction.endAt != null;
   // 제목 위 상태 줄(#404) — 서버 컴포넌트라 마감 시각 비교 없이 상태값만 본다. 마감을 화면에
   // 표시하지 않기로 했으므로(경매성 제거) 초 단위 정확도가 필요하지 않다.
   const isLive = auction.status === "LIVE";
@@ -111,17 +114,21 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
 
   const body = (
     <>
-      {/* 모바일 전용 상세 — 갤러리가 화면폭을 꽉 채우므로 데스크탑 컨테이너 밖에 둔다. */}
-      {biddable && (
+      {/* 모바일 전용 상세 — 갤러리가 화면폭을 꽉 채우므로 데스크탑 컨테이너 밖에 둔다.
+          🔴 즉시판매도 탄다(#461). 예전에는 biddable(제안판매)만 태워서, 즉시판매는 데스크탑
+          레이아웃이 375px에 그대로 구겨져 내려왔다 — 고정 CTA도 확인 단계도 없이. */}
+      {hasMobileDetail && (
         <div className="sm:hidden">
-          <MobileAuctionDetail auction={auction} actions={actions} />
+          {isInstantSale ? (
+            <MobileInstantDetail auction={auction} actions={actions} />
+          ) : (
+            <MobileAuctionDetail auction={auction} actions={actions} />
+          )}
         </div>
       )}
 
     <div
-      className={`mx-auto max-w-[1160px] px-4 py-6 sm:py-8 ${biddable ? "max-sm:hidden" : ""} ${
-        !isInstantSale && auction.status === "LIVE" ? "max-sm:pb-24" : ""
-      }`}
+      className={`mx-auto max-w-[1160px] px-4 py-6 sm:py-8 ${hasMobileDetail ? "max-sm:hidden" : ""}`}
     >
       {/* 🔴 「← 목록으로」는 없앴고 동작 아이콘은 우측 컬럼 안으로 들어갔다(#406).
           그 줄이 그리드 위에 있는 동안에는 우측 시트가 **처음 90px을 같이 끌려 올라간 뒤** 붙어서,

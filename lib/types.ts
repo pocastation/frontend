@@ -693,7 +693,21 @@ export type NotificationType =
   | "DELIVERY_ADDRESS_REQUIRED" // 배송지 미입력 — 구매자에게. 결제는 됐는데 보낼 곳이 없어 거래가 멈춘 상태
   | "SHIPPING_OVERDUE" // 발송기한 초과 — 판매자에게 발송 독촉
   | "SETTLEMENT_COMPLETED" // 정산 완료 — 판매자에게 실입금 예정 안내(실입금은 PG 사이클 시차)
-  | "INQUIRY_ANSWERED"; // 1:1 문의 답변 완료
+  | "INQUIRY_ANSWERED" // 1:1 문의 답변 완료
+  // ── 상용 BE가 이미 보내는데 union에 빠져 있던 8종(#451) — UNKNOWN_META 폴백으로만 떴다 ──
+  | "AUCTION_EXTENDED" // 판매 기간 연장 — 기존 제안자에게 「제안이 아직 유효하다」
+  | "ORDER_PREPARING" // 물품 준비 진입 — 구매자에게 「이제 취소할 수 없어요」(B3 필수 고지)
+  | "ORDER_REFUNDED" // 환불 완료 — 구매자(환급 안내)·판매자(거래 취소 통지)
+  | "RETURN_REQUESTED" // 반품 요청 — 판매자에게 응답 요구
+  | "RETURN_ACCEPTED" // 반품 수락 — 구매자에게 반송 안내
+  | "RETURN_SHIPPED" // 구매자 반송 — 판매자에게 수령 확인 요구
+  | "DISPUTE_UNDER_MEDIATION" // 관리자 중재 진입 — 구매자에게
+  | "DISPUTE_RESOLVED" // 반품 종결(환불 또는 기각) — 양측에게
+  // ── 정책 제21조 공백을 메운 신규 4종(BE #F2, 인앱 전용) ──
+  | "NEW_OFFER" // 새 제안 도착 — 판매자에게. 선택해야 거래가 성립하는 모델의 전제
+  | "AUCTION_APPROVED" // 등록 승인 완료 — 판매자에게
+  | "AUCTION_EXPIRING" // 게시 종료 1일 전 — 판매자에게. 종료되면 제안 전체가 실효된다
+  | "DELIVERY_COMPLETED"; // 배송 완료 + 자동 구매확정(3일) 예고 — 구매자에게
 
 // ─── 주문/결제 상태 ───
 

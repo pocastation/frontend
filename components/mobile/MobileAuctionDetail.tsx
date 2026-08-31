@@ -166,10 +166,20 @@ function BidSheet({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* 🔴 제안 뒤에도 잠그지 않는다(#428) — 다시 제안하는 것이 곧 수정이다(§2.1).
-            예전에는 잠겨 있어 금액을 바꿀 방법이 아예 없었다. */}
+            예전에는 잠겨 있어 금액을 바꿀 방법이 아예 없었다.
+
+            제안이 끝나면 시트를 닫는다(#453) — 열어 두면 「보내졌나?」가 남는다(토스트는 시트에
+            가려 안 보였다). 배송지 게이트로 빠질 때도 닫는다: 게이트 모달(z-400)이 시트(z-500)
+            **뒤에** 깔려, 안 닫으면 시트 뒤로 등록 화면이 비치는 겹침이 그대로 재현된다.
+            저장이 끝나면 onAddressSaved가 시트를 다시 열어 흐름을 잇는다. 실패("failed")에만
+            시트를 유지한다 — 금액을 고쳐 재시도할 자리다. */}
         <button
           type="button"
-          onClick={() => void handleBid()}
+          onClick={() => {
+            void handleBid().then((result) => {
+              if (result !== "failed") onClose();
+            });
+          }}
           disabled={submitting || !hasValidAmount}
           className={`mt-3 flex h-12 w-full items-center justify-center rounded-[7px] bg-primary text-sm font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
         >

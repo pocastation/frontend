@@ -247,7 +247,10 @@ export default function MobileAuctionDetail({
   ];
 
   return (
-    <div className={isLive ? "pb-[76px]" : undefined}>
+    /* 🔴 하단 여백을 판매 상태에서 떼어냈다(#457). 예전엔 LIVE에만 pb-[76px](고정 바 높이
+       확보용)이 있고 그 외엔 0이라, 거래 성사·완료 화면에서 탭 본문 밑에 푸터가 바로 붙었다.
+       마감 여백 32px은 항상 깔고, LIVE는 거기에 바 높이를 더한다. */
+    <div className={isLive ? "pb-[108px]" : "pb-8"}>
       <MobileDetailGallery images={auction.images} video={auction.video} title={auction.title} actions={actions} />
 
       <div className="px-4 pt-4">
@@ -352,8 +355,10 @@ export default function MobileAuctionDetail({
           })}
         </div>
 
+        {/* 탭 본문 여백 규칙(#457, 시안 승인) — 밑줄→본문 20px · 블록 간 20px ·
+            끝 24px + 헤어라인 마감. 두 탭이 같은 값을 쓴다. */}
         {tab === TAB_DELIVERY ? (
-          <div className="pt-3.5">
+          <div className="border-b border-border pb-6 pt-5">
             {/* 확정된 사실만 적는다 — 기간·조건 같은 숫자는 운영정책이 정본이라 여기서 새로 만들지 않는다. */}
             <dl className="divide-y divide-border border-y border-border">
               <div className="py-2.5">
@@ -375,7 +380,7 @@ export default function MobileAuctionDetail({
                 </dd>
               </div>
             </dl>
-            <div className="mt-3 flex gap-3">
+            <div className="mt-5 flex gap-3">
               <Link href="/policy" className={`text-[12.5px] font-bold text-text-2 underline ${FOCUS_RING}`}>
                 운영정책 보기
               </Link>
@@ -383,17 +388,17 @@ export default function MobileAuctionDetail({
                 이용 방법
               </Link>
             </div>
-            <p className="mt-4 text-[11px] leading-relaxed text-text-3">{INTERMEDIARY_NOTICE}</p>
+            <p className="mt-5 text-[11px] leading-relaxed text-text-3">{INTERMEDIARY_NOTICE}</p>
             {/* 문의는 신고와 성격이 다르다 — 사진 위 아이콘으로 올리지 않고 여기 조용히 둔다. */}
             <Link
               href="/inquiries/new"
-              className={`mt-3 inline-block text-[12.5px] font-bold text-text-3 underline ${FOCUS_RING}`}
+              className={`mt-5 inline-block text-[12.5px] font-bold text-text-3 underline ${FOCUS_RING}`}
             >
               이 매물 문의하기
             </Link>
           </div>
         ) : (
-          <div className="pt-3.5">
+          <div className="border-b border-border pb-6 pt-5">
             {auction.description && (
               <p className="whitespace-pre-wrap text-sm leading-[1.75] text-text-2">{auction.description}</p>
             )}
@@ -401,7 +406,7 @@ export default function MobileAuctionDetail({
                 값이 오른쪽 끝에 붙어 라벨과 값 사이가 줄마다 다르게 벌어졌고, 「S급 (미개봉/신품급)」
                 처럼 긴 값은 두 줄로 접히며 정렬이 무너졌다. 줄마다 긋던 구분선은 행간이 대신한다. */}
             <dl
-              className={`${auction.description ? "mt-4" : ""} grid grid-cols-[88px_1fr] gap-x-3 gap-y-3.5 text-[13px]`}
+              className={`${auction.description ? "mt-5" : ""} grid grid-cols-[88px_1fr] gap-x-3 gap-y-3.5 text-[13px]`}
             >
               {specRows.map((row) => (
                 <Fragment key={row.label}>

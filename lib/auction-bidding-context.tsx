@@ -47,7 +47,12 @@ type AuctionBiddingValue = {
   /** 이 매물에 이미 유효한 제안을 냈다 — 서버가 중복 제안을 막는다. */
   /** 이번 세션에 내가 낸 제안 금액 — 없으면 아직(또는 새로고침 뒤라) 모른다. */
   myOfferAmount: number | null;
-  handleBid: () => Promise<void>;
+  /**
+   * 제안 전송. 결과를 돌려주는 이유는 <b>바텀시트가 자기를 닫을 타이밍</b>을 알아야 해서다(#453).
+   * "placed" = 제안 완료(시트를 닫는다), "gate" = 배송지 등록 모달로 빠짐(시트를 닫아야
+   * 모달이 보인다 — 모달 z-400 < 시트 z-500), "failed" = 오류(시트를 유지해 재시도).
+   */
+  handleBid: () => Promise<"placed" | "gate" | "failed">;
   needsAddress: boolean;
   addressModalOpen: boolean;
   openAddressModal: () => void;
@@ -160,12 +165,12 @@ export function AuctionBiddingProvider({
     [floor],
   );
 
-  const handleBid = useCallback(async () => {
+  const handleBid = useCallback(async (): Promise<"placed" | "gate" | "failed"> => {
     // 배송지가 없으면 제안을 보내지 않고 등록부터 받는다(#283). 서버도 같은 조건으로 막지만,
     // 여기서 잡아야 사용자가 오류 대신 다음 행동을 본다.
     if (needsAddress) {
       setAddressModalOpen(true);
-      return;
+      return "gate";
     }
     setSubmitting(true);
     try {
@@ -194,12 +199,14 @@ export function AuctionBiddingProvider({
       // 오류 토스트 대신 등록 모달로 이어 붙인다.
       if (isGateRejection(err)) {
         setAddressModalOpen(true);
-      } else {
-        toast.show({ variant: "danger", text });
+        return "gate";
       }
+      toast.show({ variant: "danger", text });
+      return "failed";
     } finally {
       setSubmitting(false);
     }
+    return "placed";
   // 🔴 myOfferAmount가 의존성에 있어야 한다 — 토스트 문구가 그 값을 읽는데 빠뜨리면 콜백이
   // 옛 값(null)을 잡은 채 굳어, **두 번째 제안에도 「보냈어요」가 뜬다.**
   }, [amount, auctionId, fetchWithAuth, isGateRejection, myOfferAmount, needsAddress, toast]);

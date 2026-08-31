@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import OfferCounts from "@/components/OfferCounts";
 import { ApiError } from "@/lib/api";
@@ -49,7 +50,11 @@ function OfferConfirmation({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [onCancel, submitting]);
 
-  return (
+  // 🔴 body로 portal(#454) — 인라인으로 두면 조상(우측 패널·sticky 레이아웃)이 만드는 스택
+  // 컨텍스트에 z-[600]이 갇혀, 갤러리의 화살표·「1/3」 카운터(z-10, 다른 컨텍스트)가 확인 창
+  // **위로** 뚫고 올라왔다. 라이트박스가 같은 문제를 같은 방법으로 푼 전례가 있다
+  // (AuctionImageGallery — 「조상 스택 컨텍스트에도 안 갇힘」).
+  return createPortal(
     <div className="fixed inset-0 z-[600] flex items-center justify-center px-4" role="presentation">
       <button
         type="button"
@@ -139,7 +144,8 @@ function OfferConfirmation({
           </button>
         </div>
       </section>
-    </div>
+    </div>,
+    document.body,
   );
 }
 

@@ -136,6 +136,7 @@ export type AdminDashboardResponse = {
   totalMembers: number;
   todaySignups: number;
   liveAuctions: number;
+  pendingReviewAuctions: number;
   pendingReportCount: number;
   pendingSuggestionCount: number;
   recentMembers: AdminMemberSummary[];

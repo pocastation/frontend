@@ -92,6 +92,12 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
   const modelVersion = verification?.modelVersion ?? null;
   const isTrocrV5 = modelVersion?.includes("trocr-v5") ?? false;
   const modelVersionPending = modelVersion === null;
+  const readOnly = auction.status !== "PENDING_REVIEW";
+  const reviewResult = auction.status === "REJECTED"
+    ? "승인 거절"
+    : auction.reviewedAt
+      ? "승인됨"
+      : "검수 기록 없음";
 
   // Esc로 닫기 — 처리 중(submitting)에는 막는다(승인/반려 요청이 날아간 뒤 창만 사라지는 걸 방지).
   useEffect(() => {
@@ -188,9 +194,16 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
       <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[960px] flex-col overflow-hidden rounded-r3 bg-surface shadow-modal sm:max-h-[calc(100dvh-3rem)]">
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-border bg-surface px-5 py-4">
           <div className="min-w-0">
-            <h2 id="verification-review-title" className="truncate font-display text-lg font-extrabold text-text-1">
-              사진 인증 검수
-            </h2>
+            <div className="flex items-center gap-2">
+              <h2 id="verification-review-title" className="truncate font-display text-lg font-extrabold text-text-1">
+                사진 인증 검수 내용
+              </h2>
+              {readOnly && (
+                <span className="shrink-0 rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-bold text-primary">
+                  읽기 전용
+                </span>
+              )}
+            </div>
             <p className="mt-0.5 truncate text-xs text-text-3">{auction.title} · {auction.sellerNickname ?? "판매자 미상"}</p>
           </div>
           {/* 닫기는 얇은 '×' 글리프였을 때 배경과 구분이 안 돼 "버튼이 없다"고 읽혔다.
@@ -216,6 +229,31 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
             <p className="bg-accent-soft px-4 py-3 text-sm text-accent" role="alert">{error}</p>
           ) : verification ? (
             <>
+              {readOnly && error && (
+                <p className="mb-4 border-l-2 border-accent px-3 py-2 text-sm text-accent" role="alert">{error}</p>
+              )}
+              {readOnly && (
+                <dl className="mb-5 grid gap-3 rounded-r2 border border-border bg-surface-2 px-4 py-3 text-xs sm:grid-cols-3">
+                  <div>
+                    <dt className="text-text-3">검수 결과</dt>
+                    <dd className={`mt-1 font-extrabold ${
+                      auction.status === "REJECTED" ? "text-accent" : auction.reviewedAt ? "text-ok" : "text-text-3"
+                    }`}>
+                      {reviewResult}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-text-3">검수 일시</dt>
+                    <dd className="mt-1 font-bold text-text-2">
+                      {auction.reviewedAt ? new Date(auction.reviewedAt).toLocaleString("ko-KR") : "기록 없음"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-text-3">검수 사유</dt>
+                    <dd className="mt-1 font-bold text-text-2">{auction.reviewReason ?? "—"}</dd>
+                  </div>
+                </dl>
+              )}
               <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.62fr)]">
                 <section>
                   <figure>
@@ -416,10 +454,11 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                 </section>
               </div>
 
-              {/* 사유는 정해진 템플릿에서 고른다 — 판매자마다 다른 표현이 나가면 "무엇을 고치면 되는지"가
-                  흔들리고, 사유별 집계도 불가능하다. 선택한 문구가 그대로 판매자에게 전달되므로
-                  아래에 미리보기를 노출한다. */}
-              <fieldset className="mt-6 border-t border-border pt-5">
+              {!readOnly ? (
+                /* 사유는 정해진 템플릿에서 고른다 — 판매자마다 다른 표현이 나가면 "무엇을 고치면 되는지"가
+                    흔들리고, 사유별 집계도 불가능하다. 선택한 문구가 그대로 판매자에게 전달되므로
+                    아래에 미리보기를 노출한다. */
+                <fieldset className="mt-6 border-t border-border pt-5">
                 <legend className="text-xs font-extrabold text-text-2">승인 거절 사유</legend>
                 <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
                   {AUCTION_REJECTION_REASON_OPTIONS.map((option) => (
@@ -482,7 +521,18 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     {submitting ? "처리 중..." : "승인하고 공개"}
                   </button>
                 </div>
-              </fieldset>
+                </fieldset>
+              ) : (
+                <div className="mt-6 flex justify-end border-t border-border pt-5">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className={`h-11 border border-border-2 px-5 text-sm font-extrabold text-text-2 hover:border-text-2 hover:bg-surface-2 ${FOCUS_RING}`}
+                  >
+                    닫기
+                  </button>
+                </div>
+              )}
             </>
           ) : null}
         </div>

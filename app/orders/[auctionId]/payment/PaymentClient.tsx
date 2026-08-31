@@ -155,7 +155,7 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         // 적어 갤럭시아가 빠져 있지만 **문서가 낡았다.** 이 실측이 consultation **Q17**(가상계좌
         // 만료 시각을 우리가 지정할 수 있는가)의 답이다 — 지정 가능하며 오히려 필수다.
         //
-        // 기한 값은 서버가 준 것을 그대로 쓴다. 약관 제13조의2 ④의 「회사가 정한 기간」이라
+        // 기한 값은 서버가 준 것을 그대로 쓴다. 약관 제13조의2 ⑤의 「회사가 정한 결제 기한」이라
         // 정책값이고, 프론트가 정하면 결제창 파라미터를 고쳐 기한을 늘릴 수 있다.
         ...(method === "VIRTUAL_ACCOUNT"
           ? { virtualAccount: { accountExpiry: { validHours: prep.virtualAccountValidHours } } }

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import AuctionCard from "@/components/AuctionCard";
-import { CardSkeletonGrid, ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
+import { ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
 import { apiFetch } from "@/lib/api";
 import {
   addRecentSearch,
@@ -394,30 +394,49 @@ export default function SearchScreen({
               })}
             </div>
 
+            {/*
+              🔴 **갱신 중에 화면을 비우지 않는다**(#496). 예전에는 `loading`이면 결과를 스켈레톤
+              격자로 통째 교체했는데, 디바운스가 끝날 때마다 「결과 → 스켈레톤 → 결과」가 반복돼
+              한 글자 고칠 때마다 화면이 깜빡였다. 모양까지 튀었다 — 스켈레톤은 데스크탑 카드용이라
+              테두리·그림자를 두르는데 여기 카드는 `compact`(둘 다 없음)다.
+
+              지금은 새 결과가 도착할 때까지 **옛 결과를 그대로 두고 흐리게만** 한다. 목록 화면
+              (`MobileBrowse`)이 같은 훅을 쓰면서 이미 그렇게 하고 있었다 — 두 화면이 로딩 표현만
+              다를 이유가 없다. 스켈레톤은 「보여줄 것이 아직 없는 첫 로드」 전용이다.
+            */}
             {tooShort ? (
               <p className="py-10 text-center text-[12.5px] text-text-3">두 글자 이상 입력해 주세요.</p>
             ) : error ? (
               <div className="pt-6">
                 <ExploreError onRetry={retry} />
               </div>
-            ) : loading ? (
-              <div className="grid grid-cols-2 gap-x-2 gap-y-[18px] pt-3 sm:grid-cols-3">
-                <CardSkeletonGrid count={4} variant="auction" />
-              </div>
             ) : auctions.length === 0 ? (
-              <div className="pt-6">
-                <ExploreEmpty
-                  title={`"${trimmed}" 검색 결과가 없어요`}
-                  hint="다른 키워드로 검색하거나 유형을 바꿔보세요."
-                  onClear={() => handleChange("")}
-                />
-              </div>
+              loading ? (
+                // 첫 검색이라 보여줄 옛 결과가 없다. 격자를 깔면 곧 사라질 가짜 카드가 되므로
+                // 자리만 지키는 가벼운 표시로 둔다.
+                <p className="flex justify-center py-14 text-text-3">
+                  <InlineSpinner />
+                  <span className="sr-only">검색 중</span>
+                </p>
+              ) : (
+                <div className="pt-6">
+                  <ExploreEmpty
+                    title={`"${trimmed}" 검색 결과가 없어요`}
+                    hint="다른 키워드로 검색하거나 유형을 바꿔보세요."
+                    onClear={() => handleChange("")}
+                  />
+                </div>
+              )
             ) : (
               <>
                 <p className="pt-3 text-[11.5px] tabular-nums text-text-3">
                   매물 <b className="font-bold text-text-2">{totalElements.toLocaleString()}</b>
                 </p>
-                <div className="grid grid-cols-2 gap-x-2 gap-y-[18px] pt-2.5 sm:grid-cols-3">
+                <div
+                  className={`grid grid-cols-2 gap-x-2 gap-y-[18px] pt-2.5 transition-opacity sm:grid-cols-3 ${
+                    loading ? "opacity-60" : ""
+                  }`}
+                >
                   {auctions.map((auction) => (
                     <AuctionCard
                       key={auction.id}

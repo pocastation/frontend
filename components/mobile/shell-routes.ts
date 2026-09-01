@@ -21,6 +21,9 @@ const MOBILE_DETAIL_PATTERN = /^\/auctions\/\d+$/;
 // 스타 상세(#499)도 앱바 하나로 들어가고 나온다. 매물 상세와 달리 큰 사진이 위에 깔리지 않아
 // 앱바를 두고, 거기에 스타 이름을 실어 스크롤해도 누구를 보는지 잃지 않게 한다.
 const MOBILE_ARTIST_DETAIL_PATTERN = /^\/artists\/\d+$/;
+// 결제(#502)도 앱바 하나짜리 화면이다. 하단에 결제 바가 고정되므로 하단탭이 함께 뜨면 두 줄이
+// 겹치고, 결제는 다른 곳으로 새지 않아야 하는 몰입 동작이라 탭을 띄우지 않는다.
+const MOBILE_PAYMENT_PATTERN = /^\/orders\/\d+\/payment$/;
 // 마이페이지(`/mypage`)는 한 경로가 두 얼굴이다 — 쿼리가 없거나 `?tab=wishlist`면 하단탭이 가리키는
 // **루트**라 셸을 쓰고, 그 밖의 `?tab=`은 앱바 하나짜리 **서브 화면**이다. 어느 쪽이든 전역 헤더·
 // 푸터는 접혀야 해서 경로 단위 목록에 그대로 둔다(분기는 페이지가 쿼리를 보고 한다).
@@ -40,6 +43,7 @@ export function isMobileChromeHiddenRoute(pathname: string): boolean {
     isMobileShellRoute(pathname) ||
     MOBILE_DETAIL_PATTERN.test(pathname) ||
     MOBILE_ARTIST_DETAIL_PATTERN.test(pathname) ||
+    MOBILE_PAYMENT_PATTERN.test(pathname) ||
     MOBILE_FULLSCREEN_ROUTES.includes(pathname)
   );
 }

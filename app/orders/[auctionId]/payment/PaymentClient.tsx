@@ -3,12 +3,23 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import * as PortOne from "@portone/browser-sdk/v2";
+import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { formatRemaining } from "@/lib/countdown";
 import { envValue } from "@/lib/env";
 import { formatKRW } from "@/lib/format";
 import { FOCUS_RING, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import type { PaymentWindowPreparation, PaymentWindowResult } from "@/lib/types";
+
+/**
+ * 결제를 그만두는 사람이 가고 싶은 곳은 「내가 뭘 사려 했는지 보이는 자리」다(#502).
+ *
+ * <p>히스토리 뒤로를 쓰지 않는 이유가 있다 — 이 화면은 구매내역·거래 성사 알림·즉시구매 직후
+ * 여러 경로에서 들어오고, **모바일 결제창은 iframe이 아니라 페이지 이동**이라 결제를 마치고
+ * 돌아온 뒤의 히스토리가 엉뚱한 곳을 가리킨다.
+ */
+const BACK_HREF = "/mypage?tab=purchases";
 
 // ⚠️ envValue로 감싸는 이유는 lib/env.ts 참고 — 붙여넣기에 섞인 공백 하나로 결제가 통째로
 // 막힌 적이 있다(2026-08-15, 채널키 앞 탭 문자).
@@ -199,54 +210,107 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
   }
 
   if (loading) {
-    return <main className="mx-auto max-w-lg px-5 py-16 text-sm text-text-3">결제 정보를 불러오는 중이에요.</main>;
+    return (
+      <>
+        <MobilePageHead title="결제" backHref={BACK_HREF} />
+        <main className="mx-auto max-w-lg px-[14px] py-16 text-sm text-text-3 sm:px-5">
+          결제 정보를 불러오는 중이에요.
+        </main>
+      </>
+    );
   }
 
   const paid = result?.status === "PAID";
   const issued = result?.accountNumber != null && result.status === "PAYMENT_PENDING";
+  // 앱바 제목이 곧 지금 상태다 — 「결제」와 「입금 대기」는 사용자가 해야 할 일이 다르다.
+  const title = paid ? "결제 완료" : issued ? "입금 대기" : "결제";
 
   return (
-    <main className="mx-auto max-w-lg px-5 py-10">
-      <h1 className="font-display text-xl font-extrabold text-text-1">결제</h1>
+    <>
+      <MobilePageHead title={title} backHref={BACK_HREF} />
 
-      {/* 주문 요약 — 카드로 감싸지 않는다. 규칙선과 여백만으로 가른다. */}
-      {result ? (
-        <div className="mt-4 border-y border-border py-4">
-          <p className="truncate text-[13px] text-text-2">{result.orderName}</p>
-          <div className="mt-1.5 flex items-baseline justify-between gap-3">
-            <span className="text-xs text-text-3">결제 금액</span>
-            <span className="font-display text-2xl font-extrabold text-text-1 tabular-nums">
-              {formatKRW(result.amount)}
-            </span>
+      {/*
+        하단 고정 바가 본문을 가리지 않도록 모바일에서만 그 높이를 비운다(판매 등록 화면과 같은 처리).
+        데스크탑은 고정 바를 쓰지 않으므로 여백도 없다.
+      */}
+      <main className="mx-auto max-w-lg px-[14px] pb-5 pt-4 max-sm:pb-[132px] sm:px-5 sm:py-10">
+        <h1 className="hidden font-display text-xl font-extrabold text-text-1 sm:block">결제</h1>
+
+        {/* 주문 요약 — 카드로 감싸지 않는다. 규칙선과 여백만으로 가른다. */}
+        {result ? (
+          <div className="border-b border-border pb-4 sm:mt-4 sm:border-t sm:pt-4">
+            <p className="truncate text-[13px] text-text-2">{result.orderName}</p>
+            <div className="mt-1.5 flex items-baseline justify-between gap-3">
+              <span className="text-xs text-text-3">{issued ? "입금할 금액" : "결제 금액"}</span>
+              <span className="font-display text-2xl font-extrabold text-text-1 tabular-nums">
+                {formatKRW(result.amount)}
+              </span>
+            </div>
           </div>
+        ) : null}
+
+        {paid ? (
+          <PaidNotice />
+        ) : issued ? (
+          <VirtualAccountNotice result={result} />
+        ) : (
+          <MethodChooser
+            method={method}
+            onChange={setMethod}
+            previousAttemptFailed={result?.previousAttemptFailed ?? false}
+          />
+        )}
+
+        {error ? (
+          // 진짜 오류만 강조한다 — 좌측 규칙선. 일반 안내는 helper text로 녹인다.
+          <p className="mt-5 border-l-2 border-danger pl-3 text-[13px] leading-relaxed text-text-2">{error}</p>
+        ) : null}
+
+        {/* 데스크탑 액션 — 모바일은 아래 고정 바가 대신한다. */}
+        <div className="mt-8 hidden border-t border-border pt-4 sm:block">
+          {paid || issued ? (
+            <Link href={BACK_HREF} className={`inline-flex h-9 items-center px-3.5 ${SECONDARY_BUTTON_CLASS}`}>
+              구매내역으로
+            </Link>
+          ) : (
+            <button type="button" onClick={handlePay} disabled={busy} className={`h-12 w-full ${PRIMARY_BUTTON_CLASS}`}>
+              {busy ? "결제창을 여는 중…" : "결제하기"}
+            </button>
+          )}
         </div>
-      ) : null}
+      </main>
 
-      {paid ? (
-        <PaidNotice />
-      ) : issued ? (
-        <VirtualAccountNotice result={result} />
-      ) : (
-        <MethodChooser
-          method={method}
-          onChange={setMethod}
-          onPay={handlePay}
-          busy={busy}
-          previousAttemptFailed={result?.previousAttemptFailed ?? false}
-        />
-      )}
-
-      {error ? (
-        // 진짜 오류만 강조한다 — 좌측 규칙선. 일반 안내는 helper text로 녹인다.
-        <p className="mt-5 border-l-2 border-danger pl-3 text-[13px] leading-relaxed text-text-2">{error}</p>
-      ) : null}
-
-      <div className="mt-8 border-t border-border pt-4">
-        <Link href="/mypage" className={`inline-flex h-9 items-center px-3.5 ${SECONDARY_BUTTON_CLASS}`}>
-          구매내역으로
-        </Link>
+      {/*
+        모바일 하단 고정 바(#502). 결제는 「금액을 확인하고 누르는」 동작이라 금액과 버튼이 늘
+        같이 보여야 한다 — 예전에는 스크롤해야 버튼에 닿았다. 매물 상세의 고정 바와 같은 지면이다.
+      */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-[400] border-t border-border bg-white px-[14px] pt-2.5 pb-[calc(10px_+_env(safe-area-inset-bottom))] sm:hidden"
+      >
+        {paid || issued ? (
+          <Link
+            href={BACK_HREF}
+            className={`flex h-12 w-full items-center justify-center ${SECONDARY_BUTTON_CLASS}`}
+          >
+            구매내역으로
+          </Link>
+        ) : (
+          <>
+            {result ? (
+              <div className="mb-2 flex items-baseline justify-between">
+                <span className="text-[11.5px] text-text-3">결제 금액</span>
+                <span className="font-display text-[19px] font-extrabold text-text-1 tabular-nums">
+                  {formatKRW(result.amount)}
+                </span>
+              </div>
+            ) : null}
+            <button type="button" onClick={handlePay} disabled={busy} className={`h-12 w-full ${PRIMARY_BUTTON_CLASS}`}>
+              {busy ? "결제창을 여는 중…" : "결제하기"}
+            </button>
+          </>
+        )}
       </div>
-    </main>
+    </>
   );
 }
 
@@ -254,14 +318,10 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
 function MethodChooser({
   method,
   onChange,
-  onPay,
-  busy,
   previousAttemptFailed,
 }: {
   method: MethodValue;
   onChange: (v: MethodValue) => void;
-  onPay: () => void;
-  busy: boolean;
   previousAttemptFailed: boolean;
 }) {
   return (
@@ -306,12 +366,94 @@ function MethodChooser({
           지난 결제가 완료되지 않았어요. 다시 시도해 주세요.
         </p>
       ) : null}
-
-      <button type="button" onClick={onPay} disabled={busy} className={`mt-6 h-12 w-full ${PRIMARY_BUTTON_CLASS}`}>
-        {busy ? "결제창을 여는 중…" : "결제하기"}
-      </button>
     </>
   );
+}
+
+/**
+ * 계좌번호 복사(#502).
+ *
+ * <p><b>토스트를 쓰지 않는다.</b> 이 화면은 하단에 고정 바가 있어 토스트가 그 뒤로 깔릴 수 있다 —
+ * 오류 토스트가 시트에 가려 사용자가 「눌러도 아무 일도 안 일어난다」고 느낀 전례가 있다(T55).
+ * 누른 자리에서 바로 확인되도록 버튼 자체를 2초간 「복사됨」으로 바꾼다.
+ */
+function CopyAccountButton({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const id = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(id);
+  }, [copied]);
+
+  async function copy() {
+    try {
+      // clipboard API는 보안 컨텍스트(https·localhost)에서만 동작한다. 실패하면 조용히 넘기지
+      // 않고 «직접 선택해 복사하라»고 말해 준다 — 계좌번호는 못 옮기면 결제가 막히는 값이다.
+      await navigator.clipboard.writeText(value);
+      setFailed(false);
+      setCopied(true);
+    } catch {
+      setFailed(true);
+    }
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={copy}
+        className={`mt-3 inline-flex h-9 items-center gap-1.5 rounded-r2 border border-border-2 px-3 text-[12px] font-bold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+      >
+        {copied ? (
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20 6 9 17l-5-5" />
+          </svg>
+        ) : (
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <rect x="9" y="9" width="13" height="13" rx="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+        )}
+        {copied ? "복사됨" : "계좌번호 복사"}
+      </button>
+      {/* 버튼 라벨이 바뀌는 것만으로는 스크린리더가 알기 어려워 상태를 따로 알린다. */}
+      <span aria-live="polite" className="sr-only">
+        {copied ? "계좌번호를 복사했어요." : ""}
+      </span>
+      {failed ? (
+        <p className="mt-2 text-[11.5px] leading-relaxed text-text-3">
+          복사가 안 됐어요. 위 번호를 길게 눌러 직접 복사해 주세요.
+        </p>
+      ) : null}
+    </>
+  );
+}
+
+/**
+ * 입금 기한의 남은 시간(#502).
+ *
+ * <p>「9월 4일 13:27」은 <b>지금이 언제인지 알아야 의미가 생기는</b> 표기다. 기한을 넘기면 거래가
+ * 취소되므로 남은 시간을 함께 적는다. 초기값을 null로 두어 서버·클라 첫 렌더를 일치시키는 것은
+ * {@code AuctionCountdown}과 같은 이유다(하이드레이션 불일치 방지).
+ */
+function RemainingTime({ expiresAt }: { expiresAt: string }) {
+  const [label, setLabel] = useState<string | null>(null);
+
+  useEffect(() => {
+    const update = () => {
+      const diffMs = new Date(expiresAt).getTime() - Date.now();
+      setLabel(diffMs <= 0 ? "기한 지남" : `${formatRemaining(diffMs)} 남음`);
+    };
+    update();
+    // 기한이 72시간이라 초 단위 카운트다운은 의미가 옅다. 분까지만 그리므로 1분이면 충분하다.
+    const id = setInterval(update, 60000);
+    return () => clearInterval(id);
+  }, [expiresAt]);
+
+  if (!label) return null;
+  return <span className="text-[11.5px] font-bold text-danger">{label}</span>;
 }
 
 // 가상계좌 발급 완료 — **결제 완료가 아니다.** 화면도 "입금 대기"로 말해야 한다.
@@ -328,8 +470,18 @@ function VirtualAccountNotice({ result }: { result: PaymentWindowResult }) {
         {/* 예금주는 PG가 안 주는 경우가 있다(갤럭시아 가상계좌 실응답에 remitteeName이 없다).
             빈 행을 "-"로 남기면 값이 누락된 것처럼 보이므로 아예 감춘다. */}
         {result.holder ? <Row label="예금주" value={result.holder} /> : null}
-        {result.expiresAt ? <Row label="입금 기한" value={formatDeadline(result.expiresAt)} /> : null}
+        {result.expiresAt ? (
+          <Row
+            label="입금 기한"
+            value={formatDeadline(result.expiresAt)}
+            trailing={<RemainingTime expiresAt={result.expiresAt} />}
+          />
+        ) : null}
       </dl>
+
+      {/* 가상계좌는 「화면을 보며 은행 앱에 숫자를 옮기는」 동작을 반드시 동반한다. 14자리를
+          외워서 건너가는 것은 실수하면 돈이 잘못 가는 종류의 불편이라, 복사를 붙인다(#502). */}
+      {result.accountNumber ? <CopyAccountButton value={result.accountNumber} /> : null}
 
       <p className="mt-5 text-xs leading-relaxed text-text-3">
         입금자명이 달라도 괜찮아요. 발급된 계좌로 들어온 금액으로 확인해요.
@@ -349,18 +501,32 @@ function PaidNotice() {
   );
 }
 
-function Row({ label, value, emphasis }: { label: string; value: string; emphasis?: boolean }) {
+function Row({
+  label,
+  value,
+  emphasis,
+  trailing,
+}: {
+  label: string;
+  value: string;
+  emphasis?: boolean;
+  /** 값 뒤에 덧붙는 것(입금 기한의 남은 시간). 값 자체를 흔들지 않으려고 자리를 나눠 뒀다. */
+  trailing?: React.ReactNode;
+}) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-border py-3">
       <dt className="shrink-0 text-[13px] text-text-3">{label}</dt>
-      <dd
-        className={
-          emphasis
-            ? "font-display text-lg font-extrabold text-text-1 tabular-nums"
-            : "text-sm font-semibold text-text-2 tabular-nums"
-        }
-      >
-        {value}
+      <dd className="flex items-baseline gap-2">
+        <span
+          className={
+            emphasis
+              ? "font-display text-lg font-extrabold text-text-1 tabular-nums"
+              : "text-sm font-semibold text-text-2 tabular-nums"
+          }
+        >
+          {value}
+        </span>
+        {trailing}
       </dd>
     </div>
   );

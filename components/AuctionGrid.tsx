@@ -11,10 +11,19 @@ export default function AuctionGrid({
   auctions,
   emptyTitle = "아직 등록된 매물이 없어요",
   emptyDescription = "이 스타의 매물이 등록되면 여기에 표시돼요.",
+  variant = "default",
+  gridClassName = "grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3.5",
 }: {
   auctions: AuctionResponse[];
   emptyTitle?: string;
   emptyDescription?: string;
+  /**
+   * 카드 리듬(#499). 기본은 데스크탑형(테두리·그림자 있는 카드)이고, 모바일 지면을 함께 쓰는
+   * 화면은 `compact`를 넘긴다 — 홈·목록·검색이 전부 그쪽이다.
+   */
+  variant?: "default" | "compact";
+  /** 격자 배치. 좌우 14px 지면에 2열로 까는 화면은 이 값을 바꿔 넘긴다. */
+  gridClassName?: string;
 }) {
   const { wishlisted, toggle } = useWishlistStatus(auctions.map((a) => a.id));
 
@@ -34,11 +43,12 @@ export default function AuctionGrid({
   }
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3.5">
+    <div className={gridClassName}>
       {auctions.map((auction) => (
         <AuctionCard
           key={auction.id}
           auction={auction}
+          variant={variant}
           wishlisted={wishlisted.has(auction.id)}
           onToggleWishlist={(next) => toggle(auction.id, next)}
         />

@@ -106,6 +106,11 @@ export default function AdminDashboardPage() {
         />
         <Stat label="처리 대기 신고" value={loading ? "—" : `${data?.pendingReportCount ?? 0}건`} />
         <Stat label="처리 대기 건의" value={loading ? "—" : `${data?.pendingSuggestionCount ?? 0}건`} />
+        <Stat
+          label="배송 확인 필요"
+          value={loading ? "—" : `${data?.deliveryStalledCount ?? 0}건`}
+          href="/admin/delivery-stalled"
+        />
       </div>
 
       <div className="mt-8 grid gap-5 lg:grid-cols-2">

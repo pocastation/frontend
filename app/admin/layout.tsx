@@ -70,6 +70,13 @@ function ScaleIcon() {
     </svg>
   );
 }
+function TruckIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M1 5h13v11H1zM14 9h4l4 4v3h-8zM6.5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM17.5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+    </svg>
+  );
+}
 function BellIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -130,6 +137,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/admin/reports", label: "신고 관리", icon: <FlagIcon />, ready: true },
       { href: "/admin/disputes", label: "분쟁·중재", icon: <ScaleIcon />, ready: true },
+      { href: "/admin/delivery-stalled", label: "배송 확인", icon: <TruckIcon />, ready: true },
     ],
   },
   {

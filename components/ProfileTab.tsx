@@ -88,12 +88,15 @@ export default function ProfileTab() {
                 닉네임을 변경했어요.
               </p>
             )}
+            {/* 🔴 「7일」은 BE `NicknamePolicy.NICKNAME_CHANGE_INTERVAL`과 함께 움직인다 —
+                30일로 확대(2026-08-31, BE #405). 거래 상대를 닉네임으로 기억하는 서비스라
+                잦은 변경은 후기·신고·재거래의 연결을 끊는다. */}
             {locked ? (
               <p className="mt-2 text-xs text-text-3">
-                닉네임은 7일에 한 번만 바꿀 수 있어요. 다음 변경 가능일: {changeableDate}
+                닉네임은 한 달(30일)에 한 번만 바꿀 수 있어요. 다음 변경 가능일: {changeableDate}
               </p>
             ) : (
-              <p className="mt-2 text-xs text-text-3">닉네임은 변경 후 7일간 다시 바꿀 수 없어요.</p>
+              <p className="mt-2 text-xs text-text-3">닉네임은 변경 후 30일간 다시 바꿀 수 없어요.</p>
             )}
           </div>
           <button

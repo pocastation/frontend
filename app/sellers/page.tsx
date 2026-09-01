@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import BadgeChips from "@/components/BadgeChips";
 import { apiFetch } from "@/lib/api";
+import TrustLevelBadge from "@/components/TrustLevelBadge";
 import { plainLevelLabel } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { PopularSellerResponse } from "@/lib/types";
@@ -70,10 +71,13 @@ export default async function PopularSellersPage() {
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className="truncate text-sm font-bold text-text-1">{seller.nickname}</span>
-                  <span className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1">
+                  <TrustLevelBadge
+                    level={seller.trustLevel}
+                    className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1 decoration-transparent hover:decoration-text-3"
+                  >
                     <span className="text-text-3">Lv.{seller.trustLevel}</span>
                     {plainLevelLabel(seller.trustLevelLabel)}
-                  </span>
+                  </TrustLevelBadge>
                   {/* 배지는 레벨 바로 뒤 — 마이페이지·판매자 상세와 같은 자리다(BE #273).
                       옵셔널 체이닝이 아니라 기본값을 주는 이유는 컴포넌트가 배열을 요구하기 때문. */}
                   <BadgeChips badges={seller.badges ?? []} />

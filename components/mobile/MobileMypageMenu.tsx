@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import TrustLevelBadge from "@/components/TrustLevelBadge";
 import type { ReactNode } from "react";
 import { FOCUS_RING } from "@/lib/ui";
 import type { MypageTab } from "@/lib/mypage-tabs";
@@ -153,9 +154,12 @@ export default function MobileMypageMenu({
           <span className="flex items-center gap-1.5">
             <span className="truncate text-base font-extrabold text-text-1">{nickname}</span>
             {trustLevel != null && (
-              <span className="flex-shrink-0 whitespace-nowrap rounded-[3px] border border-border-2 px-1.5 py-px text-[10.5px] font-extrabold text-text-2">
+              <TrustLevelBadge
+                level={trustLevel}
+                className="flex-shrink-0 whitespace-nowrap rounded-[3px] border border-border-2 px-1.5 py-px text-[10.5px] font-extrabold text-text-2 decoration-transparent"
+              >
                 {trustLevelLabel ?? `신뢰 ${trustLevel}`}
-              </span>
+              </TrustLevelBadge>
             )}
           </span>
           <span className="mt-0.5 block text-xs tabular-nums text-text-3">거래 {tradeCount ?? 0}회</span>

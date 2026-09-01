@@ -46,6 +46,7 @@ import { isBeforeShipment } from "@/lib/types";
 import IdentityVerificationPanel from "@/components/IdentityVerificationPanel";
 import OfferWithdrawModal from "@/components/OfferWithdrawModal";
 import SellingListingActions from "@/components/SellingListingActions";
+import TrustLevelBadge from "@/components/TrustLevelBadge";
 import AuctionCard from "@/components/AuctionCard";
 import MobileShell from "@/components/mobile/MobileShell";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
@@ -654,10 +655,13 @@ function MyPageBody() {
           {(member?.trustLevel != null || (member?.badges?.length ?? 0) > 0) && (
             <div className="mt-2 flex flex-wrap items-center justify-center gap-1.5">
               {member?.trustLevel != null && (
-                <span className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1">
+                <TrustLevelBadge
+                  level={member.trustLevel}
+                  className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1 decoration-transparent hover:decoration-text-3"
+                >
                   <span className="text-text-3">Lv.{member.trustLevel}</span>
                   {member.trustLevelLabel ? plainLevelLabel(member.trustLevelLabel) : null}
-                </span>
+                </TrustLevelBadge>
               )}
               <BadgeChips badges={member?.badges ?? []} />
             </div>
@@ -1491,9 +1495,13 @@ function BuyerFulfillmentFooter({
   }
 
   // 발송 전 주문 취소(약관 제13조 제2항). 되돌릴 수 없으니 한 번 되묻는다.
+  //
+  // 🔴 수수료 공제를 여기서 고지한다(정책 제17조 ① — 공제 후 환불). 예전 문구
+  // 「환불받을까요?」는 전액 환불로 읽혔다. 금액은 적지 않는다 — 잠정 300원이
+  // PG 계약으로 바뀔 값이라(RefundPolicy.PAYMENT_FEE_KRW), 박아 두면 문구가 또 낡는다.
   async function cancel() {
     if (cancelling) return;
-    if (!window.confirm("주문을 취소하고 환불받을까요? 취소한 뒤에는 되돌릴 수 없어요.")) return;
+    if (!window.confirm("주문을 취소할까요? 결제 금액에서 전자결제 이용 수수료를 뺀 금액이 환불되고, 취소한 뒤에는 되돌릴 수 없어요.")) return;
     setCancelling(true);
     try {
       await fetchWithAuth<void>(`/api/auctions/${order.auctionId}/order/cancel`, { method: "POST" });

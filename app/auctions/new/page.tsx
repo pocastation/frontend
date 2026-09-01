@@ -8,7 +8,7 @@ import ArtistCombobox from "@/components/ArtistCombobox";
 import AuctionVerificationStep from "@/components/AuctionVerificationStep";
 import PhotoUploadGrid, { type PhotoItem } from "@/components/PhotoUploadGrid";
 import VideoUploadField, { type VideoItem } from "@/components/VideoUploadField";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch, ApiError, apiFetchMultipartWithProgress } from "@/lib/api";
 import { compressImage } from "@/lib/image-compress";
 import { MIN_LISTING_PRICE, PRICE_UNIT } from "@/lib/fees";
 import {
@@ -148,7 +148,9 @@ export default function NewAuctionPage() {
         const s = await fetchWithAuth<VideoStatusResponse>(`/api/media/videos/${videoId}`);
         if (cancelled) return;
         if (s.status === "READY") {
-          setVideo((v) => (v ? { ...v, status: "ready" } : v));
+          // 산출물을 버리지 않는다(#466) — HEVC 원본은 브라우저가 검은 화면으로 그리므로,
+          // 이후 화면은 서버 정지컷(posterUrl)과 변환 MP4(url)가 맡는다.
+          setVideo((v) => (v ? { ...v, status: "ready", url: s.url, posterUrl: s.posterUrl } : v));
         } else if (s.status === "FAILED") {
           setVideo((v) => (v ? { ...v, status: "error", error: videoFailureMessage(s.failureReason) } : v));
         }
@@ -268,11 +270,18 @@ export default function NewAuctionPage() {
       return;
     }
     const previewUrl = URL.createObjectURL(file);
-    setVideo({ previewUrl, status: "uploading" });
+    setVideo({ previewUrl, status: "uploading", uploadedBytes: 0, totalBytes: file.size });
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const uploaded = await fetchMultipartWithAuth<VideoUploadResponse>("/api/media/videos", formData);
+      // XHR 업로드(#466) — fetch는 진행 이벤트가 없어 대용량에서 멈춘 것처럼 보였다.
+      const uploaded = await apiFetchMultipartWithProgress<VideoUploadResponse>(
+        "/api/media/videos",
+        formData,
+        accessToken,
+        (loaded, total) =>
+          setVideo((v) => (v ? { ...v, uploadedBytes: loaded, totalBytes: total } : v)),
+      );
       setVideo((v) => (v ? { ...v, status: "processing", videoId: uploaded.videoId } : v));
     } catch (err) {
       const message = uploadErrorMessage(err, "영상");
@@ -306,7 +315,8 @@ export default function NewAuctionPage() {
         return (
           uploadedImages.length >= MIN_IMAGES &&
           !isUploading &&
-          (!AUCTION_VIDEO_ENABLED || video?.status === "ready")
+          // 미개봉은 검수영상 면제(#466, 정책 제3조 ③) — 다만 올리기 시작했다면 끝나길 기다린다.
+          (!AUCTION_VIDEO_ENABLED || (unopened && video == null) || video?.status === "ready")
         );
       case "verification":
         return verificationId !== null;
@@ -345,7 +355,7 @@ export default function NewAuctionPage() {
       setError(`사진을 ${MIN_IMAGES}장 이상 등록해주세요.`);
       return;
     }
-    if (AUCTION_VIDEO_ENABLED && video?.status !== "ready") {
+    if (AUCTION_VIDEO_ENABLED && !(unopened && video == null) && video?.status !== "ready") {
       setError("검수영상 처리가 완료된 뒤 등록할 수 있어요.");
       return;
     }
@@ -734,6 +744,33 @@ export default function NewAuctionPage() {
 
           {stepKey === "media" && (
             <div>
+              {/* 🔴 영상이 사진보다 위다(#466, 사용자 제안) — 이 스텝에서 영상이 유일한 수십 초
+                  병목(업로드 + 트랜스코딩)이라, 가장 느린 작업을 가장 먼저 시작시켜야 사진을
+                  고르고 다음 단계를 쓰는 동안 뒤에서 처리가 끝난다. 폼 순서 = 파이프라인 순서.
+
+                  ⚠️ 영상은 **필수**다(AUCTION_VIDEO_REQUIRED=true, 상용 라이브) — 처음에 「(선택)」
+                  으로 잘못 적었다가 정정했다(2026-08-31). 게시본 정책 제3조 ③은 「등록할 수
+                  있습니다」로 선택처럼 읽히는데, 그쪽이 코드와 어긋난 문서다(별도 결정 대기). */}
+              {AUCTION_VIDEO_ENABLED && (
+                <div className="mb-6 border-b border-border pb-5">
+                  {unopened ? (
+                    <p className="mb-2 text-xs text-text-3">
+                      <b className="font-bold text-text-2">검수영상 (미개봉 — 생략 가능)</b> — 포장을
+                      뜯지 않는 물품이라 올리지 않아도 등록돼요. 올리면 포장 상태를 보여주는 참고
+                      자료로 함께 저장돼요.
+                    </p>
+                  ) : (
+                    <p className="mb-2 text-xs text-text-3">
+                      <b className="font-bold text-text-2">검수영상</b> — 포카를 손에 들고 앞뒤로
+                      천천히 돌리는 틸팅 영상 1개를 올려주세요. 홀로그램·코팅 상태처럼 사진으로는
+                      판단하기 어려운 부분이 영상에서 드러나요. 먼저 올려두면 처리되는 동안 나머지를
+                      작성할 수 있어요.
+                    </p>
+                  )}
+                  <VideoUploadField video={video} onSelect={addVideo} onRemove={removeVideo} />
+                </div>
+              )}
+
               <p className="mb-2 text-xs text-text-3">
                 {MIN_IMAGES}~{MAX_IMAGES}장, 첫 장이 대표사진으로 노출돼요.
               </p>
@@ -745,21 +782,11 @@ export default function NewAuctionPage() {
                 onReorder={setItems}
               />
               {/* 슬리브 안내(#279) — 경고가 아니라 촬영 요령이라 규칙선 강조 없이 helper로 둔다.
-                  사진·영상 양쪽에 걸리는 이야기라 두 슬롯 사이가 아니라 사진 아래에 한 번만 쓴다. */}
+                  사진·영상 양쪽에 걸리는 이야기라 사진 아래에 한 번만 쓴다. */}
               <p className="mt-2 text-xs leading-5 text-text-3">
                 포토카드는 <b className="font-bold text-text-2">슬리브·탑로더에서 꺼내고 촬영</b>해 주세요.
                 비닐의 반사와 흠집이 카드 자체의 상태로 오해받아 문의와 분쟁이 생겨요.
               </p>
-
-              {AUCTION_VIDEO_ENABLED && (
-                <div className="mt-6 border-t border-border pt-5">
-                  <p className="mb-2 text-xs text-text-3">
-                    포카를 손에 들고 앞뒤로 천천히 돌리는 틸팅 영상 1개를 올려주세요. 홀로그램·코팅
-                    상태처럼 사진으로는 판단하기 어려운 부분이 영상에서 드러나요.
-                  </p>
-                  <VideoUploadField video={video} onSelect={addVideo} onRemove={removeVideo} />
-                </div>
-              )}
             </div>
           )}
           {stepKey === "verification" && (

@@ -83,9 +83,10 @@ export default function MobileShell({ active, children }: { active: MobileTabKey
             <Wordmark className="text-[19px] leading-none" />
           </Link>
           <div className="flex items-center">
-            {/* 검색 전용 화면은 아직 없다 — 목록 화면의 검색으로 넘긴다(데스크탑 헤더 검색과 같은 도착지). */}
+            {/* 검색 전용 화면(#493). 도착하면 입력에 포커스가 잡혀 바로 칠 수 있다 —
+                예전에는 /auctions로 보내 검색창을 한 번 더 눌러야 했다. */}
             <Link
-              href="/auctions"
+              href="/search"
               aria-label="검색"
               className={`flex h-11 w-11 items-center justify-center rounded-full text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
             >

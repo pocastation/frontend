@@ -7,7 +7,7 @@ import { useDeliveryAddressGate } from "@/lib/use-delivery-address-gate";
 import { useToast } from "@/lib/toast-context";
 import { isBeforeEnd, isEndingSoon } from "@/lib/format";
 import { OFFER_UNIT } from "@/lib/fees";
-import type { AuctionStatus, BidResponse, BidStreamEvent } from "@/lib/types";
+import type { AuctionStatus, BidResponse, BidStreamEvent, MyOfferResponse } from "@/lib/types";
 
 /**
  * 상세의 가격 제안 상태 — **한 화면에 하나만 띄운다.**
@@ -44,9 +44,15 @@ type AuctionBiddingValue = {
   outOfRange: boolean;
   adjustAmount: (next: number) => void;
   submitting: boolean;
-  /** 이 매물에 이미 유효한 제안을 냈다 — 서버가 중복 제안을 막는다. */
-  /** 이번 세션에 내가 낸 제안 금액 — 없으면 아직(또는 새로고침 뒤라) 모른다. */
+  /**
+   * 이 매물에 낸 내 현재 제안(#480) — 서버(`GET /bids/me`)가 근거라 **새로고침해도 안다**.
+   * 예전에는 세션 내 기억뿐이라 새로고침하면 「이미 제안한 매물」이 처음 보는 매물처럼 보였다.
+   */
+  myOffer: MyOfferResponse | null;
+  /** myOffer.amount의 축약 — 기존 사용처(라벨 분기·토스트 문구) 호환용. */
   myOfferAmount: number | null;
+  /** 취소 모달이 철회를 끝냈을 때 — 내 제안 상태와 인원수를 되돌린다. */
+  onOfferWithdrawn: () => void;
   /**
    * 제안 전송. 결과를 돌려주는 이유는 <b>바텀시트가 자기를 닫을 타이밍</b>을 알아야 해서다(#453).
    * "placed" = 제안 완료(시트를 닫는다), "gate" = 배송지 등록 모달로 빠짐(시트를 닫아야
@@ -97,15 +103,15 @@ export function AuctionBiddingProvider({
   // 제안가의 출발값은 최소가다. 예전에는 「현재가 + 1단위」였는데 그 현재가가 비공개가 됐다(§1.7).
   const [amount, setAmount] = useState(startPrice);
   const [submitting, setSubmitting] = useState(false);
-  // 🔴 「제안했다」가 아니라 **지금 낸 금액**을 기억한다(#428). 다시 제안하는 것이 곧 수정이라
-  // (§2.1), 바꾸려는 사람에게 필요한 정보는 「보냈다」가 아니라 「얼마로 보냈나」다.
-  //
-  // ⚠️ 이번 세션에 제안한 경우에만 안다 — 상세 응답이 내 제안을 싣지 않아 새로고침하면
-  // 잊는다. 그래서 이 값은 안내를 **더할 때만** 쓰고, 버튼을 잠그는 데는 쓰지 않는다.
-  const [myOfferAmount, setMyOfferAmount] = useState<number | null>(null);
+  // 🔴 「제안했다」가 아니라 **지금 낸 제안 그 자체**를 든다(#428→#480). 다시 제안하는 것이
+  // 곧 수정이라(§2.1), 바꾸려는 사람에게 필요한 것은 「얼마로 보냈나」와 「어느 제안을 취소할
+  // 수 있나(bidId)」다. 서버 조회(GET /bids/me)가 근거라 새로고침해도 잊지 않는다.
+  const [myOffer, setMyOffer] = useState<MyOfferResponse | null>(null);
   // 카운트다운/상대시각을 1초마다 다시 그리기 위한 틱(값은 안 읽고 리렌더 트리거로만 쓴다).
   const [, setNowTick] = useState(0);
   const amountTouchedRef = useRef(false);
+
+  const myOfferAmount = myOffer?.amount ?? null;
 
   const isLive = status === "LIVE" && isBeforeEnd(endAt);
   // 마감 임박일 때만 카운트다운을 주황(warn)으로 강조 — 그 외에는 뉴트럴로 둔다(색 절제).
@@ -114,6 +120,35 @@ export function AuctionBiddingProvider({
   const floor = startPrice;
   // 상한이 없어졌으므로 범위 이탈은 「최소가 미만」과 「단위 어긋남」 둘뿐이다.
   const outOfRange = amount < floor || amount % OFFER_UNIT !== 0;
+
+  // 내 제안 조회(#480) — 로그인했고 남의 매물일 때만. 실패해도 제안 흐름은 막지 않는다
+  // (모르면 「제안하기」로 보일 뿐이고, 서버가 어차피 수정으로 처리한다 §2.1).
+  const refreshMyOffer = useCallback(async () => {
+    try {
+      setMyOffer(await fetchWithAuth<MyOfferResponse | null>(`/api/auctions/${auctionId}/bids/me`));
+    } catch {
+      // 조회 실패는 조용히 — 틀린 상태를 보여주느니 안 보여준다.
+    }
+  }, [auctionId, fetchWithAuth]);
+
+  useEffect(() => {
+    if (!member || isOwnAuction) return;
+    void refreshMyOffer();
+  }, [member, isOwnAuction, refreshMyOffer]);
+
+  // 내 제안을 알게 되면, 아직 손대지 않은 입력값을 그 금액으로 맞춘다 — 「바꾸기」 시트가
+  // 최소가가 아니라 지금 제안에서 출발해야 수정이라는 사실이 몸으로 읽힌다.
+  useEffect(() => {
+    if (myOffer && !amountTouchedRef.current) setAmount(myOffer.amount);
+  }, [myOffer]);
+
+  // 취소 모달이 철회를 끝냈을 때 — 내 제안이 사라지고, 인원수도 하나 줄어든다(§2.9).
+  const onOfferWithdrawn = useCallback(() => {
+    setMyOffer(null);
+    setOfferCount((prev) => Math.max(prev - 1, 0));
+    amountTouchedRef.current = false;
+    setAmount(startPrice);
+  }, [startPrice]);
 
   // 관심 수는 로그인 여부와 무관한 공개 집계다. 실패해도 가격 제안 흐름은 막지 않는다.
   useEffect(() => {
@@ -179,7 +214,8 @@ export function AuctionBiddingProvider({
         body: { amount },
       });
       setEndAt(res.endAt);
-      setMyOfferAmount(amount);
+      // bidId는 응답에 없다 — 취소 진입점이 곧바로 살아나도록 서버에서 다시 받아온다.
+      void refreshMyOffer();
       // 인원수는 SSE로도 오지만, 내 제안 직후만큼은 즉시 반영돼야 「보냈는데 안 늘었다」로 보이지 않는다.
       setOfferCount((prev) => (prev === 0 ? 1 : prev));
       // 🔴 부연을 붙인다(#404). 구매자가 제안 직후 「이제 뭘 기다리면 되나」를 아는 유일한
@@ -209,7 +245,7 @@ export function AuctionBiddingProvider({
     return "placed";
   // 🔴 myOfferAmount가 의존성에 있어야 한다 — 토스트 문구가 그 값을 읽는데 빠뜨리면 콜백이
   // 옛 값(null)을 잡은 채 굳어, **두 번째 제안에도 「보냈어요」가 뜬다.**
-  }, [amount, auctionId, fetchWithAuth, isGateRejection, myOfferAmount, needsAddress, toast]);
+  }, [amount, auctionId, fetchWithAuth, isGateRejection, myOfferAmount, needsAddress, refreshMyOffer, toast]);
 
   const onAddressSaved = useCallback(
     (afterSave?: () => void) => {
@@ -236,7 +272,9 @@ export function AuctionBiddingProvider({
       outOfRange,
       adjustAmount,
       submitting,
+      myOffer,
       myOfferAmount,
+      onOfferWithdrawn,
       handleBid,
       needsAddress,
       addressModalOpen,
@@ -246,8 +284,8 @@ export function AuctionBiddingProvider({
     }),
     [
       auctionId, offerCount, wishlistCount, endAt, status, isLive, endingSoon, isOwnAuction,
-      amount, floor, outOfRange, adjustAmount, submitting, myOfferAmount, handleBid,
-      needsAddress, addressModalOpen, onAddressSaved,
+      amount, floor, outOfRange, adjustAmount, submitting, myOffer, myOfferAmount,
+      onOfferWithdrawn, handleBid, needsAddress, addressModalOpen, onAddressSaved,
     ],
   );
 

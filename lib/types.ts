@@ -139,8 +139,21 @@ export type AdminDashboardResponse = {
   pendingReviewAuctions: number;
   pendingReportCount: number;
   pendingSuggestionCount: number;
+  deliveryStalledCount: number;
   recentMembers: AdminMemberSummary[];
   recentAuctions: AuctionResponse[];
+};
+
+// GET /api/admin/orders/delivery-stalled 항목(#474) — 발송 7일 경과·배송완료 미확인 주문.
+// 관리자가 택배사 사이트에서 사람이 조회하는 데 필요한 정보 전부.
+export type AdminStalledOrderResponse = {
+  orderId: number;
+  auctionId: number;
+  title: string;
+  carrier: string | null;
+  carrierCode: string | null;
+  trackingNumber: string | null;
+  shippedAt: string;
 };
 
 // ─── 신고(report) ───

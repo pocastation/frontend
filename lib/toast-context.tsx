@@ -101,7 +101,10 @@ function VariantIcon({ variant }: { variant: ToastVariant }) {
 function ToastViewport({ toasts, onDismiss }: { toasts: ToastItem[]; onDismiss: (id: number) => void }) {
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-[calc(1rem_+_var(--mobile-tabbar-h,0px))] z-[100] flex flex-col items-center gap-2 px-4 sm:bottom-6"
+      // 토스트는 최상위 레이어다(#476) — 게이트 모달(400)·제안 시트(500)·SellerOfferPanel(600)보다
+      // 위에 있어야 한다. z-100이던 시절, 실패 시 시트가 열린 채 유지되는 설계와 겹쳐 서버 거부가
+      // 전부 「눌렀는데 아무 일도 안 일어남」으로 보였다.
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(1rem_+_var(--mobile-tabbar-h,0px))] z-[700] flex flex-col items-center gap-2 px-4 sm:bottom-6"
       aria-live="polite"
       aria-atomic="false"
     >

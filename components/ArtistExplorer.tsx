@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import ArtistCard from "@/components/ArtistCard";
+import ArtistRow from "@/components/ArtistRow";
 import { ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
 import { apiFetch } from "@/lib/api";
 import { ARTIST_TYPE_LABEL, ARTIST_TYPE_OPTIONS } from "@/lib/labels";
@@ -10,7 +10,10 @@ import type { ArtistListResponse, ArtistResponse, ArtistType } from "@/lib/types
 
 const PAGE_SIZE = 24;
 const DEBOUNCE_MS = 300;
-const GRID_CLASS = "grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3.5";
+// 줄 목록(#499). 모바일은 한 열, 데스크탑은 두 열로 흘린다 — 1160px에 한 줄씩 두면 줄이
+// 지나치게 길어지고, 카드 격자로 되돌리면 이미지 없는 스타가 대부분이라 화면이 비어 보인다.
+// column-gap이 큰 이유는 두 열 사이에 세로선이 없어서다(헤어라인은 각 줄의 아래에만 있다).
+const LIST_CLASS = "grid grid-cols-1 sm:grid-cols-2 sm:gap-x-12";
 
 function buildParams(query: string, type: ArtistType | null, page: number) {
   const params = new URLSearchParams({ size: String(PAGE_SIZE), page: String(page) });
@@ -98,8 +101,8 @@ export default function ArtistExplorer({
 
   return (
     <div>
-      <div className="mb-6 flex flex-wrap items-center gap-2.5">
-        <label className="flex h-[42px] min-w-[240px] flex-1 items-center gap-2 rounded-full border border-border px-4">
+      <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-6 sm:gap-2.5">
+        <label className="flex h-9 min-w-[200px] flex-1 items-center gap-2 rounded-full border border-border-2 px-3.5 focus-within:border-text-1 sm:h-[42px] sm:px-4">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
@@ -114,13 +117,15 @@ export default function ArtistExplorer({
           />
         </label>
 
+        {/* 선택된 칩은 잉크(text-1)로 채운다 — 거래 목록·검색 화면의 칩과 같은 관례다.
+            보라(primary)는 CTA·필수 표시·포커스처럼 «행동을 요구하는» 자리에만 쓴다. */}
         <div className="flex shrink-0 gap-1.5" role="group" aria-label="스타 타입 필터">
           <button
             type="button"
             aria-pressed={type === null}
             onClick={() => setType(null)}
-            className={`h-[42px] rounded-full border px-4 text-[13px] font-bold transition-colors ${FOCUS_RING} ${
-              type === null ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+            className={`min-h-9 rounded-full border px-3.5 text-[12.5px] font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-[13px] ${FOCUS_RING} ${
+              type === null ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
             }`}
           >
             전체
@@ -131,8 +136,8 @@ export default function ArtistExplorer({
               type="button"
               aria-pressed={type === option}
               onClick={() => setType(option)}
-              className={`h-[42px] rounded-full border px-4 text-[13px] font-bold transition-colors ${FOCUS_RING} ${
-                type === option ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+              className={`min-h-9 rounded-full border px-3.5 text-[12.5px] font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-[13px] ${FOCUS_RING} ${
+                type === option ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
               }`}
             >
               {ARTIST_TYPE_LABEL[option]}
@@ -154,9 +159,9 @@ export default function ArtistExplorer({
 
       {artists.length > 0 ? (
         // 재검색·필터 변경 중에도 기존 카드를 유지하고 dim만 준다(스켈레톤으로 통째 교체 X).
-        <div className={`${GRID_CLASS} transition-opacity ${loading ? "opacity-60" : error ? "opacity-45" : ""}`}>
+        <div className={`${LIST_CLASS} transition-opacity ${loading ? "opacity-60" : error ? "opacity-45" : ""}`}>
           {artists.map((artist) => (
-            <ArtistCard key={artist.id} artist={artist} />
+            <ArtistRow key={artist.id} artist={artist} />
           ))}
         </div>
       ) : error ? null : (
@@ -187,7 +192,7 @@ export default function ArtistExplorer({
             type="button"
             onClick={loadMore}
             disabled={loadingMore}
-            className={`flex h-11 items-center gap-2 rounded-full border border-border-2 bg-white px-6 text-[13.5px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+            className={`flex h-11 items-center gap-2 rounded-full border border-border-2 bg-white px-6 text-[13.5px] font-bold text-text-1 transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : moreError ? "다시 시도" : "더 보기"}
           </button>

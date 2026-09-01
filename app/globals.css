@@ -74,15 +74,6 @@ body {
   }
 }
 
-@keyframes tickerScroll {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    /* 배열을 2회 반복 렌더링해서 정확히 절반만 이동하면 이음매 없이 반복된다. */
-    transform: translateX(-50%);
-  }
-}
 
 /* 판매 등록 위저드 스텝 전환 — 다음=오른쪽에서, 이전=왼쪽에서 슬라이드 인. */
 @keyframes wizardInRight {

@@ -1495,9 +1495,13 @@ function BuyerFulfillmentFooter({
   }
 
   // 발송 전 주문 취소(약관 제13조 제2항). 되돌릴 수 없으니 한 번 되묻는다.
+  //
+  // 🔴 수수료 공제를 여기서 고지한다(정책 제17조 ① — 공제 후 환불). 예전 문구
+  // 「환불받을까요?」는 전액 환불로 읽혔다. 금액은 적지 않는다 — 잠정 300원이
+  // PG 계약으로 바뀔 값이라(RefundPolicy.PAYMENT_FEE_KRW), 박아 두면 문구가 또 낡는다.
   async function cancel() {
     if (cancelling) return;
-    if (!window.confirm("주문을 취소하고 환불받을까요? 취소한 뒤에는 되돌릴 수 없어요.")) return;
+    if (!window.confirm("주문을 취소할까요? 결제 금액에서 전자결제 이용 수수료를 뺀 금액이 환불되고, 취소한 뒤에는 되돌릴 수 없어요.")) return;
     setCancelling(true);
     try {
       await fetchWithAuth<void>(`/api/auctions/${order.auctionId}/order/cancel`, { method: "POST" });

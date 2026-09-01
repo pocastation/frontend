@@ -1,5 +1,4 @@
 import AuctionExplorer from "@/components/AuctionExplorer";
-import AuctionTicker from "@/components/AuctionTicker";
 import Hero from "@/components/Hero";
 import MobileHome from "@/components/mobile/MobileHome";
 import MobileShell from "@/components/mobile/MobileShell";
@@ -107,7 +106,6 @@ export default async function Home() {
 
       <div className="hidden sm:block">
         <Hero liveCount={content.length} featured={heroFeatured} />
-        <AuctionTicker />
         <AuctionExplorer initialAuctions={content} />
         <AuctionExplorer
           initialAuctions={instantContent}

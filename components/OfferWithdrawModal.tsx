@@ -1,5 +1,6 @@
 "use client";
 
+import { createPortal } from "react-dom";
 import { useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -49,7 +50,8 @@ export default function OfferWithdrawModal({
     }
   }
 
-  return (
+  // body portal(#486) — 조상 스택 컨텍스트에 갇히면 갤러리 화살표·카운터(z-10)가 위에 그려진다(SellerOfferPanel 전례).
+  return createPortal(
     <div
       className="fixed inset-0 z-[400] flex items-center justify-center bg-black/40 px-4"
       onClick={busy ? undefined : onClose}
@@ -94,5 +96,6 @@ export default function OfferWithdrawModal({
         </div>
       </div>
     </div>
+    ,document.body,
   );
 }

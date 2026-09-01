@@ -26,7 +26,11 @@ const MOBILE_DETAIL_PATTERN = /^\/auctions\/\d+$/;
 //
 // 알림함(`/notifications`)은 하단탭이 가리키는 루트가 아니라 **상단바의 종이 가리키는 서브 화면**이다.
 // 셸(상단바+하단탭)이 아니라 MobilePageHead 앱바 하나로 들어가고 나온다(#393).
-const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/notifications"];
+//
+// 검색(`/search`)도 같다 — 상단바의 돋보기가 가리키는 서브 화면이고, 앱바가 제목 대신 입력창을
+// 갖는다(#493). 하단탭을 띄우지 않는 이유는 알림함과 같다: 루트 탭이 가리키는 자리가 아니고,
+// 검색은 빠져나갈 길이 뒤로 하나면 충분한 몰입 동작이다.
+const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/notifications", "/search"];
 
 export function isMobileChromeHiddenRoute(pathname: string): boolean {
   return (

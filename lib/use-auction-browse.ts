@@ -17,13 +17,21 @@ import type { AuctionListResponse, AuctionResponse, AuctionSaleType } from "@/li
 const PAGE_SIZE = 20;
 const DEBOUNCE_MS = 300;
 
+/**
+ * 목록의 판매 유형. `"ALL"`은 제안·즉시를 함께 본다(BE #418) — 검색 화면이 쓴다.
+ *
+ * ⚠️ 도메인 타입(`AuctionSaleType`)이 아니라 **조회 조건**이다. 서버도 같은 이유로 도메인
+ * enum에 넣지 않고 `SaleTypeFilter`를 따로 뒀다.
+ */
+export type SaleTypeFilter = AuctionSaleType | "ALL";
+
 // 종료 목록 엔드포인트(/api/auctions/ended)는 saleType 파라미터를 받지 않으므로(항상 AUCTION),
 // 진행중 목록일 때만 saleType을 붙인다.
 function buildParams(
   query: string,
   sort: SortKey,
   page: number,
-  saleType: AuctionSaleType,
+  saleType: SaleTypeFilter,
   includeSaleType: boolean,
 ) {
   const params = new URLSearchParams({ sort, size: String(PAGE_SIZE), page: String(page) });
@@ -42,14 +50,22 @@ export function useAuctionBrowse({
   initialQuery = "",
   endpoint = "/api/auctions",
   defaultSort = "latest",
+  minQueryLength = 0,
 }: {
   initialAuctions: AuctionResponse[];
   initialTotalElements: number;
   initialTotalPages: number;
-  saleType?: AuctionSaleType;
+  saleType?: SaleTypeFilter;
   initialQuery?: string;
   endpoint?: string;
   defaultSort?: SortKey;
+  /**
+   * 이 길이 미만의 검색어로는 조회하지 않는다(#493). 목록 화면은 기본값 0이라 지금까지와 같다.
+   *
+   * <p>검색 화면만 2를 쓴다 — 한 글자는 사실상 전체 조회라 결과가 수백 건 나오고, 그 요청이
+   * 타이핑 첫 글자마다 날아간다. **빈 검색어는 이 제한을 받지 않는다**(목록 화면의 「전체 보기」).
+   */
+  minQueryLength?: number;
 }) {
   const includeSaleType = endpoint === "/api/auctions";
   const [query, setQuery] = useState(initialQuery);
@@ -96,9 +112,12 @@ export function useAuctionBrowse({
       isFirstRun.current = false;
       return;
     }
+    // 너무 짧은 검색어로는 서버를 부르지 않는다(#493). 빈 검색어는 「전체 보기」라 제한 밖이다.
+    const trimmed = query.trim();
+    if (trimmed.length > 0 && trimmed.length < minQueryLength) return;
     const timer = setTimeout(fetchFirstPage, DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [fetchFirstPage]);
+  }, [fetchFirstPage, query, minQueryLength]);
 
   const loadMore = useCallback(async () => {
     const nextPage = page + 1;

@@ -18,6 +18,9 @@ export function isMobileShellRoute(pathname: string): boolean {
 // 전상법 §10 표시사항이라 모바일에서도 전 화면에 떠야 한다. 함수명을 바꾸지 않은 이유는
 // 헤더 쪽 호출부가 그대로이고, 이름을 갈면 이 이력이 diff에서 흩어지기 때문이다.
 const MOBILE_DETAIL_PATTERN = /^\/auctions\/\d+$/;
+// 스타 상세(#499)도 앱바 하나로 들어가고 나온다. 매물 상세와 달리 큰 사진이 위에 깔리지 않아
+// 앱바를 두고, 거기에 스타 이름을 실어 스크롤해도 누구를 보는지 잃지 않게 한다.
+const MOBILE_ARTIST_DETAIL_PATTERN = /^\/artists\/\d+$/;
 // 마이페이지(`/mypage`)는 한 경로가 두 얼굴이다 — 쿼리가 없거나 `?tab=wishlist`면 하단탭이 가리키는
 // **루트**라 셸을 쓰고, 그 밖의 `?tab=`은 앱바 하나짜리 **서브 화면**이다. 어느 쪽이든 전역 헤더·
 // 푸터는 접혀야 해서 경로 단위 목록에 그대로 둔다(분기는 페이지가 쿼리를 보고 한다).
@@ -30,12 +33,13 @@ const MOBILE_DETAIL_PATTERN = /^\/auctions\/\d+$/;
 // 검색(`/search`)도 같다 — 상단바의 돋보기가 가리키는 서브 화면이고, 앱바가 제목 대신 입력창을
 // 갖는다(#493). 하단탭을 띄우지 않는 이유는 알림함과 같다: 루트 탭이 가리키는 자리가 아니고,
 // 검색은 빠져나갈 길이 뒤로 하나면 충분한 몰입 동작이다.
-const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/notifications", "/search"];
+const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/notifications", "/search", "/artists"];
 
 export function isMobileChromeHiddenRoute(pathname: string): boolean {
   return (
     isMobileShellRoute(pathname) ||
     MOBILE_DETAIL_PATTERN.test(pathname) ||
+    MOBILE_ARTIST_DETAIL_PATTERN.test(pathname) ||
     MOBILE_FULLSCREEN_ROUTES.includes(pathname)
   );
 }

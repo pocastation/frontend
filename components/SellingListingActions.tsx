@@ -96,6 +96,25 @@ export default function SellingListingActions({
             {auction.nextExtensionDays}일 연장
           </button>
         )}
+
+        {/* 자진 내리기(정책 제6조 ②, #472) — 결제 절차가 시작되면(MATCHED) 이 행 자체가
+            판매 중 목록에서 빠지므로, 여기 보이는 매물은 항상 내릴 수 있는 상태다.
+            받은 제안이 전부 실효되는 되돌릴 수 없는 행동이라 confirm으로 한 번 되묻는다. */}
+        <button
+          type="button"
+          onClick={() => {
+            const warning =
+              offerCount > 0
+                ? `판매글을 내릴까요? 받은 제안 ${offerCount}건이 모두 사라지고, 되돌릴 수 없어요.`
+                : "판매글을 내릴까요? 내린 뒤에는 되돌릴 수 없고, 다시 팔려면 새로 등록해야 해요.";
+            if (!window.confirm(warning)) return;
+            void run(`/api/auctions/${auction.id}/withdraw`);
+          }}
+          disabled={busy}
+          className={OUTLINE}
+        >
+          내리기
+        </button>
       </div>
 
       {editing && (

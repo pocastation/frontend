@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import OfferCounts from "@/components/OfferCounts";
@@ -299,8 +300,10 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
       </section>
 
       {/* 금액 바꾸기 팝업(#484) — 모바일 시트와 같은 골격. 게이트로 빠질 때도 닫는다
-          (게이트 모달 z-400이 이 팝업 뒤에 깔리지 않도록). 실패에만 유지해 재시도 자리를 남긴다. */}
-      {editOpen && myOffer && (
+          (게이트 모달 z-400이 이 팝업 뒤에 깔리지 않도록). 실패에만 유지해 재시도 자리를 남긴다.
+          body portal(#486) — 조상 스택 컨텍스트에 갇히면 갤러리 화살표·카운터(z-10)가 위에
+          그려진다(SellerOfferPanel 전례). */}
+      {editOpen && myOffer && createPortal(
         <div className="fixed inset-0 z-[500] hidden items-center justify-center p-4 sm:flex" role="dialog" aria-label="제안 금액 바꾸기" aria-modal="true">
           <button type="button" aria-label="닫기" onClick={() => setEditOpen(false)} className="absolute inset-0 bg-text-1/40" />
           <div className="relative max-h-[90vh] w-full max-w-[400px] overflow-y-auto rounded-r4 bg-surface p-5 shadow-modal">
@@ -329,7 +332,8 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
               />
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
       {/* 제안 취소(#484) — 마이페이지·모바일과 같은 확인 모달 재사용. */}

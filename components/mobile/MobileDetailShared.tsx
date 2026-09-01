@@ -105,7 +105,8 @@ export function MobileDetailTabs({
         {tab === TAB_DELIVERY ? (
           <div className="pb-6 pt-5">
             {/* 확정된 사실만 적는다 — 기간·조건 같은 숫자는 운영정책이 정본이라 여기서 새로 만들지 않는다. */}
-            <dl className="divide-y divide-border border-y border-border">
+            {/* 상단 선은 뺐다(#482) — 탭 밑줄 바로 아래라 겹선으로 읽혔다. 행 사이·하단만 긋는다. */}
+            <dl className="divide-y divide-border border-b border-border">
               <div className="py-2.5">
                 <dt className="text-[12.5px] font-extrabold text-text-1">배송비</dt>
                 <dd className="mt-1 text-[13px] leading-relaxed text-text-2">

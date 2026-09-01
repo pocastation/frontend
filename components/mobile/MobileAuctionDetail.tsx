@@ -203,10 +203,8 @@ export default function MobileAuctionDetail({
   ];
 
   return (
-    /* 🔴 하단 여백을 판매 상태에서 떼어냈다(#457). 예전엔 LIVE에만 pb-[76px](고정 바 높이
-       확보용)이 있고 그 외엔 0이라, 거래 성사·완료 화면에서 탭 본문 밑에 푸터가 바로 붙었다.
-       마감 여백 32px은 항상 깔고, LIVE는 거기에 바 높이를 더한다. */
-    <div className={isLive ? "pb-[108px]" : "pb-8"}>
+    /* 하단 바가 모든 상태에서 상시 노출되므로(#478) 바 높이 여백도 항상 깐다. */
+    <div className="pb-[108px]">
       <MobileDetailGallery images={auction.images} video={auction.video} title={auction.title} actions={actions} />
 
       <div className="px-4 pt-4">
@@ -291,41 +289,55 @@ export default function MobileAuctionDetail({
       </div>
 
       {/* 하단 고정 바 — 킷과 같은 구성: 관심 44×44 + 제안 CTA(남은 폭 전부).
-          최소가·마감은 위 가격 패널과 제안 시트가 말하므로 바에서는 반복하지 않는다. */}
-      {isLive && (
-        <div
-          className="fixed inset-x-0 bottom-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 sm:hidden"
-          style={{ paddingBottom: "calc(10px + env(safe-area-inset-bottom))" }}
-        >
-          <AuctionWishlistButton
-            auctionId={auctionId}
-            className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[7px] border border-border-2 bg-white text-text-2 ${FOCUS_RING}`}
-          />
-          {isOwnAuction ? (
-            <a
-              href="#seller-offer-list-mobile"
-              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
-            >
-              제안 목록 보기
-            </a>
-          ) : !accessToken ? (
-            <Link
-              href={`/login?redirect=/auctions/${auctionId}`}
-              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
-            >
-              로그인하고 제안하기
-            </Link>
-          ) : (
-            <button
-              type="button"
-              onClick={() => setSheetOpen(true)}
-              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
-            >
-              제안하기
-            </button>
-          )}
-        </div>
-      )}
+          최소가·마감은 위 가격 패널과 제안 시트가 말하므로 바에서는 반복하지 않는다.
+
+          🔴 모든 상태에서 유지한다(#478, 시안 승인). LIVE에만 그리던 시절엔 성사 대기·완료
+          매물에서 바가 통째로 사라져 관심(찜)을 누를 방법이 없었다. 관심은 언제나 살리고,
+          제안 CTA만 상태 문구로 잠근다 — 왜 제안이 안 되는지도 그 자리에서 설명된다. */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 sm:hidden"
+        style={{ paddingBottom: "calc(10px + env(safe-area-inset-bottom))" }}
+      >
+        <AuctionWishlistButton
+          auctionId={auctionId}
+          className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[7px] border border-border-2 bg-white text-text-2 ${FOCUS_RING}`}
+        />
+        {isOwnAuction && (isLive || status === "MATCHED") ? (
+          <a
+            href="#seller-offer-list-mobile"
+            className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+          >
+            제안 목록 보기
+          </a>
+        ) : !isLive ? (
+          <button
+            type="button"
+            disabled
+            className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-extrabold text-text-3"
+          >
+            {status === "MATCHED"
+              ? "거래 진행 중인 매물이에요"
+              : status === "ENDED_SOLD"
+                ? "판매 완료된 매물이에요"
+                : "판매가 종료된 매물이에요"}
+          </button>
+        ) : !accessToken ? (
+          <Link
+            href={`/login?redirect=/auctions/${auctionId}`}
+            className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+          >
+            로그인하고 제안하기
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+          >
+            제안하기
+          </button>
+        )}
+      </div>
 
       {sheetOpen && <BidSheet onClose={() => setSheetOpen(false)} />}
 

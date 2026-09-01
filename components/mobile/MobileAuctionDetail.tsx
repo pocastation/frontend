@@ -7,6 +7,7 @@ import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import MobileDetailGallery from "@/components/mobile/MobileDetailGallery";
 import { MobileDetailTabs, SellerRow } from "@/components/mobile/MobileDetailShared";
 import OfferCounts from "@/components/OfferCounts";
+import OfferWithdrawModal from "@/components/OfferWithdrawModal";
 import SellerOfferPanel from "@/components/SellerOfferPanel";
 import { useAuth } from "@/lib/auth-context";
 import { useAuctionBidding } from "@/lib/auction-bidding-context";
@@ -70,13 +71,23 @@ function BidSheet({ onClose }: { onClose: () => void }) {
     setProposalValue(formatInputAmount(normalized));
   }
 
+  // 수정 모드(#480) — 이미 제안한 사람의 시트는 새 제안과 다르게 생겨야 한다. 헤더가
+  // 「제안 금액 바꾸기」로 바뀌고 지금 제안 금액이 옆에 붙는다.
+  const isEditMode = myOfferAmount != null;
+
   return (
-    <div className="fixed inset-0 z-[500] sm:hidden" role="dialog" aria-label="가격 제안하기" aria-modal="true">
+    <div className="fixed inset-0 z-[500] sm:hidden" role="dialog" aria-label={isEditMode ? "제안 금액 바꾸기" : "가격 제안하기"} aria-modal="true">
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
       <div className="absolute inset-x-0 bottom-0 rounded-t-r4 bg-white px-[14px] pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
-        <div className="border-b border-border pb-3">
-          <p className="text-[11px] font-semibold text-text-3">판매자 최소 제안 금액</p>
-          <p className="mt-1 font-display text-xl font-extrabold tabular-nums text-text-1">{formatKRW(floor)}</p>
+        <div className="flex items-baseline justify-between border-b border-border pb-3">
+          <p className="text-[15px] font-extrabold text-text-1">{isEditMode ? "제안 금액 바꾸기" : "가격 제안하기"}</p>
+          <p className="text-[11.5px] text-text-3">
+            {isEditMode ? (
+              <>지금 제안 <b className="font-display font-bold tabular-nums text-text-2">{formatKRW(myOfferAmount)}</b></>
+            ) : (
+              <>최소 <b className="font-display font-bold tabular-nums text-text-2">{formatKRW(floor)}</b></>
+            )}
+          </p>
         </div>
 
         <div className="mb-2.5 mt-3 flex items-baseline justify-between gap-3">
@@ -143,13 +154,16 @@ function BidSheet({ onClose }: { onClose: () => void }) {
           disabled={submitting || !hasValidAmount}
           className={`mt-3 flex h-12 w-full items-center justify-center rounded-[7px] bg-primary text-sm font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
         >
+          {/* 제출 버튼이 입력 금액을 그대로 말한다(#480) — 「무엇이 일어나는지」가 버튼에 있다. */}
           {submitting
             ? "처리 중..."
             : needsAddress
               ? "배송지 등록하고 가격 제안하기"
-              : myOfferAmount != null
-                ? "제안 금액 바꾸기"
-                : "가격 제안하기"}
+              : !hasValidAmount
+                ? isEditMode ? "제안 금액 바꾸기" : "가격 제안하기"
+                : isEditMode
+                  ? `${formatKRW(typedAmount)}으로 바꾸기`
+                  : `${formatKRW(typedAmount)}으로 제안하기`}
         </button>
         {needsAddress && (
           <p className="mt-2 text-[11.5px] leading-[1.6] text-text-3">
@@ -157,13 +171,10 @@ function BidSheet({ onClose }: { onClose: () => void }) {
             <b className="font-bold text-text-2">한 번만 하면 다음부터는 물어보지 않아요.</b>
           </p>
         )}
-        {myOfferAmount != null && (
-          <div className="mt-3 border-t border-border pt-2.5">
-            <p className="text-[11.5px] leading-[1.6] text-text-3">
-              <b className="font-bold text-text-2">{formatKRW(myOfferAmount)}</b>으로 제안하셨어요.
-              새 금액으로 다시 보내면 이전 제안을 대신해요.
-            </p>
-          </div>
+        {isEditMode && (
+          <p className="mt-3 border-t border-border pt-2.5 text-[11.5px] leading-[1.6] text-text-3">
+            새 금액으로 보내면 이전 제안을 대신해요. 판매자에게는 바뀐 금액만 보여요.
+          </p>
         )}
       </div>
     </div>
@@ -185,12 +196,15 @@ export default function MobileAuctionDetail({
     status,
     isLive,
     isOwnAuction,
+    myOffer,
+    onOfferWithdrawn,
     addressModalOpen,
     closeAddressModal,
     onAddressSaved,
   } = useAuctionBidding();
 
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
   // 🔴 예전에는 「제안 내역」 탭이 있었고, 이미 제안한 사람에게는 그 탭이 먼저 열렸다
 
   const specRows: { label: string; value: string }[] = [
@@ -203,10 +217,8 @@ export default function MobileAuctionDetail({
   ];
 
   return (
-    /* 🔴 하단 여백을 판매 상태에서 떼어냈다(#457). 예전엔 LIVE에만 pb-[76px](고정 바 높이
-       확보용)이 있고 그 외엔 0이라, 거래 성사·완료 화면에서 탭 본문 밑에 푸터가 바로 붙었다.
-       마감 여백 32px은 항상 깔고, LIVE는 거기에 바 높이를 더한다. */
-    <div className={isLive ? "pb-[108px]" : "pb-8"}>
+    /* 하단 바가 모든 상태에서 상시 노출되므로(#478) 바 높이 여백도 항상 깐다. */
+    <div className="pb-[108px]">
       <MobileDetailGallery images={auction.images} video={auction.video} title={auction.title} actions={actions} />
 
       <div className="px-4 pt-4">
@@ -267,6 +279,17 @@ export default function MobileAuctionDetail({
             <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1">
               {formatKRW(auction.startPrice)}
             </p>
+            {/* 내 제안 행(#480) — 제안한 사람에게만. 보라는 상태를 말하는 자리에 쓴다(디자인 절). */}
+            {myOffer && (
+              <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-[12.5px]">
+                <span className="font-extrabold text-primary">
+                  {myOffer.status === "ACCEPTED" ? "내 제안 · 선택됨" : "내 제안"}
+                </span>
+                <span className="font-display font-extrabold tabular-nums text-text-1">
+                  {formatKRW(myOffer.amount)}
+                </span>
+              </div>
+            )}
             {/* 0건일 때만 — 아이콘 줄에서 뺀 자리를 여기서 채운다(§2.9 D1). */}
             {offerCount === 0 && (
               <p className="mt-3 border-t border-border pt-2.5 text-[11.5px] font-bold text-text-2">
@@ -291,40 +314,95 @@ export default function MobileAuctionDetail({
       </div>
 
       {/* 하단 고정 바 — 킷과 같은 구성: 관심 44×44 + 제안 CTA(남은 폭 전부).
-          최소가·마감은 위 가격 패널과 제안 시트가 말하므로 바에서는 반복하지 않는다. */}
-      {isLive && (
-        <div
-          className="fixed inset-x-0 bottom-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 sm:hidden"
-          style={{ paddingBottom: "calc(10px + env(safe-area-inset-bottom))" }}
-        >
-          <AuctionWishlistButton
-            auctionId={auctionId}
-            className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[7px] border border-border-2 bg-white text-text-2 ${FOCUS_RING}`}
-          />
-          {isOwnAuction ? (
-            <a
-              href="#seller-offer-list-mobile"
-              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+          최소가·마감은 위 가격 패널과 제안 시트가 말하므로 바에서는 반복하지 않는다.
+
+          🔴 모든 상태에서 유지한다(#478, 시안 승인). LIVE에만 그리던 시절엔 성사 대기·완료
+          매물에서 바가 통째로 사라져 관심(찜)을 누를 방법이 없었다. 관심은 언제나 살리고,
+          제안 CTA만 상태 문구로 잠근다 — 왜 제안이 안 되는지도 그 자리에서 설명된다. */}
+      <div
+        className="fixed inset-x-0 bottom-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 sm:hidden"
+        style={{ paddingBottom: "calc(10px + env(safe-area-inset-bottom))" }}
+      >
+        <AuctionWishlistButton
+          auctionId={auctionId}
+          className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[7px] border border-border-2 bg-white text-text-2 ${FOCUS_RING}`}
+        />
+        {isOwnAuction && (isLive || status === "MATCHED") ? (
+          <a
+            href="#seller-offer-list-mobile"
+            className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+          >
+            제안 목록 보기
+          </a>
+        ) : !isLive ? (
+          <button
+            type="button"
+            disabled
+            className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-extrabold text-text-3"
+          >
+            {status === "MATCHED"
+              ? "거래 진행 중인 매물이에요"
+              : status === "ENDED_SOLD"
+                ? "판매 완료된 매물이에요"
+                : "판매가 종료된 매물이에요"}
+          </button>
+        ) : !accessToken ? (
+          <Link
+            href={`/login?redirect=/auctions/${auctionId}`}
+            className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+          >
+            로그인하고 제안하기
+          </Link>
+        ) : myOffer?.status === "ACCEPTED" ? (
+          /* 내 제안이 선택됨 — 계약 성립(§1.9), 수정·취소가 아니라 결제로 이어진다. */
+          <Link
+            href={`/orders/${auctionId}/payment`}
+            className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+          >
+            결제하러 가기
+          </Link>
+        ) : myOffer ? (
+          /* 비대칭 2버튼(#480, 시안 승인) — 취소는 좁은 보조, 바꾸기가 주(아웃라인).
+             반반이면 파괴적 행동에 주연급 무게가 실리고 엄지 존 오탭이 늘어난다. */
+          <>
+            <button
+              type="button"
+              onClick={() => setWithdrawOpen(true)}
+              className={`flex h-11 w-[96px] flex-shrink-0 items-center justify-center rounded-[7px] border border-border-2 bg-white text-[13px] font-bold text-text-2 ${FOCUS_RING}`}
             >
-              제안 목록 보기
-            </a>
-          ) : !accessToken ? (
-            <Link
-              href={`/login?redirect=/auctions/${auctionId}`}
-              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
-            >
-              로그인하고 제안하기
-            </Link>
-          ) : (
+              취소하기
+            </button>
             <button
               type="button"
               onClick={() => setSheetOpen(true)}
-              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] border-[1.5px] border-text-1 bg-white text-[13.5px] font-extrabold text-text-1 ${FOCUS_RING}`}
             >
-              제안하기
+              금액 바꾸기
             </button>
-          )}
-        </div>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+          >
+            제안하기
+          </button>
+        )}
+      </div>
+
+      {/* 제안 취소(#480) — 마이페이지와 같은 확인 모달 재사용. 되돌릴 수 없음·재제안 가능 안내 포함. */}
+      {withdrawOpen && myOffer && (
+        <OfferWithdrawModal
+          auctionId={auctionId}
+          bidId={myOffer.bidId}
+          title={auction.title}
+          onClose={() => setWithdrawOpen(false)}
+          onWithdrawn={() => {
+            setWithdrawOpen(false);
+            onOfferWithdrawn();
+          }}
+        />
       )}
 
       {sheetOpen && <BidSheet onClose={() => setSheetOpen(false)} />}

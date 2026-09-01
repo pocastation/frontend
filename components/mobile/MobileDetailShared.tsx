@@ -99,10 +99,11 @@ export function MobileDetailTabs({
           })}
         </div>
 
-        {/* 탭 본문 여백 규칙(#457, 시안 승인) — 밑줄→본문 20px · 블록 간 20px ·
-            끝 24px + 헤어라인 마감. 두 탭이 같은 값을 쓴다. */}
+        {/* 탭 본문 여백 규칙(#457 시안 → #478 개정) — 밑줄→본문 20px · 블록 간 20px · 끝 24px.
+            꼬리 헤어라인은 뺐다: 마지막 행 아래 선이 하나 더 있으면 「더 있는데 잘렸다」로 읽힌다.
+            푸터와의 경계는 여백이 맡는다. 두 탭이 같은 값을 쓴다. */}
         {tab === TAB_DELIVERY ? (
-          <div className="border-b border-border pb-6 pt-5">
+          <div className="pb-6 pt-5">
             {/* 확정된 사실만 적는다 — 기간·조건 같은 숫자는 운영정책이 정본이라 여기서 새로 만들지 않는다. */}
             <dl className="divide-y divide-border border-y border-border">
               <div className="py-2.5">
@@ -142,7 +143,7 @@ export function MobileDetailTabs({
             </Link>
           </div>
         ) : (
-          <div className="border-b border-border pb-6 pt-5">
+          <div className="pb-6 pt-5">
             {description && (
               <p className="whitespace-pre-wrap text-sm leading-[1.75] text-text-2">{description}</p>
             )}

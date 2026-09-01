@@ -144,6 +144,14 @@ export type AdminDashboardResponse = {
   recentAuctions: AuctionResponse[];
 };
 
+// GET /api/auctions/{id}/bids/me (#480, BE #411) — 이 매물에 낸 내 현재 제안. 없으면 data null.
+// ACCEPTED = 판매자가 선택해 계약 성립(수정·취소 불가, 결제로 이어진다 §9.1).
+export type MyOfferResponse = {
+  bidId: number;
+  amount: number;
+  status: "ACTIVE" | "ACCEPTED";
+};
+
 // GET /api/admin/orders/delivery-stalled 항목(#474) — 발송 7일 경과·배송완료 미확인 주문.
 // 관리자가 택배사 사이트에서 사람이 조회하는 데 필요한 정보 전부.
 export type AdminStalledOrderResponse = {

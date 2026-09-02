@@ -193,9 +193,15 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
         </button>
       ) : (
         <>
-          <div className="border-l-4 border-primary bg-primary-soft px-4 py-3">
+          {/*
+            🔴 연보라 배경 + 좌측 4px 규칙선이었다(#515). 규칙은 좌측 규칙선을 **진짜 경고에만**
+            쓰라고 정해 뒀는데 인증 코드는 경고가 아니라 **읽고 옮겨 적는 값**이다. 회색 지면으로
+            바꾸고, 강조는 값 자체(큰 monospace 숫자)가 지게 둔다. 이 단계에서 정말 경고인 것은
+            아래 「곧 만료」 문장 하나뿐이고 그건 이미 accent색으로 말하고 있다.
+          */}
+          <div className="bg-surface-2 px-4 py-3.5">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-[11px] font-extrabold uppercase text-primary">Verification code</span>
+              <span className="text-[11px] font-extrabold uppercase tracking-[0.06em] text-text-3">Verification code</span>
               <span className={`text-xs font-bold ${expired && !processing ? "text-accent" : "text-text-2"}`}>
                 {processing
                   ? "사진 접수 완료"
@@ -229,11 +235,14 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
           </div>
 
           {processing ? (
-            <div className="border border-primary/30 bg-primary-soft px-4 py-3" role="status">
-              <p className="text-sm font-extrabold text-primary">
+            /* 두 번째 연보라 패널이었다(#515). 진행 상태는 패널이 아니라 문장이 말한다 —
+               지면을 걷고 헤어라인 하나로 구분한다. 아래 「인증 완료」는 성공을 색으로 말해야
+               하므로 ok 지면을 그대로 둔다(연보라 반복과 달리 의미가 있는 색이다). */
+            <div className="border-t border-border pt-3" role="status">
+              <p className="text-sm font-extrabold text-text-1">
                 {result?.status === "ANALYZING" ? "인증 사진 분석 중" : "인증 사진 분석 대기 중"}
               </p>
-              <p className="mt-1 text-xs leading-5 text-text-2">
+              <p className="mt-1 text-xs leading-5 text-text-3">
                 {result?.status === "QUEUED" && result.queuePosition
                   ? `현재 대기 순서 ${result.queuePosition}번째입니다. 순서대로 확인하고 있습니다.`
                   : "코드와 카드 형태를 확인하고 있습니다. 잠시만 기다려주세요."}

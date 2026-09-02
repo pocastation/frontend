@@ -424,7 +424,7 @@ export default function NewAuctionPage() {
   // 대금은 묶이고 구매자는 영문도 모른 채 기다린다.
   if (!settlementReady) {
     return (
-      <div className="mx-auto max-w-[520px] px-5 pt-16 pb-20">
+      <div className="mx-auto max-w-[520px] px-[14px] pt-16 pb-20 sm:px-5">
         <p className="text-[11px] font-extrabold tracking-[0.08em] text-primary">등록 전 한 가지</p>
         <h1 className="mt-2 font-display text-[24px] font-extrabold tracking-[-0.035em] text-text-1">
           정산계좌를 먼저 등록해 주세요
@@ -437,14 +437,12 @@ export default function NewAuctionPage() {
         <div className="mt-7 flex flex-wrap items-center gap-3">
           <Link
             href="/mypage?tab=settlement"
-            className={`inline-flex h-12 items-center rounded-[4px] bg-primary px-7 text-[14.5px] font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+            className={`inline-flex h-12 items-center px-7 ${PRIMARY_BUTTON_CLASS}`}
           >
             정산계좌 등록하러 가기
           </Link>
-          <Link
-            href="/"
-            className={`inline-flex h-12 items-center rounded-[4px] border border-border-2 px-6 text-[14px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
-          >
+          {/* 손으로 짠 보조 버튼이었다(모서리 4px·글자 14px). 앱이 공유하는 보조 버튼으로 맞춘다(#515). */}
+          <Link href="/" className={`inline-flex h-12 items-center px-6 ${SECONDARY_BUTTON_CLASS}`}>
             나중에 하기
           </Link>
         </div>
@@ -468,12 +466,17 @@ export default function NewAuctionPage() {
   return (
     // 모바일은 위저드가 화면 전체를 쓴다(전역 헤더·푸터는 접힌다). 하단 고정 바 높이만큼 아래를 비운다.
     <div className="mx-auto max-w-2xl sm:px-4 sm:py-10 max-sm:pb-[92px]">
-      {/* 모바일 머리 — 스크롤해도 "어느 단계인지"가 화면에 남아 있어야 한다(킷과 같은 구성). */}
+      {/*
+        모바일 머리 — 스크롤해도 "어느 단계인지"가 화면에 남아 있어야 한다(킷과 같은 구성).
+
+        🔴 부제를 여기서 뺐다(#515). 머리가 121px로 화면의 15%를 먹고 있었는데, 그 부제는
+        **첫 단계에서 한 번 읽으면 끝**인 문장이라 6단계 내내 고정으로 붙어 있을 이유가 없다.
+        첫 단계 본문 맨 위로 내렸다. 단계명·진행바는 남긴다 — 그게 머리를 고정한 이유다.
+      */}
       <div className="sticky top-0 z-[260] border-b border-border bg-white px-[14px] pb-2.5 pt-3 sm:hidden">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h1 className="font-display text-[17px] font-extrabold text-text-1">판매 등록</h1>
-            <p className="mt-0.5 text-[11px] text-text-3">정확한 정보와 실물 사진일수록 거래 신뢰도가 올라가요.</p>
           </div>
           <div className="flex flex-shrink-0 items-center gap-0.5">
             <Link
@@ -552,31 +555,47 @@ export default function NewAuctionPage() {
           }`}
         >
           {stepKey === "saleType" && (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {[
-                { type: "AUCTION" as const, title: "제안판매", desc: "정한 기간 동안 가격 제안을 받아 판매해요." },
-                { type: "INSTANT" as const, title: "즉시판매", desc: "정한 가격으로 바로 구매할 수 있게 올려요." },
-              ].map((option) => {
-                const selected = saleType === option.type;
-                return (
-                  <button
-                    key={option.type}
-                    type="button"
-                    aria-pressed={selected}
-                    onClick={() => setSaleType(option.type)}
-                    className={`rounded-r3 border p-4 text-left transition-colors ${FOCUS_RING} ${
-                      selected
-                        ? "border-primary bg-primary-soft text-primary"
-                        : "border-border bg-white text-text-2 hover:border-primary"
-                    }`}
-                  >
-                    <span className="block text-sm font-extrabold">{option.title}</span>
-                    <span className={`mt-1 block text-xs ${selected ? "text-primary" : "text-text-3"}`}>
-                      {option.desc}
-                    </span>
-                  </button>
-                );
-              })}
+            <div>
+              {/* 머리에서 내려온 문장. 첫 단계에서 한 번만 읽히면 되는 안내다(#515). */}
+              <p className="text-[12.5px] leading-relaxed text-text-3 sm:hidden">
+                정확한 정보와 실물 사진일수록 거래 신뢰도가 올라가요.
+              </p>
+
+              {/*
+                🔴 예전에는 선택된 칸을 연보라(`bg-primary-soft`)로 통째 칠했다 — 위저드 전체에서
+                연보라가 여기 하나뿐이었다. 같은 「둘 중 하나 고르기」인 결제수단 선택(#502)은
+                라디오 + 라벨만 보라로 정리했으므로 여기도 같게 맞춘다. 보라는 선택 표시에만 남고
+                지면은 흰색이다. 라디오를 실제로 쓰면 스크린리더·키보드 화살표 이동도 공짜로 따라온다.
+              */}
+              <div className="mt-3 border-t border-border sm:mt-0" role="radiogroup" aria-label="판매 방식">
+                {[
+                  { type: "AUCTION" as const, title: "제안판매", desc: "정한 기간 동안 가격 제안을 받아 판매해요." },
+                  { type: "INSTANT" as const, title: "즉시판매", desc: "정한 가격으로 바로 구매할 수 있게 올려요." },
+                ].map((option) => {
+                  const selected = saleType === option.type;
+                  return (
+                    <label
+                      key={option.type}
+                      className="flex cursor-pointer items-start gap-3 border-b border-border py-3.5"
+                    >
+                      <input
+                        type="radio"
+                        name="saleType"
+                        value={option.type}
+                        checked={selected}
+                        onChange={() => setSaleType(option.type)}
+                        className={`mt-0.5 h-4 w-4 accent-primary ${FOCUS_RING}`}
+                      />
+                      <span className="min-w-0">
+                        <span className={`block text-sm font-extrabold ${selected ? "text-primary" : "text-text-1"}`}>
+                          {option.title}
+                        </span>
+                        <span className="mt-0.5 block text-xs leading-relaxed text-text-3">{option.desc}</span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
           )}
 

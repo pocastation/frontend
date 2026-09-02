@@ -24,6 +24,8 @@ const MOBILE_ARTIST_DETAIL_PATTERN = /^\/artists\/\d+$/;
 // 결제(#502)도 앱바 하나짜리 화면이다. 하단에 결제 바가 고정되므로 하단탭이 함께 뜨면 두 줄이
 // 겹치고, 결제는 다른 곳으로 새지 않아야 하는 몰입 동작이라 탭을 띄우지 않는다.
 const MOBILE_PAYMENT_PATTERN = /^\/orders\/\d+\/payment$/;
+// 판매자 공개 프로필(#510). id가 UUID라 숫자 패턴을 쓸 수 없다 — 한 조각짜리 경로로 잡는다.
+const MOBILE_SELLER_DETAIL_PATTERN = /^\/sellers\/[^/]+$/;
 // 마이페이지(`/mypage`)는 한 경로가 두 얼굴이다 — 쿼리가 없거나 `?tab=wishlist`면 하단탭이 가리키는
 // **루트**라 셸을 쓰고, 그 밖의 `?tab=`은 앱바 하나짜리 **서브 화면**이다. 어느 쪽이든 전역 헤더·
 // 푸터는 접혀야 해서 경로 단위 목록에 그대로 둔다(분기는 페이지가 쿼리를 보고 한다).
@@ -36,7 +38,7 @@ const MOBILE_PAYMENT_PATTERN = /^\/orders\/\d+\/payment$/;
 // 검색(`/search`)도 같다 — 상단바의 돋보기가 가리키는 서브 화면이고, 앱바가 제목 대신 입력창을
 // 갖는다(#493). 하단탭을 띄우지 않는 이유는 알림함과 같다: 루트 탭이 가리키는 자리가 아니고,
 // 검색은 빠져나갈 길이 뒤로 하나면 충분한 몰입 동작이다.
-const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/notifications", "/search", "/artists"];
+const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/notifications", "/search", "/artists", "/sellers"];
 
 export function isMobileChromeHiddenRoute(pathname: string): boolean {
   return (
@@ -44,6 +46,7 @@ export function isMobileChromeHiddenRoute(pathname: string): boolean {
     MOBILE_DETAIL_PATTERN.test(pathname) ||
     MOBILE_ARTIST_DETAIL_PATTERN.test(pathname) ||
     MOBILE_PAYMENT_PATTERN.test(pathname) ||
+    MOBILE_SELLER_DETAIL_PATTERN.test(pathname) ||
     MOBILE_FULLSCREEN_ROUTES.includes(pathname)
   );
 }

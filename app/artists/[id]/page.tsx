@@ -78,10 +78,15 @@ function MetaRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-/** 섹션을 끊는 8px 회색 띠. 모바일 전용 — 데스크탑은 여백과 헤어라인으로 충분하다. */
-function Band() {
-  return <div aria-hidden="true" className="mt-5 h-2 bg-surface-2 sm:hidden" />;
-}
+/*
+  ⚠️ 8px 회색 띠를 걷어냈다(#510). 예전에는 멤버 앞·매물 앞에 두 개를 뒀는데
+  **「AI티가 난다」고 지적받았다** — 이 레포의 디자인 기준이 나온 2차 반려가 정확히
+  「모든 섹션이 같은 골격이라 문서처럼 읽힌다」였고, 같은 장치를 반복하면 그 상태가 된다.
+
+  이 화면은 정보 행(소속사·팬덤명·데뷔일)이 **이미 헤어라인**을 쓰고 있어, 멤버에 또 선을
+  그으면 장치가 세 번 겹친다. 그래서 멤버·매물은 **선 없이 제목 크기와 여백만으로** 가른다.
+  판매자 상세와 「위계로 가른다」는 원리는 같고 쓰는 장치는 다르다.
+*/
 
 export default async function ArtistDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -155,10 +160,10 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
 
         {artist.members.length > 0 && (
           <>
-            <Band />
-            <section className="mt-5 sm:mt-8">
-              <h2 className="text-sm font-extrabold tracking-[-0.02em] text-text-1 sm:text-[17px]">
-                멤버 {artist.members.length}
+            {/* 멤버는 보조 정보 — 여백을 조금만 열고 제목도 작게. 가로 스크롤이 지면을 만든다. */}
+            <section className="mt-6 sm:mt-8">
+              <h2 className="text-[12.5px] font-bold text-text-2 sm:text-sm">
+                멤버 <span className="font-bold text-text-3">{artist.members.length}</span>
               </h2>
               <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
                 {[...activeMembers, ...withdrawnMembers].map((member) => (
@@ -186,9 +191,9 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
           </>
         )}
 
-        <Band />
-        <section className="mt-5 sm:mt-8">
-          <h2 className="mb-3 text-sm font-extrabold tracking-[-0.02em] text-text-1 sm:text-[17px]">
+        {/* 매물은 이 화면의 목적지 — 여백을 크게 열고 제목을 키운다. 격자가 지면을 만든다. */}
+        <section className="mt-9 sm:mt-10">
+          <h2 className="mb-3 font-display text-base font-extrabold text-text-1 sm:text-[17px]">
             진행 중인 매물
           </h2>
           {/* 좌우 14px 지면에 2열. 카드는 홈·목록·검색과 같은 compact 리듬을 쓴다. */}

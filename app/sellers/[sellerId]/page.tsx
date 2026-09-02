@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import AuctionGrid from "@/components/AuctionGrid";
+import MobilePageHead from "@/components/mobile/MobilePageHead";
 import SellerReviewSummary from "@/components/SellerReviewSummary";
 import { plainLevelLabel } from "@/lib/labels";
 import { apiFetch, ApiError } from "@/lib/api";
@@ -67,18 +68,32 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
   }
 
   return (
-    <div className="mx-auto max-w-[1160px] px-4 py-6 sm:py-8">
-      <div className="mb-4">
-        <Link
-          href="/sellers"
-          className={`inline-flex items-center gap-1 rounded-r2 px-1 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
-        >
-          <span aria-hidden="true">←</span> 인기 판매자
-        </Link>
-      </div>
+    <>
+      {/*
+        뒤로는 **히스토리 뒤로**다(backHref 미지정, #510). 스타 상세를 `/artists` 고정으로 둔 것과
+        다른 판단인데, 스타는 목록이 사실상 유일한 진입로지만 **판매자는 매물 상세에서 들어오는
+        경우가 더 흔하다** — 그때 랭킹으로 튕기면 보던 매물을 잃는다.
+      */}
+      <MobilePageHead title={seller.nickname} />
 
-      {/* 프로필 헤더 — 레벨·거래수·평점·받은 태그·후기 목록은 판매자 카드와 같은 컴포넌트를 재사용한다. */}
-      <section className="rounded-r3 border border-border bg-surface p-5">
+      <div className="mx-auto max-w-[1160px] px-[14px] pb-10 pt-4 sm:px-4 sm:py-8">
+        <div className="mb-4 hidden sm:block">
+          <Link
+            href="/sellers"
+            className={`inline-flex items-center gap-1 rounded-r2 px-1 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-text-1 ${FOCUS_RING}`}
+          >
+            <span aria-hidden="true">←</span> 인기 판매자
+          </Link>
+        </div>
+
+        {/*
+          🔴 프로필을 감싸던 카드를 걷어냈다(#510). 모바일에서 카드는 화면 폭을 거의 다 쓰므로
+          감싸는 의미가 없고 여백만 먹는다.
+
+          ⚠️ 8px 회색 띠를 쓰지 않는다. 1차 시안이 섹션을 회색 띠 두 개로 갈랐다가
+          「AI티가 난다」고 지적받았다 — 이 레포의 디자인 기준이 나온 2차 반려가 정확히
+          「모든 섹션이 같은 골격이라 문서처럼 읽힌다」였다. **구분 장치는 블록마다 다르게 쓴다.**
+        */}
         <div className="flex items-center gap-3">
           <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-surface-2 text-lg font-bold text-text-2">
             {seller.nickname.slice(0, 1).toUpperCase()}
@@ -90,22 +105,27 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
             </p>
           </div>
         </div>
+        {/* 레벨·태그는 프로필에 붙고, 그 안에서 헤어라인으로 「받은 후기」가 갈린다. */}
         <SellerReviewSummary sellerId={sellerId} />
-      </section>
 
-      <section className="mt-8">
-        <h2 className="font-display text-base font-extrabold text-text-1">
+        {/*
+          매물은 이 화면의 목적지다 — 선이나 띠 대신 **넓은 여백과 큰 제목**으로 무게를 준다.
+          위의 후기가 헤어라인 하나로 조용히 붙는 것과 대비된다.
+        */}
+        <h2 className="mt-9 font-display text-base font-extrabold text-text-1 sm:mt-10">
           판매 중인 상품{" "}
           <span className="text-sm font-bold text-text-3">{auctions?.content.length ?? 0}</span>
         </h2>
         <div className="mt-3">
           <AuctionGrid
             auctions={auctions?.content ?? []}
+            variant="compact"
+            gridClassName="grid grid-cols-2 gap-x-2 gap-y-[18px] sm:grid-cols-4 sm:gap-x-4"
             emptyTitle="판매 중인 상품이 없어요"
             emptyDescription="이 판매자가 상품을 등록하면 여기에 표시돼요."
           />
         </div>
-      </section>
-    </div>
+      </div>
+    </>
   );
 }

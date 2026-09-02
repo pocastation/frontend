@@ -21,6 +21,30 @@ import type { PaymentWindowPreparation, PaymentWindowResult } from "@/lib/types"
  */
 const BACK_HREF = "/mypage?tab=purchases";
 
+/**
+ * PG가 준 실패 메시지를 화면에 낼 문장으로 다듬는다(#505).
+ *
+ * <p><b>{@code null}을 돌려주면 「아무것도 보여주지 않는다」는 뜻이다.</b>
+ *
+ * <p>오류 노출 정책(2026-08-15)은 「PG가 준 메시지는 사용자용으로 설계된 문장이니 그대로
+ * 보여준다」였는데, 실제 갤럭시아 메시지는 <b>{@code [1111, 00] 사용자 결제취소}</b>처럼 내부 코드가
+ * 접두어로 붙어 온다. 구매자에게 아무 의미가 없는 숫자라 벗겨 낸다 — 정책을 바꾸는 것이 아니라
+ * 「사용자용 문장」이라는 전제가 실제와 달랐던 부분을 메우는 것이다.
+ *
+ * <p>그리고 <b>사용자가 스스로 취소한 것은 오류가 아니다.</b> 빨간 규칙선으로 경고하면 자기가
+ * 취소해 놓고 「뭐가 잘못됐나」를 읽게 된다. 취소에는 조치할 것이 없고 화면도 그대로라 다시 누르면
+ * 된다 — 조용히 넘긴다.
+ *
+ * <p>⚠️ 취소 판정을 문구로 하는 것은 PG가 갤럭시아 하나뿐이라 가능한 방식이다(A안). PG가 늘면
+ * 코드 기준으로 옮겨야 한다.
+ */
+function humanizePaymentFailure(message: string | null | undefined): string | null {
+  // 「[1111, 00] 사용자 결제취소」 → 「사용자 결제취소」
+  const text = (message ?? "").replace(/^\[[^\]]*\]\s*/, "").trim();
+  if (/취소/.test(text)) return null;
+  return text || "결제가 완료되지 않았어요.";
+}
+
 // ⚠️ envValue로 감싸는 이유는 lib/env.ts 참고 — 붙여넣기에 섞인 공백 하나로 결제가 통째로
 // 막힌 적이 있다(2026-08-15, 채널키 앞 탭 문자).
 const STORE_ID = envValue(process.env.NEXT_PUBLIC_PORTONE_STORE_ID);
@@ -67,8 +91,8 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         window.history.replaceState(null, "", window.location.pathname);
       }
       if (failCode) {
-        // PG가 실패 사유를 준 경우 — 뭉개지 않고 그대로 보여준다.
-        setError(params.get("message") ?? "결제가 완료되지 않았어요.");
+        // PG가 실패 사유를 준 경우. 내부 코드를 벗기고, 사용자 취소면 아무것도 띄우지 않는다(#505).
+        setError(humanizePaymentFailure(params.get("message")));
       } else if (returnedPaymentId) {
         setResult(await confirmPayment(returnedPaymentId));
         return;
@@ -180,11 +204,13 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         redirectUrl: `${window.location.origin}/orders/${auctionId}/payment`,
       });
 
-      // 결제창이 정상 동작했고 PG가 거절·취소를 알린 경우다. 이 메시지는 **사용자에게 보여줄
-      // 목적으로 만들어진 문장**이고(잔액 부족, 창 닫음 등) 읽으면 다음 행동이 달라진다.
-      // Stripe가 card_error를 「사용자에게 보여줘도 된다」고 안내하는 것과 같은 구분이다.
+      // 결제창이 정상 동작했고 PG가 거절·취소를 알린 경우다. 잔액 부족처럼 읽으면 다음 행동이
+      // 달라지는 사유는 그대로 보여준다 — Stripe가 card_error를 「보여줘도 된다」고 하는 구분이다.
+      //
+      // 다만 메시지를 손대지 않고 그대로 내면 갤럭시아 내부 코드(`[1111, 00]`)가 딸려 나오고,
+      // **사용자가 스스로 취소한 것까지 오류로 보인다**(#505). humanizePaymentFailure가 둘을 거른다.
       if (res?.code !== undefined) {
-        setError(res.message ?? "결제가 취소됐어요.");
+        setError(humanizePaymentFailure(res.message));
         return;
       }
       setResult(await confirmPayment(prep.paymentId));
@@ -233,7 +259,12 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         하단 고정 바가 본문을 가리지 않도록 모바일에서만 그 높이를 비운다(판매 등록 화면과 같은 처리).
         데스크탑은 고정 바를 쓰지 않으므로 여백도 없다.
       */}
-      <main className="mx-auto max-w-lg px-[14px] pb-5 pt-4 max-sm:pb-[132px] sm:px-5 sm:py-10">
+      {/*
+        모바일에서 본문이 화면 한 장을 채우게 한다(#505). 결제는 내용이 짧아 그냥 두면 **첫 화면에
+        푸터가 올라온다** — 돈을 내는 자리에 사업자 정보와 약관 링크가 함께 보이면 시선이 흩어진다.
+        100dvh에서 앱바(48px)를 뺀 값이라 스크롤 없이도 화면이 꽉 찬다.
+      */}
+      <main className="mx-auto max-w-lg px-[14px] pb-5 pt-4 max-sm:min-h-[calc(100dvh-48px)] max-sm:pb-[132px] sm:px-5 sm:py-10">
         <h1 className="hidden font-display text-xl font-extrabold text-text-1 sm:block">결제</h1>
 
         {/* 주문 요약 — 카드로 감싸지 않는다. 규칙선과 여백만으로 가른다. */}

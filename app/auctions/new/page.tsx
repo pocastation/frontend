@@ -464,8 +464,15 @@ export default function NewAuctionPage() {
   const progress = `${((step + 1) / TOTAL_STEPS) * 100}%`;
 
   return (
-    // 모바일은 위저드가 화면 전체를 쓴다(전역 헤더·푸터는 접힌다). 하단 고정 바 높이만큼 아래를 비운다.
-    <div className="mx-auto max-w-2xl sm:px-4 sm:py-10 max-sm:pb-[92px]">
+    /*
+      모바일은 위저드가 화면 전체를 쓴다(전역 헤더는 접힌다 — 푸터는 전상법 §10 표시사항이라 남는다).
+
+      🔴 꼬리 여백은 32px 하나다(#522). 예전에는 `max-sm:pb-[92px]`로 **하단 고정 바(69px) 자리까지
+      여기서 비웠는데**, 바가 실제로 덮는 것은 페이지 맨 끝인 푸터고 푸터가 자기 몫을 이미 비운다
+      (`max-sm:pb-[calc(104px + safe-area)]`). 위저드는 `min-h`가 없어 **어느 단계에서든 92px 전부가
+      죽은 공간**이었다. 거래 상세가 #519에서 같은 이유로 잡은 값과 같게 맞춘다.
+    */
+    <div className="mx-auto max-w-2xl sm:px-4 sm:py-10 max-sm:pb-8">
       {/*
         모바일 머리 — 스크롤해도 "어느 단계인지"가 화면에 남아 있어야 한다(킷과 같은 구성).
 

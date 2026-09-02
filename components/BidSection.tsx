@@ -257,21 +257,31 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
           {myOffer?.status === "ACTIVE" && " 금액은 언제든 바꿀 수 있어요."}
         </p>
 
-        {isLive &&
+        {/*
+          🔴 결제 안내는 **isLive 밖에 있어야 한다**(#507). 제안이 선택되면 매물은 MATCHED가 되어
+          isLive가 false다 — 예전에는 이 버튼이 isLive 가드 안에 있어서, 정작 결제해야 하는 사람에게
+          영영 렌더되지 않았다. 알림 → 상세로 온 구매자가 결제로 가는 길이 이 버튼 하나뿐인데
+          그게 막혀 있었다.
+
+          MATCHED로 한정하는 이유: 결제가 끝나면 OrderPaidEvent가 매물을 ENDED_SOLD로 보낸다.
+          myOffer.status만 보면 결제 완료 뒤에도 「결제하러 가기」가 남는다.
+        */}
+        {status === "MATCHED" && myOffer?.status === "ACCEPTED" ? (
+          /* 내 제안이 선택됨 — 계약 성립(§1.9), 수정·취소가 아니라 결제로 이어진다. */
+          <Link
+            href={`/orders/${auctionId}/payment`}
+            className={`mt-6 flex h-12 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
+          >
+            결제하러 가기
+          </Link>
+        ) : (
+          isLive &&
           (!accessToken ? (
             <Link
               href={`/login?redirect=/auctions/${auctionId}`}
               className={`mt-6 flex h-12 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
             >
               로그인하고 가격 제안하기
-            </Link>
-          ) : myOffer?.status === "ACCEPTED" ? (
-            /* 내 제안이 선택됨 — 계약 성립(§1.9), 수정·취소가 아니라 결제로 이어진다. */
-            <Link
-              href={`/orders/${auctionId}/payment`}
-              className={`mt-6 flex h-12 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
-            >
-              결제하러 가기
             </Link>
           ) : myOffer ? (
             /* 비대칭 2버튼 — 모바일 바(#480)와 같은 어휘. 「금액 바꾸기」는 아웃라인 주,
@@ -296,7 +306,8 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
             <div className="mt-6 border-t border-border pt-5">
               <OfferForm minimumProposalAmount={minimumProposalAmount} editMode={false} />
             </div>
-          ))}
+          ))
+        )}
       </section>
 
       {/* 금액 바꾸기 팝업(#484) — 모바일 시트와 같은 골격. 게이트로 빠질 때도 닫는다

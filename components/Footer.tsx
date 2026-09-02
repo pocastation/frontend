@@ -76,9 +76,13 @@ export default function Footer() {
   return (
     // 🔴 모바일 하단 여백(#399) — 홈·목록의 5탭(56px + safe-area)과 매물 상세의 제안 CTA가
     // position: fixed라, 문서 끝까지 스크롤하면 푸터 마지막 줄이 그 아래로 가린다.
-    // 화면별로 값을 갈라 두면 새 고정 요소가 생길 때마다 여기를 고쳐야 해서, 둘 중 큰 쪽에
+    // 화면별로 값을 갈라 두면 새 고정 요소가 생길 때마다 여기를 고쳐야 해서, 가장 큰 것에
     // 맞춘 한 값으로 둔다(번개장터도 「앱에서 구매하기」 고정바와 푸터가 이렇게 공존한다).
-    <footer className="border-t border-border bg-footer px-4 pb-7 pt-12 text-text-2 max-sm:pb-[calc(76px+env(safe-area-inset-bottom))]">
+    //
+    // ⚠️ 지금 가장 큰 것은 **결제 화면의 고정 바(약 104px)** 다 — 하단 5탭(76px)이 아니다(#505).
+    // 예전 값 76px로는 결제 화면에서 푸터 마지막 줄이 가렸다. **새 고정 요소를 만들 때 그 높이가
+    // 이 값을 넘는지 확인할 것.**
+    <footer className="border-t border-border bg-footer px-4 pb-7 pt-12 text-text-2 max-sm:pb-[calc(104px+env(safe-area-inset-bottom))]">
       <div className="mx-auto grid max-w-[1160px] grid-cols-2 gap-10 sm:grid-cols-4">
         <div>
           <div className="mb-3">

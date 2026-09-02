@@ -334,6 +334,22 @@ export default function MobileAuctionDetail({
           >
             제안 목록 보기
           </a>
+        ) : status === "MATCHED" && myOffer?.status === "ACCEPTED" ? (
+          /*
+            🔴 이 분기가 `!isLive`보다 **앞에 있어야 한다**(#507). 제안이 선택되면 매물은 MATCHED가
+            되는데, 예전에는 그 순간 아래 비활성 버튼이 먼저 걸려 선택된 구매자에게
+            「거래 진행 중인 매물이에요」를 보여줬다 — **자기가 결제해야 하는 사람인데** 남의 거래를
+            구경하는 것처럼 안내한 것이다.
+
+            MATCHED로 한정하는 이유: 결제가 끝나면 매물이 ENDED_SOLD로 가므로 그때는 아래
+            「판매 완료된 매물이에요」가 맞다.
+          */
+          <Link
+            href={`/orders/${auctionId}/payment`}
+            className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+          >
+            결제하기
+          </Link>
         ) : !isLive ? (
           <button
             type="button"
@@ -352,14 +368,6 @@ export default function MobileAuctionDetail({
             className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
           >
             로그인하고 제안하기
-          </Link>
-        ) : myOffer?.status === "ACCEPTED" ? (
-          /* 내 제안이 선택됨 — 계약 성립(§1.9), 수정·취소가 아니라 결제로 이어진다. */
-          <Link
-            href={`/orders/${auctionId}/payment`}
-            className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
-          >
-            결제하러 가기
           </Link>
         ) : myOffer ? (
           /* 비대칭 2버튼(#480, 시안 승인) — 취소는 좁은 보조, 바꾸기가 주(아웃라인).

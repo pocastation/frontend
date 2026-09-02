@@ -264,7 +264,7 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
           그게 막혀 있었다.
 
           MATCHED로 한정하는 이유: 결제가 끝나면 OrderPaidEvent가 매물을 ENDED_SOLD로 보낸다.
-          myOffer.status만 보면 결제 완료 뒤에도 「결제하러 가기」가 남는다.
+          myOffer.status만 보면 결제 완료 뒤에도 「결제하기」가 남는다.
         */}
         {status === "MATCHED" && myOffer?.status === "ACCEPTED" ? (
           /* 내 제안이 선택됨 — 계약 성립(§1.9), 수정·취소가 아니라 결제로 이어진다. */
@@ -272,7 +272,7 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
             href={`/orders/${auctionId}/payment`}
             className={`mt-6 flex h-12 items-center justify-center ${PRIMARY_BUTTON_CLASS}`}
           >
-            결제하러 가기
+            결제하기
           </Link>
         ) : (
           isLive &&

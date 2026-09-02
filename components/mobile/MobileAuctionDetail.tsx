@@ -348,7 +348,7 @@ export default function MobileAuctionDetail({
             href={`/orders/${auctionId}/payment`}
             className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
           >
-            결제하러 가기
+            결제하기
           </Link>
         ) : !isLive ? (
           <button

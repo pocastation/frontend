@@ -98,11 +98,18 @@ export default function ShareButton({ title, hashtag }: { title: string; hashtag
         ) : (
           // 공유(share-2) — Lucide
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <circle cx="18" cy="5" r="3" />
-            <circle cx="6" cy="12" r="3" />
-            <circle cx="18" cy="19" r="3" />
-            <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
-            <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
+            {/*
+              광학 정렬(#519) — 원 세 개 중 **둘이 오른쪽(x 18), 하나만 왼쪽(x 6)**이라
+              획 가중 중심이 x 13.55로 viewBox 중심(12)보다 1.55 오른쪽이다. 도형 범위는
+              3~21로 대칭이라 눈에만 보이던 치우침이다. 1.5만큼 왼쪽으로 옮겨 맞춘다.
+            */}
+            <g transform="translate(-1.5,0)">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <line x1="8.59" x2="15.42" y1="13.51" y2="17.49" />
+              <line x1="15.41" x2="8.59" y1="6.51" y2="10.49" />
+            </g>
           </svg>
         )}
       </button>

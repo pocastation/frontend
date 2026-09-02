@@ -19,9 +19,8 @@ import type { AuctionImageResponse, AuctionVideoResponse } from "@/lib/types";
  * 네이티브 스크롤은 첫 제스처의 축을 브라우저가 잠그고, 영상 위 가로 팬도 스크롤로 처리한다
  * (컨트롤은 탭이라 충돌하지 않는다).
  *
- * <p>🔴 영상 차례에는 뒤로가기·공유·찜·신고 오버레이를 숨긴다(#478) — 네이티브 재생 컨트롤
- * (전체화면·PiP)이 상단에 뜨는 브라우저에서 오버레이가 그걸 가렸다. 사진으로 되돌아오면 다시
- * 나타나므로 나가는 길이 막히지는 않는다.
+ * <p>뒤로가기·공유·찜·신고 오버레이는 사진과 검수영상에서 같은 위치를 유지한다. 마지막 영상까지
+ * 넘긴 뒤에도 상세를 나가거나 매물 작업을 이어갈 수 있어야 한다.
  *
  * <p>사진은 사용자 업로드라 세로·가로가 섞여 있다. 목록 카드는 `object-cover`로 채우지만
  * 상세는 **`object-contain` 레터박스**다 — 상세까지 잘라 버리면 확인하러 들어온 사람이
@@ -64,8 +63,6 @@ export default function MobileDetailGallery({
 
   const current = slides[index];
   const onVideo = current.kind === "video";
-  // 오버레이는 영상 차례에 사라진다 — 갑자기 꺼지면 눌린 줄 알게 되므로 페이드로.
-  const overlayClass = onVideo ? "pointer-events-none opacity-0" : "opacity-100";
 
   return (
     <div className="relative aspect-[4/5] bg-surface-2">
@@ -101,12 +98,12 @@ export default function MobileDetailGallery({
         )}
       </div>
 
-      {/* 사진 위 뒤로가기 — 상세에서는 전역 헤더를 접으므로 나가는 길이 여기 하나다(킷과 같은 자리). */}
+      {/* 갤러리 위 뒤로가기 — 상세에서는 전역 헤더를 접으므로 나가는 길이 여기 하나다(킷과 같은 자리). */}
       <button
         type="button"
         aria-label="뒤로"
         onClick={() => router.back()}
-        className={`absolute left-3 top-3 z-[3] flex h-[34px] w-[34px] items-center justify-center rounded-full bg-white/90 text-text-1 backdrop-blur-[4px] transition-opacity ${overlayClass} ${FOCUS_RING}`}
+        className={`absolute left-3 top-3 z-[3] flex h-[34px] w-[34px] items-center justify-center rounded-full bg-white/90 text-text-1 backdrop-blur-[4px] ${FOCUS_RING}`}
       >
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <polyline points="15 18 9 12 15 6" />
@@ -114,10 +111,10 @@ export default function MobileDetailGallery({
       </button>
 
       {actions && (
-        // 사진 위에 아이콘만 얹으면 밝은 사진에서 묻힌다(연회색 아이콘 + 배경 없음). 공유·찜·신고
+        // 갤러리 위에 아이콘만 얹으면 밝은 미디어에서 묻힌다(연회색 아이콘 + 배경 없음). 공유·찜·신고
         // 컴포넌트를 고치지 않고 여기서만 흰 반투명 원을 깐다 — 데스크탑 액션 줄은 흰 지면 위라
         // 지금 그대로다. `>*>button`은 공유·신고의 트리거만 잡는다(펼친 메뉴는 한 단계 더 깊다).
-        <div className={`absolute right-3 top-3 z-[3] flex gap-1.5 transition-opacity ${overlayClass} [&>*>button]:!rounded-full [&>*>button]:!bg-white/90 [&>*>button]:!text-text-1 [&>*>button]:backdrop-blur-[4px] [&>button]:!rounded-full [&>button]:!bg-white/90 [&>button]:!text-text-1 [&>button]:backdrop-blur-[4px]`}>
+        <div className="absolute right-3 top-3 z-[3] flex gap-1.5 [&>*>button]:!rounded-full [&>*>button]:!bg-white/90 [&>*>button]:!text-text-1 [&>*>button]:backdrop-blur-[4px] [&>button]:!rounded-full [&>button]:!bg-white/90 [&>button]:!text-text-1 [&>button]:backdrop-blur-[4px]">
           {actions}
         </div>
       )}
@@ -146,12 +143,14 @@ export default function MobileDetailGallery({
             )}
           </div>
 
-          {/* 몇 장 중 몇 번째인지 — 영상 차례에는 그렇게 말해준다(사진이 하나 더 있는 줄 알게 두지 않는다). */}
+          {/* 몇 장 중 몇 번째인지는 사진 차례에만 표시한다. 영상은 재생 UI 자체로 구분한다. */}
           {/* 🔴 분모가 `images.length`였다(#519) — 도트는 영상까지 세는데 숫자만 빼고 세서
               사진 3 + 영상 1이면 도트 4개 옆에 「1 / 3」이 떴다. 둘이 같은 수를 말하게 한다. */}
-          <span className="absolute bottom-3 right-3 z-[3] rounded-r1 bg-black/50 px-2 py-0.5 font-display text-[11px] text-white backdrop-blur-[2px]">
-            {onVideo ? "검수영상" : `${index + 1} / ${slides.length}`}
-          </span>
+          {!onVideo && (
+            <span className="absolute bottom-3 right-3 z-[3] rounded-r1 bg-black/50 px-2 py-0.5 font-display text-[11px] text-white backdrop-blur-[2px]">
+              {index + 1} / {slides.length}
+            </span>
+          )}
         </>
       )}
     </div>

@@ -9,7 +9,9 @@ import type { AuctionResponse, AuctionSaleType } from "@/lib/types";
 
 // 모바일은 2열(카드가 화면폭을 꽉 채우지 않게), sm 이상은 auto-fill로 데스크탑 밀도 유지.
 const GRID_CLASS =
-  "grid grid-cols-2 gap-3 sm:gap-3.5 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
+  // 모바일 간격은 홈·목록·검색과 같은 카드 리듬(가로 8 / 세로 18)이다(#513).
+  // 데스크탑은 지금까지의 auto-fill 격자를 그대로 둔다.
+  "grid grid-cols-2 gap-x-2 gap-y-[18px] sm:gap-3.5 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
 
 // 홈 화면 임베드(AuctionExplorer)와 달리 /auctions 전용 페이지 — 검색은 헤더 전역검색과
 // 별개의 로컬 입력(ArtistExplorer와 같은 이유: 헤더검색은 홈으로 리다이렉트하므로 이 페이지
@@ -75,7 +77,7 @@ export default function AuctionBrowser({
 
   return (
     <div>
-      <label className="mb-5 flex h-11 max-w-[480px] items-center gap-2 rounded-full border border-border px-4">
+      <label className="mb-4 flex h-9 max-w-[480px] items-center gap-2 rounded-full border border-border-2 px-3.5 focus-within:border-text-1 sm:mb-5 sm:h-11 sm:px-4">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
@@ -104,10 +106,15 @@ export default function AuctionBrowser({
               type="button"
               aria-pressed={sort === option.key}
               onClick={() => setSort(option.key)}
-              className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+              /*
+                선택된 칩은 **잉크**로 채운다(#513). 거래 목록(MobileBrowse)·검색·판매자 화면이
+                전부 그렇게 하는데 이 컴포넌트만 보라였다 — 보라는 CTA·필수 표시·포커스처럼
+                **행동을 요구하는 자리**에 남겨 둔다. 정렬 선택은 상태 표시지 행동 요구가 아니다.
+              */
+              className={`min-h-8 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
                 sort === option.key
-                  ? "border-primary bg-primary text-white"
-                  : "border-border text-text-2 hover:border-primary hover:text-primary"
+                  ? "border-text-1 bg-text-1 text-white"
+                  : "border-border-2 bg-white text-text-2"
               }`}
             >
               {option.label}
@@ -154,7 +161,7 @@ export default function AuctionBrowser({
             type="button"
             onClick={loadMore}
             disabled={loadingMore}
-            className={`flex h-11 items-center gap-2 rounded-full border border-border-2 bg-white px-6 text-[13.5px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+            className={`flex h-11 items-center gap-2 rounded-full border border-border-2 bg-white px-6 text-[13.5px] font-bold text-text-1 transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : moreError ? "다시 시도" : "더 보기"}
           </button>

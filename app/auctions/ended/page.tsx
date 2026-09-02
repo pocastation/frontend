@@ -1,4 +1,5 @@
 import AuctionBrowser from "@/components/AuctionBrowser";
+import MobilePageHead from "@/components/mobile/MobilePageHead";
 import type { SortKey } from "@/components/AuctionExplorer";
 import { apiFetch } from "@/lib/api";
 import type { AuctionListResponse } from "@/lib/types";
@@ -45,26 +46,42 @@ export default async function EndedAuctionsPage({
   const auctions = await getEndedAuctions(query);
 
   return (
-    <div className="mx-auto max-w-[1160px] px-4 py-8 sm:py-10">
-      <div className="mb-7">
-        <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">거래 완료</h1>
-        {/* 🔴 문구를 두 번 고쳤다. 「최종 거래가를 확인해보세요」는 §1.7·§9.4로 성사가를 감추면서
-            지키지 못하는 약속이 됐고(T40), 「거래 성사·미성사로 종료된 매물」은 목록이 성사분만
-            담게 되면서 사실과 달라졌다. 화면이 실제로 하는 일만 적는다. */}
-        <p className="mt-1.5 text-sm text-text-3">거래가 성사된 매물을 확인해보세요.</p>
-      </div>
+    <>
+      {/*
+        뒤로는 **히스토리 뒤로**다(#513). 하단 5탭이 가리키지 않는 화면이라 진입로가 하나로
+        정해져 있지 않다 — 고정 도착지를 두면 들어온 곳과 다른 데로 보낸다(판매자 상세와 같은 판단).
+      */}
+      <MobilePageHead title="거래 완료" />
 
-      <AuctionBrowser
-        key={query}
-        endpoint="/api/auctions/ended"
-        sortOptions={ENDED_SORT_OPTIONS}
-        initialAuctions={auctions?.content ?? []}
-        initialTotalElements={auctions?.totalElements ?? 0}
-        initialTotalPages={auctions?.totalPages ?? 0}
-        initialQuery={query}
-        emptyTitle="완료된 거래가 없습니다"
-        searchPlaceholder="완료된 거래 제목, 스타명, 멤버명으로 검색"
-      />
-    </div>
+      <div className="mx-auto max-w-[1160px] px-[14px] py-5 sm:px-4 sm:py-10">
+        <div className="mb-4 sm:mb-7">
+          {/* 모바일은 앱바가 제목이다 — 화면 안에서 h1을 반복하지 않는다(알림·스타·판매자와 같다). */}
+          <h1 className="hidden font-display text-2xl font-extrabold tracking-tight text-text-1 sm:block">
+            거래 완료
+          </h1>
+          {/* 🔴 문구를 두 번 고쳤다. 「최종 거래가를 확인해보세요」는 §1.7·§9.4로 성사가를 감추면서
+              지키지 못하는 약속이 됐고(T40), 「거래 성사·미성사로 종료된 매물」은 목록이 성사분만
+              담게 되면서 사실과 달라졌다. 화면이 실제로 하는 일만 적는다.
+
+              모바일에서도 이 문장은 남긴다 — 이 목록이 **성사분만 담는다**는 사실을 말해 주는
+              유일한 자리라 지우면 오해가 생긴다. */}
+          <p className="text-[12.5px] text-text-3 sm:mt-1.5 sm:text-sm">거래가 성사된 매물을 확인해보세요.</p>
+        </div>
+
+        <AuctionBrowser
+          key={query}
+          endpoint="/api/auctions/ended"
+          sortOptions={ENDED_SORT_OPTIONS}
+          initialAuctions={auctions?.content ?? []}
+          initialTotalElements={auctions?.totalElements ?? 0}
+          initialTotalPages={auctions?.totalPages ?? 0}
+          initialQuery={query}
+          emptyTitle="완료된 거래가 없습니다"
+          // 375px 검색칸에서 잘리지 않는 길이로 줄였다. 입력을 두 벌 두면 id가 문서에 둘 생겨
+          // 포커스가 보이지 않는 쪽으로 갈 수 있어(#493에서 실제로 겪었다) 한 문구로 통일한다.
+          searchPlaceholder="제목·스타·멤버 검색"
+        />
+      </div>
+    </>
   );
 }

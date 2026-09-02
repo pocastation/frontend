@@ -108,6 +108,20 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
         )}
       </div>
 
+      {/*
+        여기부터가 「받은 후기」다(#510). 레벨 배지는 프로필에 딸린 값이고 후기는 그 아래
+        별도 정보라, 판매자 상세에서 카드를 걷어내면 **경계가 사라진다.**
+
+        ⚠️ 8px 회색 띠를 쓰지 않는다 — 그 화면은 아래에서 매물 섹션도 갈라야 하는데, 같은 장치를
+        두 번 쓰면 「모든 섹션이 같은 골격」이 되어 문서처럼 읽힌다(디자인 규칙의 2차 반려 사유).
+        후기는 **보조 정보라 헤어라인 하나로 조용히**, 매물은 **여백과 큰 제목으로** 가른다.
+      */}
+      <div className="mt-4 border-t border-border pt-3">
+        <p className="text-[12.5px] font-bold text-text-2">
+          받은 후기 <span className="font-bold text-text-3">{rating.reviewCount}</span>
+        </p>
+      </div>
+
       {/* 별점 + 후기 보기 + 매너 태그를 한 줄에(시안). 후기 0건이면 안내 문구만. */}
       <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
         {rating.reviewCount === 0 ? (

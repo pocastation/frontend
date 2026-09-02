@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import BadgeChips from "@/components/BadgeChips";
+import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { apiFetch } from "@/lib/api";
 import TrustLevelBadge from "@/components/TrustLevelBadge";
 import { plainLevelLabel } from "@/lib/labels";
@@ -37,11 +38,14 @@ export default async function PopularSellersPage() {
   const sellers = await getPopularSellers();
 
   return (
-    <div className="mx-auto max-w-[1160px] px-4 py-8 sm:py-10">
-      <h1 className="font-display text-xl font-extrabold text-text-1">인기 판매자</h1>
-      <p className="mt-1 text-sm text-text-3">
-        거래 실적과 후기로 신뢰를 쌓은 판매자예요. 거래 5건 이상인 판매자만 보여드려요.
-      </p>
+    <>
+      <MobilePageHead title="인기 판매자" />
+
+      <div className="mx-auto max-w-[1160px] px-[14px] py-5 sm:px-4 sm:py-10">
+        <h1 className="hidden font-display text-xl font-extrabold text-text-1 sm:block">인기 판매자</h1>
+        <p className="text-[12.5px] text-text-3 sm:mt-1 sm:text-sm">
+          거래 실적과 후기로 신뢰를 쌓은 판매자예요. 거래 5건 이상인 판매자만 보여드려요.
+        </p>
 
       {sellers.length === 0 ? (
         <div className="mt-8 flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-20 text-center">
@@ -49,17 +53,30 @@ export default async function PopularSellersPage() {
           <p className="text-sm text-text-3">거래와 후기가 쌓이면 이곳에 표시돼요.</p>
         </div>
       ) : (
-        <ol className="mt-6 flex flex-col divide-y divide-border/70 rounded-r3 border border-border bg-surface">
+        /*
+          🔴 목록 전체를 카드로 감싸지 않는다(#510). 30명을 테두리 하나에 넣으면 「같은 카드로
+          전부 감싸기」가 되고, 모바일에서는 그 카드가 화면 폭을 다 써서 감싸는 의미도 없다.
+          헤어라인만으로 줄을 가른다.
+
+          데스크탑도 **1열**이다. 스타 목록은 2열로 갔지만 판매자는 **순위가 정보**라 한 줄로
+          내려 읽어야 한다 — 2열이면 왼쪽에 1·3·5, 오른쪽에 2·4·6이 와서 지그재그가 된다.
+        */
+        <ol className="mt-4 flex flex-col sm:mt-6">
           {sellers.map((seller, index) => (
             <li key={seller.sellerId} className="p-0">
               <Link
                 href={`/sellers/${seller.sellerId}`}
-                className={`flex items-center gap-3 p-4 transition-colors hover:bg-surface-2/50 ${FOCUS_RING}`}
+                className={`flex items-center gap-3 border-b border-border py-3 transition-colors hover:bg-surface-2/50 sm:px-2 ${FOCUS_RING}`}
               >
-              {/* 순위 — 상위 3명만 강조하고 나머지는 뉴트럴(절제 톤). */}
+              {/*
+                순위 — 상위 3명만 강조한다(절제 톤, 기존 판단 유지). 다만 **색이 아니라 농도**로
+                한다(#510): 보라는 상태·행동을 말하는 자리(선택됨·활성 탭·CTA·필수·포커스)에만
+                쓰는데, 1·2·3등은 상태가 아니라 **값**이다. 그 자리에 브랜드색이 있으면
+                「누를 수 있는 것」처럼 읽힌다.
+              */}
               <span
-                className={`w-6 shrink-0 text-center font-display text-sm font-extrabold ${
-                  index < 3 ? "text-primary" : "text-text-3"
+                className={`w-6 shrink-0 text-center font-display text-sm font-extrabold tabular-nums ${
+                  index < 3 ? "text-text-1" : "text-text-3"
                 }`}
               >
                 {index + 1}
@@ -95,8 +112,9 @@ export default async function PopularSellersPage() {
                   )}
                 </div>
               </div>
+                {/* 줄 끝의 「더 보기」 표시 — 목록 줄에서 쓰는 모양으로 맞춘다. */}
                 <span aria-hidden="true" className="shrink-0 text-text-3">
-                  →
+                  ›
                 </span>
               </Link>
             </li>
@@ -104,10 +122,11 @@ export default async function PopularSellersPage() {
         </ol>
       )}
 
-      {/* 표시광고법 정합(§9.2-4) — 광고성 오인 소지를 없애기 위해 산정 근거를 명시한다. */}
-      <p className="mt-4 text-[11px] text-text-3">
-        순위는 거래 실적과 후기를 반영해 산정되며, 광고나 유료 노출이 아니에요.
-      </p>
-    </div>
+        {/* 표시광고법 정합(§9.2-4) — 광고성 오인 소지를 없애기 위해 산정 근거를 명시한다. */}
+        <p className="mt-4 text-[11px] text-text-3">
+          순위는 거래 실적과 후기를 반영해 산정되며, 광고나 유료 노출이 아니에요.
+        </p>
+      </div>
+    </>
   );
 }

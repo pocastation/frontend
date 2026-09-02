@@ -68,14 +68,22 @@ export default function ReportButton({ auctionId }: { auctionId: number }) {
         ) : (
           // 신고(siren) — Lucide
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M7 18v-6a5 5 0 1 1 10 0v6" />
-            <path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z" />
-            <path d="M21 12h1" />
-            <path d="M18.5 4.5 18 5" />
-            <path d="M2 12h1" />
-            <path d="M12 2v1" />
-            <path d="m4.929 4.929.707.707" />
-            <path d="M12 12v6" />
+            {/*
+              광학 정렬(#519) — 도형 범위(y 2~22)는 대칭이지만 **보이는 무게는 아래에 몰려 있다**:
+              덮개(획 27.7)와 받침(33.4)이 아래쪽이고 위쪽은 가느다란 불빛 선 다섯 개(합 4.7)뿐이라
+              획 가중 중심이 y 15.87 — viewBox 중심(12)보다 3.87 아래다. 원 안에서 사이렌만
+              가라앉아 보이던 이유다. 2만큼 올려 눈에 맞춘다(최상단 2→0, 받침 22→20으로 안 잘린다).
+            */}
+            <g transform="translate(0,-2)">
+              <path d="M7 18v-6a5 5 0 1 1 10 0v6" />
+              <path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z" />
+              <path d="M21 12h1" />
+              <path d="M18.5 4.5 18 5" />
+              <path d="M2 12h1" />
+              <path d="M12 2v1" />
+              <path d="m4.929 4.929.707.707" />
+              <path d="M12 12v6" />
+            </g>
           </svg>
         )}
       </button>

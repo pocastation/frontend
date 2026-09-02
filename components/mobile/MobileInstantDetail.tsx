@@ -185,8 +185,12 @@ export default function MobileInstantDetail({
   const showBar = isLive || isMatched;
 
   return (
-    // 하단 여백 규칙(#457)과 동일 — 마감 32px 상시, 바가 있으면 그 높이를 더한다.
-    <div className={showBar ? "pb-[108px]" : "pb-8"}>
+    /*
+      하단 여백 규칙(#457) — 마감 32px 상시. **바가 있어도 그 높이를 더하지 않는다**(#519):
+      바가 덮는 것은 페이지 맨 끝의 푸터고, 푸터가 자기 몫을 이미 비운다(제안판매 상세와 같은 판단).
+      그래서 `showBar` 분기가 사라졌다 — 두 경우가 같은 값을 쓴다.
+    */
+    <div className="pb-8">
       <MobileDetailGallery images={auction.images} video={auction.video} title={auction.title} actions={actions} />
 
       <div className="px-4 pt-4">

@@ -147,8 +147,10 @@ export default function MobileDetailGallery({
           </div>
 
           {/* 몇 장 중 몇 번째인지 — 영상 차례에는 그렇게 말해준다(사진이 하나 더 있는 줄 알게 두지 않는다). */}
+          {/* 🔴 분모가 `images.length`였다(#519) — 도트는 영상까지 세는데 숫자만 빼고 세서
+              사진 3 + 영상 1이면 도트 4개 옆에 「1 / 3」이 떴다. 둘이 같은 수를 말하게 한다. */}
           <span className="absolute bottom-3 right-3 z-[3] rounded-r1 bg-black/50 px-2 py-0.5 font-display text-[11px] text-white backdrop-blur-[2px]">
-            {onVideo ? "검수영상" : `${index + 1} / ${images.length}`}
+            {onVideo ? "검수영상" : `${index + 1} / ${slides.length}`}
           </span>
         </>
       )}

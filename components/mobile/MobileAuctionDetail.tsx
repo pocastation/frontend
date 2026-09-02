@@ -217,8 +217,18 @@ export default function MobileAuctionDetail({
   ];
 
   return (
-    /* 하단 바가 모든 상태에서 상시 노출되므로(#478) 바 높이 여백도 항상 깐다. */
-    <div className="pb-[108px]">
+    /*
+      꼬리 여백은 32px 하나다(#519).
+
+      🔴 예전에는 `pb-[108px]`로 **하단 고정 바(65px) 자리까지 여기서 비웠다**. 그런데 그 아래
+      푸터가 자기 몫으로 또 비운다(`max-sm:pb-[calc(104px + safe-area)]`) — 바가 실제로 덮는 것은
+      페이지 맨 끝, 즉 **푸터**지 이 본문이 아니다. 상세의 76px은 그대로 죽은 공간이었다.
+
+      이 값은 푸터를 모바일에서 접던 시절의 잔재다. #399에서 전상법 §10 표시사항이라 푸터를 전
+      화면으로 되돌리면서 바 여백의 책임이 푸터로 넘어갔는데 이 스페이서만 남아 있었다.
+      32px은 즉시판매 상세가 바 없을 때 쓰던 기존 값이고, 탭 본문이 이미 `pb-6`로 끝난다.
+    */
+    <div className="pb-8">
       <MobileDetailGallery images={auction.images} video={auction.video} title={auction.title} actions={actions} />
 
       <div className="px-4 pt-4">

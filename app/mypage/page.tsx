@@ -37,6 +37,7 @@ import type {
   MySellingAuctionListResponse,
   MySellingAuctionResponse,
   MyOrderStatusResponse,
+  OrderStatus,
   ReviewableOrderResponse,
   SoldOrderResponse,
   WishlistListResponse,
@@ -1721,6 +1722,41 @@ function BuyerDisputeFooter({
   );
 }
 
+/**
+ * 결제되지 않은 주문을 판매자에게 어떻게 말할지(#537).
+ *
+ * <p>구매자 푸터가 같은 상태를 「내가 결제해야 한다」로 말한다면, 여기서는 <b>「기다리는 중인지
+ * 끝난 것인지」</b>가 판매자가 알아야 할 전부다. 발송은 어느 쪽에서도 할 수 없다.
+ */
+function sellerPaymentWaitCopy(status: OrderStatus): { label: string; message: string } {
+  switch (status) {
+    case "PAYMENT_PENDING":
+      return {
+        label: "구매자 결제 대기",
+        message: "입금이 확인되면 배송지가 열리고 발송할 수 있어요.",
+      };
+    case "PAYMENT_RETRYING":
+      return {
+        label: "구매자 결제 대기",
+        message: "구매자가 다시 결제하고 있어요. 완료되면 발송할 수 있어요.",
+      };
+    case "SECOND_CHANCE_OFFERED":
+      return {
+        label: "구매자 결제 대기",
+        message: "구매자에게 결제 기회가 한 번 더 열려 있어요.",
+      };
+    // 기한 내 미입금으로 끝난 거래 — 「배송지 대기」로 보이면 아직 진행 중인 줄 안다.
+    case "PAYMENT_DEFAULTED":
+    case "PAYMENT_FAILED":
+      return {
+        label: "결제 미완료",
+        message: "기한 안에 입금되지 않아 거래가 종료됐어요.",
+      };
+    default:
+      return { label: "결제 대기", message: "결제가 끝나면 발송할 수 있어요." };
+  }
+}
+
 // 판매자 관점 발송 푸터(#119) — 판매 내역. sold-order가 있으면(=결제 완료된 거래) 발송/상태 표시.
 function SellerFulfillmentFooter({
   soldOrder,
@@ -1732,8 +1768,15 @@ function SellerFulfillmentFooter({
   const { fetchWithAuth } = useAuth();
   const [shipOpen, setShipOpen] = useState(false);
   const [preparing, setPreparing] = useState(false);
+  const [prepareError, setPrepareError] = useState<string | null>(null);
   const fs = soldOrder.fulfillmentStatus;
   const addr = soldOrder.deliveryAddress;
+  // 🔴 발송 UI의 전제는 **결제 완료**다(#537). 예전에는 이 게이트가 없어, 입금 전인데 주소가
+  // 있다는 이유만으로(거래 성사 시 기본배송지가 자동 확정된다 — #262) 「발송 대기」와 버튼 둘이
+  // 떴다. 눌러도 아무 일이 없었던 건 부수적이고, **보낼 수 없는 거래에 보내라고 말한 것**이
+  // 진짜 문제였다 — 그대로 발송하면 대금을 못 받는다.
+  // 구매 내역 푸터·모바일 발송 배지는 이미 같은 판정을 쓰고 있었다.
+  const paid = soldOrder.orderStatus === "PAID";
 
   /**
    * 「물품 준비」 — 이 순간부터 구매자 취소가 잠긴다(§1.5).
@@ -1743,11 +1786,14 @@ function SellerFulfillmentFooter({
    */
   async function startPreparing() {
     setPreparing(true);
+    setPrepareError(null);
     try {
       await fetchWithAuth<void>(`/api/auctions/${soldOrder.auctionId}/order/prepare`, { method: "POST" });
       onRefresh();
-    } catch {
-      // 실패해도 화면을 흔들지 않는다 — 다시 누르면 된다(서버가 멱등이라 두 번 눌러도 안전하다).
+    } catch (err) {
+      // 🔴 예전에는 `catch {}`로 통째로 삼켰다(#537) — 실패해도 화면이 그대로라 「버튼이 안 눌린다」로
+      // 보였다. 서버가 멱등이라 다시 눌러도 안전한 것과, 실패를 사용자에게 숨기는 것은 다른 얘기다.
+      setPrepareError(err instanceof ApiError ? err.message : "처리하지 못했어요. 잠시 후 다시 시도해 주세요.");
     } finally {
       setPreparing(false);
     }
@@ -1763,6 +1809,22 @@ function SellerFulfillmentFooter({
       <div className="mt-2.5 flex flex-wrap items-center gap-3 pl-[56px] text-xs text-text-2">
         {fulfillmentPill("xCircle", "neutral", "거래 취소")}
         <span className="min-w-0 flex-1">거래가 취소돼 구매자에게 환불됐어요 · 정산 대상이 아니에요.</span>
+      </div>
+    );
+  }
+
+  /*
+    🔴 결제 전에는 발송 UI를 띄우지 않는다(#537).
+
+    받는 사람·주소도 함께 감춘다 — 판매자에게 **지금 필요한 정보가 아니고**, 결제가 무산되면
+    (실제로 그런 건이 있었다) 끝내 쓰이지 않을 개인정보다. 결제 완료 시점에 연다.
+  */
+  if (!paid) {
+    const waiting = sellerPaymentWaitCopy(soldOrder.orderStatus);
+    return (
+      <div className="mt-2.5 flex flex-wrap items-center gap-3 pl-[56px] text-xs text-text-2">
+        {fulfillmentPill("clock", "neutral", waiting.label)}
+        <span className="min-w-0 flex-1">{waiting.message}</span>
       </div>
     );
   }
@@ -1828,6 +1890,7 @@ function SellerFulfillmentFooter({
           </>
         )}
       </div>
+      {prepareError && <p className="mt-2 text-[11px] font-bold text-accent">{prepareError}</p>}
       {shipOpen && isBeforeShipment(fs) && addr && (
         <OrderShipForm
           auctionId={soldOrder.auctionId}

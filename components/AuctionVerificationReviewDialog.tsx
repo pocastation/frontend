@@ -346,49 +346,51 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     role={!modelVersionPending && !isTrocrV5 ? "alert" : undefined}
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <h3 className="text-xs font-extrabold text-text-1">OCR 모델</h3>
+                      <h3 className="text-xs font-extrabold text-text-1">OCR 실행 구성</h3>
                       <span className={`text-xs font-extrabold ${modelVersionPending ? "text-text-3" : isTrocrV5 ? "text-ok" : "text-accent"}`}>
-                        {modelVersionPending ? "분석 정보 대기" : isTrocrV5 ? "TrOCR v5" : "v5 아님"}
+                        {modelVersionPending ? "분석 정보 대기" : isTrocrV5 ? "TrOCR v5 가중치" : "v5 아님"}
                       </span>
                     </div>
                     {isTrocrV5 ? (
                       <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
-                        <dt className="text-text-3">전처리</dt>
-                        <dd className="text-right font-bold text-text-2">명암 자동 보정</dd>
+                        <dt className="text-text-3">입력 처리</dt>
+                        <dd className="text-right font-bold text-text-2">원근 보정 · 명암 보정 없음</dd>
                         <dt className="text-text-3">디코딩</dt>
-                        <dd className="text-right font-bold text-text-2">Beam 5 후보 비교</dd>
+                        <dd className="text-right font-bold text-text-2">Greedy · Beam 1</dd>
+                        <dt className="text-text-3">후보 재정렬</dt>
+                        <dd className="text-right font-bold text-text-2">사용 안 함</dd>
                       </dl>
                     ) : (
                       <p className="mt-2 text-[11px] leading-5 text-text-3">
                         {modelVersionPending
                           ? "모델 버전은 분석이 끝난 뒤 표시됩니다."
-                          : "TrOCR v5 결과가 아닙니다. 모델 버전과 분석 결과를 확인하세요."}
+                          : "TrOCR v5 가중치 결과가 아닙니다. 모델 버전과 분석 결과를 확인하세요."}
                       </p>
                     )}
                   </div>
                   <div className="mt-2">
                     <AnalysisSection
-                      title={isTrocrV5 ? "OCR 인식 참고 지표 · TrOCR v5" : "OCR 인식 참고 지표"}
+                      title="OCR 인식 참고 지표"
                       passed={null}
                       advisory
                       metrics={[
                         {
-                          label: "선택 결과 참고 점수",
+                          label: "인식 결과 참고 점수",
                           value: formatPercentage(verification.ocrConfidenceScore),
                         },
                       ]}
                       condition={isTrocrV5
-                        ? "TrOCR v5가 코드를 한 단위씩 생성할 때 각 단계에서 선택한 단위에 부여한 모델 점수입니다. 여러 문자가 한 단위로 묶일 수 있으며, 선택 결과 참고 점수는 이 단위별 점수의 기하평균입니다. 정답 확률이나 자동 통과 기준은 아닙니다."
+                        ? "Greedy 디코딩이 각 생성 단계에서 선택한 토큰 점수의 기하평균입니다. 정답 확률이나 자동 통과 기준은 아닙니다."
                         : "모델이 최종 선택한 인식 단위의 참고 지표입니다. 확률 보정값이 아니며 최종 통과를 직접 결정하지 않습니다."}
                     >
                       <p className="mt-1 text-[11px] leading-5 text-text-3">
-                        높을수록 모델이 읽어낸 코드 전체를 강하게 지지한다는 뜻입니다. 낮다면 점수가 가장 낮은 부분을 사진과 대조하세요.
+                        높을수록 생성 과정에서 선택한 토큰들을 모델이 상대적으로 강하게 지지했다는 뜻입니다. 낮은 토큰을 사진과 대조하세요.
                       </p>
                       <div className="mt-3 border-t border-border pt-2">
                         <p className="text-[11px] font-extrabold text-text-3">인식 단위별 참고 점수</p>
                         <p className="mt-1 text-[11px] leading-5 text-text-3">
                           {isTrocrV5
-                            ? "v5가 최종 후보로 선택한 토큰 단위 점수입니다. 한 토큰에 여러 문자가 묶일 수 있습니다."
+                            ? "Greedy 디코딩이 각 단계에서 선택한 토큰의 점수입니다. 한 토큰에 여러 문자가 포함될 수 있습니다."
                             : "모델이 반환한 토큰 단위 참고 점수입니다."}
                         </p>
                         {verification.ocrTokenConfidences?.length ? (
@@ -447,7 +449,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                   </div>
                   <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                     <dt className="text-text-3">분석 모델</dt>
-                    <dd className="truncate text-right font-bold text-text-2" title={modelVersion ?? undefined}>
+                    <dd className="break-all text-right font-bold text-text-2" title={modelVersion ?? undefined}>
                       {modelVersion ?? "—"}
                     </dd>
                   </dl>

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import OfferCounts from "@/components/OfferCounts";
+import SellerListingActions from "@/components/SellerListingActions";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useAuctionBidding } from "@/lib/auction-bidding-context";
@@ -274,6 +275,18 @@ export default function SellerOfferPanel({
         <p className={`${viewport === "desktop" ? "mt-1.5 text-3xl" : "mt-1 text-2xl"} font-display font-extrabold tabular-nums text-text-1`}>
           {displayAmount == null ? "금액 확인 중" : formatKRW(displayAmount)}
         </p>
+
+        {/* 판매자 액션(#533) — 거래가 성사된 뒤에는 고칠 것도 내릴 것도 없다(결제 대기 중이다). */}
+        {!isMatched && (
+          <SellerListingActions
+            auctionId={auctionId}
+            saleType="AUCTION"
+            price={startPrice}
+            offerCount={totalElements}
+            viewport={viewport}
+            onChanged={() => router.refresh()}
+          />
+        )}
 
         {isMatched ? (
           <div className={`${viewport === "desktop" ? "mt-5 pt-5" : "mt-4 pt-3.5"} border-t border-border`}>

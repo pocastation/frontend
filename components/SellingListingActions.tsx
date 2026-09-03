@@ -32,7 +32,11 @@ export default function SellingListingActions({
   // 🔴 제안 인원수로 잠금을 판정한다. 「제안이 있어서」보다 「3명이 제안해서」가 납득되고,
   // 무엇보다 서버가 같은 값(살아 있는 제안)으로 판정하므로 화면과 어긋나지 않는다.
   const offerCount = auction.offerCount ?? 0;
-  const priceLocked = offerCount > 0;
+  // 🔴 즉시판매는 제안이라는 게 없어 잠기지 않는다(#533·backend#420). 연장도 대상이 아니다 —
+  // 기간이 없기 때문이다. 유형 분기를 여기서 하고, 바깥(마이페이지)은 유형을 보지 않는다.
+  const isInstant = auction.saleType === "INSTANT";
+  const priceLocked = !isInstant && offerCount > 0;
+  const priceLabel = isInstant ? "판매가" : "최소가";
 
   // 연장은 서버가 열어 주는 시각(종료 1일 전)과 남은 횟수로 갈린다. 둘 다 서버가 계산해
   // 내려준다 — 화면이 「1일 전」과 「+7 → +3」을 다시 세면 규칙이 바뀔 때 갈린다(BE #399).
@@ -57,7 +61,9 @@ export default function SellingListingActions({
     <div className="mt-2.5 pl-[56px]">
       <div className="flex flex-wrap items-center gap-2.5">
         <span className="min-w-0 flex-1 text-[11.5px] leading-relaxed text-text-3">
-          {exhausted ? (
+          {isInstant ? (
+            <>판매 중에는 언제든 가격을 바꿀 수 있어요</>
+          ) : exhausted ? (
             <>
               연장을 <b className="font-bold text-text-1">모두 사용</b>했어요 · 종료 후 다시 등록할 수 있어요
             </>
@@ -79,13 +85,14 @@ export default function SellingListingActions({
         {/* 최소가는 제안이 하나라도 오면 버튼째 사라진다 — 눌리지 않는 버튼을 남기지 않는다. */}
         {!priceLocked && !editing && (
           <button type="button" onClick={() => setEditing(true)} disabled={busy} className={OUTLINE}>
-            최소가 수정
+            {priceLabel} 수정
           </button>
         )}
 
         {/* 🔴 이른 경우는 흐리게 두고, 소진한 경우는 아예 없앤다. 전자는 「기다리면 된다」이고
             후자는 「이 매물에선 끝났다」 — 다른 사실이라 형태도 달라야 한다. */}
-        {!exhausted && (
+        {/* 연장은 제안판매 전용 — 즉시판매는 기간 자체가 없다(#533). */}
+        {!isInstant && !exhausted && (
           <button
             type="button"
             onClick={() => void run(`/api/auctions/${auction.id}/extend`)}

@@ -1251,9 +1251,14 @@ function SellingList({
               )}
               {/* 연장·최소가 수정(§1.3·§1.1) — 판매 중인 제안판매에만. 즉시판매는 기간이 없고
                   (마감 자체가 없다) 종료된 매물은 손댈 것이 없다. */}
+              {/*
+                🔴 예전에는 `saleType === "AUCTION"` 조건이 붙어 **즉시판매는 액션 줄 자체가 안 떴다**
+                (#533). 「N일 연장」이 제안판매 전용이라 한 줄에 묶여 있었는데 내리기까지 함께 잠긴
+                것이다 — 즉시판매 판매자는 자기 글을 내릴 방법이 없었다. 유형 분기는
+                SellingListingActions 안에서 버튼별로 한다.
+              */}
               {showListingActions
                 && isLive
-                && item.saleType === "AUCTION"
                 && "nextExtensionDays" in item && (
                   <SellingListingActions auction={item} onChanged={() => onRefresh?.()} />
                 )}

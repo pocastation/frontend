@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import MediaZoomViewer from "@/components/MediaZoomViewer";
 import { mediaUrl } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionImageResponse, AuctionVideoResponse } from "@/lib/types";
@@ -48,6 +49,9 @@ export default function MobileDetailGallery({
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const trackRef = useRef<HTMLDivElement | null>(null);
+  // 확대 뷰어 — 열려 있으면 보고 있는 **사진** 인덱스, 닫혀 있으면 null(#527).
+  // 캐러셀 인덱스(`index`)와 따로 두는 이유: 캐러셀은 영상까지 세지만 뷰어는 사진만 받는다.
+  const [zoomAt, setZoomAt] = useState<number | null>(null);
 
   if (slides.length === 0) {
     return (
@@ -77,13 +81,22 @@ export default function MobileDetailGallery({
       >
         {slides.map((slide, i) =>
           slide.kind === "image" ? (
-            // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
-            <img
+            /*
+              사진을 누르면 확대 뷰어가 열린다(#527). 그 전에는 **크게 볼 방법이 아예 없어**
+              브라우저 핀치에만 기대야 했다 — 상태 등급이 분쟁 사유인 서비스에서 하자를 볼
+              수단이 브라우저 기능 하나뿐이었다. 슬라이드에서 사진이 영상보다 앞에 오므로
+              슬라이드 인덱스가 그대로 사진 인덱스다.
+            */
+            <button
               key={slide.src}
-              src={slide.src}
-              alt={`${title} ${i + 1}`}
-              className="h-full w-full flex-shrink-0 snap-center object-contain"
-            />
+              type="button"
+              onClick={() => setZoomAt(i)}
+              aria-label={`${title} 사진 ${i + 1} 크게 보기`}
+              className={`h-full w-full flex-shrink-0 snap-center ${FOCUS_RING}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일 */}
+              <img src={slide.src} alt={`${title} ${i + 1}`} className="h-full w-full object-contain" />
+            </button>
           ) : (
             <video
               key={slide.src}
@@ -153,6 +166,16 @@ export default function MobileDetailGallery({
           )}
         </>
       )}
+
+      {/* 데스크탑 상세와 같은 뷰어를 쓴다 — 핀치·더블탭 확대, 좌우 스와이프, 아래로 당겨 닫기. */}
+      <MediaZoomViewer
+        open={zoomAt !== null}
+        images={images}
+        title={title}
+        index={zoomAt ?? 0}
+        onIndexChange={setZoomAt}
+        onClose={() => setZoomAt(null)}
+      />
     </div>
   );
 }

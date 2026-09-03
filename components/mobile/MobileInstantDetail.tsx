@@ -27,6 +27,7 @@ import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import MobileDetailGallery from "@/components/mobile/MobileDetailGallery";
 import { MobileDetailTabs, SellerRow } from "@/components/mobile/MobileDetailShared";
 import { apiFetch, ApiError } from "@/lib/api";
+import SellerListingActions from "@/components/SellerListingActions";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/lib/toast-context";
 import { useDeliveryAddressGate } from "@/lib/use-delivery-address-gate";
@@ -251,7 +252,27 @@ export default function MobileInstantDetail({
 
       {/* 하단 고정 바 — 제안판매와 같은 구성. MATCHED에도 남겨 「왜 못 사는지」를 바가 말한다
           (정책 제13조 ① — 다른 회원에게 「다른 구매자가 거래를 진행 중」 안내). */}
-      {showBar && (
+      {/*
+        🔴 판매자에게는 바 자리를 통째로 액션으로 바꾼다(#533). 예전에는 「내 상품은 구매할 수
+        없어요」 한 줄이라 자기 매물에서 **할 수 있는 게 아무것도 없었다**. 찜 버튼도 빼는데,
+        자기 매물을 찜하는 자리가 아니다.
+      */}
+      {showBar && isOwnSale && isLive && (
+        <div
+          className="fixed inset-x-0 bottom-0 z-[400] border-t border-border bg-white px-4 pb-[calc(10px+env(safe-area-inset-bottom))] sm:hidden"
+        >
+          <SellerListingActions
+            auctionId={auction.id}
+            saleType="INSTANT"
+            price={price}
+            offerCount={0}
+            viewport="mobile"
+            onChanged={() => router.refresh()}
+          />
+        </div>
+      )}
+
+      {showBar && !(isOwnSale && isLive) && (
         <div
           className="fixed inset-x-0 bottom-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 sm:hidden"
           style={{ paddingBottom: "calc(10px + env(safe-area-inset-bottom))" }}

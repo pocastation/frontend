@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import { ApiError } from "@/lib/api";
+import SellerListingActions from "@/components/SellerListingActions";
 import { useAuth } from "@/lib/auth-context";
 import { useDeliveryAddressGate } from "@/lib/use-delivery-address-gate";
 import { buyerFee, estimatedTotal } from "@/lib/fees";
@@ -109,9 +110,19 @@ export default function InstantPurchaseSection({
 
       {isLive &&
         (isOwnSale ? (
-          <div className="mt-4 rounded-r2 border border-border bg-surface-2 p-4 text-center text-sm font-semibold text-text-2">
-            내 상품입니다. 직접 구매할 수 없어요.
-          </div>
+          /*
+            🔴 예전에는 「내 상품입니다. 직접 구매할 수 없어요.」 한 줄로 끝나 판매자가 자기 매물에서
+            **할 수 있는 게 아무것도 없었다**(#533). 못 하는 일을 알리는 자리를 할 수 있는 일로 바꾼다.
+            즉시판매엔 제안이 없으므로 잠금도 없다 — 판매 중이면 언제든 가격을 바꿀 수 있다.
+          */
+          <SellerListingActions
+            auctionId={saleId}
+            saleType="INSTANT"
+            price={price}
+            offerCount={0}
+            viewport="desktop"
+            onChanged={() => router.refresh()}
+          />
         ) : !accessToken ? (
           <Link
             href={`/login?redirect=/auctions/${saleId}`}

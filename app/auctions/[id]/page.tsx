@@ -285,7 +285,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
               saleId={auction.id}
               price={auction.buyNowPrice ?? auction.startPrice}
               status={auction.status}
-              sellerNickname={auction.sellerNickname}
+              sellerId={auction.sellerId}
               viewCount={auction.viewCount}
             />
           ) : auction.endAt ? (
@@ -334,7 +334,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
       initialOfferCount={auction.offerCount}
       initialEndAt={auction.endAt!}
       status={auction.status}
-      sellerNickname={auction.sellerNickname}
+      sellerId={auction.sellerId}
     >
       {body}
     </AuctionBiddingProvider>

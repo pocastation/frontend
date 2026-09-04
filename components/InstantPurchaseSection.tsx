@@ -17,7 +17,8 @@ type Props = {
   saleId: number;
   price: number;
   status: AuctionStatus;
-  sellerNickname: string;
+  /** 판매자 회원 id — 본인 판정용(#536). */
+  sellerId: string;
   viewCount: number;
 };
 
@@ -31,7 +32,7 @@ export default function InstantPurchaseSection({
   saleId,
   price,
   status,
-  sellerNickname,
+  sellerId,
   viewCount,
 }: Props) {
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function InstantPurchaseSection({
   const [addressModalOpen, setAddressModalOpen] = useState(false);
 
   const isLive = currentStatus === "LIVE";
-  const isOwnSale = member?.nickname != null && member.nickname === sellerNickname;
+  const isOwnSale = member?.id != null && member.id === sellerId;
   const total = estimatedTotal(price);
 
   async function handlePurchase() {

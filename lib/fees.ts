@@ -26,8 +26,13 @@ export const OFFER_UNIT = 500;
  */
 export const PRICE_UNIT = OFFER_UNIT;
 
-/** 등록가 하한(원) — 과저가 낚시·정렬 교란 차단(§12.1). 단위와 목적이 다르므로 함께 바뀌지 않는다. */
-export const MIN_LISTING_PRICE = 5000;
+/**
+ * 등록가 하한(원) — 과저가 낚시·정렬 교란 차단(§12.1). 단위와 목적이 다르므로 함께 바뀌지 않는다.
+ *
+ * 5,000원에서 500원으로 내렸다(BE #426). 저가 포토카드를 올릴 수 없다는 요청이 근거다.
+ * 단위는 500원 그대로라 하한과 단위가 같은 값이 된다.
+ */
+export const MIN_LISTING_PRICE = 500;
 
 // 구매자 수수료율(거래가 구간별, §12.2 확정). 경계는 ≤30,000 / ≤100,000 / >100,000.
 function buyerFeeRate(hammerPrice: number): number {

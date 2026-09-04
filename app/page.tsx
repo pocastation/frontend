@@ -1,5 +1,6 @@
 import AuctionExplorer from "@/components/AuctionExplorer";
 import Hero from "@/components/Hero";
+import HomeRanking from "@/components/HomeRanking";
 import MobileHome from "@/components/mobile/MobileHome";
 import MobileShell from "@/components/mobile/MobileShell";
 import { apiFetch } from "@/lib/api";
@@ -115,6 +116,8 @@ export default async function Home() {
           description="마감까지 기다리지 않고 바로 구매할 수 있는 포토카드"
           viewAllHref="/instant-sales"
         />
+        {/* 랭킹은 모바일 홈에만 있었다(#548). 데스크탑에서도 볼 수 있게 같은 집계로 블록을 둔다. */}
+        <HomeRanking auctions={popular?.content ?? []} sellers={popularSellers} />
       </div>
     </MobileShell>
   );

@@ -110,7 +110,7 @@ export default function MobileInstantDetail({
   const price = auction.buyNowPrice ?? auction.startPrice;
   const isLive = status === "LIVE";
   const isMatched = status === "MATCHED";
-  const isOwnSale = member?.nickname != null && member.nickname === auction.sellerNickname;
+  const isOwnSale = member?.id != null && member.id === auction.sellerId;
 
   useEffect(() => {
     if (!accessToken || status !== "MATCHED") return;

@@ -80,7 +80,7 @@ export function AuctionBiddingProvider({
   initialOfferCount,
   initialEndAt,
   status,
-  sellerNickname,
+  sellerId,
   children,
 }: {
   auctionId: number;
@@ -88,7 +88,8 @@ export function AuctionBiddingProvider({
   initialOfferCount: number;
   initialEndAt: string;
   status: AuctionStatus;
-  sellerNickname: string;
+  /** 판매자 회원 id. 본인 판정에 쓴다 — 닉네임은 바뀌는 값이라 식별자가 될 수 없다(#536). */
+  sellerId: string;
   children: ReactNode;
 }) {
   const { member, fetchWithAuth } = useAuth();
@@ -116,7 +117,9 @@ export function AuctionBiddingProvider({
   const isLive = status === "LIVE" && isBeforeEnd(endAt);
   // 마감 임박일 때만 카운트다운을 주황(warn)으로 강조 — 그 외에는 뉴트럴로 둔다(색 절제).
   const endingSoon = isLive && isEndingSoon(endAt);
-  const isOwnAuction = member?.nickname != null && member.nickname === sellerNickname;
+  // 🔴 닉네임 비교였다(#536). 닉네임은 변경 가능하고(#118) 유일성도 이름 정책에 묶여 있어
+  //    식별자가 아니다. 판정이 어긋나면 판매자에게 구매 UI가 뜨거나 판매자 액션이 사라진다.
+  const isOwnAuction = member?.id != null && member.id === sellerId;
   const floor = startPrice;
   // 상한이 없어졌으므로 범위 이탈은 「최소가 미만」과 「단위 어긋남」 둘뿐이다.
   const outOfRange = amount < floor || amount % OFFER_UNIT !== 0;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { mediaUrl } from "@/lib/api";
 import { countdownLevel, countdownLevelAt, formatRemaining, type CountdownLevel } from "@/lib/countdown";
@@ -20,7 +20,9 @@ import type { AuctionResponse } from "@/lib/types";
  */
 
 const AUTO_MS = 5000;
-const SWIPE_PX = 40;
+// 조작 뒤 쉬는 시간. 스와이프는 넘기려는 뜻이라 짧게, 도트는 「이걸 보겠다」라 길게 쉰다.
+const PAUSE_AFTER_SWIPE_MS = 8000;
+const PAUSE_AFTER_DOT_MS = 15000;
 
 // 별 산포 — 순장식(aria-hidden). 플랫하게 점만 찍는다(그라데이션·글로우 금지).
 const STARS: { top: string; left: string; size: number; color: string }[] = [
@@ -152,7 +154,9 @@ function AuctionSlide({ auction }: { auction: AuctionResponse }) {
           제안하러 가기 →
         </Link>
       </div>
-      <div className="aspect-[4/5] w-[108px] flex-shrink-0 overflow-hidden rounded-[12px] border border-white/15 bg-white/[0.06]">
+      {/* 3:4 · 118px(#550). 예전 108×135(4:5)는 텍스트 열보다 짧아 오른쪽 아래가 비었고,
+          목록 카드(3:4)와도 비율이 달라 같은 사진이 다르게 잘렸다. */}
+      <div className="aspect-[3/4] w-[118px] flex-shrink-0 overflow-hidden rounded-[6px] border border-white/15 bg-white/[0.06]">
         {auction.representativeThumbnailUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
           <img
@@ -180,9 +184,21 @@ export default function MobilePromoBanner({ featured }: { featured: AuctionRespo
   const promoted = featured.slice(0, 3);
   const total = promoted.length + 1;
   const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const touchStartX = useRef<number | null>(null);
+  // 화면 밖이면 넘기지 않는다 — 아무도 안 보는 배너가 혼자 돌 이유가 없다.
+  const [visible, setVisible] = useState(true);
+  /*
+    조작 뒤 「언제까지 쉴지」를 시각으로 들고 있다(#550).
+
+    예전에는 boolean 하나였고 `onTouchStart`에서 켜기만 하고 끄는 곳이 없었다 — 세로로 스크롤하려고
+    배너를 스치기만 해도 그 세션 동안 자동 넘김이 끝났다. 조작과 통과를 구분하지 못한 것이다.
+  */
+  const [pausedUntil, setPausedUntil] = useState(0);
+  const pagerRef = useRef<HTMLDivElement>(null);
+  // 프로그램 스크롤(자동 넘김·도트) 중에는 onScroll이 중간 위치를 읽지 않게 잠근다.
+  const navLock = useRef(false);
+  const navTarget = useRef(0);
+  const navTimer = useRef(0);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -192,40 +208,70 @@ export default function MobilePromoBanner({ featured }: { featured: AuctionRespo
     return () => mq.removeEventListener("change", sync);
   }, []);
 
-  // 자동 전환 5초. 사용자가 한 번이라도 조작하면 멈춘다 — 읽는 중에 화면이 넘어가지 않게.
   useEffect(() => {
-    if (total < 2 || paused || reduceMotion) return;
-    const id = setTimeout(() => setIndex((v) => (v + 1) % total), AUTO_MS);
-    return () => clearTimeout(id);
-  }, [index, total, paused, reduceMotion]);
+    const el = pagerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { threshold: 0.35 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
-  function goTo(next: number) {
-    setIndex(((next % total) + total) % total);
-    setPaused(true);
+  const scrollToIndex = useCallback((next: number, smooth: boolean) => {
+    const pager = pagerRef.current;
+    if (!pager) return;
+    const i = ((next % total) + total) % total;
+    const left = i * pager.clientWidth;
+    navLock.current = true;
+    navTarget.current = left;
+    setIndex(i);
+    pager.scrollTo({ left, behavior: smooth ? "smooth" : "auto" });
+    // 잠금은 도착하면 풀린다(onPagerScroll). 타이머는 도착 이벤트가 오지 않을 때의 안전장치다.
+    window.clearTimeout(navTimer.current);
+    navTimer.current = window.setTimeout(() => {
+      navLock.current = false;
+    }, 1200);
+  }, [total]);
+
+  // 자동 전환. 쉬는 중이면 남은 시간만큼 미뤘다가 다시 잡는다 — 멈추는 게 아니라 미루는 것이다.
+  useEffect(() => {
+    if (total < 2 || reduceMotion || !visible) return;
+    const delay = Math.max(AUTO_MS, pausedUntil - Date.now());
+    const id = setTimeout(() => scrollToIndex(index + 1, true), delay);
+    return () => clearTimeout(id);
+  }, [index, total, reduceMotion, visible, pausedUntil, scrollToIndex]);
+
+  const goTo = useCallback((next: number) => {
+    setPausedUntil(Date.now() + PAUSE_AFTER_DOT_MS);
+    scrollToIndex(next, true);
+  }, [scrollToIndex]);
+
+  // 네이티브 스냅이 정착한 지점을 읽는다. 손으로 넘긴 것이면 잠깐 쉰다.
+  function onPagerScroll(e: React.UIEvent<HTMLDivElement>) {
+    const el = e.currentTarget;
+    if (navLock.current) {
+      // 목적지에 닿는 순간 잠금을 푼다. 시간으로 풀면 기기가 느릴 때 이동 중 위치를 손조작으로 읽는다.
+      if (Math.abs(el.scrollLeft - navTarget.current) < 2) navLock.current = false;
+      return;
+    }
+    const next = Math.round(el.scrollLeft / el.clientWidth);
+    if (next !== index && next >= 0 && next < total) {
+      setIndex(next);
+      setPausedUntil(Date.now() + PAUSE_AFTER_SWIPE_MS);
+    }
   }
 
   return (
-    <section
-      aria-roledescription="carousel"
-      aria-label="메인 배너"
-      className="relative overflow-hidden bg-deepspace"
-      onTouchStart={(e) => {
-        touchStartX.current = e.touches[0].clientX;
-        setPaused(true);
-      }}
-      onTouchEnd={(e) => {
-        if (touchStartX.current === null) return;
-        const dx = e.changedTouches[0].clientX - touchStartX.current;
-        if (Math.abs(dx) > SWIPE_PX) goTo(index + (dx < 0 ? 1 : -1));
-        touchStartX.current = null;
-      }}
-    >
+    <section aria-roledescription="carousel" aria-label="메인 배너" className="relative bg-deepspace">
+      {/*
+        네이티브 가로 스크롤 스냅(#550). 예전에는 `translateX`와 좌표 직접 판정이라 **축 잠금이
+        없었다** — 배너를 옆으로 넘기는 동안 세로 스크롤이 같이 움직였다. 네이티브 스크롤은 첫
+        제스처의 축을 브라우저가 잠근다. 매물 상세 갤러리(#478)가 같은 이유로 쓰는 방식이다.
+      */}
       <div
-        className="flex w-full"
-        style={{
-          transform: `translateX(-${index * 100}%)`,
-          transition: reduceMotion ? "none" : "transform 420ms cubic-bezier(0.22, 1, 0.36, 1)",
-        }}
+        ref={pagerRef}
+        onScroll={onPagerScroll}
+        className="flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        style={{ touchAction: "pan-x pan-y", scrollBehavior: reduceMotion ? "auto" : undefined }}
       >
         {Array.from({ length: total }, (_, i) => (
           <div
@@ -233,8 +279,7 @@ export default function MobilePromoBanner({ featured }: { featured: AuctionRespo
             role="group"
             aria-roledescription="slide"
             aria-label={`${i + 1} / ${total}`}
-            aria-hidden={i !== index}
-            className="box-border w-full min-w-full flex-[0_0_100%] px-5 pb-11 pt-[26px]"
+            className="box-border w-full min-w-full flex-[0_0_100%] snap-center snap-always px-5 pb-11 pt-[26px]"
           >
             {i === 0 ? <BrandSlide /> : <AuctionSlide auction={promoted[i - 1]} />}
           </div>
@@ -242,7 +287,7 @@ export default function MobilePromoBanner({ featured }: { featured: AuctionRespo
       </div>
 
       {total > 1 && (
-        <div className="absolute bottom-3.5 left-5 flex gap-1.5">
+        <div className="absolute bottom-3.5 left-1/2 flex -translate-x-1/2 gap-1.5">
           {Array.from({ length: total }, (_, i) => (
             <button
               key={i}

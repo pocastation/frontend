@@ -222,12 +222,14 @@ export default function NotificationsPage() {
                   <button
                     type="button"
                     onClick={() => handleClick(notification)}
-                    className={`flex w-full items-center gap-3 p-4 text-left transition-colors hover:bg-surface-2/60 ${FOCUS_RING} ${
+                    // 세 줄까지 늘어나는 본문에 맞춰 위쪽 정렬이다(#557). 가운데 정렬이면 긴 알림에서
+                    // 아이콘과 안읽음 닷이 본문 한가운데에 떠 어느 줄에 걸린 표시인지 읽히지 않는다.
+                    className={`flex w-full items-start gap-3 p-4 text-left transition-colors hover:bg-surface-2/60 ${FOCUS_RING} ${
                       unread ? "bg-surface" : "bg-surface-2/40"
                     }`}
                   >
                     <span
-                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[20px] ${STATUS_TONE_CLASS[meta.tone]} ${unread ? "" : "opacity-70"}`}
+                      className={`mt-px flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[20px] ${STATUS_TONE_CLASS[meta.tone]} ${unread ? "" : "opacity-70"}`}
                       aria-label={meta.label}
                     >
                       <StatusGlyph name={meta.icon} />
@@ -241,11 +243,19 @@ export default function NotificationsPage() {
                           {formatRelativeTime(notification.createdAt)}
                         </span>
                       </span>
-                      <span className={`mt-0.5 block truncate text-[13px] leading-relaxed ${unread ? "text-text-2" : "text-text-3"}`}>
+                      {/*
+                        세 줄까지 편다(#557). 한 줄로 자르던 시절엔 알림 21종 중 한 줄에 들어가는 것이
+                        하나도 없었다 — 375px에서 26자까지 들어가는데 문구 중앙값이 39자다. 다 읽으려고
+                        탭하면 관련 화면으로 넘어가 버려서 본문을 끝까지 읽을 경로가 없었다.
+
+                        두 줄이 아닌 이유는 남는 셋이 하필 자동 구매확정 3일·자동 환불 3영업일·
+                        미결제 제재 7일이어서다. 분쟁 소재가 되는 값이라 화면에서 빼지 않는다.
+                      */}
+                      <span className={`mt-0.5 line-clamp-3 text-[13px] leading-relaxed ${unread ? "text-text-2" : "text-text-3"}`}>
                         {notification.message}
                       </span>
                     </span>
-                    {unread && <span className="h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />}
+                    {unread && <span className="mt-[7px] h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />}
                   </button>
                 </li>
               );

@@ -330,8 +330,9 @@ export default function MobileAuctionDetail({
           매물에서 바가 통째로 사라져 관심(찜)을 누를 방법이 없었다. 관심은 언제나 살리고,
           제안 CTA만 상태 문구로 잠근다 — 왜 제안이 안 되는지도 그 자리에서 설명된다. */}
       <div
-        className="fixed inset-x-0 bottom-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 sm:hidden"
-        style={{ paddingBottom: "calc(10px + env(safe-area-inset-bottom))" }}
+        className="fixed inset-x-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 pb-2.5 sm:hidden"
+        // 하단 5탭 위에 쌓인다(#554). 탭이 없는 화면에서는 safe-area 위에 앉는다.
+        style={{ bottom: "var(--mobile-tabbar-h, env(safe-area-inset-bottom))" }}
       >
         <AuctionWishlistButton
           auctionId={auctionId}

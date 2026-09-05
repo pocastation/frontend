@@ -1024,7 +1024,7 @@ function MyPageBody() {
   // 워드마크 바 + 하단 5탭)을 쓰고, 나머지 탭은 **서브 화면**이라 앱바 하나로 들어가고 나온다.
   // 데스크탑에서는 둘 다 `sm:hidden`으로 접히므로 본문 트리는 그대로 하나다.
   if (tab === null || tab === "wishlist") {
-    return <MobileShell active={tab === "wishlist" ? "관심" : "마이"}>{body}</MobileShell>;
+    return <MobileShell>{body}</MobileShell>;
   }
   return (
     <>

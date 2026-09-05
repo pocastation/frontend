@@ -89,7 +89,7 @@ export default async function Home() {
 
   return (
     // 모바일(sm 미만)에서는 앱 셸이 크롬을 대신한다 — 상단바 48px + 하단 5탭.
-    <MobileShell active="홈">
+    <MobileShell>
       {/*
        * 모바일과 데스크탑은 **블록 구성 자체가 다른 화면**이라 트리를 둘 다 담고 CSS로 가른다
        * (배너 캐러셀·회색 띠·랭킹은 모바일만, 티커·정렬 칩은 데스크탑만).

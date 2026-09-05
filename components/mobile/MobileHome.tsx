@@ -71,7 +71,7 @@ export default function MobileHome({
       <MobilePromoBanner featured={featured} />
 
       <section className="px-[14px] pt-[18px]">
-        <SectionHead title="마감임박" href="/auctions?sort=ending_soon" />
+        <SectionHead title="제안판매" href="/auctions?sort=ending_soon" />
         {endingSoon.length > 0 ? (
           <Grid>
             {endingSoon.map((auction) => (
@@ -94,7 +94,7 @@ export default function MobileHome({
       </div>
 
       <section className="px-[14px] pb-6 pt-[18px]">
-        <SectionHead title="바로 살 수 있어요" href="/instant-sales" />
+        <SectionHead title="즉시판매" href="/instant-sales" />
         {instantSales.length > 0 ? (
           <Grid>
             {instantSales.map((auction) => (

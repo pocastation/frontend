@@ -41,9 +41,11 @@ export default function StickyApplyBar() {
 
   return (
     <div
-      className={`fixed inset-x-0 bottom-0 z-50 border-t border-border bg-white px-4 py-3 transition-transform sm:hidden ${
+      className={`fixed inset-x-0 z-50 border-t border-border bg-white px-4 py-3 transition-transform sm:hidden ${
         visible ? "translate-y-0" : "translate-y-full"
       }`}
+      // 하단 5탭 위에 쌓인다(#554).
+      style={{ bottom: "var(--mobile-tabbar-h, 0px)" }}
       // 화면 밖으로 내려가 있을 때는 보조기기·키보드 탐색에서도 빠져야 한다.
       aria-hidden={!visible}
     >

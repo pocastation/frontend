@@ -716,9 +716,11 @@ function MyPageBody() {
       </aside>
 
       {/* 탭 본문 — 데스크탑은 늘, 모바일은 `?tab=`으로 열렸을 때만 보인다(트리는 한 벌). */}
+      {/* 꼬리 여백 32px(#548). 없을 때는 본문 마지막 줄이 푸터 경계선에 그대로 붙었다(실측 0px).
+          모바일에만 준다. 데스크탑은 좌우 여백이 있어 경계가 이미 읽힌다. */}
       <div
         ref={contentRef}
-        className={`scroll-mt-4 px-3.5 pt-3.5 sm:px-0 sm:pt-0 ${tab === null ? "hidden sm:block" : ""}`}
+        className={`scroll-mt-4 px-3.5 pb-8 pt-3.5 sm:px-0 sm:pb-0 sm:pt-0 ${tab === null ? "hidden sm:block" : ""}`}
       >
         {error && (
           <p role="alert" className="mb-4 rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
@@ -1022,7 +1024,7 @@ function MyPageBody() {
   // 워드마크 바 + 하단 5탭)을 쓰고, 나머지 탭은 **서브 화면**이라 앱바 하나로 들어가고 나온다.
   // 데스크탑에서는 둘 다 `sm:hidden`으로 접히므로 본문 트리는 그대로 하나다.
   if (tab === null || tab === "wishlist") {
-    return <MobileShell active={tab === "wishlist" ? "관심" : "마이"}>{body}</MobileShell>;
+    return <MobileShell>{body}</MobileShell>;
   }
   return (
     <>

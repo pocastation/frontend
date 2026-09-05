@@ -298,7 +298,7 @@ export default function NewAuctionPage() {
   }
 
   // 각 스텝의 필수값이 채워졌는지 — 안 채워지면 "다음"/"등록" 비활성.
-  // 최소 제안가·즉시판매가: 최저 5,000원 + 500원 단위(§12.1, BE와 동일 규칙).
+  // 최소 제안가·즉시판매가: 최저 500원 + 500원 단위(§12.1, BE와 동일 규칙).
   const priceValid =
     startPrice.trim() !== "" &&
     Number.isFinite(Number(startPrice)) &&

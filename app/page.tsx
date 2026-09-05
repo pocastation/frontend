@@ -1,5 +1,6 @@
 import AuctionExplorer from "@/components/AuctionExplorer";
 import Hero from "@/components/Hero";
+import HomeRanking from "@/components/HomeRanking";
 import MobileHome from "@/components/mobile/MobileHome";
 import MobileShell from "@/components/mobile/MobileShell";
 import { apiFetch } from "@/lib/api";
@@ -88,7 +89,7 @@ export default async function Home() {
 
   return (
     // 모바일(sm 미만)에서는 앱 셸이 크롬을 대신한다 — 상단바 48px + 하단 5탭.
-    <MobileShell active="홈">
+    <MobileShell>
       {/*
        * 모바일과 데스크탑은 **블록 구성 자체가 다른 화면**이라 트리를 둘 다 담고 CSS로 가른다
        * (배너 캐러셀·회색 띠·랭킹은 모바일만, 티커·정렬 칩은 데스크탑만).
@@ -115,6 +116,8 @@ export default async function Home() {
           description="마감까지 기다리지 않고 바로 구매할 수 있는 포토카드"
           viewAllHref="/instant-sales"
         />
+        {/* 랭킹은 모바일 홈에만 있었다(#548). 데스크탑에서도 볼 수 있게 같은 집계로 블록을 둔다. */}
+        <HomeRanking auctions={popular?.content ?? []} sellers={popularSellers} />
       </div>
     </MobileShell>
   );

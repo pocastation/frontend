@@ -1,4 +1,6 @@
+import Link from "next/link";
 import Wordmark from "@/components/Wordmark";
+import { FOCUS_RING } from "@/lib/ui";
 import { BUSINESS_INFO, INTERMEDIARY_NOTICE } from "@/lib/business";
 
 // 🔴 `mobileHidden`은 모바일 폭에서 그 그룹을 감춘다(#399).
@@ -85,12 +87,10 @@ export default function Footer() {
     <footer className="border-t border-border bg-footer px-4 pb-7 pt-12 text-text-2 max-sm:pb-[calc(104px+env(safe-area-inset-bottom))]">
       <div className="mx-auto grid max-w-[1160px] grid-cols-2 gap-10 sm:grid-cols-4">
         <div>
-          <div className="mb-3">
+          {/* 로고는 홈으로 가는 길이다(#548). 헤더 워드마크와 같은 동작. */}
+          <Link href="/" aria-label="포카스테이션 홈" className={`inline-block ${FOCUS_RING}`}>
             <Wordmark className="text-[22px] leading-none" />
-          </div>
-          <p className="max-w-[22ch] text-xs leading-relaxed text-text-3">
-            K-pop 포토카드 특화 거래 플랫폼
-          </p>
+          </Link>
         </div>
         {FOOTER_COLUMNS.map((column) => (
           <div key={column.title} className={"mobileHidden" in column && column.mobileHidden ? "max-sm:hidden" : undefined}>

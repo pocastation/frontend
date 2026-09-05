@@ -33,7 +33,7 @@ export default async function InstantSalesPage() {
   const totalPages = sales?.totalPages ?? 0;
 
   return (
-    <MobileShell active="거래">
+    <MobileShell>
       <div className="sm:hidden">
         <MobileBrowse
           initialAuctions={content}

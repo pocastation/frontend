@@ -93,10 +93,12 @@ export default function AuctionExplorer({
   }, [saleType, sortBy]);
 
   const sortOptions = saleType === "INSTANT" ? INSTANT_SORT_OPTIONS : SORT_OPTIONS;
-  const heading = title ?? (saleType === "INSTANT" ? "즉시판매" : "진행 중인 매물");
+  // 홈의 두 블록은 판매 방식 이름을 그대로 쓴다(#548). 「진행 중인 매물」은 즉시판매도
+  // 진행 중이라 이름으로 두 블록을 가르지 못했다. 모바일 홈도 같은 이름을 쓴다.
+  const heading = title ?? (saleType === "INSTANT" ? "즉시판매" : "제안판매");
   // 섹션 부제(제목 바로 아래). 건수는 노출하지 않는다.
   const subcopy = description ?? (saleType === "INSTANT" ? "기다리지 않고 바로 구매할 수 있는 포토카드" : "실시간 업데이트 · 지금 바로 확인하세요");
-  const emptyTitle = saleType === "INSTANT" ? "등록된 즉시판매가 없습니다" : "진행 중인 매물이 없습니다";
+  const emptyTitle = saleType === "INSTANT" ? "등록된 즉시판매가 없습니다" : "진행 중인 제안판매가 없습니다";
   const allHref = viewAllHref ?? (saleType === "INSTANT" ? "/instant-sales" : "/auctions");
 
   useEffect(() => {

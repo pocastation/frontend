@@ -259,7 +259,8 @@ export default function MobileInstantDetail({
       */}
       {showBar && isOwnSale && isLive && (
         <div
-          className="fixed inset-x-0 bottom-0 z-[400] border-t border-border bg-white px-4 pb-[calc(10px+env(safe-area-inset-bottom))] sm:hidden"
+          className="fixed inset-x-0 z-[400] border-t border-border bg-white px-4 pb-2.5 sm:hidden"
+          style={{ bottom: "var(--mobile-tabbar-h, env(safe-area-inset-bottom))" }}
         >
           <SellerListingActions
             auctionId={auction.id}
@@ -274,8 +275,8 @@ export default function MobileInstantDetail({
 
       {showBar && !(isOwnSale && isLive) && (
         <div
-          className="fixed inset-x-0 bottom-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 sm:hidden"
-          style={{ paddingBottom: "calc(10px + env(safe-area-inset-bottom))" }}
+          className="fixed inset-x-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 pb-2.5 sm:hidden"
+          style={{ bottom: "var(--mobile-tabbar-h, env(safe-area-inset-bottom))" }}
         >
           <AuctionWishlistButton
             auctionId={auction.id}

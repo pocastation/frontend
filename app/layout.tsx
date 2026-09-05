@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_KR, Plus_Jakarta_Sans } from "next/font/google";
 import Header from "@/components/Header";
@@ -12,6 +13,7 @@ import { AuthProvider } from "@/lib/auth-context";
 import { WishlistProvider } from "@/lib/wishlist-context";
 import { NotificationProvider } from "@/lib/notification-context";
 import { ToastProvider } from "@/lib/toast-context";
+import MobileTabBar from "@/components/mobile/MobileTabBar";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL, X_HANDLE } from "@/lib/site";
 import "./globals.css";
 
@@ -123,6 +125,12 @@ export default function RootLayout({
                     우리보다 3.6배 긴 푸터(모바일 1,961px)를 전 화면에 단다.
                     모바일에서 지면을 아끼는 일은 Footer 자신이 한다(사이트맵 링크를 감춘다). */}
                 <Footer />
+                {/* 모바일 하단 5탭(#554). 푸터 다음에 둬야 스페이서가 흐름 맨 끝에 온다 —
+                    셸 안에 있던 시절엔 스페이서가 푸터 위였고, 푸터 끝이 탭 뒤로 숨었다.
+                    useSearchParams를 쓰므로 Suspense로 감싼다. */}
+                <Suspense fallback={null}>
+                  <MobileTabBar />
+                </Suspense>
               </ToastProvider>
             </WishlistProvider>
           </NotificationProvider>

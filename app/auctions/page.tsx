@@ -36,7 +36,7 @@ export default async function AuctionsPage({
   return (
     // 모바일과 데스크탑은 지면 구성이 다르다 — 상단 언더라인 탭·정렬 칩 가로스크롤은 모바일만,
     // 큰 제목·넓은 그리드는 데스크탑만. 데이터는 위에서 한 번만 가져와 양쪽에 넘긴다.
-    <MobileShell active="거래">
+    <MobileShell>
       <div className="sm:hidden">
         <MobileBrowse
           key={query}

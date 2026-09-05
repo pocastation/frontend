@@ -7,7 +7,9 @@ import { useAuth } from "@/lib/auth-context";
 import { INPUT_CLASS } from "@/lib/ui";
 
 // 계정 설정 탭 — 현재는 회원 탈퇴만. 파괴적·비가역 액션이라 "탈퇴"를 직접 입력해야 버튼이 열린다
-// (비밀번호 입력은 받지 않는다). 성공하면 서버가 프로필을 가명화하고 세션을 폐기하므로 홈으로 보낸다.
+// (비밀번호 입력은 받지 않는다). 성공하면 서버가 프로필을 가명화하고 세션을 폐기하므로 완료 화면으로 보낸다(#567).
+// 예전 목적지 `/?withdrawn=1`은 읽는 코드가 없었고, 로그인 상태가 풀리는 순간 마이페이지 가드가
+// `/login`으로 먼저 보내 버려 방금 탈퇴한 사람이 로그인 폼을 봤다 — 가드는 auth-context의 isWithdrawing이 막는다.
 export default function SettingsTab() {
   const router = useRouter();
   const { withdraw } = useAuth();
@@ -24,7 +26,7 @@ export default function SettingsTab() {
     setError(null);
     try {
       await withdraw();
-      router.replace("/?withdrawn=1");
+      router.replace("/withdrawn");
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "탈퇴 처리에 실패했어요. 잠시 후 다시 시도해 주세요.");
       setIsSubmitting(false);

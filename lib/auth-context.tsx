@@ -26,6 +26,8 @@ type AuthContextValue = {
   // 재동의(#219, BE #198) — 동의 기록이 없는 기존 회원이 동의만 다시 낸다(닉네임은 건드리지 않는다).
   recordConsents: (payload: ConsentPayload) => Promise<void>;
   withdraw: () => Promise<void>;
+  // 탈퇴가 성공해 로그인 상태가 풀리는 중(#567). 마이페이지 가드가 이 동안은 로그인으로 보내지 않는다.
+  isWithdrawing: boolean;
   fetchWithAuth: <T>(path: string, options?: ApiFetchOptions) => Promise<T>;
   fetchMultipartWithAuth: <T>(path: string, formData: FormData) => Promise<T>;
   fetchBlobWithAuth: (path: string) => Promise<Blob>;
@@ -101,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [member, setMember] = useState<MemberResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   const fetchMe = useCallback(async (token: string) => {
     const me = await apiFetch<MemberResponse>("/api/members/me", { accessToken: token });
@@ -178,6 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       setAccessToken(tokens.accessToken);
       await fetchMe(tokens.accessToken);
+      setIsWithdrawing(false); // 같은 세션에서 다른 계정으로 다시 들어오면 가드는 평소대로 돌아간다.
     },
     [fetchMe],
   );
@@ -305,9 +309,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const withdraw = useCallback(async () => {
+    // 탈퇴 진행 표시(#567) — 성공 뒤 로그인 상태가 풀리는 순간 마이페이지의 비로그인 가드가
+    // /login으로 보내 버린다. 이 플래그가 켜져 있는 동안은 가드가 물러서고, 호출측이 완료 화면으로 옮긴다.
+    setIsWithdrawing(true);
     // 서버가 프로필을 가명화하고 리프레시 토큰을 폐기한다(backend #120). 진행 중 거래가 있으면
     // 409를 던져 호출측(SettingsTab)이 사유를 표시한다.
-    await fetchWithAuth<void>("/api/members/me", { method: "DELETE" });
+    try {
+      await fetchWithAuth<void>("/api/members/me", { method: "DELETE" });
+    } catch (err) {
+      setIsWithdrawing(false); // 실패했으면 회원은 그대로다 — 가드도 평소대로 돌아간다.
+      throw err;
+    }
     // 세션 쿠키는 서버만 지울 수 있어 로그아웃을 best-effort로 호출(토큰은 이미 폐기됨)한 뒤
     // 클라 상태를 정리한다.
     try {
@@ -332,6 +344,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         completeOnboarding,
         recordConsents,
         withdraw,
+        isWithdrawing,
         fetchWithAuth,
         fetchMultipartWithAuth,
         fetchBlobWithAuth,

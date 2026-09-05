@@ -127,7 +127,12 @@ a {
   text-decoration: none;
 }
 
-button {
+/*
+  비활성 버튼은 제외한다(#560). 이 규칙은 Tailwind의 레이어 **밖**에 있어, 캐스케이드 레이어
+  규칙상 `cursor-not-allowed` 같은 유틸리티보다 특이도와 무관하게 이긴다 — 레포 13곳의
+  `cursor-not-allowed`가 전부 무효였다. 여기서 :disabled를 빼면 그 전부가 살아난다.
+*/
+button:not(:disabled) {
   cursor: pointer;
 }
 

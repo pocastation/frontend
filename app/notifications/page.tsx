@@ -173,16 +173,27 @@ export default function NotificationsPage() {
     );
   }
 
-  // 데스크탑 헤더와 모바일 앱바가 같은 버튼을 쓴다 — 한쪽만 고쳐 동작이 갈리는 일을 막는다.
-  const markAllReadButton = hasUnread ? (
+  /*
+    데스크탑 헤더와 모바일 앱바가 같은 버튼을 쓴다 — 한쪽만 고쳐 동작이 갈리는 일을 막는다.
+
+    안읽음이 0이어도 버튼을 지우지 않고 비활성으로 둔다(#560). 사라지던 시점이 하필 「방금 알림을
+    누른 뒤」였다 — 목록에서 탭하면 읽음 처리되고 관련 화면으로 넘어가므로, 몇 개 보고 돌아오면
+    버튼이 없어져 있다. 도구가 인과 없이 사라지면 사용자는 자기가 잘못 본 것으로 받아들인다.
+  */
+  const markAllReadButton = (
     <button
       type="button"
       onClick={handleMarkAllRead}
-      className={`shrink-0 rounded-full border border-border-2 bg-white px-3.5 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+      disabled={!hasUnread}
+      className={`shrink-0 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold transition-colors ${FOCUS_RING} ${
+        hasUnread
+          ? "border border-border-2 text-text-2 hover:border-primary hover:text-primary"
+          : "cursor-not-allowed border border-border text-text-3"
+      }`}
     >
       모두 읽음
     </button>
-  ) : null;
+  );
 
   return (
     <>

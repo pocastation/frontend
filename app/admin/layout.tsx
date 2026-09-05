@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { FOCUS_RING } from "@/lib/ui";
 import type { MemberResponse } from "@/lib/types";
+import { useDialogFocus } from "@/lib/use-dialog-focus";
+import "./admin.css";
 
 function isAdmin(member: MemberResponse | null): boolean {
   return member?.role === "ADMIN" || member?.role === "ROLE_ADMIN";
@@ -176,9 +179,6 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
-// 모바일 탭바·활성 판정에 쓰는 평탄화 목록.
-const READY_NAV: NavItem[] = NAV_GROUPS.flatMap((group) => group.items).filter((item) => item.ready);
-
 function NavLink({ item, active }: { item: NavItem; active: boolean }) {
   const base = "flex items-center gap-2.5 rounded-r2 px-2.5 py-2 text-sm font-bold transition-colors";
   if (!item.ready) {
@@ -197,6 +197,7 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
   return (
     <Link
       href={item.href}
+      aria-current={active ? "page" : undefined}
       className={`${base} ${FOCUS_RING} ${active ? "bg-primary-soft text-primary" : "text-text-2 hover:bg-surface-2"}`}
     >
       {item.icon}
@@ -210,6 +211,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const { accessToken, member, isLoading } = useAuth();
   const admin = isAdmin(member);
+  const [menuPath, setMenuPath] = useState<string | null>(null);
+  const menuOpen = menuPath === pathname && admin && !isLoading;
+  const menuRef = useRef<HTMLDivElement>(null);
+  useDialogFocus(menuRef, menuOpen, () => setMenuPath(null));
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const closeOnDesktop = () => { if (desktop.matches) setMenuPath(null); };
+    desktop.addEventListener("change", closeOnDesktop);
+    return () => desktop.removeEventListener("change", closeOnDesktop);
+  }, []);
 
   useEffect(() => {
     if (isLoading) return;
@@ -256,31 +268,17 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   // 무제한으로 풀지는 않는다 — 2560 울트라와이드에서 표가 2300px로 늘어나면 눈이 좌우로 너무
   // 멀리 가 밀도가 아니라 피로가 된다. 마이페이지는 사용자 화면이라 1160px 상한을 그대로 둔다.
   return (
-    <div className="mx-auto max-w-[1720px] px-4 py-6 sm:py-8">
-      {/* 모바일 내비 — 사이드바가 lg 미만에서 숨겨지므로, 사용 가능한 운영 메뉴를 가로 스크롤
-          탭바로 제공해 모바일에서도 섹션 이동이 되게 한다. */}
-      <nav
-        aria-label="관리자 메뉴"
-        className="mb-4 flex gap-2 overflow-x-auto pb-1 lg:hidden"
-      >
-        {READY_NAV.map((item) => {
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              aria-current={active ? "page" : undefined}
-              className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold transition-colors ${FOCUS_RING} ${
-                active ? "border-primary bg-primary text-white" : "border-border bg-surface text-text-2"
-              }`}
-            >
-              {item.icon}
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
-
+    <>
+      <header className="admin-mobile-head sticky top-0 z-[300] flex h-13 items-center justify-between border-b border-border bg-white px-3 lg:hidden">
+        <Link href="/mypage" className={`flex min-h-11 items-center gap-1 text-[13px] font-bold text-text-2 ${FOCUS_RING}`}>
+          <span aria-hidden="true">‹</span> 마이
+        </Link>
+        <span className="text-sm font-bold text-text-1">관리자</span>
+        <button type="button" aria-expanded={menuOpen} aria-controls="admin-mobile-menu" onClick={() => setMenuPath(pathname)} className={`min-h-11 px-1 text-[13px] font-bold text-text-2 ${FOCUS_RING}`}>
+          전체 메뉴 <span aria-hidden="true">☰</span>
+        </button>
+      </header>
+      <div className="mx-auto max-w-[1720px] px-4 py-6 sm:py-8">
       <div className="flex gap-6">
         <aside className="hidden w-[220px] shrink-0 lg:block">
           <div className="sticky top-20 rounded-r3 border border-border bg-surface p-2">
@@ -298,8 +296,29 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
           </div>
         </aside>
 
-        <div className="min-w-0 flex-1">{children}</div>
+        <div className="admin-content min-w-0 flex-1">{children}</div>
       </div>
-    </div>
+      </div>
+      {menuOpen && createPortal(
+        <div ref={menuRef} id="admin-mobile-menu" role="dialog" aria-modal="true" aria-labelledby="admin-mobile-menu-title" tabIndex={-1} className="admin-mobile-menu fixed inset-0 z-[350] flex flex-col bg-white lg:hidden">
+          <div className="flex h-13 shrink-0 items-center justify-between border-b border-border px-4">
+            <Link href="/mypage" onClick={() => setMenuPath(null)} className={`flex min-h-11 items-center text-[13px] font-bold text-text-2 ${FOCUS_RING}`}>‹ 마이</Link>
+            <span className="text-sm font-bold">관리자</span>
+            <button type="button" onClick={() => setMenuPath(null)} className={`min-h-11 px-2 text-[13px] font-bold ${FOCUS_RING}`} aria-label="관리자 메뉴 닫기">닫기 ×</button>
+          </div>
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-5">
+            <h2 id="admin-mobile-menu-title" className="text-xl font-extrabold">전체 메뉴</h2>
+            {NAV_GROUPS.map((group) => (
+              <section key={group.title} className="mt-5">
+                <h3 className="mb-1 px-2.5 text-xs font-bold text-text-3">{group.title}</h3>
+                <nav aria-label={`${group.title} 메뉴`} onClick={(event) => { if ((event.target as HTMLElement).closest("a")) setMenuPath(null); }}>
+                  {group.items.map((item) => <NavLink key={item.href} item={item} active={item.ready && isActive(item.href)} />)}
+                </nav>
+              </section>
+            ))}
+          </div>
+        </div>, document.body,
+      )}
+    </>
   );
 }

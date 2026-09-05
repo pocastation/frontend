@@ -105,13 +105,14 @@ export default function AdminReviewsPage() {
 
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {item.reports.map((rep, i) => (
-                  <span
+                  <div
                     key={i}
-                    className="rounded-full border border-border px-2 py-0.5 text-[11px] font-semibold text-text-2"
+                    className="rounded-full border border-border px-2 py-0.5 text-[11px] font-semibold text-text-2 max-lg:w-full max-lg:rounded-r1 max-lg:py-1"
                     title={rep.detail ?? undefined}
                   >
                     {REVIEW_REPORT_REASON_LABEL[rep.reasonCode]}
-                  </span>
+                    {rep.detail && <p className="mt-1 whitespace-pre-wrap text-xs font-normal text-text-2 lg:hidden">{rep.detail}</p>}
+                  </div>
                 ))}
               </div>
 

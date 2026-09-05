@@ -129,7 +129,7 @@ export default function AdminBannerPage() {
         ) : (
           <ul className="divide-y divide-border">
             {items.map((item, i) => (
-              <li key={item.id} className="flex items-center gap-3.5 px-4 py-3.5">
+              <li key={item.id} className="admin-banner-row flex items-center gap-3.5 px-4 py-3.5">
                 {/* 1번만 보라다. 순위가 아니라 「지금 첫 화면인 것」을 가리키므로 하나면 충분하다. */}
                 <span
                   className={`w-[22px] flex-shrink-0 text-center font-display text-[15px] font-extrabold tabular-nums ${
@@ -149,7 +149,7 @@ export default function AdminBannerPage() {
                     />
                   )}
                 </span>
-                <span className="min-w-0 flex-1">
+                <span className="admin-banner-identity min-w-0 flex-1">
                   {item.artistName && (
                     <span className="block truncate text-[11px] font-extrabold text-text-3">{item.artistName}</span>
                   )}
@@ -163,6 +163,7 @@ export default function AdminBannerPage() {
                     제안 {item.bidCount}회{item.endAt && ` · 마감 ${formatTimeLeft(item.endAt)}`}
                   </span>
                 </span>
+                <div className="admin-banner-actions flex items-center gap-3.5">
                 <span className="flex-shrink-0 text-right text-[13px]">
                   <b className="block font-display font-extrabold tabular-nums">{formatKRW(item.currentPrice)}</b>
                   <span className="block text-[11px] font-medium text-text-3">최소가</span>
@@ -179,6 +180,7 @@ export default function AdminBannerPage() {
                 >
                   내리기
                 </button>
+                </div>
               </li>
             ))}
           </ul>

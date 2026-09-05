@@ -291,7 +291,21 @@ export default function AdminAuctionsPage() {
             className="w-full border-0 bg-transparent text-[13.5px] text-text-1 outline-none placeholder:text-text-3"
           />
         </label>
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="상태 필터">
+        <div className="grid w-full grid-cols-2 gap-2 lg:hidden">
+          <label className="min-w-0 text-xs font-bold text-text-3">상태
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as AuctionStatus | "ALL")}
+              className={`mt-1 w-full rounded-r1 border border-border bg-surface px-3 text-text-2 ${FOCUS_RING}`}>
+              {STATUS_FILTERS.map((filter) => <option key={filter.key} value={filter.key}>{filter.label}</option>)}
+            </select>
+          </label>
+          <label className="min-w-0 text-xs font-bold text-text-3">판매 유형
+            <select value={saleTypeFilter} onChange={(event) => setSaleTypeFilter(event.target.value as AuctionSaleType | "ALL")}
+              className={`mt-1 w-full rounded-r1 border border-border bg-surface px-3 text-text-2 ${FOCUS_RING}`}>
+              {SALE_TYPE_FILTERS.map((filter) => <option key={filter.key} value={filter.key}>{filter.label}</option>)}
+            </select>
+          </label>
+        </div>
+        <div className="hidden flex-wrap gap-1.5 lg:flex" role="group" aria-label="상태 필터">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.key}
@@ -306,7 +320,7 @@ export default function AdminAuctionsPage() {
             </button>
           ))}
         </div>
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="판매 유형 필터">
+        <div className="hidden flex-wrap gap-1.5 lg:flex" role="group" aria-label="판매 유형 필터">
           {SALE_TYPE_FILTERS.map((f) => (
             <button
               key={f.key}
@@ -325,10 +339,10 @@ export default function AdminAuctionsPage() {
 
       <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
-      <div className="overflow-x-auto rounded-r3 border border-border bg-surface">
+      <div className="admin-table-wrap overflow-x-auto rounded-r3 border border-border bg-surface">
         {/* 유형 컬럼을 제목 아래로 내려 8열 → 7열, 최소폭 980 → 900(#291).
             지면 상한이 1720이라 1440 모니터에서 콘텐츠 1164px — 이제 여유가 264px 있다. */}
-        <table className="w-full min-w-[900px] border-collapse">
+        <table role="table" className="admin-table admin-table-auctions w-full min-w-[900px] border-collapse">
           <thead>
             <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
               <th className="whitespace-nowrap px-4 py-2.5">매물</th>
@@ -382,10 +396,10 @@ export default function AdminAuctionsPage() {
                       </div>
                     )}
                   </td>
-                  <td className="px-4 py-3 text-text-2">{a.sellerNickname ?? "—"}</td>
-                  <td className="whitespace-nowrap px-4 py-3 font-display font-bold text-text-1">{formatKRW(a.currentPrice)}</td>
-                  <td className="whitespace-nowrap px-4 py-3 text-text-2">{a.saleType === "INSTANT" ? "즉시구매" : `${a.bidCount}회`}</td>
-                  <td className="px-4 py-3">
+                  <td data-label="판매자" className="px-4 py-3 text-text-2">{a.sellerNickname ?? "—"}</td>
+                  <td data-label="현재가" className="whitespace-nowrap px-4 py-3 font-display font-bold text-text-1">{formatKRW(a.currentPrice)}</td>
+                  <td data-label="제안" className="whitespace-nowrap px-4 py-3 text-text-2">{a.saleType === "INSTANT" ? "즉시구매" : `${a.bidCount}회`}</td>
+                  <td data-label="상태" className="px-4 py-3">
                     <StatusBadge tone={AUCTION_STATUS_TONE[a.status]}>
                       {AUCTION_STATUS_LABEL[a.status]}
                     </StatusBadge>
@@ -396,7 +410,7 @@ export default function AdminAuctionsPage() {
                       <span className="mt-1 block text-[10.5px] text-text-3">사유: {a.reviewReason}</span>
                     )}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 text-text-3">{getEndLabel(a)}</td>
+                  <td data-label="마감" className="whitespace-nowrap px-4 py-3 text-text-3">{getEndLabel(a)}</td>
                   <td className="whitespace-nowrap px-4 py-3">
                     <div className="flex items-center gap-1.5">
                       <button

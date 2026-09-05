@@ -105,6 +105,7 @@ function Group({ children }: { children: ReactNode }) {
 }
 
 export default function MobileMypageMenu({
+  isAdmin = false,
   nickname,
   trustLevel,
   trustLevelLabel,
@@ -117,6 +118,7 @@ export default function MobileMypageMenu({
   onOpenAddress,
   onLogout,
 }: {
+  isAdmin?: boolean;
   nickname: string;
   trustLevel: number | null;
   trustLevelLabel: string | null;
@@ -197,6 +199,15 @@ export default function MobileMypageMenu({
             </span>
             <span className="flex-shrink-0 rounded-r1 bg-danger px-2.5 py-1.5 text-xs font-extrabold text-white">입력</span>
           </button>
+        </div>
+      )}
+
+      {isAdmin && (
+        <div className="px-[14px] pb-0.5 pt-4">
+          <Link href="/admin" className={`flex min-h-[50px] items-center justify-between rounded-r1 border border-primary px-3.5 text-sm font-bold text-primary ${FOCUS_RING}`}>
+            관리자
+            <Chevron />
+          </Link>
         </div>
       )}
 

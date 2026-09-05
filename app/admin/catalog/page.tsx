@@ -114,6 +114,7 @@ export default function AdminCatalogPage() {
   const [editing, setEditing] = useState<ArtistResponse | null>(null);
   const [editForm, setEditForm] = useState<EditForm | null>(null);
   const [editSubmitting, setEditSubmitting] = useState(false);
+  const [mobileForm, setMobileForm] = useState<"artist" | "idol" | "membership" | null>(null);
 
   const loadOverview = useCallback(async () => {
     setIsDataLoading(true);
@@ -331,7 +332,18 @@ export default function AdminCatalogPage() {
         </div>
       )}
 
-      <section className="mt-6 rounded-r2 border border-border bg-white p-4">
+      <div className="mt-5 lg:hidden">
+        {mobileForm ? (
+          <button type="button" onClick={() => setMobileForm(null)} className={`text-sm font-bold text-text-2 ${FOCUS_RING}`}>‹ 목록으로</button>
+        ) : (
+          <div className="grid grid-cols-3 gap-2">
+            {([['artist', '스타 등록'], ['idol', '멤버 등록'], ['membership', '멤버 연결']] as const).map(([form, label]) => (
+              <button key={form} type="button" onClick={() => setMobileForm(form)} className={`border border-border-2 px-2 text-xs font-bold text-text-2 ${FOCUS_RING}`}>{label}</button>
+            ))}
+          </div>
+        )}
+      </div>
+      <section className={`mt-6 rounded-r2 border border-border bg-white p-4 ${mobileForm ? "hidden lg:block" : ""}`}>
         <h2 className="font-display text-base font-extrabold text-text-1">카탈로그 요약</h2>
         <p className="mt-1 text-xs text-text-3">등록된 스타와 운영 상태입니다.</p>
 
@@ -361,6 +373,7 @@ export default function AdminCatalogPage() {
                   onClick={() => {
                     handleArtistSelect(String(artist.id));
                     setMembershipForm((prev) => ({ ...prev, artistId: String(artist.id) }));
+                    setMobileForm("membership");
                   }}
                   className={`flex flex-1 items-center justify-between gap-3 text-left ${FOCUS_RING}`}
                 >
@@ -389,8 +402,8 @@ export default function AdminCatalogPage() {
         </div>
       </section>
 
-      <section className="mt-6 grid gap-4 lg:grid-cols-3">
-        <form onSubmit={handleCreateArtist} className="rounded-r2 border border-border bg-white p-4">
+      <section className={`admin-catalog-forms mt-6 gap-4 lg:grid lg:grid-cols-3 ${mobileForm ? "grid" : "hidden"}`}>
+        <form onSubmit={handleCreateArtist} className={`rounded-r2 border border-border bg-white p-4 ${mobileForm === "artist" ? "" : "hidden lg:block"}`}>
           <h2 className="font-display text-base font-extrabold text-text-1">스타 등록</h2>
           <div className="mt-4 flex flex-col gap-3">
             <input
@@ -409,6 +422,7 @@ export default function AdminCatalogPage() {
               className={INPUT_CLASS}
             />
             <select
+              aria-label="스타 유형"
               value={artistForm.type}
               onChange={(e) => setArtistForm((prev) => ({ ...prev, type: e.target.value as ArtistType }))}
               className={INPUT_CLASS}
@@ -437,6 +451,7 @@ export default function AdminCatalogPage() {
             </div>
             <input
               type="date"
+              aria-label="데뷔일"
               value={artistForm.debutDate}
               onChange={(e) => setArtistForm((prev) => ({ ...prev, debutDate: e.target.value }))}
               className={INPUT_CLASS}
@@ -461,7 +476,7 @@ export default function AdminCatalogPage() {
           </div>
         </form>
 
-        <form onSubmit={handleCreateIdol} className="rounded-r2 border border-border bg-white p-4">
+        <form onSubmit={handleCreateIdol} className={`rounded-r2 border border-border bg-white p-4 ${mobileForm === "idol" ? "" : "hidden lg:block"}`}>
           <h2 className="font-display text-base font-extrabold text-text-1">멤버 등록</h2>
           <div className="mt-4 flex flex-col gap-3">
             <input
@@ -488,6 +503,7 @@ export default function AdminCatalogPage() {
             />
             <input
               type="date"
+              aria-label="생년월일"
               value={idolForm.birthDate}
               onChange={(e) => setIdolForm((prev) => ({ ...prev, birthDate: e.target.value }))}
               className={INPUT_CLASS}
@@ -510,11 +526,12 @@ export default function AdminCatalogPage() {
           </div>
         </form>
 
-        <form onSubmit={handleAddMembership} className="rounded-r2 border border-border bg-white p-4">
+        <form onSubmit={handleAddMembership} className={`rounded-r2 border border-border bg-white p-4 ${mobileForm === "membership" ? "" : "hidden lg:block"}`}>
           <h2 className="font-display text-base font-extrabold text-text-1">스타-멤버 연결</h2>
           <div className="mt-4 flex flex-col gap-3">
             <select
               required
+              aria-label="연결할 스타"
               value={membershipForm.artistId}
               onChange={(e) => {
                 setMembershipForm((prev) => ({ ...prev, artistId: e.target.value }));
@@ -539,6 +556,7 @@ export default function AdminCatalogPage() {
             />
             <input
               type="date"
+              aria-label="합류일"
               value={membershipForm.joinedAt}
               onChange={(e) => setMembershipForm((prev) => ({ ...prev, joinedAt: e.target.value }))}
               className={INPUT_CLASS}

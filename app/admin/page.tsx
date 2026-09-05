@@ -95,7 +95,7 @@ export default function AdminDashboardPage() {
       )}
 
       {/* 위아래 규칙선 안에서 세로선으로만 나눈다. 검수 대기는 매물 운영 조치라 진행 중 매물 바로 뒤에 둔다. */}
-      <div className="mt-6 flex flex-wrap gap-y-4 border-y border-border py-4">
+      <div className="admin-dashboard-stats mt-6 flex flex-wrap gap-y-4 border-y border-border py-4">
         <Stat label="전체 회원 수" value={loading ? "—" : `${data?.totalMembers ?? 0}명`} />
         <Stat label="오늘 신규 가입" value={loading ? "—" : `${data?.todaySignups ?? 0}명`} />
         <Stat label="진행 중인 매물" value={loading ? "—" : `${data?.liveAuctions ?? 0}건`} />
@@ -113,7 +113,7 @@ export default function AdminDashboardPage() {
         />
       </div>
 
-      <div className="mt-8 grid gap-5 lg:grid-cols-2">
+      <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <section className="rounded-r3 border border-border bg-surface p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-sm font-extrabold text-text-1">최근 가입 회원</h2>

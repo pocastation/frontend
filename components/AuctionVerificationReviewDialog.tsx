@@ -1,10 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { AUCTION_REJECTION_REASON_OPTIONS } from "@/lib/labels";
+import MediaZoomViewer from "@/components/MediaZoomViewer";
+import { useDialogFocus } from "@/lib/use-dialog-focus";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
   AdminAuctionSummary,
@@ -24,6 +26,16 @@ function formatPercentage(value: number | null) {
   if (value === null || !Number.isFinite(value)) return "미분석";
   const percentage = value * 100;
   return `${percentage.toFixed(percentage % 1 === 0 ? 0 : 1)}%`;
+}
+
+function PhotoExpandMark() {
+  return (
+    <span aria-hidden="true" className="pointer-events-none absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-r1 border border-border bg-surface/90 text-text-2">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M15 3h6v6M21 3l-7 7M9 21H3v-6M3 21l7-7" />
+      </svg>
+    </span>
+  );
 }
 
 function AnalysisSection({
@@ -83,6 +95,39 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const reasonRef = useRef<HTMLFieldSetElement>(null);
+  const [mobileTab, setMobileTab] = useState<"media" | "info">("media");
+  const [mobileRejectOpen, setMobileRejectOpen] = useState(false);
+  const [zoomImages, setZoomImages] = useState<AuctionImageResponse[]>([]);
+  const [zoomIndex, setZoomIndex] = useState(0);
+  useDialogFocus(dialogRef, true, onClose, { canClose: !submitting, suspended: zoomImages.length > 0 });
+
+  function selectTab(tab: "media" | "info") {
+    videoRef.current?.pause();
+    setMobileTab(tab);
+    scrollRef.current?.scrollTo({ top: 0 });
+  }
+
+  function openPhotos(images: AuctionImageResponse[], index: number) {
+    videoRef.current?.pause();
+    setZoomIndex(index);
+    setZoomImages(images);
+  }
+
+  function showRejection(open: boolean) {
+    videoRef.current?.pause();
+    setMobileRejectOpen(open);
+    setError(null);
+    scrollRef.current?.scrollTo({ top: 0 });
+    requestAnimationFrame(() => {
+      if (open) (reasonRef.current?.querySelector<HTMLInputElement>("input:checked") ?? reasonRef.current?.querySelector<HTMLInputElement>("input"))?.focus();
+      else dialogRef.current?.querySelector<HTMLButtonElement>('[aria-selected="true"]')?.focus();
+    });
+  }
+
   const selectedReason = AUCTION_REJECTION_REASON_OPTIONS.find((option) => option.code === reasonCode) ?? null;
   const finalPassed = verification?.status === "PASSED" || verification?.status === "CONSUMED";
   const finalAnalyzed = verification != null
@@ -98,15 +143,6 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
     : auction.reviewedAt
       ? "승인됨"
       : "검수 기록 없음";
-
-  // Esc로 닫기 — 처리 중(submitting)에는 막는다(승인/반려 요청이 날아간 뒤 창만 사라지는 걸 방지).
-  useEffect(() => {
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape" && !submitting) onClose();
-    }
-    document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
-  }, [onClose, submitting]);
 
   useEffect(() => {
     let active = true;
@@ -181,8 +217,11 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
   }
 
   return (
+    <>
     <div
-      className="fixed inset-0 z-[400] flex items-center justify-center overflow-hidden bg-black/50 p-3 sm:p-6"
+      ref={dialogRef}
+      tabIndex={-1}
+      className="admin-verification fixed inset-0 z-[400] flex items-center justify-center overflow-hidden bg-black/50 p-3 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-labelledby="verification-review-title"
@@ -191,7 +230,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
         if (event.target === event.currentTarget && !submitting) onClose();
       }}
     >
-      <div className="flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[960px] flex-col overflow-hidden rounded-r3 bg-surface shadow-modal sm:max-h-[calc(100dvh-3rem)]">
+      <div className="verification-shell flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[960px] flex-col overflow-hidden rounded-r3 bg-surface shadow-modal sm:max-h-[calc(100dvh-3rem)]">
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-border bg-surface px-5 py-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -222,7 +261,27 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
           </button>
         </div>
 
-        <div className="min-h-0 overflow-y-auto p-4 sm:p-5">
+        {!mobileRejectOpen && (
+          <div className="verification-tabs grid shrink-0 grid-cols-2 border-b border-border lg:hidden" role="tablist" aria-label="검수 자료">
+            {(["media", "info"] as const).map((tab) => (
+              <button key={tab} type="button" role="tab" id={`verification-tab-${tab}`}
+                aria-controls={`verification-panel-${tab}`} aria-selected={mobileTab === tab}
+                tabIndex={mobileTab === tab ? 0 : -1}
+                onClick={() => selectTab(tab)}
+                onKeyDown={(event) => {
+                  if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+                  event.preventDefault();
+                  const next = event.key === "Home" ? "media" : event.key === "End" ? "info" : tab === "media" ? "info" : "media";
+                  selectTab(next);
+                  document.getElementById(`verification-tab-${next}`)?.focus();
+                }}
+                className={`min-h-12 border-b-2 text-sm font-bold ${FOCUS_RING} ${mobileTab === tab ? "border-primary text-primary" : "border-transparent text-text-3"}`}>
+                {tab === "media" ? "사진·영상" : "검수 정보"}
+              </button>
+            ))}
+          </div>
+        )}
+        <div ref={scrollRef} className="verification-scroll min-h-0 overflow-y-auto p-4 sm:p-5">
           {readOnly && (
             <dl className="mb-5 grid gap-3 rounded-r2 border border-border bg-surface-2 px-4 py-3 text-xs sm:grid-cols-3">
               <div>
@@ -255,13 +314,17 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                 <p className="mb-4 border-l-2 border-accent px-3 py-2 text-sm text-accent" role="alert">{error}</p>
               )}
               <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.62fr)]">
-                <section>
+                <section id="verification-panel-media" role="tabpanel" aria-labelledby="verification-tab-media" className={mobileRejectOpen || mobileTab !== "media" ? "hidden lg:block" : ""}>
                   <figure>
                     <figcaption className="mb-2 text-xs font-extrabold text-text-2">관리자 전용 인증 사진</figcaption>
                     <div className="flex aspect-[4/3] items-center justify-center overflow-hidden border border-border bg-surface-2">
                       {verificationImageUrl ? (
-                        // eslint-disable-next-line @next/next/no-img-element -- 인증이 필요한 Blob URL
-                        <img src={verificationImageUrl} alt="판매자가 제출한 인증 사진" className="h-full w-full object-contain" />
+                        <button type="button" aria-label="관리자 전용 인증 사진 확대" className={`relative h-full w-full ${FOCUS_RING}`}
+                          onClick={() => openPhotos([{ url: verificationImageUrl, displayUrl: null, thumbnailUrl: verificationImageUrl, displayOrder: 0 }], 0)}>
+                          {/* eslint-disable-next-line @next/next/no-img-element -- 인증이 필요한 Blob URL */}
+                          <img src={verificationImageUrl} alt="판매자가 제출한 인증 사진" className="h-full w-full object-contain" />
+                          <PhotoExpandMark />
+                        </button>
                       ) : (
                         <span className="text-xs text-text-3">인증 사진 없음</span>
                       )}
@@ -272,6 +335,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     <p className="mb-2 text-xs font-extrabold text-text-2">틸팅 검수영상</p>
                     {reviewVideo ? (
                       <video
+                        ref={videoRef}
                         controls
                         playsInline
                         preload="metadata"
@@ -286,23 +350,19 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                         등록된 검수영상 없음
                       </div>
                     )}
-                    <p className="mt-1.5 text-[11px] leading-5 text-text-3">
-                      개봉 상태와 표면 틸팅을 재생해 판매사진·인증사진과 같은 물품인지 확인하세요.
-                    </p>
                   </div>
 
                   <div className="mt-4">
                     <p className="mb-2 text-xs font-extrabold text-text-2">공개 판매 사진 {publicImages.length}장</p>
                     {publicImages.length > 0 ? (
-                      <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="grid grid-cols-2 gap-3">
                         {publicImages.map((image, index) => (
                           <figure key={`${image.displayOrder}-${image.url}`}>
-                            <a
-                              href={mediaUrl(image.url)}
-                              target="_blank"
-                              rel="noreferrer"
-                              aria-label={`공개 판매 사진 ${index + 1} 원본 보기`}
-                              className={`flex aspect-[4/3] items-center justify-center overflow-hidden border border-border bg-surface-2 hover:border-primary ${FOCUS_RING}`}
+                            <button
+                              type="button"
+                              onClick={() => openPhotos(publicImages, index)}
+                              aria-label={`공개 판매 사진 ${index + 1} 확대`}
+                              className={`relative flex w-full aspect-[4/3] items-center justify-center overflow-hidden border border-border bg-surface-2 hover:border-primary ${FOCUS_RING}`}
                             >
                               {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드 공개 미디어 */}
                               <img
@@ -310,8 +370,8 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                                 alt={`공개 판매 사진 ${index + 1}`}
                                 className="h-full w-full object-contain"
                               />
-                            </a>
-                            <figcaption className="mt-1 text-[10.5px] text-text-3">사진 {index + 1}</figcaption>
+                              <PhotoExpandMark />
+                            </button>
                           </figure>
                         ))}
                       </div>
@@ -321,12 +381,9 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                       </div>
                     )}
                   </div>
-                  <p className="mt-3 text-xs leading-5 text-text-3">
-                    인증 사진과 공개 판매 사진의 물품이 자연스럽게 이어지는지, 코드나 물품을 붙여 넣은 흔적이 없는지 직접 확인하세요.
-                  </p>
                 </section>
 
-                <section>
+                <section id="verification-panel-info" role="tabpanel" aria-labelledby="verification-tab-info" className={`verification-info ${mobileRejectOpen || mobileTab !== "info" ? "hidden lg:block" : ""}`}>
                   <div className="flex items-baseline justify-between border-b border-border pb-3">
                     <span className="text-xs font-bold text-text-3">발급 코드</span>
                     <strong className="font-mono text-xl text-text-1">{verification.issuedCode}</strong>
@@ -460,7 +517,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                 /* 사유는 정해진 템플릿에서 고른다 — 판매자마다 다른 표현이 나가면 "무엇을 고치면 되는지"가
                     흔들리고, 사유별 집계도 불가능하다. 선택한 문구가 그대로 판매자에게 전달되므로
                     아래에 미리보기를 노출한다. */
-                <fieldset className="mt-6 border-t border-border pt-5">
+                <fieldset ref={reasonRef} className={`verification-reasons mt-6 border-t border-border pt-5 ${mobileRejectOpen ? "" : "hidden lg:block"}`}>
                 <legend className="text-xs font-extrabold text-text-2">승인 거절 사유</legend>
                 <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
                   {AUCTION_REJECTION_REASON_OPTIONS.map((option) => (
@@ -496,7 +553,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                 {error && (
                   <p className="mt-2 text-xs text-accent" role="alert">{error}</p>
                 )}
-                <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <div className="mt-4 hidden gap-2 lg:flex lg:justify-end">
                   {/* 헤더 닫기까지 스크롤을 올려야 했던 문제 — 액션 줄에도 닫기를 둔다. */}
                   <button
                     type="button"
@@ -528,7 +585,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
             </>
           ) : null}
           {readOnly && !loading && (
-            <div className="mt-6 flex justify-end border-t border-border pt-5">
+            <div className="mt-6 hidden justify-end border-t border-border pt-5 lg:flex">
               <button
                 type="button"
                 onClick={onClose}
@@ -539,7 +596,30 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
             </div>
           )}
         </div>
+        <div className="verification-actions shrink-0 border-t border-border bg-surface p-4 lg:hidden">
+          {error && verification && !mobileRejectOpen && !readOnly && <p role="alert" className="mb-3 text-sm text-accent">{error}</p>}
+          {readOnly || !verification ? (
+            <button type="button" onClick={onClose} className={`min-h-12 w-full border border-border-2 text-sm font-bold text-text-2 ${FOCUS_RING}`}>닫기</button>
+          ) : mobileRejectOpen ? (
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => showRejection(false)} disabled={submitting}
+                className={`min-h-12 border border-border-2 text-sm font-bold text-text-2 disabled:opacity-50 ${FOCUS_RING}`}>취소</button>
+              <button type="button" onClick={reject} disabled={submitting}
+                className={`min-h-12 bg-accent text-sm font-bold text-white disabled:opacity-50 ${FOCUS_RING}`}>{submitting ? "처리 중..." : "승인 거절"}</button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-2">
+              <button type="button" onClick={() => showRejection(true)} disabled={submitting || loading}
+                className={`min-h-12 border border-accent text-sm font-bold text-accent disabled:opacity-50 ${FOCUS_RING}`}>승인 거절</button>
+              <button type="button" onClick={approve} disabled={submitting || loading}
+                className={`min-h-12 bg-ok text-sm font-bold text-white disabled:opacity-50 ${FOCUS_RING}`}>{submitting ? "처리 중..." : "승인하고 공개"}</button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
+    <MediaZoomViewer open={zoomImages.length > 0} images={zoomImages} title={auction.title} index={zoomIndex}
+      onIndexChange={setZoomIndex} onClose={() => setZoomImages([])} />
+    </>
   );
 }

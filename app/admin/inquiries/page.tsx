@@ -172,7 +172,7 @@ export default function AdminInquiriesPage() {
         </AdminNotice>
       )}
 
-      <div className="min-h-[560px] overflow-hidden rounded-r3 border border-border bg-surface lg:grid lg:grid-cols-[320px_minmax(0,1fr)]">
+      <div className="admin-conversation min-h-[560px] overflow-hidden rounded-r3 border border-border bg-surface lg:grid lg:grid-cols-[320px_minmax(0,1fr)]">
         <section
           className={(selected ? "hidden lg:block" : "block") + " border-b border-border lg:border-b-0 lg:border-r"}
           aria-label="문의 목록"

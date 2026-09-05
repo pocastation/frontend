@@ -97,7 +97,7 @@ export default function AdminDeliveryStalledPage() {
         ) : (
           <ul className="divide-y divide-border">
             {items.map((item) => (
-              <li key={item.orderId} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-4">
+              <li key={item.orderId} className="admin-delivery-row flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-4">
                 <div className="min-w-0 flex-1 basis-56">
                   <Link
                     href={`/auctions/${item.auctionId}`}

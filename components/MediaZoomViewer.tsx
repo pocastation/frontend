@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { mediaUrl } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
+import { useDialogFocus } from "@/lib/use-dialog-focus";
 import type { AuctionImageResponse } from "@/lib/types";
 
 /**
@@ -40,6 +41,7 @@ export default function MediaZoomViewer({
   onClose: () => void;
 }) {
   const overlayRef = useRef<HTMLDivElement>(null); // 아래로 당겨 닫기 시 translateY가 걸리는 루트
+  useDialogFocus(overlayRef, open && images.length > 0, onClose);
   const pagerRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLImageElement | null)[]>([]);
   const rafRef = useRef(0);
@@ -397,12 +399,11 @@ export default function MediaZoomViewer({
     };
   }, [open, locked, measureActive, clampActive, scheduleApply, resetActive, applyActive, onClose]);
 
-  // 키보드: ← → 전환, Esc 닫기.
+  // 키보드: ← → 전환. Esc·포커스·스크롤 잠금은 useDialogFocus에서 처리한다.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      else if (e.key === "ArrowLeft") scrollToIndex(Math.max(0, index - 1));
+      if (e.key === "ArrowLeft") scrollToIndex(Math.max(0, index - 1));
       else if (e.key === "ArrowRight") scrollToIndex(Math.min(images.length - 1, index + 1));
     };
     window.addEventListener("keydown", onKey);
@@ -427,7 +428,7 @@ export default function MediaZoomViewer({
 
   // 헤더(.hdr, z-index:300)보다 위에 오도록 body로 portal + z-[400]. 조상 스택 컨텍스트에도 안 갇힌다.
   return createPortal(
-    <div ref={overlayRef} className="fixed inset-0 z-[400] flex flex-col bg-[rgba(8,7,12,0.94)]">
+    <div ref={overlayRef} role="dialog" aria-modal="true" aria-label="사진 확대" tabIndex={-1} className="fixed inset-0 z-[410] flex flex-col bg-[rgba(8,7,12,0.94)]">
       {/* 페이지 카운터 — 본 화면과 통일해 우하단. 여러 장일 때만 노출. */}
       {hasMultiple && (
         <span className="pointer-events-none absolute bottom-3 right-3.5 z-10 rounded-full bg-white/15 px-2.5 py-0.5 text-[12px] font-semibold text-white tabular-nums">

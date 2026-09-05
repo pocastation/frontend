@@ -1,5 +1,6 @@
 "use client";
 
+import AdminDetailPane from "@/components/admin/AdminDetailPane";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -232,7 +233,7 @@ export default function AdminMembersPage() {
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_320px]">
         {/* 목록 — min-w-0로 그리드 컬럼이 테이블(min-w) 너비만큼 늘어나 페이지가 넘치는 걸 막고,
             테이블은 내부(overflow-x-auto)에서만 가로 스크롤되게 한다. */}
-        <div className="min-w-0">
+        <div className={`min-w-0 ${selectedId !== null ? "max-lg:hidden" : ""}`}>
           <div className="mb-3 flex flex-wrap items-center gap-2.5">
             <label className="flex h-10 min-w-[200px] flex-1 items-center gap-2 rounded-full border border-border px-4">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
@@ -285,8 +286,8 @@ export default function AdminMembersPage() {
             </p>
           )}
 
-          <div className="overflow-x-auto rounded-r3 border border-border bg-surface">
-            <table className="w-full min-w-[560px] border-collapse">
+          <div className="admin-table-wrap overflow-x-auto rounded-r3 border border-border bg-surface">
+            <table role="table" className="admin-table admin-table-members w-full min-w-[560px] border-collapse">
               <thead>
                 <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
                   <th className="px-4 py-2.5">회원</th>
@@ -319,7 +320,7 @@ export default function AdminMembersPage() {
                         className={`px-4 py-3 font-bold text-text-1 ${
                           m.status === "SUSPENDED" ? "border-l-2 border-l-accent" : "border-l-2 border-l-transparent"
                         }`}
-                      >
+                      ><button type="button" aria-label={`${m.nickname} 회원 상세`} onClick={(event) => { event.stopPropagation(); void openDetail(m.id); }} className={`text-left ${FOCUS_RING}`}>
                         <span className="block">{m.nickname}</span>
                         {/* 변하지 않는 짧은 식별자(UUID 앞 8자리) — 닉 변경·동명이인과 무관하게 특정용. */}
                         <span className="font-mono text-[11px] font-normal text-text-3">#{m.id.slice(0, 8)}</span>
@@ -330,17 +331,17 @@ export default function AdminMembersPage() {
                             <span className="ml-1.5 font-bold text-accent">미인증</span>
                           )}
                         </span>
-                      </td>
+                      </button></td>
                       {/* 자르지 않고 줄바꿈한다 — 이메일은 관리자가 계정을 특정하는 식별 정보라
                           잘리면 누구인지 알 수 없다. 잘린 이메일보다 두 줄 이메일이 낫다. */}
-                      <td className="px-4 py-3 text-text-2 [word-break:break-all]">{m.email ?? "—"}</td>
-                      <td className="whitespace-nowrap px-4 py-3">
+                      <td data-label="이메일" className="px-4 py-3 text-text-2 [word-break:break-all]">{m.email ?? "—"}</td>
+                      <td data-label="상태" className="whitespace-nowrap px-4 py-3">
                         <StatusBadge tone={MEMBER_STATUS_TONE[m.status]}>
                           {MEMBER_STATUS_LABEL[m.status]}
                         </StatusBadge>
                       </td>
-                      <td className="whitespace-nowrap px-4 py-3 text-text-2">{m.role === "ADMIN" ? "관리자" : "일반"}</td>
-                      <td className="whitespace-nowrap px-4 py-3 tabular-nums text-text-3">{formatDate(m.createdAt)}</td>
+                      <td data-label="역할" className="whitespace-nowrap px-4 py-3 text-text-2">{m.role === "ADMIN" ? "관리자" : "일반"}</td>
+                      <td data-label="가입일" className="whitespace-nowrap px-4 py-3 tabular-nums text-text-3">{formatDate(m.createdAt)}</td>
                     </tr>
                   ))
                 )}
@@ -363,7 +364,7 @@ export default function AdminMembersPage() {
         </div>
 
         {/* 상세 패널 */}
-        <aside className="lg:sticky lg:top-20 lg:self-start">
+        <AdminDetailPane open={selectedId !== null} title="회원 상세" onBack={() => setSelectedId(null)}>
           {!selectedId ? (
             <div className="rounded-r3 border border-dashed border-border-2 p-8 text-center text-sm text-text-3">
               회원을 선택하면 상세 정보와 관리 기능이 표시됩니다.
@@ -566,7 +567,7 @@ export default function AdminMembersPage() {
               </div>
             </div>
           )}
-        </aside>
+        </AdminDetailPane>
       </div>
 
       {purging && detail && (

@@ -67,7 +67,8 @@ function mediaOrigin(): string {
 //  - LocalStorageClient(로컬): /media/** 상대경로 → 같은 출처 기준으로 조합(위 mediaOrigin 주석).
 // 절대 URL에 API 주소를 덧붙이면 "https://api…https://cloudfront…"로 깨지므로 반드시 분기한다.
 export function mediaUrl(path: string): string {
-  if (/^https?:\/\//i.test(path)) {
+  // 관리자 인증사진은 인증된 응답으로 만든 Blob URL을 확대 뷰어에서도 사용한다.
+  if (/^(?:https?:\/\/|blob:)/i.test(path)) {
     return path;
   }
   return `${mediaOrigin()}${path}`;

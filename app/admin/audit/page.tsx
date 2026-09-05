@@ -120,8 +120,8 @@ export default function AdminAuditLogPage() {
 
       <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
-      <div className="overflow-x-auto rounded-r3 border border-border bg-surface">
-        <table className="w-full min-w-[720px] border-collapse">
+      <div className="admin-table-wrap overflow-x-auto rounded-r3 border border-border bg-surface">
+        <table role="table" className="admin-table admin-table-audit w-full min-w-[720px] border-collapse">
           <thead>
             <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
               <th className="whitespace-nowrap px-4 py-2.5">시각</th>
@@ -141,18 +141,18 @@ export default function AdminAuditLogPage() {
             ) : (
               logs.map((log) => (
                 <tr key={log.id} className="border-b border-border text-[13px] last:border-0">
-                  <td className="whitespace-nowrap px-4 py-3 text-text-3">{formatRelativeTime(log.createdAt)}</td>
-                  <td className="whitespace-nowrap px-4 py-3 font-semibold text-text-1">{log.actorNickname ?? "—"}</td>
-                  <td className="whitespace-nowrap px-4 py-3">
+                  <td data-label="시각" className="whitespace-nowrap px-4 py-3 text-text-3">{formatRelativeTime(log.createdAt)}</td>
+                  <td data-label="관리자" className="whitespace-nowrap px-4 py-3 font-semibold text-text-1">{log.actorNickname ?? "—"}</td>
+                  <td data-label="조치" className="whitespace-nowrap px-4 py-3">
                     <StatusBadge tone={AUDIT_ACTION_TONE[log.action]}>
                       {AUDIT_ACTION_LABEL[log.action]}
                     </StatusBadge>
                   </td>
-                  <td className="px-4 py-3">
+                  <td data-label="대상" className="px-4 py-3">
                     <span className="block max-w-[200px] truncate font-semibold text-text-1">{log.targetLabel ?? "—"}</span>
                     <span className="text-[11px] text-text-3">{AUDIT_TARGET_TYPE_LABEL[log.targetType]}</span>
                   </td>
-                  <td className="max-w-[240px] px-4 py-3 text-text-2">
+                  <td data-label="사유" className="max-w-[240px] px-4 py-3 text-text-2">
                     <span className="line-clamp-2">{log.reason ?? "—"}</span>
                   </td>
                 </tr>

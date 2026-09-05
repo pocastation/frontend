@@ -103,7 +103,7 @@ export default function Header() {
   }
 
   return (
-    <header className={foldOnMobile ? "hdr max-sm:hidden" : "hdr"}>
+    <header className={pathname === "/admin" || pathname.startsWith("/admin/") ? "hdr max-lg:hidden" : foldOnMobile ? "hdr max-sm:hidden" : "hdr"}>
       <div className="pg hdr-in">
         <Link href="/" onClick={closeMenu} className="logo" aria-label="포카스테이션 홈">
           <Wordmark className="text-[19px] leading-none" />

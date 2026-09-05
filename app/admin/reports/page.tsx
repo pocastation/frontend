@@ -1,5 +1,6 @@
 "use client";
 
+import AdminDetailPane from "@/components/admin/AdminDetailPane";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ReportScopeTabs from "./ReportScopeTabs";
@@ -149,7 +150,7 @@ export default function AdminReportsPage() {
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_340px]">
         {/* 목록 — min-w-0로 테이블(min-w)이 그리드 컬럼을 늘려 페이지가 넘치는 걸 막는다. */}
-        <div className="min-w-0">
+        <div className={`min-w-0 ${selectedId !== null ? "max-lg:hidden" : ""}`}>
           <div className="mb-3 flex flex-wrap gap-1.5" role="group" aria-label="상태 필터">
             {STATUS_FILTERS.map((f) => (
               <button
@@ -168,8 +169,8 @@ export default function AdminReportsPage() {
 
           <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
-          <div className="overflow-x-auto rounded-r3 border border-border bg-surface">
-            <table className="w-full min-w-[640px] border-collapse">
+          <div className="admin-table-wrap overflow-x-auto rounded-r3 border border-border bg-surface">
+            <table role="table" className="admin-table admin-table-reports w-full min-w-[640px] border-collapse">
               <thead>
                 <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
                   <th className="px-4 py-2.5">대상</th>
@@ -195,7 +196,7 @@ export default function AdminReportsPage() {
                         selectedId === r.auctionId ? "bg-primary-soft/50" : ""
                       }`}
                     >
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3"><button type="button" aria-label={`${r.auctionTitle ?? "매물"} 신고 상세`} onClick={(event) => { event.stopPropagation(); void openDetail(r.auctionId); }} className={`text-left ${FOCUS_RING}`}>
                         <div className="flex items-center gap-2.5">
                           <span className="h-9 w-9 shrink-0 overflow-hidden rounded-r1 bg-surface-2">
                             {r.representativeThumbnailUrl && (
@@ -208,17 +209,17 @@ export default function AdminReportsPage() {
                             <span className="block max-w-[180px] truncate font-bold text-text-1">{r.auctionTitle ?? "-"}</span>
                           </span>
                         </div>
-                      </td>
-                      <td className="px-4 py-3">
+                      </button></td>
+                      <td data-label="사유" className="px-4 py-3">
                         <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-extrabold text-text-2">
                           {REPORT_REASON_LABEL[r.representativeReason]}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td data-label="신고자" className="px-4 py-3">
                         <span className={`font-extrabold ${r.reporterCount > 1 ? "text-accent" : "text-text-2"}`}>{r.reporterCount}명</span>
                       </td>
-                      <td className="px-4 py-3 text-text-3">{formatRelativeTime(r.latestReportedAt)}</td>
-                      <td className="px-4 py-3">
+                      <td data-label="최근 신고" className="px-4 py-3 text-text-3">{formatRelativeTime(r.latestReportedAt)}</td>
+                      <td data-label="상태" className="px-4 py-3">
                         <StatusBadge tone={REPORT_STATUS_TONE[r.status]}>
                           {REPORT_STATUS_LABEL[r.status]}
                         </StatusBadge>
@@ -245,7 +246,7 @@ export default function AdminReportsPage() {
         </div>
 
         {/* 상세 패널 */}
-        <aside className="lg:sticky lg:top-20 lg:self-start">
+        <AdminDetailPane open={selectedId !== null} title="신고 상세" onBack={() => setSelectedId(null)}>
           {!selectedId ? (
             <div className="rounded-r3 border border-dashed border-border-2 p-8 text-center text-sm text-text-3">
               신고를 선택하면 상세 내용과 처리 기능이 표시됩니다.
@@ -281,7 +282,7 @@ export default function AdminReportsPage() {
               <p className="mt-3 mb-2 border-t border-border pt-3 text-[11px] font-extrabold text-text-3">
                 신고 내역 ({detail.reports.length}건)
               </p>
-              <div className="flex max-h-[220px] flex-col gap-1.5 overflow-y-auto pr-1">
+              <div className="admin-report-items flex max-h-[220px] flex-col gap-1.5 overflow-y-auto pr-1">
                 {detail.reports.map((item) => (
                   <div key={item.reportId} className="rounded-r2 border border-border p-2.5">
                     <div className="flex items-center justify-between gap-2 text-[11px] font-bold">
@@ -386,7 +387,7 @@ export default function AdminReportsPage() {
               )}
             </div>
           )}
-        </aside>
+        </AdminDetailPane>
       </div>
     </div>
   );

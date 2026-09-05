@@ -623,6 +623,7 @@ function MyPageBody() {
       {/* 모바일 메뉴 목록 — `?tab=`이 없을 때만. 있으면 그 탭이 서브 화면으로 열린다. */}
       {tab === null && (
         <MobileMypageMenu
+          isAdmin={member?.role === "ADMIN" || member?.role === "ROLE_ADMIN"}
           nickname={member?.nickname ?? ""}
           trustLevel={member?.trustLevel ?? null}
           trustLevelLabel={member?.trustLevelLabel ? plainLevelLabel(member.trustLevelLabel) : null}

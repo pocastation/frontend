@@ -23,7 +23,7 @@ export default function ReportScopeTabs() {
             key={scope.href}
             href={scope.href}
             aria-current={active ? "page" : undefined}
-            className={`-mb-px border-b-2 px-3 pb-2.5 text-[13.5px] font-bold transition-colors ${FOCUS_RING} ${
+            className={`-mb-px border-b-2 px-3 pb-2.5 text-[13.5px] font-bold transition-colors max-lg:flex max-lg:min-h-11 max-lg:items-center ${FOCUS_RING} ${
               active ? "border-primary text-primary" : "border-transparent text-text-3 hover:text-text-1"
             }`}
           >

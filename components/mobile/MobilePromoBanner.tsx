@@ -180,8 +180,9 @@ function AuctionSlide({ auction }: { auction: AuctionResponse }) {
 }
 
 export default function MobilePromoBanner({ featured }: { featured: AuctionResponse[] }) {
-  // 홍보 매물은 최대 3건 — 그 이상 넘기면 아무도 끝까지 보지 않는다.
-  const promoted = featured.slice(0, 3);
+  // 홍보 매물은 서버 상한과 같은 5건까지(#552, BE #428). 프론트에서 더 잘라내면 관리자는
+  // 지정해 놓고 안 보이는 이유를 알 수 없다 — 건수는 관리자가 정하고 화면은 그대로 반영한다.
+  const promoted = featured.slice(0, 5);
   const total = promoted.length + 1;
   const [index, setIndex] = useState(0);
   const [reduceMotion, setReduceMotion] = useState(false);

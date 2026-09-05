@@ -96,7 +96,20 @@ export default function AdminAuctionsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<{ kind: "success" | "error"; text: string } | null>(null);
 
+  // 배너 지정 순번(#552) — 목록 응답의 featured는 켜짐 여부만 알려 준다. 몇 번째로 보이는지는
+  // 배너 목록을 따로 읽어 id로 맞춘다. 상한 판정도 이 목록의 길이로 한다.
+  const [bannerOrder, setBannerOrder] = useState<Map<number, number>>(new Map());
+
   const isFirstRun = useRef(true);
+
+  const loadBannerOrder = useCallback(async () => {
+    try {
+      const featured = await fetchWithAuth<AdminAuctionSummary[]>("/api/admin/auctions/featured");
+      setBannerOrder(new Map(featured.map((item, i) => [item.id, i + 1])));
+    } catch {
+      // 순번은 부가 정보다 — 못 읽어도 목록은 그대로 쓴다.
+    }
+  }, [fetchWithAuth]);
 
   const fetchList = useCallback(
     async (q: string, status: AuctionStatus | "ALL", saleType: AuctionSaleType | "ALL") => {
@@ -130,11 +143,12 @@ export default function AdminAuctionsPage() {
       // eslint-disable-next-line react-hooks/set-state-in-effect -- URL 쿼리는 마운트 후에만 읽을 수 있다(마이페이지 ?tab=과 같은 패턴).
       if (initial !== "ALL") setStatusFilter(initial);
       void fetchList("", initial, "ALL");
+      void loadBannerOrder();
       return;
     }
     const timer = setTimeout(() => void fetchList(query, statusFilter, saleTypeFilter), DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [query, statusFilter, saleTypeFilter, fetchList]);
+  }, [query, statusFilter, saleTypeFilter, fetchList, loadBannerOrder]);
 
   async function loadMore() {
     const nextPage = page + 1;
@@ -191,7 +205,7 @@ export default function AdminAuctionsPage() {
     await fetchList(query, statusFilter, saleTypeFilter);
   }
 
-  // 홈 배너(Hero) 노출 토글(#150) — 배너는 단일 슬롯이라 새로 켜면 기존 지정이 자동 해제된다.
+  // 홈 배너 노출 토글(#150, 다건 #552) — 최대 5건이고 순서는 /admin/banner에서 바꾼다.
   // 홈 배너 조회는 '진행 중인 제안판매' 매물만 대상이라 즉시판매는 애초에 지정할 수 없다(서버도 409로 막는다).
   async function toggleFeatured(auction: AdminAuctionSummary) {
     try {
@@ -199,15 +213,40 @@ export default function AdminAuctionsPage() {
         method: "PATCH",
         body: { featured: !auction.featured },
       });
+      // 순번은 서버가 정한다(맨 뒤에 붙는다) — 화면이 미리 세지 않고 다시 읽어 그 값을 말한다.
+      const slot = auction.featured ? null : (await readSlot(auction.id));
       setNotice({
         kind: "success",
         text: auction.featured
-          ? `"${auction.title}"을(를) 홈 배너에서 내렸습니다.`
-          : `"${auction.title}"을(를) 홈 배너로 지정했습니다. 기존 배너 지정은 해제됩니다.`,
+          ? `「${auction.title}」을 홈 배너에서 내렸어요.`
+          : slot == null
+            ? `「${auction.title}」을 홈 배너에 세웠어요.`
+            : `「${auction.title}」을 홈 배너 ${slot}번으로 지정했어요. 순서는 홈 배너에서 바꿔요.`,
       });
       await fetchList(query, statusFilter, saleTypeFilter);
     } catch (err) {
-      setNotice({ kind: "error", text: err instanceof ApiError ? err.message : "배너 설정에 실패했습니다." });
+      setNotice({
+        kind: "error",
+        text:
+          err instanceof ApiError && err.errorCode === "FEATURED_LIMIT_EXCEEDED"
+            ? "배너 자리가 다 찼어요. 홈 배너에서 한 건을 먼저 내려 주세요."
+            : err instanceof ApiError
+              ? err.message
+              : "배너 설정에 실패했습니다.",
+      });
+      await loadBannerOrder();
+    }
+  }
+
+  /** 토글 직후의 순번. 배너 목록을 다시 읽어 방금 켠 매물이 몇 번째인지 본다. */
+  async function readSlot(auctionId: number): Promise<number | null> {
+    try {
+      const featured = await fetchWithAuth<AdminAuctionSummary[]>("/api/admin/auctions/featured");
+      const map = new Map(featured.map((item, i) => [item.id, i + 1]));
+      setBannerOrder(map);
+      return map.get(auctionId) ?? null;
+    } catch {
+      return null;
     }
   }
 
@@ -385,7 +424,7 @@ export default function AdminAuctionsPage() {
                           aria-pressed={a.featured}
                           title={
                             a.saleType === "AUCTION"
-                              ? "홈 배너 노출 토글 (배너는 한 건만 지정됩니다)"
+                              ? "홈 배너에 세워요 (최대 5건)"
                               : "홈 배너에는 제안판매 매물만 지정할 수 있습니다"
                           }
                           className={`inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-3 py-1 text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING} ${
@@ -398,7 +437,8 @@ export default function AdminAuctionsPage() {
                             className={`h-1.5 w-1.5 rounded-full ${a.featured ? "bg-primary" : "bg-border-2"}`}
                             aria-hidden="true"
                           />
-                          배너
+                          {/* 켜졌다는 것만으로는 홈에서 몇 번째로 보일지 알 수 없다 — 순번을 함께 말한다. */}
+                          {a.featured && bannerOrder.has(a.id) ? `배너 ${bannerOrder.get(a.id)}번` : "배너"}
                         </button>
                         <button
                           type="button"

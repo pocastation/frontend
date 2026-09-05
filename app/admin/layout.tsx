@@ -49,6 +49,14 @@ function TagIcon() {
     </svg>
   );
 }
+function BannerIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="11" rx="2" />
+      <path d="M9 20h6" />
+    </svg>
+  );
+}
 function MegaphoneIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -130,6 +138,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/admin/members", label: "회원 관리", icon: <UsersIcon />, ready: true },
       { href: "/admin/catalog", label: "카탈로그 관리", icon: <CardIcon />, ready: true },
       { href: "/admin/auctions", label: "매물 관리", icon: <GavelIcon />, ready: true },
+      { href: "/admin/banner", label: "홈 배너", icon: <BannerIcon />, ready: true },
     ],
   },
   {

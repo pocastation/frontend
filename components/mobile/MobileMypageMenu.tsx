@@ -144,10 +144,25 @@ export default function MobileMypageMenu({
 
   return (
     <div className="pb-6 sm:hidden">
-      <button
-        type="button"
+      {/*
+        button이 아니라 role="button"인 div다(#566). 이 행 안에 거래 레벨 배지(TrustLevelBadge)가
+        있고 그 배지는 시트를 여는 button이라, 행까지 button이면 button 안에 button이 된다 —
+        HTML이 금지하는 중첩이라 React가 하이드레이션 오류를 내고, 브라우저마다 안쪽 클릭 전달이
+        다르다. 배지의 onClick이 stopPropagation을 하므로 행 클릭과 배지 클릭은 섞이지 않는다.
+        화면은 그대로다 — 키보드 동작(Enter·Space)만 손으로 잇는다.
+      */}
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => onSelectTab("profile")}
-        className={`flex w-full items-center gap-3 px-[14px] py-4 text-left ${FOCUS_RING}`}
+        onKeyDown={(event) => {
+          if (event.target !== event.currentTarget) return; // 배지에서 올라온 키 입력은 배지 몫이다.
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onSelectTab("profile");
+          }
+        }}
+        className={`flex w-full cursor-pointer items-center gap-3 px-[14px] py-4 text-left ${FOCUS_RING}`}
       >
         <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary-soft font-display text-lg font-extrabold text-primary">
           {nickname.slice(0, 1).toUpperCase()}
@@ -169,7 +184,7 @@ export default function MobileMypageMenu({
         <span className="inline-flex text-border-2">
           <Chevron size={16} />
         </span>
-      </button>
+      </div>
 
       <nav aria-label="내 활동" className="grid grid-cols-4 border-y border-border">
         {quick.map(({ label, value, tab }, i) => (

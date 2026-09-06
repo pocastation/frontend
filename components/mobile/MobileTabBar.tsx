@@ -40,7 +40,8 @@ export type MobileTabKey = "홈" | "거래" | "판매등록" | "관심" | "마�
   사진 확대 뷰어는 라우트가 아니라 전체 화면 오버레이(z-400)라 여기 없다 — 탭바(z-300) 위를
   통째로 덮는다.
 */
-const HIDDEN_EXACT = new Set(["/auctions/new", "/auctions/submitted", "/login", "/signup", "/onboarding"]);
+// 탈퇴 완료(#567)도 숨긴다 — 방금 계정을 지운 사람에게 「마이」·「관심」 탭은 전부 로그인으로 가는 문이다.
+const HIDDEN_EXACT = new Set(["/auctions/new", "/auctions/submitted", "/login", "/signup", "/onboarding", "/withdrawn"]);
 const HIDDEN_PREFIX = ["/auth/", "/admin"];
 
 function isHidden(pathname: string): boolean {

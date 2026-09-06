@@ -14,6 +14,7 @@ import { WishlistProvider } from "@/lib/wishlist-context";
 import { NotificationProvider } from "@/lib/notification-context";
 import { ToastProvider } from "@/lib/toast-context";
 import MobileTabBar from "@/components/mobile/MobileTabBar";
+import IdentityGateRedirect from "@/components/IdentityGateRedirect";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL, X_HANDLE } from "@/lib/site";
 import "./globals.css";
 
@@ -113,6 +114,10 @@ export default function RootLayout({
           <NotificationProvider>
             <WishlistProvider>
               <ToastProvider>
+                {/* 본인인증 게이트(#390·#565) — 화면을 그리지 않는다. useSearchParams를 쓰므로 Suspense로 감싼다. */}
+                <Suspense fallback={null}>
+                  <IdentityGateRedirect />
+                </Suspense>
                 {/* 상용에서는 아무것도 렌더하지 않는다. staging·로컬에서만 맨 위에 띠가 붙는다. */}
                 <PreProductionBar />
                 <Header />

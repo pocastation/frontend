@@ -290,7 +290,7 @@ function FilterChips<T extends string>({
 function MyPageBody() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { accessToken, member, isLoading, fetchWithAuth, logout } = useAuth();
+  const { accessToken, member, isLoading, isWithdrawing, fetchWithAuth, logout } = useAuth();
   const { toggle: toggleWishlistCache } = useWishlist();
 
   // null = 쿼리 없음. 모바일은 메뉴 목록, 데스크탑은 대시보드다(한 화면이라 늘 무언가를 보여준다).
@@ -536,12 +536,15 @@ function MyPageBody() {
   useEffect(() => {
     if (isLoading) return;
     if (!accessToken) {
+      // 탈퇴가 끝나 로그인 상태가 풀리는 중이면 물러선다(#567) — 여기서 /login으로 보내면 설정 탭이
+      // 보내는 완료 화면(/withdrawn)을 덮어 방금 탈퇴한 사람이 로그인 폼을 본다.
+      if (isWithdrawing) return;
       router.replace("/login?redirect=/mypage");
       return;
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 인증 상태 확정 후 서버 데이터를 동기화한다.
     void loadMyActivity();
-  }, [accessToken, isLoading, loadMyActivity, router]);
+  }, [accessToken, isLoading, isWithdrawing, loadMyActivity, router]);
 
   async function handleLogout() {
     await logout();

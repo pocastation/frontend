@@ -42,7 +42,10 @@ const MOBILE_SELLER_DETAIL_PATTERN = /^\/sellers\/[^/]+$/;
 // 등록완료(`/auctions/submitted`)는 그 위저드의 마지막 장이다(#515). 여기가 빠져 있어서
 // 위저드를 X로 닫는 풀스크린으로 쓰다가 **마지막 화면에서만 전역 헤더 58px이 되살아났다**.
 // 같은 흐름이면 크롬도 같아야 한다.
-const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/auctions/submitted", "/notifications", "/search", "/artists", "/sellers", "/auctions/ended"];
+//
+// 탈퇴 완료(`/withdrawn`, #567)는 등록완료와 같은 한 장짜리 결과 화면이다 — 앱바 하나(닫기 → 홈)로
+// 들어가고 나온다. 데스크탑은 전역 헤더 그대로다(로그인·가입 화면과 같은 처리).
+const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/auctions/submitted", "/notifications", "/search", "/artists", "/sellers", "/auctions/ended", "/withdrawn"];
 
 export function isMobileChromeHiddenRoute(pathname: string): boolean {
   return (

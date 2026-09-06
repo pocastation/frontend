@@ -26,6 +26,8 @@ type AuthContextValue = {
   // 재동의(#219, BE #198) — 동의 기록이 없는 기존 회원이 동의만 다시 낸다(닉네임은 건드리지 않는다).
   recordConsents: (payload: ConsentPayload) => Promise<void>;
   withdraw: () => Promise<void>;
+  // 탈퇴가 성공해 로그인 상태가 풀리는 중(#567). 마이페이지 가드가 이 동안은 로그인으로 보내지 않는다.
+  isWithdrawing: boolean;
   fetchWithAuth: <T>(path: string, options?: ApiFetchOptions) => Promise<T>;
   fetchMultipartWithAuth: <T>(path: string, formData: FormData) => Promise<T>;
   fetchBlobWithAuth: (path: string) => Promise<Blob>;
@@ -84,8 +86,20 @@ const IDENTITY_GATE_EXEMPT_PREFIXES = [
   "/inquiries",
 ] as const;
 
-function isIdentityGateExempt(pathname: string | null): boolean {
+/**
+ * 본인인증 게이트가 비켜 가는 화면인가(#390, #565).
+ *
+ * <p>경로 접두 목록에 더해 <b>마이페이지 계정 설정 탭</b>(`/mypage?tab=settings`)을 연다(#565).
+ * 서버는 탈퇴(`DELETE /api/members/me`)를 동의·인증 게이트의 예외로 열어 두었는데
+ * (파기 요구권, PIPA §36), 프론트가 `/mypage` 전체를 인증 화면으로 되돌려 그 예외가 무효였다 —
+ * 인증이 안 되는 사람이 나갈 길이 없었다. 마이페이지의 <b>다른 탭은 그대로 게이트 대상</b>이라
+ * 경로만이 아니라 쿼리까지 봐야 하고, 그래서 판정을 `pathname`+`search`로 받는다.
+ */
+export function isIdentityGateExempt(pathname: string | null, search: URLSearchParams | null): boolean {
   if (!pathname) {
+    return true;
+  }
+  if (pathname === "/mypage" && search?.get("tab") === "settings") {
     return true;
   }
   return IDENTITY_GATE_EXEMPT_PREFIXES.some(
@@ -101,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [member, setMember] = useState<MemberResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
 
   const fetchMe = useCallback(async (token: string) => {
     const me = await apiFetch<MemberResponse>("/api/members/me", { accessToken: token });
@@ -143,32 +158,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refresh().finally(() => setIsLoading(false));
   }, [refresh]);
 
-  // 본인인증 게이트(#390) — 미인증 회원을 인증 화면으로 되돌린다.
-  //
-  // **소셜 가입만 이 상태에 도달한다.** 이메일 가입은 서버가 인증 없이는 대기 행조차
-  // 만들지 않아(BE PendingSignupService) 미인증 회원이 생기지 않는다. 소셜은 OAuth 콜백이
-  // 서버 리다이렉트라 그 사이에 인증창을 끼울 수 없어 회원이 먼저 만들어진다.
-  //
-  // `/auth/callback`이 신규 회원을 인증 화면으로 보내지만 **거기서 이탈하면 다시 요구하지
-  // 않는다** — 다음 로그인은 `new=true`가 아니라 홈으로 간다. 그 구멍을 여기서 막는다.
-  //
-  // 동의 게이트와 달리 **서버 응답값을 보고 프론트가 판단한다.** 동의는 서버가 403을 주는
-  // 진입점이 정해져 있지만, 본인인증의 서버 게이트는 거래 진입점에만 걸려 있어
-  // 403을 기다리면 "거래를 눌러야 비로소 안내받는" 지금 동작이 그대로 남는다.
-  // 대신 판정 근거는 서버가 내려준 값(`identityVerificationRequired`)이라,
-  // 서버 플래그를 끄면 이 게이트도 함께 꺼진다.
-  useEffect(() => {
-    if (isLoading || !member) {
-      return;
-    }
-    if (!member.identityVerificationRequired || member.identityVerified) {
-      return;
-    }
-    if (isIdentityGateExempt(pathname)) {
-      return;
-    }
-    router.replace(`${IDENTITY_PATH}?next=${encodeURIComponent(pathname ?? "/")}`);
-  }, [isLoading, member, pathname, router]);
+  // 본인인증 게이트(#390)의 리다이렉트는 components/IdentityGateRedirect.tsx로 옮겼다(#565) —
+  // 쿼리(`?tab=settings`)까지 봐야 해서 useSearchParams가 필요한데, 그 훅은 Suspense 경계 안에서만
+  // 쓸 수 있고 이 Provider는 루트 레이아웃 최상단이라 경계를 둘 자리가 없다.
 
   const login = useCallback(
     async (email: string, password: string) => {
@@ -178,6 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
       setAccessToken(tokens.accessToken);
       await fetchMe(tokens.accessToken);
+      setIsWithdrawing(false); // 같은 세션에서 다른 계정으로 다시 들어오면 가드는 평소대로 돌아간다.
     },
     [fetchMe],
   );
@@ -305,9 +298,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const withdraw = useCallback(async () => {
+    // 탈퇴 진행 표시(#567) — 성공 뒤 로그인 상태가 풀리는 순간 마이페이지의 비로그인 가드가
+    // /login으로 보내 버린다. 이 플래그가 켜져 있는 동안은 가드가 물러서고, 호출측이 완료 화면으로 옮긴다.
+    setIsWithdrawing(true);
     // 서버가 프로필을 가명화하고 리프레시 토큰을 폐기한다(backend #120). 진행 중 거래가 있으면
     // 409를 던져 호출측(SettingsTab)이 사유를 표시한다.
-    await fetchWithAuth<void>("/api/members/me", { method: "DELETE" });
+    try {
+      await fetchWithAuth<void>("/api/members/me", { method: "DELETE" });
+    } catch (err) {
+      setIsWithdrawing(false); // 실패했으면 회원은 그대로다 — 가드도 평소대로 돌아간다.
+      throw err;
+    }
     // 세션 쿠키는 서버만 지울 수 있어 로그아웃을 best-effort로 호출(토큰은 이미 폐기됨)한 뒤
     // 클라 상태를 정리한다.
     try {
@@ -332,6 +333,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         completeOnboarding,
         recordConsents,
         withdraw,
+        isWithdrawing,
         fetchWithAuth,
         fetchMultipartWithAuth,
         fetchBlobWithAuth,

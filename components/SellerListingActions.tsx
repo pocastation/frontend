@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { formatKRW } from "@/lib/format";
+import { formatKRW, hasPassed } from "@/lib/format";
 import { MIN_LISTING_PRICE, PRICE_UNIT } from "@/lib/fees";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionSaleType } from "@/lib/types";
@@ -25,14 +25,17 @@ import type { AuctionSaleType } from "@/lib/types";
  * </ul>
  * 가격 수정이 잠기면 버튼이 사라지고 내리기가 폭만 넓어진다. 무게는 그대로다.
  *
- * <p>연장은 여기 없다. 상세 응답에 {@code nextExtensionDays}·{@code extendableFrom}이 없어
- * 「언제부터 며칠 느는지」를 화면이 알 수 없다 — 연장은 마이페이지가 계속 맡는다.
+ * <p>연장(#581)도 여기서 한다. 규칙은 마이페이지 {@code SellingListingActions}와 같다 — 종료 1일 전부터
+ * 열리고, 이르면 흐리게(45%) 두고, 2회를 다 쓰면 버튼을 없앤다. 열리는 시각과 다음 일수는 서버가
+ * 상세 응답에 실어 준다(backend #451). 무게는 <b>한 줄에 잉크 테두리 하나</b> — 가격 수정이 열려 있으면
+ * 연장은 보조 아웃라인이고, 가격이 잠기면 연장이 주 행동 자리로 올라온다.
  */
 export default function SellerListingActions({
   auctionId,
   saleType,
   price,
   offerCount,
+  extension,
   viewport,
   onChanged,
 }: {
@@ -42,6 +45,8 @@ export default function SellerListingActions({
   price: number;
   /** 살아 있는 제안 수. 제안판매의 가격 잠금 판정 근거(§1.1). */
   offerCount: number;
+  /** 연장 정보(제안판매만). nextDays가 null이면 2회 소진. 즉시판매 호출부는 넘기지 않는다. */
+  extension?: { nextDays: number | null; from: string | null };
   viewport: "desktop" | "mobile";
   /** 성공 후 화면을 새로고침할 방법 — 페이지마다 다르다(라우터 refresh / 재조회). */
   onChanged: () => void;
@@ -56,6 +61,23 @@ export default function SellerListingActions({
   //    이 컴포넌트가 아예 렌더되지 않는다(backend#420과 같은 판단).
   const priceLocked = !isInstant && offerCount > 0;
   const priceLabel = isInstant ? "판매가" : "최소 제안가";
+  // 연장 판정 — 마이페이지와 같은 세 갈래. 서버가 계산한 값만 읽고 「1일 전」을 다시 세지 않는다.
+  const exhausted = !isInstant && extension != null && extension.nextDays == null;
+  const showExtend = !isInstant && extension != null && extension.nextDays != null;
+  const tooEarly = showExtend && extension.from != null && !hasPassed(extension.from);
+
+  async function extend() {
+    setBusy(true);
+    setError(null);
+    try {
+      await fetchWithAuth<void>(`/api/auctions/${auctionId}/extend`, { method: "POST" });
+      onChanged();
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "연장하지 못했어요. 잠시 후 다시 시도해 주세요.");
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function withdraw() {
     const warning =
@@ -89,17 +111,46 @@ export default function SellerListingActions({
           <>내 매물이에요 · 판매 중에는 언제든 가격을 바꿀 수 있어요</>
         ) : priceLocked ? (
           <>
-            내 매물이에요 · <b className="font-bold text-text-1">{offerCount}명</b>이 제안했어요 · 가격은 더 바꿀 수 없어요
+            내 매물이에요 · <b className="font-bold text-text-1">{offerCount}명</b>이 제안했어요
           </>
         ) : (
           <>내 매물이에요 · 아직 제안이 없어 가격을 바꿀 수 있어요</>
         )}
+        {/* 연장 상태 한 토막 — 「가격은 더 바꿀 수 없어요」는 버튼이 사라진 것으로 이미 보이므로 이 자리를 연장에 준다. */}
+        {exhausted && <> · 연장을 모두 사용했어요</>}
+        {tooEarly && (
+          <>
+            {" "}· 연장은 종료 <b className="font-bold text-text-1">1일 전</b>부터
+          </>
+        )}
+        {showExtend && !tooEarly && (
+          <>
+            {" "}· 지금 연장하면 <b className="font-bold text-text-1">{extension.nextDays}일</b> 늘어나요
+          </>
+        )}
       </p>
 
       <div className="flex items-center gap-2">
-        <button type="button" onClick={() => void withdraw()} disabled={busy} className={priceLocked ? subWideClass : subClass}>
+        <button
+          type="button"
+          onClick={() => void withdraw()}
+          disabled={busy}
+          className={priceLocked && !showExtend ? subWideClass : subClass}
+        >
           내리기
         </button>
+        {/* 이르면 흐리게 두고, 소진하면 없앤다 — 「기다리면 된다」와 「이 매물에선 끝났다」는 다른 사실이다. */}
+        {showExtend && (
+          <button
+            type="button"
+            onClick={() => void extend()}
+            disabled={busy || tooEarly}
+            title={tooEarly ? "종료 1일 전부터 연장할 수 있어요" : undefined}
+            className={priceLocked ? mainClass : subWideClass}
+          >
+            {extension.nextDays}일 연장
+          </button>
+        )}
         {!priceLocked && (
           <button type="button" onClick={() => setEditOpen(true)} disabled={busy} className={mainClass}>
             가격 수정

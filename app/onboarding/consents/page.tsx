@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { safeRedirectPath } from "@/lib/use-guest-only";
 import { ApiError } from "@/lib/api";
 import ConsentFields, {
   EMPTY_CONSENTS,
@@ -29,11 +30,9 @@ function ConsentsForm() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // 동의를 마치면 원래 있던 화면으로 돌려보낸다. 외부 URL로 튕기지 않도록 내부 경로만 허용한다.
-  const nextPath = (() => {
-    const raw = searchParams.get("next");
-    return raw && raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
-  })();
+  // 동의를 마치면 원래 있던 화면으로 돌려보낸다. 외부 URL로 튕기지 않도록 내부 경로만 허용한다 —
+  // 검사는 로그인과 같은 함수 하나로(#584). 세 곳에 복제돼 있던 문자열 검사는 백슬래시를 놓쳤다.
+  const nextPath = safeRedirectPath(searchParams.get("next"));
 
   useEffect(() => {
     if (!isLoading && !accessToken) {

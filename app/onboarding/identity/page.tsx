@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
+import { safeRedirectPath } from "@/lib/use-guest-only";
 import IdentityVerificationPanel, {
   type IdentityStatus,
 } from "@/components/IdentityVerificationPanel";
@@ -25,7 +26,7 @@ function IdentityOnboarding() {
 
   const rawNext = searchParams.get("next");
   const isOnboardingFlow = Boolean(rawNext);
-  const nextPath = rawNext && rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/";
+  const nextPath = safeRedirectPath(rawNext);
 
   useEffect(() => {
     if (!isLoading && !accessToken) {

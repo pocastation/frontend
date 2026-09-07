@@ -12,12 +12,14 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { apiFetch, apiFetchBlob, apiFetchMultipart, ApiError, type ApiFetchOptions } from "./api";
 import type { MemberResponse, TokenResponse } from "./types";
+import type { LoginResponse } from "./admin-totp";
 
 type AuthContextValue = {
   accessToken: string | null;
   member: MemberResponse | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<"authenticated" | "totp">;
+  completeTotpLogin: (token: string) => Promise<void>;
   logout: () => Promise<void>;
   refresh: () => Promise<string | null>;
   updateNickname: (nickname: string) => Promise<void>;
@@ -114,8 +116,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [member, setMember] = useState<MemberResponse | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(pathname !== "/auth/totp");
   const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const authEpoch = useRef(0);
 
   const fetchMe = useCallback(async (token: string) => {
     const me = await apiFetch<MemberResponse>("/api/members/me", { accessToken: token });
@@ -134,14 +137,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const promise = (async () => {
+      const epoch = authEpoch.current;
       try {
         const tokens = await apiFetch<TokenResponse>("/api/auth/refresh", { method: "POST" });
+        const me = await apiFetch<MemberResponse>("/api/members/me", { accessToken: tokens.accessToken });
+        if (epoch !== authEpoch.current) return null;
         setAccessToken(tokens.accessToken);
-        await fetchMe(tokens.accessToken);
+        setMember(me);
         return tokens.accessToken;
       } catch {
-        setAccessToken(null);
-        setMember(null);
+        if (epoch === authEpoch.current) {
+          setAccessToken(null);
+          setMember(null);
+        }
         return null;
       } finally {
         refreshPromiseRef.current = null;
@@ -150,11 +158,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     refreshPromiseRef.current = promise;
     return promise;
-  }, [fetchMe]);
+  }, []);
 
   // 새로고침 시 refreshToken 쿠키로 세션 복구를 시도한다. 쿠키가 없으면(비로그인)
   // refresh()가 조용히 null을 반환하므로 별도 에러 처리는 불필요.
   useEffect(() => {
+    // PASS/OAuth 복귀는 임시 쿠키로 시작한다. 남아 있는 갱신 쿠키로 인증 단계를 덮지 않는다.
+    if (window.location.pathname === "/auth/totp") {
+      return;
+    }
     refresh().finally(() => setIsLoading(false));
   }, [refresh]);
 
@@ -164,18 +176,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string) => {
-      const tokens = await apiFetch<TokenResponse>("/api/auth/login", {
+      authEpoch.current += 1;
+      const tokens = await apiFetch<LoginResponse>("/api/auth/login", {
         method: "POST",
         body: { email, password },
       });
+      if ("challenge" in tokens) {
+        setAccessToken(null);
+        setMember(null);
+        return "totp" as const;
+      }
       setAccessToken(tokens.accessToken);
       await fetchMe(tokens.accessToken);
       setIsWithdrawing(false); // 같은 세션에서 다른 계정으로 다시 들어오면 가드는 평소대로 돌아간다.
+      return "authenticated" as const;
     },
     [fetchMe],
   );
 
+  const completeTotpLogin = useCallback(async (token: string) => {
+    const epoch = ++authEpoch.current;
+    const me = await apiFetch<MemberResponse>("/api/members/me", { accessToken: token, cache: "no-store" });
+    if (epoch !== authEpoch.current) throw new Error("인증 상태가 변경됐어요.");
+    setMember(me);
+    setAccessToken(token);
+    setIsWithdrawing(false);
+  }, []);
+
   const logout = useCallback(async () => {
+    authEpoch.current += 1;
     await apiFetch<void>("/api/auth/logout", { method: "POST" });
     setAccessToken(null);
     setMember(null);
@@ -327,6 +356,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         member,
         isLoading,
         login,
+        completeTotpLogin,
         logout,
         refresh,
         updateNickname,

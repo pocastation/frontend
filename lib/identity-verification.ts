@@ -47,12 +47,13 @@ export function isIdentityWindowReady(): boolean {
  * @returns 대행사 발급 식별자. 채널 설정이 없으면 null.
  * @throws 인증을 취소했거나 실패했을 때. 메시지를 그대로 사용자에게 보여줄 수 있다.
  */
-export async function openIdentityWindow(redirectUrl?: string): Promise<string | null> {
+export async function openIdentityWindow(redirectUrl?: string, serverRequestId?: string): Promise<string | null> {
   if (!isIdentityWindowReady()) {
     return null;
   }
   // 이미 완료된 식별자로 다시 요청하면 실패한다 — 매 시도마다 새로 채번한다.
-  const identityVerificationId = `identity-${crypto.randomUUID()}`;
+  // TOTP 등록은 서버가 챌린지와 결합한 ID만 사용한다. 일반 가입·온보딩은 기존 방식 유지.
+  const identityVerificationId = serverRequestId ?? `identity-${crypto.randomUUID()}`;
   const response = await PortOne.requestIdentityVerification({
     storeId: STORE_ID,
     channelKey: CHANNEL_KEY,

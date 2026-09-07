@@ -5,8 +5,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PreProductionBar from "@/components/PreProductionBar";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import SiteTelemetry from "@/components/SiteTelemetry";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 import ServiceWorkerRegistrar from "@/components/pwa/ServiceWorkerRegistrar";
 import { AuthProvider } from "@/lib/auth-context";
@@ -142,8 +141,7 @@ export default function RootLayout({
         </AuthProvider>
         <ServiceWorkerRegistrar />
         <InstallPrompt />
-        <Analytics />
-        <SpeedInsights />
+        <SiteTelemetry />
       </body>
     </html>
   );

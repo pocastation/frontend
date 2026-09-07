@@ -391,6 +391,10 @@ export type AuctionDetailResponse = {
   images: AuctionImageResponse[];
   // 검수영상(개봉·틸팅 등, 경매당 최대 1개). 영상 없이 등록된 경매는 null/미존재.
   video?: AuctionVideoResponse | null;
+  // 판매자 연장(#581, backend #451) — 다음 수동 연장 일수(2회 소진·즉시판매면 null)와
+  // 연장이 열리는 시각(종료 1일 전). 마이페이지 목록 응답과 같은 계산이라 화면이 다시 세지 않는다.
+  nextExtensionDays: number | null;
+  extendableFrom: string | null;
 };
 
 export type AuctionVideoResponse = {

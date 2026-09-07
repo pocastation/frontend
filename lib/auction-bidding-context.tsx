@@ -38,6 +38,9 @@ type AuctionBiddingValue = {
   isLive: boolean;
   endingSoon: boolean;
   isOwnAuction: boolean;
+  /** 판매자 연장(#581) — 상세 응답 그대로. 판매자 액션만 읽는다. */
+  nextExtensionDays: number | null;
+  extendableFrom: string | null;
   amount: number;
   /** 제안 하한 = 최소가. 상한은 없다(§2.3). */
   floor: number;
@@ -81,6 +84,8 @@ export function AuctionBiddingProvider({
   initialEndAt,
   status,
   sellerId,
+  nextExtensionDays = null,
+  extendableFrom = null,
   children,
 }: {
   auctionId: number;
@@ -90,6 +95,8 @@ export function AuctionBiddingProvider({
   status: AuctionStatus;
   /** 판매자 회원 id. 본인 판정에 쓴다 — 닉네임은 바뀌는 값이라 식별자가 될 수 없다(#536). */
   sellerId: string;
+  nextExtensionDays?: number | null;
+  extendableFrom?: string | null;
   children: ReactNode;
 }) {
   const { member, fetchWithAuth } = useAuth();
@@ -101,6 +108,14 @@ export function AuctionBiddingProvider({
   const [offerCount, setOfferCount] = useState(initialOfferCount);
   const [wishlistCount, setWishlistCount] = useState(0);
   const [endAt, setEndAt] = useState(initialEndAt);
+  // 판매자가 연장하면 서버 컴포넌트가 새 마감으로 다시 그려진다(router.refresh). 상태로 든 마감은
+  // 첫 값에 묶여 있어 그대로면 카운트다운이 옛 마감을 센다(#581). 이펙트가 아니라 렌더 중에
+  // 맞추는 이유는 한 프레임이라도 옛 마감을 그리지 않기 위해서다(React 「props에서 파생한 상태」 패턴).
+  const [seenInitialEndAt, setSeenInitialEndAt] = useState(initialEndAt);
+  if (seenInitialEndAt !== initialEndAt) {
+    setSeenInitialEndAt(initialEndAt);
+    setEndAt(initialEndAt);
+  }
   // 제안가의 출발값은 최소가다. 예전에는 「현재가 + 1단위」였는데 그 현재가가 비공개가 됐다(§1.7).
   const [amount, setAmount] = useState(startPrice);
   const [submitting, setSubmitting] = useState(false);
@@ -270,6 +285,8 @@ export function AuctionBiddingProvider({
       isLive,
       endingSoon,
       isOwnAuction,
+      nextExtensionDays,
+      extendableFrom,
       amount,
       floor,
       outOfRange,
@@ -287,6 +304,7 @@ export function AuctionBiddingProvider({
     }),
     [
       auctionId, offerCount, wishlistCount, endAt, status, isLive, endingSoon, isOwnAuction,
+      nextExtensionDays, extendableFrom,
       amount, floor, outOfRange, adjustAmount, submitting, myOffer, myOfferAmount,
       onOfferWithdrawn, handleBid, needsAddress, addressModalOpen, onAddressSaved,
     ],

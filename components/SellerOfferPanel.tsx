@@ -159,7 +159,7 @@ export default function SellerOfferPanel({
 }: Props) {
   const router = useRouter();
   const { fetchWithAuth } = useAuth();
-  const { auctionId } = useAuctionBidding();
+  const { auctionId, nextExtensionDays, extendableFrom } = useAuctionBidding();
   const toast = useToast();
   const [activeViewport, setActiveViewport] = useState(false);
   const [offers, setOffers] = useState<BidHistoryItem[]>([]);
@@ -283,6 +283,7 @@ export default function SellerOfferPanel({
             saleType="AUCTION"
             price={startPrice}
             offerCount={totalElements}
+            extension={{ nextDays: nextExtensionDays, from: extendableFrom }}
             viewport={viewport}
             onChanged={() => router.refresh()}
           />

@@ -51,9 +51,11 @@ const PAUSE_AFTER_DOT_MS = 15000;
 // 배너 슬롯 — 관리자가 지정한 매물 최대 5건을 캐러셀로 넘긴다(#573). 예전에는 단일 슬롯이라 순서 1번만
 // 보였는데, 관리자가 순서까지 정해 올린 나머지 4건이 데스크탑에서는 존재하지 않는 셈이었다.
 //
-// 지정이 1건 이하면 도트 없이 예전과 같은 화면이다. 홈이 넘기는 폴백(인기 1위·최신 1건)은 언제나
+// 지정이 1건 이하면 도트·화살표 없이 예전과 같은 화면이다. 홈이 넘기는 폴백(인기 1위·최신 1건)은 언제나
 // 1건이라 캐러셀이 되지 않는다 — 지정하지 않았는데 조작 UI가 뜨던 #150 문제를 다시 만들지 않는다.
-// 좌우 화살표는 같은 이유로 두지 않는다. 이동 수단은 도트와 키보드(← →)뿐이다.
+// 카드 아래 한 줄은 왼쪽 도트 · 오른쪽 화살표 쌍이다(#576). 화살표는 도트를 정확히 누르지 않아도
+// 이전·다음으로 갈 수 있는 길이고, 움직임 줄이기(reduced-motion)로 자동 넘김이 없는 사용자에게는 유일한
+// 눈에 보이는 이동 수단이다.
 export default function Hero({ liveCount, featured }: { liveCount: number; featured: AuctionResponse[] }) {
   const slides = featured.slice(0, 5);
   const total = slides.length;
@@ -136,7 +138,7 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
     }
   }
 
-  // 도트에 포커스가 있을 때 ← →로 이동한다. 화살표 버튼을 두지 않는 대신 키보드 길은 남긴다.
+  // 도트에 포커스가 있을 때 ← →로 이동한다. 화살표 버튼과 별개로 키보드 길도 남긴다.
   function onDotsKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
     e.preventDefault();
@@ -257,27 +259,61 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
               ))}
             </div>
 
-            {/* 도트 — 모바일 배너와 같은 값(7px 점, 활성 20px 막대). 카운터는 두지 않는다(시안 결정). */}
+            {/*
+              조작 줄 — 왼쪽 도트(모바일 배너와 같은 7px 점, 활성 20px 막대), 오른쪽 화살표 쌍(시안 C안).
+              화살표는 셰브론 10px에 히트 영역 24px이라 셰브론이 카드 오른쪽 모서리에 닿도록 7px 안쪽으로
+              당긴다. 쉬는 상태는 비활성 도트와 같은 흰 35%, 호버·포커스에 흰 100%. 카운터는 두지 않는다.
+            */}
             {total > 1 && (
-              <div className="mt-3.5 flex justify-center gap-1.5" onKeyDown={onDotsKeyDown}>
-                {slides.map((auction, i) => (
-                  <button
-                    key={auction.id}
-                    type="button"
-                    aria-label={`${i + 1}번 배너로 이동`}
-                    aria-current={i === index}
-                    onClick={() => goTo(i)}
-                    className={`h-[7px] rounded-full transition-all duration-200 ${FOCUS_RING} ${
-                      i === index ? "w-5 bg-white" : "w-[7px] bg-white/35"
-                    }`}
-                  />
-                ))}
+              <div className="mt-3.5 flex items-center justify-between">
+                <div className="flex items-center gap-1.5" onKeyDown={onDotsKeyDown}>
+                  {slides.map((auction, i) => (
+                    <button
+                      key={auction.id}
+                      type="button"
+                      aria-label={`${i + 1}번 배너로 이동`}
+                      aria-current={i === index}
+                      onClick={() => goTo(i)}
+                      className={`h-[7px] rounded-full transition-all duration-200 ${FOCUS_RING} ${
+                        i === index ? "w-5 bg-white" : "w-[7px] bg-white/35"
+                      }`}
+                    />
+                  ))}
+                </div>
+                <div className="-mr-[7px] flex items-center gap-0.5">
+                  <ArrowButton label="이전 배너" direction="prev" onClick={() => goTo(index - 1)} />
+                  <ArrowButton label="다음 배너" direction="next" onClick={() => goTo(index + 1)} />
+                </div>
               </div>
             )}
           </div>
         )}
       </div>
     </section>
+  );
+}
+
+// 이전·다음 화살표 — 원·테두리·배경 없이 셰브론만. 끝에서는 순환하므로 비활성 상태가 없다.
+function ArrowButton({
+  label,
+  direction,
+  onClick,
+}: {
+  label: string;
+  direction: "prev" | "next";
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      onClick={onClick}
+      className={`grid h-6 w-6 place-items-center rounded-full text-white/35 transition-colors duration-200 hover:text-white focus-visible:text-white ${FOCUS_RING}`}
+    >
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        {direction === "prev" ? <path d="M6.5 1.5 3 5l3.5 3.5" /> : <path d="M3.5 1.5 7 5 3.5 8.5" />}
+      </svg>
+    </button>
   );
 }
 

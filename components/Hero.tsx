@@ -1,10 +1,12 @@
 "use client";
 
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import AuctionCountdown from "@/components/AuctionCountdown";
 import { mediaUrl } from "@/lib/api";
 import { formatKRW } from "@/lib/format";
 import { BRAND_HEADLINE_LINES, BRAND_SUBHEAD } from "@/lib/site";
+import { FOCUS_RING } from "@/lib/ui";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import type { AuctionResponse } from "@/lib/types";
 import WishlistHeart from "@/components/WishlistHeart";
@@ -37,12 +39,112 @@ const STAR_SPARKLES: { top: string; left: string; size: number; lav?: boolean }[
   { top: "22%", left: "93%", size: 13 },
 ];
 
-// 배너는 **단일 슬롯**이다 — 관리자가 지정한 매물 1건(없으면 홈이 넘겨주는 폴백 1건)만 보여준다.
-// 캐러셀(좌우 네비 버튼)은 제거했다: 지정이 없을 때 폴백 여러 건이 들어와 화살표만 떠 있는 상태가 됐고,
-// 배너의 목적(관리자가 고른 매물 하나를 강조)과도 맞지 않았다.
-export default function Hero({ liveCount, featured }: { liveCount: number; featured: AuctionResponse | null }) {
-  const current = featured;
-  const { wishlisted, toggle } = useWishlistStatus(current ? [current.id] : []);
+/*
+  넘김 규칙은 모바일 배너(MobilePromoBanner, T68)와 같은 값을 쓴다 — 두 지면이 같은 데이터를
+  다른 리듬으로 넘기면 「데스크탑에서는 왜 더 빨리 넘어가나」가 된다.
+  데스크탑에만 있는 조작은 호버·포커스다: 카드에 가격·마감이 실려 있어 읽는 중에 넘어가지 않게
+  마우스가 올라와 있는 동안은 멈춘다(시안 승인 2026-09-07).
+*/
+const AUTO_MS = 5000;
+const PAUSE_AFTER_DOT_MS = 15000;
+
+// 배너 슬롯 — 관리자가 지정한 매물 최대 5건을 캐러셀로 넘긴다(#573). 예전에는 단일 슬롯이라 순서 1번만
+// 보였는데, 관리자가 순서까지 정해 올린 나머지 4건이 데스크탑에서는 존재하지 않는 셈이었다.
+//
+// 지정이 1건 이하면 도트 없이 예전과 같은 화면이다. 홈이 넘기는 폴백(인기 1위·최신 1건)은 언제나
+// 1건이라 캐러셀이 되지 않는다 — 지정하지 않았는데 조작 UI가 뜨던 #150 문제를 다시 만들지 않는다.
+// 좌우 화살표는 같은 이유로 두지 않는다. 이동 수단은 도트와 키보드(← →)뿐이다.
+export default function Hero({ liveCount, featured }: { liveCount: number; featured: AuctionResponse[] }) {
+  const slides = featured.slice(0, 5);
+  const total = slides.length;
+  const { wishlisted, toggle } = useWishlistStatus(slides.map((a) => a.id));
+
+  const [index, setIndex] = useState(0);
+  const [reduceMotion, setReduceMotion] = useState(false);
+  const [visible, setVisible] = useState(true);
+  // 마우스·포커스가 카드 위에 있는 동안은 자동 넘김을 멈춘다. 벗어나면 다음 턴부터 재개.
+  const [hovering, setHovering] = useState(false);
+  // 도트로 골랐으면 「이걸 보겠다」는 뜻이라 한동안 쉰다(모바일과 같은 15초).
+  const [pausedUntil, setPausedUntil] = useState(0);
+  const pagerRef = useRef<HTMLDivElement>(null);
+  // 프로그램 스크롤 중에는 onScroll이 중간 위치를 읽지 않게 잠근다(모바일 배너와 같은 장치).
+  const navLock = useRef(false);
+  const navTarget = useRef(0);
+  const navTimer = useRef(0);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduceMotion(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  useEffect(() => {
+    const el = pagerRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver(([e]) => setVisible(e.isIntersecting), { threshold: 0.35 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  // 탭이 뒤로 가면 멈춘다 — 아무도 안 보는 배너가 혼자 도는 동안 위치만 바뀌어 있으면 돌아왔을 때 어색하다.
+  useEffect(() => {
+    const sync = () => setVisible(document.visibilityState === "visible");
+    document.addEventListener("visibilitychange", sync);
+    return () => document.removeEventListener("visibilitychange", sync);
+  }, []);
+
+  const scrollToIndex = useCallback((next: number, smooth: boolean) => {
+    const pager = pagerRef.current;
+    if (!pager || total < 1) return;
+    const i = ((next % total) + total) % total;
+    const left = i * pager.clientWidth;
+    navLock.current = true;
+    navTarget.current = left;
+    setIndex(i);
+    pager.scrollTo({ left, behavior: smooth ? "smooth" : "auto" });
+    window.clearTimeout(navTimer.current);
+    navTimer.current = window.setTimeout(() => {
+      navLock.current = false;
+    }, 1200);
+  }, [total]);
+
+  // 자동 전환 — 멈추는 게 아니라 미루는 것이다. 쉬는 시간이 남았으면 그만큼 뒤에 다시 잡는다.
+  useEffect(() => {
+    if (total < 2 || reduceMotion || !visible || hovering) return;
+    const delay = Math.max(AUTO_MS, pausedUntil - Date.now());
+    const id = setTimeout(() => scrollToIndex(index + 1, !reduceMotion), delay);
+    return () => clearTimeout(id);
+  }, [index, total, reduceMotion, visible, hovering, pausedUntil, scrollToIndex]);
+
+  const goTo = useCallback((next: number) => {
+    setPausedUntil(Date.now() + PAUSE_AFTER_DOT_MS);
+    scrollToIndex(next, true);
+  }, [scrollToIndex]);
+
+  function onPagerScroll(e: React.UIEvent<HTMLDivElement>) {
+    const el = e.currentTarget;
+    if (navLock.current) {
+      if (Math.abs(el.scrollLeft - navTarget.current) < 2) navLock.current = false;
+      return;
+    }
+    const next = Math.round(el.scrollLeft / el.clientWidth);
+    if (next !== index && next >= 0 && next < total) {
+      setIndex(next);
+      setPausedUntil(Date.now() + PAUSE_AFTER_DOT_MS);
+    }
+  }
+
+  // 도트에 포커스가 있을 때 ← →로 이동한다. 화살표 버튼을 두지 않는 대신 키보드 길은 남긴다.
+  function onDotsKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    e.preventDefault();
+    const next = e.key === "ArrowLeft" ? index - 1 : index + 1;
+    goTo(next);
+    const dots = e.currentTarget.querySelectorAll<HTMLButtonElement>("button");
+    dots[((next % total) + total) % total]?.focus();
+  }
 
   return (
     <section className="relative overflow-hidden bg-deepspace text-white">
@@ -115,61 +217,132 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
           </div>
         </div>
 
-        {current && (
-          <Link
-            href={`/auctions/${current.id}`}
-            className="group relative hidden aspect-[4/5] w-72 shrink-0 overflow-hidden rounded-[12px] border border-white/20 transition duration-300 ease-out hover:-translate-y-1.5 hover:border-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace motion-reduce:transition-none motion-reduce:hover:translate-y-0 sm:block"
+        {total > 0 && (
+          <div
+            className="hidden w-72 shrink-0 sm:block"
+            aria-roledescription={total > 1 ? "carousel" : undefined}
+            aria-label={total > 1 ? "추천 매물 배너" : undefined}
+            onMouseEnter={() => setHovering(true)}
+            onMouseLeave={() => setHovering(false)}
+            onFocus={() => setHovering(true)}
+            onBlur={(e) => {
+              if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHovering(false);
+            }}
           >
-            {current.representativeThumbnailUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
-              <img
-                src={mediaUrl(current.representativeThumbnailUrl)}
-                alt={current.title}
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-              />
-            ) : (
-              <span className="absolute inset-0 flex items-center justify-center bg-white/5 text-white/40" aria-hidden="true">
-                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                  <circle cx="8.5" cy="8.5" r="1.5" />
-                  <path d="m21 15-5-5L5 21" />
-                </svg>
-              </span>
-            )}
-            <span
-              className="pointer-events-none absolute inset-0"
-              style={{ background: "linear-gradient(180deg, transparent 45%, rgba(0,0,0,0.82) 100%)" }}
-              aria-hidden="true"
-            />
-
-            {/* 목록 카드는 이미 흰 pill + 도트에서 잉크 시계 칩으로 정리했는데 여기만 보라 필
-                배지로 남아 있었다 — 같은 요소가 두 언어를 쓰던 셈이라 같은 칩으로 맞춘다(#277). */}
-            {current.endAt && <AuctionCountdown endAt={current.endAt} />}
-
-            <WishlistHeart
-              auctionId={current.id}
-              active={wishlisted.has(current.id)}
-              onToggle={(next) => toggle(current.id, next)}
-              className="absolute right-3 top-3 z-[2] flex h-7 w-7 items-center justify-center rounded-full text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] hover:text-accent"
-            />
-
-            <div className="absolute inset-x-5 bottom-5 z-[2] text-white">
-              <p className="truncate text-sm font-bold">{current.artistName ?? current.title}</p>
-              <p className="mt-0.5 truncate text-xs text-white/60">{current.title}</p>
-              <div className="mt-3 flex items-end justify-between border-t border-white/20 pt-3">
-                <div>
-                  <p className="text-[10px] text-white/60">현재 제안가</p>
-                  <p className="font-display text-lg font-bold">{formatKRW(current.startPrice)}</p>
+            {/*
+              네이티브 가로 스크롤 스냅 — 모바일 배너(#550)·매물 상세 갤러리(#478)와 같은 방식.
+              카드 폭(288px)이 곧 슬롯 폭이라 scrollLeft / clientWidth가 곧 index다.
+              1건이면 스크롤할 것이 없어 지금까지의 단일 카드와 같다.
+            */}
+            <div
+              ref={pagerRef}
+              onScroll={onPagerScroll}
+              className="flex snap-x snap-mandatory overflow-x-auto overflow-y-hidden overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              style={{ scrollBehavior: reduceMotion ? "auto" : undefined }}
+            >
+              {slides.map((auction, i) => (
+                <div
+                  key={auction.id}
+                  role={total > 1 ? "group" : undefined}
+                  aria-roledescription={total > 1 ? "slide" : undefined}
+                  aria-label={total > 1 ? `${i + 1} / ${total}` : undefined}
+                  className="box-border w-full min-w-full flex-[0_0_100%] snap-center snap-always"
+                >
+                  <HeroCard
+                    auction={auction}
+                    wishlisted={wishlisted.has(auction.id)}
+                    onToggleWishlist={(next) => toggle(auction.id, next)}
+                  />
                 </div>
-                <div className="text-right">
-                  <p className="text-[10px] text-white/60">제안</p>
-                  <p className="font-display text-sm font-bold">{current.bidCount}회</p>
-                </div>
-              </div>
+              ))}
             </div>
-          </Link>
+
+            {/* 도트 — 모바일 배너와 같은 값(7px 점, 활성 20px 막대). 카운터는 두지 않는다(시안 결정). */}
+            {total > 1 && (
+              <div className="mt-3.5 flex justify-center gap-1.5" onKeyDown={onDotsKeyDown}>
+                {slides.map((auction, i) => (
+                  <button
+                    key={auction.id}
+                    type="button"
+                    aria-label={`${i + 1}번 배너로 이동`}
+                    aria-current={i === index}
+                    onClick={() => goTo(i)}
+                    className={`h-[7px] rounded-full transition-all duration-200 ${FOCUS_RING} ${
+                      i === index ? "w-5 bg-white" : "w-[7px] bg-white/35"
+                    }`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
     </section>
+  );
+}
+
+// 카드 한 장 — 지정 매물의 대표 사진 + 스타명·상품명·최소 제안가·제안 수. 단일 슬롯 시절의 카드 그대로다.
+function HeroCard({
+  auction,
+  wishlisted,
+  onToggleWishlist,
+}: {
+  auction: AuctionResponse;
+  wishlisted: boolean;
+  onToggleWishlist: (next: boolean) => void;
+}) {
+  return (
+    <Link
+      href={`/auctions/${auction.id}`}
+      className="group relative block aspect-[4/5] w-72 overflow-hidden rounded-[12px] border border-white/20 transition duration-300 ease-out hover:-translate-y-1.5 hover:border-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+    >
+      {auction.representativeThumbnailUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
+        <img
+          src={mediaUrl(auction.representativeThumbnailUrl)}
+          alt={auction.title}
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+        />
+      ) : (
+        <span className="absolute inset-0 flex items-center justify-center bg-white/5 text-white/40" aria-hidden="true">
+          <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <path d="m21 15-5-5L5 21" />
+          </svg>
+        </span>
+      )}
+      <span
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "linear-gradient(180deg, transparent 45%, rgba(0,0,0,0.82) 100%)" }}
+        aria-hidden="true"
+      />
+
+      {/* 목록 카드는 이미 흰 pill + 도트에서 잉크 시계 칩으로 정리했는데 여기만 보라 필
+          배지로 남아 있었다 — 같은 요소가 두 언어를 쓰던 셈이라 같은 칩으로 맞춘다(#277). */}
+      {auction.endAt && <AuctionCountdown endAt={auction.endAt} />}
+
+      <WishlistHeart
+        auctionId={auction.id}
+        active={wishlisted}
+        onToggle={onToggleWishlist}
+        className="absolute right-3 top-3 z-[2] flex h-7 w-7 items-center justify-center rounded-full text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)] hover:text-accent"
+      />
+
+      <div className="absolute inset-x-5 bottom-5 z-[2] text-white">
+        <p className="truncate text-sm font-bold">{auction.artistName ?? auction.title}</p>
+        <p className="mt-0.5 truncate text-xs text-white/60">{auction.title}</p>
+        <div className="mt-3 flex items-end justify-between border-t border-white/20 pt-3">
+          <div>
+            <p className="text-[10px] text-white/60">현재 제안가</p>
+            <p className="font-display text-lg font-bold">{formatKRW(auction.startPrice)}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-[10px] text-white/60">제안</p>
+            <p className="font-display text-sm font-bold">{auction.bidCount}회</p>
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }

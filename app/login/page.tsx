@@ -9,6 +9,7 @@ import { apiFetch, ApiError, socialLoginUrl } from "@/lib/api";
 import { EMAIL_NOT_VERIFIED } from "@/lib/auth-context";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import { GoogleIcon } from "@/components/GoogleIcon";
+import { totpDestination } from "@/lib/admin-totp";
 
 
 function LoginForm() {
@@ -42,8 +43,11 @@ function LoginForm() {
     setResendError(null);
     setIsSubmitting(true);
     try {
-      await login(email, password);
-      router.replace(redirectTo);
+      const result = await login(email, password);
+      setPassword("");
+      router.replace(result === "totp"
+        ? `/auth/totp?next=${encodeURIComponent(totpDestination(searchParams.get("redirect")))}`
+        : redirectTo);
     } catch (err) {
       if (err instanceof ApiError && err.errorCode === EMAIL_NOT_VERIFIED) {
         setNeedsVerification(true);

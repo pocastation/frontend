@@ -335,6 +335,8 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
       initialEndAt={auction.endAt!}
       status={auction.status}
       sellerId={auction.sellerId}
+      nextExtensionDays={auction.nextExtensionDays ?? null}
+      extendableFrom={auction.extendableFrom ?? null}
     >
       {body}
     </AuctionBiddingProvider>

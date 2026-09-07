@@ -1282,7 +1282,10 @@ function SellingList({
                 ) : onGoPayment ? (
                   <OrderStatusFooter order={order} onGoPayment={onGoPayment} />
                 ) : null)}
-              {soldOrder && onRefresh && (
+              {/* 🔴 판매 중(LIVE)인 매물에는 진행 중인 거래가 없다(#579) — 선택하면 MATCHED, 결제되면
+                  ENDED_SOLD다. 그런데 미입금·구매자 취소로 복귀한 매물에는 끝난 주문이 남아 있어,
+                  주문만 보고 그리면 「17시간 남음」 옆에 「결제 미완료 · 거래가 종료됐어요」가 붙는다. */}
+              {soldOrder && onRefresh && !isLive && (
                 <SellerFulfillmentFooter soldOrder={soldOrder} onRefresh={onRefresh} />
               )}
             </div>

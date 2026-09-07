@@ -43,9 +43,9 @@ async function getPopularAuctions(): Promise<AuctionListResponse | null> {
   }
 }
 
-// 홈 배너 — 관리자가 지정(featured)한 LIVE 매물. 데스크탑 Hero는 단일 슬롯이라 첫 건만 쓰고,
-// 모바일 배너는 캐러셀이라 여러 건을 슬라이드로 넘긴다. 지정이 없으면 빈 목록이 오고,
-// 데스크탑은 아래에서 인기 매물로 폴백한다(#150). 모바일은 브랜드 카피 한 장만 남는다.
+// 홈 배너 — 관리자가 지정(featured)한 LIVE 매물, 순서대로 최대 5건. 데스크탑 Hero(#573)와
+// 모바일 배너 둘 다 같은 목록을 캐러셀로 넘긴다. 지정이 없으면 빈 목록이 오고,
+// 데스크탑은 아래에서 인기 매물 1건으로 폴백한다(#150). 모바일은 브랜드 카피 한 장만 남는다.
 async function getFeaturedAuctions(): Promise<AuctionListResponse | null> {
   try {
     return await apiFetch<AuctionListResponse>("/api/auctions/featured?size=5", { cache: "no-store" });
@@ -82,10 +82,12 @@ export default async function Home() {
   ]);
   const content = auctions?.content ?? [];
   const instantContent = instantSales?.content ?? [];
-  // 배너는 한 자리다 — 관리자 지정(featured) 1건 우선 → 없으면 인기 1위 → 그것도 없으면 최신 1건.
-  // 여러 건을 넘기면 Hero가 캐러셀이 되어, 지정하지 않았는데도 네비 버튼이 뜨는 상태가 됐었다.
-  const heroFeatured =
-    featured?.content?.[0] ?? popular?.content?.[0] ?? content[0] ?? null;
+  // 데스크탑 배너 — 관리자 지정(featured) 목록 전체(최대 5, #573)를 넘긴다. 지정이 없을 때만
+  // 인기 1위 → 최신 1건으로 폴백하되 **항상 1건**이다: 폴백을 여럿 넘기면 지정하지 않았는데도
+  // 캐러셀 도트가 뜬다(#150에서 겪은 상태).
+  const featuredList = featured?.content ?? [];
+  const heroFallback = popular?.content?.[0] ?? content[0] ?? null;
+  const heroFeatured = featuredList.length > 0 ? featuredList : heroFallback ? [heroFallback] : [];
 
   return (
     // 모바일(sm 미만)에서는 앱 셸이 크롬을 대신한다 — 상단바 48px + 하단 5탭.

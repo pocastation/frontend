@@ -3,6 +3,7 @@
 import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { PAYMENT_FEE_KRW } from "@/lib/fees";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWishlist } from "@/lib/wishlist-context";
@@ -1511,12 +1512,12 @@ function BuyerFulfillmentFooter({
 
   // 발송 전 주문 취소(약관 제13조 제2항). 되돌릴 수 없으니 한 번 되묻는다.
   //
-  // 🔴 수수료 공제를 여기서 고지한다(정책 제17조 ① — 공제 후 환불). 예전 문구
-  // 「환불받을까요?」는 전액 환불로 읽혔다. 금액은 적지 않는다 — 잠정 300원이
-  // PG 계약으로 바뀔 값이라(RefundPolicy.PAYMENT_FEE_KRW), 박아 두면 문구가 또 낡는다.
+  // 🔴 수수료 공제를 여기서 고지한다(운영정책 제19조 ④ — 금액과 산정 기준을 취소 신청 화면에 미리 고지).
+  // 금액은 `PAYMENT_FEE_KRW`(lib/fees) 한 곳에서만 온다 — 백엔드 RefundPolicy.PAYMENT_FEE_KRW와 같은 값이고,
+  // PG 계약이 끝나면 운영정책·백엔드·이 상수를 함께 바꾼다.
   async function cancel() {
     if (cancelling) return;
-    if (!window.confirm("주문을 취소할까요? 결제 금액에서 전자결제 이용 수수료를 뺀 금액이 환불되고, 취소한 뒤에는 되돌릴 수 없어요.")) return;
+    if (!window.confirm(`주문을 취소할까요? 결제 금액에서 전자결제 이용 수수료 ${PAYMENT_FEE_KRW.toLocaleString()}원(거래 금액과 관계없이 건당)을 뺀 금액이 환불되고, 거래 수수료는 전액 환불돼요. 취소한 뒤에는 되돌릴 수 없어요.`)) return;
     setCancelling(true);
     try {
       await fetchWithAuth<void>(`/api/auctions/${order.auctionId}/order/cancel`, { method: "POST" });

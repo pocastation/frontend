@@ -91,6 +91,21 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* 사전예약 페이지 — 히어로 좌우 포카 사진 부유(왼쪽 6s·10px, 오른쪽 7.5s·14px)와 그룹 띠 순환.
+   회전은 keyframe 안에 함께 둔다. transform 한 속성이라 따로 두면 애니메이션이 회전을 덮어쓴다. */
+@keyframes pocaFloat {
+  0%, 100% { transform: translateY(0) rotate(-7deg); }
+  50% { transform: translateY(-10px) rotate(-7deg); }
+}
+@keyframes pocaFloat2 {
+  0%, 100% { transform: translateY(0) rotate(8deg); }
+  50% { transform: translateY(-14px) rotate(8deg); }
+}
+@keyframes pocaMarquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
 /* prefers-reduced-motion 사용자에게는 트랜지션/애니메이션을 사실상 없앤다(접근성). */
 @media (prefers-reduced-motion: reduce) {
   *,

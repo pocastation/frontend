@@ -236,7 +236,7 @@ export default function MobileMypageMenu({
       <Band />
       <GroupHead>판매</GroupHead>
       <Group>
-        <TabRow label="판매 중인 매물" value={`${counts.selling}건`} onClick={() => onSelectTab("selling")} />
+        <TabRow label="판매 중인 상품" value={`${counts.selling}건`} onClick={() => onSelectTab("selling")} />
         <TabRow label="판매 내역" value={`${counts.sellHistory}건`} badge={shipmentActionCount} onClick={() => onSelectTab("sellHistory")} />
         <TabRow label="정산 계좌" onClick={() => onSelectTab("settlement")} last />
       </Group>

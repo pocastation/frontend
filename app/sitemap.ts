@@ -73,7 +73,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // 진행 중인 매물 — 종료되면 사라지지만 종료 경매 상세도 공개라 색인 가치가 있다.
+  // 판매 중인 상품 — 종료되면 사라지지만 종료 경매 상세도 공개라 색인 가치가 있다.
   // 다만 목록이 계속 바뀌므로 상한을 두고 최신 것 위주로만 싣는다(sitemap 크기 관리).
   for (const saleType of ["AUCTION", "INSTANT"] as const) {
     const auctions = await safeFetch<AuctionListResponse>(`/api/auctions?saleType=${saleType}&size=200`);

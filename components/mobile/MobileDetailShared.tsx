@@ -140,7 +140,7 @@ export function MobileDetailTabs({
               href="/inquiries/new"
               className={`mt-5 inline-block text-[12.5px] font-bold text-text-3 underline ${FOCUS_RING}`}
             >
-              이 매물 문의하기
+              이 상품 문의하기
             </Link>
           </div>
         ) : (

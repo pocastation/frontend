@@ -206,7 +206,7 @@ export default function AdminDisputesPage() {
                   href={`/auctions/${selected.auctionId}`}
                   className={`text-xs font-semibold text-primary hover:underline ${FOCUS_RING}`}
                 >
-                  매물 보기 →
+                  판매글 보기 →
                 </Link>
               </div>
 

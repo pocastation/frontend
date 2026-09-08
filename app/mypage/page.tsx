@@ -200,7 +200,7 @@ const TRADE_NAV: { key: Tab; label: string; icon: () => ReactNode }[] = [
   { key: "dashboard", label: "대시보드", icon: DashboardIcon },
   { key: "bidding", label: "가격 제안", icon: TicketIcon },
   { key: "purchases", label: "구매 내역", icon: BadgeCheckIcon },
-  { key: "selling", label: "판매 중인 매물", icon: TagIcon },
+  { key: "selling", label: "판매 중인 상품", icon: TagIcon },
   { key: "sellHistory", label: "판매 내역", icon: ArchiveIcon },
   { key: "wishlist", label: "관심 목록", icon: HeartIcon },
 ];
@@ -385,7 +385,7 @@ function MyPageBody() {
       // 구매 확정 건(거래 성사 + 즉시구매)의 주문 상태를 배치로 채운다 — 주문이 없는 매물은 응답에 안 온다.
       // 배치 채움 실패는 non-fatal: 목록은 그대로 보여주고 상태 푸터만 생략한다(wishlist 하트와 동일 원칙).
       // 🔴 예전에는 isTopBidder로 「내가 성사된 건」만 골라 보냈는데, 그 필드가 사라졌다(§1.7 —
-      // 「내가 1등이다」는 남의 제안 상태다). 성사된 매물 전체를 보내고 **주문이 돌아오는지로
+      // 「내가 1등이다」는 남의 제안 상태다). 성사된 상품 전체를 보내고 **주문이 돌아오는지로
       // 판정**한다 — 이 API는 내 주문만 돌려주므로 오히려 더 정확하다(승계로 성사된 건도 잡힌다).
       //
       // 🔴 **MATCHED를 반드시 포함한다**(#419). 거래 개편으로 결제 대기 상태가 ENDED_SOLD에서
@@ -746,10 +746,10 @@ function MyPageBody() {
             {/* 위아래 규칙선 안에서 세로선으로만 나눈다 — 다섯 값이 한 덩어리로 읽혀야 비교가 된다. */}
             <div className="mt-5 flex flex-wrap gap-y-4 border-y border-border py-4">
               <DashboardStat label="참여 중인 거래" value={`${liveBidding.length}건`} />
-              <DashboardStat label="제안한 매물" value={`${bidding.length}건`} />
+              <DashboardStat label="제안한 상품" value={`${bidding.length}건`} />
               <DashboardStat label="거래 성사" value={`${wonBidding.length}건`} />
               <DashboardStat label="즉시구매" value={`${instantPurchases.length}건`} />
-              <DashboardStat label="판매 중인 매물" value={`${activeSelling.length}건`} />
+              <DashboardStat label="판매 중인 상품" value={`${activeSelling.length}건`} />
             </div>
 
             {/* 내 신뢰 레벨 진행도(§12.7) — 레벨·배지는 왼쪽 사용자 카드로 옮겼고(#275)
@@ -803,11 +803,11 @@ function MyPageBody() {
               </DashboardPanel>
 
               <DashboardPanel title="제안 내역" onSeeAll={() => goToBidding("all")}>
-                <MyBiddingList items={bidding.slice(0, 3)} loading={loading} emptyText="아직 제안한 매물이 없어요." orders={orders} onWithdrawOffer={openWithdrawModal} />
+                <MyBiddingList items={bidding.slice(0, 3)} loading={loading} emptyText="아직 제안한 상품이 없어요." orders={orders} onWithdrawOffer={openWithdrawModal} />
               </DashboardPanel>
 
               <DashboardPanel title="구매 내역" onSeeAll={() => goToPurchases("auction")}>
-                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="거래가 성사된 매물이 없습니다." orders={orders} onGoPayment={() => selectTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
+                <MyBiddingList items={wonBidding.slice(0, 3)} loading={loading} emptyText="거래가 성사된 판매글이 없습니다." orders={orders} onGoPayment={() => selectTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
               </DashboardPanel>
 
               <DashboardPanel title="즉시구매 내역" onSeeAll={() => goToPurchases("instant")}>
@@ -824,11 +824,11 @@ function MyPageBody() {
                 />
               </DashboardPanel>
 
-              <DashboardPanel title="판매 중인 매물" onSeeAll={() => selectTab("selling")}>
+              <DashboardPanel title="판매 중인 상품" onSeeAll={() => selectTab("selling")}>
                 <SellingList
                   items={activeSelling.slice(0, 3)}
                   loading={loading}
-                  emptyText="등록한 매물이 없습니다."
+                  emptyText="등록한 판매글이 없습니다."
                   showReviewStatus
                   soldOrders={soldOrders}
                   onRefresh={loadMyActivity}
@@ -838,7 +838,7 @@ function MyPageBody() {
           </>
         ) : activeTab === "bidding" ? (
           <>
-            <TabHead title="가격 제안" sub={<>가격을 제안한 매물을 모아서 봐요.</>} />
+            <TabHead title="가격 제안" sub={<>가격을 제안한 상품을 모아서 봐요.</>} />
             <FilterChips
               label="제안 목록 필터"
               value={biddingFilter}
@@ -852,7 +852,7 @@ function MyPageBody() {
               <MyBiddingList
                 items={biddingFilter === "live" ? liveBidding : bidding}
                 loading={loading}
-                emptyText={biddingFilter === "live" ? "참여 중인 거래가 없습니다." : "아직 제안한 매물이 없어요."}
+                emptyText={biddingFilter === "live" ? "참여 중인 거래가 없습니다." : "아직 제안한 상품이 없어요."}
                 orders={orders}
                 onGoPayment={() => selectTab("payment")}
                 onWithdrawOffer={openWithdrawModal}
@@ -873,7 +873,7 @@ function MyPageBody() {
             />
             <div className="mt-5">
               {purchaseFilter === "auction" ? (
-                <MyBiddingList items={wonBidding} loading={loading} emptyText="거래가 성사된 매물이 없습니다." orders={orders} onGoPayment={() => selectTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
+                <MyBiddingList items={wonBidding} loading={loading} emptyText="거래가 성사된 판매글이 없습니다." orders={orders} onGoPayment={() => selectTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
               ) : (
                 <SellingList
                   items={instantPurchases}
@@ -891,12 +891,12 @@ function MyPageBody() {
           </>
         ) : activeTab === "selling" ? (
           <>
-            <TabHead title="판매 중인 매물" sub={<>등록한 매물과 검수 상태 {activeSelling.length}건</>} />
+            <TabHead title="판매 중인 상품" sub={<>등록한 판매글과 검수 상태 {activeSelling.length}건</>} />
             {loading ? (
               <p className="mt-6 text-sm text-text-3">불러오는 중...</p>
             ) : activeSelling.length === 0 ? (
               <p className="mt-6 text-sm text-text-3">
-                아직 등록한 매물이 없어요.{" "}
+                아직 등록한 판매글이 없어요.{" "}
                 <Link href="/auctions/new" className={`font-bold text-primary hover:underline ${FOCUS_RING}`}>
                   판매 등록하기 →
                 </Link>
@@ -906,7 +906,7 @@ function MyPageBody() {
                 <SellingList
                   items={activeSelling}
                   loading={loading}
-                  emptyText="등록한 매물이 없습니다."
+                  emptyText="등록한 판매글이 없습니다."
                   showReviewStatus
                   showListingActions
                   soldOrders={soldOrders}
@@ -970,7 +970,7 @@ function MyPageBody() {
           </>
         ) : activeTab === "wishlist" ? (
           <>
-            <TabHead title="관심 목록" sub={<>찜한 매물 {wishlist.length}건</>} />
+            <TabHead title="관심 목록" sub={<>찜한 상품 {wishlist.length}건</>} />
             {/* 관심 목록은 하단탭의 루트 화면이라 모바일에서도 제목을 갖는다(서브 화면 앱바가 없다). */}
             <div className="flex items-baseline gap-2 pt-0.5 sm:hidden">
               <h1 className="font-display text-xl font-extrabold text-text-1">관심 목록</h1>
@@ -992,7 +992,7 @@ function MyPageBody() {
             ) : (
               !loading && (
                 <p className="mt-8 text-center text-[13px] text-text-3 sm:hidden">
-                  아직 찜한 매물이 없어요.
+                  아직 찜한 상품이 없어요.
                 </p>
               )
             )}
@@ -1000,14 +1000,14 @@ function MyPageBody() {
               <WishlistTabList
                 items={wishlist}
                 loading={loading}
-                emptyText="아직 찜한 매물이 없어요."
+                emptyText="아직 찜한 상품이 없어요."
                 onRemove={handleRemoveWishlist}
               />
             </div>
           </>
         ) : (
           <>
-            <TabHead title="판매 내역" sub={<>종료되거나 취소된 매물 {sellingHistory.length}건</>} />
+            <TabHead title="판매 내역" sub={<>종료되거나 취소된 판매글 {sellingHistory.length}건</>} />
             <div className="mt-5">
               <SellingList
                 items={sellingHistory}
@@ -1125,7 +1125,7 @@ function getSellerModerationReason(item: SellingListItem) {
     && "cancellationReason" in item
     && item.cancellationReason?.trim()
   ) {
-    return { label: "취소 사유", text: item.cancellationReason, inquiryTag: "매물 취소 문의" };
+    return { label: "취소 사유", text: item.cancellationReason, inquiryTag: "판매글 취소 문의" };
   }
   return null;
 }
@@ -1156,7 +1156,7 @@ function SellingList({
   soldOrders?: Record<number, SoldOrderResponse>;
   onRefresh?: () => void;
   onConfirmed?: (auctionId: number) => void;
-  // 연장·최소가 수정은 「판매 중인 매물」 탭에서만 — 판매 내역(종료분)과 즉시구매 내역에는
+  // 연장·최소가 수정은 「판매 중인 상품」 탭에서만 — 판매 내역(종료분)과 즉시구매 내역에는
   // 손댈 것이 없다. 목록 컴포넌트를 셋이 공유하므로 켜는 쪽에서만 켠다.
   showListingActions?: boolean;
 }) {
@@ -2105,7 +2105,7 @@ function MyBiddingList({
                   <span className="block truncate text-[13.5px] font-bold text-text-1">{item.title}</span>
                   {/* 🔴 아티스트명을 보라 굵은 글씨에서 이 메타 줄로 내렸다(#419).
                       「보라는 상태를 말하는 자리에만 — 제목에는 쓰지 않는다」는 규칙을 어기고
-                      있었고, 목록에서 가장 먼저 읽혀야 할 것은 매물 제목이지 아티스트가 아니다. */}
+                      있었고, 목록에서 가장 먼저 읽혀야 할 것은 판매글 제목이지 아티스트가 아니다. */}
                   <span className="mt-0.5 block truncate text-[11.5px] text-text-3">
                     {item.artistName ? `${item.artistName} · ` : ""}
                     최소가 {formatKRW(item.startPrice)}

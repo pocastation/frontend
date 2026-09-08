@@ -31,13 +31,15 @@ function UsersIcon() {
     </svg>
   );
 }
-function GavelIcon() {
+function ListingIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-      <path d="m14 6 4 4M9 11l4 4M3 21h8M12.5 3.5l8 8-2 2-8-8zM8 9l-4.5 4.5 2 2L10 11" />
+      <rect x="4" y="3" width="16" height="18" rx="2" />
+      <path d="M8 8h8M8 12h8M8 16h5" />
     </svg>
   );
 }
+
 function FlagIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -140,7 +142,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/admin", label: "대시보드", icon: <GridIcon />, ready: true },
       { href: "/admin/members", label: "회원 관리", icon: <UsersIcon />, ready: true },
       { href: "/admin/catalog", label: "카탈로그 관리", icon: <CardIcon />, ready: true },
-      { href: "/admin/auctions", label: "매물 관리", icon: <GavelIcon />, ready: true },
+      { href: "/admin/auctions", label: "판매글 관리", icon: <ListingIcon />, ready: true },
       { href: "/admin/banner", label: "홈 배너", icon: <BannerIcon />, ready: true },
     ],
   },

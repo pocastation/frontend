@@ -430,7 +430,7 @@ export default function SearchScreen({
             ) : (
               <>
                 <p className="pt-3 text-[11.5px] tabular-nums text-text-3">
-                  매물 <b className="font-bold text-text-2">{totalElements.toLocaleString()}</b>
+                  상품 <b className="font-bold text-text-2">{totalElements.toLocaleString()}</b>
                 </p>
                 <div
                   className={`grid grid-cols-2 gap-x-2 gap-y-[18px] pt-2.5 transition-opacity sm:grid-cols-3 ${

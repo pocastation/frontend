@@ -5,6 +5,7 @@ import {
   PRIVACY_ARTICLES,
   PRIVACY_EFFECTIVE_DATE,
   PRIVACY_HISTORY,
+  PRIVACY_PREAMBLE,
   type PrivacyBlock,
   type PrivacyBullet,
   type PrivacyTable,
@@ -21,8 +22,8 @@ function anchorOf(no: string) {
 function Paragraphs({ items }: { items: string[] }) {
   return (
     <>
-      {items.map((p) => (
-        <p key={p} className="mt-2 text-sm leading-relaxed text-text-2">
+      {items.map((p, index) => (
+        <p key={index} className="mt-2 text-sm leading-relaxed text-text-2">
           {p}
         </p>
       ))}
@@ -33,8 +34,8 @@ function Paragraphs({ items }: { items: string[] }) {
 function Bullets({ items }: { items: PrivacyBullet[] }) {
   return (
     <ul className="mt-3 space-y-1.5">
-      {items.map((b) => (
-        <li key={b.text} className="flex gap-2 text-sm leading-relaxed text-text-2">
+      {items.map((b, index) => (
+        <li key={index} className="flex gap-2 text-sm leading-relaxed text-text-2">
           <span aria-hidden="true" className="shrink-0 text-text-3">
             ·
           </span>
@@ -136,6 +137,13 @@ export default function PrivacyPage() {
         </dl>
       </header>
 
+      {/* 전문 — 법 §30에 따른 방침 수립·공개 선언. 원본 문서 머리에 있는 문단 그대로. */}
+      <div className="mt-6 space-y-2 text-sm leading-relaxed text-text-2">
+        {PRIVACY_PREAMBLE.map((p, index) => (
+          <p key={index}>{p}</p>
+        ))}
+      </div>
+
       <nav aria-label="목차" className="mt-8 rounded-r3 border border-border p-4 sm:p-5">
         <h2 className="text-sm font-bold text-text-1">목차</h2>
         <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5">
@@ -162,8 +170,8 @@ export default function PrivacyPage() {
             {article.paragraphs && <Paragraphs items={article.paragraphs} />}
             {article.table && <Table table={article.table} />}
             {article.bullets && <Bullets items={article.bullets} />}
-            {article.blocks?.map((block) => (
-              <Block key={block.heading ?? block.paragraphs?.[0]} block={block} />
+            {article.blocks?.map((block, index) => (
+              <Block key={index} block={block} />
             ))}
 
             {/* 권익침해 구제방법은 보호책임자 조항에 딸린 정보다 — 별도 조문으로 세우면

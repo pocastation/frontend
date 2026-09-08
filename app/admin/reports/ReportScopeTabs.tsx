@@ -7,7 +7,7 @@ import { FOCUS_RING } from "@/lib/ui";
 // 사이드바에 '신고 관리'와 '리뷰 신고'가 따로 있어 메뉴가 길어졌다. 사이드바에는 '신고 관리'만
 // 남기고, 대상(매물/리뷰) 전환은 이 하위 탭이 담당한다. 두 페이지 모두 같은 탭을 렌더한다.
 const SCOPES: { href: string; label: string }[] = [
-  { href: "/admin/reports", label: "매물 신고" },
+  { href: "/admin/reports", label: "판매글 신고" },
   { href: "/admin/reviews", label: "리뷰 신고" },
 ];
 

@@ -108,7 +108,7 @@ function BrandSlide() {
         href="/auctions"
         className={`mt-[18px] flex h-11 w-full items-center justify-center rounded-[7px] bg-primary text-sm font-extrabold text-white ${FOCUS_RING}`}
       >
-        진행 중인 매물 보기 →
+        진행 중인 판매글 보기 →
       </Link>
       <Link
         href="/guide"

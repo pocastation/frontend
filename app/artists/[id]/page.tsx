@@ -194,7 +194,7 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
         {/* 매물은 이 화면의 목적지 — 여백을 크게 열고 제목을 키운다. 격자가 지면을 만든다. */}
         <section className="mt-9 sm:mt-10">
           <h2 className="mb-3 font-display text-base font-extrabold text-text-1 sm:text-[17px]">
-            진행 중인 매물
+            판매 중인 상품
           </h2>
           {/* 좌우 14px 지면에 2열. 카드는 홈·목록·검색과 같은 compact 리듬을 쓴다. */}
           <AuctionGrid

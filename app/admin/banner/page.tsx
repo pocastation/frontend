@@ -15,7 +15,7 @@ import type { AdminAuctionSummary } from "@/lib/types";
  * <p>배너는 오래 단일 슬롯이었다. 서버가 5건과 노출 순서를 받게 되면서 「몇 번째로 보일지」가
  * 관리자의 결정 사항이 됐는데, 그걸 정할 화면이 없었다.
  *
- * <p>지정 자체는 여기서 하지 않는다 — 매물을 찾으려면 검색·필터가 필요하고 그건 매물 관리의 일이다.
+ * <p>지정 자체는 여기서 하지 않는다 — 매물을 찾으려면 검색·필터가 필요하고 그건 판매글 관리의 일이다.
  * 이 화면은 <b>이미 지정된 것들의 순서와 현황</b>만 맡는다.
  */
 
@@ -97,7 +97,7 @@ export default function AdminBannerPage() {
       <header className="mb-1">
         <h1 className="font-display text-xl font-extrabold text-text-1">홈 배너</h1>
         <p className="mt-1 text-sm text-text-3">
-          홈 첫 화면에 세울 매물이에요. 위에서부터 차례로 넘어가고, 5초마다 다음 장으로 바뀌어요.
+          홈 첫 화면에 세울 판매글이에요. 위에서부터 차례로 넘어가고, 5초마다 다음 장으로 바뀌어요.
         </p>
       </header>
 
@@ -123,7 +123,7 @@ export default function AdminBannerPage() {
           <p className="py-20 text-center text-sm text-text-3">불러오는 중...</p>
         ) : items.length === 0 ? (
           <div className="py-20 text-center">
-            <p className="text-sm font-bold text-text-2">지정된 매물이 없어요</p>
+            <p className="text-sm font-bold text-text-2">지정된 판매글이 없어요</p>
             <p className="mt-1 text-sm text-text-3">홈에는 브랜드 소개 한 장만 보여요.</p>
           </div>
         ) : (
@@ -188,17 +188,17 @@ export default function AdminBannerPage() {
       </div>
 
       <p className="mt-4 text-xs leading-relaxed text-text-3">
-        매물을 새로 올리려면{" "}
+        판매글을 새로 올리려면{" "}
         <Link href="/admin/auctions?status=LIVE" className={`font-bold text-text-2 hover:text-primary ${FOCUS_RING}`}>
-          매물 관리
+          판매글 관리
         </Link>
-        에서 찾아 「배너」를 켜세요. 여기서는 순서를 바꾸거나 내릴 수 있어요. 지정한 매물이 팔리거나 취소되면
+        에서 찾아 「배너」를 켜세요. 여기서는 순서를 바꾸거나 내릴 수 있어요. 지정한 판매글이 팔리거나 취소되면
         배너에서 자동으로 빠져요.
       </p>
 
       {items.length >= MAX_FEATURED && (
         <p className="mt-4 border-l-2 border-warn py-2 pl-3 text-[12.5px] text-text-2">
-          자리가 다 찼어요. 매물 관리에서 「배너」를 켜려 하면 막히고, 먼저 여기서 한 건을 내려야 해요.
+          자리가 다 찼어요. 판매글 관리에서 「배너」를 켜려 하면 막히고, 먼저 여기서 한 건을 내려야 해요.
         </p>
       )}
     </div>

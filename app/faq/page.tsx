@@ -130,7 +130,7 @@ export default function FaqPage() {
             찾는 답이 없다면
           </h2>
           <p className="mt-1.5 max-w-[34rem] text-[13px] leading-[1.75] text-text-3">
-            문의를 남겨 주시면 확인 후 답변드려요. 거래 중인 건이라면 어떤 매물인지 함께 적어 주시면
+            문의를 남겨 주시면 확인 후 답변드려요. 거래 중인 건이라면 어떤 상품인지 함께 적어 주시면
             훨씬 빠릅니다.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">

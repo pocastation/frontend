@@ -13,7 +13,7 @@ const FOOTER_COLUMNS = [
     title: "서비스",
     mobileHidden: true,
     links: [
-      { label: "매물 둘러보기", href: "/" },
+      { label: "상품 둘러보기", href: "/" },
       { label: "이용 방법", href: "/guide" },
     ],
   },

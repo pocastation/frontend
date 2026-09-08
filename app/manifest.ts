@@ -37,7 +37,7 @@ export default function manifest(): MetadataRoute.Manifest {
       { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
     shortcuts: [
-      { name: "진행 중인 매물", url: "/auctions" },
+      { name: "판매 중인 상품", url: "/auctions" },
       { name: "즉시판매", url: "/instant-sales" },
       { name: "관심 목록", url: "/mypage?tab=wishlist" },
     ],

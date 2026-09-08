@@ -37,7 +37,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   const auction = await getAuction(id);
   if (!auction) {
-    return { title: "매물을 찾을 수 없어요 — Pocastation" };
+    return { title: "판매글을 찾을 수 없어요 — Pocastation" };
   }
   const cover = auction.images?.[0];
   const image = cover ? mediaUrl(cover.displayUrl ?? cover.url) : undefined;
@@ -197,7 +197,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
           {/* 🔴 「하자 안내」(conditionNote) 섹션은 지웠다(#406) — **등록 폼이 더 이상 그 값을 받지 않는다.**
               「상세 설명 (선택)」 하나로 합쳐졌고, 그 placeholder가 하자·상태를 함께 적으라고 안내한다.
               모바일 상세는 이미 빼고 있어서 데스크탑만 없어진 필드를 위한 제목을 들고 있었다.
-              ⚠️ 통합 이전에 등록된 매물의 conditionNote는 화면에서 보이지 않게 된다(로컬 2건). */}
+              ⚠️ 통합 이전에 등록된 판매글의 conditionNote는 화면에서 보이지 않게 된다(로컬 2건). */}
 
           <section className="mt-8">
             <h2 className="font-display text-xl font-bold text-text-1">판매자 정보</h2>
@@ -219,7 +219,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
                     query={auction.artistName}
                     className={`text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
                   >
-                    {auction.artistName} 다른 매물 보기 →
+                    {auction.artistName} 다른 판매글 보기 →
                   </SearchLink>
                 )}
               </div>

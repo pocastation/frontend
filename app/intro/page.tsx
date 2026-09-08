@@ -34,9 +34,9 @@ export const metadata: Metadata = {
 // problem은 없앤 문제다. 화면에서는 취소선으로 그려 「지웠다」는 뜻을 형태로 드러낸다.
 const FEATURES: { problem: string; title: string; body: string }[] = [
   {
-    problem: "사진만 퍼온 매물",
+    problem: "사진만 퍼온 상품",
     title: "실물 없이는 등록이 안 돼요",
-    body: "판매자는 발급된 코드를 종이에 적어 실물과 함께 찍어야 등록을 마칠 수 있어요. 인증 사진과 판매 사진을 대조해 승인한 매물만 공개돼요.",
+    body: "판매자는 발급된 코드를 종이에 적어 실물과 함께 찍어야 등록을 마칠 수 있어요. 인증 사진과 판매 사진을 대조해 승인한 판매글만 공개돼요.",
   },
   {
     problem: "입금하고 잠수",
@@ -57,7 +57,7 @@ const FEATURES: { problem: string; title: string; body: string }[] = [
 
 // 거래 흐름은 실제 순서라 번호를 붙인다(01~04).
 const STEPS: { who: string; title: string; body: string }[] = [
-  { who: "판매자", title: "코드를 적어 실물과 함께 찍어요", body: "인증 사진을 대조해 승인한 매물만 공개돼요." },
+  { who: "판매자", title: "코드를 적어 실물과 함께 찍어요", body: "인증 사진을 대조해 승인한 판매글만 공개돼요." },
   { who: "구매자", title: "원하는 값을 제안해요", body: "판매자가 고르면 그 자리에서 거래가 성사돼요." },
   { who: "포카스테이션", title: "대금을 맡아 보관해요", body: "판매자에게 곧장 넘어가지 않아요." },
   { who: "구매자 · 판매자", title: "수령을 확인하면 정산돼요", body: "구매 확정 뒤에 판매자에게 넘어가요." },
@@ -96,7 +96,7 @@ export default function IntroPage() {
               <span className="block font-sans font-black text-primary">포카스테이션</span>
             </h1>
             <p className="mt-4 max-w-[32rem] text-[14.5px] leading-[1.8] text-text-2 sm:text-[15.5px]">
-              사진만 퍼온 매물, 입금하고 잠수, 마감 직전 낚아채기. 이 세 가지를 시스템으로 막아요.
+              사진만 퍼온 상품, 입금하고 잠수, 마감 직전 낚아채기. 이 세 가지를 시스템으로 막아요.
             </p>
             <ul className="mt-[18px] flex flex-wrap gap-2">
               {CHIPS.map((c) => (
@@ -193,7 +193,7 @@ export default function IntroPage() {
             href="/auctions"
             className={`text-[13px] font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-text-1 hover:decoration-text-1 ${FOCUS_RING}`}
           >
-            지금 올라온 매물 둘러보기
+            지금 올라온 상품 둘러보기
           </Link>
         </div>
       </section>

@@ -11,7 +11,7 @@ import type { MySellingAuctionResponse } from "@/lib/types";
 const OUTLINE = `shrink-0 rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-45 disabled:hover:border-border-2 disabled:hover:text-text-2 ${FOCUS_RING}`;
 
 /**
- * 판매 중인 매물의 판매자 행동 — 기간 연장(§1.3·§2.4)과 최소가 수정(§1.1, #434).
+ * 판매 중인 상품의 판매자 행동 — 기간 연장(§1.3·§2.4)과 최소가 수정(§1.1, #434).
  *
  * <p>둘을 한 컴포넌트에 둔 이유는 <b>같은 행에서 서로를 가리기 때문</b>이다. 최소가는 제안이
  * 들어오면 잠기고, 연장은 종료 1일 전에야 열린다 — 따로 두면 한 행에 버튼이 넷까지 늘어난다.

@@ -168,7 +168,7 @@ export default function MobileBrowse({
       ) : error ? null : (
         <div className={`px-[14px] ${loading ? "opacity-60 transition-opacity" : ""}`}>
           <ExploreEmpty
-            title={query ? `"${query}" 검색 결과가 없어요` : isInstant ? "등록된 즉시판매가 아직 없어요" : "진행 중인 매물이 아직 없어요"}
+            title={query ? `"${query}" 검색 결과가 없어요` : isInstant ? "등록된 즉시판매가 아직 없어요" : "판매 중인 상품이 아직 없어요"}
             hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
             onClear={query ? () => setQuery("") : undefined}
           />
@@ -198,7 +198,7 @@ export default function MobileBrowse({
           href="/auctions/ended"
           className={`mt-6 block border-t border-border px-[14px] py-4 text-center text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
         >
-          거래 완료된 매물 보기
+          거래 완료된 상품 보기
         </Link>
       )}
     </div>

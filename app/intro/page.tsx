@@ -109,7 +109,7 @@ export default function IntroPage() {
               ))}
             </ul>
 
-            <PhoneMockup className="mt-7 lg:mt-9 lg:max-w-[420px]" />
+            <PhoneMockup className="mt-7 lg:mt-9" />
           </div>
 
           <Suspense fallback={<div className="h-[520px] rounded-[6px] border border-border-2 bg-white" />}>

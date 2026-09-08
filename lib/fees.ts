@@ -97,3 +97,14 @@ export const CANCELLATION_WINDOW_HOURS = 24;
 export function cancellationLocksAt(paidAt: string): string {
   return new Date(new Date(paidAt).getTime() + CANCELLATION_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
 }
+
+/**
+ * 구매자가 스스로 거래를 취소할 때 환불액에서 공제하는 결제수수료(운영정책 제19조 ①).
+ *
+ * 백엔드 `RefundPolicy.PAYMENT_FEE_KRW`와 같은 값이어야 한다. 거래 금액과 관계없이 건당 정액이고,
+ * 거래 수수료(제18조)는 공제하지 않는다.
+ *
+ * ⚠️ 잠정값이다. PG 계약(토스페이먼츠)이 끝나면 실제 수수료로 바뀌며, 그때 운영정책 제19조·백엔드·이 상수를
+ * 함께 고친다. 여기 말고 다른 곳에 300을 적지 말 것.
+ */
+export const PAYMENT_FEE_KRW = 300;

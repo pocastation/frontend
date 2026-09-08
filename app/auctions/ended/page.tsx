@@ -6,7 +6,7 @@ import type { AuctionListResponse } from "@/lib/types";
 
 export const metadata = { title: "거래 완료 — Pocastation" };
 
-// 🔴 이 목록은 **실제로 거래가 성사된 매물만** 담는다(BE #365).
+// 🔴 이 목록은 **실제로 거래가 성사된 상품만** 담는다(BE #365).
 //
 // 예전에는 제안 없이 끝난 매물(ENDED_NO_BIDS)과 판매자 미선택 종료(ENDED_NOT_SELECTED)까지
 // 함께 보여주고 「종료된 거래」라 불렀다. 이름이 「거래 완료」가 되면서 **거래가 아예 없었던
@@ -65,7 +65,7 @@ export default async function EndedAuctionsPage({
 
               모바일에서도 이 문장은 남긴다 — 이 목록이 **성사분만 담는다**는 사실을 말해 주는
               유일한 자리라 지우면 오해가 생긴다. */}
-          <p className="text-[12.5px] text-text-3 sm:mt-1.5 sm:text-sm">거래가 성사된 매물을 확인해보세요.</p>
+          <p className="text-[12.5px] text-text-3 sm:mt-1.5 sm:text-sm">거래가 성사된 상품을 확인해보세요.</p>
         </div>
 
         <AuctionBrowser

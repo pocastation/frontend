@@ -29,7 +29,7 @@ export const TAB_TITLE: Record<MypageTab, string> = {
   dashboard: "대시보드",
   bidding: "가격 제안",
   purchases: "구매 내역",
-  selling: "판매 중인 매물",
+  selling: "판매 중인 상품",
   sellHistory: "판매 내역",
   wishlist: "관심 목록",
   profile: "내 정보",

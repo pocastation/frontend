@@ -43,7 +43,7 @@ export default function PhoneMockup({ className = "" }: { className?: string }) 
 
           <div className="px-3">
             <div className="relative flex h-[208px] items-center justify-center overflow-hidden rounded-[10px] bg-surface-2">
-              <Image src={phoneScreen} alt="포카 매물 사진" width={112} sizes="112px" priority className="block w-[112px]" />
+              <Image src={phoneScreen} alt="포카 상품 사진" width={112} sizes="112px" priority className="block w-[112px]" />
               <span className="absolute left-2 top-2 inline-flex items-center gap-[5px] rounded-[4px] bg-[#111118]/80 px-2 py-1 text-[9.5px] font-bold text-white">
                 <span aria-hidden="true" className="h-[5px] w-[5px] rounded-full bg-star" />
                 사진 인증 완료

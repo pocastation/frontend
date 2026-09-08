@@ -196,7 +196,7 @@ export default function AdminReportsPage() {
                         selectedId === r.auctionId ? "bg-primary-soft/50" : ""
                       }`}
                     >
-                      <td className="px-4 py-3"><button type="button" aria-label={`${r.auctionTitle ?? "매물"} 신고 상세`} onClick={(event) => { event.stopPropagation(); void openDetail(r.auctionId); }} className={`text-left ${FOCUS_RING}`}>
+                      <td className="px-4 py-3"><button type="button" aria-label={`${r.auctionTitle ?? "판매글"} 신고 상세`} onClick={(event) => { event.stopPropagation(); void openDetail(r.auctionId); }} className={`text-left ${FOCUS_RING}`}>
                         <div className="flex items-center gap-2.5">
                           <span className="h-9 w-9 shrink-0 overflow-hidden rounded-r1 bg-surface-2">
                             {r.representativeThumbnailUrl && (
@@ -270,7 +270,7 @@ export default function AdminReportsPage() {
                   <dd className="font-semibold text-text-1">{detail.sellerNickname}</dd>
                 </div>
                 <div className="flex justify-between gap-2">
-                  <dt className="text-text-3">매물</dt>
+                  <dt className="text-text-3">판매글</dt>
                   <dd className="font-semibold">
                     <Link href={`/auctions/${detail.auctionId}`} className={`text-primary hover:underline ${FOCUS_RING}`}>
                       바로가기 →

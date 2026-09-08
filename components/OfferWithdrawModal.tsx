@@ -71,7 +71,7 @@ export default function OfferWithdrawModal({
           제안이 판매자의 목록에서 사라지고, <b className="font-bold text-text-1">다시 되돌릴 수 없어요.</b>
         </p>
         <p className="mt-1.5 text-[11.5px] leading-relaxed text-text-3">
-          같은 매물에 새로 제안하는 건 언제든 가능해요.
+          같은 상품에 새로 제안하는 건 언제든 가능해요.
         </p>
 
         {error && <p className="mt-3 text-[11.5px] leading-relaxed text-accent">{error}</p>}

@@ -231,7 +231,7 @@ export const REPORT_STATUS_TONE: Record<ReportStatus, StatusTone> = {
 };
 
 export const RESOLUTION_ACTION_LABEL: Record<ResolutionAction, string> = {
-  AUCTION_CANCELLED: "매물 취소",
+  AUCTION_CANCELLED: "판매글 취소",
   NONE: "조치 없음(반려)",
 };
 
@@ -241,13 +241,13 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   MEMBER_SUSPENDED: "회원 정지",
   MEMBER_UNSUSPENDED: "회원 정지해제",
   MEMBER_WITHDRAWN: "회원 탈퇴처리",
-  AUCTION_CANCELLED: "매물 강제취소",
-  REPORT_RESOLVED: "신고 처리(매물취소)",
+  AUCTION_CANCELLED: "판매글 강제취소",
+  REPORT_RESOLVED: "신고 처리(판매글 취소)",
   REPORT_REJECTED: "신고 반려",
   MEMBER_ROLE_GRANTED: "관리자 승격",
   MEMBER_ROLE_REVOKED: "관리자 권한회수",
-  AUCTION_APPROVED: "인증 매물 승인",
-  AUCTION_REJECTED: "인증 매물 반려",
+  AUCTION_APPROVED: "판매글 승인",
+  AUCTION_REJECTED: "판매글 반려",
 };
 
 export const AUDIT_ACTION_OPTIONS: AuditAction[] = [
@@ -280,7 +280,7 @@ export const AUDIT_ACTION_TONE: Record<AuditAction, StatusTone> = {
 
 export const AUDIT_TARGET_TYPE_LABEL: Record<AuditTargetType, string> = {
   MEMBER: "회원",
-  AUCTION: "매물",
+  AUCTION: "판매글",
 };
 
 export const MEMBER_ROLE_LABEL: Record<MemberRole, string> = {
@@ -314,14 +314,14 @@ export const AUCTION_CANCELLATION_REASON_OPTIONS: {
   label: string;
   preview: string;
 }[] = [
-  { code: "REPORTED_FAKE", label: "위조품 의심 신고", preview: "위조품 의심 신고가 접수돼 매물을 내렸어요." },
-  { code: "PROHIBITED_ITEM", label: "거래 불가 상품", preview: "포카스테이션에서 거래할 수 없는 상품이라 매물을 내렸어요." },
-  { code: "INFO_MISMATCH", label: "상품 정보 불일치", preview: "등록한 상품 정보가 실제와 달라 매물을 내렸어요." },
-  { code: "LOW_RESOLUTION", label: "해상도 미달", preview: "사진 또는 영상의 해상도가 낮아 상태를 확인하기 어려워 매물을 내렸어요." },
-  { code: "DUPLICATE_LISTING", label: "중복 등록", preview: "같은 상품이 중복 등록돼 있어 매물을 내렸어요." },
-  { code: "SELLER_REQUEST", label: "판매자 요청", preview: "판매자 요청으로 매물을 내렸어요." },
-  { code: "POLICY_VIOLATION", label: "운영 정책 위반", preview: "운영 정책을 위반해 매물을 내렸어요." },
-  { code: "SUSPECTED_ABUSE", label: "비정상 거래 정황", preview: "비정상적인 거래 정황이 확인돼 매물을 내렸어요." },
+  { code: "REPORTED_FAKE", label: "위조품 의심 신고", preview: "위조품 의심 신고가 접수돼 판매글을 내렸어요." },
+  { code: "PROHIBITED_ITEM", label: "거래 불가 상품", preview: "포카스테이션에서 거래할 수 없는 상품이라 판매글을 내렸어요." },
+  { code: "INFO_MISMATCH", label: "상품 정보 불일치", preview: "등록한 상품 정보가 실제와 달라 판매글을 내렸어요." },
+  { code: "LOW_RESOLUTION", label: "해상도 미달", preview: "사진 또는 영상의 해상도가 낮아 상태를 확인하기 어려워 판매글을 내렸어요." },
+  { code: "DUPLICATE_LISTING", label: "중복 등록", preview: "같은 상품이 중복 등록돼 있어 판매글을 내렸어요." },
+  { code: "SELLER_REQUEST", label: "판매자 요청", preview: "판매자 요청으로 판매글을 내렸어요." },
+  { code: "POLICY_VIOLATION", label: "운영 정책 위반", preview: "운영 정책을 위반해 판매글을 내렸어요." },
+  { code: "SUSPECTED_ABUSE", label: "비정상 거래 정황", preview: "비정상적인 거래 정황이 확인돼 판매글을 내렸어요." },
 ];
 
 // ─── 건의(suggestion) ───

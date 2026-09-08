@@ -9,8 +9,8 @@ import type { AuctionResponse } from "@/lib/types";
 // 빈 상태 문구는 호출부마다 달라서 프롭으로 받는다(기본값은 아티스트 상세 기준).
 export default function AuctionGrid({
   auctions,
-  emptyTitle = "아직 등록된 매물이 없어요",
-  emptyDescription = "이 스타의 매물이 등록되면 여기에 표시돼요.",
+  emptyTitle = "아직 등록된 판매글이 없어요",
+  emptyDescription = "이 스타의 상품이 등록되면 여기에 표시돼요.",
   variant = "default",
   gridClassName = "grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3.5",
 }: {

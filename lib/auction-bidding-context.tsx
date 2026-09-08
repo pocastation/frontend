@@ -49,7 +49,7 @@ type AuctionBiddingValue = {
   submitting: boolean;
   /**
    * 이 매물에 낸 내 현재 제안(#480) — 서버(`GET /bids/me`)가 근거라 **새로고침해도 안다**.
-   * 예전에는 세션 내 기억뿐이라 새로고침하면 「이미 제안한 매물」이 처음 보는 매물처럼 보였다.
+   * 예전에는 세션 내 기억뿐이라 새로고침하면 「이미 제안한 상품」이 처음 보는 상품처럼 보였다.
    */
   myOffer: MyOfferResponse | null;
   /** myOffer.amount의 축약 — 기존 사용처(라벨 분기·토스트 문구) 호환용. */

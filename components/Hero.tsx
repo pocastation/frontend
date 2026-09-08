@@ -48,7 +48,7 @@ const STAR_SPARKLES: { top: string; left: string; size: number; lav?: boolean }[
 const AUTO_MS = 5000;
 const PAUSE_AFTER_DOT_MS = 15000;
 
-// 배너 슬롯 — 관리자가 지정한 매물 최대 5건을 캐러셀로 넘긴다(#573). 예전에는 단일 슬롯이라 순서 1번만
+// 배너 슬롯 — 관리자가 지정한 판매글 최대 5건을 캐러셀로 넘긴다(#573). 예전에는 단일 슬롯이라 순서 1번만
 // 보였는데, 관리자가 순서까지 정해 올린 나머지 4건이 데스크탑에서는 존재하지 않는 셈이었다.
 //
 // 지정이 1건 이하면 도트·화살표 없이 예전과 같은 화면이다. 홈이 넘기는 폴백(인기 1위·최신 1건)은 언제나
@@ -208,7 +208,7 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
               href="#auctions"
               className="inline-flex h-12 items-center justify-center rounded-r2 bg-primary px-7 text-sm font-bold text-white transition-colors hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace"
             >
-              진행 중인 매물 보기 →
+              진행 중인 판매글 보기 →
             </Link>
             <Link
               href="/guide"
@@ -223,7 +223,7 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
           <div
             className="hidden w-72 shrink-0 sm:block"
             aria-roledescription={total > 1 ? "carousel" : undefined}
-            aria-label={total > 1 ? "추천 매물 배너" : undefined}
+            aria-label={total > 1 ? "추천 상품 배너" : undefined}
             onMouseEnter={() => setHovering(true)}
             onMouseLeave={() => setHovering(false)}
             onFocus={() => setHovering(true)}

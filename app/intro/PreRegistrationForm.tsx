@@ -127,7 +127,7 @@ export default function PreRegistrationForm() {
           href="/auctions"
           className={`mt-5 inline-flex h-11 items-center rounded-[4px] border border-border-2 px-5 text-[13.5px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
         >
-          지금 올라온 매물 둘러보기
+          지금 올라온 상품 둘러보기
         </Link>
       </div>
     );

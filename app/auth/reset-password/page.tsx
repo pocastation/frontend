@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useId, useState, type FormEvent } from "react";
+import { Suspense, useEffect, useId, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { apiFetch, ApiError } from "@/lib/api";
@@ -14,7 +14,13 @@ const MAX_LENGTH = 64;
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  // 토큰은 첫 렌더에서 한 번만 읽고 URL에서 지운다(#591) — 이메일 인증 페이지와 같은 이유.
+  const [token] = useState(() => searchParams.get("token"));
+  useEffect(() => {
+    if (token && window.location.search.includes("token=")) {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, [token]);
   const passwordId = useId();
   const confirmId = useId();
   const [password, setPassword] = useState("");

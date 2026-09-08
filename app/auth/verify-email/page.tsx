@@ -22,7 +22,9 @@ const SECONDARY =
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  // 토큰은 첫 렌더에서 한 번만 읽고 URL에서 지운다(#591). 주소창·히스토리·요청 로그에 일회성 토큰이 남지
+  // 않게 한다. 새로고침하면 토큰이 없는 화면이 되는데, 링크는 어차피 한 번 쓰면 끝이라 잃는 것이 없다.
+  const [token] = useState(() => searchParams.get("token"));
   const { accessToken, refresh } = useAuth();
   const [status, setStatus] = useState<Status>(token ? "verifying" : "missing");
   const [message, setMessage] = useState<string | null>(null);
@@ -39,6 +41,9 @@ function VerifyEmailContent() {
       return;
     }
     attemptedRef.current = true;
+    if (window.location.search.includes("token=")) {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
     (async () => {
       // 같은 링크 주소를 두 흐름이 쓴다.
       //  ① 인증 후 가입(BE #252) — 이 요청이 통과해야 회원이 만들어진다

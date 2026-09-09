@@ -135,10 +135,6 @@ export default function AdminPreRegistrationsPage() {
     };
   }, [load]);
 
-  const buyers = stats?.byRole?.BUYER ?? 0;
-  const sellers = stats?.byRole?.SELLER ?? 0;
-  const roleTotal = buyers + sellers;
-
   const peak = stats?.todayByHour?.reduce(
     (best, h) => (h.count > best.count ? h : best),
     { hour: 0, count: 0 },
@@ -253,38 +249,12 @@ export default function AdminPreRegistrationsPage() {
             </section>
 
             <div className="flex flex-col gap-8">
+              {/* 구매자·판매자 비율 섹션을 뺐다(#611). 폼에서 이용 형태를 더 이상 받지 않아
+                  오늘 들어오는 신청에는 값이 없다 — 빈 막대를 계속 그리면 「아무도 안 왔다」로 읽힌다.
+                  옛 신청의 값은 DB에 남아 있으므로 나중에 필요하면 기간을 넓혀 되살릴 수 있다. */}
               <section>
                 <div className="flex items-baseline justify-between gap-3">
-                  <h2 className="font-display text-sm font-extrabold text-text-1">구매자 · 판매자</h2>
-                  <span className="text-[11.5px] text-text-3">오늘 신청 기준</span>
-                </div>
-                {roleTotal === 0 ? (
-                  <p className="mt-3 text-sm text-text-3">오늘 신청이 아직 없어요.</p>
-                ) : (
-                  <>
-                    <div className="mt-3 flex h-[30px] overflow-hidden rounded-[3px]">
-                      <span className="block bg-text-1" style={{ flexBasis: `${(buyers / roleTotal) * 100}%` }} />
-                      <span className="block bg-star-line" style={{ flexBasis: `${(sellers / roleTotal) * 100}%` }} />
-                    </div>
-                    <div className="mt-2.5 flex flex-wrap gap-x-5 gap-y-1 text-xs text-text-2">
-                      <span className="flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-[2px] bg-text-1" aria-hidden="true" />
-                        구매자 <b className="font-display font-extrabold tabular-nums text-text-1">{buyers}</b>
-                        <span className="tabular-nums">· {Math.round((buyers / roleTotal) * 100)}%</span>
-                      </span>
-                      <span className="flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-[2px] bg-star-line" aria-hidden="true" />
-                        판매자 <b className="font-display font-extrabold tabular-nums text-text-1">{sellers}</b>
-                        <span className="tabular-nums">· {Math.round((sellers / roleTotal) * 100)}%</span>
-                      </span>
-                    </div>
-                  </>
-                )}
-              </section>
-
-              <section>
-                <div className="flex items-baseline justify-between gap-3">
-                  <h2 className="font-display text-sm font-extrabold text-text-1">관심 스타 상위</h2>
+                  <h2 className="font-display text-sm font-extrabold text-text-1">좋아하는 가수 상위</h2>
                   <span className="text-[11.5px] text-text-3">오늘 신청 기준</span>
                 </div>
                 {stats.topGroups.length === 0 ? (
@@ -334,8 +304,7 @@ export default function AdminPreRegistrationsPage() {
                     <tr className="border-b border-border-2 text-left">
                       <th className="py-2 pr-4 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-text-3">시각</th>
                       <th className="py-2 pr-4 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-text-3">휴대폰</th>
-                      <th className="py-2 pr-4 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-text-3">관심 스타</th>
-                      <th className="py-2 pr-4 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-text-3">역할</th>
+                      <th className="py-2 pr-4 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-text-3">좋아하는 가수</th>
                       <th className="py-2 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-text-3">이메일</th>
                     </tr>
                   </thead>
@@ -349,15 +318,6 @@ export default function AdminPreRegistrationsPage() {
                           {revealed ? formatPhone(a.phone) : maskPhone(a.phone)}
                         </td>
                         <td className="whitespace-nowrap py-2.5 pr-4 text-text-1">{a.idolGroup}</td>
-                        <td className="whitespace-nowrap py-2.5 pr-4">
-                          <span className="flex items-center gap-1.5 text-xs font-bold text-text-2">
-                            <span
-                              className={`h-1.5 w-1.5 rounded-full ${a.role === "SELLER" ? "bg-star-line" : "bg-text-1"}`}
-                              aria-hidden="true"
-                            />
-                            {a.role === "SELLER" ? "판매자" : "구매자"}
-                          </span>
-                        </td>
                         <td className="whitespace-nowrap py-2.5 text-xs text-text-3">{a.email ? "남김" : "—"}</td>
                       </tr>
                     ))}

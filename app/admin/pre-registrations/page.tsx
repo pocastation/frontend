@@ -31,8 +31,28 @@ import AdminNotice from "@/components/AdminNotice";
 // 요청이라 이보다 더 조이면 얻는 것 없이 서버만 때린다.
 const REFRESH_MS = 15_000;
 
-// 목록에 싣는 최근 신청 수. 서버 상한은 200이지만 현황 화면에서 스크롤할 일은 없다.
-const RECENT_SIZE = 20;
+// 목록 한 쪽에 싣는 신청 수. 「더보기」가 이 단위로 다음 쪽을 이어 붙인다(#623).
+const PAGE_SIZE = 20;
+
+/**
+ * 최신순 목록 둘을 합친다 — <b>id로 중복을 제거</b>하고 `createdAt` 내림차순으로 다시 세운다.
+ *
+ * <p>폴링과 누적을 함께 쓰기 때문에 필요하다. 15초마다 목록 전체를 다시 읽으면 더보기로 펼친
+ * 것이 그때마다 접히므로, 폴링은 <b>첫 쪽만</b> 다시 읽고 이미 받아 둔 뒷부분은 그대로 둔다.
+ *
+ * <p>⚠️ 그 사이 신규 신청이 들어오면 쪽 경계가 밀려 같은 항목이 두 쪽에 걸친다. 서버는
+ * offset으로 자르므로 이건 못 막는다 — 여기서 id로 흡수한다.
+ */
+function mergeByLatest(
+  base: PreRegistrationApplicationView[],
+  incoming: PreRegistrationApplicationView[],
+): PreRegistrationApplicationView[] {
+  const byId = new Map<number, PreRegistrationApplicationView>();
+  for (const item of [...base, ...incoming]) {
+    byId.set(item.id, item);
+  }
+  return [...byId.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
 
 /** 010-1234-5678 → 010-****-5678. 뒷자리를 남기는 건 현장에서 신청자와 대조할 때 쓰기 때문이다. */
 function maskPhone(phone: string): string {
@@ -84,6 +104,11 @@ export default function AdminPreRegistrationsPage() {
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [revealed, setRevealed] = useState(false);
+  /** 서버가 가진 전체 신청 수. 「더보기」를 더 보여줄지 판단하는 기준이다. */
+  const [totalCount, setTotalCount] = useState(0);
+  /** 다음 「더보기」가 요청할 쪽 번호. 0쪽은 폴링이 맡는다. */
+  const [nextPage, setNextPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   // 갱신 중에도 이전 숫자를 지우지 않는다. 15초마다 화면이 빈 상태로 깜빡이면 읽을 수가 없다
   // (검색 화면에서 같은 실수를 한 적이 있다 — FE #497).
@@ -96,11 +121,13 @@ export default function AdminPreRegistrationsPage() {
       const [nextStats, list] = await Promise.all([
         fetchWithAuth<PreRegistrationApplicationStats>("/api/admin/pre-registrations/applications/stats"),
         fetchWithAuth<PreRegistrationApplicationListResponse>(
-          `/api/admin/pre-registrations/applications?page=0&size=${RECENT_SIZE}`,
+          `/api/admin/pre-registrations/applications?page=0&size=${PAGE_SIZE}`,
         ),
       ]);
       setStats(nextStats);
-      setRecent(list.content);
+      // 첫 쪽만 다시 읽고 이미 펼쳐 둔 뒷부분과 합친다 — 폴링이 더보기를 되감으면 안 된다.
+      setRecent((prev) => mergeByLatest(prev, list.content));
+      setTotalCount(list.totalElements);
       setUpdatedAt(new Date().toISOString());
       setError(null);
       // 번호를 펼친 채로 두지 않는다. 갱신될 때마다 접으므로 길어야 15초 뒤에는 다시 가려진다 —
@@ -112,6 +139,29 @@ export default function AdminPreRegistrationsPage() {
       loadingRef.current = false;
     }
   }, [fetchWithAuth]);
+
+  /**
+   * 다음 쪽을 이어 붙인다. 폴링(0쪽)과 달리 이쪽은 <b>사용자가 누를 때만</b> 돈다.
+   *
+   * <p>실패해도 이미 보고 있던 목록은 건드리지 않는다 — 더 보려다 보던 것까지 잃으면 안 된다.
+   */
+  const loadMore = useCallback(async () => {
+    if (loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const list = await fetchWithAuth<PreRegistrationApplicationListResponse>(
+        `/api/admin/pre-registrations/applications?page=${nextPage}&size=${PAGE_SIZE}`,
+      );
+      setRecent((prev) => mergeByLatest(prev, list.content));
+      setTotalCount(list.totalElements);
+      setNextPage((p) => p + 1);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : "다음 목록을 불러오지 못했습니다.");
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [fetchWithAuth, loadingMore, nextPage]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 마운트 후 서버 집계를 1회 로드.
@@ -325,6 +375,24 @@ export default function AdminPreRegistrationsPage() {
                 </table>
               )}
             </div>
+
+            {recent.length > 0 && (
+              <div className="mt-4 flex flex-col items-center gap-2">
+                <p className="text-[11.5px] tabular-nums text-text-3">
+                  {recent.length.toLocaleString()} / {totalCount.toLocaleString()}건
+                </p>
+                {recent.length < totalCount && (
+                  <button
+                    type="button"
+                    onClick={() => void loadMore()}
+                    disabled={loadingMore}
+                    className={`h-10 rounded-r2 border border-border-2 px-6 text-[13px] font-bold text-text-2 transition-colors hover:bg-bg disabled:opacity-50 ${FOCUS_RING}`}
+                  >
+                    {loadingMore ? "불러오는 중..." : `${PAGE_SIZE}건 더보기`}
+                  </button>
+                )}
+              </div>
+            )}
           </section>
         </>
       )}

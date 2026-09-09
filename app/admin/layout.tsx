@@ -104,6 +104,13 @@ function ClipboardListIcon() {
     </svg>
   );
 }
+function ChartIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M4 20h16M7 20v-7M12 20V6M17 20v-4" strokeLinecap="round" />
+    </svg>
+  );
+}
 function LightbulbIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -144,6 +151,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/admin/catalog", label: "카탈로그 관리", icon: <CardIcon />, ready: true },
       { href: "/admin/auctions", label: "판매글 관리", icon: <ListingIcon />, ready: true },
       { href: "/admin/banner", label: "홈 배너", icon: <BannerIcon />, ready: true },
+      { href: "/admin/pre-registrations", label: "사전예약 현황", icon: <ChartIcon />, ready: true },
     ],
   },
   {

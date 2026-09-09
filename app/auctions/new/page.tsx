@@ -730,8 +730,8 @@ export default function NewAuctionPage() {
                 <input
                   id={startPriceFieldId}
                   type="number"
-                  min={5000}
-                  step={500}
+                  min={MIN_LISTING_PRICE}
+                  step={PRICE_UNIT}
                   inputMode="numeric"
                   placeholder="10000"
                   value={startPrice}

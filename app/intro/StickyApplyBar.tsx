@@ -44,8 +44,9 @@ export default function StickyApplyBar() {
       className={`fixed inset-x-0 z-50 border-t border-border bg-white px-4 py-3 transition-transform sm:hidden ${
         visible ? "translate-y-0" : "translate-y-full"
       }`}
-      // 하단 5탭 위에 쌓인다(#554).
-      style={{ bottom: "var(--mobile-tabbar-h, 0px)" }}
+      // 하단 5탭 위에 쌓인다(#554). 이 화면은 탭바를 숨기므로(#605) 실제로는 폴백이 쓰이고,
+      // 그때 바가 화면 맨 밑에 붙어 홈 인디케이터와 겹치지 않도록 safe-area를 폴백으로 둔다.
+      style={{ bottom: "var(--mobile-tabbar-h, env(safe-area-inset-bottom))" }}
       // 화면 밖으로 내려가 있을 때는 보조기기·키보드 탐색에서도 빠져야 한다.
       aria-hidden={!visible}
     >

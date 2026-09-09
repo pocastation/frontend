@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { FOCUS_RING } from "@/lib/ui";
 
 /**
@@ -11,7 +12,8 @@ import { FOCUS_RING } from "@/lib/ui";
  * - **iOS 사파리**: 이 이벤트가 없다. 설치 경로가 «공유 → 홈 화면에 추가»뿐이라 **안내만** 한다.
  *
  * <p>띄우지 않는 경우: 이미 설치돼 실행 중일 때(`display-mode: standalone`), 카카오톡 같은 인앱
- * 브라우저(설치 자체가 불가능해서 안내가 거짓말이 된다), 아래 세 가지 억제 중 하나에 걸릴 때.
+ * 브라우저(설치 자체가 불가능해서 안내가 거짓말이 된다), {@link SUPPRESSED_ROUTES}에 있는 경로,
+ * 아래 세 가지 억제 중 하나에 걸릴 때.
  *
  * <p><b>물러나는 방법이 세 단계다.</b> 예전에는 닫기(X) 하나뿐이었고 그게 곧 영구 차단이었다 —
  * 그래서 <b>그냥 무시하고 넘어간 사람에게는 방문할 때마다 다시 떴다.</b> iOS는 설치 버튼도 없이
@@ -37,6 +39,17 @@ const SNOOZE_MS = 24 * 60 * 60 * 1000;
 const MAX_SHOWS = 3;
 // 첫 화면에 바로 끼어들지 않는다. 읽던 것을 가리면 배너가 아니라 방해가 된다.
 const SHOW_DELAY_MS = 4000;
+
+/*
+  배너를 띄우지 않는 경로(#605).
+
+  사전예약은 홍보 링크의 도착지다 — 서비스를 아직 모르는 사람에게 설치부터 권하는 순서가 되고,
+  하단 고정 CTA(사전 신청) 위에 배너가 겹쳐 정작 눌러야 할 것을 가린다.
+
+  억제는 «이 경로에서 안 띄운다»일 뿐 «영구 차단»이 아니다. 띄우지 않은 회차는 노출 횟수를
+  세지 않으므로(show()가 불리지 않는다) 다른 화면으로 넘어가면 정상적으로 다시 후보가 된다.
+*/
+const SUPPRESSED_ROUTES: readonly string[] = ["/intro"];
 
 type SuppressState = {
   /** 영구 차단 — 설치 프롬프트에 응답했거나 예전 키로 닫은 사용자. */
@@ -82,8 +95,13 @@ export default function InstallPrompt() {
   const [deferred, setDeferred] = useState<InstallPromptEvent | null>(null);
   const [iosHint, setIosHint] = useState(false);
   const [visible, setVisible] = useState(false);
+  const pathname = usePathname();
+  const suppressed = SUPPRESSED_ROUTES.includes(pathname);
 
   useEffect(() => {
+    // 억제 경로에서는 리스너도 타이머도 걸지 않는다. 경로가 바뀌면 효과가 다시 돌아 정상 무장한다.
+    if (suppressed) return;
+
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       // iOS 사파리는 표준 미디어쿼리 대신 이 비표준 플래그로 설치 실행 여부를 알린다.
@@ -137,7 +155,7 @@ export default function InstallPrompt() {
       window.removeEventListener("appinstalled", onInstalled);
       if (timer) clearTimeout(timer);
     };
-  }, []);
+  }, [suppressed]);
 
   // 닫기(X) — 이번 방문만. 지금 화면을 가려서 치운 것이지 «앞으로 보지 않겠다»가 아니다.
   function closeForNow() {
@@ -165,7 +183,7 @@ export default function InstallPrompt() {
     setDeferred(null);
   }
 
-  if (!visible) return null;
+  if (!visible || suppressed) return null;
 
   return (
     <div

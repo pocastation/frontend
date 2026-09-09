@@ -80,6 +80,15 @@ export default function Header() {
   // 상세의 사진 위 뒤로가기가 대신한다. 데스크탑 폭과 나머지 경로는 그대로다.
   const foldOnMobile = isMobileChromeHiddenRoute(pathname);
 
+  /*
+    사전예약(#605)은 모바일에서 워드마크만 남긴다 — 알림 벨·햄버거는 그리지 않는다.
+
+    헤더를 통째로 접지 않는 이유는 로고다. 홍보 링크로 들어온 사람이 서비스로 넘어가는 길이
+    본문 하단의 「지금 올라온 상품 둘러보기」 하나만 남으면 지면이 막다른 길이 된다.
+    데스크탑은 그대로다 — 지면이 넓어 액션이 랜딩을 방해하지 않는다.
+  */
+  const bareOnMobile = pathname === "/intro";
+
   const isAdminMember = member?.role === "ADMIN" || member?.role === "ROLE_ADMIN";
   const navLinks = isAdminMember ? [...NAV_LINKS, { href: "/admin", label: "관리자" }] : NAV_LINKS;
 
@@ -174,43 +183,48 @@ export default function Header() {
         </div>
 
         {/* 모바일 전용 알림 벨 — 데스크탑 벨(hdr-r)은 모바일에서 숨겨져 있어 여기에 별도로 둔다. */}
-        <Link
-          href="/notifications"
-          onClick={closeMenu}
-          aria-label={member && unreadCount > 0 ? `알림 ${unreadCount}개` : "알림"}
-          className={`relative ml-auto mr-1 flex h-9 w-9 items-center justify-center rounded-r2 text-text-1 sm:hidden ${FOCUS_RING}`}
-        >
-          <BellIcon />
-          {member && unreadCount > 0 && (
-            <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-extrabold leading-none text-white">
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </span>
-          )}
-        </Link>
+        {!bareOnMobile && (
+          <>
+            <Link
+              href="/notifications"
+              onClick={closeMenu}
+              aria-label={member && unreadCount > 0 ? `알림 ${unreadCount}개` : "알림"}
+              className={`relative ml-auto mr-1 flex h-9 w-9 items-center justify-center rounded-r2 text-text-1 sm:hidden ${FOCUS_RING}`}
+            >
+              <BellIcon />
+              {member && unreadCount > 0 && (
+                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-extrabold leading-none text-white">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </Link>
 
-        <button
-          type="button"
-          aria-label={isMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
-          aria-expanded={isMenuOpen}
-          aria-controls="mobile-menu"
-          onClick={() => setIsMenuOpen((open) => !open)}
-          className={`flex h-9 w-9 items-center justify-center rounded-r2 text-text-1 sm:hidden ${FOCUS_RING}`}
-        >
-          <span className="relative block h-4 w-5" aria-hidden="true">
-            <span
-              className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-current transition-transform ${isMenuOpen ? "translate-y-[7px] rotate-45" : ""}`}
-            />
-            <span
-              className={`absolute left-0 top-1.5 h-0.5 w-5 rounded-full bg-current transition-opacity ${isMenuOpen ? "opacity-0" : ""}`}
-            />
-            <span
-              className={`absolute left-0 top-3 h-0.5 w-5 rounded-full bg-current transition-transform ${isMenuOpen ? "-translate-y-[7px] -rotate-45" : ""}`}
-            />
-          </span>
-        </button>
+            <button
+              type="button"
+              aria-label={isMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
+              aria-expanded={isMenuOpen}
+              aria-controls="mobile-menu"
+              onClick={() => setIsMenuOpen((open) => !open)}
+              className={`flex h-9 w-9 items-center justify-center rounded-r2 text-text-1 sm:hidden ${FOCUS_RING}`}
+            >
+              <span className="relative block h-4 w-5" aria-hidden="true">
+                <span
+                  className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-current transition-transform ${isMenuOpen ? "translate-y-[7px] rotate-45" : ""}`}
+                />
+                <span
+                  className={`absolute left-0 top-1.5 h-0.5 w-5 rounded-full bg-current transition-opacity ${isMenuOpen ? "opacity-0" : ""}`}
+                />
+                <span
+                  className={`absolute left-0 top-3 h-0.5 w-5 rounded-full bg-current transition-transform ${isMenuOpen ? "-translate-y-[7px] -rotate-45" : ""}`}
+                />
+              </span>
+            </button>
+          </>
+        )}
       </div>
 
-      {isMenuOpen && (
+      {/* 열림 상태로 /intro에 도착하면(뒤로가기 등) 닫을 버튼이 없다 — 경로로도 함께 막는다. */}
+      {isMenuOpen && !bareOnMobile && (
         <div id="mobile-menu" className="border-t border-border bg-white px-4 py-3 sm:hidden">
           <form className="relative mb-3" role="search" onSubmit={handleSearchSubmit}>
             <label htmlFor={mobileSearchFieldId} className="sr-only">

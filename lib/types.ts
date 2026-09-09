@@ -1100,3 +1100,35 @@ export type PaymentWindowResult = {
   // 화면에 안 그려도 개발자도구에서 보인다(BE #328 전수점검). 여부만 있으면 충분하다.
   previousAttemptFailed: boolean;
 };
+
+// 사전예약 현황(#608, BE #482).
+//
+// total·withEmail만 전체 누적이고 나머지 넷은 **오늘(KST) 신청 기준**이다. 기준이 섞여 있어
+// 화면에도 그렇게 적어야 한다 — "오늘"이라고 안 쓰면 전체 비율로 읽힌다.
+export type PreRegistrationApplicationStats = {
+  total: number;
+  withEmail: number;
+  today: number;
+  lastHour: number;
+  // "BUYER" | "SELLER". 0인 역할도 키가 온다.
+  byRole: Record<string, number>;
+  // 0~23시 24칸이 항상 채워져 온다.
+  todayByHour: { hour: number; count: number }[];
+  topGroups: { idolGroup: string; count: number }[];
+};
+
+export type PreRegistrationApplicationView = {
+  id: number;
+  phone: string;
+  email: string | null;
+  idolGroup: string;
+  role: string;
+  source: string | null;
+  privacyAgreedAt: string;
+  createdAt: string;
+};
+
+export type PreRegistrationApplicationListResponse = {
+  content: PreRegistrationApplicationView[];
+  totalElements: number;
+};

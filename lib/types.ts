@@ -17,7 +17,7 @@ export type MemberResponse = {
   // OAuth 가입 회원은 이메일을 저장하지 않는다(§13 최소수집) — null 가능.
   email: string | null;
   nickname: string;
-  role: string;
+  role: string | null;
   // GET /api/members/me 만 내려주는 프로필 보강 필드(내 정보 탭 표시용) —
   // 가입/로그인·닉네임 변경 응답에는 없어서 옵션으로 둔다.
   provider?: string;
@@ -89,7 +89,7 @@ export type AdminMemberSummary = {
   nickname: string;
   provider: string;
   status: MemberStatus;
-  role: string;
+  role: string | null;
   createdAt: string;
   suspensionReason: string | null;
   // null이면 미인증. 인증 후 가입 전환(BE #252) 이후로는 새로 생기지 않는 상태라,
@@ -1122,7 +1122,7 @@ export type PreRegistrationApplicationView = {
   phone: string;
   email: string | null;
   idolGroup: string;
-  role: string;
+  role: string | null;
   source: string | null;
   privacyAgreedAt: string;
   createdAt: string;

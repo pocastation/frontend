@@ -51,7 +51,6 @@ export default function PreRegistrationForm() {
   const [email, setEmail] = useState("");
   const [group, setGroup] = useState("");
   const [customGroup, setCustomGroup] = useState("");
-  const [role, setRole] = useState<"SELLER" | "BUYER" | "">("");
   const [agreed, setAgreed] = useState(false);
   const [openConsent, setOpenConsent] = useState(false);
 
@@ -65,17 +64,13 @@ export default function PreRegistrationForm() {
     if (status === "sending") return;
 
     // 브라우저 기본 검증에 맡기지 않고 직접 본다 — 에러 문구를 항목별로 다르게 줘야 하고,
-    // 커스텀 컨트롤(역할 버튼·동의 체크박스)은 required로 표현되지 않는다.
+    // 커스텀 컨트롤(동의 체크박스)은 required로 표현되지 않는다.
     if (phone.replace(/[^0-9]/g, "").length !== 11) {
       setError("휴대폰 번호 11자리를 정확히 입력해 주세요.");
       return;
     }
     if (!resolvedGroup) {
-      setError("주로 거래하는 그룹을 알려주세요.");
-      return;
-    }
-    if (!role) {
-      setError("판매자인지 구매자인지 선택해 주세요.");
+      setError("좋아하는 가수를 알려주세요.");
       return;
     }
     if (!agreed) {
@@ -93,7 +88,8 @@ export default function PreRegistrationForm() {
           phone,
           email: email.trim() || null,
           idolGroup: resolvedGroup,
-          role,
+          // 이용 형태(#611)는 더 이상 받지 않는다. 서버에서도 선택 항목이라(BE #484) 보내지 않으면
+          // 값 없이 저장된다 — 기본값을 대신 실어 보내면 집계가 사실과 달라진다.
           privacyAgreed: true,
         },
       });
@@ -191,7 +187,7 @@ export default function PreRegistrationForm() {
 
         <div>
           <label htmlFor={`${uid}-group`} className="flex items-baseline gap-1">
-            <span className="text-[13px] font-extrabold text-text-1">주로 거래하는 그룹</span>
+            <span className="text-[13px] font-extrabold text-text-1">좋아하는 가수</span>
             <span aria-hidden="true" className="text-[13px] font-extrabold text-primary">
               *
             </span>
@@ -220,51 +216,10 @@ export default function PreRegistrationForm() {
               onChange={(e) => setCustomGroup(e.target.value)}
               maxLength={50}
               placeholder="예) 엔하이픈, 트레저"
-              aria-label="그룹 직접 입력"
+              aria-label="가수 직접 입력"
               className={`mt-2 ${INPUT_CLASS} ${FOCUS_RING}`}
             />
           )}
-        </div>
-
-        <div>
-          <span className="flex items-baseline gap-1">
-            <span className="text-[13px] font-extrabold text-text-1">주로 어느 쪽인가요</span>
-            <span aria-hidden="true" className="text-[13px] font-extrabold text-primary">
-              *
-            </span>
-          </span>
-          {/* 라디오 그룹 — 버튼 두 개로 보이지만 의미는 택일이라 role로 그렇게 알린다. */}
-          <div role="radiogroup" aria-label="주 이용 형태" className="mt-2 grid grid-cols-2 gap-2">
-            {(
-              [
-                ["SELLER", "판매자"],
-                ["BUYER", "구매자"],
-              ] as const
-            ).map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                role="radio"
-                aria-checked={role === value}
-                onClick={() => setRole(value)}
-                className={`flex h-12 items-center justify-center gap-2 rounded-[4px] border text-[14px] font-bold transition-colors ${FOCUS_RING} ${
-                  role === value
-                    ? "border-primary text-primary"
-                    : "border-border-2 text-text-2 hover:border-text-3"
-                }`}
-              >
-                <span
-                  aria-hidden="true"
-                  className={`flex h-[15px] w-[15px] items-center justify-center rounded-full border-[1.5px] ${
-                    role === value ? "border-primary" : "border-border-2"
-                  }`}
-                >
-                  {role === value && <span className="h-[7px] w-[7px] rounded-full bg-primary" />}
-                </span>
-                {label}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 

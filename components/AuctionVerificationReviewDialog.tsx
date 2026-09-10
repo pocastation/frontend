@@ -135,7 +135,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
     && verification.status !== "QUEUED"
     && verification.status !== "ANALYZING";
   const modelVersion = verification?.modelVersion ?? null;
-  const isTrocrV5 = modelVersion?.includes("trocr-v5") ?? false;
+  const isTrocrV6 = modelVersion?.includes("trocr-v6") ?? false;
   const modelVersionPending = modelVersion === null;
   const readOnly = auction.status !== "PENDING_REVIEW";
   const reviewResult = auction.status === "REJECTED"
@@ -396,19 +396,19 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     className={`mt-3 border px-3 py-3 ${
                       modelVersionPending
                         ? "border-border bg-surface-2"
-                        : isTrocrV5
+                        : isTrocrV6
                           ? "border-border"
                           : "border-accent bg-accent-soft"
                     }`}
-                    role={!modelVersionPending && !isTrocrV5 ? "alert" : undefined}
+                    role={!modelVersionPending && !isTrocrV6 ? "alert" : undefined}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <h3 className="text-xs font-extrabold text-text-1">OCR 실행 구성</h3>
-                      <span className={`text-xs font-extrabold ${modelVersionPending ? "text-text-3" : isTrocrV5 ? "text-ok" : "text-accent"}`}>
-                        {modelVersionPending ? "분석 정보 대기" : isTrocrV5 ? "TrOCR v5 가중치" : "v5 아님"}
+                      <span className={`text-xs font-extrabold ${modelVersionPending ? "text-text-3" : isTrocrV6 ? "text-ok" : "text-accent"}`}>
+                        {modelVersionPending ? "분석 정보 대기" : isTrocrV6 ? "TrOCR v6 가중치" : "v6 아님"}
                       </span>
                     </div>
-                    {isTrocrV5 ? (
+                    {isTrocrV6 ? (
                       <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
                         <dt className="text-text-3">입력 처리</dt>
                         <dd className="text-right font-bold text-text-2">원근 보정 · 명암 보정 없음</dd>
@@ -421,7 +421,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                       <p className="mt-2 text-[11px] leading-5 text-text-3">
                         {modelVersionPending
                           ? "모델 버전은 분석이 끝난 뒤 표시됩니다."
-                          : "TrOCR v5 가중치 결과가 아닙니다. 모델 버전과 분석 결과를 확인하세요."}
+                          : "TrOCR v6 가중치 결과가 아닙니다. 모델 버전과 분석 결과를 확인하세요."}
                       </p>
                     )}
                   </div>
@@ -436,7 +436,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                           value: formatPercentage(verification.ocrConfidenceScore),
                         },
                       ]}
-                      condition={isTrocrV5
+                      condition={isTrocrV6
                         ? "Greedy 디코딩이 각 생성 단계에서 선택한 토큰 점수의 기하평균입니다. 정답 확률이나 자동 통과 기준은 아닙니다."
                         : "모델이 최종 선택한 인식 단위의 참고 지표입니다. 확률 보정값이 아니며 최종 통과를 직접 결정하지 않습니다."}
                     >
@@ -446,7 +446,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                       <div className="mt-3 border-t border-border pt-2">
                         <p className="text-[11px] font-extrabold text-text-3">인식 단위별 참고 점수</p>
                         <p className="mt-1 text-[11px] leading-5 text-text-3">
-                          {isTrocrV5
+                          {isTrocrV6
                             ? "Greedy 디코딩이 각 단계에서 선택한 토큰의 점수입니다. 한 토큰에 여러 문자가 포함될 수 있습니다."
                             : "모델이 반환한 토큰 단위 참고 점수입니다."}
                         </p>

@@ -869,7 +869,27 @@ export type NotificationListResponse = {
 // ─── 1:1 문의 ───
 
 export type InquiryStatus = "RECEIVED" | "CHECKING" | "ANSWERED";
-export type InquiryCategory = "ACCOUNT" | "AUCTION" | "PAYMENT" | "DELIVERY" | "ETC";
+/**
+ * 🔴 `ORDER`는 일반 문의 유형 선택지에 넣지 않는다(BE #490) — 거래 문의는 거래 화면에서만
+ * 접수되고, 주문 참조 없이 `POST /api/inquiries`로 보내면 서버가 400으로 막는다.
+ * 선택지 배열은 `INQUIRY_CATEGORIES`(lib/inquiries)가 따로 만든다.
+ */
+export type InquiryCategory = "ACCOUNT" | "AUCTION" | "PAYMENT" | "DELIVERY" | "ETC" | "ORDER";
+
+/** 거래 문의의 세부 유형(BE #490). `category = "ORDER"`인 문의에만 있다. */
+export type OrderInquiryTopic = "DELIVERY" | "SETTLEMENT" | "REFUND" | "RETURN" | "ETC";
+
+/** 문의에 붙는 거래 요약. 이 문의를 쓴 사람이 그 거래에서 무엇인지(`role`)를 함께 준다. */
+export type InquiryOrderResponse = {
+  orderId: number;
+  auctionId: number;
+  auctionTitle: string;
+  orderStatus: OrderStatus;
+  // 이행 축은 결제 완료 시점에 열린다 — 결제 전 주문에서는 null.
+  fulfillmentStatus: FulfillmentStatus | null;
+  disputeStatus: DisputeStatus;
+  role: "BUYER" | "SELLER";
+};
 
 export type InquiryResponse = {
   id: number;
@@ -881,6 +901,9 @@ export type InquiryResponse = {
   createdAt: string;
   updatedAt: string;
   answeredAt: string | null;
+  // 거래 문의에만 채워진다. 일반 문의는 둘 다 null.
+  orderTopic: OrderInquiryTopic | null;
+  order: InquiryOrderResponse | null;
 };
 
 export type InquiryListResponse = {

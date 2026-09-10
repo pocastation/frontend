@@ -106,9 +106,17 @@ export default function InquiryDetailPage() {
                 <span aria-hidden="true">·</span>
                 <span>{orderInquiryStateLabel(inquiry.order)}</span>
                 <span aria-hidden="true">·</span>
+                {/*
+                  12px 링크의 기본 탭 타겟(16px 높이)은 모바일에서 너무 작아 상하로 넓힌다.
+
+                  여기서는 `OrderInquiryLine`처럼 의사요소를 쓸 수 없다 — `truncate`의
+                  `overflow: hidden`이 음수 inset을 준 의사요소를 그대로 잘라낸다(실측: 히트
+                  높이가 16px에서 안 늘어났다). 대신 패딩+음수마진으로 넓힌다. 이 줄은 헤더의
+                  단독 한 줄이라 baseline 반올림 1px이 목록 행처럼 문제되지 않는다.
+                */}
                 <Link
                   href={`/auctions/${inquiry.order.auctionId}`}
-                  className={`min-w-0 truncate font-bold text-text-2 underline decoration-border-2 underline-offset-[3px] transition-colors hover:text-text-1 ${FOCUS_RING}`}
+                  className={`-mx-1.5 -my-1.5 min-w-0 truncate px-1.5 py-1.5 font-bold text-text-2 underline decoration-border-2 underline-offset-[3px] transition-colors hover:text-text-1 ${FOCUS_RING}`}
                 >
                   {inquiry.order.auctionTitle}
                 </Link>

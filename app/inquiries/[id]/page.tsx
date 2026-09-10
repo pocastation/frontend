@@ -10,6 +10,8 @@ import {
   formatInquiryDate,
   INQUIRY_CATEGORY_LABEL,
   INQUIRY_STATUS_LABEL,
+  ORDER_INQUIRY_TOPIC_SHORT,
+  orderInquiryStateLabel,
 } from "@/lib/inquiries";
 import { FOCUS_RING } from "@/lib/ui";
 import type { InquiryResponse, InquiryStatus } from "@/lib/types";
@@ -95,6 +97,23 @@ export default function InquiryDetailPage() {
               {inquiry.title}
             </h1>
             <p className="mt-2 text-xs text-text-3">접수일 {formatInquiryDate(inquiry.createdAt)}</p>
+            {/* 거래 문의(#633) — 어느 거래로 넣었는지. 여기서 그 거래로 바로 건너간다. */}
+            {inquiry.order && inquiry.orderTopic && (
+              <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-3">
+                <span className="font-bold text-text-2">
+                  {ORDER_INQUIRY_TOPIC_SHORT[inquiry.orderTopic]}
+                </span>
+                <span aria-hidden="true">·</span>
+                <span>{orderInquiryStateLabel(inquiry.order)}</span>
+                <span aria-hidden="true">·</span>
+                <Link
+                  href={`/auctions/${inquiry.order.auctionId}`}
+                  className={`min-w-0 truncate font-bold text-text-2 underline decoration-border-2 underline-offset-[3px] transition-colors hover:text-text-1 ${FOCUS_RING}`}
+                >
+                  {inquiry.order.auctionTitle}
+                </Link>
+              </p>
+            )}
           </header>
 
           <ol className="grid grid-cols-3 border-b border-border py-6" aria-label="문의 처리 단계">

@@ -58,7 +58,24 @@ export default function AdminDeliveryStalledPage() {
       setNotice(`「${item.title}」을 배송완료로 기록했어요. 3일 뒤 자동 확정돼요.`);
       await load();
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : "배송완료 기록에 실패했습니다.");
+      /*
+        409는 이 화면에서 원인이 사실상 하나다(BE #488) — 목록을 열어둔 사이 구매자가 구매확정을
+        누르거나 다른 관리자가 먼저 처리한 것. 서버의 공용 문구("현재 주문 상태에서는…")로는
+        관리자가 「내가 고른 건인데 왜 안 되지」에서 멈춘다. 런북이 주간 작업이라 목록이 오래된
+        상태로 클릭하는 일이 드물지 않다.
+
+        그 밖의 오류(네트워크·서버 장애)는 서버 메시지를 그대로 보여준다 — 원인 파악에 낫다.
+      */
+      const message =
+        err instanceof ApiError && err.status === 409
+          ? "이미 처리된 주문이에요. 구매자가 구매확정을 눌렀거나 다른 관리자가 먼저 기록했을 수 있어요. 목록을 새로 불러왔어요."
+          : err instanceof ApiError
+            ? err.message
+            : "배송완료 기록에 실패했습니다.";
+      // 실패해도 목록을 다시 읽어 화면과 서버 상태를 맞춘다 — 처리된 건이 목록에 남아 있으면 또 누른다.
+      // ⚠️ 순서가 중요하다. `load`가 시작할 때 오류를 비우므로 문구를 먼저 세우면 지워진다.
+      await load();
+      setError(message);
     } finally {
       setBusyId(null);
     }

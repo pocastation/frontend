@@ -16,6 +16,7 @@ import BadgeChips from "@/components/BadgeChips";
 import DeliveryAddressModal from "@/components/DeliveryAddressModal";
 import ReviewComposerModal from "@/components/ReviewComposerModal";
 import OrderShipForm from "@/components/OrderShipForm";
+import OrderInquiryLine from "@/components/OrderInquiryLine";
 import ReturnRequestModal from "@/components/ReturnRequestModal";
 import ReturnShipForm from "@/components/ReturnShipForm";
 import { type StatusTone } from "@/components/StatusIcon";
@@ -1289,6 +1290,15 @@ function SellingList({
               {soldOrder && onRefresh && !isLive && (
                 <SellerFulfillmentFooter soldOrder={soldOrder} onRefresh={onRefresh} />
               )}
+              {/* 거래 문의 진입(#633) — 주문이 있으면 상태와 무관하게 항상. 이 목록은 판매 관점
+                  (soldOrder)과 즉시구매 관점(order)에 함께 쓰이므로 어느 쪽인지로 역할이 갈린다. */}
+              {(soldOrder || order) && (
+                <OrderInquiryLine
+                  auctionId={item.id}
+                  title={item.title}
+                  role={soldOrder ? "SELLER" : "BUYER"}
+                />
+              )}
             </div>
           </li>
         );
@@ -2170,6 +2180,8 @@ function MyBiddingList({
                 ) : onGoPayment ? (
                   <OrderStatusFooter order={order} onGoPayment={onGoPayment} />
                 ) : null)}
+              {/* 거래 문의 진입(#633) — 제안 내역은 언제나 구매자 관점이다. */}
+              {order && <OrderInquiryLine auctionId={item.id} title={item.title} role="BUYER" />}
             </div>
           </li>
         );

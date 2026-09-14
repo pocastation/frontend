@@ -309,6 +309,16 @@ export default function AdminDisputesPage() {
                       ? `${selected.returnCarrier ?? ""} ${selected.returnTrackingNumber}`
                       : "-",
                   ],
+                  // 훼손 신고가 들어왔을 때 「언제 도착해서 며칠 뒤에 신고했는가」가 판단의
+                  // 재료다(#639). 추적 불가한 택배사로 보낸 반송은 비어 있어 행이 뜨지 않는다.
+                  ...(selected.returnDeliveredAt
+                    ? [
+                        [
+                          "반송 도착 확인",
+                          formatDateTimeKST(selected.returnDeliveredAt),
+                        ] as [string, string],
+                      ]
+                    : []),
                   [
                     "요청 시각",
                     selected.returnRequestedAt ? formatDateTimeKST(selected.returnRequestedAt) : "-",

@@ -7,9 +7,11 @@ import { FOCUS_RING, INPUT_CLASS } from "@/lib/ui";
 
 type Carrier = { code: string; name: string };
 
-// 구매자 반송 운송장 등록(#213, 약관 제15조 제2항 b). 판매자 발송(OrderShipForm)과 같은 모양이지만
-// 반송은 배송추적 폴링 대상이 아니라 코드를 서버에 보내지 않는다 — 수령 확인은 판매자가 직접 하고,
-// 안 하면 기한(5일) 초과로 자동 환불된다.
+// 구매자 반송 운송장 등록(#213, 약관 제15조 제2항 b). 판매자 발송(OrderShipForm)과 같은 모양이다.
+//
+// 택배사 코드를 함께 보낸다(#639). 「반송은 추적 대상이 아니다」는 전제로 코드를 빼 놨었는데
+// BE #498이 반송도 폴링 대상에 넣었다 — 코드가 없으면 추적이 한 건도 걸리지 않고 기한이
+// 반송 등록 + 5영업일로 소진된다. 코드를 보내면 도착이 확인된 시점에 기한이 3영업일로 당겨진다.
 export default function ReturnShipForm({
   auctionId,
   onShipped,
@@ -50,7 +52,11 @@ export default function ReturnShipForm({
     try {
       await fetchWithAuth<void>(`/api/auctions/${auctionId}/order/return/ship`, {
         method: "POST",
-        body: { carrier: carrier.name, trackingNumber: trackingNumber.trim() },
+        body: {
+          carrier: carrier.name,
+          carrierCode: carrier.code,
+          trackingNumber: trackingNumber.trim(),
+        },
       });
       onShipped();
     } catch (err) {

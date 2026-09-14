@@ -1693,7 +1693,7 @@ function BuyerDisputeFooter({
     await post("evidence", { note });
   }
 
-  const body = (() => {
+  const body = ((): { pill: ReactNode; message: ReactNode; sub?: ReactNode } => {
     switch (order.disputeStatus) {
       // 🔴 접수 직후 기다리는 상대는 **판매자가 아니라 운영팀**이다(BE #494). 예전 문구가
       // 「판매자가 응답해요」였는데, 그대로 두면 구매자가 엉뚱한 상대를 기다린다.
@@ -1739,6 +1739,24 @@ function BuyerDisputeFooter({
           ),
         };
       case "RETURN_SHIPPED":
+        // 도착이 확인되면 그 사실과 자동 환불 기한을 말한다(#639). 「판매자 확인 후」만 적으면
+        // 판매자가 손을 놓았을 때 무한정 기다리는 것으로 읽히는데, 실제로는 기한이 있고 지나면
+        // 환불된다 — 기다리는 쪽이 그 사실을 알아야 한다.
+        if (order.returnDeliveredAt) {
+          return {
+            pill: fulfillmentPill("box", "primary", "도착 확인"),
+            message: due ? (
+              <>판매자에게 도착했어요 · {due}까지 확인이 없으면 자동 환불돼요</>
+            ) : (
+              <>판매자에게 도착했어요 · 확인 후 환불돼요</>
+            ),
+            sub: (
+              <>
+                {order.returnCarrier} {order.returnTrackingNumber}
+              </>
+            ),
+          };
+        }
         return {
           pill: fulfillmentPill("box", "primary", "반송 중"),
           message: (
@@ -1810,6 +1828,8 @@ function BuyerDisputeFooter({
           />
         )}
       </div>
+      {/* 운송장은 도착이 확인된 뒤 보조 정보로 내려온다 — 그 줄의 자리를 「도착했다」가 쓴다. */}
+      {body.sub && <p className="mt-1.5 text-[11px] text-text-3">{body.sub}</p>}
       {order.returnReason && (
         <p className="mt-1.5 text-[11px] text-text-3">
           사유 {RETURN_REASON_LABEL[order.returnReason]}
@@ -2075,7 +2095,7 @@ function SellerDisputeFooter({
   const outlineBtn = `shrink-0 rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`;
   const solidBtn = `shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`;
 
-  const body = (() => {
+  const body = ((): { pill: ReactNode; message: ReactNode; sub?: ReactNode; actions: ReactNode } => {
     switch (soldOrder.disputeStatus) {
       /*
         🔴 접수·보완 단계(RETURN_REQUESTED·EVIDENCE_REQUESTED)는 판매자에게 보이지 않는다.
@@ -2120,13 +2140,25 @@ function SellerDisputeFooter({
         };
       case "RETURN_SHIPPED":
         return {
-          pill: fulfillmentPill("box", "accent", "반송 도착 확인"),
+          /*
+           * 상태 이름을 둘로 가른다(#639). 예전 「반송 도착 확인」은 **수령을 확인하라는 요구**
+           * 였는데, 추적으로 실제 도착 확인이 별도 사건이 되면서 같은 말이 두 가지를 가리켰다.
+           * 요구는 「수령 확인 필요」, 사실은 「도착 확인」이다.
+           */
+          pill: soldOrder.returnDeliveredAt
+            ? fulfillmentPill("box", "accent", "도착 확인")
+            : fulfillmentPill("box", "accent", "수령 확인 필요"),
           message: (
             <>
               {soldOrder.returnCarrier} {soldOrder.returnTrackingNumber}
               {due ? ` · ${due}까지 확인하지 않으면 자동 환불돼요` : ""}
             </>
           ),
+          // 기한이 당겨진 이유를 말한다 — 반송 등록 알림은 5영업일을 안내했다. 날짜를 문구에
+          // 박지 않고 서버가 내린 disputeDueAt만 쓴다(상수와 문구가 갈리면 안 된다).
+          sub: soldOrder.returnDeliveredAt ? (
+            <>{formatDateTimeKST(soldOrder.returnDeliveredAt)} 도착 확인 · 기한이 앞당겨졌어요</>
+          ) : null,
           actions: (
             <>
               <button
@@ -2189,6 +2221,8 @@ function SellerDisputeFooter({
         <span className="min-w-0 flex-1">{body.message}</span>
         {body.actions}
       </div>
+      {/* 기한이 당겨진 이유 — 사유보다 위에 둔다. 지금 행동을 정하는 정보라서다(#639). */}
+      {body.sub && <p className="mt-1.5 text-[11px] font-semibold text-text-2">{body.sub}</p>}
       {soldOrder.returnReason && (
         <p className="mt-1.5 text-[11px] text-text-3">
           사유 {RETURN_REASON_LABEL[soldOrder.returnReason]}

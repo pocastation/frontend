@@ -1,3 +1,4 @@
+import { PAYMENT_FEE_KRW } from "@/lib/fees";
 import type { StatusTone } from "@/components/StatusBadge";
 import type {
   SuggestionKind,
@@ -445,7 +446,13 @@ export const RETURN_SHIPPING_FEE_NOTE: Record<ReturnReason, string> = {
   WRONG_ITEM: "판매자 귀책이라 반송비는 판매자 부담이에요.",
   DAMAGED_IN_TRANSIT: "배송 중 파손은 택배사 보상 대상이라 반송비는 협의가 필요해요.",
   // 단순 변심은 구매자 귀책이라 수수료 공제·반송비 자기 부담을 고른 즉시 알려야 한다(§7.1-A S1·S3).
-  CHANGE_OF_MIND: "전자결제 이용 수수료를 뺀 금액이 환불되고, 반송비는 직접 부담해요.",
+  //
+  // 🔴 금액과 산정 기준을 함께 말한다(운영정책 제19조 ④ — 「제1항의 금액과 산정 기준을 미리
+  // 고지」). BE #504로 단순 변심 반품이 제19조 ①의 공제 대상이 되면서 취소 화면과 같은 기준을
+  // 적용받는다. 값은 `PAYMENT_FEE_KRW` 한 곳에서만 오고 백엔드
+  // `RefundPolicy.PAYMENT_FEE_KRW`와 같아야 한다 — PG 계약이 끝나면 정책 문안·백엔드·이
+  // 상수를 함께 바꾼다. 문구에 숫자를 박으면 세 곳이 갈린다.
+  CHANGE_OF_MIND: `전자결제 이용 수수료 ${PAYMENT_FEE_KRW.toLocaleString()}원(거래 금액과 관계없이 건당)을 뺀 금액이 환불되고, 거래 수수료는 전액 환불돼요. 반송비는 직접 부담해요.`,
   ETC: "반송비 부담은 운영팀이 사유를 보고 안내해요.",
 };
 

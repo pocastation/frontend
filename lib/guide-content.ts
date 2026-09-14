@@ -10,7 +10,7 @@
  * | 값 | 코드 |
  * | --- | --- |
  * | 결제 기한 48시간 | `PaymentDeadlinePolicy.PAYMENT_WINDOW` |
- * | 자동 구매확정 3일 | `FulfillmentSweeper.CONFIRM_AFTER_DELIVERED` |
+ * | 자동 구매확정 3영업일 | `FulfillmentSweeper.CONFIRM_AFTER_DELIVERED_BUSINESS_DAYS` |
  * | 발송 2·3영업일 | `SHIPPING_DEADLINE_BUSINESS_DAYS` · `SHIPPING_AUTO_CANCEL_BUSINESS_DAYS` |
  */
 
@@ -56,7 +56,7 @@ export const GUIDE_DEADLINES: [string, string][] = [
   ["성사 후 결제", "48시간"],
   ["단순 변심 취소", "물품 준비 전"],
   ["발송", "3영업일"],
-  ["자동 구매 확정", "배송 완료 후 3일"],
+  ["자동 구매 확정", "배송 완료 후 3영업일"],
 ];
 
 export const GUIDE_DOCS: GuideDoc[] = [
@@ -106,7 +106,7 @@ export const GUIDE_DOCS: GuideDoc[] = [
     title: "받고 나서 할 일",
     desc: "구매 확정 · 반품",
     facts: [
-      ["자동 확정", "배송 완료 후 3일"],
+      ["자동 확정", "배송 완료 후 3영업일"],
       ["변심 취소", "입금 확인 후 24시간 안"],
       ["이의 제기", "구매 확정 전까지"],
     ],
@@ -117,7 +117,7 @@ export const GUIDE_DOCS: GuideDoc[] = [
       ],
       [
         "구매 확정",
-        "확정하면 바로 판매자에게 정산돼요. 누르지 않으면 배송 완료 후 3일에 자동 확정돼요.",
+        "확정하면 바로 판매자에게 정산돼요. 누르지 않으면 배송 완료 후 3영업일에 자동 확정돼요.",
       ],
       [
         "이의 제기",

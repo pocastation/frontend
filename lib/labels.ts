@@ -18,6 +18,7 @@ import type {
   ReportStatus,
   ResolutionAction,
   ReviewReportReason,
+  DisputeDecision,
   DisputeStatus,
   RefundReason,
   ReturnReason,
@@ -248,6 +249,17 @@ export const AUDIT_ACTION_LABEL: Record<AuditAction, string> = {
   MEMBER_ROLE_REVOKED: "관리자 권한회수",
   AUCTION_APPROVED: "판매글 승인",
   AUCTION_REJECTED: "판매글 반려",
+  MEMBER_SESSIONS_REVOKED: "세션 강제 만료",
+  MEMBER_PURGED: "개인정보 파기",
+  EMAIL_SUPPRESSION_RELEASED: "발송 금지 해제",
+  ORDER_DELIVERY_MARKED: "배송완료 수동 기록",
+  // 반품 대금 처리(BE #494) — 「중재」라 쓰지 않는다.
+  DISPUTE_RESOLVED_REFUND: "반품 전액환불",
+  DISPUTE_RESOLVED_PARTIAL_REFUND: "반품 일부환불",
+  DISPUTE_RESOLVED_DISMISSED: "반품 기각",
+  DISPUTE_REOPENED: "반품 재오픈",
+  DISPUTE_EVIDENCE_REQUESTED: "자료 보완 요청",
+  DISPUTE_FORWARDED: "판매자 전달",
 };
 
 export const AUDIT_ACTION_OPTIONS: AuditAction[] = [
@@ -276,11 +288,24 @@ export const AUDIT_ACTION_TONE: Record<AuditAction, StatusTone> = {
   MEMBER_ROLE_REVOKED: "neutral",
   AUCTION_APPROVED: "ok",
   AUCTION_REJECTED: "danger",
+  // 되돌릴 수 없는 조치와 돈이 나가는 조치를 danger로 둔다 — 로그에서 먼저 눈에 걸려야 한다.
+  MEMBER_SESSIONS_REVOKED: "warn",
+  MEMBER_PURGED: "danger",
+  EMAIL_SUPPRESSION_RELEASED: "warn",
+  ORDER_DELIVERY_MARKED: "warn",
+  DISPUTE_RESOLVED_REFUND: "danger",
+  DISPUTE_RESOLVED_PARTIAL_REFUND: "danger",
+  DISPUTE_RESOLVED_DISMISSED: "muted",
+  DISPUTE_REOPENED: "warn",
+  // 절차를 진행시키는 행위는 판단이 아니라 진행이라 중립으로 둔다.
+  DISPUTE_EVIDENCE_REQUESTED: "neutral",
+  DISPUTE_FORWARDED: "neutral",
 };
 
 export const AUDIT_TARGET_TYPE_LABEL: Record<AuditTargetType, string> = {
   MEMBER: "회원",
   AUCTION: "판매글",
+  ORDER: "주문",
 };
 
 export const MEMBER_ROLE_LABEL: Record<MemberRole, string> = {
@@ -383,6 +408,7 @@ export const RETURN_REASON_LABEL: Record<ReturnReason, string> = {
   CONDITION_MISMATCH: "상태가 설명과 달라요",
   WRONG_ITEM: "다른 물건이 왔어요",
   DAMAGED_IN_TRANSIT: "배송 중 파손됐어요",
+  CHANGE_OF_MIND: "단순 변심이에요",
   ETC: "기타",
 };
 
@@ -391,8 +417,25 @@ export const RETURN_REASON_OPTIONS: ReturnReason[] = [
   "CONDITION_MISMATCH",
   "WRONG_ITEM",
   "DAMAGED_IN_TRANSIT",
+  "CHANGE_OF_MIND",
   "ETC",
 ];
+
+/**
+ * 사진이 필수인 사유(BE #494 `ReturnReason.requiresPhoto`와 같은 규칙).
+ *
+ * ⚠️ 사진 첨부 자체는 아직 없다 — `MediaImageOwnershipGate`가 경매 전용 시그니처라 media 모듈
+ * 일반화가 선행돼야 한다(별도 이슈). 지금은 **필수 사유를 골랐을 때 안내 문구만** 띄운다.
+ * 백엔드는 사진 없이도 접수를 받으므로 이 표는 안내용이고 검증용이 아니다.
+ */
+export const RETURN_REASON_NEEDS_PHOTO: Record<ReturnReason, boolean> = {
+  COUNTERFEIT_SUSPECTED: true,
+  CONDITION_MISMATCH: true,
+  WRONG_ITEM: true,
+  DAMAGED_IN_TRANSIT: true,
+  CHANGE_OF_MIND: false,
+  ETC: false,
+};
 
 // 반송비 안내(2026-07-23 결정) — 정산에 반영하지 않고 문구로만 안내한다.
 // 판매자 귀책이 명백한 사유는 판매자 부담으로 안내하고, 그 외는 협의 대상으로 둔다.
@@ -401,25 +444,92 @@ export const RETURN_SHIPPING_FEE_NOTE: Record<ReturnReason, string> = {
   CONDITION_MISMATCH: "판매자 귀책이라 반송비는 판매자 부담이에요.",
   WRONG_ITEM: "판매자 귀책이라 반송비는 판매자 부담이에요.",
   DAMAGED_IN_TRANSIT: "배송 중 파손은 택배사 보상 대상이라 반송비는 협의가 필요해요.",
-  ETC: "반송비 부담은 판매자와 협의해 주세요.",
+  // 단순 변심은 구매자 귀책이라 수수료 공제·반송비 자기 부담을 고른 즉시 알려야 한다(§7.1-A S1·S3).
+  CHANGE_OF_MIND: "전자결제 이용 수수료를 뺀 금액이 환불되고, 반송비는 직접 부담해요.",
+  ETC: "반송비 부담은 운영팀이 사유를 보고 안내해요.",
 };
 
+/**
+ * 단계 라벨 — 사용자에게 보이는 말이다.
+ *
+ * 「중재」·「조정」을 쓰지 않는다. 중재법 제35조에 따라 중재판정은 확정판결과 같은 효력을 갖는데
+ * 플랫폼의 내부 판단에는 그런 효력이 없고, 용어가 효력을 오인시키면 분쟁이 커진다(§7.1-A D5).
+ */
 export const DISPUTE_STATUS_LABEL: Record<DisputeStatus, string> = {
   NONE: "",
-  RETURN_REQUESTED: "반품 요청",
-  RETURN_ACCEPTED: "반품 수락",
+  RETURN_REQUESTED: "반품 접수",
+  EVIDENCE_REQUESTED: "자료 보완 필요",
+  SELLER_REVIEW: "판매자 의견 대기",
+  ADMIN_DECISION: "대금 처리 검토",
+  RETURN_PENDING: "반송 대기",
   RETURN_SHIPPED: "반송 중",
-  UNDER_MEDIATION: "중재 진행",
   RESOLVED_REFUND: "반품 완료",
+  RESOLVED_PARTIAL_REFUND: "일부 환불",
   RESOLVED_DISMISSED: "반품 기각",
+  RESOLVED_WITHDRAWN: "요청 철회",
 };
+
+/** 관리자 대금 처리 버튼 문구 — 결과가 무엇인지 버튼에서 읽히게 한다. */
+export const DISPUTE_DECISION_LABEL: Record<DisputeDecision, string> = {
+  FULL_REFUND: "전액환불 + 반품",
+  PARTIAL_REFUND: "일부환불 + 물품 유지",
+  DISMISSED: "이의 기각",
+};
+
+/**
+ * 구매자가 철회할 수 있는 단계(BE `DisputeStatus.isWithdrawable`과 같은 규칙).
+ *
+ * 반품이 확정된 뒤(`RETURN_PENDING` 이후)에는 막는다 — 판매자가 이미 동의했거나 관리자가
+ * 대금 처리를 결정한 상태라, 그때 되돌리면 그 결정이 무의미해진다. 최종 판정은 서버가 하고
+ * 화면은 버튼을 띄울지만 고른다.
+ */
+export const WITHDRAWABLE_DISPUTE: DisputeStatus[] = [
+  "RETURN_REQUESTED",
+  "EVIDENCE_REQUESTED",
+  "SELLER_REVIEW",
+];
+
+/** 관리자가 실제로 손을 대야 하는 단계 — 목록에서 「내 차례」로 가른다. */
+export const ADMIN_ACTION_DISPUTE: DisputeStatus[] = ["RETURN_REQUESTED", "ADMIN_DECISION"];
+
+/** 관리자가 재오픈할 수 있는 종결 — 환불은 PG 취소가 나가 되돌릴 수 없다. */
+export const REOPENABLE_DISPUTE: DisputeStatus[] = ["RESOLVED_DISMISSED", "RESOLVED_WITHDRAWN"];
+
+/**
+ * 거래가 그대로 진행되는 종결 — 반품 푸터가 아니라 일반 배송 푸터를 보여준다.
+ *
+ * 기각·철회는 자동 구매확정 경로로 돌아가므로 당사자가 볼 것은 배송·확정이다. 반품 상태를
+ * 계속 얹으면 끝난 절차가 화면을 차지한다.
+ */
+export const DISPUTE_BACK_TO_NORMAL: DisputeStatus[] = [
+  "NONE",
+  "RESOLVED_DISMISSED",
+  "RESOLVED_WITHDRAWN",
+];
+
+/**
+ * 판매자에게 보이는 반품 단계 — 관리자가 전달한 뒤부터다.
+ *
+ * 접수·보완(`RETURN_REQUESTED`·`EVIDENCE_REQUESTED`)은 회사가 1차로 검토하는 구간이라 판매자가
+ * 볼 수 없다(BE #494). 그 단계에 「반품 상태를 확인해 주세요」를 띄우면 대응할 수 없는 건을
+ * 확인하라고 말하는 셈이 된다.
+ */
+export const SELLER_VISIBLE_DISPUTE: DisputeStatus[] = [
+  "SELLER_REVIEW",
+  "ADMIN_DECISION",
+  "RETURN_PENDING",
+  "RETURN_SHIPPED",
+  "RESOLVED_REFUND",
+  "RESOLVED_PARTIAL_REFUND",
+];
 
 export const REFUND_REASON_LABEL: Record<RefundReason, string> = {
   BUYER_CANCELLED: "구매자 취소",
   SHIPPING_OVERDUE: "발송 기한 초과",
   SELLER_CANCELLED: "판매자 취소",
   RETURN_COMPLETED: "반품 완료",
-  ADMIN_DECISION: "중재 결정",
+  // 「중재」를 쓰지 않는다(BE #494) — 서버 enum 이름은 ADMIN_DECISION 그대로다.
+  ADMIN_DECISION: "운영팀 결정",
 };
 
 /**

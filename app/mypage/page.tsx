@@ -19,6 +19,7 @@ import OrderShipForm from "@/components/OrderShipForm";
 import OrderInquiryLine from "@/components/OrderInquiryLine";
 import ReturnRequestModal from "@/components/ReturnRequestModal";
 import ReturnShipForm from "@/components/ReturnShipForm";
+import SellerDefenseModal from "@/components/SellerDefenseModal";
 import { type StatusTone } from "@/components/StatusIcon";
 import { formatDateTimeKST, formatKRW, formatTimeLeft } from "@/lib/format";
 import { cancellationLocksAt } from "@/lib/fees";
@@ -28,6 +29,9 @@ import {
   SELLER_AUCTION_STATUS_LABEL,
   REFUND_REASON_LABEL,
   RETURN_REASON_LABEL,
+  DISPUTE_BACK_TO_NORMAL,
+  SELLER_VISIBLE_DISPUTE,
+  WITHDRAWABLE_DISPUTE,
   plainLevelLabel,
 } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
@@ -1288,7 +1292,7 @@ function SellingList({
                   ENDED_SOLD다. 그런데 미입금·구매자 취소로 복귀한 매물에는 끝난 주문이 남아 있어,
                   주문만 보고 그리면 「17시간 남음」 옆에 「결제 미완료 · 거래가 종료됐어요」가 붙는다. */}
               {soldOrder && onRefresh && !isLive && (
-                <SellerFulfillmentFooter soldOrder={soldOrder} onRefresh={onRefresh} />
+                <SellerFulfillmentFooter soldOrder={soldOrder} title={item.title} onRefresh={onRefresh} />
               )}
               {/* 거래 문의 진입(#633) — 주문이 있으면 상태와 무관하게 항상. 이 목록은 판매 관점
                   (soldOrder)과 즉시구매 관점(order)에 함께 쓰이므로 어느 쪽인지로 역할이 갈린다. */}
@@ -1541,8 +1545,9 @@ function BuyerFulfillmentFooter({
 
   const fs = order.fulfillmentStatus;
 
-  // 반품이 열려 있으면 배송 상태보다 분쟁 단계가 우선 — 지금 내가 뭘 해야 하는지가 먼저다.
-  if (order.disputeStatus !== "NONE" && order.disputeStatus !== "RESOLVED_DISMISSED") {
+  // 반품이 열려 있으면 배송 상태보다 반품 단계가 우선 — 지금 내가 뭘 해야 하는지가 먼저다.
+  // 기각·철회는 거래가 그대로 진행되므로 일반 배송 푸터로 돌아간다.
+  if (!DISPUTE_BACK_TO_NORMAL.includes(order.disputeStatus)) {
     return <BuyerDisputeFooter order={order} onRefresh={onRefresh} />;
   }
 
@@ -1654,27 +1659,83 @@ function BuyerDisputeFooter({
   order: MyOrderStatusResponse;
   onRefresh: () => void;
 }) {
+  const { fetchWithAuth } = useAuth();
   const [shipOpen, setShipOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
   const due = order.disputeDueAt ? formatDateTimeKST(order.disputeDueAt) : null;
+
+  async function post(path: string, body?: Record<string, unknown>) {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await fetchWithAuth<void>(`/api/auctions/${order.auctionId}/order/return/${path}`, {
+        method: "POST",
+        body,
+      });
+      onRefresh();
+    } catch {
+      // 실패는 조용히 — 다음 새로고침에서 서버 상태로 보정(이 화면의 기존 관례).
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // 되돌릴 수 없는 조작이라 한 번 되묻는다. 철회 후 재요청은 가능하므로 그 점을 함께 알린다.
+  async function withdraw() {
+    if (!window.confirm("반품 요청을 철회할까요?\n\n구매확정 전이라면 다시 요청할 수 있어요.")) return;
+    await post("withdraw");
+  }
+
+  // 보완 자료는 지금 글로만 받는다 — 사진 첨부는 media 모듈 일반화가 선행돼야 한다(별도 이슈).
+  async function submitEvidence() {
+    const note = window.prompt("보완할 내용을 적어주세요. 운영팀이 이어서 검토해요.")?.trim();
+    if (!note) return;
+    await post("evidence", { note });
+  }
 
   const body = (() => {
     switch (order.disputeStatus) {
+      // 🔴 접수 직후 기다리는 상대는 **판매자가 아니라 운영팀**이다(BE #494). 예전 문구가
+      // 「판매자가 응답해요」였는데, 그대로 두면 구매자가 엉뚱한 상대를 기다린다.
       case "RETURN_REQUESTED":
         return {
-          pill: fulfillmentPill("clock", "primary", "반품 요청"),
+          pill: fulfillmentPill("clock", "primary", "반품 접수"),
           message: due ? (
-            <>{due}까지 판매자가 응답해요 · 응답이 없으면 자동으로 수락돼요</>
+            <>운영팀이 확인하고 있어요 · {due}까지 검토해요</>
           ) : (
-            <>판매자의 응답을 기다리고 있어요</>
+            <>운영팀이 확인하고 있어요</>
           ),
         };
-      case "RETURN_ACCEPTED":
+      case "EVIDENCE_REQUESTED":
+        return {
+          pill: fulfillmentPill("alertCircle", "accent", "자료 보완 필요"),
+          message: due ? (
+            <>{due}까지 보완해 주세요{order.disputeNote ? ` · ${order.disputeNote}` : ""}</>
+          ) : (
+            <>자료를 보완해 주세요{order.disputeNote ? ` · ${order.disputeNote}` : ""}</>
+          ),
+        };
+      case "SELLER_REVIEW":
+        return {
+          pill: fulfillmentPill("clock", "primary", "판매자 의견 대기"),
+          message: due ? (
+            <>{due}까지 판매자가 의견을 내요 · 응답이 없으면 운영팀이 판단해요</>
+          ) : (
+            <>판매자의 의견을 기다리고 있어요</>
+          ),
+        };
+      case "ADMIN_DECISION":
+        return {
+          pill: fulfillmentPill("alertCircle", "warn", "대금 처리 검토"),
+          message: <>운영팀이 대금 처리를 결정해요 · 결과를 알림으로 알려드릴게요</>,
+        };
+      case "RETURN_PENDING":
         return {
           pill: fulfillmentPill("box", "accent", "반송 필요"),
           message: due ? (
-            <>반품이 수락됐어요 · {due}까지 반송하고 운송장을 등록해 주세요</>
+            <>반품이 확정됐어요 · {due}까지 반송하고 운송장을 등록해 주세요</>
           ) : (
-            <>반품이 수락됐어요 · 물품을 반송하고 운송장을 등록해 주세요</>
+            <>반품이 확정됐어요 · 물품을 반송하고 운송장을 등록해 주세요</>
           ),
         };
       case "RETURN_SHIPPED":
@@ -1686,15 +1747,25 @@ function BuyerDisputeFooter({
             </>
           ),
         };
-      case "UNDER_MEDIATION":
-        return {
-          pill: fulfillmentPill("alertCircle", "warn", "중재 진행"),
-          message: <>운영진이 확인하고 있어요 · 결과를 알림으로 알려드릴게요</>,
-        };
       case "RESOLVED_REFUND":
         return {
           pill: fulfillmentPill("checkCircle", "ok", "반품 완료"),
           message: <>반품이 확정돼 환불 절차가 진행돼요</>,
+        };
+      case "RESOLVED_PARTIAL_REFUND":
+        return {
+          pill: fulfillmentPill("checkCircle", "ok", "일부 환불"),
+          message: (
+            <>
+              일부 금액을 환불하고 물품은 그대로 보유해요
+              {order.partialRefundAmount ? ` · ${formatKRW(order.partialRefundAmount)}` : ""}
+            </>
+          ),
+        };
+      case "RESOLVED_WITHDRAWN":
+        return {
+          pill: fulfillmentPill("xCircle", "neutral", "요청 철회"),
+          message: <>반품 요청을 철회했어요 · 구매확정 전이면 다시 요청할 수 있어요</>,
         };
       default:
         return {
@@ -1710,13 +1781,23 @@ function BuyerDisputeFooter({
       <div className="flex flex-wrap items-center gap-2.5">
         {body.pill}
         <span className="min-w-0 flex-1">{body.message}</span>
-        {order.disputeStatus === "RETURN_ACCEPTED" && !shipOpen && (
+        {order.disputeStatus === "EVIDENCE_REQUESTED" && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void submitEvidence()}
+            className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+          >
+            자료 제출
+          </button>
+        )}
+        {order.disputeStatus === "RETURN_PENDING" && !shipOpen && (
           <button
             type="button"
             onClick={() => setShipOpen(true)}
             className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
           >
-            반송 등록
+            운송장 등록
           </button>
         )}
         {shipOpen && (
@@ -1735,8 +1816,29 @@ function BuyerDisputeFooter({
           {order.returnDetail ? ` · ${order.returnDetail}` : ""}
         </p>
       )}
-      {order.disputeNote && order.disputeStatus === "UNDER_MEDIATION" && (
-        <p className="mt-1 text-[11px] text-text-3">판매자 의견 · {order.disputeNote}</p>
+      {/* 반송 기한의 결과를 미리 말한다 — 미이행이 기각이라 「그냥 늦어도 되는 기한」이 아니다. */}
+      {order.disputeStatus === "RETURN_PENDING" && (
+        <p className="mt-1 text-[11px] text-text-3">
+          기한이 지나면 거래가 그대로 확정돼요 · 반송비는{" "}
+          {order.returnReason === "CHANGE_OF_MIND" ? "구매자 부담이에요" : "사유에 따라 안내해 드려요"}
+        </p>
+      )}
+      {/* 철회는 판매자 의견 단계까지만(BE #494) — 반품이 확정된 뒤에는 되돌릴 수 없다.
+          문의 진입 줄(#633)과 같은 헬퍼 텍스트로 둔다. 버튼으로 만들면 반송·확정 같은 실제
+          액션과 무게가 같아진다. */}
+      {WITHDRAWABLE_DISPUTE.includes(order.disputeStatus) && (
+        <p className="mt-1 text-[11px] text-text-3">
+          요청을{" "}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void withdraw()}
+            className={`relative font-bold text-text-2 underline decoration-border-2 underline-offset-[3px] transition-colors after:absolute after:-inset-x-1.5 after:-inset-y-1.5 after:content-[''] hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
+          >
+            철회
+          </button>
+          할 수 있어요 · 구매확정 전이면 다시 요청할 수 있어요
+        </p>
       )}
     </div>
   );
@@ -1780,9 +1882,12 @@ function sellerPaymentWaitCopy(status: OrderStatus): { label: string; message: s
 // 판매자 관점 발송 푸터(#119) — 판매 내역. sold-order가 있으면(=결제 완료된 거래) 발송/상태 표시.
 function SellerFulfillmentFooter({
   soldOrder,
+  title,
   onRefresh,
 }: {
   soldOrder: SoldOrderResponse;
+  // 의견 제출 모달이 어느 거래인지 보여줘야 한다 — SoldOrderResponse에는 제목이 없다.
+  title: string;
   onRefresh: () => void;
 }) {
   const { fetchWithAuth } = useAuth();
@@ -1820,8 +1925,11 @@ function SellerFulfillmentFooter({
   }
 
   // 반품이 열려 있으면 발송 상태보다 반품 대응이 우선 — 판매자가 지금 눌러야 할 버튼이 여기 있다.
-  if (soldOrder.disputeStatus !== "NONE" && soldOrder.disputeStatus !== "RESOLVED_DISMISSED") {
-    return <SellerDisputeFooter soldOrder={soldOrder} onRefresh={onRefresh} />;
+  //
+  // 🔴 관리자가 전달하기 전(접수·보완)에는 이 푸터를 띄우지 않는다(BE #494). 판매자가 볼 수
+  // 없는 건이라, 띄우면 「반품 상태를 확인해 주세요」로 떨어져 대응할 수 없는 일을 지시한다.
+  if (SELLER_VISIBLE_DISPUTE.includes(soldOrder.disputeStatus)) {
+    return <SellerDisputeFooter soldOrder={soldOrder} title={title} onRefresh={onRefresh} />;
   }
   // 환불로 끝난 거래는 발송 UI를 띄우지 않는다(취소·미발송 자동취소 포함).
   if (soldOrder.orderStatus === "REFUNDING" || soldOrder.orderStatus === "REFUNDED") {
@@ -1928,16 +2036,20 @@ function SellerFulfillmentFooter({
 // 요청 도착 시 수락/거절, 반송 도착 시 수령확인/훼손신고. 무응답은 자동 수락되므로 기한을 명시한다.
 function SellerDisputeFooter({
   soldOrder,
+  title,
   onRefresh,
 }: {
   soldOrder: SoldOrderResponse;
+  title: string;
   onRefresh: () => void;
 }) {
   const { fetchWithAuth } = useAuth();
   const [busy, setBusy] = useState(false);
+  const [defenseOpen, setDefenseOpen] = useState(false);
   const due = soldOrder.disputeDueAt ? formatDateTimeKST(soldOrder.disputeDueAt) : null;
 
-  // 거절·훼손신고는 사유가 필수다(관리자 중재의 판단 근거) — prompt로 받고 비면 중단한다.
+  // 훼손신고는 사유가 필수다(운영팀 대금 처리의 판단 근거) — prompt로 받고 비면 중단한다.
+  // 의견 제출은 길게 쓰는 글이라 별도 모달(SellerDefenseModal)이 받는다.
   async function act(path: string, note?: string) {
     if (busy) return;
     setBusy(true);
@@ -1965,23 +2077,28 @@ function SellerDisputeFooter({
 
   const body = (() => {
     switch (soldOrder.disputeStatus) {
-      case "RETURN_REQUESTED":
+      /*
+        🔴 접수·보완 단계(RETURN_REQUESTED·EVIDENCE_REQUESTED)는 판매자에게 보이지 않는다.
+        회사가 1차로 검토한 뒤 전달하는 구조라(BE #494), 전달 전에 표시하면 대응할 수 없는
+        건을 보여주는 셈이 된다. 그 두 값은 아래 default로 떨어지지 않도록 호출부에서 걸러진다.
+      */
+      case "SELLER_REVIEW":
         return {
-          pill: fulfillmentPill("alertCircle", "accent", "반품 요청"),
+          pill: fulfillmentPill("alertCircle", "accent", "반품 요청 전달"),
           message: due ? (
-            <>{due}까지 응답해 주세요 · 응답이 없으면 자동으로 수락돼요</>
+            <>{due}까지 응답해 주세요 · 응답이 없으면 운영팀이 제출된 자료만으로 판단해요</>
           ) : (
-            <>구매자가 반품을 요청했어요</>
+            <>구매자의 반품 요청을 전달해요</>
           ),
           actions: (
             <>
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => actWithNote("reject", "반품을 거절하는 사유를 적어주세요. 운영진 중재의 판단 근거가 돼요.")}
+                onClick={() => setDefenseOpen(true)}
                 className={outlineBtn}
               >
-                거절
+                의견 제출
               </button>
               <button type="button" disabled={busy} onClick={() => void act("accept")} className={solidBtn}>
                 수락
@@ -1989,7 +2106,13 @@ function SellerDisputeFooter({
             </>
           ),
         };
-      case "RETURN_ACCEPTED":
+      case "ADMIN_DECISION":
+        return {
+          pill: fulfillmentPill("alertCircle", "warn", "대금 처리 검토"),
+          message: <>운영팀이 대금 처리를 결정해요 · 결과를 알림으로 알려드릴게요</>,
+          actions: null,
+        };
+      case "RETURN_PENDING":
         return {
           pill: fulfillmentPill("clock", "primary", "반송 대기"),
           message: due ? <>{due}까지 구매자가 반송해요</> : <>구매자의 반송을 기다리고 있어요</>,
@@ -2009,7 +2132,7 @@ function SellerDisputeFooter({
               <button
                 type="button"
                 disabled={busy}
-                onClick={() => actWithNote("damaged", "어떤 점이 훼손됐는지 적어주세요. 운영진 중재로 넘어가요.")}
+                onClick={() => actWithNote("damaged", "어떤 점이 훼손됐는지 적어주세요. 운영팀이 대금 처리를 결정할 때 근거로 써요.")}
                 className={outlineBtn}
               >
                 훼손 신고
@@ -2020,16 +2143,33 @@ function SellerDisputeFooter({
             </>
           ),
         };
-      case "UNDER_MEDIATION":
-        return {
-          pill: fulfillmentPill("alertCircle", "warn", "중재 진행"),
-          message: <>운영진이 확인하고 있어요 · 결과를 알림으로 알려드릴게요</>,
-          actions: null,
-        };
       case "RESOLVED_REFUND":
         return {
           pill: fulfillmentPill("xCircle", "neutral", "반품 완료"),
           message: <>반품이 확정돼 구매자에게 환불돼요 · 정산 대상이 아니에요</>,
+          actions: null,
+        };
+      case "RESOLVED_PARTIAL_REFUND":
+        return {
+          pill: fulfillmentPill("xCircle", "neutral", "일부 환불"),
+          message: (
+            <>
+              일부 금액을 환불하고 물품은 구매자가 보유해요
+              {soldOrder.partialRefundAmount ? ` · 환불 ${formatKRW(soldOrder.partialRefundAmount)}` : ""}
+            </>
+          ),
+          actions: null,
+        };
+      case "RESOLVED_DISMISSED":
+        return {
+          pill: fulfillmentPill("checkCircle", "ok", "반품 기각"),
+          message: <>반품 요청이 받아들여지지 않아 거래가 그대로 진행돼요</>,
+          actions: null,
+        };
+      case "RESOLVED_WITHDRAWN":
+        return {
+          pill: fulfillmentPill("checkCircle", "ok", "요청 철회"),
+          message: <>구매자가 반품 요청을 철회했어요 · 거래가 그대로 진행돼요</>,
           actions: null,
         };
       default:
@@ -2054,6 +2194,23 @@ function SellerDisputeFooter({
           사유 {RETURN_REASON_LABEL[soldOrder.returnReason]}
           {soldOrder.returnDetail ? ` · ${soldOrder.returnDetail}` : ""}
         </p>
+      )}
+      {/* 관리자 판단 근거 — 기각·일부환불로 끝난 이유를 판매자도 알아야 한다(BE #496). */}
+      {soldOrder.disputeNote && soldOrder.disputeDecision && (
+        <p className="mt-1 text-[11px] text-text-3">운영팀 판단 · {soldOrder.disputeNote}</p>
+      )}
+      {defenseOpen && (
+        <SellerDefenseModal
+          auctionId={soldOrder.auctionId}
+          title={title}
+          returnReason={soldOrder.returnReason}
+          returnDetail={soldOrder.returnDetail}
+          onClose={() => setDefenseOpen(false)}
+          onDone={() => {
+            setDefenseOpen(false);
+            onRefresh();
+          }}
+        />
       )}
     </div>
   );

@@ -438,6 +438,14 @@ export const RETURN_REASON_NEEDS_PHOTO: Record<ReturnReason, boolean> = {
   ETC: false,
 };
 
+/**
+ * 반품 사진 상한 — 주문당 요청과 보완 제출을 합산한다(BE `DisputePhotoService.MAX_PER_ORDER`).
+ *
+ * 매물 사진과 같은 천장이라 설명이 하나로 선다. 서버가 정본이고 여기 값은 화면이 미리 막는
+ * 용도다 — 갈리면 「6장까지」라고 적힌 화면에서 7장을 올리고 400을 받는다.
+ */
+export const RETURN_PHOTO_MAX = 6;
+
 // 반송비 안내(2026-07-23 결정) — 정산에 반영하지 않고 문구로만 안내한다.
 // 판매자 귀책이 명백한 사유는 판매자 부담으로 안내하고, 그 외는 협의 대상으로 둔다.
 export const RETURN_SHIPPING_FEE_NOTE: Record<ReturnReason, string> = {

@@ -6,10 +6,10 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ArtistCombobox from "@/components/ArtistCombobox";
 import AuctionVerificationStep from "@/components/AuctionVerificationStep";
-import PhotoUploadGrid, { type PhotoItem } from "@/components/PhotoUploadGrid";
+import PhotoUploadGrid from "@/components/PhotoUploadGrid";
 import VideoUploadField, { type VideoItem } from "@/components/VideoUploadField";
 import { apiFetch, ApiError, apiFetchMultipartWithProgress } from "@/lib/api";
-import { compressImage } from "@/lib/image-compress";
+import { usePhotoUpload } from "@/lib/use-photo-upload";
 import { MIN_LISTING_PRICE, PRICE_UNIT } from "@/lib/fees";
 import {
   MAX_VIDEO_DURATION_SEC,
@@ -24,7 +24,6 @@ import type {
   ArtistMemberResponse,
   AuctionSaleType,
   AuctionStatus,
-  MediaUploadResponse,
   PhotocardGrade,
   PhotocardSource,
   VideoFailureReason,
@@ -87,7 +86,7 @@ function uploadErrorMessage(err: unknown, what: string): string {
 
 export default function NewAuctionPage() {
   const router = useRouter();
-  const { accessToken, isLoading: isAuthLoading, fetchWithAuth, fetchMultipartWithAuth } = useAuth();
+  const { accessToken, isLoading: isAuthLoading, fetchWithAuth } = useAuth();
 
   const artistFieldId = useId();
   const idolFieldId = useId();
@@ -111,7 +110,9 @@ export default function NewAuctionPage() {
   const [unopened, setUnopened] = useState(false);
   const [startPrice, setStartPrice] = useState("");
 
-  const [items, setItems] = useState<PhotoItem[]>([]);
+  // 사진 업로드는 공용 훅이 들고 있다(#647) — 반품 요청·자료 보완과 같은 구현이다.
+  const photos = usePhotoUpload(MAX_IMAGES);
+  const { items, setItems } = photos;
   const [video, setVideo] = useState<(VideoItem & { videoId?: string }) | null>(null);
   const [verificationId, setVerificationId] = useState<string | null>(null);
 
@@ -219,46 +220,14 @@ export default function NewAuctionPage() {
   }, [artistId]);
 
   // 여러 장을 병렬로 업로드한다 — 각 파일이 독립적으로 진행/실패하므로 한 장이 실패해도 나머지는 계속된다.
+  // 업로드 로직은 `usePhotoUpload`에 있다(#647) — 반품 요청·자료 보완이 같은 것을 쓴다.
+  // 복사하면 한쪽만 고치는 일이 생긴다. 여기서는 폼 상단 오류 표시만 연결한다.
   function addFiles(files: File[]) {
-    if (!accessToken) return;
-    const picked = files.slice(0, MAX_IMAGES - items.length);
-    if (picked.length === 0) return;
     setError(null);
-    const newItems: PhotoItem[] = picked.map((file) => ({
-      id: crypto.randomUUID(),
-      previewUrl: URL.createObjectURL(file),
-      status: "uploading",
-    }));
-    setItems((prev) => [...prev, ...newItems]);
-    newItems.forEach((it, i) => {
-      const file = picked[i];
-      void (async () => {
-        try {
-          const compressed = await compressImage(file); // 업로드 전 상한 리사이즈(대역폭 절감)
-          // fetchMultipartWithAuth를 쓰는 이유: 401이면 리프레시 후 재시도한다(#269).
-          // 액세스 토큰은 30분인데 이 폼은 5단계라, 사진 단계에 도달할 때쯤 만료돼 있기 쉽다.
-          const formData = new FormData();
-          formData.append("file", compressed);
-          const uploaded = await fetchMultipartWithAuth<MediaUploadResponse>("/api/media/images", formData);
-          setItems((prev) => prev.map((x) => (x.id === it.id ? { ...x, status: "done", uploaded } : x)));
-        } catch (err) {
-          const message = uploadErrorMessage(err, "사진");
-          setItems((prev) => prev.map((x) => (x.id === it.id ? { ...x, status: "error", error: message } : x)));
-          // 타일은 좁아서 사유를 다 못 보여준다 — 폼 상단에 한 번 띄운다. 이게 없으면
-          // 사용자도 우리도 "업로드 실패" 네 글자만 보고 원인을 추측하게 된다.
-          setError(message);
-        }
-      })();
-    });
+    photos.addFiles(files);
   }
 
-  function removeItem(id: string) {
-    setItems((prev) => {
-      const found = prev.find((x) => x.id === id);
-      if (found) URL.revokeObjectURL(found.previewUrl);
-      return prev.filter((x) => x.id !== id);
-    });
-  }
+  const removeItem = photos.removeItem;
 
   // 영상은 1개만 — 새로 고르면 클라 검증 후 업로드하고, PROCESSING이 되면 위 폴링 effect가 완료를 감지한다.
   async function addVideo(file: File) {

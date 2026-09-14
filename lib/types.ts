@@ -738,7 +738,8 @@ export type NotificationType =
   | "ORDER_REFUNDED" // 환불 완료 — 구매자(환급 안내)·판매자(거래 취소 통지)
   | "RETURN_REQUESTED" // BE #494부터 「관리자가 판매자에게 전달」 — 판매자에게 수락·의견 요구
   | "RETURN_ACCEPTED" // 반품 확정 — 양측에게(판매자 통지는 #494에서 추가)
-  | "RETURN_SHIPPED" // 구매자 반송 — 판매자에게 수령 확인 요구
+  | "RETURN_SHIPPED" // 구매자 반송 시작 — 판매자에게 수령 확인 요구
+  | "RETURN_DELIVERED" // 반송 도착 확인(BE #498) — 판매자에게 당겨진 기한 통보
   | "DISPUTE_UNDER_MEDIATION" // BE #494부터 「관리자 대금 처리 단계 진입」 — 양측에게
   | "DISPUTE_RESOLVED" // 반품 종결(전액환불·일부환불·기각) — 양측에게
   // BE #494 신설 — 전부 인앱 전용(알림톡 템플릿은 문구가 굳은 뒤 심사 신청)
@@ -784,7 +785,7 @@ export type DisputeStatus =
   | "SELLER_REVIEW" // 판매자에게 전달됨 — 수락 또는 의견 대기
   | "ADMIN_DECISION" // 관리자 대금 처리 대기 — 기한 없음(사람이 판단한다)
   | "RETURN_PENDING" // 반품 확정 — 구매자 반송 대기
-  | "RETURN_SHIPPED" // 반송 중 — 판매자 수령 확인 대기
+  | "RETURN_SHIPPED" // 반송 중 — 판매자 수령 확인 대기(도착 확인 여부는 returnDeliveredAt이 가른다)
   | "RESOLVED_REFUND"
   | "RESOLVED_PARTIAL_REFUND" // 일부 환불 — 물품은 구매자가 보유
   | "RESOLVED_DISMISSED"
@@ -848,6 +849,9 @@ export type MyOrderStatusResponse = {
   disputeNote: string | null;
   returnCarrier: string | null;
   returnTrackingNumber: string | null;
+  // 반송 도착 확인 시각(BE #498). 채워지면 disputeDueAt은 도착 + 3영업일이고,
+  // null이면 반송 등록 + 5영업일이다 — 추적 불가한 택배사로 보낸 경우다.
+  returnDeliveredAt: string | null;
   disputeDueAt: string | null;
   // 가능 여부는 서버가 판정한다(#177) — 조건이 4개 축에 걸쳐 있어 화면에서 재구현하면 어긋난다.
   cancellable: boolean;
@@ -884,6 +888,7 @@ export type SoldOrderResponse = {
   returnDetail: string | null;
   returnCarrier: string | null;
   returnTrackingNumber: string | null;
+  returnDeliveredAt: string | null;
   disputeDueAt: string | null;
   // BE #496 — 판매자가 「무엇으로 끝났고 왜 그랬는지」를 알아야 하는 값들.
   disputeNote: string | null;
@@ -1104,6 +1109,7 @@ export type AdminDisputeResponse = {
   disputeNote: string | null;
   returnCarrier: string | null;
   returnTrackingNumber: string | null;
+  returnDeliveredAt: string | null;
   returnRequestedAt: string | null;
   disputeDueAt: string | null;
   disputeResolvedAt: string | null;

@@ -43,7 +43,10 @@ const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; ico
   ORDER_REFUNDED: { label: "환불 완료", tone: "ok", icon: "card" },
   RETURN_REQUESTED: { label: "반품 요청", tone: "accent", icon: "alertCircle" },
   RETURN_ACCEPTED: { label: "반품 확정", tone: "accent", icon: "box" },
-  RETURN_SHIPPED: { label: "반송 도착", tone: "accent", icon: "box" },
+  // 「반송 도착」이었는데 이 알림은 **구매자가 보냈다**는 뜻이다(#639). 실제 도착 알림
+  // (RETURN_DELIVERED)이 생기면서 같은 말이 둘이 됐다.
+  RETURN_SHIPPED: { label: "반송 시작", tone: "accent", icon: "box" },
+  RETURN_DELIVERED: { label: "도착 확인", tone: "primary", icon: "box" },
   // ⚠️ 값 이름은 옛 용어(UNDER_MEDIATION)지만 라벨에서 「중재」를 쓰지 않는다 — 중재법 §35
   // 효력 오인 방지(BE #494). 값을 바꾸면 DB·서버 분기까지 번져 이름만 남겨 뒀다.
   DISPUTE_UNDER_MEDIATION: { label: "대금 처리 검토", tone: "neutral", icon: "clock" },

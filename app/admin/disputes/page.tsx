@@ -390,7 +390,7 @@ export default function AdminDisputesPage() {
                       className={`mt-1.5 w-full resize-none rounded-r3 border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
                     />
                   </label>
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                     <button
                       type="button"
                       disabled={busy || !note.trim()}
@@ -429,21 +429,25 @@ export default function AdminDisputesPage() {
                       일부 환불 금액{" "}
                       <span className="font-normal text-text-3">— 일부환불을 고를 때만</span>
                     </span>
-                    <span className="mt-1.5 flex items-center gap-2">
+                    {/* 좁은 폭에서는 범위 안내를 입력칸 아래로 내린다 — 나란히 두면 320px에서
+                        「미/만」으로 접힌다. 범위는 읽어야 하는 값이라 접히면 안 된다. */}
+                    <span className="mt-1.5 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
                       <input
                         type="text"
                         inputMode="numeric"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, "").slice(0, 9))}
                         placeholder="3000"
-                        className={`h-10 w-36 rounded-r3 border border-border bg-surface px-3 text-sm tabular-nums text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+                        className={`h-10 w-full rounded-r3 border border-border bg-surface px-3 text-sm tabular-nums text-text-1 placeholder:text-text-3 sm:w-36 ${FOCUS_RING}`}
                       />
                       <span className="text-[11px] text-text-3">
                         0원 초과 · {formatKRW(selected.chargeAmount)} 미만
                       </span>
                     </span>
                   </label>
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  {/* 모바일에서는 세로로 쌓는다 — 좁은 폭에 셋을 나란히 두면 각 101px(320px에선 77px)로
+                      좁아져 문구가 2줄로 접힌다. 대금의 향방을 가르는 버튼이라 오탭이 그대로 사고가 된다. */}
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row">
                     <button
                       type="button"
                       disabled={busy || !note.trim()}

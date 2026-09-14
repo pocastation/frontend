@@ -3,15 +3,10 @@ import Wordmark from "@/components/Wordmark";
 import { FOCUS_RING } from "@/lib/ui";
 import { BUSINESS_INFO, INTERMEDIARY_NOTICE } from "@/lib/business";
 
-// 🔴 `mobileHidden`은 모바일 폭에서 그 그룹을 감춘다(#399).
-//
-// 푸터는 이제 모든 화면에 뜨는데, 모바일 375px에서 통째로 그리면 538px(화면의 66%)이고
-// 그 절반이 사이트맵이다. **하단 5탭이 이미 내비게이션을 하므로 중복**이라 감춘다.
-// 감추지 않는 것은 「약관」 그룹과 사업자 정보 — 그쪽이 법정 표시사항이다.
+// 모바일은 로고 아래 섹션별 두 열 링크, 데스크톱은 로고와 세 목록의 네 열 배치(#650).
 const FOOTER_COLUMNS = [
   {
     title: "서비스",
-    mobileHidden: true,
     links: [
       { label: "상품 둘러보기", href: "/" },
       { label: "이용 방법", href: "/guide" },
@@ -19,7 +14,6 @@ const FOOTER_COLUMNS = [
   },
   {
     title: "고객지원",
-    mobileHidden: true,
     links: [
       { label: "공지사항", href: "/notices" },
       { label: "문의하기", href: "/inquiries" },
@@ -84,8 +78,8 @@ export default function Footer() {
     // ⚠️ 지금 가장 큰 것은 **결제 화면의 고정 바(약 104px)** 다 — 하단 5탭(76px)이 아니다(#505).
     // 예전 값 76px로는 결제 화면에서 푸터 마지막 줄이 가렸다. **새 고정 요소를 만들 때 그 높이가
     // 이 값을 넘는지 확인할 것.**
-    <footer className="border-t border-border bg-footer px-4 pb-7 pt-12 text-text-2 max-sm:pb-[calc(104px+env(safe-area-inset-bottom))]">
-      <div className="mx-auto grid max-w-[1160px] grid-cols-2 gap-10 sm:grid-cols-4">
+    <footer className="border-t border-border bg-footer px-5 pb-7 pt-8 text-text-2 max-sm:pb-[calc(104px+env(safe-area-inset-bottom))] sm:px-4 sm:pt-12">
+      <div className="mx-auto grid max-w-[1160px] grid-cols-1 sm:grid-cols-4 sm:gap-10">
         <div>
           {/* 로고는 홈으로 가는 길이다(#548). 헤더 워드마크와 같은 동작. */}
           <Link href="/" aria-label="포카스테이션 홈" className={`inline-block ${FOCUS_RING}`}>
@@ -93,25 +87,27 @@ export default function Footer() {
           </Link>
         </div>
         {FOOTER_COLUMNS.map((column) => (
-          <div key={column.title} className={"mobileHidden" in column && column.mobileHidden ? "max-sm:hidden" : undefined}>
-            <h4 className="mb-3 text-[11px] font-extrabold tracking-wide text-text-1">
+          <div key={column.title} className="border-b border-border py-[25px] sm:border-0 sm:py-0">
+            <h4 className="mb-[17px] text-[13px] font-extrabold tracking-wide text-text-1 sm:mb-3 sm:text-[11px]">
               {column.title}
             </h4>
-            {column.links.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className={`block w-fit rounded-r1 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-footer ${
-                  // 구분은 하되 과하지 않게 — 크기 반 포인트·굵기·명도 세 축을 조금씩만 쓴다.
-                  // 푸터에서 혼자 튀면 법 요구를 넘어 디자인을 깨뜨린다.
-                  "emphasis" in link && link.emphasis
-                    ? "text-[12.5px] font-bold text-text-1 hover:text-primary"
-                    : "text-xs text-text-2 hover:text-text-1"
-                }`}
-              >
-                {link.label}
-              </a>
-            ))}
+            <div className="grid grid-cols-2 gap-x-5 gap-y-[6px] sm:block">
+              {column.links.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className={`block w-fit rounded-r1 py-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-footer ${
+                    // 구분은 하되 과하지 않게 — 크기 반 포인트·굵기·명도 세 축을 조금씩만 쓴다.
+                    // 푸터에서 혼자 튀면 법 요구를 넘어 디자인을 깨뜨린다.
+                    "emphasis" in link && link.emphasis
+                      ? "text-[12.5px] font-bold text-text-1 hover:text-primary"
+                      : "text-xs text-text-2 hover:text-text-1"
+                  }`}
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
           </div>
         ))}
       </div>
@@ -120,7 +116,7 @@ export default function Footer() {
           MobileChromeGate가 홈·목록·매물 상세에서 이걸 접었고, 그 사이 §10 표시사항이 모바일
           주요 화면에서 사라져 있었다. 게이트를 걷어내 지금은 실제로 전 화면에 뜬다 —
           **모바일에서 접는 처리를 다시 넣지 말 것.** */}
-      <address className="mx-auto mt-10 max-w-[1160px] border-t border-border pt-5 text-[11px] not-italic leading-relaxed">
+      <address className="mx-auto mt-6 max-w-[1160px] text-[11px] not-italic leading-relaxed sm:mt-10 sm:border-t sm:border-border sm:pt-5">
         <dl className="flex flex-wrap gap-x-3 gap-y-1">
           {rows.map((row) => (
             <div key={row.label} className="flex gap-1.5">

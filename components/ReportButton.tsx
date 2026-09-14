@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -88,12 +90,47 @@ export default function ReportButton({ auctionId }: { auctionId: number }) {
         )}
       </button>
 
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
+      {/*
+        🔴 body로 portal + z-[400](#635). 인라인으로 두면 이 버튼이 사는 갤러리 우상단 액션 줄
+        (`absolute right-3 top-3 z-[3]`)이 만든 스택 컨텍스트에 오버레이가 갇혀, 그 안에서 z를
+        아무리 올려도 **밖으로 못 나간다**. 실제로 헤더(.hdr z-index 300)와 갤러리 화살표·
+        「1/3」 카운터(z-10)가 모달 위로 뚫고 올라왔고, 모바일에서는 하단 액션바(z-400)·
+        탭바(z-300)·뒤로 버튼·도트 인디케이터까지 올라왔다.
+
+        같은 함정을 #454에서 SellerOfferPanel에 대해 같은 방법으로 풀었다. z 사다리는
+        lib/ui.ts 주석에 정리해 뒀다.
+
+        z는 모달 기본값 400이 아니라 500이다. 이 화면(모바일)에는 하단 고정 액션바가 z-400으로
+        같이 떠 있어서, 400끼리 붙으면 승부가 DOM 순서로 갈린다 — portal이 body 끝에 붙어
+        지금은 이기지만, 그건 우연에 기대는 것이다. 한 층 올려 못 박는다.
+      */}
+      {open && typeof document !== "undefined" && createPortal(
+        <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-sm rounded-r3 bg-surface p-5 shadow-modal">
             <h2 className="font-display text-base font-extrabold text-text-1">신고하기</h2>
             <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
               이 판매글의 어떤 점이 문제인지 알려주세요. 접수된 신고는 운영팀이 검토 후 필요한 조치를 취합니다.
+            </p>
+
+            {/*
+              🔴 신고는 **판매글**을 제재하는 도구다(#633). 이미 결제한 거래의 「물건이 안 왔다」가
+              신고로 들어오면 운영팀이 그 신고로 할 수 있는 일이 없고, 신고자는 답을 받지 못한 채
+              기다린다 — 신고는 답변을 돌려주는 창구가 아니다. 갈림길을 사유 목록 **위**에서 가른다.
+              아래에 두면 사유를 고른 뒤에 읽게 되어 이미 늦다.
+
+              링크는 `/mypage`로 보낸다. 이 화면은 그 사람이 이 매물의 당사자인지 모르고,
+              당사자가 아니면 거래 카드가 없으니 링크만으로도 갈림길이 맞다.
+            */}
+            <p className="mt-2.5 text-[11.5px] leading-relaxed text-text-2">
+              이미 결제한 거래에 문제가 있다면(물건이 오지 않음 · 파손 · 환불){" "}
+              <b className="font-bold text-text-1">신고가 아니라</b> 마이페이지 거래 내역의{" "}
+              <Link
+                href="/mypage"
+                className={`font-bold text-text-1 underline underline-offset-2 ${FOCUS_RING}`}
+              >
+                문의하기
+              </Link>
+              로 접수해 주세요. 신고로는 결제·환불을 처리할 수 없어요.
             </p>
 
             <fieldset className="mt-3.5">
@@ -161,7 +198,8 @@ export default function ReportButton({ auctionId }: { auctionId: number }) {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

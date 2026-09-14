@@ -76,8 +76,10 @@ export default function SuggestArtistButton() {
       </div>
 
       {open && (
+        // z는 헤더(.hdr z-index 300)보다 위여야 한다(#635) — z-50이던 동안 헤더가 오버레이를
+        // 뚫고 올라와 딤이 걸리지 않은 채로 클릭까지 받았다. 사다리는 lib/ui.ts 참고.
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+          className="fixed inset-0 z-[400] flex items-center justify-center bg-black/40 px-4"
           role="dialog"
           aria-modal="true"
           aria-label="등록 건의"

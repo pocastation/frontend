@@ -7,7 +7,12 @@ import InquiryNotices from "@/components/InquiryNotices";
 import InquiryStatusBadge from "@/components/InquiryStatusBadge";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { formatInquiryDate, INQUIRY_CATEGORY_LABEL } from "@/lib/inquiries";
+import {
+  formatInquiryDate,
+  INQUIRY_CATEGORY_LABEL,
+  ORDER_INQUIRY_TOPIC_SHORT,
+  orderInquiryStateLabel,
+} from "@/lib/inquiries";
 import { FOCUS_RING } from "@/lib/ui";
 import type { InquiryListResponse, InquiryResponse, InquiryStatus } from "@/lib/types";
 
@@ -188,6 +193,14 @@ export default function InquiriesPage() {
                     <span className="text-[11px] text-text-3">{formatInquiryDate(inquiry.createdAt)}</span>
                   </span>
                   <span className="mt-2 block truncate text-sm font-bold text-text-1 sm:text-[15px]">{inquiry.title}</span>
+                  {/* 거래 문의(#633)는 「어느 거래」가 내용 미리보기보다 먼저다. 행 전체가 이미
+                      Link라 판매글 링크는 걸지 않는다 — 상세에서 건너간다. */}
+                  {inquiry.order && inquiry.orderTopic && (
+                    <span className="mt-1 block truncate text-xs text-text-3">
+                      {ORDER_INQUIRY_TOPIC_SHORT[inquiry.orderTopic]} ·{" "}
+                      {orderInquiryStateLabel(inquiry.order)} · {inquiry.order.auctionTitle}
+                    </span>
+                  )}
                   <span className="mt-1 block truncate text-xs text-text-3">{inquiry.content}</span>
                 </span>
                 <InquiryStatusBadge status={inquiry.status} />

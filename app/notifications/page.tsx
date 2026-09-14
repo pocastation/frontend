@@ -42,10 +42,20 @@ const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; ico
   ORDER_PREPARING: { label: "취소 마감", tone: "accent", icon: "alertCircle" },
   ORDER_REFUNDED: { label: "환불 완료", tone: "ok", icon: "card" },
   RETURN_REQUESTED: { label: "반품 요청", tone: "accent", icon: "alertCircle" },
-  RETURN_ACCEPTED: { label: "반송 안내", tone: "accent", icon: "box" },
-  RETURN_SHIPPED: { label: "반송 도착", tone: "accent", icon: "box" },
-  DISPUTE_UNDER_MEDIATION: { label: "중재 진행", tone: "neutral", icon: "clock" },
-  DISPUTE_RESOLVED: { label: "분쟁 종결", tone: "neutral", icon: "checkCircle" },
+  RETURN_ACCEPTED: { label: "반품 확정", tone: "accent", icon: "box" },
+  // 「반송 도착」이었는데 이 알림은 **구매자가 보냈다**는 뜻이다(#639). 실제 도착 알림
+  // (RETURN_DELIVERED)이 생기면서 같은 말이 둘이 됐다.
+  RETURN_SHIPPED: { label: "반송 시작", tone: "accent", icon: "box" },
+  RETURN_DELIVERED: { label: "도착 확인", tone: "primary", icon: "box" },
+  // ⚠️ 값 이름은 옛 용어(UNDER_MEDIATION)지만 라벨에서 「중재」를 쓰지 않는다 — 중재법 §35
+  // 효력 오인 방지(BE #494). 값을 바꾸면 DB·서버 분기까지 번져 이름만 남겨 뒀다.
+  DISPUTE_UNDER_MEDIATION: { label: "대금 처리 검토", tone: "neutral", icon: "clock" },
+  DISPUTE_RESOLVED: { label: "반품 종결", tone: "neutral", icon: "checkCircle" },
+  // ── 반품 절차 개편으로 생긴 4종(BE #494) — 전부 인앱 전용 ──
+  RETURN_RECEIVED: { label: "반품 접수", tone: "neutral", icon: "checkCircle" },
+  RETURN_EVIDENCE_REQUESTED: { label: "자료 보완 요청", tone: "accent", icon: "alertCircle" },
+  RETURN_WITHDRAWN: { label: "요청 철회", tone: "neutral", icon: "checkCircle" },
+  DISPUTE_REOPENED: { label: "재검토 시작", tone: "accent", icon: "clock" },
   // ── 정책 제21조 공백을 메운 신규 4종(BE 배포 전엔 도착하지 않는다 — 미리 채워 두는 값). ──
   NEW_OFFER: { label: "새 제안", tone: "primary", icon: "tag" },
   AUCTION_APPROVED: { label: "게시 승인", tone: "ok", icon: "checkCircle" },

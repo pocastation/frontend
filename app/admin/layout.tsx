@@ -158,7 +158,7 @@ const NAV_GROUPS: NavGroup[] = [
     title: "검토·조치",
     items: [
       { href: "/admin/reports", label: "신고 관리", icon: <FlagIcon />, ready: true },
-      { href: "/admin/disputes", label: "분쟁·중재", icon: <ScaleIcon />, ready: true },
+      { href: "/admin/disputes", label: "반품 처리", icon: <ScaleIcon />, ready: true },
       { href: "/admin/delivery-stalled", label: "배송 확인", icon: <TruckIcon />, ready: true },
     ],
   },

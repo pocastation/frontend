@@ -673,9 +673,21 @@ export type AuditAction =
   | "MEMBER_ROLE_GRANTED"
   | "MEMBER_ROLE_REVOKED"
   | "AUCTION_APPROVED"
-  | "AUCTION_REJECTED";
+  | "AUCTION_REJECTED"
+  // 아래 일곱은 서버에는 있었는데 이 타입에 빠져 있던 값이다(#637에서 대조해 채움).
+  // 라벨 맵에 없으면 감사 로그 화면이 조치 이름을 `undefined`로 그린다.
+  | "MEMBER_SESSIONS_REVOKED"
+  | "MEMBER_PURGED"
+  | "EMAIL_SUPPRESSION_RELEASED"
+  | "ORDER_DELIVERY_MARKED"
+  | "DISPUTE_RESOLVED_REFUND"
+  | "DISPUTE_RESOLVED_PARTIAL_REFUND"
+  | "DISPUTE_RESOLVED_DISMISSED"
+  | "DISPUTE_REOPENED"
+  | "DISPUTE_EVIDENCE_REQUESTED"
+  | "DISPUTE_FORWARDED";
 
-export type AuditTargetType = "MEMBER" | "AUCTION";
+export type AuditTargetType = "MEMBER" | "AUCTION" | "ORDER";
 
 // GET /api/admin/audit-logs 항목 — targetLabel은 대상이 회원이면 닉네임, 경매면 제목.
 export type AdminAuditLogResponse = {
@@ -724,11 +736,16 @@ export type NotificationType =
   | "AUCTION_EXTENDED" // 판매 기간 연장 — 기존 제안자에게 「제안이 아직 유효하다」
   | "ORDER_PREPARING" // 물품 준비 진입 — 구매자에게 「이제 취소할 수 없어요」(B3 필수 고지)
   | "ORDER_REFUNDED" // 환불 완료 — 구매자(환급 안내)·판매자(거래 취소 통지)
-  | "RETURN_REQUESTED" // 반품 요청 — 판매자에게 응답 요구
-  | "RETURN_ACCEPTED" // 반품 수락 — 구매자에게 반송 안내
+  | "RETURN_REQUESTED" // BE #494부터 「관리자가 판매자에게 전달」 — 판매자에게 수락·의견 요구
+  | "RETURN_ACCEPTED" // 반품 확정 — 양측에게(판매자 통지는 #494에서 추가)
   | "RETURN_SHIPPED" // 구매자 반송 — 판매자에게 수령 확인 요구
-  | "DISPUTE_UNDER_MEDIATION" // 관리자 중재 진입 — 구매자에게
-  | "DISPUTE_RESOLVED" // 반품 종결(환불 또는 기각) — 양측에게
+  | "DISPUTE_UNDER_MEDIATION" // BE #494부터 「관리자 대금 처리 단계 진입」 — 양측에게
+  | "DISPUTE_RESOLVED" // 반품 종결(전액환불·일부환불·기각) — 양측에게
+  // BE #494 신설 — 전부 인앱 전용(알림톡 템플릿은 문구가 굳은 뒤 심사 신청)
+  | "RETURN_RECEIVED" // 접수 완료 — 구매자에게. 회사가 먼저 본다는 것을 알린다
+  | "RETURN_EVIDENCE_REQUESTED" // 자료 보완 요청 — 구매자에게
+  | "RETURN_WITHDRAWN" // 구매자 철회 — 판매자에게
+  | "DISPUTE_REOPENED" // 종결 건 재오픈 — 양측에게
   // ── 정책 제21조 공백을 메운 신규 4종(BE #F2, 인앱 전용) ──
   | "NEW_OFFER" // 새 제안 도착 — 판매자에게. 선택해야 거래가 성립하는 모델의 전제
   | "AUCTION_APPROVED" // 등록 승인 완료 — 판매자에게
@@ -750,20 +767,38 @@ export type OrderStatus =
   | "REFUNDED";
 
 // 반품·분쟁(#175). 결제·배송·정산과 직교하는 축 — 분쟁이 열려 있으면 자동 구매확정이 멈춘다.
+/**
+ * 반품 단계(BE #494 개편 · design-plan §7.1-A).
+ *
+ * 회사가 1차로 판단한다 — 구매자 요청은 관리자 검토 큐로 들어가고, 관리자가 판매자에게 전달한
+ * 뒤 판매자의 수락 또는 의견을 받아 대금을 처리한다.
+ *
+ * ⚠️ `RETURN_REQUESTED`의 의미가 바뀌었다. 예전에는 「판매자 응답 대기」였고 이제는
+ * 「관리자 1차 검토 대기」다. 그 단계에서 판매자는 아직 이 건을 보지 못한다 — 화면 문구를
+ * 「판매자가 응답해요」로 두면 구매자가 엉뚱한 상대를 기다린다.
+ */
 export type DisputeStatus =
   | "NONE"
-  | "RETURN_REQUESTED"
-  | "RETURN_ACCEPTED"
-  | "RETURN_SHIPPED"
-  | "UNDER_MEDIATION"
+  | "RETURN_REQUESTED" // 접수 — 관리자 1차 검토 대기
+  | "EVIDENCE_REQUESTED" // 자료 보완 요청 — 구매자 제출 대기
+  | "SELLER_REVIEW" // 판매자에게 전달됨 — 수락 또는 의견 대기
+  | "ADMIN_DECISION" // 관리자 대금 처리 대기 — 기한 없음(사람이 판단한다)
+  | "RETURN_PENDING" // 반품 확정 — 구매자 반송 대기
+  | "RETURN_SHIPPED" // 반송 중 — 판매자 수령 확인 대기
   | "RESOLVED_REFUND"
-  | "RESOLVED_DISMISSED";
+  | "RESOLVED_PARTIAL_REFUND" // 일부 환불 — 물품은 구매자가 보유
+  | "RESOLVED_DISMISSED"
+  | "RESOLVED_WITHDRAWN"; // 구매자 철회 — 구매확정 전이면 다시 요청할 수 있다
+
+/** 관리자 대금 처리 결정(BE #494). 「중재」라 부르지 않는다 — 중재법 §35 효력 오인 방지. */
+export type DisputeDecision = "FULL_REFUND" | "PARTIAL_REFUND" | "DISMISSED";
 
 export type ReturnReason =
   | "COUNTERFEIT_SUSPECTED"
   | "CONDITION_MISMATCH"
   | "WRONG_ITEM"
   | "DAMAGED_IN_TRANSIT"
+  | "CHANGE_OF_MIND" // 단순 변심 — 같은 트랙이지만 수수료 공제 + 반송비 구매자 부담
   | "ETC";
 
 export type RefundReason =
@@ -817,6 +852,11 @@ export type MyOrderStatusResponse = {
   // 가능 여부는 서버가 판정한다(#177) — 조건이 4개 축에 걸쳐 있어 화면에서 재구현하면 어긋난다.
   cancellable: boolean;
   returnable: boolean;
+  // BE #496 — sellerDefense를 구매자도 본다. 자기 주장이 어떻게 반박됐는지 알아야
+  // 다음 행동(보완·철회)을 정할 수 있다. disputeNote는 관리자 판단 근거다.
+  sellerDefense: string | null;
+  disputeDecision: DisputeDecision | null;
+  partialRefundAmount: number | null;
 };
 
 // GET /api/members/me/sold-orders/status — 판매자용(#110). 발송 UI가 소비, 배송지(발송용) 포함.
@@ -838,13 +878,18 @@ export type SoldOrderResponse = {
   } | null;
   // 환불로 종료된 거래를 발송 UI에서 걸러내기 위해 함께 내려온다(#177).
   orderStatus: OrderStatus;
-  // 반품·분쟁(#175) — 판매자가 수락·거절·수령확인 중 무엇을 해야 하는지 판정하는 근거.
+  // 반품(#175, BE #494·#496) — 판매자가 수락·의견제출·수령확인 중 무엇을 해야 하는지 판정하는 근거.
   disputeStatus: DisputeStatus;
   returnReason: ReturnReason | null;
   returnDetail: string | null;
   returnCarrier: string | null;
   returnTrackingNumber: string | null;
   disputeDueAt: string | null;
+  // BE #496 — 판매자가 「무엇으로 끝났고 왜 그랬는지」를 알아야 하는 값들.
+  disputeNote: string | null;
+  sellerDefense: string | null;
+  disputeDecision: DisputeDecision | null;
+  partialRefundAmount: number | null;
 };
 
 export type NotificationResponse = {
@@ -1062,6 +1107,13 @@ export type AdminDisputeResponse = {
   returnRequestedAt: string | null;
   disputeDueAt: string | null;
   disputeResolvedAt: string | null;
+  // BE #494 — 관리자가 대금 처리를 판단할 때 보는 것들.
+  // disputeDecision은 재오픈해도 남는다(상태는 ADMIN_DECISION으로 돌아가 직전 결정을 잃는다).
+  sellerDefense: string | null;
+  disputeDecision: DisputeDecision | null;
+  partialRefundAmount: number | null;
+  disputeReopenedAt: string | null;
+  disputeReopenCount: number;
 };
 
 export type AdminDisputeListResponse = {

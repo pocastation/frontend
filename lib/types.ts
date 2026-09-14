@@ -715,6 +715,24 @@ export type MemberRole = "ADMIN" | "USER";
 
 // ─── 인앱 알림 ───
 
+/** 반품 사진 한 장(BE #506). display 변형은 쓰지 않는다 — 원본과 썸네일만 보여준다. */
+export type DisputePhotoView = {
+  id: number;
+  url: string;
+  thumbnailUrl: string;
+};
+
+/**
+ * 반품 사진 목록.
+ *
+ * `remaining`은 주문당 남은 첨부 가능 장수다 — 보완 제출 화면이 「몇 장 더 올릴 수 있는지」를
+ * 서버에 다시 묻지 않게 함께 내려온다. 판매자에게는 항상 0이다(첨부는 구매자만 한다).
+ */
+export type DisputePhotoListResponse = {
+  photos: DisputePhotoView[];
+  remaining: number;
+};
+
 export type NotificationType =
   | "OUTBID"
   | "AUCTION_WON"

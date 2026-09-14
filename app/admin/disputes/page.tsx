@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import AdminDisputeEvidence from "@/components/AdminDisputeEvidence";
 import { formatDateTimeKST, formatKRW } from "@/lib/format";
 import {
   ADMIN_ACTION_DISPUTE,
@@ -346,6 +347,10 @@ export default function AdminDisputesPage() {
                   </div>
                 ))}
               </dl>
+
+              {/* 자료 대조(#647) — 판단 방법이 「등록 자료와 제출 자료의 대조」다(정책 제16조 ③).
+                  매물 상세를 따로 열어 오가는 동안 무엇을 보고 있었는지 놓친다. */}
+              <AdminDisputeEvidence orderId={selected.orderId} auctionId={selected.auctionId} />
 
               {/*
                 양쪽 주장을 나란히 둔다 — 판단의 재료가 이 둘이고, 위 표의 한 칸에 합치면 누가

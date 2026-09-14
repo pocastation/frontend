@@ -8,6 +8,8 @@ import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useWishlist } from "@/lib/wishlist-context";
 import DeliveryAddressBook from "@/components/DeliveryAddressBook";
+import DisputePhotoStrip from "@/components/DisputePhotoStrip";
+import ReturnEvidenceForm from "@/components/ReturnEvidenceForm";
 import PaymentMethodManager from "@/components/PaymentMethodManager";
 import BankAccountManager from "@/components/BankAccountManager";
 import ProfileTab from "@/components/ProfileTab";
@@ -1661,6 +1663,7 @@ function BuyerDisputeFooter({
 }) {
   const { fetchWithAuth } = useAuth();
   const [shipOpen, setShipOpen] = useState(false);
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const due = order.disputeDueAt ? formatDateTimeKST(order.disputeDueAt) : null;
 
@@ -1686,12 +1689,8 @@ function BuyerDisputeFooter({
     await post("withdraw");
   }
 
-  // 보완 자료는 지금 글로만 받는다 — 사진 첨부는 media 모듈 일반화가 선행돼야 한다(별도 이슈).
-  async function submitEvidence() {
-    const note = window.prompt("보완할 내용을 적어주세요. 운영팀이 이어서 검토해요.")?.trim();
-    if (!note) return;
-    await post("evidence", { note });
-  }
+  // 보완 자료는 글과 사진을 함께 받는다(#647) — prompt로는 사진을 받을 수 없고, 보완을
+  // 요청하는 이유가 「자료가 부족하다」인데 글만 더 받으면 보완의 의미가 약하다.
 
   const body = ((): { pill: ReactNode; message: ReactNode; sub?: ReactNode } => {
     switch (order.disputeStatus) {
@@ -1799,11 +1798,11 @@ function BuyerDisputeFooter({
       <div className="flex flex-wrap items-center gap-2.5">
         {body.pill}
         <span className="min-w-0 flex-1">{body.message}</span>
-        {order.disputeStatus === "EVIDENCE_REQUESTED" && (
+        {order.disputeStatus === "EVIDENCE_REQUESTED" && !evidenceOpen && (
           <button
             type="button"
             disabled={busy}
-            onClick={() => void submitEvidence()}
+            onClick={() => setEvidenceOpen(true)}
             className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
           >
             자료 제출
@@ -1828,6 +1827,18 @@ function BuyerDisputeFooter({
           />
         )}
       </div>
+      {evidenceOpen && (
+        <ReturnEvidenceForm
+          auctionId={order.auctionId}
+          onClose={() => setEvidenceOpen(false)}
+          onDone={() => {
+            setEvidenceOpen(false);
+            onRefresh();
+          }}
+        />
+      )}
+      {/* 자기가 무엇을 냈는지 보여준다(#647). 종결 6개월 뒤에는 파기돼 줄이 사라진다. */}
+      <DisputePhotoStrip auctionId={order.auctionId} />
       {/* 운송장은 도착이 확인된 뒤 보조 정보로 내려온다 — 그 줄의 자리를 「도착했다」가 쓴다. */}
       {body.sub && <p className="mt-1.5 text-[11px] text-text-3">{body.sub}</p>}
       {order.returnReason && (
@@ -2223,6 +2234,11 @@ function SellerDisputeFooter({
       </div>
       {/* 기한이 당겨진 이유 — 사유보다 위에 둔다. 지금 행동을 정하는 정보라서다(#639). */}
       {body.sub && <p className="mt-1.5 text-[11px] font-semibold text-text-2">{body.sub}</p>}
+      {/* 무엇을 근거로 다투는지 판매자도 봐야 한다(#647). 관리자가 전달하기 전에는 서버가
+          403으로 답하고 줄이 렌더되지 않는다 — 그전에는 건의 존재조차 알려 주지 않는다. */}
+      {SELLER_VISIBLE_DISPUTE.includes(soldOrder.disputeStatus) && (
+        <DisputePhotoStrip auctionId={soldOrder.auctionId} />
+      )}
       {soldOrder.returnReason && (
         <p className="mt-1.5 text-[11px] text-text-3">
           사유 {RETURN_REASON_LABEL[soldOrder.returnReason]}

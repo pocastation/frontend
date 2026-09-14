@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import PhotoUploadGrid from "@/components/PhotoUploadGrid";
+import { usePhotoUpload } from "@/lib/use-photo-upload";
+import { RETURN_PHOTO_MAX } from "@/lib/labels";
 import {
   RETURN_REASON_LABEL,
   RETURN_REASON_NEEDS_PHOTO,
@@ -17,8 +20,12 @@ import type { ReturnReason } from "@/lib/types";
 // 요청은 판매자가 아니라 **회사에 접수**된다(BE #494). 그 점을 미리 알려야 「판매자가 응답을
 // 안 한다」는 오해가 생기지 않는다.
 //
-// 사진 첨부는 아직 없다 — MediaImageOwnershipGate가 경매 전용 시그니처라 media 모듈 일반화가
-// 선행돼야 한다(별도 이슈). 필수 사유에는 안내 문구만 띄운다.
+// 사진은 사유에 따라 필수다(BE #506, §7.1-A D4). 물건의 상태를 다투는 사유는 사진이 없으면
+// 관리자가 대조할 자료가 없다 — 등록 자료(인증 사진·판매글 사진·영상)와 대조하는 것이
+// 정책 제16조 제3항이 정한 판단 방법이다.
+//
+// 업로드 UI는 매물 등록의 `PhotoUploadGrid`를 그대로 쓴다. 끌어다 놓기·진행 표시·삭제·실패
+// 재시도가 이미 들어 있고, 새로 그리면 같은 일을 하는 두 개가 생긴다.
 export default function ReturnRequestModal({
   auctionId,
   title,
@@ -35,6 +42,8 @@ export default function ReturnRequestModal({
   const [detail, setDetail] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const photos = usePhotoUpload(RETURN_PHOTO_MAX, setError);
+  const needsPhoto = reason !== null && RETURN_REASON_NEEDS_PHOTO[reason];
 
   async function submit() {
     if (saving) return;
@@ -42,12 +51,22 @@ export default function ReturnRequestModal({
       setError("반품 사유를 선택해 주세요.");
       return;
     }
+    // 서버도 막지만 여기서 먼저 세운다 — 필수 사유에 사진 없이 보내면 400이고, 그 왕복을
+    // 사용자에게 보여 줄 이유가 없다.
+    if (needsPhoto && photos.uploadedUrls.length === 0) {
+      setError("이 사유는 물품 상태를 확인할 수 있는 사진이 필요해요.");
+      return;
+    }
+    if (photos.uploading) {
+      setError("사진 업로드가 끝난 뒤에 요청해 주세요.");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
       await fetchWithAuth<void>(`/api/auctions/${auctionId}/order/return`, {
         method: "POST",
-        body: { reason, detail: detail.trim() || null },
+        body: { reason, detail: detail.trim() || null, images: photos.uploadedUrls },
       });
       onDone();
     } catch (err) {
@@ -104,12 +123,29 @@ export default function ReturnRequestModal({
         {reason && (
           <div className="mt-2 space-y-1 text-[11px] leading-relaxed text-text-3">
             <p>{RETURN_SHIPPING_FEE_NOTE[reason]}</p>
-            {RETURN_REASON_NEEDS_PHOTO[reason] && (
+            {needsPhoto && (
               <p>
-                이 사유는 <b className="font-bold text-text-2">사진이 있어야 판단할 수 있어요</b> —
-                아래에 어떤 상태인지 적어주시면 운영팀이 검토하면서 사진을 요청해요.
+                이 사유는 <b className="font-bold text-text-2">사진이 있어야 판단할 수 있어요.</b>{" "}
+                등록된 사진·영상과 대조해요.
               </p>
             )}
+          </div>
+        )}
+
+        {/* 사유를 고른 뒤에 띄운다 — 필수인지 선택인지가 사유에 달려 있어, 고르기 전에는
+            무엇을 요구하는지 말할 수 없다. 그리드는 같은 것이고 라벨만 갈린다. */}
+        {reason && (
+          <div className="mt-4">
+            <p className="text-xs font-bold text-text-2">사진 ({needsPhoto ? "필수" : "선택"})</p>
+            <div className="mt-1.5">
+              <PhotoUploadGrid
+                items={photos.items}
+                max={RETURN_PHOTO_MAX}
+                onAddFiles={photos.addFiles}
+                onRemove={photos.removeItem}
+                onReorder={photos.setItems}
+              />
+            </div>
           </div>
         )}
 

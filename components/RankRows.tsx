@@ -13,6 +13,9 @@ import type { AuctionResponse, PopularSellerResponse } from "@/lib/types";
  * 두 목록을 나란히 둔다. 다만 행 자체는 같은 정보를 같은 순서로 말해야 해서 여기로 모았다.
  *
  * <p>순위 숫자는 1위만 강조하고 2·3위는 뉴트럴이다. 색을 세 개 쓰면 순위가 아니라 색이 보인다.
+ *
+ * <p>`SellerRow`는 #653 이후 부르는 곳이 없다. 판매자 랭킹을 되살릴 때 그대로 쓰려고 남겨 뒀다 —
+ * 지우면 홈 두 곳의 열 구성을 다시 짜야 한다.
  */
 
 export function RankNumber({ index }: { index: number }) {

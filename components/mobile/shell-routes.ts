@@ -45,7 +45,10 @@ const MOBILE_SELLER_DETAIL_PATTERN = /^\/sellers\/[^/]+$/;
 //
 // 탈퇴 완료(`/withdrawn`, #567)는 등록완료와 같은 한 장짜리 결과 화면이다 — 앱바 하나(닫기 → 홈)로
 // 들어가고 나온다. 데스크탑은 전역 헤더 그대로다(로그인·가입 화면과 같은 처리).
-const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/auctions/submitted", "/notifications", "/search", "/artists", "/sellers", "/auctions/ended", "/withdrawn"];
+//
+// 스타·인기 판매자 목록(`/artists`·`/sellers`)은 #653에서 뺐다. next.config의 redirects가 홈으로
+// 보내 이 목록이 볼 일이 없다. 상세는 아래 두 패턴이 계속 잡는다.
+const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/auctions/submitted", "/notifications", "/search", "/auctions/ended", "/withdrawn"];
 
 export function isMobileChromeHiddenRoute(pathname: string): boolean {
   return (

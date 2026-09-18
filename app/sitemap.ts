@@ -28,8 +28,7 @@ const STATIC_PATHS: { path: string; priority: number; changeFrequency: MetadataR
   { path: "/auctions", priority: 0.9, changeFrequency: "hourly" },
   { path: "/instant-sales", priority: 0.8, changeFrequency: "hourly" },
   { path: "/auctions/ended", priority: 0.5, changeFrequency: "daily" },
-  { path: "/artists", priority: 0.7, changeFrequency: "weekly" },
-  { path: "/sellers", priority: 0.6, changeFrequency: "daily" },
+  // 스타·인기 판매자 목록은 #653에서 뺐다. 홈으로 리다이렉트되므로 색인 대상이 아니다.
   { path: "/guide", priority: 0.5, changeFrequency: "monthly" },
   { path: "/faq", priority: 0.5, changeFrequency: "monthly" },
   { path: "/notices", priority: 0.4, changeFrequency: "weekly" },
@@ -63,6 +62,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // 스타 상세 — 카탈로그는 자주 바뀌지 않고 개수도 적어 전부 넣는다.
+  // 목록(`/artists`)과 달리 상세는 계속 공개다(#653). 판매글 상세에서 들어가는 길이 살아 있어
+  // 색인에서 뺄 이유가 없다.
   const artists = await safeFetch<ArtistListResponse>("/api/artists?size=200");
   for (const artist of artists?.content ?? []) {
     entries.push({

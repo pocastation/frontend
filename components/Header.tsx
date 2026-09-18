@@ -11,11 +11,13 @@ import { useNotifications } from "@/lib/notification-context";
 // 상단 메뉴는 리디자인 검토 과정에서 일단 비웠었고, 콘텐츠를 갖춘 페이지가 생길 때마다 되살렸음
 // (아티스트·매물 목록·즉시판매). 거래 완료 목록은 실페이지가 있지만 매물 목록의 하위 뷰라 주 네비 대신
 // /auctions 상단 링크로만 진입시킨다(주 네비 과밀 방지).
+//
+// 스타(/artists)·인기 판매자(/sellers)는 #653에서 내렸다. 두 목록은 next.config의 redirects로
+// 홈에 보내므로 여기에 되살리려면 그 항목부터 지워야 한다 — 링크만 되돌리면 홈으로 튕긴다.
+// 상세(/artists/{id}·/sellers/{sellerId})는 대상이 아니다. 판매글 상세에서 들어가는 길이 살아 있다.
 const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/auctions", label: "제안판매" },
   { href: "/instant-sales", label: "즉시판매" },
-  { href: "/artists", label: "스타" },
-  { href: "/sellers", label: "인기 판매자" },
 ];
 
 const FOCUS_RING =

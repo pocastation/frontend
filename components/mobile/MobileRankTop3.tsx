@@ -2,27 +2,24 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { AuctionRow, SellerRow } from "@/components/RankRows";
+import { AuctionRow } from "@/components/RankRows";
 import { FOCUS_RING } from "@/lib/ui";
-import type { AuctionResponse, PopularSellerResponse } from "@/lib/types";
+import type { AuctionResponse } from "@/lib/types";
 
 /**
  * 홈 랭킹 프리뷰 — 종류별로 1~3위만 보여주고 좌우로 넘겨 본다.
  *
- * <p>**집계가 실제로 있는 것만 올린다.** 지금은 포카(제안 수)와 판매자(신뢰 등급)뿐이고,
- * 스타 랭킹은 매물 수 집계 API가 없어서 넣지 않았다 — 없는 실적을 그럴듯하게 채우지 않는다는
- * 원칙(신뢰가 서비스의 핵심 가치)이 우선이다. 집계가 생기면 페이지를 한 장 더 붙이면 된다.
+ * <p>**집계가 실제로 있는 것만 올린다.** 지금은 포카(제안 수)뿐이고, 스타 랭킹은 매물 수 집계
+ * API가 없어서 넣지 않았다 — 없는 실적을 그럴듯하게 채우지 않는다는 원칙(신뢰가 서비스의 핵심
+ * 가치)이 우선이다. 집계가 생기면 페이지를 한 장 더 붙이면 된다.
+ *
+ * <p>판매자(신뢰 등급) 장은 #653에서 뺐다. 집계가 없어서가 아니라 인기 판매자를 일반 사용자에게
+ * 노출하지 않기로 해서다. 장이 하나면 도트도 뜨지 않으므로 캐러셀 골격은 그대로 둔다.
  *
  * <p>순위 숫자는 1위만 강조하고 2·3위는 뉴트럴이다. 색을 세 개 쓰면 순위가 아니라 색이 보인다.
  */
 
-export default function MobileRankTop3({
-  auctions,
-  sellers,
-}: {
-  auctions: AuctionResponse[];
-  sellers: PopularSellerResponse[];
-}) {
+export default function MobileRankTop3({ auctions }: { auctions: AuctionResponse[] }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [page, setPage] = useState(0);
 
@@ -33,12 +30,6 @@ export default function MobileRankTop3({
       note: "제안 많은 순",
       href: "/auctions?sort=popular",
       body: auctions.slice(0, 3).map((auction, i) => <AuctionRow key={auction.id} auction={auction} index={i} />),
-    },
-    sellers.length > 0 && {
-      key: "판매자",
-      note: "신뢰 등급 순",
-      href: "/sellers",
-      body: sellers.slice(0, 3).map((seller, i) => <SellerRow key={seller.sellerId} seller={seller} index={i} />),
     },
   ].filter((p): p is { key: string; note: string; href: string; body: React.ReactElement[] } => Boolean(p));
 

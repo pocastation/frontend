@@ -1,13 +1,11 @@
 import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import AuctionGrid from "@/components/AuctionGrid";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { ARTIST_STATUS_LABEL, ARTIST_TYPE_LABEL } from "@/lib/labels";
 import { DEFAULT_OG_IMAGE } from "@/lib/site";
-import { FOCUS_RING } from "@/lib/ui";
 import type { ArtistDetailResponse, AuctionListResponse } from "@/lib/types";
 
 // cache()로 감싸 generateMetadata와 본문이 한 번만 페치하도록 dedup.
@@ -104,17 +102,12 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
 
   return (
     <>
-      {/* 모바일은 앱바에 스타 이름을 싣는다 — 스크롤해도 누구를 보고 있는지 잃지 않는다. */}
-      <MobilePageHead title={artist.name} backHref="/artists" />
+      {/* 모바일은 앱바에 스타 이름을 싣는다 — 스크롤해도 누구를 보고 있는지 잃지 않는다.
+          뒤로는 **히스토리 뒤로**다(backHref 미지정, #653). 목록이 홈으로 리다이렉트되면서
+          고정 복귀지가 사라졌고, 이제 판매글 상세가 사실상 유일한 진입로다. 판매자 상세와 같은 처리. */}
+      <MobilePageHead title={artist.name} />
 
       <div className="mx-auto max-w-[1160px] px-[14px] pb-10 pt-4 sm:px-4 sm:py-8">
-        <Link
-          href="/artists"
-          className={`mb-4 hidden items-center gap-1 rounded-r2 px-1 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-text-1 sm:inline-flex ${FOCUS_RING}`}
-        >
-          <span aria-hidden="true">←</span> 스타 목록으로
-        </Link>
-
         {/*
           프로필을 감싸던 그림자 카드를 걷어냈다(#499). 모바일에서 카드는 화면 폭을 거의 다
           쓰므로 감싸는 의미가 없고 여백만 먹는다. 지면은 헤어라인과 회색 띠로 나눈다.

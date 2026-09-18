@@ -1,14 +1,12 @@
 import { cache } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import AuctionGrid from "@/components/AuctionGrid";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import SellerReviewSummary from "@/components/SellerReviewSummary";
 import { plainLevelLabel } from "@/lib/labels";
 import { apiFetch, ApiError } from "@/lib/api";
 import { DEFAULT_OG_IMAGE } from "@/lib/site";
-import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionListResponse, SellerRatingResponse } from "@/lib/types";
 
 // 판매자 공개 프로필(#207). 공개 항목은 닉네임·레벨·거래수·평점·판매 중 상품·후기뿐이고
@@ -70,21 +68,13 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
   return (
     <>
       {/*
-        뒤로는 **히스토리 뒤로**다(backHref 미지정, #510). 스타 상세를 `/artists` 고정으로 둔 것과
-        다른 판단인데, 스타는 목록이 사실상 유일한 진입로지만 **판매자는 매물 상세에서 들어오는
-        경우가 더 흔하다** — 그때 랭킹으로 튕기면 보던 매물을 잃는다.
+        뒤로는 **히스토리 뒤로**다(backHref 미지정, #510). 판매자는 판매글 상세에서 들어오는
+        경우가 흔해 고정 복귀지로 튕기면 보던 판매글을 잃는다. #653에서 목록이 홈으로
+        리다이렉트되면서 데스크톱의 「인기 판매자」 복귀 링크도 함께 걷었다.
       */}
       <MobilePageHead title={seller.nickname} />
 
       <div className="mx-auto max-w-[1160px] px-[14px] pb-10 pt-4 sm:px-4 sm:py-8">
-        <div className="mb-4 hidden sm:block">
-          <Link
-            href="/sellers"
-            className={`inline-flex items-center gap-1 rounded-r2 px-1 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-text-1 ${FOCUS_RING}`}
-          >
-            <span aria-hidden="true">←</span> 인기 판매자
-          </Link>
-        </div>
 
         {/*
           🔴 프로필을 감싸던 카드를 걷어냈다(#510). 모바일에서 카드는 화면 폭을 거의 다 쓰므로

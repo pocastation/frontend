@@ -7,7 +7,7 @@ import MobilePromoBanner from "@/components/mobile/MobilePromoBanner";
 import MobileRankTop3 from "@/components/mobile/MobileRankTop3";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import { FOCUS_RING } from "@/lib/ui";
-import type { AuctionResponse, PopularSellerResponse } from "@/lib/types";
+import type { AuctionResponse } from "@/lib/types";
 
 /**
  * 모바일 홈 — 국내 커머스 앱 문법으로 짠 별도 화면.
@@ -54,13 +54,11 @@ export default function MobileHome({
   endingSoon,
   instantSales,
   popularAuctions,
-  popularSellers,
 }: {
   featured: AuctionResponse[];
   endingSoon: AuctionResponse[];
   instantSales: AuctionResponse[];
   popularAuctions: AuctionResponse[];
-  popularSellers: PopularSellerResponse[];
 }) {
   // 화면에 깔린 매물의 찜 상태는 한 번에 확인한다(데스크탑 그리드와 같은 훅·같은 캐시).
   const shown = [...endingSoon, ...instantSales];
@@ -114,7 +112,7 @@ export default function MobileHome({
 
       <Band />
 
-      <MobileRankTop3 auctions={popularAuctions} sellers={popularSellers} />
+      <MobileRankTop3 auctions={popularAuctions} />
 
       {/* 완료된 거래 진입 — 순위·목록과 성격이 달라 조용한 텍스트 링크 한 줄로 둔다.
           🔴 라벨이 「시세 확인하기」였다. §1.7·§9.4로 성사가를 감추면서 **누르면 시세가

@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import AuctionCard from "@/components/AuctionCard";
 import { ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
 import { apiFetch } from "@/lib/api";
@@ -312,12 +311,11 @@ export default function SearchScreen({
               </>
             )}
 
+            {/* 「더보기」(→ /artists)는 #653에서 걷었다. 칩은 스타 목록으로 가지 않고 그 이름으로
+                검색을 제출하므로 섹션 자체는 그대로 쓴다. */}
             <section className="px-[14px] sm:mt-8 sm:px-0">
-              <div className="flex items-center justify-between pt-3.5 sm:pt-0">
+              <div className="flex items-center pt-3.5 sm:pt-0">
                 <h2 className="text-sm font-extrabold tracking-[-0.02em] text-text-1">인기 스타</h2>
-                <Link href="/artists" className={`rounded-r1 text-[11.5px] font-semibold text-text-3 hover:text-text-1 ${FOCUS_RING}`}>
-                  더보기
-                </Link>
               </div>
               {popularArtists.length === 0 ? (
                 <p className="py-8 text-center text-[12.5px] text-text-3">불러올 스타가 없어요.</p>

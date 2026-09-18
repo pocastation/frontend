@@ -4,7 +4,7 @@ import HomeRanking from "@/components/HomeRanking";
 import MobileHome from "@/components/mobile/MobileHome";
 import MobileShell from "@/components/mobile/MobileShell";
 import { apiFetch } from "@/lib/api";
-import type { AuctionListResponse, PopularSellerResponse } from "@/lib/types";
+import type { AuctionListResponse } from "@/lib/types";
 
 // 모바일 홈이 한 화면에 올리는 개수. 2열 그리드라 짝수로 둔다.
 const MOBILE_SECTION_SIZE = 4;
@@ -62,23 +62,16 @@ async function getInstantSales(): Promise<AuctionListResponse | null> {
   }
 }
 
-// 모바일 홈의 판매자 랭킹 — 신뢰 등급 순(trustScore desc). 상위 3명만 쓴다.
-async function getPopularSellers(): Promise<PopularSellerResponse[]> {
-  try {
-    return await apiFetch<PopularSellerResponse[]>("/api/sellers/popular?size=3", { cache: "no-store" });
-  } catch {
-    return [];
-  }
-}
+// 판매자 랭킹 집계(`/api/sellers/popular`)는 #653에서 걷었다. 홈의 두 랭킹 블록이 유일한 소비처였고
+// 인기 판매자를 일반 사용자에게 노출하지 않기로 하면서 화면에서 함께 빠졌다. API는 그대로 살아 있다.
 
 export default async function Home() {
-  const [auctions, featured, popular, instantSales, endingSoon, popularSellers] = await Promise.all([
+  const [auctions, featured, popular, instantSales, endingSoon] = await Promise.all([
     getAuctions(),
     getFeaturedAuctions(),
     getPopularAuctions(),
     getInstantSales(),
     getEndingSoonAuctions(),
-    getPopularSellers(),
   ]);
   const content = auctions?.content ?? [];
   const instantContent = instantSales?.content ?? [];
@@ -103,7 +96,6 @@ export default async function Home() {
           endingSoon={endingSoon?.content ?? []}
           instantSales={instantContent.slice(0, MOBILE_SECTION_SIZE)}
           popularAuctions={popular?.content ?? []}
-          popularSellers={popularSellers}
         />
       </div>
 
@@ -119,7 +111,7 @@ export default async function Home() {
           viewAllHref="/instant-sales"
         />
         {/* 랭킹은 모바일 홈에만 있었다(#548). 데스크탑에서도 볼 수 있게 같은 집계로 블록을 둔다. */}
-        <HomeRanking auctions={popular?.content ?? []} sellers={popularSellers} />
+        <HomeRanking auctions={popular?.content ?? []} />
       </div>
     </MobileShell>
   );

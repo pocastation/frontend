@@ -32,6 +32,25 @@ const nextConfig: NextConfig = {
   },
 
   /**
+   * 스타·인기 판매자 목록을 일반 사용자에게 닫는다(#653).
+   *
+   * <p>페이지 파일은 그대로 두고 경로만 홈으로 보낸다. 화면의 진입점을 지우는 것만으로는
+   * 주소를 직접 친 접근이 남고, sitemap에 실려 있던 경로라 색인에서도 들어올 수 있다.
+   *
+   * <p>`permanent: false`(307)다. 영구(308)로 보내면 브라우저가 캐시해 버려서 되살릴 때
+   * 항목을 지워도 사용자 쪽에서 한동안 홈으로 튕긴다.
+   *
+   * <p>**상세는 대상이 아니다.** `source`가 정확히 두 경로라 `/artists/{id}`·`/sellers/{sellerId}`는
+   * 걸리지 않는다. 판매글 상세의 아티스트·판매자 프로필 링크가 그대로 살아 있어야 한다.
+   */
+  async redirects() {
+    return [
+      { source: "/artists", destination: "/", permanent: false },
+      { source: "/sellers", destination: "/", permanent: false },
+    ];
+  },
+
+  /**
    * 개발 환경에서만 백엔드를 같은 출처로 붙인다.
    *
    * <p>로컬은 프론트가 :3000, 백엔드가 :8080이라 브라우저 입장에서 **다른 출처**다. 그래서

@@ -247,6 +247,8 @@ export default function MobileMypageMenu({
         <TabRow label="내 정보" onClick={() => onSelectTab("profile")} />
         <TabRow label="배송지 관리" onClick={() => onSelectTab("shipping")} />
         <TabRow label="계정 설정" onClick={() => onSelectTab("settings")} />
+        {/* 교환에서만 적용되는 차단이라 「계정」에 둔다 — 거래 그룹에 넣으면 판매까지 막는 것으로 읽힌다. */}
+        <LinkRow label="교환 차단 목록" href="/mypage/exchange-blocks" />
         <LinkRow label="문의하기" href="/inquiries" />
         <LinkRow label="공지사항" href="/notices" />
         <LinkRow label="이용약관" href="/terms" />

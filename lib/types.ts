@@ -1392,3 +1392,56 @@ export type ExchangeRequestItem = {
 export type ExchangeRequestListResponse = {
   content: ExchangeRequestItem[];
 };
+
+// ─── 확정 교환의 대화 ───
+
+/** 보낸 사람을 id가 아니라 mine으로 받는다. 화면이 필요한 건 말풍선 방향뿐이다. */
+export type ExchangeMessage = {
+  id: number;
+  mine: boolean;
+  body: string;
+  createdAt: string;
+};
+
+/**
+ * 완료 확인 상태. 대화 응답에 실려 온다 — 완료를 누르는 곳이 대화 화면이라
+ * 따로 불러오면 두 값이 어긋난 순간이 생긴다.
+ */
+export type ExchangeCompletion = {
+  /** 지금 내가 누를 수 있는가(행사가 끝났고 아직 아무도 안 눌렀다). */
+  confirmable: boolean;
+  confirmed: boolean;
+  confirmedByMe: boolean;
+  disputed: boolean;
+  confirmedAt: string | null;
+  /** 상대가 아니라고 말할 수 있는 시각. */
+  disputableUntil: string | null;
+};
+
+export type ExchangeThreadResponse = {
+  id: number;
+  postId: number;
+  counterpartNickname: string | null;
+  place: string;
+  slot: ExchangeSlotView | null;
+  writable: boolean;
+  /** 잠긴 뒤에도 내려온다 — 입력창이 사라진 이유를 화면이 말해야 한다. */
+  lockedAt: string;
+  completion: ExchangeCompletion;
+  messages: ExchangeMessage[];
+};
+
+export type ExchangeMessageListResponse = {
+  messages: ExchangeMessage[];
+};
+
+/** 교환에서만 적용되는 차단. 해제는 회원 id가 아니라 이 행의 id로 한다. */
+export type ExchangeBlock = {
+  id: number;
+  nickname: string | null;
+  blockedAt: string;
+};
+
+export type ExchangeBlockListResponse = {
+  content: ExchangeBlock[];
+};

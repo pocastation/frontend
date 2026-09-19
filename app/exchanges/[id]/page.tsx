@@ -53,7 +53,7 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
       <MobilePageHead
         title="교환글"
         sub={post.authorNickname ?? undefined}
-        action={<ExchangeMoreMenu postId={post.id} />}
+        action={<ExchangeMoreMenu postId={post.id} authorNickname={post.authorNickname} />}
       />
 
       <div className="mx-auto max-w-[760px] pb-10 sm:px-4 sm:py-8">
@@ -83,7 +83,7 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
           </div>
           {/* 데스크톱에는 앱바가 없다(sm:hidden) — 진입점이 사라지지 않게 제목 줄에 한 번 더 둔다. */}
           <div className="max-sm:hidden">
-            <ExchangeMoreMenu postId={post.id} />
+            <ExchangeMoreMenu postId={post.id} authorNickname={post.authorNickname} />
           </div>
         </div>
 

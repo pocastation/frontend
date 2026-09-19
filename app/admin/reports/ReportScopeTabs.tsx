@@ -5,9 +5,13 @@ import { usePathname } from "next/navigation";
 import { FOCUS_RING } from "@/lib/ui";
 
 // 사이드바에 '신고 관리'와 '리뷰 신고'가 따로 있어 메뉴가 길어졌다. 사이드바에는 '신고 관리'만
-// 남기고, 대상(매물/리뷰) 전환은 이 하위 탭이 담당한다. 두 페이지 모두 같은 탭을 렌더한다.
+// 남기고, 대상 전환은 이 하위 탭이 담당한다. 모든 신고 페이지가 같은 탭을 렌더한다.
+//
+// 앞의 둘은 같은 테이블·같은 처리 흐름이라 화면 하나를 targetType만 바꿔 쓰고, 리뷰는 테이블과
+// 상태 기계가 따로라 별도 페이지로 남는다.
 const SCOPES: { href: string; label: string }[] = [
   { href: "/admin/reports", label: "판매글 신고" },
+  { href: "/admin/reports/exchange", label: "교환글 신고" },
   { href: "/admin/reviews", label: "리뷰 신고" },
 ];
 

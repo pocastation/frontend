@@ -172,17 +172,27 @@ export type ReportReason =
   | "HARMFUL_CONTENT"
   | "FRAUD_SUSPECTED"
   | "ABUSE"
+  // 금전 거래 유도 — 교환글 전용. 포카끼리 바꾸는 자리에 돈이 끼는 것을 막는다.
+  | "MONEY_TRADE"
   | "ETC";
+
+// 신고 대상 종류. 어떤 사유를 고를 수 있는지·무엇을 내리는지가 여기서 갈린다.
+export type ReportTargetType = "AUCTION" | "EXCHANGE_POST";
 
 export type ReportStatus = "RECEIVED" | "RESOLVED" | "REJECTED";
 
-export type ResolutionAction = "AUCTION_CANCELLED" | "NONE";
+export type ResolutionAction = "AUCTION_CANCELLED" | "EXCHANGE_POST_REMOVED" | "NONE";
 
-// GET /api/admin/reports 항목 — 같은 경매(대상)에 대한 신고를 신고자 수로 묶어 보여준다.
+// GET /api/admin/reports 항목 — 같은 대상에 대한 신고를 신고자 수로 묶어 보여준다.
+//
+// 대상은 targetTitle/targetSubtitle 두 줄로 통일돼 내려온다 — 판매글은 제목·스타, 교환글은
+// 만날 곳·행사명이 그 자리에 들어간다. 종류마다 필드를 따로 읽으면 종류가 늘 때마다 화면을
+// 고쳐야 한다. auctionId 등 판매글 전용 칸은 백엔드가 하위호환으로 남겨 둔 것이라 쓰지 않는다.
 export type AdminReportSummary = {
-  auctionId: number;
-  auctionTitle: string | null;
-  artistName: string | null;
+  targetType: ReportTargetType;
+  targetId: number;
+  targetTitle: string | null;
+  targetSubtitle: string | null;
   representativeThumbnailUrl: string | null;
   representativeReason: ReportReason;
   reporterCount: number;
@@ -198,7 +208,7 @@ export type AdminReportListResponse = {
   totalPages: number;
 };
 
-// GET /api/admin/reports/{auctionId} 신고자 항목 — 어드민 화면이라 닉네임은 마스킹하지 않는다.
+// GET /api/admin/reports/{targetId} 신고자 항목 — 어드민 화면이라 닉네임은 마스킹하지 않는다.
 export type AdminReportItem = {
   reportId: number;
   reporterNickname: string;
@@ -209,10 +219,13 @@ export type AdminReportItem = {
 };
 
 export type AdminReportDetailResponse = {
-  auctionId: number;
-  auctionTitle: string | null;
-  artistName: string | null;
-  sellerNickname: string;
+  targetType: ReportTargetType;
+  targetId: number;
+  targetTitle: string | null;
+  targetSubtitle: string | null;
+  ownerNickname: string | null;
+  // 이 대상을 내릴 때 보내야 하는 조치. 화면이 종류를 보고 이름을 추측하지 않는다.
+  removalAction: ResolutionAction;
   reports: AdminReportItem[];
   actionable: boolean;
   resolutionAction: ResolutionAction | null;
@@ -769,7 +782,17 @@ export type NotificationType =
   | "NEW_OFFER" // 새 제안 도착 — 판매자에게. 선택해야 거래가 성립하는 모델의 전제
   | "AUCTION_APPROVED" // 등록 승인 완료 — 판매자에게
   | "AUCTION_EXPIRING" // 게시 종료 1일 전 — 판매자에게. 종료되면 제안 전체가 실효된다
-  | "DELIVERY_COMPLETED"; // 배송 완료 + 자동 구매확정(3일) 예고 — 구매자에게
+  | "DELIVERY_COMPLETED" // 배송 완료 + 자동 구매확정(3일) 예고 — 구매자에게
+  // ── 포카 교환(BE #522·#524·#526·#528·#534, 전부 인앱 전용) ──
+  // auctionId가 비고 exchangePostId가 채워져 온다. 링크 분기가 그 값을 봐야 한다.
+  | "EXCHANGE_REQUESTED" // 교환 신청 도착 — 작성자에게
+  | "EXCHANGE_MATCHED" // 신청 수락 — 신청자에게. 대화가 열린다
+  | "EXCHANGE_DECLINED" // 다른 건이 수락되거나 글이 내려감 — 나머지 신청자에게
+  | "EXCHANGE_MESSAGE" // 새 대화 메시지 — 상대에게. 안 읽은 것이 있으면 묶여서 오지 않는다
+  | "EXCHANGE_COMPLETED" // 상대가 완료를 확인 — 24시간 이의 창 안내
+  | "EXCHANGE_COMPLETION_DISPUTED" // 완료에 이의 — 확인한 쪽에게
+  | "EXCHANGE_POST_REMOVED" // 신고 처리로 교환글이 내려감 — 작성자에게
+  | "EXCHANGE_EXPIRED"; // 행사가 지나 교환글이 마감됨 — 대기 중이던 신청자에게
 
 // ─── 주문/결제 상태 ───
 
@@ -919,6 +942,9 @@ export type NotificationResponse = {
   id: number;
   type: NotificationType;
   auctionId: number | null;
+  // 교환 알림은 auctionId를 비우고 이 값을 채운다. 둘을 함께 채우지 않는다 —
+  // 채우면 화면이 어느 쪽으로 보낼지 정할 수 없다.
+  exchangePostId: number | null;
   title: string;
   message: string;
   isRead: boolean;
@@ -1251,6 +1277,9 @@ export type EventResponse = {
   status: EventStatus;
 };
 
+// 공개 기간 조회. 페이지를 나누지 않는다 — 조회 단위가 한 달이고 하루 몇 건이라 수십 건을 넘지 않는다.
+export type EventListResponse = { content: EventResponse[] };
+
 export type AdminEventListResponse = {
   content: EventResponse[];
   page: number;
@@ -1281,3 +1310,151 @@ export type EventRecurrenceResponse = {
 };
 
 export type EventRecurrenceListResponse = { content: EventRecurrenceResponse[] };
+
+// ── 교환글(#516·#520) ────────────────────────────────────────────────────────
+// 포카를 자유 텍스트가 아니라 카탈로그로 받는다. 그래야 역매칭(P5)이 성립한다.
+
+/** 만날 시점 — 절대 시각이 아니라 행사 기준 상대 단계다. */
+export type ExchangePhase = "BEFORE_ENTRY" | "WAITING" | "AFTER_END";
+
+export type ExchangeStatus =
+  | "OPEN" | "MATCHED" | "COMPLETED" | "EXPIRED" | "CANCELLED" | "SUSPENDED";
+
+/** 서버가 카탈로그 이름까지 채워 준다 — 화면이 아티스트를 따로 조회하지 않는다. */
+export type ExchangeItemView = {
+  artistId: number;
+  artistName: string | null;
+  idolId: number | null;
+  idolName: string | null;
+  source: PhotocardSource;
+  // 보유 품목만 값이 있다. 희망에는 등급을 받지 않는다.
+  grade: PhotocardGrade | null;
+};
+
+// id는 신청이 시간대를 고를 때 쓴다. 값 조합으로 되찾으면 같은 시간대를 두 번 제시한 글에서 갈리지 않는다.
+export type ExchangeSlotView = { id: number; phase: ExchangePhase; fromHour: number; toHour: number };
+
+export type ExchangeFeedItem = {
+  id: number;
+  thumbnailUrl: string | null;
+  photoCount: number;
+  have: ExchangeItemView | null;
+  wants: ExchangeItemView[];
+  place: string;
+  slots: ExchangeSlotView[];
+  expiresAt: string;
+  createdAt: string;
+};
+
+export type ExchangeFeedResponse = {
+  content: ExchangeFeedItem[];
+  // 필터 칩. 목록을 잘라도 개수는 전체 기준이다.
+  artists: { artistId: number; artistName: string | null; count: number }[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+export type ExchangePostDetail = {
+  id: number;
+  eventId: number;
+  authorNickname: string | null;
+  place: string;
+  status: ExchangeStatus;
+  photos: { url: string; thumbnailUrl: string }[];
+  have: ExchangeItemView | null;
+  wants: ExchangeItemView[];
+  slots: ExchangeSlotView[];
+  /** 로그인해야 채워진다. 비로그인이면 null이고, 화면은 그걸로 로그인 여부를 안다. */
+  viewer: ExchangeViewer | null;
+  expiresAt: string;
+  createdAt: string;
+};
+
+/**
+ * 이 교환글을 보는 사람이 지금 무엇을 할 수 있는가.
+ *
+ * 하단 버튼 하나를 고르는 데 쓴다 — 작성자면 받은 신청, 확정 당사자면 대화, 이미 신청했으면
+ * 철회, 차단 사이면 안내다. 서버가 판정해서 내려주므로 화면이 권한 오류로 역할을 알아내지 않는다.
+ */
+export type ExchangeViewer = {
+  author: boolean;
+  participant: boolean;
+  blocked: boolean;
+  myRequestId: number | null;
+  myRequestStatus: ExchangeRequestStatus | null;
+  /** 작성자에게만 채워진다. */
+  receivedRequestCount: number | null;
+};
+
+export type ExchangeRequestStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "WITHDRAWN";
+
+/** 받은 신청 한 건. 사진과 제시 품목은 교환글 작성자만 받는다. */
+export type ExchangeRequestItem = {
+  id: number;
+  requesterNickname: string | null;
+  offer: ExchangeItemView;
+  slot: ExchangeSlotView | null;
+  message: string | null;
+  photos: { url: string; thumbnailUrl: string }[];
+  status: ExchangeRequestStatus;
+  createdAt: string;
+};
+
+export type ExchangeRequestListResponse = {
+  content: ExchangeRequestItem[];
+};
+
+// ─── 확정 교환의 대화 ───
+
+/** 보낸 사람을 id가 아니라 mine으로 받는다. 화면이 필요한 건 말풍선 방향뿐이다. */
+export type ExchangeMessage = {
+  id: number;
+  mine: boolean;
+  body: string;
+  createdAt: string;
+};
+
+/**
+ * 완료 확인 상태. 대화 응답에 실려 온다 — 완료를 누르는 곳이 대화 화면이라
+ * 따로 불러오면 두 값이 어긋난 순간이 생긴다.
+ */
+export type ExchangeCompletion = {
+  /** 지금 내가 누를 수 있는가(행사가 끝났고 아직 아무도 안 눌렀다). */
+  confirmable: boolean;
+  confirmed: boolean;
+  confirmedByMe: boolean;
+  disputed: boolean;
+  confirmedAt: string | null;
+  /** 상대가 아니라고 말할 수 있는 시각. */
+  disputableUntil: string | null;
+};
+
+export type ExchangeThreadResponse = {
+  id: number;
+  postId: number;
+  counterpartNickname: string | null;
+  place: string;
+  slot: ExchangeSlotView | null;
+  writable: boolean;
+  /** 잠긴 뒤에도 내려온다 — 입력창이 사라진 이유를 화면이 말해야 한다. */
+  lockedAt: string;
+  completion: ExchangeCompletion;
+  messages: ExchangeMessage[];
+};
+
+export type ExchangeMessageListResponse = {
+  messages: ExchangeMessage[];
+};
+
+/** 교환에서만 적용되는 차단. 해제는 회원 id가 아니라 이 행의 id로 한다. */
+export type ExchangeBlock = {
+  id: number;
+  nickname: string | null;
+  blockedAt: string;
+};
+
+export type ExchangeBlockListResponse = {
+  content: ExchangeBlock[];
+};

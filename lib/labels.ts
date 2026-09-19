@@ -16,6 +16,7 @@ import type {
   PhotocardGrade,
   PhotocardSource,
   ReportReason,
+  ReportTargetType,
   ReportStatus,
   ResolutionAction,
   ReviewReportReason,
@@ -186,24 +187,30 @@ export const AUCTION_SALE_TYPE_TONE: Record<AuctionSaleType, StatusTone> = {
   INSTANT: "neutral",
 };
 
-// 신고 사유 6종 — 신고 모달의 선택지 순서와 어드민 목록의 배지 순서가 이 배열을 공유한다.
+// 신고 사유 — 신고 모달의 선택지와 어드민 목록의 배지가 이 표를 공유한다.
 export const REPORT_REASON_LABEL: Record<ReportReason, string> = {
   BANNED_ITEM: "금지품목",
   PHOTO_THEFT: "도용 사진",
   HARMFUL_CONTENT: "유해물·불법촬영물",
   FRAUD_SUSPECTED: "사기 의심",
   ABUSE: "욕설·비방",
+  MONEY_TRADE: "금전 거래 유도",
   ETC: "기타",
 };
 
-export const REPORT_REASON_OPTIONS: ReportReason[] = [
-  "BANNED_ITEM",
-  "PHOTO_THEFT",
-  "HARMFUL_CONTENT",
-  "FRAUD_SUSPECTED",
-  "ABUSE",
-  "ETC",
-];
+/**
+ * 대상별 선택지. **서버가 같은 규칙을 다시 본다** — 목록이 어긋나면 400이 돌아온다.
+ *
+ * 교환글에서 금지품목이 빠지는 이유는 교환 대상이 포카로 한정돼 있어서고, 대신 금전 거래
+ * 유도가 들어온다. 교환은 돈이 끼는 순간 우리가 감당할 수 없는 거래가 된다.
+ *
+ * 순서는 **그 대상에서 흔한 것부터**다. 교환글의 첫 줄이 금전 거래 유도인 것은 방침상 전면
+ * 금지 항목이라 신고가 가장 자주 그 이유로 들어오기 때문이다.
+ */
+export const REPORT_REASON_OPTIONS: Record<ReportTargetType, ReportReason[]> = {
+  AUCTION: ["BANNED_ITEM", "PHOTO_THEFT", "HARMFUL_CONTENT", "FRAUD_SUSPECTED", "ABUSE", "ETC"],
+  EXCHANGE_POST: ["MONEY_TRADE", "FRAUD_SUSPECTED", "PHOTO_THEFT", "HARMFUL_CONTENT", "ABUSE", "ETC"],
+};
 
 // 신고 사유도 분류지만 **심각도가 실제로 다르다**(#289). 예전에는 6종에 분홍·주황·보라를 흩뿌려
 // 색이 우선순위를 말해주지 못했다. 즉시 확인해야 하는 둘만 danger 로 두고 나머지는 중립으로 둔다
@@ -214,6 +221,8 @@ export const REPORT_REASON_TONE: Record<ReportReason, StatusTone> = {
   HARMFUL_CONTENT: "danger",
   FRAUD_SUSPECTED: "danger",
   ABUSE: "neutral",
+  // 즉시 확인해야 하는 쪽에 둔다 — 현장에서 만나기 전에 내려야 의미가 있다.
+  MONEY_TRADE: "danger",
   ETC: "muted",
 };
 
@@ -234,6 +243,7 @@ export const REPORT_STATUS_TONE: Record<ReportStatus, StatusTone> = {
 
 export const RESOLUTION_ACTION_LABEL: Record<ResolutionAction, string> = {
   AUCTION_CANCELLED: "판매글 취소",
+  EXCHANGE_POST_REMOVED: "교환글 내리기",
   NONE: "조치 없음(반려)",
 };
 

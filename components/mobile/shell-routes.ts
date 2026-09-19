@@ -26,6 +26,9 @@ const MOBILE_ARTIST_DETAIL_PATTERN = /^\/artists\/\d+$/;
 const MOBILE_PAYMENT_PATTERN = /^\/orders\/\d+\/payment$/;
 // 판매자 공개 프로필(#510). id가 UUID라 숫자 패턴을 쓸 수 없다 — 한 조각짜리 경로로 잡는다.
 const MOBILE_SELLER_DETAIL_PATTERN = /^\/sellers\/[^/]+$/;
+// 행사 피드(#662)와 교환글 상세도 앱바 하나짜리 화면이다. 캘린더에서 한 단계씩 들어간다.
+const MOBILE_EVENT_FEED_PATTERN = /^\/events\/\d+$/;
+const MOBILE_EXCHANGE_DETAIL_PATTERN = /^\/exchanges\/\d+$/;
 // 마이페이지(`/mypage`)는 한 경로가 두 얼굴이다 — 쿼리가 없거나 `?tab=wishlist`면 하단탭이 가리키는
 // **루트**라 셸을 쓰고, 그 밖의 `?tab=`은 앱바 하나짜리 **서브 화면**이다. 어느 쪽이든 전역 헤더·
 // 푸터는 접혀야 해서 경로 단위 목록에 그대로 둔다(분기는 페이지가 쿼리를 보고 한다).
@@ -48,7 +51,7 @@ const MOBILE_SELLER_DETAIL_PATTERN = /^\/sellers\/[^/]+$/;
 //
 // 스타·인기 판매자 목록(`/artists`·`/sellers`)은 #653에서 뺐다. next.config의 redirects가 홈으로
 // 보내 이 목록이 볼 일이 없다. 상세는 아래 두 패턴이 계속 잡는다.
-const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/auctions/submitted", "/notifications", "/search", "/auctions/ended", "/withdrawn"];
+const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/auctions/submitted", "/notifications", "/search", "/events", "/exchanges/new", "/auctions/ended", "/withdrawn"];
 
 export function isMobileChromeHiddenRoute(pathname: string): boolean {
   return (
@@ -57,6 +60,8 @@ export function isMobileChromeHiddenRoute(pathname: string): boolean {
     MOBILE_ARTIST_DETAIL_PATTERN.test(pathname) ||
     MOBILE_PAYMENT_PATTERN.test(pathname) ||
     MOBILE_SELLER_DETAIL_PATTERN.test(pathname) ||
+    MOBILE_EVENT_FEED_PATTERN.test(pathname) ||
+    MOBILE_EXCHANGE_DETAIL_PATTERN.test(pathname) ||
     MOBILE_FULLSCREEN_ROUTES.includes(pathname)
   );
 }

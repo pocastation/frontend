@@ -42,3 +42,22 @@ export const ACTION_ICON_BUTTON =
  * z를 아무리 올려도 밖으로 나가지 못한다. 그런 자리에서 열리는 모달은 `createPortal(…,
  * document.body)`로 빼낸다 — #454(SellerOfferPanel)·#635(ReportButton)가 같은 함정이었다.
  */
+
+/**
+ * 폼 맨 끝 액션 버튼을 담는 줄(#683).
+ *
+ * <p>모바일에서는 화면 아래에 고정한다 — 매물 상세의 즉시구매 바와 같은 자리다. 긴 폼일수록
+ * 「다음」을 찾으러 끝까지 굴려야 하는데, 다음 걸음이 어디 있는지는 화면을 떠나지 않아야 한다.
+ *
+ * <p>{@code bottom}을 인라인으로 주는 이유는 하단 5탭이 있는 화면과 없는 화면이 갈리기
+ * 때문이다. 탭이 있으면 그 위에, 없으면 안전영역 위에 앉는다.
+ *
+ * <p>데스크탑에서는 다시 흐름 안으로 돌아간다(`sm:static`). 세로가 넉넉해 고정할 이유가 없고,
+ * 넓은 화면 아래에 띠가 하나 걸리면 그게 더 눈에 띈다.
+ */
+export const FORM_ACTION_BAR =
+  "fixed inset-x-0 z-[400] border-t border-border bg-white px-[14px] py-2.5 " +
+  "sm:static sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:pt-5";
+
+/** 고정 바가 마지막 입력칸을 가리지 않게 본문 끝에 두는 여백. 바 높이(48) + 위아래 여백. */
+export const FORM_ACTION_BAR_STYLE = { bottom: "var(--mobile-tabbar-h, env(safe-area-inset-bottom))" } as const;

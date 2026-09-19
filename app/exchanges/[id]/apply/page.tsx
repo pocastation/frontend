@@ -7,7 +7,7 @@ import PhotoUploadGrid from "@/components/PhotoUploadGrid";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { itemName, slotLabel } from "@/lib/exchange-labels";
-import { GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
+import { GRADE_NOTE, GRADE_OPTIONS, GRADE_SHORT, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { usePhotoUpload, photoUploadErrorMessage } from "@/lib/use-photo-upload";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
@@ -172,12 +172,15 @@ export default function ExchangeApplyPage() {
             </select>
             <select value={grade} onChange={(e) => setGrade(e.target.value as PhotocardGrade)} aria-label="상태 등급" className={INPUT}>
               {GRADE_OPTIONS.map((g) => (
-                <option key={g} value={g}>{GRADE_LABEL[g]}</option>
+                <option key={g} value={g}>{GRADE_SHORT[g]}</option>
               ))}
             </select>
           </div>
-          {/* 등급은 교환글의 희망 품목과 달리 필수다. 별표만 붙이면 왜 필수인지 모른다. */}
-          <p className={HELP}>등급은 꼭 골라 주세요. 현장에서 상태를 보고 무르는 일을 줄여줘요.</p>
+          {/* 등급은 교환글의 희망 품목과 달리 필수다. 별표만 붙이면 왜 필수인지 모른다.
+              고른 등급의 설명도 여기 붙는다 — 셀렉트에 넣으면 글자가 화살표까지 닿는다. */}
+          <p className={HELP}>
+            {GRADE_SHORT[grade]} — {GRADE_NOTE[grade]}. 등급은 꼭 골라 주세요. 현장에서 상태를 보고 무르는 일을 줄여줘요.
+          </p>
         </section>
 
         <section className="mt-5 bg-surface-2 px-[14px] py-4 sm:rounded-r2 sm:px-4">

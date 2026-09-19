@@ -17,7 +17,7 @@ import {
   validateVideo,
 } from "@/lib/video-validate";
 import { useAuth } from "@/lib/auth-context";
-import { GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
+import { GRADE_NOTE, GRADE_OPTIONS, GRADE_SHORT, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import type {
   ArtistListResponse,
@@ -670,10 +670,13 @@ export default function NewAuctionPage() {
                   >
                     {GRADE_OPTIONS.map((option) => (
                       <option key={option} value={option}>
-                        {GRADE_LABEL[option]}
+                        {GRADE_SHORT[option]}
                       </option>
                     ))}
                   </select>
+                  {/* 설명은 셀렉트가 아니라 여기 둔다 — 전체 표기는 좁은 칸에서 글자가
+                      화살표까지 닿는다(#679 실측). */}
+                  <p className="text-[11.5px] leading-relaxed text-text-3">{GRADE_NOTE[grade]}</p>
                 </div>
               </div>
 

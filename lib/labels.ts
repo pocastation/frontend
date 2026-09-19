@@ -53,11 +53,36 @@ export const SOURCE_OPTIONS: PhotocardSource[] = [
   "ETC",
 ];
 
+/** 등급 전체 표기. 상세 화면의 사양 표처럼 한 줄이 통째로 들어가는 자리에 쓴다. */
 export const GRADE_LABEL: Record<PhotocardGrade, string> = {
   S: "S급 (미개봉/신품급)",
   A: "A급 (신품에 가까움)",
   B: "B급 (사용흔적 있음)",
   C: "C급 (손상 있음)",
+};
+
+/**
+ * 셀렉트에 넣는 짧은 표기(#679).
+ *
+ * <p>전체 표기는 폼의 셀렉트에 들어가지 않는다 — 「A급 (신품에 가까움)」이 124.4px인데 출처와
+ * 나란히 놓인 칸의 안쪽 폭이 125.5px라 여유가 1.1px다(375px 폭 실측). 화살표를 어디에 두든
+ * 글자가 거기까지 닿는다.
+ *
+ * <p>괄호 안 설명은 {@link GRADE_NOTE}로 떼어 helper text에 둔다. 고른 등급 하나만 풀어 주면
+ * 되고, 그 자리가 원래 설명이 가야 할 자리다.
+ */
+export const GRADE_SHORT: Record<PhotocardGrade, string> = {
+  S: "S급",
+  A: "A급",
+  B: "B급",
+  C: "C급",
+};
+
+export const GRADE_NOTE: Record<PhotocardGrade, string> = {
+  S: "미개봉·신품급",
+  A: "신품에 가까움",
+  B: "사용흔적 있음",
+  C: "손상 있음",
 };
 
 export const GRADE_OPTIONS: PhotocardGrade[] = ["S", "A", "B", "C"];

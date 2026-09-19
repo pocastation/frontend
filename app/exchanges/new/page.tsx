@@ -7,7 +7,7 @@ import PhotoUploadGrid from "@/components/PhotoUploadGrid";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { PHASE_OPTIONS } from "@/lib/exchange-labels";
-import { GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
+import { GRADE_NOTE, GRADE_OPTIONS, GRADE_SHORT, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { usePhotoUpload, photoUploadErrorMessage } from "@/lib/use-photo-upload";
 import { FOCUS_RING } from "@/lib/ui";
 import type {
@@ -234,10 +234,13 @@ function NewExchangeForm() {
                 </select>
                 <select value={grade} onChange={(e) => setGrade(e.target.value as PhotocardGrade)} aria-label="상태 등급" className={INPUT}>
                   {GRADE_OPTIONS.map((g) => (
-                    <option key={g} value={g}>{GRADE_LABEL[g]}</option>
+                    <option key={g} value={g}>{GRADE_SHORT[g]}</option>
                   ))}
                 </select>
               </div>
+              {/* 등급 설명은 셀렉트가 아니라 여기 둔다 — 「A급 (신품에 가까움)」은 이 칸에 1.1px
+                  남기고 들어가 글자가 화살표까지 닿는다(실측). 고른 하나만 풀어 주면 된다. */}
+              <p className={HELP}>{GRADE_SHORT[grade]} — {GRADE_NOTE[grade]}</p>
 
               <p className={`${LABEL} mt-5`}>
                 받고 싶은 포카<span className="ml-0.5 text-primary">*</span>

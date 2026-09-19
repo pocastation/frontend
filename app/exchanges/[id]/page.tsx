@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import ExchangeCta from "@/components/ExchangeCta";
 import ExchangeMoreMenu from "@/components/ExchangeMoreMenu";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
@@ -15,8 +16,8 @@ import type { ExchangePostDetail } from "@/lib/types";
  * <p>신고 진입점은 더보기(⋮) 하나로 모은다 — 사이렌을 본문에 띄우면 화면에서 가장 센 신호가
  * 신고가 된다. 자세한 근거는 {@link ExchangeMoreMenu}.
  *
- * <p>신청 버튼은 자리만 둔다. 누를 곳(신청 흐름)이 아직 없어 비활성으로 두고 문구로 알린다.
- * 링크를 붙이면 빈 화면으로 보내게 된다.
+ * <p>하단 버튼은 클라이언트가 그린다({@link ExchangeCta}). 이 페이지는 서버 컴포넌트라 사용자
+ * 토큰이 없어 역할을 알 수 없다.
  */
 
 async function getPost(id: string): Promise<ExchangePostDetail | null> {
@@ -123,17 +124,9 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
           </div>
         </div>
 
+        {/* 하단은 버튼 한 자리다. 무엇이 앉을지는 보는 사람의 역할이 정한다 — ExchangeCta 참고. */}
         <div className="px-[14px] pt-4 sm:px-0">
-          <button
-            type="button"
-            disabled
-            className="flex h-12 w-full items-center justify-center rounded-[7px] border border-border-2 bg-white text-[15px] font-extrabold text-text-3"
-          >
-            교환 신청하기
-          </button>
-          <p className="pt-2 text-center text-[11.5px] text-text-3">
-            신청 기능은 준비 중이에요. 열리면 알려드릴게요.
-          </p>
+          <ExchangeCta postId={post.id} status={post.status} />
         </div>
       </div>
     </>

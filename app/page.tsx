@@ -1,10 +1,12 @@
 import AuctionExplorer from "@/components/AuctionExplorer";
+import EventStrip from "@/components/EventStrip";
 import Hero from "@/components/Hero";
 import HomeRanking from "@/components/HomeRanking";
 import MobileHome from "@/components/mobile/MobileHome";
 import MobileShell from "@/components/mobile/MobileShell";
 import { apiFetch } from "@/lib/api";
-import type { AuctionListResponse } from "@/lib/types";
+import { addDays, todayInKst, ymd } from "@/lib/event-dates";
+import type { AuctionListResponse, EventListResponse } from "@/lib/types";
 
 // 모바일 홈이 한 화면에 올리는 개수. 2열 그리드라 짝수로 둔다.
 const MOBILE_SECTION_SIZE = 4;
@@ -62,16 +64,30 @@ async function getInstantSales(): Promise<AuctionListResponse | null> {
   }
 }
 
+// 홈 스트립이 보여주는 2주치 행사(#659). 캘린더로 들어가는 입구라 오늘부터 13일 뒤까지만 받는다.
+async function getUpcomingEvents(): Promise<EventListResponse | null> {
+  const today = todayInKst();
+  try {
+    return await apiFetch<EventListResponse>(
+      `/api/events?from=${ymd(today)}&to=${ymd(addDays(today, 13))}`,
+      { cache: "no-store" },
+    );
+  } catch {
+    return null;
+  }
+}
+
 // 판매자 랭킹 집계(`/api/sellers/popular`)는 #653에서 걷었다. 홈의 두 랭킹 블록이 유일한 소비처였고
 // 인기 판매자를 일반 사용자에게 노출하지 않기로 하면서 화면에서 함께 빠졌다. API는 그대로 살아 있다.
 
 export default async function Home() {
-  const [auctions, featured, popular, instantSales, endingSoon] = await Promise.all([
+  const [auctions, featured, popular, instantSales, endingSoon, upcomingEvents] = await Promise.all([
     getAuctions(),
     getFeaturedAuctions(),
     getPopularAuctions(),
     getInstantSales(),
     getEndingSoonAuctions(),
+    getUpcomingEvents(),
   ]);
   const content = auctions?.content ?? [];
   const instantContent = instantSales?.content ?? [];
@@ -96,11 +112,14 @@ export default async function Home() {
           endingSoon={endingSoon?.content ?? []}
           instantSales={instantContent.slice(0, MOBILE_SECTION_SIZE)}
           popularAuctions={popular?.content ?? []}
+          upcomingEvents={upcomingEvents?.content ?? []}
         />
       </div>
 
       <div className="hidden sm:block">
         <Hero liveCount={content.length} featured={heroFeatured} />
+        {/* 데스크탑은 지면이 넓어 2주 14칸을 한 줄에 편다(#659). */}
+        <EventStrip events={upcomingEvents?.content ?? []} />
         <AuctionExplorer initialAuctions={content} />
         <AuctionExplorer
           initialAuctions={instantContent}

@@ -1318,7 +1318,8 @@ export type ExchangeItemView = {
   grade: PhotocardGrade | null;
 };
 
-export type ExchangeSlotView = { phase: ExchangePhase; fromHour: number; toHour: number };
+// id는 신청이 시간대를 고를 때 쓴다. 값 조합으로 되찾으면 같은 시간대를 두 번 제시한 글에서 갈리지 않는다.
+export type ExchangeSlotView = { id: number; phase: ExchangePhase; fromHour: number; toHour: number };
 
 export type ExchangeFeedItem = {
   id: number;
@@ -1352,6 +1353,42 @@ export type ExchangePostDetail = {
   have: ExchangeItemView | null;
   wants: ExchangeItemView[];
   slots: ExchangeSlotView[];
+  /** 로그인해야 채워진다. 비로그인이면 null이고, 화면은 그걸로 로그인 여부를 안다. */
+  viewer: ExchangeViewer | null;
   expiresAt: string;
   createdAt: string;
+};
+
+/**
+ * 이 교환글을 보는 사람이 지금 무엇을 할 수 있는가.
+ *
+ * 하단 버튼 하나를 고르는 데 쓴다 — 작성자면 받은 신청, 확정 당사자면 대화, 이미 신청했으면
+ * 철회, 차단 사이면 안내다. 서버가 판정해서 내려주므로 화면이 권한 오류로 역할을 알아내지 않는다.
+ */
+export type ExchangeViewer = {
+  author: boolean;
+  participant: boolean;
+  blocked: boolean;
+  myRequestId: number | null;
+  myRequestStatus: ExchangeRequestStatus | null;
+  /** 작성자에게만 채워진다. */
+  receivedRequestCount: number | null;
+};
+
+export type ExchangeRequestStatus = "PENDING" | "ACCEPTED" | "REJECTED" | "WITHDRAWN";
+
+/** 받은 신청 한 건. 사진과 제시 품목은 교환글 작성자만 받는다. */
+export type ExchangeRequestItem = {
+  id: number;
+  requesterNickname: string | null;
+  offer: ExchangeItemView;
+  slot: ExchangeSlotView | null;
+  message: string | null;
+  photos: { url: string; thumbnailUrl: string }[];
+  status: ExchangeRequestStatus;
+  createdAt: string;
+};
+
+export type ExchangeRequestListResponse = {
+  content: ExchangeRequestItem[];
 };

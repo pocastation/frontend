@@ -172,17 +172,27 @@ export type ReportReason =
   | "HARMFUL_CONTENT"
   | "FRAUD_SUSPECTED"
   | "ABUSE"
+  // 금전 거래 유도 — 교환글 전용. 포카끼리 바꾸는 자리에 돈이 끼는 것을 막는다.
+  | "MONEY_TRADE"
   | "ETC";
+
+// 신고 대상 종류. 어떤 사유를 고를 수 있는지·무엇을 내리는지가 여기서 갈린다.
+export type ReportTargetType = "AUCTION" | "EXCHANGE_POST";
 
 export type ReportStatus = "RECEIVED" | "RESOLVED" | "REJECTED";
 
-export type ResolutionAction = "AUCTION_CANCELLED" | "NONE";
+export type ResolutionAction = "AUCTION_CANCELLED" | "EXCHANGE_POST_REMOVED" | "NONE";
 
-// GET /api/admin/reports 항목 — 같은 경매(대상)에 대한 신고를 신고자 수로 묶어 보여준다.
+// GET /api/admin/reports 항목 — 같은 대상에 대한 신고를 신고자 수로 묶어 보여준다.
+//
+// 대상은 targetTitle/targetSubtitle 두 줄로 통일돼 내려온다 — 판매글은 제목·스타, 교환글은
+// 만날 곳·행사명이 그 자리에 들어간다. 종류마다 필드를 따로 읽으면 종류가 늘 때마다 화면을
+// 고쳐야 한다. auctionId 등 판매글 전용 칸은 백엔드가 하위호환으로 남겨 둔 것이라 쓰지 않는다.
 export type AdminReportSummary = {
-  auctionId: number;
-  auctionTitle: string | null;
-  artistName: string | null;
+  targetType: ReportTargetType;
+  targetId: number;
+  targetTitle: string | null;
+  targetSubtitle: string | null;
   representativeThumbnailUrl: string | null;
   representativeReason: ReportReason;
   reporterCount: number;
@@ -198,7 +208,7 @@ export type AdminReportListResponse = {
   totalPages: number;
 };
 
-// GET /api/admin/reports/{auctionId} 신고자 항목 — 어드민 화면이라 닉네임은 마스킹하지 않는다.
+// GET /api/admin/reports/{targetId} 신고자 항목 — 어드민 화면이라 닉네임은 마스킹하지 않는다.
 export type AdminReportItem = {
   reportId: number;
   reporterNickname: string;
@@ -209,10 +219,13 @@ export type AdminReportItem = {
 };
 
 export type AdminReportDetailResponse = {
-  auctionId: number;
-  auctionTitle: string | null;
-  artistName: string | null;
-  sellerNickname: string;
+  targetType: ReportTargetType;
+  targetId: number;
+  targetTitle: string | null;
+  targetSubtitle: string | null;
+  ownerNickname: string | null;
+  // 이 대상을 내릴 때 보내야 하는 조치. 화면이 종류를 보고 이름을 추측하지 않는다.
+  removalAction: ResolutionAction;
   reports: AdminReportItem[];
   actionable: boolean;
   resolutionAction: ResolutionAction | null;

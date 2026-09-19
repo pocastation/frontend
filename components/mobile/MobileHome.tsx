@@ -3,11 +3,12 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import AuctionCard from "@/components/AuctionCard";
+import EventStrip from "@/components/EventStrip";
 import MobilePromoBanner from "@/components/mobile/MobilePromoBanner";
 import MobileRankTop3 from "@/components/mobile/MobileRankTop3";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import { FOCUS_RING } from "@/lib/ui";
-import type { AuctionResponse } from "@/lib/types";
+import type { AuctionResponse, EventResponse } from "@/lib/types";
 
 /**
  * 모바일 홈 — 국내 커머스 앱 문법으로 짠 별도 화면.
@@ -54,11 +55,13 @@ export default function MobileHome({
   endingSoon,
   instantSales,
   popularAuctions,
+  upcomingEvents,
 }: {
   featured: AuctionResponse[];
   endingSoon: AuctionResponse[];
   instantSales: AuctionResponse[];
   popularAuctions: AuctionResponse[];
+  upcomingEvents: EventResponse[];
 }) {
   // 화면에 깔린 매물의 찜 상태는 한 번에 확인한다(데스크탑 그리드와 같은 훅·같은 캐시).
   const shown = [...endingSoon, ...instantSales];
@@ -67,6 +70,9 @@ export default function MobileHome({
   return (
     <>
       <MobilePromoBanner featured={featured} />
+
+      {/* 히어로 바로 아래 한 줄(#659). 8px 띠로 끊는 기존 리듬을 그대로 쓴다. */}
+      <EventStrip events={upcomingEvents} />
 
       <section className="px-[14px] pt-[18px]">
         <SectionHead title="제안판매" href="/auctions?sort=ending_soon" />

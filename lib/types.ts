@@ -1251,6 +1251,9 @@ export type EventResponse = {
   status: EventStatus;
 };
 
+// 공개 기간 조회. 페이지를 나누지 않는다 — 조회 단위가 한 달이고 하루 몇 건이라 수십 건을 넘지 않는다.
+export type EventListResponse = { content: EventResponse[] };
+
 export type AdminEventListResponse = {
   content: EventResponse[];
   page: number;

@@ -129,6 +129,15 @@ function MailBanIcon() {
   );
 }
 
+function CalendarIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 10h18M8 3v4M16 3v4" />
+    </svg>
+  );
+}
+
 function MessageIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -149,6 +158,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/admin", label: "대시보드", icon: <GridIcon />, ready: true },
       { href: "/admin/members", label: "회원 관리", icon: <UsersIcon />, ready: true },
       { href: "/admin/catalog", label: "카탈로그 관리", icon: <CardIcon />, ready: true },
+      { href: "/admin/events", label: "행사 관리", icon: <CalendarIcon />, ready: true },
       { href: "/admin/auctions", label: "판매글 관리", icon: <ListingIcon />, ready: true },
       { href: "/admin/banner", label: "홈 배너", icon: <BannerIcon />, ready: true },
       { href: "/admin/pre-registrations", label: "사전예약 현황", icon: <ChartIcon />, ready: true },

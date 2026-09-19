@@ -108,7 +108,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
     <>
       <ShareButton title={auction.title} hashtag={auction.artistName?.replace(/\s+/g, "") || undefined} />
       <AuctionWishlistButton auctionId={auction.id} className={ACTION_ICON_BUTTON} />
-      <ReportButton auctionId={auction.id} />
+      <ReportButton targetType="AUCTION" targetId={auction.id} />
     </>
   );
 

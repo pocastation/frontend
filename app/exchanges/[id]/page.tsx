@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import ExchangeMoreMenu from "@/components/ExchangeMoreMenu";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { itemDetail, itemName, slotLabel } from "@/lib/exchange-labels";
@@ -10,6 +11,9 @@ import type { ExchangePostDetail } from "@/lib/types";
  *
  * <p>정보를 <code>라벨 | 값</code> 표 하나로 늘어놓지 않는다. 포카 이름은 <b>제목</b>, 교환 방향은
  * <b>세로선으로 가른 두 칸</b>, 만날 곳은 <b>회색 띠</b>다 — 성격이 다른 셋이 서로 다른 지면에 앉는다.
+ *
+ * <p>신고 진입점은 더보기(⋮) 하나로 모은다 — 사이렌을 본문에 띄우면 화면에서 가장 센 신호가
+ * 신고가 된다. 자세한 근거는 {@link ExchangeMoreMenu}.
  *
  * <p>신청 버튼은 자리만 둔다. 누를 곳(신청 흐름)이 아직 없어 비활성으로 두고 문구로 알린다.
  * 링크를 붙이면 빈 화면으로 보내게 된다.
@@ -45,7 +49,11 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
 
   return (
     <>
-      <MobilePageHead title="교환글" sub={post.authorNickname ?? undefined} />
+      <MobilePageHead
+        title="교환글"
+        sub={post.authorNickname ?? undefined}
+        action={<ExchangeMoreMenu postId={post.id} />}
+      />
 
       <div className="mx-auto max-w-[760px] pb-10 sm:px-4 sm:py-8">
         {cover && (
@@ -67,9 +75,15 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
           </div>
         )}
 
-        <div className="px-[14px] pt-3.5 sm:px-0">
-          <h1 className="text-xl font-extrabold tracking-[-0.025em] text-text-1">{itemName(post.have)}</h1>
-          <p className="mt-0.5 text-xs font-semibold text-text-3">{itemDetail(post.have)}</p>
+        <div className="flex items-start gap-2 px-[14px] pt-3.5 sm:px-0">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl font-extrabold tracking-[-0.025em] text-text-1">{itemName(post.have)}</h1>
+            <p className="mt-0.5 text-xs font-semibold text-text-3">{itemDetail(post.have)}</p>
+          </div>
+          {/* 데스크톱에는 앱바가 없다(sm:hidden) — 진입점이 사라지지 않게 제목 줄에 한 번 더 둔다. */}
+          <div className="max-sm:hidden">
+            <ExchangeMoreMenu postId={post.id} />
+          </div>
         </div>
 
         <div className="px-[14px] pt-3.5 sm:px-0">

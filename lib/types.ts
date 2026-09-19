@@ -1284,3 +1284,61 @@ export type EventRecurrenceResponse = {
 };
 
 export type EventRecurrenceListResponse = { content: EventRecurrenceResponse[] };
+
+// ── 교환글(#516·#520) ────────────────────────────────────────────────────────
+// 포카를 자유 텍스트가 아니라 카탈로그로 받는다. 그래야 역매칭(P5)이 성립한다.
+
+/** 만날 시점 — 절대 시각이 아니라 행사 기준 상대 단계다. */
+export type ExchangePhase = "BEFORE_ENTRY" | "WAITING" | "AFTER_END";
+
+export type ExchangeStatus =
+  | "OPEN" | "MATCHED" | "COMPLETED" | "EXPIRED" | "CANCELLED" | "SUSPENDED";
+
+/** 서버가 카탈로그 이름까지 채워 준다 — 화면이 아티스트를 따로 조회하지 않는다. */
+export type ExchangeItemView = {
+  artistId: number;
+  artistName: string | null;
+  idolId: number | null;
+  idolName: string | null;
+  source: PhotocardSource;
+  // 보유 품목만 값이 있다. 희망에는 등급을 받지 않는다.
+  grade: PhotocardGrade | null;
+};
+
+export type ExchangeSlotView = { phase: ExchangePhase; fromHour: number; toHour: number };
+
+export type ExchangeFeedItem = {
+  id: number;
+  thumbnailUrl: string | null;
+  photoCount: number;
+  have: ExchangeItemView | null;
+  wants: ExchangeItemView[];
+  place: string;
+  slots: ExchangeSlotView[];
+  expiresAt: string;
+  createdAt: string;
+};
+
+export type ExchangeFeedResponse = {
+  content: ExchangeFeedItem[];
+  // 필터 칩. 목록을 잘라도 개수는 전체 기준이다.
+  artists: { artistId: number; artistName: string | null; count: number }[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+export type ExchangePostDetail = {
+  id: number;
+  eventId: number;
+  authorNickname: string | null;
+  place: string;
+  status: ExchangeStatus;
+  photos: { url: string; thumbnailUrl: string }[];
+  have: ExchangeItemView | null;
+  wants: ExchangeItemView[];
+  slots: ExchangeSlotView[];
+  expiresAt: string;
+  createdAt: string;
+};

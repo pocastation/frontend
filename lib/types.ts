@@ -1231,3 +1231,53 @@ export type PreRegistrationApplicationListResponse = {
   content: PreRegistrationApplicationView[];
   totalElements: number;
 };
+
+// ── 행사 캘린더(#508·#510·#512) ──────────────────────────────────────────────
+// 교환글이 붙는 일정. 출연 아티스트는 담지 않는다 — 방송 며칠 전에야 확정돼 운영이 못 따라간다.
+
+export type EventType = "MUSIC_SHOW" | "CONCERT" | "ETC";
+export type EventStatus = "SCHEDULED" | "CANCELLED";
+
+export type EventResponse = {
+  id: number;
+  type: EventType;
+  name: string;
+  venue: string;
+  // KST 기준 날짜(YYYY-MM-DD). startsAt에서 뽑지 말 것 — 기기 시간대에 따라 하루가 밀린다.
+  eventDate: string;
+  startsAt: string;
+  // 예정 종료. 교환글 마감·사진 파기가 전부 이 값 기준이다.
+  endsAt: string;
+  status: EventStatus;
+};
+
+export type AdminEventListResponse = {
+  content: EventResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+export type EventWeekday =
+  | "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
+
+export type EventRecurrenceResponse = {
+  id: number;
+  type: EventType;
+  name: string;
+  venue: string;
+  weekday: EventWeekday;
+  // KST 벽시계 시각(HH:mm:ss).
+  startsAtTime: string;
+  endsAtTime: string;
+  activeFrom: string;
+  activeUntil: string | null;
+  generatedUntil: string | null;
+  active: boolean;
+  // 이 규칙으로 이미 만들어진 앞으로의 회차 수(취소 제외). 규칙을 고쳐도 그 회차는 옛 값을
+  // 유지하므로, 관리자가 몇 건을 개별로 옮겨야 하는지 알려 주는 값이다.
+  affectedFutureEvents: number;
+};
+
+export type EventRecurrenceListResponse = { content: EventRecurrenceResponse[] };

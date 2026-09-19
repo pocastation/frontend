@@ -19,7 +19,9 @@ export default function ExchangeFeedRow({ item }: { item: ExchangeFeedItem }) {
   const firstSlot = item.slots[0];
 
   return (
-    <li className="border-b border-border last:border-b-0">
+    // 마지막 줄에도 구분선을 남긴다. 목록이 화면 중간에서 끊기면 「여기까지」가 아니라
+    // 「덜 불러왔다」로 읽힌다 — 아래에 빈 지면이 남는 짧은 피드에서 특히 그렇다.
+    <li className="border-b border-border">
       <Link
         href={`/exchanges/${item.id}`}
         className={`flex gap-2.5 py-3 ${FOCUS_RING}`}

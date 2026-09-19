@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { itemName, slotLabel } from "@/lib/exchange-labels";
 import { GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { usePhotoUpload, photoUploadErrorMessage } from "@/lib/use-photo-upload";
-import { FOCUS_RING, FORM_ACTION_BAR, FORM_ACTION_BAR_STYLE } from "@/lib/ui";
+import { FOCUS_RING, FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE } from "@/lib/ui";
 import type {
   ArtistListResponse,
   ArtistMemberResponse,
@@ -133,7 +133,7 @@ export default function ExchangeApplyPage() {
         backHref={`/exchanges/${postId}`}
       />
 
-      <div className="mx-auto max-w-[640px] pb-24 sm:px-4 sm:py-8">
+      <div className={`mx-auto max-w-[640px] ${FORM_ACTION_BAR_PAD} sm:px-4 sm:py-8`}>
         {error && (
           <p role="alert" className="mx-[14px] mt-3 rounded-r1 border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger sm:mx-0">
             {error}

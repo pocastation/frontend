@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { PHASE_OPTIONS } from "@/lib/exchange-labels";
 import { GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { usePhotoUpload, photoUploadErrorMessage } from "@/lib/use-photo-upload";
-import { FOCUS_RING, FORM_ACTION_BAR, FORM_ACTION_BAR_STYLE } from "@/lib/ui";
+import { FOCUS_RING, FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE } from "@/lib/ui";
 import type {
   ArtistListResponse,
   ArtistMemberResponse,
@@ -178,7 +178,7 @@ function NewExchangeForm() {
         backHref={`/events/${eventId}`}
       />
 
-      <div className="mx-auto max-w-[640px] pb-24 sm:px-4 sm:py-8">
+      <div className={`mx-auto max-w-[640px] ${FORM_ACTION_BAR_PAD} sm:px-4 sm:py-8`}>
         <div className="flex gap-1 px-[14px] pt-2.5 sm:px-0" aria-hidden="true">
           <i className="h-0.5 flex-1 rounded-full bg-primary" />
           <i className={`h-0.5 flex-1 rounded-full ${step === 2 ? "bg-primary" : "bg-border-2"}`} />
@@ -192,13 +192,6 @@ function NewExchangeForm() {
 
         {step === 1 ? (
           <>
-            <div className="mx-[14px] mt-3 rounded-r1 border-l-2 border-warn bg-warn-soft px-3 py-2.5 sm:mx-0">
-              <p className="text-[12.5px] font-extrabold text-[#8a5a08]">처음 만나는 사람과의 현장 교환이에요</p>
-              <p className="mt-0.5 text-[11.5px] leading-relaxed text-[#8a5a08]">
-                사람이 많은 공개된 곳에서 만나고, 약속 장소를 바꾸자는 요청은 받지 마세요. 돈이 오가는 교환은 금지돼 있어요.
-              </p>
-            </div>
-
             <section className="px-[14px] pt-4 sm:px-0">
               <p className={LABEL}>
                 내가 가진 포카<span className="ml-0.5 text-primary">*</span>
@@ -213,7 +206,7 @@ function NewExchangeForm() {
               <p className={HELP}>최대 {MAX_PHOTOS}장. 행사가 끝나고 30일 뒤 자동으로 지워져요.</p>
             </section>
 
-            <section className="mt-5 bg-surface-2 px-[14px] py-4 sm:rounded-r2 sm:px-4">
+            <section className="mt-6 px-[14px] sm:px-0">
               <p className={LABEL}>
                 어떤 포카인가요<span className="ml-0.5 text-primary">*</span>
               </p>
@@ -282,7 +275,7 @@ function NewExchangeForm() {
                 onClick={() => setStep(2)}
                 className={`h-12 w-full rounded-[7px] bg-primary text-[15px] font-extrabold text-white disabled:opacity-50 ${FOCUS_RING}`}
               >
-                다음 — 장소와 시간
+                다음
               </button>
             </div>
           </>
@@ -302,7 +295,7 @@ function NewExchangeForm() {
               <p className={HELP}>행사장 안에서 서로 찾을 수 있는 지점으로 적어 주세요.</p>
             </section>
 
-            <section className="mt-5 bg-surface-2 px-[14px] py-4 sm:rounded-r2 sm:px-4">
+            <section className="mt-6 px-[14px] sm:px-0">
               <p className={LABEL}>
                 만날 수 있는 시간<span className="ml-0.5 text-primary">*</span>
               </p>
@@ -342,7 +335,7 @@ function NewExchangeForm() {
                 onClick={submit}
                 className={`h-12 flex-[2] rounded-[7px] bg-primary text-[15px] font-extrabold text-white disabled:opacity-50 ${FOCUS_RING}`}
               >
-                {submitting ? "올리는 중…" : "교환글 올리기"}
+                {submitting ? "등록 중…" : "교환글 등록"}
               </button>
             </div>
           </>

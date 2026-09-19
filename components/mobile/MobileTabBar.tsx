@@ -43,7 +43,10 @@ export type MobileTabKey = "홈" | "거래" | "판매등록" | "관심" | "마�
 // 탈퇴 완료(#567)도 숨긴다 — 방금 계정을 지운 사람에게 「마이」·「관심」 탭은 전부 로그인으로 가는 문이다.
 // 사전예약(#605)은 홍보 링크로 들어오는 첫 화면이고 아직 회원이 아닌 사람이 본다 — 로그인·가입과
 // 같은 처지라 여기 둔다. 랜딩 한 장으로 읽혀야 하는 화면에 앱 탭이 붙으면 서비스 내부로 보인다.
-const HIDDEN_EXACT = new Set(["/auctions/new", "/auctions/submitted", "/exchanges/new", "/login", "/signup", "/onboarding", "/withdrawn", "/intro"]);
+// 교환글 등록은 이 목록에서 뺐다(#685, 사용자 결정). 판매 등록과 달리 사진·검수·가격이 없는
+// 두 장짜리라 「중간에 나가면 안 되는 절차」로 다룰 무게가 아니고, 행사 피드에서 가볍게
+// 들렀다 나오는 흐름이다.
+const HIDDEN_EXACT = new Set(["/auctions/new", "/auctions/submitted", "/login", "/signup", "/onboarding", "/withdrawn", "/intro"]);
 const HIDDEN_PREFIX = ["/auth/", "/admin"];
 
 function isHidden(pathname: string): boolean {

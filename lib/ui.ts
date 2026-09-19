@@ -59,5 +59,14 @@ export const FORM_ACTION_BAR =
   "fixed inset-x-0 z-[400] border-t border-border bg-white px-[14px] py-2.5 " +
   "sm:static sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:pt-5";
 
-/** 고정 바가 마지막 입력칸을 가리지 않게 본문 끝에 두는 여백. 바 높이(48) + 위아래 여백. */
 export const FORM_ACTION_BAR_STYLE = { bottom: "var(--mobile-tabbar-h, env(safe-area-inset-bottom))" } as const;
+
+/**
+ * 고정 액션 바가 본문 끝을 가리지 않게 두는 여백(#685).
+ *
+ * <p>비워야 하는 높이는 <b>탭바 60 + 액션 바 68.8</b>이다(375px 실측). 액션 바가 탭바 위에
+ * 앉으므로 둘을 더해야 한다 — 바 높이만 보고 96px을 뒀다가 마지막 입력칸이 가려졌다.
+ *
+ * <p>데스크탑에서는 바가 흐름으로 돌아가 여백이 필요 없다.
+ */
+export const FORM_ACTION_BAR_PAD = "pb-[136px] sm:pb-10";

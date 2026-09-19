@@ -5,6 +5,7 @@ import ExchangeMoreMenu from "@/components/ExchangeMoreMenu";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { itemDetail, itemName, slotLabel } from "@/lib/exchange-labels";
+import { FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE } from "@/lib/ui";
 import type { ExchangePostDetail } from "@/lib/types";
 
 /**
@@ -56,7 +57,7 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
         action={<ExchangeMoreMenu postId={post.id} authorNickname={post.authorNickname} />}
       />
 
-      <div className="mx-auto max-w-[760px] pb-10 sm:px-4 sm:py-8">
+      <div className={`mx-auto max-w-[760px] ${FORM_ACTION_BAR_PAD} sm:px-4 sm:py-8`}>
         {cover && (
           <div className="flex gap-1.5 px-[14px] pt-3 sm:px-0">
             <div className="relative flex-[1.8] overflow-hidden rounded-r1 border border-border bg-surface-2">
@@ -124,8 +125,10 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
           </div>
         </div>
 
-        {/* 하단은 버튼 한 자리다. 무엇이 앉을지는 보는 사람의 역할이 정한다 — ExchangeCta 참고. */}
-        <div className="px-[14px] pt-4 sm:px-0">
+        {/* 하단은 버튼 한 자리다. 무엇이 앉을지는 보는 사람의 역할이 정한다 — ExchangeCta 참고.
+            모바일에서는 화면 아래에 고정한다(하단 5탭 위). 사진·품목·시간대를 지나 끝까지
+            굴려야 다음 걸음에 닿는 화면이었다. */}
+        <div className={FORM_ACTION_BAR} style={FORM_ACTION_BAR_STYLE}>
           <ExchangeCta postId={post.id} status={post.status} />
         </div>
       </div>

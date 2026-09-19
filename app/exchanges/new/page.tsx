@@ -78,6 +78,18 @@ function NewExchangeForm() {
     }
   }, [authLoading, member, router]);
 
+  /*
+    장을 넘기면 맨 위로 올린다. 스크롤 위치는 라우팅이 아니라 상태로 바뀌는 화면에서 그대로
+    남는다 — 「다음」은 폼 맨 아래에 있으니 다음 장이 중간부터 보인다. 새 장의 첫 입력칸을
+    찾으려면 위로 올려야 한다.
+
+    instant다. 한 화면 분량을 부드럽게 굴리면 넘긴 뒤에도 잠깐 움직이는 화면을 보게 되고,
+    장이 바뀌는 일은 페이지 이동에 가깝다.
+  */
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [step]);
+
   useEffect(() => {
     if (!eventId) return;
     apiFetch<EventResponse>(`/api/events/${eventId}`)

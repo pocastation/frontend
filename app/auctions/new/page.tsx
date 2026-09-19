@@ -294,6 +294,11 @@ export default function NewAuctionPage() {
     }
   }
 
+  // 장을 넘기면 맨 위로 올린다 — 「다음」이 폼 맨 아래라 다음 장이 중간부터 보인다(#681).
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" });
+  }, [step]);
+
   function goNext() {
     if (step < TOTAL_STEPS - 1 && isStepValid(step)) {
       setDir(1);

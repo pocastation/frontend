@@ -5,7 +5,7 @@ import ExchangeFeedRow from "@/components/ExchangeFeedRow";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { apiFetch, ApiError } from "@/lib/api";
 import { kstHm, weekdayKo } from "@/lib/event-dates";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE } from "@/lib/ui";
 import type { EventResponse, ExchangeFeedResponse } from "@/lib/types";
 
 /**
@@ -68,7 +68,7 @@ export default async function EventFeedPage({
     <>
       <MobilePageHead title={event.name} sub={`${dateLabel} · ${event.venue}`} />
 
-      <div className="mx-auto max-w-[760px] pb-10 sm:px-4 sm:py-8">
+      <div className={`mx-auto max-w-[760px] ${FORM_ACTION_BAR_PAD} sm:px-4 sm:py-8`}>
         <div className="hidden sm:mb-5 sm:block">
           <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">{event.name}</h1>
           <p className="mt-1 text-[13px] text-text-3">
@@ -118,12 +118,12 @@ export default async function EventFeedPage({
         </div>
 
         {event.status !== "CANCELLED" && (
-          <div className="px-[14px] pt-5 sm:px-0">
+          <div className={FORM_ACTION_BAR} style={FORM_ACTION_BAR_STYLE}>
             <Link
               href={`/exchanges/new?eventId=${id}`}
               className={`flex h-12 items-center justify-center rounded-[7px] bg-primary text-[15px] font-extrabold text-white ${FOCUS_RING}`}
             >
-              교환글 올리기
+              교환글 등록
             </Link>
           </div>
         )}

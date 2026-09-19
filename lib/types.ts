@@ -782,7 +782,17 @@ export type NotificationType =
   | "NEW_OFFER" // 새 제안 도착 — 판매자에게. 선택해야 거래가 성립하는 모델의 전제
   | "AUCTION_APPROVED" // 등록 승인 완료 — 판매자에게
   | "AUCTION_EXPIRING" // 게시 종료 1일 전 — 판매자에게. 종료되면 제안 전체가 실효된다
-  | "DELIVERY_COMPLETED"; // 배송 완료 + 자동 구매확정(3일) 예고 — 구매자에게
+  | "DELIVERY_COMPLETED" // 배송 완료 + 자동 구매확정(3일) 예고 — 구매자에게
+  // ── 포카 교환(BE #522·#524·#526·#528·#534, 전부 인앱 전용) ──
+  // auctionId가 비고 exchangePostId가 채워져 온다. 링크 분기가 그 값을 봐야 한다.
+  | "EXCHANGE_REQUESTED" // 교환 신청 도착 — 작성자에게
+  | "EXCHANGE_MATCHED" // 신청 수락 — 신청자에게. 대화가 열린다
+  | "EXCHANGE_DECLINED" // 다른 건이 수락되거나 글이 내려감 — 나머지 신청자에게
+  | "EXCHANGE_MESSAGE" // 새 대화 메시지 — 상대에게. 안 읽은 것이 있으면 묶여서 오지 않는다
+  | "EXCHANGE_COMPLETED" // 상대가 완료를 확인 — 24시간 이의 창 안내
+  | "EXCHANGE_COMPLETION_DISPUTED" // 완료에 이의 — 확인한 쪽에게
+  | "EXCHANGE_POST_REMOVED" // 신고 처리로 교환글이 내려감 — 작성자에게
+  | "EXCHANGE_EXPIRED"; // 행사가 지나 교환글이 마감됨 — 대기 중이던 신청자에게
 
 // ─── 주문/결제 상태 ───
 
@@ -932,6 +942,9 @@ export type NotificationResponse = {
   id: number;
   type: NotificationType;
   auctionId: number | null;
+  // 교환 알림은 auctionId를 비우고 이 값을 채운다. 둘을 함께 채우지 않는다 —
+  // 채우면 화면이 어느 쪽으로 보낼지 정할 수 없다.
+  exchangePostId: number | null;
   title: string;
   message: string;
   isRead: boolean;

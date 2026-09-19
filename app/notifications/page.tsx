@@ -61,6 +61,31 @@ const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; ico
   AUCTION_APPROVED: { label: "게시 승인", tone: "ok", icon: "checkCircle" },
   AUCTION_EXPIRING: { label: "종료 임박", tone: "accent", icon: "clock" },
   DELIVERY_COMPLETED: { label: "배송 완료", tone: "primary", icon: "box" },
+  // ── 포카 교환(BE #522~#534). 전부 인앱 전용이고 auctionId 대신 exchangePostId를 들고 온다. ──
+  // 지금 손을 써야 하는 둘만 accent다 — 신청이 왔는데 안 고르면 행사가 그냥 지나가고,
+  // 완료 확인은 24시간 안에 아니라고 말하지 않으면 그대로 기록된다.
+  EXCHANGE_REQUESTED: { label: "교환 신청", tone: "accent", icon: "tag" },
+  EXCHANGE_MATCHED: { label: "교환 확정", tone: "ok", icon: "checkCircle" },
+  EXCHANGE_DECLINED: { label: "신청 마감", tone: "neutral", icon: "minus" },
+  EXCHANGE_MESSAGE: { label: "새 메시지", tone: "primary", icon: "tag" },
+  EXCHANGE_COMPLETED: { label: "완료 확인", tone: "accent", icon: "alertCircle" },
+  EXCHANGE_COMPLETION_DISPUTED: { label: "완료 이의", tone: "neutral", icon: "xCircle" },
+  EXCHANGE_POST_REMOVED: { label: "교환글 내림", tone: "accent", icon: "xCircle" },
+  EXCHANGE_EXPIRED: { label: "교환 마감", tone: "neutral", icon: "clock" },
+};
+
+/**
+ * 교환 알림이 갈 곳. 전부 교환글로 보내면 이미 확정된 사람이 한 번 더 눌러 들어가야 한다.
+ *
+ * <p>대화가 열린 뒤의 알림(확정·새 메시지·완료·이의)은 대화로, 신청 도착은 작성자가 고르는
+ * 화면으로, 나머지(마감·내림)는 글로 보낸다 — 마감된 건에서 대화를 열면 없는 대화다.
+ */
+const EXCHANGE_DESTINATION: Partial<Record<NotificationType, (postId: number) => string>> = {
+  EXCHANGE_REQUESTED: (id) => `/exchanges/${id}/requests`,
+  EXCHANGE_MATCHED: (id) => `/exchanges/${id}/thread`,
+  EXCHANGE_MESSAGE: (id) => `/exchanges/${id}/thread`,
+  EXCHANGE_COMPLETED: (id) => `/exchanges/${id}/thread`,
+  EXCHANGE_COMPLETION_DISPUTED: (id) => `/exchanges/${id}/thread`,
 };
 
 // 배포 시점 차이로 프론트가 모르는 타입이 와도 렌더가 깨지지 않게 폴백.
@@ -170,6 +195,12 @@ export default function NotificationsPage() {
     // 마이페이지에 들어가면 미입력 주문의 배송지 팝업이 자동으로 열린다.
     if (notification.type === "DELIVERY_ADDRESS_REQUIRED") {
       router.push("/mypage?tab=purchases");
+      return;
+    }
+    // 교환 알림은 auctionId가 비어 있다. 이 분기가 없으면 눌러도 아무 데도 가지 않는다.
+    if (notification.exchangePostId != null) {
+      const to = EXCHANGE_DESTINATION[notification.type];
+      router.push(to ? to(notification.exchangePostId) : `/exchanges/${notification.exchangePostId}`);
       return;
     }
     if (notification.auctionId != null) {

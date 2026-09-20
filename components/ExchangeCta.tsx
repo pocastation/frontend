@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { isClosed } from "@/lib/exchange-labels";
 import { FOCUS_RING } from "@/lib/ui";
 import type { ExchangePostDetail, ExchangeStatus, ExchangeViewer } from "@/lib/types";
 
@@ -19,7 +20,17 @@ const BUTTON = "flex h-12 w-full items-center justify-center rounded-[7px] text-
  * <p>역할을 서버가 판정한 값 하나로 읽는다. 화면이 「대화를 열어 보고 403이면 당사자가 아니다」
  * 식으로 알아내면 권한 오류와 진짜 오류가 섞이고, 화면 한 장에 실패하는 요청이 붙는다.
  */
-export default function ExchangeCta({ postId, status }: { postId: number; status: ExchangeStatus }) {
+export default function ExchangeCta({
+  postId,
+  status,
+  eventId,
+  expiresAt,
+}: {
+  postId: number;
+  status: ExchangeStatus;
+  eventId: number;
+  expiresAt: string;
+}) {
   const { accessToken, fetchWithAuth, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -71,7 +82,30 @@ export default function ExchangeCta({ postId, status }: { postId: number; status
     return <div aria-hidden="true" className="h-12 w-full rounded-[7px] bg-surface-2" />;
   }
 
+  /*
+    마감은 status가 아니라 시각으로 본다. 만료 스위퍼가 돌기 전까지 마감된 글도 status는
+    OPEN이라, status만 보면 버튼이 남아 사진까지 올린 뒤에 서버가 거절한다(#690).
+
+    안내로 끝내지 않고 같은 행사로 돌아갈 자리를 함께 둔다 — 마감을 알리면서 다음 걸음을
+    주지 않으면 그 사용자는 뒤로가기밖에 할 것이 없다.
+  */
+  const closedNotice = (
+    <div className="rounded-[7px] bg-surface-2 px-3 py-3 text-center">
+      <p className="text-[13px] font-semibold text-text-2">마감된 교환글이에요.</p>
+      <Link
+        href={`/events/${eventId}`}
+        className={`mt-1 inline-block text-[12.5px] font-bold text-primary ${FOCUS_RING}`}
+      >
+        같은 행사의 다른 교환글 보기
+      </Link>
+    </div>
+  );
+  const closed = isClosed(expiresAt);
+
   if (!accessToken) {
+    // 마감 확인이 로그인 유도보다 앞선다. 유입이 가장 많은 자리라, 여기서 로그인시켜 놓고
+    // 다음 화면에서 막으면 두 번 헛걸음이 된다.
+    if (closed) return closedNotice;
     return (
       <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className={`${BUTTON} bg-primary text-white ${FOCUS_RING}`}>
         로그인하고 신청하기
@@ -131,6 +165,10 @@ export default function ExchangeCta({ postId, status }: { postId: number; status
       </p>
     );
   }
+
+  // 작성자·당사자·신청자 분기를 지나온 사람만 여기 닿는다. 그들에게는 마감이 「신청할 수
+  // 있는가」의 답이므로 status보다 앞에서 답한다.
+  if (closed) return closedNotice;
 
   if (status !== "OPEN") {
     return (

@@ -96,7 +96,10 @@ export default function ExchangeApplyPage() {
     photos.addFiles(files);
   }, [photos]);
 
-  const ready = artistId !== "" && slotId !== null && !photos.uploading;
+  // 사진은 API가 한 장 이상을 요구한다(`CreateExchangeRequestRequest.photos`에 `@NotEmpty`).
+  // 여기서 막지 않으면 다 쓰고 제출한 뒤에 「photos: 비어 있을 수 없습니다」를 보게 된다.
+  const ready =
+    artistId !== "" && slotId !== null && photos.uploadedUrls.length > 0 && !photos.uploading;
 
   async function submit() {
     if (!ready || submitting) return;
@@ -207,7 +210,9 @@ export default function ExchangeApplyPage() {
         </section>
 
         <section className="px-[14px] pt-5 sm:px-0">
-          <p className={LABEL}>포카 사진 <span className="font-semibold text-text-3">(선택)</span></p>
+          <p className={LABEL}>
+            포카 사진<span className="ml-0.5 text-primary">*</span>
+          </p>
           <PhotoUploadGrid
             items={photos.items}
             max={MAX_PHOTOS}
@@ -215,8 +220,11 @@ export default function ExchangeApplyPage() {
             onRemove={photos.removeItem}
             onReorder={photos.setItems}
           />
-          {/* 올리고 나서 알면 이미 늦다. 입력 전에 누가 보는지 말한다. */}
-          <p className={HELP}>사진은 글쓴이에게만 보여요. 목록에는 올라가지 않아요.</p>
+          {/* 올리고 나서 알면 이미 늦다. 입력 전에 누가 보는지, 왜 필요한지 말한다. */}
+          <p className={HELP}>
+            글쓴이가 상태를 보고 고를 수 있게 한 장은 필요해요. 사진은 글쓴이에게만 보이고 목록에는
+            올라가지 않아요.
+          </p>
         </section>
 
         <section className="px-[14px] pt-5 sm:px-0">

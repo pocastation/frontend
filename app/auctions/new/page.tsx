@@ -173,9 +173,10 @@ export default function NewAuctionPage() {
   const [dir, setDir] = useState<1 | -1>(1);
 
   // 비로그인 상태로 접근하면 로그인으로 돌려보낸다(닉네임 온보딩 페이지와 동일 패턴).
+  // redirect를 붙여 로그인한 뒤 이 화면으로 돌아오게 한다 — 홈에 떨어지면 다시 찾아와야 한다.
   useEffect(() => {
     if (!isAuthLoading && !accessToken) {
-      router.replace("/login");
+      router.replace(`/login?redirect=${encodeURIComponent("/auctions/new")}`);
     }
   }, [isAuthLoading, accessToken, router]);
 

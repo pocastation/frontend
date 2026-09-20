@@ -74,9 +74,11 @@ function NewExchangeForm() {
   useEffect(() => {
     if (authLoading) return;
     if (!member) {
-      router.replace("/login");
+      // 쿼리까지 들고 돌아온다. eventId를 잃으면 로그인한 뒤 어느 행사였는지도 사라진다.
+      const back = eventId ? `/exchanges/new?eventId=${eventId}` : "/exchanges/new";
+      router.replace(`/login?redirect=${encodeURIComponent(back)}`);
     }
-  }, [authLoading, member, router]);
+  }, [authLoading, member, eventId, router]);
 
   /*
     장을 넘기면 맨 위로 올린다. 스크롤 위치는 라우팅이 아니라 상태로 바뀌는 화면에서 그대로

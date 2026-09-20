@@ -28,8 +28,10 @@ export default function EventCalendar({
 
   // 이번 달이면 오늘을, 아니면 1일을 편다. 다른 달을 열었는데 오늘이 선택돼 있으면
   // 격자와 아래 목록이 서로 다른 달을 말하게 된다.
-  const initial = events.find((e) => e.eventDate === todayKey)?.eventDate
-    ?? (todayKey.startsWith(month) ? todayKey : ymd(first));
+  //
+  // 판정을 목록이 아니라 달로 한다(#696). 조회가 격자 범위로 넓어진 뒤에는 오늘이 앞뒤 칸으로
+  // 들어올 수 있어, 목록에서 오늘을 찾는 방식이면 9월을 열었는데 10월 1일이 펴진다.
+  const initial = todayKey.startsWith(month) ? todayKey : ymd(first);
   const [selected, setSelected] = useState(initial);
 
   const byDate = new Map<string, EventResponse[]>();

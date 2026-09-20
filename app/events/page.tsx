@@ -3,7 +3,7 @@ import Link from "next/link";
 import EventCalendar from "@/components/EventCalendar";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { apiFetch } from "@/lib/api";
-import { currentMonth, monthBounds, monthLabel, shiftMonth, ymd } from "@/lib/event-dates";
+import { currentMonth, gridBounds, monthLabel, shiftMonth, ymd } from "@/lib/event-dates";
 import { FOCUS_RING } from "@/lib/ui";
 import type { EventListResponse } from "@/lib/types";
 
@@ -21,7 +21,8 @@ export const metadata: Metadata = {
  * <p>한 달치를 서버에서 받아 넘기고 날짜 선택만 화면이 한다 — 자세한 이유는 {@code EventCalendar}.
  */
 async function getEvents(month: string): Promise<EventListResponse | null> {
-  const { first, last } = monthBounds(month);
+  // 격자가 덮는 범위로 부른다 — 그 달만 부르면 앞뒤 칸의 행사가 없는 것처럼 보인다(#696).
+  const { first, last } = gridBounds(month);
   try {
     return await apiFetch<EventListResponse>(
       `/api/events?from=${ymd(first)}&to=${ymd(last)}`,

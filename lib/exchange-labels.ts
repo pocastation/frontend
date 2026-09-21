@@ -55,3 +55,14 @@ export function isClosingSoon(expiresAt: string, now: number = Date.now()): bool
   const remaining = new Date(expiresAt).getTime() - now;
   return remaining > 0 && remaining < 24 * 60 * 60 * 1000;
 }
+
+/**
+ * 마감이 지났는가.
+ *
+ * <p><b>판정을 {@code status}가 아니라 시각으로 한다.</b> 만료 스위퍼는 한 시간에 한 번 도므로
+ * 그 사이 글은 {@code OPEN}인 채로 마감 시각을 넘긴다. 서버는 신청 시점에 다시 검사해 막지만,
+ * 화면이 {@code status}만 보면 사용자는 사진까지 올린 뒤에 거절당한다.
+ */
+export function isClosed(expiresAt: string, now: number = Date.now()): boolean {
+  return new Date(expiresAt).getTime() <= now;
+}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { isClosingSoon, itemDetail, itemName, slotLabel } from "@/lib/exchange-labels";
+import { isClosed, isClosingSoon, itemDetail, itemName, slotLabel } from "@/lib/exchange-labels";
 import { mediaUrl } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
 import type { ExchangeFeedItem } from "@/lib/types";
@@ -15,6 +15,9 @@ import type { ExchangeFeedItem } from "@/lib/types";
  * 눈에 안 들어온다.
  */
 export default function ExchangeFeedRow({ item }: { item: ExchangeFeedItem }) {
+  // 마감된 글은 목록에서 빠지지 않는다(스위퍼가 한 시간에 한 번 돈다). 아무 표시가 없으면
+  // 정상 글과 구분되지 않아 눌러 들어가 신청까지 쓰게 된다 — 배지 하나가 그걸 막는다.
+  const closed = isClosed(item.expiresAt);
   const soon = isClosingSoon(item.expiresAt);
   const firstSlot = item.slots[0];
 
@@ -67,11 +70,15 @@ export default function ExchangeFeedRow({ item }: { item: ExchangeFeedItem }) {
           </span>
           <span className="mt-0.5 block truncate text-[11.5px] text-text-3">{itemDetail(item.have)}</span>
           <span className="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-text-2">
-            {soon && (
+            {closed ? (
+              <span className="rounded-[2px] border border-border-2 px-1 text-[10px] font-extrabold text-text-3">
+                마감
+              </span>
+            ) : soon ? (
               <span className="rounded-[2px] border border-[#f0d9ae] px-1 text-[10px] font-extrabold text-warn">
                 마감 임박
               </span>
-            )}
+            ) : null}
             {firstSlot && <span className="shrink-0">{slotLabel(firstSlot)}</span>}
             {firstSlot && <i aria-hidden="true" className="h-[2px] w-[2px] shrink-0 rounded-full bg-border-2" />}
             <span className="truncate">{item.place}</span>

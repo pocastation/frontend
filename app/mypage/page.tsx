@@ -176,6 +176,15 @@ function CardIcon() {
 }
 
 // 정산계좌 — 지폐·카드와 구분되게 건물(은행) 실루엣으로.
+function BlockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M5.6 5.6 18.4 18.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 function BankIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4">
@@ -715,6 +724,19 @@ function MyPageBody() {
               </button>
             ))}
           </nav>
+
+          {/*
+            교환 차단 목록은 탭이 아니라 별도 라우트(`/mypage/exchange-blocks`)라 ACCOUNT_NAV에
+            넣을 수 없다. 모바일 메뉴에만 있어서 데스크탑에서는 주소를 직접 쳐야 닿았는데,
+            차단된 상대의 교환글이 「마이페이지에서 차단을 풀 수 있어요」라고 안내한다.
+          */}
+          <Link
+            href="/mypage/exchange-blocks"
+            className={`mt-1 flex items-center gap-2.5 rounded-r2 px-2.5 py-2 text-sm font-bold text-text-2 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+          >
+            <BlockIcon />
+            교환 차단 목록
+          </Link>
         </div>
 
         <button

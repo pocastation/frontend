@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { ApiError, apiFetch, mediaUrl } from "@/lib/api";
@@ -104,9 +105,17 @@ export default function ExchangeRequestsPage() {
         ) : requests.length === 0 ? (
           <p className="px-[14px] py-16 text-center text-[12.5px] text-text-3">아직 받은 신청이 없어요.</p>
         ) : alreadySettled ? (
-          <p className="px-[14px] py-16 text-center text-[12.5px] text-text-3">
-            이미 교환이 확정됐어요. 대화에서 약속을 이어가 주세요.
-          </p>
+          // 「대화에서 이어가 주세요」라고만 적어 두면 뒤로 → 상세 → 「대화 열기」로 두 번 더
+          // 움직여야 한다. 말한 곳으로 가는 길을 같은 자리에 둔다.
+          <div className="px-[14px] py-16 text-center">
+            <p className="text-[12.5px] text-text-3">이미 교환이 확정됐어요.</p>
+            <Link
+              href={`/exchanges/${postId}/thread`}
+              className={`mt-2.5 inline-flex h-11 items-center justify-center rounded-[7px] bg-text-1 px-5 text-[14px] font-extrabold text-white ${FOCUS_RING}`}
+            >
+              대화 열기
+            </Link>
+          </div>
         ) : (
           <div className="px-[14px] sm:px-0">
             {pending.map((request, index) => (

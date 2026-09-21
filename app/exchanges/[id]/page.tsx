@@ -129,7 +129,12 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
             모바일에서는 화면 아래에 고정한다(하단 5탭 위). 사진·품목·시간대를 지나 끝까지
             굴려야 다음 걸음에 닿는 화면이었다. */}
         <div className={FORM_ACTION_BAR} style={FORM_ACTION_BAR_STYLE}>
-          <ExchangeCta postId={post.id} status={post.status} />
+          <ExchangeCta
+            postId={post.id}
+            status={post.status}
+            eventId={post.eventId}
+            expiresAt={post.expiresAt}
+          />
         </div>
       </div>
     </>

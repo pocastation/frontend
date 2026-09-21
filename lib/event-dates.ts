@@ -62,6 +62,17 @@ export function monthBounds(month: string): { first: Date; last: Date } {
   return { first: new Date(y, m - 1, 1), last: new Date(y, m, 0) };
 }
 
+/**
+ * 달력 격자가 실제로 덮는 범위 — 앞 달 말일 몇 칸과 다음 달 초 몇 칸을 포함한다.
+ *
+ * <p>조회는 이 범위로 해야 한다. {@link monthBounds}로 부르면 격자에 깔리는 앞뒤 칸이 데이터
+ * 없는 상태로 남아 <b>행사가 있는데 없는 것처럼 보인다.</b>
+ */
+export function gridBounds(month: string): { first: Date; last: Date } {
+  const days = calendarDays(month);
+  return { first: days[0], last: days[days.length - 1] };
+}
+
 export function monthLabel(month: string): string {
   const [y, m] = month.split("-").map(Number);
   return `${y}년 ${m}월`;

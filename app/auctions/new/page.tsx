@@ -440,7 +440,7 @@ export default function NewAuctionPage() {
 
   return (
     /*
-      모바일은 위저드가 화면 전체를 쓴다(전역 헤더는 접힌다 — 푸터는 전상법 §10 표시사항이라 남는다).
+      모바일은 홈과 같은 MobileShell 헤더 아래에서 위저드를 쓴다(#704). 푸터는 전상법 §10 표시사항이라 남는다.
 
       🔴 꼬리 여백은 32px 하나다(#522). 예전에는 `max-sm:pb-[92px]`로 **하단 고정 바(69px) 자리까지
       여기서 비웠는데**, 바가 실제로 덮는 것은 페이지 맨 끝인 푸터고 푸터가 자기 몫을 이미 비운다
@@ -455,7 +455,7 @@ export default function NewAuctionPage() {
         **첫 단계에서 한 번 읽으면 끝**인 문장이라 6단계 내내 고정으로 붙어 있을 이유가 없다.
         첫 단계 본문 맨 위로 내렸다. 단계명·진행바는 남긴다 — 그게 머리를 고정한 이유다.
       */}
-      <div className="sticky top-0 z-[260] border-b border-border bg-white px-[14px] pb-2.5 pt-3 sm:hidden">
+      <div className="sticky top-12 z-[260] border-b border-border bg-white px-[14px] pb-2.5 pt-3 sm:hidden">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h1 className="font-display text-[17px] font-extrabold text-text-1">판매 등록</h1>

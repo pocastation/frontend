@@ -209,17 +209,29 @@ export default function Header() {
               onClick={() => setIsMenuOpen((open) => !open)}
               className={`flex h-9 w-9 items-center justify-center rounded-r2 text-text-1 sm:hidden ${FOCUS_RING}`}
             >
-              <span className="relative block h-4 w-5" aria-hidden="true">
-                <span
-                  className={`absolute left-0 top-0 h-0.5 w-5 rounded-full bg-current transition-transform ${isMenuOpen ? "translate-y-[7px] rotate-45" : ""}`}
-                />
-                <span
-                  className={`absolute left-0 top-1.5 h-0.5 w-5 rounded-full bg-current transition-opacity ${isMenuOpen ? "opacity-0" : ""}`}
-                />
-                <span
-                  className={`absolute left-0 top-3 h-0.5 w-5 rounded-full bg-current transition-transform ${isMenuOpen ? "-translate-y-[7px] -rotate-45" : ""}`}
-                />
-              </span>
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                aria-hidden="true"
+              >
+                {isMenuOpen ? (
+                  <>
+                    <path d="M6 6l12 12" />
+                    <path d="M18 6 6 18" />
+                  </>
+                ) : (
+                  <>
+                    <path d="M4 6h16" />
+                    <path d="M4 12h16" />
+                    <path d="M4 18h16" />
+                  </>
+                )}
+              </svg>
             </button>
           </>
         )}

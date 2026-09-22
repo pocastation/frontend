@@ -49,7 +49,7 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
   return (
     <section aria-label="다가오는 행사" className="px-[14px] pt-4 sm:mx-auto sm:max-w-[1160px] sm:px-4 sm:pt-10">
       <div className="flex items-baseline justify-between gap-2">
-        <h2 className="text-base font-extrabold tracking-[-0.02em] text-text-1 sm:font-display sm:text-xl sm:font-extrabold">
+        <h2 className="text-[17px] font-extrabold tracking-[-0.02em] text-text-1 sm:font-display sm:text-xl sm:font-extrabold">
           다가오는 행사
         </h2>
         <Link href="/events" className={`flex items-center gap-0.5 text-xs font-semibold text-text-3 ${FOCUS_RING}`}>
@@ -85,8 +85,13 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
               onClick={() => setSelected(key)}
               aria-pressed={on}
               aria-label={`${day.getMonth() + 1}월 ${day.getDate()}일${count > 0 ? ` 행사 ${count}건` : ""}`}
+              /* 모바일에서는 칸 테두리를 걷는다(#741). 14칸의 테두리가 화면에서 선을 가장 많이
+                 만드는데, 고른 날만 칠해도 점이 남아 행사 있는 날은 그대로 읽힌다. 지면이 넓은
+                 데스크탑은 칸이 떨어져 보여야 해서 테두리를 남긴다. */
               className={`rounded-[3px] border py-1.5 ${PRESS_CHIP} ${FOCUS_RING} ${
-                on ? "border-primary bg-primary text-white" : "border-border bg-white"
+                on
+                  ? "border-primary bg-primary text-white"
+                  : "border-transparent bg-white sm:border-border"
               }`}
             >
               <span

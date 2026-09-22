@@ -6,7 +6,7 @@ import MobilePageHead from "@/components/mobile/MobilePageHead";
 import PhotoUploadGrid from "@/components/PhotoUploadGrid";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { PHASE_OPTIONS } from "@/lib/exchange-labels";
+import { SLOT_STEP_MINUTES } from "@/lib/exchange-labels";
 import { GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { usePhotoUpload, photoUploadErrorMessage } from "@/lib/use-photo-upload";
 import { FOCUS_RING, FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE } from "@/lib/ui";
@@ -14,7 +14,6 @@ import type {
   ArtistListResponse,
   ArtistMemberResponse,
   EventResponse,
-  ExchangePhase,
   PhotocardGrade,
   PhotocardSource,
 } from "@/lib/types";
@@ -33,7 +32,7 @@ const MAX_PHOTOS = 3;
 const MAX_WANTS = 5;
 
 type Want = { artistId: string; idolId: string; source: PhotocardSource };
-type Slot = { phase: ExchangePhase; fromHour: number; toHour: number };
+type Slot = { fromMinuteOfDay: number; toMinuteOfDay: number };
 
 const LABEL = "mb-1.5 text-[12.5px] font-extrabold text-text-2";
 const INPUT =
@@ -67,7 +66,7 @@ function NewExchangeForm() {
   const [grade, setGrade] = useState<PhotocardGrade>("A");
   const [wants, setWants] = useState<Want[]>([{ artistId: "", idolId: "", source: "BROADCAST" }]);
   const [place, setPlace] = useState("");
-  const [slots, setSlots] = useState<Slot[]>([{ phase: "AFTER_END", fromHour: 19, toHour: 20 }]);
+  const [slots, setSlots] = useState<Slot[]>([{ fromMinuteOfDay: 19 * 60, toMinuteOfDay: 20 * 60 }]);
 
   const photos = usePhotoUpload(MAX_PHOTOS, (message) => setError(message));
 
@@ -312,7 +311,7 @@ function NewExchangeForm() {
               {slots.length < 4 && (
                 <button
                   type="button"
-                  onClick={() => setSlots([...slots, { phase: "AFTER_END", fromHour: 20, toHour: 21 }])}
+                  onClick={() => setSlots([...slots, { fromMinuteOfDay: 20 * 60, toMinuteOfDay: 21 * 60 }])}
                   className={`mt-2 h-10 w-full rounded-r1 border border-border-2 bg-white text-[13px] font-extrabold text-text-2 ${FOCUS_RING}`}
                 >
                   시간대 추가
@@ -419,53 +418,85 @@ function SlotRow({
   onChange: (next: Slot) => void;
   onRemove?: () => void;
 }) {
+  // 시와 분을 따로 고르고 값은 자정 기준 분으로 합친다. 서버가 그 단위로 받는다.
+  const setPart = (which: "from" | "to", hour: number, minute: number) => {
+    const value = hour * 60 + minute;
+    if (which === "from") {
+      // 시작을 뒤로 밀면 종료가 따라온다. 역순이면 서버가 400을 주는데, 그 전에 화면이 막는다.
+      onChange({ fromMinuteOfDay: value, toMinuteOfDay: Math.max(value + SLOT_STEP_MINUTES, slot.toMinuteOfDay) });
+      return;
+    }
+    onChange({ ...slot, toMinuteOfDay: value });
+  };
+
   return (
-    <div className="mt-2 flex gap-2">
-      <select
-        value={slot.phase}
-        onChange={(e) => onChange({ ...slot, phase: e.target.value as ExchangePhase })}
-        aria-label="만날 시점"
-        className={INPUT}
-      >
-        {PHASE_OPTIONS.map((p) => (
-          <option key={p.value} value={p.value}>{p.label}</option>
-        ))}
-      </select>
-      <select
-        value={slot.fromHour}
-        onChange={(e) => {
-          const from = Number(e.target.value);
-          onChange({ ...slot, fromHour: from, toHour: Math.max(from + 1, slot.toHour) });
-        }}
-        aria-label="시작 시각"
-        className={INPUT}
-      >
-        {Array.from({ length: 24 }, (_, h) => (
-          <option key={h} value={h}>{h}시</option>
-        ))}
-      </select>
-      <select
-        value={slot.toHour}
-        onChange={(e) => onChange({ ...slot, toHour: Number(e.target.value) })}
-        aria-label="종료 시각"
-        className={INPUT}
-      >
-        {Array.from({ length: 24 }, (_, i) => i + 1)
-          .filter((h) => h > slot.fromHour)
-          .map((h) => (
-            <option key={h} value={h}>{h}시</option>
-          ))}
-      </select>
+    <div className="mt-2 flex items-center gap-1.5">
+      <TimePicker
+        label="시작"
+        value={slot.fromMinuteOfDay}
+        onChange={(h, m) => setPart("from", h, m)}
+      />
+      <span aria-hidden="true" className="shrink-0 text-[13px] font-bold text-text-3">–</span>
+      <TimePicker
+        label="종료"
+        value={slot.toMinuteOfDay}
+        min={slot.fromMinuteOfDay + SLOT_STEP_MINUTES}
+        onChange={(h, m) => setPart("to", h, m)}
+      />
       {onRemove && (
         <button
           type="button"
           onClick={onRemove}
           aria-label="이 시간대 삭제"
-          className={`h-12 w-11 shrink-0 rounded-r1 border border-border-2 bg-white text-text-3 ${FOCUS_RING}`}
+          className={`h-12 w-10 shrink-0 rounded-r1 border border-border-2 bg-white text-text-3 ${FOCUS_RING}`}
         >
           ×
         </button>
       )}
+    </div>
+  );
+}
+
+/** 시·분 두 칸. 분은 10분 간격만 준다 — 현장 약속에 1분 단위는 의미가 없다. */
+function TimePicker({
+  label,
+  value,
+  min = 0,
+  onChange,
+}: {
+  label: string;
+  value: number;
+  min?: number;
+  onChange: (hour: number, minute: number) => void;
+}) {
+  const hour = Math.floor(value / 60);
+  const minute = value % 60;
+  const hours = Array.from({ length: 24 }, (_, h) => h).filter((h) => h * 60 + 50 >= min);
+  const minutes = Array.from({ length: 60 / SLOT_STEP_MINUTES }, (_, i) => i * SLOT_STEP_MINUTES)
+    .filter((m) => hour * 60 + m >= min);
+
+  return (
+    <div className="flex min-w-0 flex-1 items-center gap-1">
+      <select
+        value={hour}
+        onChange={(e) => onChange(Number(e.target.value), minute)}
+        aria-label={`${label} 시`}
+        className={`${INPUT} min-w-0 flex-1`}
+      >
+        {hours.map((h) => (
+          <option key={h} value={h}>{h}시</option>
+        ))}
+      </select>
+      <select
+        value={minute}
+        onChange={(e) => onChange(hour, Number(e.target.value))}
+        aria-label={`${label} 분`}
+        className={`${INPUT} min-w-0 flex-1`}
+      >
+        {minutes.map((m) => (
+          <option key={m} value={m}>{String(m).padStart(2, "0")}분</option>
+        ))}
+      </select>
     </div>
   );
 }

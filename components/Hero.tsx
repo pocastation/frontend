@@ -56,7 +56,7 @@ const PAUSE_AFTER_DOT_MS = 15000;
 // 카드 아래 한 줄은 왼쪽 도트 · 오른쪽 화살표 쌍이다(#576). 화살표는 도트를 정확히 누르지 않아도
 // 이전·다음으로 갈 수 있는 길이고, 움직임 줄이기(reduced-motion)로 자동 넘김이 없는 사용자에게는 유일한
 // 눈에 보이는 이동 수단이다.
-export default function Hero({ liveCount, featured }: { liveCount: number; featured: AuctionResponse[] }) {
+export default function Hero({ featured }: { featured: AuctionResponse[] }) {
   const slides = featured.slice(0, 5);
   const total = slides.length;
   const { wishlisted, toggle } = useWishlistStatus(slides.map((a) => a.id));
@@ -179,11 +179,6 @@ export default function Hero({ liveCount, featured }: { liveCount: number; featu
 
       <div className="relative mx-auto flex max-w-[1160px] flex-col items-center gap-12 px-4 py-16 sm:flex-row sm:items-center sm:justify-between sm:py-20">
         <div className="max-w-[560px] text-center sm:text-left">
-          <div className="mb-5 inline-flex items-center gap-2 rounded-r1 border border-white/20 bg-white/10 px-3 py-1 text-xs font-bold tracking-wide text-white/90">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-ok" aria-hidden="true" />
-            LIVE 지금 <strong className="text-white">{liveCount.toLocaleString()}개</strong> 거래 진행 중
-          </div>
-
           {/* 브랜드 문장은 모바일 홍보 배너 1장과 **같은 것을 쓴다**(lib/site.ts). 지면 크기만
               여기서 키우고, 줄 나눔과 «마지막 줄만 강조»는 공유한다. */}
           <h1 className="font-display text-[clamp(28px,4.5vw,42px)] font-extrabold leading-[1.25] tracking-[-0.02em] text-white">

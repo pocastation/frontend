@@ -1314,9 +1314,6 @@ export type EventRecurrenceListResponse = { content: EventRecurrenceResponse[] }
 // ── 교환글(#516·#520) ────────────────────────────────────────────────────────
 // 포카를 자유 텍스트가 아니라 카탈로그로 받는다. 그래야 역매칭(P5)이 성립한다.
 
-/** 만날 시점 — 절대 시각이 아니라 행사 기준 상대 단계다. */
-export type ExchangePhase = "BEFORE_ENTRY" | "WAITING" | "AFTER_END";
-
 export type ExchangeStatus =
   | "OPEN" | "MATCHED" | "COMPLETED" | "EXPIRED" | "CANCELLED" | "SUSPENDED";
 
@@ -1332,7 +1329,8 @@ export type ExchangeItemView = {
 };
 
 // id는 신청이 시간대를 고를 때 쓴다. 값 조합으로 되찾으면 같은 시간대를 두 번 제시한 글에서 갈리지 않는다.
-export type ExchangeSlotView = { id: number; phase: ExchangePhase; fromHour: number; toHour: number };
+/** 시각은 자정 기준 분으로 온다 — 시·분을 따로 받으면 저장·검증·표시가 단위를 달리 쓴다. */
+export type ExchangeSlotView = { id: number; fromMinuteOfDay: number; toMinuteOfDay: number };
 
 export type ExchangeFeedItem = {
   id: number;

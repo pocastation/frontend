@@ -35,7 +35,6 @@ const MAX_PHOTOS = 3;
 const LABEL = "mb-1.5 text-[12.5px] font-extrabold text-text-2";
 const INPUT =
   "h-12 w-full rounded-r1 border border-border-2 bg-white px-3 text-[15px] font-semibold text-text-1";
-const HELP = "mt-1.5 text-[11.5px] leading-relaxed text-text-3";
 
 export default function ExchangeApplyPage() {
   const params = useParams<{ id: string }>();
@@ -181,11 +180,11 @@ export default function ExchangeApplyPage() {
               ))}
             </select>
           </div>
-          {/* 등급은 교환글의 희망 품목과 달리 필수다. 별표만 붙이면 왜 필수인지 모른다. */}
-          <p className={HELP}>등급은 꼭 골라 주세요. 현장에서 상태를 보고 무르는 일을 줄여줘요.</p>
         </section>
 
-        <section className="mt-5 bg-surface-2 px-[14px] py-4 sm:rounded-r2 sm:px-4">
+        {/* 회색 띠를 걷었다(#718). 세 묶음(포카·시간·사진)이 같은 지면 위에 서고 헤어라인으로 갈린다. */}
+        <section className="mt-5 px-[14px] sm:px-0">
+          <div className="border-t border-border pt-4">
           <p className={LABEL}>
             만날 시간<span className="ml-0.5 text-primary">*</span>
           </p>
@@ -208,12 +207,15 @@ export default function ExchangeApplyPage() {
               </label>
             ))}
           </div>
-          <p className={HELP}>글쓴이가 제시한 시간 중에서 골라요.</p>
+          </div>
         </section>
 
-        <section className="px-[14px] pt-5 sm:px-0">
+        <section className="mt-5 px-[14px] sm:px-0">
+          <div className="border-t border-border pt-4">
+          {/* 누가 보는지는 화면만 봐서는 알 수 없다 — 안내 문구 중 이 한 줄만 남긴다(#718). */}
           <p className={LABEL}>
             포카 사진<span className="ml-0.5 text-primary">*</span>
+            <span className="ml-1.5 font-semibold text-text-3">글쓴이에게만 보여요</span>
           </p>
           <PhotoUploadGrid
             items={photos.items}
@@ -222,14 +224,11 @@ export default function ExchangeApplyPage() {
             onRemove={photos.removeItem}
             onReorder={photos.setItems}
           />
-          {/* 올리고 나서 알면 이미 늦다. 입력 전에 누가 보는지, 왜 필요한지 말한다. */}
-          <p className={HELP}>
-            글쓴이가 상태를 보고 고를 수 있게 한 장은 필요해요. 사진은 글쓴이에게만 보이고 목록에는
-            올라가지 않아요.
-          </p>
+          </div>
         </section>
 
-        <section className="px-[14px] pt-5 sm:px-0">
+        <section className="mt-5 px-[14px] sm:px-0">
+          <div className="border-t border-border pt-4">
           <p className={LABEL}>한마디 <span className="font-semibold text-text-3">(선택)</span></p>
           <textarea
             value={message}
@@ -239,7 +238,7 @@ export default function ExchangeApplyPage() {
             placeholder="예) 윈터 두 장 있어요. 종료 후에 뵐게요."
             className={`w-full resize-none rounded-r1 border border-border-2 bg-white px-3 py-2.5 text-[15px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
           />
-          <p className={HELP}>수락되면 이 말이 대화의 첫 줄이 돼요.</p>
+          </div>
         </section>
 
         <div className={FORM_ACTION_BAR} style={FORM_ACTION_BAR_STYLE}>

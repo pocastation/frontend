@@ -3,6 +3,44 @@
 export const FOCUS_RING =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2";
 
+/*
+  모바일 눌린 상태(#720).
+
+  터치에는 hover가 오지 않는다. 그래서 눌린 느낌은 `active:`로 따로 말해야 하는데, 저장소에
+  hover는 354곳이고 active는 8곳이었다 — 하단 탭·교환 CTA·피드 행은 둘 다 0이었다.
+
+  규칙 다섯(시안 승인본):
+  1. 전환은 75ms. 길면 뗀 뒤에도 남아 늦게 느껴진다
+  2. 바탕이 있으면 배경으로, 흰 바탕이면 opacity로 말한다
+  3. scale은 독립한 것에만 — 버튼·칩·카드. 목록 행과 탭에 쓰면 옆 것과 어긋나 보인다
+  4. 선택 결과(보라)와 눌림(회색)을 섞지 않는다
+  5. 비활성에는 눌림을 주지 않는다 — 반응하면 눌린 줄 안다
+*/
+const PRESS_BASE = "transition-[background-color,opacity,transform] duration-75";
+
+/** 보라 CTA. 배경을 한 단 어둡게. */
+export const PRESS_PRIMARY = `${PRESS_BASE} active:bg-primary-dark active:scale-[0.98]`;
+/** 흰 바탕 테두리 버튼. */
+export const PRESS_OUTLINE = `${PRESS_BASE} active:bg-surface-2 active:scale-[0.98]`;
+/** 보라 테두리 버튼 — 회색 대신 연보라로 눌러야 색이 튀지 않는다. */
+export const PRESS_ACCENT = `${PRESS_BASE} active:bg-primary-soft active:scale-[0.98]`;
+/** 먹색 버튼. 어둡게 하면 변화가 안 보여 밝게 뒤집는다. */
+export const PRESS_INK = `${PRESS_BASE} active:bg-text-2 active:scale-[0.98]`;
+/** 위험 버튼. */
+export const PRESS_DANGER = `${PRESS_BASE} active:bg-danger-soft active:scale-[0.98]`;
+/** 목록 행·시트 항목. scale 없음 — 옆 행과 어긋나 보인다. */
+export const PRESS_ROW = `${PRESS_BASE} active:bg-surface-2`;
+/** 칩. 작아서 조금 더 줄인다. */
+export const PRESS_CHIP = `${PRESS_BASE} active:bg-surface-2 active:scale-[0.96]`;
+/** 카드. 독립해 있어 미세한 scale이 읽힌다. */
+export const PRESS_CARD = `${PRESS_BASE} active:bg-surface-2 active:scale-[0.985]`;
+/** 아이콘 버튼 — 원형 배경이 보이는 크기. */
+export const PRESS_ICON = `${PRESS_BASE} active:bg-surface-2`;
+/** 배경이 없는 것 — 텍스트 버튼, 앱바 아이콘. */
+export const PRESS_FADE = `${PRESS_BASE} active:opacity-55`;
+/** 하단 탭. 바탕이 흰색이라 배경 변화가 보이지 않는다. 아이콘과 글자를 함께 흐린다. */
+export const PRESS_TAB = `${PRESS_BASE} active:opacity-50`;
+
 export const INPUT_CLASS =
   `w-full rounded-r2 border border-border px-3.5 py-2.5 text-sm text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`;
 

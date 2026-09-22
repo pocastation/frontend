@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { itemName, slotLabel } from "@/lib/exchange-labels";
 import { GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { usePhotoUpload, photoUploadErrorMessage } from "@/lib/use-photo-upload";
-import { FOCUS_RING, FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE } from "@/lib/ui";
+import { FOCUS_RING, FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE, PRESS_PRIMARY } from "@/lib/ui";
 import type {
   ArtistListResponse,
   ArtistMemberResponse,
@@ -246,7 +246,7 @@ export default function ExchangeApplyPage() {
             type="button"
             disabled={!ready || submitting}
             onClick={submit}
-            className={`h-12 w-full rounded-[7px] bg-primary text-[15px] font-extrabold text-white disabled:opacity-40 ${FOCUS_RING}`}
+            className={`h-12 w-full rounded-[7px] bg-primary text-[15px] font-extrabold text-white disabled:opacity-40 ${PRESS_PRIMARY} ${FOCUS_RING}`}
           >
             {submitting ? "보내는 중..." : "신청 보내기"}
           </button>

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, PRESS_TAB } from "@/lib/ui";
 
 /**
  * 모바일 하단 5탭 — 전역(#554).
@@ -137,7 +137,9 @@ export default function MobileTabBar() {
               key={tab.key}
               href={tab.href}
               aria-current={on ? "page" : undefined}
-              className={`flex flex-1 flex-col items-center justify-center gap-1 pb-[7px] pt-2 transition-colors ${FOCUS_RING} ${
+              /* 눌림은 아이콘과 글자를 함께 흐린다(#720). 탭 바탕이 흰색이라 배경 변화는 보이지
+                 않고, scale을 주면 옆 탭과 높이가 어긋나 보인다. */
+              className={`flex flex-1 flex-col items-center justify-center gap-1 pb-[7px] pt-2 ${PRESS_TAB} ${FOCUS_RING} ${
                 on ? "text-text-1" : "text-text-3"
               }`}
             >

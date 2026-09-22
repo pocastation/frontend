@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, PRESS_ICON } from "@/lib/ui";
 
 /**
  * 모바일 서브 화면 앱바 — 뒤로 44px + 제목 17px + 우측 액션 슬롯.
@@ -44,7 +44,7 @@ export default function MobilePageHead({
             type="button"
             aria-label="뒤로"
             onClick={leave}
-            className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+            className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-text-1 hover:bg-surface-2 ${PRESS_ICON} ${FOCUS_RING}`}
           >
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <polyline points="15 18 9 12 15 6" />
@@ -61,7 +61,7 @@ export default function MobilePageHead({
             type="button"
             aria-label="닫기"
             onClick={leave}
-            className={`-mr-2 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-text-2 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+            className={`-mr-2 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-text-2 hover:bg-surface-2 ${PRESS_ICON} ${FOCUS_RING}`}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18" />

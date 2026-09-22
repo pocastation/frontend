@@ -9,7 +9,7 @@ import { useAuth } from "@/lib/auth-context";
 import { SLOT_STEP_MINUTES } from "@/lib/exchange-labels";
 import { GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { usePhotoUpload, photoUploadErrorMessage } from "@/lib/use-photo-upload";
-import { FOCUS_RING, FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE } from "@/lib/ui";
+import { FOCUS_RING, FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE, PRESS_PRIMARY } from "@/lib/ui";
 import type {
   ArtistListResponse,
   ArtistMemberResponse,
@@ -274,7 +274,7 @@ function NewExchangeForm() {
                 type="button"
                 disabled={!step1Ready}
                 onClick={() => setStep(2)}
-                className={`h-12 w-full rounded-[7px] bg-primary text-[15px] font-extrabold text-white disabled:opacity-50 ${FOCUS_RING}`}
+                className={`h-12 w-full rounded-[7px] bg-primary text-[15px] font-extrabold text-white disabled:opacity-50 ${PRESS_PRIMARY} ${FOCUS_RING}`}
               >
                 다음
               </button>

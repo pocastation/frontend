@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import ReportButton from "@/components/ReportButton";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, PRESS_OUTLINE, PRESS_ROW } from "@/lib/ui";
 
 /**
  * 교환글 더보기(⋮) — 신고 진입점을 담는 하단 시트.
@@ -103,7 +103,7 @@ export default function ExchangeMoreMenu({
                 setError(null);
                 setConfirmingBlock(true);
               }}
-              className={`flex min-h-[52px] w-full items-center gap-3 px-[18px] text-left text-[15px] font-bold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+              className={`flex min-h-[52px] w-full items-center gap-3 px-[18px] text-left text-[15px] font-bold text-text-1 hover:bg-surface-2 ${PRESS_ROW} ${FOCUS_RING}`}
             >
               <span className="text-text-2">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -117,7 +117,7 @@ export default function ExchangeMoreMenu({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className={`mx-3.5 flex min-h-12 w-[calc(100%-28px)] items-center justify-center rounded-[7px] border border-border-2 bg-white text-[15px] font-extrabold text-text-2 ${FOCUS_RING}`}
+              className={`mx-3.5 flex min-h-12 w-[calc(100%-28px)] items-center justify-center rounded-[7px] border border-border-2 bg-white text-[15px] font-extrabold text-text-2 ${PRESS_OUTLINE} ${FOCUS_RING}`}
             >
               닫기
             </button>

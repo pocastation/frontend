@@ -59,15 +59,26 @@ export function slotLabel(slot: ExchangeSlotView): string {
  * <p>상한은 서버에서 「시작 + 12시간」과 만료 중 이른 쪽인데, 만료도 12시간으로 맞춰 둘이
  * 같다 — 화면은 시작 하나만 보면 된다.
  */
-export const EXCHANGE_WRITABLE_HOURS = 12;
+/**
+ * 작성 창은 행사 **날짜** 기준이다(#738). 전날 낮 12시에 열려 다음 날 낮 12시에 닫힌다.
+ *
+ * <p>시각이 아니라 날짜를 기준으로 두는 이유는, 시각으로 재면 같은 날 행사인데도 낮 공개방송은
+ * 열려 있고 저녁 공연은 아직 닫혀 있어 「오늘 행사 글을 쓸 수 있는가」가 행사마다 갈리기 때문이다.
+ *
+ * <p>서버(`ExchangePost.isWritable`)와 같은 경계다. 화면이 먼저 갈라 주지 않으면 사용자는 폼을
+ * 다 채운 뒤 400을 받는다.
+ */
+export const EXCHANGE_WRITE_OPEN_HOURS = 12;
 
 export type ExchangeWindow = "open" | "tooEarly" | "closed";
 
-export function exchangeWindow(eventStartsAt: string, now: number = Date.now()): ExchangeWindow {
-  const starts = new Date(eventStartsAt).getTime();
-  const span = EXCHANGE_WRITABLE_HOURS * 60 * 60 * 1000;
-  if (now < starts - span) return "tooEarly";
-  if (now > starts + span) return "closed";
+const HOUR = 60 * 60 * 1000;
+
+/** `YYYY-MM-DD`(KST) 기준. 브라우저 시간대와 무관하게 같은 경계를 쓴다. */
+export function exchangeWindow(eventDate: string, now: number = Date.now()): ExchangeWindow {
+  const dayStart = new Date(`${eventDate}T00:00:00+09:00`).getTime();
+  if (now < dayStart - EXCHANGE_WRITE_OPEN_HOURS * HOUR) return "tooEarly";
+  if (now > dayStart + (24 + EXCHANGE_WRITE_OPEN_HOURS) * HOUR) return "closed";
   return "open";
 }
 

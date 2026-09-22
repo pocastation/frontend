@@ -5,7 +5,7 @@ import ExchangeFeedRow from "@/components/ExchangeFeedRow";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { apiFetch, ApiError } from "@/lib/api";
 import { kstHm, weekdayKo } from "@/lib/event-dates";
-import { EXCHANGE_WRITABLE_HOURS, exchangeWindow } from "@/lib/exchange-labels";
+import { exchangeWindow } from "@/lib/exchange-labels";
 import {
   FOCUS_RING,
   FORM_ACTION_BAR,
@@ -71,7 +71,7 @@ export default async function EventFeedPage({
   const feed = await getFeed(id, artistId);
   const dateLabel = `${Number(event.eventDate.slice(5, 7))}월 ${Number(event.eventDate.slice(8, 10))}일 ${weekdayKo(event.eventDate)}요일`;
   const selected = artistId ? Number(artistId) : null;
-  const writeWindow = exchangeWindow(event.startsAt);
+  const writeWindow = exchangeWindow(event.eventDate);
 
   return (
     <>
@@ -140,7 +140,7 @@ export default async function EventFeedPage({
             ) : (
               <p className="rounded-[7px] bg-surface-2 px-3 py-3.5 text-center text-[13px] font-semibold text-text-2">
                 {writeWindow === "tooEarly"
-                  ? `교환글은 행사 시작 ${EXCHANGE_WRITABLE_HOURS}시간 전부터 올릴 수 있어요.`
+                  ? "교환글은 행사 전날 낮 12시부터 올릴 수 있어요."
                   : "교환글을 올릴 수 있는 시간이 지났어요."}
               </p>
             )}

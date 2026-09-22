@@ -51,6 +51,26 @@ export function slotLabel(slot: ExchangeSlotView): string {
   return `${minuteLabel(slot.fromMinuteOfDay)}–${minuteLabel(slot.toMinuteOfDay)}`;
 }
 
+/**
+ * 교환글을 쓸 수 있는 구간 — 행사 시작 앞뒤 12시간(backend#541).
+ *
+ * <p>서버가 막는 것을 화면도 막는다. 버튼을 남겨 두면 폼을 다 채운 뒤에 400을 받는다.
+ *
+ * <p>상한은 서버에서 「시작 + 12시간」과 만료 중 이른 쪽인데, 만료도 12시간으로 맞춰 둘이
+ * 같다 — 화면은 시작 하나만 보면 된다.
+ */
+export const EXCHANGE_WRITABLE_HOURS = 12;
+
+export type ExchangeWindow = "open" | "tooEarly" | "closed";
+
+export function exchangeWindow(eventStartsAt: string, now: number = Date.now()): ExchangeWindow {
+  const starts = new Date(eventStartsAt).getTime();
+  const span = EXCHANGE_WRITABLE_HOURS * 60 * 60 * 1000;
+  if (now < starts - span) return "tooEarly";
+  if (now > starts + span) return "closed";
+  return "open";
+}
+
 /** 서버가 10분 단위만 받는다(`ExchangeSlot.STEP_MINUTES`). */
 export const SLOT_STEP_MINUTES = 10;
 

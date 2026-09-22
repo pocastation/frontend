@@ -5,6 +5,7 @@ import ExchangeFeedRow from "@/components/ExchangeFeedRow";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { apiFetch, ApiError } from "@/lib/api";
 import { kstHm, weekdayKo } from "@/lib/event-dates";
+import { EXCHANGE_WRITABLE_HOURS, exchangeWindow } from "@/lib/exchange-labels";
 import {
   FOCUS_RING,
   FORM_ACTION_BAR,
@@ -70,6 +71,7 @@ export default async function EventFeedPage({
   const feed = await getFeed(id, artistId);
   const dateLabel = `${Number(event.eventDate.slice(5, 7))}월 ${Number(event.eventDate.slice(8, 10))}일 ${weekdayKo(event.eventDate)}요일`;
   const selected = artistId ? Number(artistId) : null;
+  const writeWindow = exchangeWindow(event.startsAt);
 
   return (
     <>
@@ -124,14 +126,24 @@ export default async function EventFeedPage({
           )}
         </div>
 
+        {/* 창 밖이면 버튼을 남기지 않는다(#722). 서버가 막는 것을 화면이 안 막으면 폼을 다 채운
+            뒤에 400을 받는다 — #690과 같은 모양이다. 아직인지 이미 닫혔는지는 갈라서 말한다. */}
         {event.status !== "CANCELLED" && (
           <div className={FORM_ACTION_BAR} style={FORM_ACTION_BAR_STYLE}>
-            <Link
-              href={`/exchanges/new?eventId=${id}`}
-              className={`flex h-12 items-center justify-center rounded-[7px] bg-primary text-[15px] font-extrabold text-white ${PRESS_PRIMARY} ${FOCUS_RING}`}
-            >
-              교환글 등록
-            </Link>
+            {writeWindow === "open" ? (
+              <Link
+                href={`/exchanges/new?eventId=${id}`}
+                className={`flex h-12 items-center justify-center rounded-[7px] bg-primary text-[15px] font-extrabold text-white ${PRESS_PRIMARY} ${FOCUS_RING}`}
+              >
+                교환글 등록
+              </Link>
+            ) : (
+              <p className="rounded-[7px] bg-surface-2 px-3 py-3.5 text-center text-[13px] font-semibold text-text-2">
+                {writeWindow === "tooEarly"
+                  ? `교환글은 행사 시작 ${EXCHANGE_WRITABLE_HOURS}시간 전부터 올릴 수 있어요.`
+                  : "교환글을 올릴 수 있는 시간이 지났어요."}
+              </p>
+            )}
           </div>
         )}
       </div>

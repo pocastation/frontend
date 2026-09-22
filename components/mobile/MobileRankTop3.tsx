@@ -34,15 +34,15 @@ export default function MobileRankTop3({ auctions }: { auctions: AuctionResponse
         auctions.length > 0 ? (
           auctions.slice(0, 3).map((auction, i) => <AuctionRow key={auction.id} auction={auction} index={i} />)
         ) : (
-          <p className="border-t border-border py-8 text-center text-[12.5px] text-text-3">
-            제안이 쌓이면 순위가 나와요.
-          </p>
+          /* 윗선을 두지 않는다(#741). 줄이 있을 때는 각 줄의 아랫선만 그어져 제목 밑에 선이
+             생기지 않는데, 빈 상태에만 윗선이 있으면 같은 자리에서 선이 나타났다 사라진다. */
+          <p className="py-8 text-center text-[12.5px] text-text-3">제안이 쌓이면 순위가 나와요.</p>
         ),
     },
   ];
 
   return (
-    <section className="pb-1 pt-[18px]" aria-label="랭킹">
+    <section className="pb-1 pt-[38px]" aria-label="랭킹">
       <div
         ref={scrollerRef}
         className="flex snap-x snap-mandatory overflow-x-auto"
@@ -51,7 +51,7 @@ export default function MobileRankTop3({ auctions }: { auctions: AuctionResponse
         {pages.map((p) => (
           <div key={p.key} className="w-full min-w-full flex-[0_0_100%] snap-start px-[14px]">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="flex items-baseline gap-1.5 text-base font-extrabold tracking-[-0.02em]">
+              <h2 className="flex items-baseline gap-1.5 text-[17px] font-extrabold tracking-[-0.02em]">
                 {p.key} 랭킹
                 <span className="text-[11px] font-semibold text-text-3">{p.note}</span>
               </h2>

@@ -13,7 +13,7 @@ import type { AuctionResponse, EventResponse } from "@/lib/types";
 /**
  * 모바일 홈 — 국내 커머스 앱 문법으로 짠 별도 화면.
  *
- * <p>데스크탑 홈과 **블록 구성 자체가 다르다**(배너 캐러셀·회색 띠·랭킹은 여기만, 티커·정렬
+ * <p>데스크탑 홈과 **블록 구성 자체가 다르다**(배너 캐러셀·랭킹은 여기만, 티커·정렬
  * 칩은 데스크탑만). 그래서 같은 트리를 반응형으로 좁히지 않고 이 파일이 배치를 따로 갖는다.
  * 카드·카운트다운·찜·가격 포맷 같은 알맹이는 데스크탑과 **같은 컴포넌트를 그대로 쓴다** —
  * 두 벌로 두는 건 이 배치 파일 하나뿐이다.
@@ -22,15 +22,18 @@ import type { AuctionResponse, EventResponse } from "@/lib/types";
  * 칩을 달지 않는다 — 그건 목록 화면이 할 일이다.
  */
 
-// 섹션 사이는 여백이 아니라 8px 회색 띠로 끊는다. 카드로 감싸지 않고 지면을 바꿔 구분한다.
-function Band() {
-  return <div aria-hidden="true" className="h-2 bg-surface-2" />;
-}
+/*
+  섹션 사이를 8px 회색 띠로 끊던 것을 걷었다(#741). 섹션이 넷뿐인 화면에서 띠는 끊기보다
+  토막 내는 쪽으로 읽힌다.
+
+  대신 간격과 제목이 경계를 나눠 맡는다 — 그냥 지우기만 하면 섹션이 붙어 한 덩어리가 된다.
+*/
+const SECTION_GAP = "pt-[38px]";
 
 function SectionHead({ title, href }: { title: string; href: string }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <h2 className="text-base font-extrabold tracking-[-0.02em]">{title}</h2>
+      <h2 className="text-[17px] font-extrabold tracking-[-0.02em]">{title}</h2>
       <Link href={href} className={`flex items-center gap-0.5 text-xs font-semibold text-text-3 ${FOCUS_RING}`}>
         더보기
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -43,7 +46,7 @@ function SectionHead({ title, href }: { title: string; href: string }) {
 
 // 좌우 14px, 2열, column-gap 8 / row-gap 18 — 카드에 테두리·그림자를 두르지 않는다.
 function Grid({ children }: { children: ReactNode }) {
-  return <div className="mt-2.5 grid grid-cols-2 gap-x-2 gap-y-[18px]">{children}</div>;
+  return <div className="mt-3 grid grid-cols-2 gap-x-2 gap-y-[18px]">{children}</div>;
 }
 
 function Empty({ message }: { message: string }) {
@@ -74,7 +77,7 @@ export default function MobileHome({
       {/* 히어로 바로 아래 한 줄(#659). 8px 띠로 끊는 기존 리듬을 그대로 쓴다. */}
       <EventStrip events={upcomingEvents} />
 
-      <section className="px-[14px] pt-[18px]">
+      <section className={`px-[14px] ${SECTION_GAP}`}>
         <SectionHead title="제안판매" href="/auctions?sort=ending_soon" />
         {endingSoon.length > 0 ? (
           <Grid>
@@ -93,11 +96,7 @@ export default function MobileHome({
         )}
       </section>
 
-      <div className="mt-6">
-        <Band />
-      </div>
-
-      <section className="px-[14px] pb-6 pt-[18px]">
+      <section className={`px-[14px] ${SECTION_GAP}`}>
         <SectionHead title="즉시판매" href="/instant-sales" />
         {instantSales.length > 0 ? (
           <Grid>
@@ -116,8 +115,6 @@ export default function MobileHome({
         )}
       </section>
 
-      <Band />
-
       <MobileRankTop3 auctions={popularAuctions} />
 
       {/* 완료된 거래 진입 — 순위·목록과 성격이 달라 조용한 텍스트 링크 한 줄로 둔다.
@@ -125,7 +122,7 @@ export default function MobileHome({
           없는 화면**이 됐다(T40 패턴). MobileBrowse의 같은 링크와 문구를 맞춘다. */}
       <Link
         href="/auctions/ended"
-        className={`mt-1.5 block border-t border-border px-[14px] py-4 text-center text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
+        className={`mt-6 block px-[14px] pb-5 text-center text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
       >
         거래 완료된 상품 보기
       </Link>

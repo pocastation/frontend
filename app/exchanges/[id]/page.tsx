@@ -116,7 +116,7 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
           <div className="mt-2 flex flex-wrap gap-1.5">
             {post.slots.map((slot) => (
               <span
-                key={`${slot.phase}-${slot.fromHour}`}
+                key={slot.id}
                 className="rounded-[3px] border border-border-2 bg-white px-2.5 py-[5px] text-[11.5px] font-bold text-text-2"
               >
                 {slotLabel(slot)}

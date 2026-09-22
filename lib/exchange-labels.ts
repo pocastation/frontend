@@ -1,5 +1,5 @@
 import { SOURCE_LABEL } from "@/lib/labels";
-import type { ExchangeItemView, ExchangePhase, ExchangeSlotView } from "@/lib/types";
+import type { ExchangeItemView, ExchangeSlotView } from "@/lib/types";
 
 /**
  * 교환글 문구 조립. 서버는 값만 내리고 사람이 읽는 문장은 화면이 만든다.
@@ -7,12 +7,6 @@ import type { ExchangeItemView, ExchangePhase, ExchangeSlotView } from "@/lib/ty
  * <p>서버가 완성 문장을 내리면 같은 데이터를 목록·상세·알림이 다르게 보여줄 수 없고, 문구를
  * 고칠 때마다 배포가 필요해진다.
  */
-
-const PHASE_LABEL: Record<ExchangePhase, string> = {
-  BEFORE_ENTRY: "입장 전",
-  WAITING: "대기 중",
-  AFTER_END: "종료 후",
-};
 
 /** 「카리나」처럼 화면에서 부르는 이름. 멤버가 없으면 그룹 이름으로 내려간다. */
 export function itemName(item: ExchangeItemView | null): string {
@@ -34,16 +28,20 @@ export function itemDetail(item: ExchangeItemView | null): string {
   return parts.filter(Boolean).join(" · ");
 }
 
-/** 「종료 후 19–20시」. 분 단위는 받지 않으므로 시각만 쓴다. */
-export function slotLabel(slot: ExchangeSlotView): string {
-  return `${PHASE_LABEL[slot.phase]} ${slot.fromHour}–${slot.toHour}시`;
+/** 자정 기준 분 → 「19:30」. */
+export function minuteLabel(minuteOfDay: number): string {
+  const h = Math.floor(minuteOfDay / 60);
+  const m = minuteOfDay % 60;
+  return `${h}:${String(m).padStart(2, "0")}`;
 }
 
-export const PHASE_OPTIONS: { value: ExchangePhase; label: string }[] = [
-  { value: "BEFORE_ENTRY", label: "입장 전" },
-  { value: "WAITING", label: "대기 중" },
-  { value: "AFTER_END", label: "종료 후" },
-];
+/** 「19:00–20:30」. */
+export function slotLabel(slot: ExchangeSlotView): string {
+  return `${minuteLabel(slot.fromMinuteOfDay)}–${minuteLabel(slot.toMinuteOfDay)}`;
+}
+
+/** 서버가 10분 단위만 받는다(`ExchangeSlot.STEP_MINUTES`). */
+export const SLOT_STEP_MINUTES = 10;
 
 /**
  * 마감이 가까운가. 행사 종료 6시간 뒤가 만료라, 남은 시간이 하루 밑이면 알린다.

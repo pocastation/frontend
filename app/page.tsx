@@ -117,7 +117,7 @@ export default async function Home() {
       </div>
 
       <div className="hidden sm:block">
-        <Hero liveCount={content.length} featured={heroFeatured} />
+        <Hero featured={heroFeatured} />
         {/* 데스크탑은 지면이 넓어 2주 14칸을 한 줄에 편다(#659). */}
         <EventStrip events={upcomingEvents?.content ?? []} />
         <AuctionExplorer initialAuctions={content} />

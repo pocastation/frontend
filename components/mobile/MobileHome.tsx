@@ -115,17 +115,9 @@ export default function MobileHome({
         )}
       </section>
 
+      {/* 완료된 거래 링크는 홈에서 뺐다(#744). 같은 링크가 거래 탭과 데스크탑 목록에 있어
+          진입로는 남고, 홈 맨 아래에서는 순위 다음에 붙은 꼬리로 읽혔다. */}
       <MobileRankTop3 auctions={popularAuctions} />
-
-      {/* 완료된 거래 진입 — 순위·목록과 성격이 달라 조용한 텍스트 링크 한 줄로 둔다.
-          🔴 라벨이 「시세 확인하기」였다. §1.7·§9.4로 성사가를 감추면서 **누르면 시세가
-          없는 화면**이 됐다(T40 패턴). MobileBrowse의 같은 링크와 문구를 맞춘다. */}
-      <Link
-        href="/auctions/ended"
-        className={`mt-6 block px-[14px] pb-5 text-center text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
-      >
-        거래 완료된 상품 보기
-      </Link>
     </>
   );
 }

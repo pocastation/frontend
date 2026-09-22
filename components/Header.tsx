@@ -35,15 +35,15 @@ function SearchIcon() {
 }
 
 /*
-  종 아래 1px 획(추)이 잉크 bbox만 늘리고 무게는 주지 않는다. 그래서 bbox 중심은 viewBox
-  중심과 같은데 **시각 무게중심은 종 몸통(y 2~17) 중심인 9.5**에 있다 — 렌더 17px 기준 1.77px
-  위다. 옆 로그아웃 아이콘은 잉크가 중심에 고르게 있어(y 3~21) 그 차이가 눈에 보인다(#711).
+  밀지 않는다. 종을 아래로 2px 내렸던 적이 있는데(#711) 방향이 반대였다(#734).
 
-  path를 고치지 않고 svg만 내린다. 아이콘 원본은 표준 도형이고, 여기서 맞출 것은 광학 정렬이다.
+  path의 bbox가 아니라 실제로 칠해지는 잉크를 래스터라이즈해 알파 가중 중심을 재면(viewBox 24,
+  중심 12) 돋보기 11.893, 로그아웃 11.999, 종 12.244다. 종은 밑변 가로선과 추 때문에 원래도
+  중심보다 아래에 실린다 — bbox만 보면 몸통이 위에 있는 것처럼 읽혀 반대 결론이 나온다.
 */
 function BellIcon() {
   return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true" className="translate-y-[2px]">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
       <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
       <path d="M13.73 21a2 2 0 0 1-3.46 0" />
     </svg>

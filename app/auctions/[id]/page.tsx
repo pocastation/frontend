@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import AuctionImageGallery from "@/components/AuctionImageGallery";
 import AuctionWishlistButton from "@/components/AuctionWishlistButton";
+import AuctionViewRecorder from "@/components/AuctionViewRecorder";
 import BidSection from "@/components/BidSection";
 import MobileAuctionDetail from "@/components/mobile/MobileAuctionDetail";
 import MobileInstantDetail from "@/components/mobile/MobileInstantDetail";
@@ -338,6 +339,8 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
       nextExtensionDays={auction.nextExtensionDays ?? null}
       extendableFrom={auction.extendableFrom ?? null}
     >
+      {/* 화면을 그리지 않는다. 상세가 서버 컴포넌트라 조회 기록은 클라이언트가 따로 부른다(#728). */}
+      <AuctionViewRecorder auctionId={auction.id} />
       {body}
     </AuctionBiddingProvider>
   );

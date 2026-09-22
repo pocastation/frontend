@@ -326,7 +326,17 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
     </>
   );
 
-  if (!biddable) return body;
+  /* 조회 기록은 제안 가능 여부와 무관하다(#731). 아래 분기는 즉시판매에 provider를 세우지 않으므로,
+     그 안에 두면 즉시판매만 통째로 집계에서 빠진다. */
+  const withRecorder = (
+    <>
+      {/* 화면을 그리지 않는다. 상세가 서버 컴포넌트라 조회 기록은 클라이언트가 따로 부른다(#728). */}
+      <AuctionViewRecorder auctionId={auction.id} />
+      {body}
+    </>
+  );
+
+  if (!biddable) return withRecorder;
 
   return (
     <AuctionBiddingProvider
@@ -339,9 +349,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
       nextExtensionDays={auction.nextExtensionDays ?? null}
       extendableFrom={auction.extendableFrom ?? null}
     >
-      {/* 화면을 그리지 않는다. 상세가 서버 컴포넌트라 조회 기록은 클라이언트가 따로 부른다(#728). */}
-      <AuctionViewRecorder auctionId={auction.id} />
-      {body}
+      {withRecorder}
     </AuctionBiddingProvider>
   );
 }

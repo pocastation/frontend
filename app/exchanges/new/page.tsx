@@ -6,7 +6,7 @@ import MobilePageHead from "@/components/mobile/MobilePageHead";
 import PhotoUploadGrid from "@/components/PhotoUploadGrid";
 import { apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { EXCHANGE_WRITABLE_HOURS, SLOT_STEP_MINUTES, exchangeWindow } from "@/lib/exchange-labels";
+import { SLOT_STEP_MINUTES, exchangeWindow } from "@/lib/exchange-labels";
 import { GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { usePhotoUpload, photoUploadErrorMessage } from "@/lib/use-photo-upload";
 import { FOCUS_RING, FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE, PRESS_PRIMARY } from "@/lib/ui";
@@ -176,14 +176,14 @@ function NewExchangeForm() {
 
     행사를 아직 못 읽었으면 막지 않는다 — 읽는 중에 가로막으면 정상 진입이 깜빡인다.
   */
-  const writeWindow = event ? exchangeWindow(event.startsAt) : "open";
+  const writeWindow = event ? exchangeWindow(event.eventDate) : "open";
   if (writeWindow !== "open") {
     return (
       <>
         <MobilePageHead title="교환글 작성" sub={event?.name} variant="close" backHref={`/events/${eventId}`} />
         <p className="px-[14px] py-16 text-center text-[12.5px] leading-relaxed text-text-3">
           {writeWindow === "tooEarly"
-            ? `교환글은 행사 시작 ${EXCHANGE_WRITABLE_HOURS}시간 전부터 올릴 수 있어요.`
+            ? "교환글은 행사 전날 낮 12시부터 올릴 수 있어요."
             : "교환글을 올릴 수 있는 시간이 지났어요."}
         </p>
       </>

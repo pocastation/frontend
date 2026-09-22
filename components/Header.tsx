@@ -18,6 +18,8 @@ import { useNotifications } from "@/lib/notification-context";
 const NAV_LINKS: { href: string; label: string }[] = [
   { href: "/auctions", label: "제안판매" },
   { href: "/instant-sales", label: "즉시판매" },
+  // 교환은 행사 캘린더에서 시작한다 — 교환글 목록은 회차 안에 있어 독립 진입점이 없다.
+  { href: "/events", label: "교환" },
 ];
 
 const FOCUS_RING =
@@ -32,9 +34,16 @@ function SearchIcon() {
   );
 }
 
+/*
+  종 아래 1px 획(추)이 잉크 bbox만 늘리고 무게는 주지 않는다. 그래서 bbox 중심은 viewBox
+  중심과 같은데 **시각 무게중심은 종 몸통(y 2~17) 중심인 9.5**에 있다 — 렌더 17px 기준 1.77px
+  위다. 옆 로그아웃 아이콘은 잉크가 중심에 고르게 있어(y 3~21) 그 차이가 눈에 보인다(#711).
+
+  path를 고치지 않고 svg만 내린다. 아이콘 원본은 표준 도형이고, 여기서 맞출 것은 광학 정렬이다.
+*/
 function BellIcon() {
   return (
-    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true" className="translate-y-[2px]">
       <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
       <path d="M13.73 21a2 2 0 0 1-3.46 0" />
     </svg>

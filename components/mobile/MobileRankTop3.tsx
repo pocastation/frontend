@@ -24,16 +24,22 @@ export default function MobileRankTop3({ auctions }: { auctions: AuctionResponse
   const [page, setPage] = useState(0);
 
   // 집계가 비어 있는 종류는 페이지 자체를 만들지 않는다.
+  // 비어도 장을 그린다(#724). 근거는 HomeRanking의 주석과 같다.
   const pages = [
-    auctions.length > 0 && {
+    {
       key: "포카",
       note: "제안 많은 순",
       href: "/auctions?sort=popular",
-      body: auctions.slice(0, 3).map((auction, i) => <AuctionRow key={auction.id} auction={auction} index={i} />),
+      body:
+        auctions.length > 0 ? (
+          auctions.slice(0, 3).map((auction, i) => <AuctionRow key={auction.id} auction={auction} index={i} />)
+        ) : (
+          <p className="border-t border-border py-8 text-center text-[12.5px] text-text-3">
+            제안이 쌓이면 순위가 나와요.
+          </p>
+        ),
     },
-  ].filter((p): p is { key: string; note: string; href: string; body: React.ReactElement[] } => Boolean(p));
-
-  if (pages.length === 0) return null;
+  ];
 
   return (
     <section className="pb-1 pt-[18px]" aria-label="랭킹">

@@ -28,6 +28,17 @@ export function itemDetail(item: ExchangeItemView | null): string {
   return parts.filter(Boolean).join(" · ");
 }
 
+/**
+ * 「레드벨벳 · 공개방송」. 이름을 뺀 출처 줄이다.
+ *
+ * <p>상세는 제목이 이미 「슬기 → 아이린」으로 이름을 말한다. 그 아래 패널까지 이름을 반복하면
+ * 화면 위쪽 셋이 같은 글자를 세 번 쓴다(#718).
+ */
+export function itemSource(item: ExchangeItemView | null): string {
+  if (!item) return "";
+  return [item.artistName, SOURCE_LABEL[item.source]].filter(Boolean).join(" · ");
+}
+
 /** 자정 기준 분 → 「19:30」. */
 export function minuteLabel(minuteOfDay: number): string {
   const h = Math.floor(minuteOfDay / 60);

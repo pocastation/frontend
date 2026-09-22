@@ -44,6 +44,7 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
   if (events.length === 0) return null;
 
   const selectedEvents = byDate.get(selected) ?? [];
+  const maxPerDay = Math.max(1, ...days.map((day) => byDate.get(ymd(day))?.length ?? 0));
 
   return (
     <section aria-label="다가오는 행사" className="px-[14px] pt-4 sm:mx-auto sm:max-w-[1160px] sm:px-4 sm:pt-10">
@@ -105,8 +106,10 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
         })}
       </div>
 
+      {/* 날짜를 옮겨도 아래 섹션이 움직이지 않게 가장 붐비는 날만큼 자리를 잡아 둔다(#736).
+          고정값을 박으면 행사가 둘 이상인 날에 다시 밀리고, 크게 잡으면 빈 여백만 남는다. */}
       <div className="pt-1.5">
-        <EventList events={selectedEvents} />
+        <EventList events={selectedEvents} reserveRows={maxPerDay} />
       </div>
     </section>
   );

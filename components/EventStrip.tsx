@@ -85,13 +85,11 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
               onClick={() => setSelected(key)}
               aria-pressed={on}
               aria-label={`${day.getMonth() + 1}월 ${day.getDate()}일${count > 0 ? ` 행사 ${count}건` : ""}`}
-              /* 모바일에서는 칸 테두리를 걷는다(#741). 14칸의 테두리가 화면에서 선을 가장 많이
-                 만드는데, 고른 날만 칠해도 점이 남아 행사 있는 날은 그대로 읽힌다. 지면이 넓은
-                 데스크탑은 칸이 떨어져 보여야 해서 테두리를 남긴다. */
+              /* 칸 테두리를 걷는다(#741, #744). 14칸의 테두리가 화면에서 선을 가장 많이 만드는데,
+                 고른 날만 칠해도 점이 남아 행사 있는 날은 그대로 읽힌다. 테두리 폭은 남겨 둔다 —
+                 빼면 고른 날만 1px씩 커져 격자가 흔들린다. */
               className={`rounded-[3px] border py-1.5 ${PRESS_CHIP} ${FOCUS_RING} ${
-                on
-                  ? "border-primary bg-primary text-white"
-                  : "border-transparent bg-white sm:border-border"
+                on ? "border-primary bg-primary text-white" : "border-transparent bg-white"
               }`}
             >
               <span

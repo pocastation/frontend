@@ -9,6 +9,19 @@ const TYPE_LABEL: Record<EventType, string> = {
   ETC: "행사",
 };
 
+/*
+  종류를 색으로 가른다(#726). 채우기를 쓰지 않는다 — 기록된 톤이 파스텔 필 배지를 금지하고
+  뉴트럴 + 헤어라인을 기준으로 둔다. 테두리와 글자만 색을 맡는다.
+
+  보라(primary)는 상태를 말하는 자리에만 쓰므로 종류 색으로 쓰지 않는다. 기타(ETC)는 이름
+  그대로 나머지라 색을 주지 않는다 — 색이 셋이면 무엇이 특별한지 사라진다.
+*/
+const TYPE_CHIP: Record<EventType, string> = {
+  MUSIC_SHOW: "border-[#1d4ed8] text-[#1d4ed8]",
+  CONCERT: "border-warn text-warn",
+  ETC: "border-border-2 text-text-2",
+};
+
 /**
  * 행사 줄 목록. 캘린더와 홈 스트립이 같은 줄을 쓴다.
  *
@@ -28,7 +41,9 @@ export default function EventList({ events }: { events: EventResponse[] }) {
       {events.map((event) => (
         <li key={event.id} className="border-b border-border last:border-b-0">
           <Link href={`/events/${event.id}`} className={`flex items-center gap-2.5 py-[11px] ${FOCUS_RING}`}>
-            <span className="shrink-0 rounded-r1 border border-border-2 px-1.5 py-0.5 text-[10px] font-extrabold text-text-2">
+            <span
+              className={`shrink-0 rounded-r1 border px-1.5 py-0.5 text-[10px] font-extrabold ${TYPE_CHIP[event.type]}`}
+            >
               {TYPE_LABEL[event.type]}
             </span>
             <span className="min-w-0 flex-1">

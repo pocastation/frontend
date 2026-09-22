@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import EventList from "@/components/EventList";
-import { addDays, todayInKst, weekdayIndex, ymd } from "@/lib/event-dates";
-import { FOCUS_RING } from "@/lib/ui";
+import { addDays, todayInKst, weekStart, weekdayIndex, ymd } from "@/lib/event-dates";
+import { FOCUS_RING, PRESS_CHIP } from "@/lib/ui";
 import type { EventResponse } from "@/lib/types";
 
 const DOW = ["일", "월", "화", "수", "목", "금", "토"];
@@ -19,8 +19,15 @@ const DAYS = 14;
  * <p>행사가 하나도 없으면 블록을 만들지 않는다. 빈 달력은 「준비 중인 서비스」로 읽힌다.
  */
 export default function EventStrip({ events }: { events: EventResponse[] }) {
+  /*
+    이번 주 일요일부터 2주다(#726). 오늘부터 세면 요일이 세로로 맞지 않고, 14칸이 화면을
+    넘겨 옆으로 끌어야 했다. 주 시작으로 맞추면 7열 두 줄에 전부 들어온다.
+
+    창은 주 단위로 굴러간다 — 토요일까지 같은 2주를 보다가 일요일에 통째로 넘어간다.
+  */
   const today = todayInKst();
-  const days = Array.from({ length: DAYS }, (_, i) => addDays(today, i));
+  const todayKey = ymd(today);
+  const days = Array.from({ length: DAYS }, (_, i) => addDays(weekStart(today), i));
 
   const byDate = new Map<string, EventResponse[]>();
   for (const event of events) {
@@ -52,12 +59,24 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
         </Link>
       </div>
 
-      <div className="mt-2.5 flex gap-1.5 overflow-x-auto pb-0.5 sm:overflow-visible">
+      <div className="mt-2.5 grid grid-cols-7 gap-1" aria-hidden="true">
+        {DOW.map((label, i) => (
+          <span
+            key={label}
+            className={`text-center text-[10px] font-bold ${i === 0 ? "text-accent" : "text-text-3"}`}
+          >
+            {label}
+          </span>
+        ))}
+      </div>
+      <div className="mt-1 grid grid-cols-7 gap-1">
         {days.map((day) => {
           const key = ymd(day);
           const count = byDate.get(key)?.length ?? 0;
           const on = key === selected;
           const dow = weekdayIndex(key);
+          // 지난 날은 흐리게 둔다. 지워 버리면 요일 열이 어긋나고 주가 읽히지 않는다.
+          const past = key < todayKey;
           return (
             <button
               key={key}
@@ -65,18 +84,15 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
               onClick={() => setSelected(key)}
               aria-pressed={on}
               aria-label={`${day.getMonth() + 1}월 ${day.getDate()}일${count > 0 ? ` 행사 ${count}건` : ""}`}
-              className={`w-[42px] shrink-0 rounded-[3px] border py-1.5 sm:w-auto sm:flex-1 ${FOCUS_RING} ${
+              className={`rounded-[3px] border py-1.5 ${PRESS_CHIP} ${FOCUS_RING} ${
                 on ? "border-primary bg-primary text-white" : "border-border bg-white"
               }`}
             >
               <span
-                className={`block text-center text-[10px] font-bold leading-tight ${
-                  on ? "text-white/70" : dow === 0 ? "text-accent" : "text-text-3"
+                className={`block text-center font-display text-[15px] font-bold leading-tight ${
+                  on ? "text-white" : past ? "text-text-3/60" : dow === 0 ? "text-accent" : "text-text-1"
                 }`}
               >
-                {DOW[dow]}
-              </span>
-              <span className="block text-center font-display text-base font-bold leading-tight">
                 {day.getDate()}
               </span>
               <span className="mt-[3px] flex h-1 justify-center gap-[2px]" aria-hidden="true">

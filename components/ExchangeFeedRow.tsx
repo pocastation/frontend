@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { isClosed, isClosingSoon, itemDetail, itemName, slotLabel } from "@/lib/exchange-labels";
 import { mediaUrl } from "@/lib/api";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, PRESS_ROW } from "@/lib/ui";
 import type { ExchangeFeedItem } from "@/lib/types";
 
 /**
@@ -27,7 +27,7 @@ export default function ExchangeFeedRow({ item }: { item: ExchangeFeedItem }) {
     <li className="border-b border-border">
       <Link
         href={`/exchanges/${item.id}`}
-        className={`flex gap-2.5 py-3 ${FOCUS_RING}`}
+        className={`-mx-2 flex gap-2.5 rounded-r1 px-2 py-3 ${PRESS_ROW} ${FOCUS_RING}`}
       >
         <span className="relative block h-[62px] w-[52px] shrink-0">
           {item.photoCount > 1 && (

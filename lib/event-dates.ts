@@ -42,6 +42,16 @@ export function weekdayKo(eventDate: string): string {
   return WEEKDAY_KO[new Date(`${eventDate}T12:00:00Z`).getUTCDay()];
 }
 
+/**
+ * 이 날짜가 속한 주의 일요일. 홈 스트립이 2주를 세우는 기준점이다(#726).
+ *
+ * <p>오늘부터 세면 요일이 세로로 맞지 않는다 — 22일(화)에서 시작하면 첫 칸이 화요일이라
+ * 「이번 주」가 읽히지 않는다. 주 시작으로 맞추면 27일(일)에 다음 두 주로 통째로 넘어간다.
+ */
+export function weekStart(date: Date): Date {
+  return addDays(date, -date.getDay());
+}
+
 export function weekdayIndex(eventDate: string): number {
   return new Date(`${eventDate}T12:00:00Z`).getUTCDay();
 }

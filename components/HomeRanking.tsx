@@ -16,16 +16,27 @@ import type { AuctionResponse } from "@/lib/types";
  * `/sellers`로 가는 마지막 진입점이었다. 열 구성은 배열 그대로라 되살릴 때 항목만 다시 넣으면 된다.
  */
 export default function HomeRanking({ auctions }: { auctions: AuctionResponse[] }) {
+  /*
+    비어도 블록을 그린다(#724). 예전에는 집계가 없으면 통째로 빠져, 제안판매가 하나도 없는 날
+    즉시판매와 푸터가 맞붙어 홈이 갑자기 끝난 것처럼 보였다.
+
+    없는 순위를 지어내지는 않는다 — 자리와 이유만 남긴다.
+  */
   const columns = [
-    auctions.length > 0 && {
+    {
       key: "포카",
       note: "제안 많은 순",
       href: "/auctions?sort=popular",
-      body: auctions.slice(0, 3).map((auction, i) => <AuctionRow key={auction.id} auction={auction} index={i} />),
+      body:
+        auctions.length > 0 ? (
+          auctions.slice(0, 3).map((auction, i) => <AuctionRow key={auction.id} auction={auction} index={i} />)
+        ) : (
+          <p className="border-t border-border py-9 text-center text-[12.5px] text-text-3">
+            제안이 쌓이면 순위가 나와요.
+          </p>
+        ),
     },
-  ].filter((c): c is { key: string; note: string; href: string; body: React.ReactElement[] } => Boolean(c));
-
-  if (columns.length === 0) return null;
+  ];
 
   return (
     <section className="mx-auto max-w-[1160px] px-4 py-10" aria-label="랭킹">

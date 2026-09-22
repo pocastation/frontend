@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { isClosed } from "@/lib/exchange-labels";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, PRESS_ACCENT, PRESS_FADE, PRESS_INK, PRESS_OUTLINE, PRESS_PRIMARY } from "@/lib/ui";
 import type { ExchangePostDetail, ExchangeStatus, ExchangeViewer } from "@/lib/types";
 
 const BUTTON = "flex h-12 w-full items-center justify-center rounded-[7px] text-[15px] font-extrabold";
@@ -94,7 +94,7 @@ export default function ExchangeCta({
       <p className="text-[13px] font-semibold text-text-2">마감된 교환글이에요.</p>
       <Link
         href={`/events/${eventId}`}
-        className={`mt-1 inline-block text-[12.5px] font-bold text-primary ${FOCUS_RING}`}
+        className={`mt-1 inline-block text-[12.5px] font-bold text-primary ${PRESS_FADE} ${FOCUS_RING}`}
       >
         같은 행사의 다른 교환글 보기
       </Link>
@@ -107,7 +107,10 @@ export default function ExchangeCta({
     // 다음 화면에서 막으면 두 번 헛걸음이 된다.
     if (closed) return closedNotice;
     return (
-      <Link href={`/login?redirect=${encodeURIComponent(pathname)}`} className={`${BUTTON} bg-primary text-white ${FOCUS_RING}`}>
+      <Link
+        href={`/login?redirect=${encodeURIComponent(pathname)}`}
+        className={`${BUTTON} bg-primary text-white ${PRESS_PRIMARY} ${FOCUS_RING}`}
+      >
         로그인하고 신청하기
       </Link>
     );
@@ -116,7 +119,7 @@ export default function ExchangeCta({
   if (viewer?.participant) {
     // 먹색이다. 나머지는 이 글에 무언가를 거는 일이고, 대화는 이미 정해진 약속으로 들어가는 일이다.
     return (
-      <Link href={`/exchanges/${postId}/thread`} className={`${BUTTON} bg-text-1 text-white ${FOCUS_RING}`}>
+      <Link href={`/exchanges/${postId}/thread`} className={`${BUTTON} bg-text-1 text-white ${PRESS_INK} ${FOCUS_RING}`}>
         대화 열기
       </Link>
     );
@@ -127,7 +130,7 @@ export default function ExchangeCta({
     return (
       <Link
         href={`/exchanges/${postId}/requests`}
-        className={`${BUTTON} gap-1.5 border border-primary bg-white text-primary ${FOCUS_RING}`}
+        className={`${BUTTON} gap-1.5 border border-primary bg-white text-primary ${PRESS_ACCENT} ${FOCUS_RING}`}
       >
         받은 신청
         {count > 0 && (
@@ -146,7 +149,7 @@ export default function ExchangeCta({
           type="button"
           onClick={withdraw}
           disabled={withdrawing}
-          className={`${BUTTON} border border-border-2 bg-white text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+          className={`${BUTTON} border border-border-2 bg-white text-text-2 disabled:opacity-60 ${PRESS_OUTLINE} ${FOCUS_RING}`}
         >
           {withdrawing ? "취소하는 중..." : "신청함 · 취소하기"}
         </button>
@@ -182,7 +185,7 @@ export default function ExchangeCta({
     <button
       type="button"
       onClick={() => router.push(`/exchanges/${postId}/apply`)}
-      className={`${BUTTON} bg-primary text-white ${FOCUS_RING}`}
+      className={`${BUTTON} bg-primary text-white ${PRESS_PRIMARY} ${FOCUS_RING}`}
     >
       교환 신청하기
     </button>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import GradeStandard from "@/components/GradeStandard";
+import GuidePhotoExamples from "@/components/GuidePhotoExamples";
 import {
   GRADE_RAMP,
   GRADE_SCALE,
@@ -146,19 +147,7 @@ export default async function GuideDocPage({ params }: { params: Promise<{ topic
             </div>
           )}
 
-          {doc.shots && (
-            <div className="mt-5">
-              <p className="text-[12.5px] text-text-3">필수 4컷</p>
-              <div className="mt-2 flex gap-2 overflow-x-auto">
-                {doc.shots.map((c) => (
-                  <span key={c} className="w-24 shrink-0">
-                    <span className="block aspect-[1/1.4] border border-border bg-surface-2" />
-                    <span className="block pt-1.5 text-[11.5px] font-bold text-text-2">{c}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
+          {doc.shots && <GuidePhotoExamples shots={doc.shots} />}
 
           {/* 🔴 소제목 앞에 보라 세로 띠(`w-[3px] bg-primary`)를 세웠었다. 문서마다 5~7번,
               문서 7개에 걸쳐 같은 조각이 반복돼 **AI가 만든 화면**으로 읽혔다(#437 리뷰).

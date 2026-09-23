@@ -14,6 +14,12 @@
  * | 발송 2·3영업일 | `SHIPPING_DEADLINE_BUSINESS_DAYS` · `SHIPPING_AUTO_CANCEL_BUSINESS_DAYS` |
  */
 
+export type GuidePhotoShot = {
+  label: string;
+  src: string;
+  alt: string;
+};
+
 export type GuideDoc = {
   /** URL 조각. `/guide/{id}` */
   id: string;
@@ -29,7 +35,7 @@ export type GuideDoc = {
   /** 등급 스케일 바를 함께 그린다. */
   scale?: boolean;
   /** 필수 촬영 컷. */
-  shots?: string[];
+  shots?: GuidePhotoShot[];
   /** 이 문서는 전용 페이지를 갖는다(상태 등급 기준표). */
   standalone?: boolean;
 };
@@ -185,7 +191,12 @@ export const GUIDE_DOCS: GuideDoc[] = [
     id: "photo",
     title: "사진 찍는 법",
     desc: "필수 4컷",
-    shots: ["앞면", "뒷면", "모서리 근접", "하자 부위"],
+    shots: [
+      { label: "앞면", src: "/guide/photo/front.webp", alt: "포토카드 앞면 전체와 네 모서리를 보여 주는 사진" },
+      { label: "뒷면", src: "/guide/photo/back.webp", alt: "연보라색 포토카드 뒷면 전체를 보여 주는 사진" },
+      { label: "모서리 근접", src: "/guide/photo/corner.webp", alt: "우측 상단 모서리의 작은 벗겨짐을 확대한 사진" },
+      { label: "하자 부위", src: "/guide/photo/defect.webp", alt: "빛을 비춰 표면의 미세 기스를 보여 주는 사진" },
+    ],
     facts: [
       ["사진", "3~6장"],
       ["영상", "10~15초 · 미개봉은 생략"],

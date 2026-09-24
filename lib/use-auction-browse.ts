@@ -79,6 +79,8 @@ export function useAuctionBrowse({
   const [error, setError] = useState(false);
   const [moreError, setMoreError] = useState(false);
   const isFirstRun = useRef(true);
+  // 검색어 이펙트가 정렬 변경에 딸려 도는 것을 걸러낸다.
+  const lastQueryRef = useRef(initialQuery);
   // 빠른 연속 정렬/검색 시 옛 응답이 최신 결과를 덮어쓰는 걸 막는 요청 시퀀스 가드.
   const reqIdRef = useRef(0);
   const { wishlisted, toggle } = useWishlistStatus(auctions.map((a) => a.id));
@@ -106,12 +108,27 @@ export function useAuctionBrowse({
     }
   }, [query, saleType, sort, endpoint, includeSaleType]);
 
+  /*
+    디바운스는 검색어에만 건다(#752). 정렬 칩은 **이산 이벤트**라 기다릴 이유가 없는데,
+    예전에는 둘이 한 이펙트에 묶여 클릭에도 300ms가 붙었다 — 47ms면 끝날 조회가 355ms 걸렸다.
+
+    두 이펙트가 같은 `fetchFirstPage`를 본다. 정렬을 바꾸면 검색어 쪽 이펙트도 함께 다시
+    도는데, 그쪽은 `query`가 그대로면 아무것도 하지 않는다(아래 `lastQueryRef`).
+  */
   useEffect(() => {
-    // 첫 렌더는 서버가 이미 같은 조건으로 SSR해 온 결과라 재요청하지 않는다.
     if (isFirstRun.current) {
+      // 첫 렌더는 서버가 이미 같은 조건으로 SSR해 온 결과라 재요청하지 않는다.
       isFirstRun.current = false;
       return;
     }
+    void fetchFirstPage();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sort]);
+
+  useEffect(() => {
+    if (isFirstRun.current) return;
+    if (lastQueryRef.current === query) return;
+    lastQueryRef.current = query;
     // 너무 짧은 검색어로는 서버를 부르지 않는다(#493). 빈 검색어는 「전체 보기」라 제한 밖이다.
     const trimmed = query.trim();
     if (trimmed.length > 0 && trimmed.length < minQueryLength) return;

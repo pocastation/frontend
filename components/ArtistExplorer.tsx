@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import ArtistRow from "@/components/ArtistRow";
-import { ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
+import { ExploreEmpty, ExploreError } from "@/components/explore-states";
+import TopProgressBar from "@/components/TopProgressBar";
 import { apiFetch } from "@/lib/api";
 import { ARTIST_TYPE_LABEL, ARTIST_TYPE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
@@ -101,6 +102,9 @@ export default function ArtistExplorer({
 
   return (
     <div>
+      {/* 진행 표시는 화면 최상단 막대 하나로 모은다(#752). */}
+      <TopProgressBar active={loading} />
+
       <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-6 sm:gap-2.5">
         <label className="flex h-9 min-w-[200px] flex-1 items-center gap-2 rounded-full border border-border-2 px-3.5 focus-within:border-text-1 sm:h-[42px] sm:px-4">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
@@ -148,7 +152,6 @@ export default function ArtistExplorer({
 
       <p className="mb-3 flex items-center gap-2 text-xs text-text-3">
         <span>{totalElements}개</span>
-        {loading && <InlineSpinner />}
       </p>
 
       {error && (
@@ -159,14 +162,14 @@ export default function ArtistExplorer({
 
       {artists.length > 0 ? (
         // 재검색·필터 변경 중에도 기존 카드를 유지하고 dim만 준다(스켈레톤으로 통째 교체 X).
-        <div className={`${LIST_CLASS} transition-opacity ${loading ? "opacity-60" : error ? "opacity-45" : ""}`}>
+        <div className={`${LIST_CLASS} transition-opacity ${error ? "opacity-45" : ""}`}>
           {artists.map((artist) => (
             <ArtistRow key={artist.id} artist={artist} />
           ))}
         </div>
       ) : error ? null : (
         // 빈 목록도 로딩 중 높이가 다른 스피너로 교체하지 않고 dim만(레이아웃 시프트 방지).
-        <div className={loading ? "opacity-60 transition-opacity" : undefined}>
+        <div>
           <ExploreEmpty
             title={filtered ? "조건에 맞는 스타가 없어요" : "등록된 스타가 없습니다"}
             hint={filtered ? "다른 키워드로 검색하거나 필터를 바꿔보세요." : undefined}
@@ -183,7 +186,7 @@ export default function ArtistExplorer({
         </div>
       )}
 
-      {hasMore && !loading && (
+      {hasMore && (
         <div className="mt-8 flex flex-col items-center gap-2">
           {moreError && (
             <p className="text-xs font-semibold text-accent">더 불러오지 못했어요. 다시 시도해 주세요.</p>
@@ -191,7 +194,7 @@ export default function ArtistExplorer({
           <button
             type="button"
             onClick={loadMore}
-            disabled={loadingMore}
+            disabled={loadingMore || loading}
             className={`flex h-11 items-center gap-2 rounded-full border border-border-2 bg-white px-6 text-[13.5px] font-bold text-text-1 transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : moreError ? "다시 시도" : "더 보기"}

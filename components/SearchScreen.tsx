@@ -15,7 +15,7 @@ import {
   removeRecentSearch,
   subscribeRecentSearches,
 } from "@/lib/recent-searches";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, RESULT_FLOOR } from "@/lib/ui";
 import { useAuctionBrowse, type SaleTypeFilter } from "@/lib/use-auction-browse";
 import type { ArtistListResponse, ArtistResponse, AuctionResponse } from "@/lib/types";
 
@@ -420,12 +420,13 @@ export default function SearchScreen({
               slowSearch ? (
                 // 첫 검색이라 보여줄 옛 결과가 없다. 격자를 깔면 곧 사라질 가짜 카드가 되므로
                 // 자리만 지키는 가벼운 표시로 둔다. 빠른 응답에서는 이 자리도 뜨지 않는다(#752).
-                <p className="flex justify-center py-14 text-text-3">
+                // 빈 결과와 같은 바닥값을 써서 둘 사이를 오갈 때 아래가 움직이지 않게 한다(#755).
+                <p className={`flex items-center justify-center text-text-3 ${RESULT_FLOOR}`}>
                   <InlineSpinner />
                   <span className="sr-only">검색 중</span>
                 </p>
               ) : (
-                <div className="pt-6">
+                <div className={`pt-6 ${RESULT_FLOOR}`}>
                   <ExploreEmpty
                     title={`"${trimmed}" 검색 결과가 없어요`}
                     hint="다른 키워드로 검색하거나 유형을 바꿔보세요."

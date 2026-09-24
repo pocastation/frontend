@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import AuctionCard from "@/components/AuctionCard";
-import { ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
+import { ExploreEmpty, ExploreError } from "@/components/explore-states";
+import TopProgressBar from "@/components/TopProgressBar";
 import { apiFetch } from "@/lib/api";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import { FOCUS_RING } from "@/lib/ui";
@@ -39,7 +40,6 @@ const INSTANT_SORT_OPTIONS = SORT_OPTIONS.filter(
 // 판매 유형마다 기본이 다르다. 제안판매는 끌올이 반영되는 「추천순」이고, 즉시판매는 끌올
 // 자체가 없어 최신순이다.
 const DEFAULT_SORT: Record<AuctionSaleType, SortKey> = { AUCTION: "recommended", INSTANT: "latest" };
-const DEBOUNCE_MS = 300;
 // 모바일은 2열(카드가 화면폭을 꽉 채우지 않게), sm 이상은 auto-fill로 데스크탑 밀도 유지.
 const GRID_CLASS =
   "grid grid-cols-2 gap-3 sm:gap-3.5 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
@@ -107,12 +107,15 @@ export default function AuctionExplorer({
       isFirstRun.current = false;
       return;
     }
-    const timer = setTimeout(fetchResults, DEBOUNCE_MS);
-    return () => clearTimeout(timer);
+    // 이 블록에는 검색 입력이 없다. 정렬 클릭뿐이라 디바운스를 걸 이유가 없다(#752).
+    void fetchResults();
   }, [fetchResults]);
 
   return (
     <section id={sectionId} className="mx-auto max-w-[1160px] px-4 py-10">
+      {/* 진행 표시는 화면 최상단 막대 하나로 모은다(#752). 예전에는 스피너가 정렬 칩들의
+          형제로 행 안에 들어가 칩 전체를 18px 밀었다. */}
+      <TopProgressBar active={loading} />
       {/* (1) 제목 + 전체보기 한 줄  (2) 부제  (3) 정렬칩 가로 스크롤 — 모바일에서 칩이 2줄로
           접히거나 전체보기·부제가 밀리지 않게 한다. 칩 줄은 스와이프 가능(스크롤바는 숨김). */}
       <div className="flex items-center justify-between gap-4">
@@ -134,7 +137,6 @@ export default function AuctionExplorer({
         role="group"
         aria-label="정렬 기준"
       >
-        {loading && <InlineSpinner />}
         {sortOptions.map((option) => (
           <button
             key={option.key}
@@ -161,7 +163,7 @@ export default function AuctionExplorer({
           )}
           {results.length > 0 ? (
             // 재정렬·재검색 중에도 기존 카드를 유지하고 dim만 준다(스켈레톤으로 통째 교체 X).
-            <div className={`${GRID_CLASS} transition-opacity ${loading ? "opacity-60" : error ? "opacity-45" : ""}`}>
+            <div className={`${GRID_CLASS} transition-opacity ${error ? "opacity-45" : ""}`}>
               {results.map((auction) => (
                 <AuctionCard
                   key={auction.id}

@@ -4,6 +4,7 @@ import Link from "next/link";
 import AuctionCard from "@/components/AuctionCard";
 import { SORT_OPTIONS, type SortKey } from "@/components/AuctionExplorer";
 import { ExploreEmpty, ExploreError } from "@/components/explore-states";
+import TopProgressBar from "@/components/TopProgressBar";
 import { useAuctionBrowse } from "@/lib/use-auction-browse";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionResponse, AuctionSaleType } from "@/lib/types";
@@ -78,6 +79,9 @@ export default function MobileBrowse({
 
   return (
     <div>
+      {/* 진행 표시는 화면 최상단 막대 하나로 모은다(#752). 목록을 흐리게 하지 않는다. */}
+      <TopProgressBar active={loading} />
+
       {/* 상단바 48px 바로 아래에 붙어 함께 고정된다 — 스크롤해도 어느 목록인지 놓치지 않게. */}
       <div className="sticky top-12 z-[250] border-b border-border bg-white">
         <div role="tablist" className="flex gap-1 px-2.5">
@@ -152,7 +156,7 @@ export default function MobileBrowse({
         // 재정렬·재검색 중에도 기존 카드를 유지하고 dim만 준다(스켈레톤으로 통째 교체 X).
         <div
           className={`mt-2 grid grid-cols-2 gap-x-2 gap-y-[18px] px-[14px] transition-opacity ${
-            loading ? "opacity-60" : error ? "opacity-45" : ""
+            error ? "opacity-45" : ""
           }`}
         >
           {auctions.map((auction) => (
@@ -166,7 +170,7 @@ export default function MobileBrowse({
           ))}
         </div>
       ) : error ? null : (
-        <div className={`px-[14px] ${loading ? "opacity-60 transition-opacity" : ""}`}>
+        <div className="px-[14px]">
           <ExploreEmpty
             title={query ? `"${query}" 검색 결과가 없어요` : isInstant ? "등록된 즉시판매가 아직 없어요" : "판매 중인 상품이 아직 없어요"}
             hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
@@ -175,13 +179,13 @@ export default function MobileBrowse({
         </div>
       )}
 
-      {hasMore && !loading && (
+      {hasMore && (
         <div className="mt-6 flex flex-col items-center gap-2 px-[14px]">
           {moreError && <p className="text-[11.5px] font-bold text-danger">더 불러오지 못했어요.</p>}
           <button
             type="button"
             onClick={loadMore}
-            disabled={loadingMore}
+            disabled={loadingMore || loading}
             className={`flex h-11 w-full items-center justify-center rounded-[7px] border border-border-2 bg-white text-[13px] font-bold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : moreError ? "다시 시도" : "더 보기"}

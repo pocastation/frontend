@@ -2,7 +2,8 @@
 
 import AuctionCard from "@/components/AuctionCard";
 import { SORT_OPTIONS, type SortKey } from "@/components/AuctionExplorer";
-import { ExploreEmpty, ExploreError, InlineSpinner } from "@/components/explore-states";
+import { ExploreEmpty, ExploreError } from "@/components/explore-states";
+import TopProgressBar from "@/components/TopProgressBar";
 import { useAuctionBrowse } from "@/lib/use-auction-browse";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionResponse, AuctionSaleType } from "@/lib/types";
@@ -77,6 +78,9 @@ export default function AuctionBrowser({
 
   return (
     <div>
+      {/* 진행 표시는 화면 최상단 막대 하나로 모은다(#752). 예전에는 스피너가 아래 건수 옆에
+          있었는데, 그 자리에 들고 나면서 정렬 칩 행의 폭이 흔들렸다. */}
+      <TopProgressBar active={loading} />
       <label className="mb-4 flex h-9 max-w-[480px] items-center gap-2 rounded-full border border-border-2 px-3.5 focus-within:border-text-1 sm:mb-5 sm:h-11 sm:px-4">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
           <circle cx="11" cy="11" r="8" />
@@ -97,7 +101,6 @@ export default function AuctionBrowser({
           <span>
             총 <strong className="font-bold text-text-1">{totalElements}</strong>개
           </span>
-          {loading && <InlineSpinner />}
         </span>
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="정렬 기준">
           {sortOptions.map((option) => (
@@ -131,7 +134,7 @@ export default function AuctionBrowser({
 
       {auctions.length > 0 ? (
         // 재정렬·재검색 중에도 기존 카드를 유지하고 dim만 준다(스켈레톤으로 통째 교체 X).
-        <div className={`${GRID_CLASS} transition-opacity ${loading ? "opacity-60" : error ? "opacity-45" : ""}`}>
+        <div className={`${GRID_CLASS} transition-opacity ${error ? "opacity-45" : ""}`}>
           {auctions.map((auction) => (
             <AuctionCard
               key={auction.id}
@@ -143,7 +146,7 @@ export default function AuctionBrowser({
         </div>
       ) : error ? null : (
         // 빈 목록도 로딩 중 높이가 다른 스피너로 교체하지 않고 dim만(레이아웃 시프트 방지).
-        <div className={loading ? "opacity-60 transition-opacity" : undefined}>
+        <div>
           <ExploreEmpty
             title={query ? `"${query}" 검색 결과가 없어요` : resolvedEmptyTitle}
             hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
@@ -152,7 +155,7 @@ export default function AuctionBrowser({
         </div>
       )}
 
-      {hasMore && !loading && (
+      {hasMore && (
         <div className="mt-8 flex flex-col items-center gap-2">
           {moreError && (
             <p className="text-xs font-semibold text-accent">더 불러오지 못했어요. 다시 시도해 주세요.</p>
@@ -160,7 +163,7 @@ export default function AuctionBrowser({
           <button
             type="button"
             onClick={loadMore}
-            disabled={loadingMore}
+            disabled={loadingMore || loading}
             className={`flex h-11 items-center gap-2 rounded-full border border-border-2 bg-white px-6 text-[13.5px] font-bold text-text-1 transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : moreError ? "다시 시도" : "더 보기"}

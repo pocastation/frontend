@@ -5,7 +5,7 @@ import { SORT_OPTIONS, type SortKey } from "@/components/AuctionExplorer";
 import { ExploreEmpty, ExploreError } from "@/components/explore-states";
 import TopProgressBar from "@/components/TopProgressBar";
 import { useAuctionBrowse } from "@/lib/use-auction-browse";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, RESULT_FLOOR } from "@/lib/ui";
 import type { AuctionResponse, AuctionSaleType } from "@/lib/types";
 
 // 모바일은 2열(카드가 화면폭을 꽉 채우지 않게), sm 이상은 auto-fill로 데스크탑 밀도 유지.
@@ -146,7 +146,7 @@ export default function AuctionBrowser({
         </div>
       ) : error ? null : (
         // 빈 목록도 로딩 중 높이가 다른 스피너로 교체하지 않고 dim만(레이아웃 시프트 방지).
-        <div>
+        <div className={RESULT_FLOOR}>
           <ExploreEmpty
             title={query ? `"${query}" 검색 결과가 없어요` : resolvedEmptyTitle}
             hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}

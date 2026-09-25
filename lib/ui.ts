@@ -108,3 +108,14 @@ export const FORM_ACTION_BAR_STYLE = { bottom: "var(--mobile-tabbar-h, env(safe-
  * <p>데스크탑에서는 바가 흐름으로 돌아가 여백이 필요 없다.
  */
 export const FORM_ACTION_BAR_PAD = "pb-[136px] sm:pb-10";
+
+/**
+ * 결과가 0건일 때도 잡아 두는 바닥 높이(#755).
+ *
+ * <p>카드 한 줄의 실측값이다 — 모바일 289px, 데스크탑 345px. 0건이 되면 목록 자리가 통째로
+ * 사라져 아래 섹션과 푸터가 딸려 올라오는데, 한 줄만큼은 남겨 그 되튐을 줄인다.
+ *
+ * <p>13건과 0건의 높이를 같게 만들 수는 없다. 그건 내용이 실제로 다른 것이고, 여기서 막는 것은
+ * <b>0건과 한두 건 사이를 오갈 때의 흔들림</b>이다.
+ */
+export const RESULT_FLOOR = "min-h-[289px] sm:min-h-[345px]";

@@ -6,7 +6,7 @@ import { SORT_OPTIONS, type SortKey } from "@/components/AuctionExplorer";
 import { ExploreEmpty, ExploreError } from "@/components/explore-states";
 import TopProgressBar from "@/components/TopProgressBar";
 import { useAuctionBrowse } from "@/lib/use-auction-browse";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, RESULT_FLOOR } from "@/lib/ui";
 import type { AuctionResponse, AuctionSaleType } from "@/lib/types";
 
 /**
@@ -170,7 +170,7 @@ export default function MobileBrowse({
           ))}
         </div>
       ) : error ? null : (
-        <div className="px-[14px]">
+        <div className={`px-[14px] ${RESULT_FLOOR}`}>
           <ExploreEmpty
             title={query ? `"${query}" 검색 결과가 없어요` : isInstant ? "등록된 즉시판매가 아직 없어요" : "판매 중인 상품이 아직 없어요"}
             hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}

@@ -112,7 +112,7 @@ function ToastViewport({ toasts, onDismiss }: { toasts: ToastItem[]; onDismiss: 
         <div
           key={t.id}
           role={t.variant === "danger" ? "alert" : "status"}
-          className="pointer-events-auto flex w-full max-w-[440px] items-start gap-3 rounded-r3 border border-border bg-surface px-3.5 py-3 shadow-modal animate-[toastIn_0.18s_ease-out]"
+          className="pointer-events-auto flex w-full max-w-[440px] items-start gap-3 rounded-card border border-border bg-surface px-3.5 py-3 shadow-modal animate-[toastIn_0.18s_ease-out]"
         >
           <span className={`mt-px shrink-0 ${VARIANT_TEXT[t.variant]}`}>
             <VariantIcon variant={t.variant} />

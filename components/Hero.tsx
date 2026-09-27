@@ -201,13 +201,13 @@ export default function Hero({ featured }: { featured: AuctionResponse[] }) {
           <div className="mt-8 flex justify-center gap-3 sm:justify-start">
             <Link
               href="#auctions"
-              className="inline-flex h-12 items-center justify-center rounded-r2 bg-primary px-7 text-sm font-bold text-white transition-colors hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace"
+              className="inline-flex h-12 items-center justify-center rounded-control bg-primary px-7 text-sm font-bold text-white transition-colors hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace"
             >
               진행 중인 판매글 보기 →
             </Link>
             <Link
               href="/guide"
-              className="inline-flex h-12 items-center justify-center rounded-r2 border border-white/40 px-7 text-sm font-bold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace"
+              className="inline-flex h-12 items-center justify-center rounded-control border border-white/40 px-7 text-sm font-bold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace"
             >
               이용 방법
             </Link>
@@ -325,7 +325,7 @@ function HeroCard({
   return (
     <Link
       href={`/auctions/${auction.id}`}
-      className="group relative block aspect-[4/5] w-72 overflow-hidden rounded-[12px] border border-white/20 transition duration-300 ease-out hover:-translate-y-1.5 hover:border-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+      className="group relative block aspect-[4/5] w-72 overflow-hidden rounded-card border border-white/20 transition duration-300 ease-out hover:-translate-y-1.5 hover:border-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace motion-reduce:transition-none motion-reduce:hover:translate-y-0"
     >
       {auction.representativeThumbnailUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일

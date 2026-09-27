@@ -47,7 +47,7 @@ export default function ArtistRow({ artist }: { artist: ArtistResponse }) {
           {/* 상태 배지는 예외 상태(휴식기·해체)만 띄운다 — 대부분이 활동 중이라 전 줄에 같은
               배지가 붙으면 정보량 없이 시선만 끈다. 구 카드에서 확정된 판단을 그대로 잇는다. */}
           {artist.status !== "ACTIVE" && (
-            <span className="shrink-0 rounded-r1 border border-border-2 px-1.5 py-px text-[10px] font-bold text-text-3">
+            <span className="shrink-0 rounded-control border border-border-2 px-1.5 py-px text-[10px] font-bold text-text-3">
               {ARTIST_STATUS_LABEL[artist.status]}
             </span>
           )}

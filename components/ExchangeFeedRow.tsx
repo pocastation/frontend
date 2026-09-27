@@ -27,22 +27,22 @@ export default function ExchangeFeedRow({ item }: { item: ExchangeFeedItem }) {
     <li className="border-b border-border">
       <Link
         href={`/exchanges/${item.id}`}
-        className={`-mx-2 flex gap-2.5 rounded-r1 px-2 py-3 ${PRESS_ROW} ${FOCUS_RING}`}
+        className={`-mx-2 flex gap-2.5 rounded-control px-2 py-3 ${PRESS_ROW} ${FOCUS_RING}`}
       >
         <span className="relative block h-[62px] w-[52px] shrink-0">
           {item.photoCount > 1 && (
             <>
               <span
                 aria-hidden="true"
-                className="absolute inset-0 translate-x-[5px] -translate-y-[3px] rotate-[5deg] rounded-r1 border border-border bg-surface-2"
+                className="absolute inset-0 translate-x-[5px] -translate-y-[3px] rotate-[5deg] rounded-control border border-border bg-surface-2"
               />
               <span
                 aria-hidden="true"
-                className="absolute inset-0 translate-x-[2px] -translate-y-[1px] rotate-[2deg] rounded-r1 border border-border bg-surface-2"
+                className="absolute inset-0 translate-x-[2px] -translate-y-[1px] rotate-[2deg] rounded-control border border-border bg-surface-2"
               />
             </>
           )}
-          <span className="absolute inset-0 overflow-hidden rounded-r1 border border-border bg-surface-2">
+          <span className="absolute inset-0 overflow-hidden rounded-control border border-border bg-surface-2">
             {item.thumbnailUrl && (
               // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
               <img
@@ -54,7 +54,7 @@ export default function ExchangeFeedRow({ item }: { item: ExchangeFeedItem }) {
             )}
           </span>
           {item.photoCount > 1 && (
-            <span className="absolute -bottom-0.5 -right-0.5 rounded-[2px] bg-text-1 px-[3.5px] font-display text-[9.5px] font-extrabold text-white">
+            <span className="absolute -bottom-0.5 -right-0.5 rounded-control bg-text-1 px-[3.5px] font-display text-[9.5px] font-extrabold text-white">
               {item.photoCount}
             </span>
           )}
@@ -71,11 +71,11 @@ export default function ExchangeFeedRow({ item }: { item: ExchangeFeedItem }) {
           <span className="mt-0.5 block truncate text-[11.5px] text-text-3">{itemDetail(item.have)}</span>
           <span className="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-text-2">
             {closed ? (
-              <span className="rounded-[2px] border border-border-2 px-1 text-[10px] font-extrabold text-text-3">
+              <span className="rounded-control border border-border-2 px-1 text-[10px] font-extrabold text-text-3">
                 마감
               </span>
             ) : soon ? (
-              <span className="rounded-[2px] border border-[#f0d9ae] px-1 text-[10px] font-extrabold text-warn">
+              <span className="rounded-control border border-[#f0d9ae] px-1 text-[10px] font-extrabold text-warn">
                 마감 임박
               </span>
             ) : null}

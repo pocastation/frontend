@@ -35,7 +35,7 @@ export default function SettingsTab() {
 
   return (
     <div className="max-w-xl">
-      <section className="rounded-r3 border border-accent/30 bg-surface p-5">
+      <section className="rounded-card border border-accent/30 bg-surface p-5">
         <h2 className="font-display text-sm font-extrabold text-accent">회원 탈퇴</h2>
         <div className="mt-3 space-y-1.5 text-sm text-text-2">
           <p>탈퇴하면 계정을 다시 사용할 수 없고, 되돌릴 수 없어요.</p>
@@ -70,7 +70,7 @@ export default function SettingsTab() {
           type="button"
           onClick={handleWithdraw}
           disabled={!armed || isSubmitting}
-          className="mt-4 w-full rounded-full bg-accent px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="mt-4 w-full rounded-control bg-accent px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {isSubmitting ? "처리 중..." : "회원 탈퇴"}
         </button>

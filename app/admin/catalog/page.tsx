@@ -322,7 +322,7 @@ export default function AdminCatalogPage() {
       {notice && (
         <div
           role="status"
-          className={`mt-5 rounded-r2 border px-4 py-3 text-sm font-semibold ${
+          className={`mt-5 rounded-card border px-4 py-3 text-sm font-semibold ${
             notice.kind === "success"
               ? "border-ok/20 bg-ok-soft text-ok"
               : "border-accent/20 bg-accent-soft text-accent"
@@ -343,18 +343,18 @@ export default function AdminCatalogPage() {
           </div>
         )}
       </div>
-      <section className={`mt-6 rounded-r2 border border-border bg-white p-4 ${mobileForm ? "hidden lg:block" : ""}`}>
+      <section className={`mt-6 rounded-card border border-border bg-white p-4 ${mobileForm ? "hidden lg:block" : ""}`}>
         <h2 className="font-display text-base font-extrabold text-text-1">카탈로그 요약</h2>
         <p className="mt-1 text-xs text-text-3">등록된 스타와 운영 상태입니다.</p>
 
         <div className="mt-4 grid grid-cols-2 gap-2 sm:max-w-xs">
-          <div className="rounded-r2 bg-surface-2 p-3">
+          <div className="rounded-card bg-surface-2 p-3">
             <p className="text-xs text-text-3">스타</p>
             <p className="mt-1 font-display text-xl font-extrabold text-text-1">
               {artistTotal.toLocaleString("ko-KR")}
             </p>
           </div>
-          <div className="rounded-r2 bg-surface-2 p-3">
+          <div className="rounded-card bg-surface-2 p-3">
             <p className="text-xs text-text-3">활동중</p>
             <p className="mt-1 font-display text-xl font-extrabold text-primary">
               {artists.filter((artist) => artist.status === "ACTIVE").length.toLocaleString("ko-KR")}
@@ -386,14 +386,14 @@ export default function AdminCatalogPage() {
                       {ARTIST_TYPE_LABEL[artist.type]} · {artist.agency ?? "소속사 미입력"}
                     </span>
                   </span>
-                  <span className="shrink-0 rounded-full bg-surface-3 px-2 py-1 text-[11px] font-bold text-text-2">
+                  <span className="shrink-0 rounded-control bg-surface-3 px-2 py-1 text-[11px] font-bold text-text-2">
                     {ARTIST_STATUS_LABEL[artist.status]}
                   </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => openEdit(artist)}
-                  className={`shrink-0 rounded-full border border-border-2 px-2.5 py-1 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+                  className={`shrink-0 rounded-control border border-border-2 px-2.5 py-1 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
                 >
                   편집
                 </button>
@@ -403,7 +403,7 @@ export default function AdminCatalogPage() {
       </section>
 
       <section className={`admin-catalog-forms mt-6 gap-4 lg:grid lg:grid-cols-3 ${mobileForm ? "grid" : "hidden"}`}>
-        <form onSubmit={handleCreateArtist} className={`rounded-r2 border border-border bg-white p-4 ${mobileForm === "artist" ? "" : "hidden lg:block"}`}>
+        <form onSubmit={handleCreateArtist} className={`rounded-card border border-border bg-white p-4 ${mobileForm === "artist" ? "" : "hidden lg:block"}`}>
           <h2 className="font-display text-base font-extrabold text-text-1">스타 등록</h2>
           <div className="mt-4 flex flex-col gap-3">
             <input
@@ -476,7 +476,7 @@ export default function AdminCatalogPage() {
           </div>
         </form>
 
-        <form onSubmit={handleCreateIdol} className={`rounded-r2 border border-border bg-white p-4 ${mobileForm === "idol" ? "" : "hidden lg:block"}`}>
+        <form onSubmit={handleCreateIdol} className={`rounded-card border border-border bg-white p-4 ${mobileForm === "idol" ? "" : "hidden lg:block"}`}>
           <h2 className="font-display text-base font-extrabold text-text-1">멤버 등록</h2>
           <div className="mt-4 flex flex-col gap-3">
             <input
@@ -516,7 +516,7 @@ export default function AdminCatalogPage() {
               className={INPUT_CLASS}
             />
             {recentIdol && (
-              <p className="rounded-r2 bg-surface-2 px-3 py-2 text-xs font-semibold text-text-2">
+              <p className="rounded-control bg-surface-2 px-3 py-2 text-xs font-semibold text-text-2">
                 최근 생성 ID: {recentIdol.id} · {recentIdol.stageName}
               </p>
             )}
@@ -526,7 +526,7 @@ export default function AdminCatalogPage() {
           </div>
         </form>
 
-        <form onSubmit={handleAddMembership} className={`rounded-r2 border border-border bg-white p-4 ${mobileForm === "membership" ? "" : "hidden lg:block"}`}>
+        <form onSubmit={handleAddMembership} className={`rounded-card border border-border bg-white p-4 ${mobileForm === "membership" ? "" : "hidden lg:block"}`}>
           <h2 className="font-display text-base font-extrabold text-text-1">스타-멤버 연결</h2>
           <div className="mt-4 flex flex-col gap-3">
             <select
@@ -602,7 +602,7 @@ export default function AdminCatalogPage() {
         >
           <form
             onSubmit={handleUpdateArtist}
-            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-r3 bg-surface p-5 shadow-modal"
+            className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-card bg-surface p-5 shadow-modal"
           >
             <div className="flex items-center justify-between">
               <h2 className="font-display text-base font-extrabold text-text-1">

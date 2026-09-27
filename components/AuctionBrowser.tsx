@@ -81,7 +81,7 @@ export default function AuctionBrowser({
       {/* 진행 표시는 화면 최상단 막대 하나로 모은다(#752). 예전에는 스피너가 아래 건수 옆에
           있었는데, 그 자리에 들고 나면서 정렬 칩 행의 폭이 흔들렸다. */}
       <TopProgressBar active={loading} />
-      <label className="mb-4 flex h-9 max-w-[480px] items-center gap-2 rounded-full border border-border-2 px-3.5 focus-within:border-text-1 sm:mb-5 sm:h-11 sm:px-4">
+      <label className="mb-4 flex h-9 max-w-[480px] items-center gap-2 rounded-control border border-border-2 px-3.5 focus-within:border-text-1 sm:mb-5 sm:h-11 sm:px-4">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
@@ -114,7 +114,7 @@ export default function AuctionBrowser({
                 전부 그렇게 하는데 이 컴포넌트만 보라였다 — 보라는 CTA·필수 표시·포커스처럼
                 **행동을 요구하는 자리**에 남겨 둔다. 정렬 선택은 상태 표시지 행동 요구가 아니다.
               */
-              className={`min-h-8 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+              className={`min-h-8 rounded-control border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
                 sort === option.key
                   ? "border-text-1 bg-text-1 text-white"
                   : "border-border-2 bg-white text-text-2"
@@ -164,7 +164,7 @@ export default function AuctionBrowser({
             type="button"
             onClick={loadMore}
             disabled={loadingMore || loading}
-            className={`flex h-11 items-center gap-2 rounded-full border border-border-2 bg-white px-6 text-[13.5px] font-bold text-text-1 transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+            className={`flex h-11 items-center gap-2 rounded-control border border-border-2 bg-white px-6 text-[13.5px] font-bold text-text-1 transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : moreError ? "다시 시도" : "더 보기"}
           </button>

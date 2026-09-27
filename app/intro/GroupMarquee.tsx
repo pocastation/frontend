@@ -22,7 +22,7 @@ function Chips({ hidden = false }: { hidden?: boolean }) {
       {GROUPS.map((g) => (
         <li
           key={g}
-          className="mr-2 inline-flex h-7 items-center rounded-[3px] border border-border-2 bg-white px-2.5 text-[12px] font-bold text-text-1"
+          className="mr-2 inline-flex h-7 items-center rounded-control border border-border-2 bg-white px-2.5 text-[12px] font-bold text-text-1"
         >
           {g}
         </li>

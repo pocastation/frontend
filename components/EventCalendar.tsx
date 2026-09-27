@@ -14,7 +14,7 @@ const DOW = ["일", "월", "화", "수", "목", "금", "토"];
  * <p>한 달치를 서버에서 한 번에 받아 두고 날짜 선택만 화면에서 한다. 날짜를 누를 때마다 서버에
  * 다시 물으면 달력을 훑는 동작이 매번 왕복이 된다 — 한 달이 수십 건이라 미리 받아도 부담이 없다.
  *
- * <p>도트는 <b>최대 3개</b>에서 멈춘다. 개수를 세는 자리가 아니라 「뭔가 있다」를 알리는 자리다.
+ * <p>행사 있는 날은 날짜 밑 짧은 선 하나다. 개수를 세는 자리가 아니라 「뭔가 있다」를 알리는 자리다.
  */
 export default function EventCalendar({
   month,
@@ -72,7 +72,7 @@ export default function EventCalendar({
                 onClick={() => setSelected(key)}
                 aria-pressed={on}
                 aria-label={`${day.getMonth() + 1}월 ${day.getDate()}일${count > 0 ? ` 행사 ${count}건` : ""}`}
-                className={`rounded-r1 py-1.5 ${FOCUS_RING} ${on ? "bg-primary text-white" : ""}`}
+                className={`rounded-control py-1.5 ${FOCUS_RING} ${on ? "bg-primary text-white" : ""}`}
               >
                 <span
                   className={`block font-display text-[13.5px] ${
@@ -87,13 +87,10 @@ export default function EventCalendar({
                 >
                   {day.getDate()}
                 </span>
-                <span className="mt-[3px] flex h-1 justify-center gap-[2px]" aria-hidden="true">
-                  {Array.from({ length: Math.min(count, 3) }).map((_, i) => (
-                    <i
-                      key={i}
-                      className={`h-[3px] w-[3px] rounded-full ${on ? "bg-white/85" : "bg-border-2"}`}
-                    />
-                  ))}
+                {/* 행사가 있는 날은 날짜 밑 짧은 선 하나로 표시한다. 건수 도트(최대 3개)는 걷었다(#758).
+                    몇 건인지는 aria-label과 날짜를 누른 뒤 목록이 말한다. */}
+                <span className="mt-[3px] flex h-1 items-end justify-center" aria-hidden="true">
+                  {count > 0 && <i className={`h-[2px] w-3 ${on ? "bg-white/85" : "bg-text-3"}`} />}
                 </span>
               </button>
             );

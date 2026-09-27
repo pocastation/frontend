@@ -161,7 +161,7 @@ export default function AdminEmailSuppressionsPage() {
                   setReason("");
                   setModalError(null);
                 }}
-                className={`mt-3 h-10 shrink-0 rounded-[4px] border border-border-2 bg-white px-4 text-[13px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary sm:mt-0 ${FOCUS_RING}`}
+                className={`mt-3 h-10 shrink-0 rounded-control border border-border-2 bg-white px-4 text-[13px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary sm:mt-0 ${FOCUS_RING}`}
               >
                 해제
               </button>
@@ -176,7 +176,7 @@ export default function AdminEmailSuppressionsPage() {
           role="dialog"
           aria-modal="true"
         >
-          <div className="w-full max-w-sm rounded-[6px] bg-surface p-5 shadow-modal">
+          <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
             <h2 className="font-display text-base font-extrabold text-text-1">발송 금지 해제</h2>
             <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
               <b className="font-bold break-all text-text-1">{target.email}</b> 로 다시 메일을 보낼 수
@@ -193,7 +193,7 @@ export default function AdminEmailSuppressionsPage() {
               rows={3}
               autoFocus
               maxLength={200}
-              className={`mt-3 w-full resize-none rounded-[4px] border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+              className={`mt-3 w-full resize-none rounded-control border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
             />
             {modalError && (
               <p role="alert" className="mt-2 text-[12px] font-bold text-danger">
@@ -205,7 +205,7 @@ export default function AdminEmailSuppressionsPage() {
                 type="button"
                 onClick={() => setTarget(null)}
                 disabled={submitting}
-                className={`h-10 flex-1 rounded-[4px] border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
               >
                 취소
               </button>
@@ -213,7 +213,7 @@ export default function AdminEmailSuppressionsPage() {
                 type="button"
                 onClick={release}
                 disabled={submitting}
-                className={`h-10 flex-1 rounded-[4px] bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {submitting ? "해제 중..." : "해제"}
               </button>

@@ -117,7 +117,7 @@ export default function ShareButton({ title, hashtag }: { title: string; hashtag
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-30 mt-1 w-44 overflow-hidden rounded-r2 border border-border bg-surface py-1"
+          className="absolute right-0 top-full z-30 mt-1 w-44 overflow-hidden rounded-control border border-border bg-surface py-1"
         >
           <button type="button" role="menuitem" onClick={shareToX} className={itemClass}>
             {/* X 로고 — 목적지를 알아보게 하는 식별 아이콘이라 장식 아이콘 금지 규칙과 다르다. */}

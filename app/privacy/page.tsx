@@ -144,14 +144,14 @@ export default function PrivacyPage() {
         ))}
       </div>
 
-      <nav aria-label="목차" className="mt-8 rounded-r3 border border-border p-4 sm:p-5">
+      <nav aria-label="목차" className="mt-8 rounded-card border border-border p-4 sm:p-5">
         <h2 className="text-sm font-bold text-text-1">목차</h2>
         <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5">
           {PRIVACY_ARTICLES.map((a) => (
             <li key={a.no}>
               <a
                 href={`#${anchorOf(a.no)}`}
-                className={`rounded-r1 text-xs text-text-2 transition-colors hover:text-primary ${FOCUS_RING}`}
+                className={`rounded-control text-xs text-text-2 transition-colors hover:text-primary ${FOCUS_RING}`}
               >
                 {a.no} {a.title}
               </a>

@@ -27,7 +27,7 @@ import {
 // 입력칸 — 라벨(13px)보다 크고(15px·높이 48px) helper(12px)보다 확실히 앞선다.
 // 가입 폼에서 시각적으로 가장 앞에 있어야 하는 건 설명이 아니라 실제로 조작하는 칸이다.
 const FIELD =
-  "h-12 w-full rounded-[4px] border border-border-2 bg-white px-3.5 text-[15px] text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary";
+  "h-12 w-full rounded-control border border-border-2 bg-white px-3.5 text-[15px] text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary";
 
 function Label({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
@@ -278,7 +278,7 @@ export default function SignupPage() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`flex h-[52px] w-full items-center justify-center rounded-[4px] bg-primary text-[15px] font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
+          className={`flex h-[52px] w-full items-center justify-center rounded-control bg-primary text-[15px] font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
         >
           {/* 문구가 다음에 무슨 일이 일어나는지 말한다 — 관문이 켜져 있으면 이 버튼이 인증창을 띄운다.
               "가입하기"로 두면 눌렀을 때 인증창이 뜨는 게 예고 없는 일이 된다. */}
@@ -329,7 +329,7 @@ function PasswordRules({
   return (
     <div
       // 떠 있는 층이라 그림자를 쓴다 — 장식이 아니라 아래 내용과 겹친다는 신호다.
-      className="absolute inset-x-0 top-full z-20 mt-1.5 rounded-[4px] border border-border-2 bg-white p-3.5 shadow-[0_4px_16px_rgba(17,17,24,0.08)]"
+      className="absolute inset-x-0 top-full z-20 mt-1.5 rounded-card border border-border-2 bg-white p-3.5 shadow-[0_4px_16px_rgba(17,17,24,0.08)]"
     >
       <div className="h-[3px] w-full overflow-hidden rounded-full bg-surface-2">
         <div
@@ -436,7 +436,7 @@ function MailSentNotice({ email }: { email: string }) {
           type="button"
           onClick={resend}
           disabled={status === "sending"}
-          className={`inline-flex h-11 items-center rounded-[4px] border border-border-2 px-5 text-[13.5px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
+          className={`inline-flex h-11 items-center rounded-control border border-border-2 px-5 text-[13.5px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
         >
           {status === "sending" ? "보내는 중..." : "인증 메일 다시 보내기"}
         </button>

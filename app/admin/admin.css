@@ -30,7 +30,7 @@
   .admin-table .line-clamp-2 { display: block; -webkit-line-clamp: unset; overflow: visible; }
   .admin-table-auctions td:last-child { grid-column: 1 / -1; }
   .admin-table-auctions td:last-child > div { flex-wrap: wrap; gap: 8px; }
-  .admin-table-auctions td:last-child button { flex: 1; min-height: 44px; border-radius: 6px; }
+  .admin-table-auctions td:last-child button { flex: 1; min-height: 44px; border-radius: var(--radius-control); }
   .admin-table-members td:nth-child(2),
   .admin-table-audit td:nth-child(4),
   .admin-table-audit td:nth-child(5) { grid-column: 1 / -1; }

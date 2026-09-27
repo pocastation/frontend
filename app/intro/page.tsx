@@ -86,7 +86,6 @@ export default function IntroPage() {
         <div className="mx-auto grid max-w-[1080px] items-start gap-8 px-5 pt-10 pb-8 sm:pt-14 sm:pb-14 lg:grid-cols-[1fr_400px] lg:gap-14">
           <div>
             <p className="flex items-center gap-2 text-[12px] font-extrabold text-primary">
-              <span aria-hidden="true" className="h-1.5 w-1.5 rounded-full bg-primary" />
               사전 신청 모집 중
             </p>
             <h1 className="mt-3.5 font-display text-[30px] font-extrabold leading-[1.18] tracking-[-0.045em] text-text-1 sm:text-[42px]">
@@ -102,7 +101,7 @@ export default function IntroPage() {
               {CHIPS.map((c) => (
                 <li
                   key={c}
-                  className="inline-flex h-7 items-center rounded-[3px] border border-border-2 bg-white px-2.5 text-[12px] font-bold text-text-1"
+                  className="inline-flex h-7 items-center rounded-control border border-border-2 bg-white px-2.5 text-[12px] font-bold text-text-1"
                 >
                   {c}
                 </li>
@@ -112,7 +111,7 @@ export default function IntroPage() {
             <PhoneMockup className="mt-7 lg:mt-9" />
           </div>
 
-          <Suspense fallback={<div className="h-[520px] rounded-[6px] border border-border-2 bg-white" />}>
+          <Suspense fallback={<div className="h-[520px] rounded-card border border-border-2 bg-white" />}>
             <PreRegistrationForm />
           </Suspense>
         </div>
@@ -185,7 +184,7 @@ export default function IntroPage() {
         <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
           <a
             href="#apply"
-            className={`inline-flex h-12 items-center rounded-[4px] bg-primary px-7 text-[14.5px] font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+            className={`inline-flex h-12 items-center rounded-control bg-primary px-7 text-[14.5px] font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
           >
             사전 신청하기
           </a>

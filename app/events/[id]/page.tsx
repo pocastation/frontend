@@ -86,7 +86,7 @@ export default async function EventFeedPage({
         </div>
 
         {event.status === "CANCELLED" && (
-          <p className="mx-[14px] mt-3 rounded-r1 border-l-2 border-warn bg-warn-soft px-3 py-2 text-[12.5px] font-semibold text-[#8a5a08] sm:mx-0">
+          <p className="mx-[14px] mt-3 rounded-control border-l-2 border-warn bg-warn-soft px-3 py-2 text-[12.5px] font-semibold text-[#8a5a08] sm:mx-0">
             휴방·취소된 회차예요. 새 교환글은 올릴 수 없어요.
           </p>
         )}
@@ -133,12 +133,12 @@ export default async function EventFeedPage({
             {writeWindow === "open" ? (
               <Link
                 href={`/exchanges/new?eventId=${id}`}
-                className={`flex h-12 items-center justify-center rounded-[7px] bg-primary text-[15px] font-extrabold text-white ${PRESS_PRIMARY} ${FOCUS_RING}`}
+                className={`flex h-12 items-center justify-center rounded-control bg-primary text-[15px] font-extrabold text-white ${PRESS_PRIMARY} ${FOCUS_RING}`}
               >
                 교환글 등록
               </Link>
             ) : (
-              <p className="rounded-[7px] bg-surface-2 px-3 py-3.5 text-center text-[13px] font-semibold text-text-2">
+              <p className="rounded-card bg-surface-2 px-3 py-3.5 text-center text-[13px] font-semibold text-text-2">
                 {writeWindow === "tooEarly"
                   ? "교환글은 행사 전날 낮 12시부터 올릴 수 있어요."
                   : "교환글을 올릴 수 있는 시간이 지났어요."}
@@ -157,7 +157,7 @@ function FilterChip({ href, on, children }: { href: string; on: boolean; childre
       href={href}
       aria-current={on ? "true" : undefined}
       /* 선택된 칩(보라)에는 눌림 배경을 주지 않는다 — 선택 결과와 눌림이 섞인다(#720). */
-      className={`shrink-0 rounded-[3px] border px-2.5 py-[5px] text-xs font-bold ${FOCUS_RING} ${
+      className={`shrink-0 rounded-control border px-2.5 py-[5px] text-xs font-bold ${FOCUS_RING} ${
         on ? "border-primary bg-primary text-white" : `border-border-2 text-text-2 ${PRESS_CHIP}`
       }`}
     >

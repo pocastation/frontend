@@ -67,7 +67,7 @@ export default function ReturnShipForm({
   }
 
   return (
-    <div className="mt-2.5 flex w-full flex-col gap-2 rounded-r2 border border-border bg-surface p-3">
+    <div className="mt-2.5 flex w-full flex-col gap-2 rounded-card border border-border bg-surface p-3">
       <div className="flex gap-2">
         <select
           className={`${INPUT_CLASS} w-32`}
@@ -94,7 +94,7 @@ export default function ReturnShipForm({
         type="button"
         onClick={submit}
         disabled={saving}
-        className={`self-end rounded-r2 bg-text-1 px-4 py-2 text-[13px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+        className={`self-end rounded-control bg-text-1 px-4 py-2 text-[13px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
       >
         반송 등록
       </button>

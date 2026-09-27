@@ -68,14 +68,14 @@ function OfferConfirmation({
         role="dialog"
         aria-modal="true"
         aria-labelledby="offer-confirm-title"
-        className="relative w-full max-w-[440px] rounded-r3 border border-border bg-white p-5 shadow-modal sm:p-6"
+        className="relative w-full max-w-[440px] rounded-card border border-border bg-white p-5 shadow-modal sm:p-6"
       >
         <button
           type="button"
           aria-label="닫기"
           disabled={submitting}
           onClick={onCancel}
-          className={`absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-r2 text-text-3 transition-colors hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
+          className={`absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-control text-text-3 transition-colors hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
         >
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
             <path d="m6 6 12 12M18 6 6 18" />
@@ -130,7 +130,7 @@ function OfferConfirmation({
             type="button"
             disabled={submitting}
             onClick={onCancel}
-            className={`h-[46px] w-[84px] shrink-0 rounded-r1 border border-border-2 bg-white text-[13.5px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
+            className={`h-[46px] w-[84px] shrink-0 rounded-control border border-border-2 bg-white text-[13.5px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
           >
             취소
           </button>
@@ -139,7 +139,7 @@ function OfferConfirmation({
             autoFocus
             disabled={submitting}
             onClick={onConfirm}
-            className={`h-[46px] flex-1 rounded-r1 bg-primary text-[13.5px] font-extrabold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+            className={`h-[46px] flex-1 rounded-control bg-primary text-[13.5px] font-extrabold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
             {submitting ? "처리 중..." : "이 제안 선택"}
           </button>
@@ -266,7 +266,7 @@ export default function SellerOfferPanel({
     <>
       <section
         id={viewport === "mobile" ? "seller-offer-list-mobile" : undefined}
-        className={`rounded-r3 border border-border bg-surface ${panelPadding}`}
+        className={`rounded-card border border-border bg-surface ${panelPadding}`}
       >
         <div className="flex items-center justify-between gap-4">
           <p className="text-xs font-semibold text-text-3">{amountLabel}</p>
@@ -388,7 +388,7 @@ export default function SellerOfferPanel({
                     <button
                       type="button"
                       onClick={() => setPendingOffer(offer)}
-                      className={`col-start-2 h-8 justify-self-end rounded-r1 border border-border-2 bg-white px-3 text-xs font-bold text-text-1 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+                      className={`col-start-2 h-8 justify-self-end rounded-control border border-border-2 bg-white px-3 text-xs font-bold text-text-1 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
                     >
                       선택
                     </button>

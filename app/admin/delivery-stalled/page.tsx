@@ -106,7 +106,7 @@ export default function AdminDeliveryStalledPage() {
         </AdminNotice>
       )}
 
-      <div className="overflow-hidden rounded-r3 border border-border bg-surface">
+      <div className="overflow-hidden rounded-card border border-border bg-surface">
         {loading ? (
           <p className="py-20 text-center text-sm text-text-3">불러오는 중...</p>
         ) : items.length === 0 ? (
@@ -134,7 +134,7 @@ export default function AdminDeliveryStalledPage() {
                   type="button"
                   disabled={busyId !== null}
                   onClick={() => void markDelivered(item)}
-                  className={`h-9 shrink-0 rounded-r2 bg-text-1 px-3.5 text-xs font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-50 ${FOCUS_RING}`}
+                  className={`h-9 shrink-0 rounded-control bg-text-1 px-3.5 text-xs font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-50 ${FOCUS_RING}`}
                 >
                   {busyId === item.orderId ? "기록 중..." : "배송완료 기록"}
                 </button>

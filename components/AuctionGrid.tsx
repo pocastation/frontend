@@ -29,7 +29,7 @@ export default function AuctionGrid({
 
   if (auctions.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-3 rounded-r4 border border-dashed border-border-2 py-16 text-center">
+      <div className="flex flex-col items-center gap-3 rounded-card border border-dashed border-border-2 py-16 text-center">
         <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-border-2" aria-hidden="true">
           <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
           <path d="m3.3 7 8.7 5 8.7-5M12 22V12" />

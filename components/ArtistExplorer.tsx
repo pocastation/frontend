@@ -106,7 +106,7 @@ export default function ArtistExplorer({
       <TopProgressBar active={loading} />
 
       <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-6 sm:gap-2.5">
-        <label className="flex h-9 min-w-[200px] flex-1 items-center gap-2 rounded-full border border-border-2 px-3.5 focus-within:border-text-1 sm:h-[42px] sm:px-4">
+        <label className="flex h-9 min-w-[200px] flex-1 items-center gap-2 rounded-control border border-border-2 px-3.5 focus-within:border-text-1 sm:h-[42px] sm:px-4">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
@@ -128,7 +128,7 @@ export default function ArtistExplorer({
             type="button"
             aria-pressed={type === null}
             onClick={() => setType(null)}
-            className={`min-h-9 rounded-full border px-3.5 text-[12.5px] font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-[13px] ${FOCUS_RING} ${
+            className={`min-h-9 rounded-control border px-3.5 text-[12.5px] font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-[13px] ${FOCUS_RING} ${
               type === null ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
             }`}
           >
@@ -140,7 +140,7 @@ export default function ArtistExplorer({
               type="button"
               aria-pressed={type === option}
               onClick={() => setType(option)}
-              className={`min-h-9 rounded-full border px-3.5 text-[12.5px] font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-[13px] ${FOCUS_RING} ${
+              className={`min-h-9 rounded-control border px-3.5 text-[12.5px] font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-[13px] ${FOCUS_RING} ${
                 type === option ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
               }`}
             >
@@ -195,7 +195,7 @@ export default function ArtistExplorer({
             type="button"
             onClick={loadMore}
             disabled={loadingMore || loading}
-            className={`flex h-11 items-center gap-2 rounded-full border border-border-2 bg-white px-6 text-[13.5px] font-bold text-text-1 transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+            className={`flex h-11 items-center gap-2 rounded-control border border-border-2 bg-white px-6 text-[13.5px] font-bold text-text-1 transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : moreError ? "다시 시도" : "더 보기"}
           </button>

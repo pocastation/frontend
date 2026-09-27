@@ -200,7 +200,7 @@ const NAV_GROUPS: NavGroup[] = [
 ];
 
 function NavLink({ item, active }: { item: NavItem; active: boolean }) {
-  const base = "flex items-center gap-2.5 rounded-r2 px-2.5 py-2 text-sm font-bold transition-colors";
+  const base = "flex items-center gap-2.5 rounded-control px-2.5 py-2 text-sm font-bold transition-colors";
   if (!item.ready) {
     return (
       <span
@@ -210,7 +210,7 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
       >
         {item.icon}
         <span className="flex-1">{item.label}</span>
-        <span className="rounded-full bg-surface-2 px-1.5 py-0.5 text-[9.5px] font-extrabold text-text-3">준비 중</span>
+        <span className="rounded-control bg-surface-2 px-1.5 py-0.5 text-[9.5px] font-extrabold text-text-3">준비 중</span>
       </span>
     );
   }
@@ -266,7 +266,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <p className="mt-3 text-sm leading-relaxed text-text-3">
           현재 계정은 {member?.role ?? "알 수 없음"} 권한입니다. 관리자 계정으로 로그인한 뒤 다시 접근해주세요.
         </p>
-        <Link href="/" className={`mt-6 inline-flex h-11 items-center rounded-full border border-border-2 bg-white px-5 text-sm font-bold text-text-2 ${FOCUS_RING}`}>
+        <Link href="/" className={`mt-6 inline-flex h-11 items-center rounded-control border border-border-2 bg-white px-5 text-sm font-bold text-text-2 ${FOCUS_RING}`}>
           홈으로 돌아가기
         </Link>
       </div>
@@ -301,7 +301,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <div className="mx-auto max-w-[1720px] px-4 py-6 sm:py-8">
       <div className="flex gap-6">
         <aside className="hidden w-[220px] shrink-0 lg:block">
-          <div className="sticky top-20 rounded-r3 border border-border bg-surface p-2">
+          <div className="sticky top-20 rounded-card border border-border bg-surface p-2">
             <p className="px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold tracking-wide text-primary">POCASTATION ADMIN</p>
             {NAV_GROUPS.map((group) => (
               <div key={group.title}>

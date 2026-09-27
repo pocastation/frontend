@@ -51,7 +51,7 @@ function RowShell({
       <span className="text-[15px] font-medium tracking-[-0.35px] text-text-1">{label}</span>
       <span className="inline-flex shrink-0 items-center gap-[9px]">
         {badge ? (
-          <span aria-label={`확인이 필요한 항목 ${badge}건`} className="rounded-[4px] bg-primary-soft px-[7px] py-px text-[11px] font-semibold tabular-nums text-primary">새 소식 {badge}</span>
+          <span aria-label={`확인이 필요한 항목 ${badge}건`} className="rounded-control bg-primary-soft px-[7px] py-px text-[11px] font-semibold tabular-nums text-primary">새 소식 {badge}</span>
         ) : null}
         {value != null && <span className="text-sm font-semibold tabular-nums text-text-1">{value}<span className="ml-0.5 text-xs font-normal text-[#686873]">{unit}</span></span>}
         <span className="inline-flex text-[#686873]">
@@ -76,7 +76,7 @@ function TabRow({
   onClick: () => void;
 }) {
   return (
-    <button type="button" onClick={onClick} className={`block w-full rounded-md ${PRESS_ROW} ${FOCUS_RING}`}>
+    <button type="button" onClick={onClick} className={`block w-full rounded-control ${PRESS_ROW} ${FOCUS_RING}`}>
       <RowShell label={label} value={value} badge={badge} unit={unit} />
     </button>
   );
@@ -84,7 +84,7 @@ function TabRow({
 
 function LinkRow({ label, href }: { label: string; href: string }) {
   return (
-    <Link href={href} className={`block w-full rounded-md ${PRESS_ROW} ${FOCUS_RING}`}>
+    <Link href={href} className={`block w-full rounded-control ${PRESS_ROW} ${FOCUS_RING}`}>
       <RowShell label={label} />
     </Link>
   );
@@ -169,7 +169,7 @@ export default function MobileMypageMenu({
             {trustLevel != null && (
               <TrustLevelBadge
                 level={trustLevel}
-                className="shrink-0 whitespace-nowrap rounded-[3px] border border-border-2 px-1.5 py-px text-[10.5px] font-bold text-text-2 no-underline"
+                className="shrink-0 whitespace-nowrap rounded-control border border-border-2 px-1.5 py-px text-[10.5px] font-bold text-text-2 no-underline"
               >
                 {trustLevelLabel ?? `신뢰 ${trustLevel}`}
               </TrustLevelBadge>
@@ -189,7 +189,7 @@ export default function MobileMypageMenu({
             key={label}
             type="button"
             onClick={() => onSelectTab(tab)}
-            className={`relative flex min-w-0 flex-col items-center justify-center gap-[3px] rounded-[5px] ${i ? "before:absolute before:bottom-[5px] before:left-0 before:top-2 before:w-px before:bg-border" : ""} ${PRESS_ROW} ${FOCUS_RING}`}
+            className={`relative flex min-w-0 flex-col items-center justify-center gap-[3px] rounded-control ${i ? "before:absolute before:bottom-[5px] before:left-0 before:top-2 before:w-px before:bg-border" : ""} ${PRESS_ROW} ${FOCUS_RING}`}
           >
             <span className="text-[25px] font-semibold leading-[1.2] tracking-[-0.6px] tabular-nums text-text-1">{value}</span>
             <span className="text-xs text-[#686873]">{label}</span>
@@ -203,13 +203,13 @@ export default function MobileMypageMenu({
           <button
             type="button"
             onClick={() => onOpenAddress(pendingAddress.auctionId, pendingAddress.title)}
-            className={`flex w-full items-center gap-2.5 rounded-r2 border border-danger bg-danger-soft px-3 py-[11px] text-left ${FOCUS_RING}`}
+            className={`flex w-full items-center gap-2.5 rounded-control border border-danger bg-danger-soft px-3 py-[11px] text-left ${FOCUS_RING}`}
           >
             <span className="min-w-0 flex-1">
               <span className="block text-[13px] font-extrabold text-danger">배송지를 입력해 주세요</span>
               <span className="mt-0.5 block truncate text-[11.5px] text-text-2">{pendingAddress.title} · 결제 완료</span>
             </span>
-            <span className="flex-shrink-0 rounded-r1 bg-danger px-2.5 py-1.5 text-xs font-extrabold text-white">입력</span>
+            <span className="flex-shrink-0 rounded-control bg-danger px-2.5 py-1.5 text-xs font-extrabold text-white">입력</span>
           </button>
         </div>
       )}
@@ -236,7 +236,7 @@ export default function MobileMypageMenu({
         {/* 교환에서만 적용되는 차단이라 「계정」에 둔다 — 거래 그룹에 넣으면 판매까지 막는 것으로 읽힌다. */}
         <LinkRow label="교환 차단 목록" href="/mypage/exchange-blocks" />
         {isAdmin && (
-          <Link href="/admin" className={`mt-2 flex min-h-[49px] items-center gap-[9px] rounded-md border-t border-border pt-[9px] text-[15px] font-medium text-primary ${PRESS_ROW} ${FOCUS_RING}`}>
+          <Link href="/admin" className={`mt-2 flex min-h-[49px] items-center gap-[9px] rounded-control border-t border-border pt-[9px] text-[15px] font-medium text-primary ${PRESS_ROW} ${FOCUS_RING}`}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M12 3 20 6v7c0 4-4 7-8 9-4-2-8-5-8-9V6z" />
               <path d="m9 12 2 2 4-4" />

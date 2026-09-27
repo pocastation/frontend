@@ -96,7 +96,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
       <div className="flex flex-wrap items-center gap-1.5">
         <TrustLevelBadge
           level={rating.trustLevel}
-          className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1 decoration-transparent hover:decoration-text-3"
+          className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-0.5 text-[11px] font-bold text-text-1 decoration-transparent hover:decoration-text-3"
         >
           <span className="text-text-3">Lv.{rating.trustLevel}</span>
           {plainLevelLabel(rating.trustLevelLabel)}
@@ -135,7 +135,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
             <button
               type="button"
               onClick={toggleExpand}
-              className={`rounded-r2 text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
+              className={`rounded-control text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
             >
               거래 후기 {rating.reviewCount}개 {expanded ? "접기" : "보기"}
             </button>
@@ -147,7 +147,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
             {rating.tags.map((t) => (
               <span
                 key={t.code}
-                className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-semibold text-text-2"
+                className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-0.5 text-[11px] font-semibold text-text-2"
               >
                 {t.label}
                 <span className="text-text-3">{t.count}</span>
@@ -167,7 +167,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
               type="button"
               onClick={() => loadPage(page + 1)}
               disabled={loadingList}
-              className={`mt-2 rounded-r2 py-2 text-xs font-semibold text-text-3 transition-colors hover:text-primary disabled:opacity-50 ${FOCUS_RING}`}
+              className={`mt-2 rounded-control py-2 text-xs font-semibold text-text-3 transition-colors hover:text-primary disabled:opacity-50 ${FOCUS_RING}`}
             >
               {loadingList ? "불러오는 중..." : "후기 더 보기"}
             </button>
@@ -219,7 +219,7 @@ function ReviewRow({
       {review.tags.length > 0 && (
         <div className="mt-1.5 flex flex-wrap gap-1">
           {review.tags.map((t) => (
-            <span key={t.code} className="rounded-full border border-border px-1.5 py-0.5 text-[10px] font-semibold text-text-2">
+            <span key={t.code} className="rounded-control border border-border px-1.5 py-0.5 text-[10px] font-semibold text-text-2">
               {t.label}
             </span>
           ))}
@@ -235,7 +235,7 @@ function ReviewRow({
               <select
                 value={reason}
                 onChange={(e) => setReason(e.target.value as ReviewReportReason)}
-                className={`rounded-r2 border border-border-2 bg-surface px-2 py-1 text-[11px] text-text-2 ${FOCUS_RING}`}
+                className={`rounded-control border border-border-2 bg-surface px-2 py-1 text-[11px] text-text-2 ${FOCUS_RING}`}
               >
                 {REVIEW_REPORT_REASON_OPTIONS.map((code) => (
                   <option key={code} value={code}>
@@ -246,14 +246,14 @@ function ReviewRow({
               <button
                 type="button"
                 onClick={submitReport}
-                className={`rounded-r2 bg-text-1 px-2 py-1 text-[11px] font-bold text-white ${FOCUS_RING}`}
+                className={`rounded-control bg-text-1 px-2 py-1 text-[11px] font-bold text-white ${FOCUS_RING}`}
               >
                 신고 접수
               </button>
               <button
                 type="button"
                 onClick={() => setReporting(false)}
-                className={`rounded-r2 px-1.5 py-1 text-[11px] font-semibold text-text-3 ${FOCUS_RING}`}
+                className={`rounded-control px-1.5 py-1 text-[11px] font-semibold text-text-3 ${FOCUS_RING}`}
               >
                 취소
               </button>

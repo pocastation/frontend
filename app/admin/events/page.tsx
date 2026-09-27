@@ -96,12 +96,12 @@ function dayLabel(eventDate: string): string {
   return ["일", "월", "화", "수", "목", "금", "토"][date.getUTCDay()];
 }
 
-const PANEL = "mt-6 rounded-r2 border border-border bg-white p-4";
+const PANEL = "mt-6 rounded-card border border-border bg-white p-4";
 const LABEL = "mb-1.5 text-[11.5px] font-bold text-text-2";
 const INPUT =
-  "h-9 w-full rounded-r1 border border-border-2 bg-white px-2.5 text-[13px] font-semibold text-text-1";
-const BTN = `inline-flex h-9 items-center justify-center rounded-r1 bg-primary px-3.5 text-[13px] font-extrabold text-white ${FOCUS_RING}`;
-const BTN_GHOST = `inline-flex h-9 items-center justify-center rounded-r1 border border-border-2 bg-white px-3.5 text-[13px] font-extrabold text-text-2 ${FOCUS_RING}`;
+  "h-9 w-full rounded-control border border-border-2 bg-white px-2.5 text-[13px] font-semibold text-text-1";
+const BTN = `inline-flex h-9 items-center justify-center rounded-control bg-primary px-3.5 text-[13px] font-extrabold text-white ${FOCUS_RING}`;
+const BTN_GHOST = `inline-flex h-9 items-center justify-center rounded-control border border-border-2 bg-white px-3.5 text-[13px] font-extrabold text-text-2 ${FOCUS_RING}`;
 const LINK = `text-xs font-bold text-text-2 underline decoration-border-2 underline-offset-2 ${FOCUS_RING}`;
 const LINK_D = `text-xs font-bold text-danger underline decoration-danger/30 underline-offset-2 ${FOCUS_RING}`;
 
@@ -302,12 +302,12 @@ export default function AdminEventsPage() {
       </div>
 
       {error && (
-        <p role="alert" className="mt-4 rounded-r1 border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger">
+        <p role="alert" className="mt-4 rounded-control border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger">
           {error}
         </p>
       )}
       {notice && (
-        <p role="status" className="mt-4 rounded-r1 border-l-2 border-primary bg-surface-2 px-3 py-2 text-[12.5px] font-semibold text-text-2">
+        <p role="status" className="mt-4 rounded-control border-l-2 border-primary bg-surface-2 px-3 py-2 text-[12.5px] font-semibold text-text-2">
           {notice}
         </p>
       )}
@@ -373,7 +373,7 @@ export default function AdminEventsPage() {
 
       <section className={PANEL}>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex overflow-hidden rounded-r1 border border-border-2">
+          <div className="flex overflow-hidden rounded-control border border-border-2">
             {[{ v: -1, l: "지난달" }, { v: 0, l: "이번 달" }, { v: 1, l: "다음 달" }].map((o) => (
               <button key={o.v} type="button" onClick={() => setRangeOffset(o.v)}
                 aria-pressed={rangeOffset === o.v}
@@ -386,7 +386,7 @@ export default function AdminEventsPage() {
           </div>
           <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value as EventType | "")}
             aria-label="유형 필터"
-            className="h-[30px] rounded-r1 border border-border-2 bg-white px-2 text-xs font-semibold text-text-2">
+            className="h-[30px] rounded-control border border-border-2 bg-white px-2 text-xs font-semibold text-text-2">
             <option value="">전체 유형</option>
             {(Object.keys(TYPE_LABEL) as EventType[]).map((t) => (
               <option key={t} value={t}>{TYPE_LABEL[t]}</option>
@@ -394,14 +394,14 @@ export default function AdminEventsPage() {
           </select>
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as EventStatus | "")}
             aria-label="상태 필터"
-            className="h-[30px] rounded-r1 border border-border-2 bg-white px-2 text-xs font-semibold text-text-2">
+            className="h-[30px] rounded-control border border-border-2 bg-white px-2 text-xs font-semibold text-text-2">
             <option value="">전체 상태</option>
             <option value="SCHEDULED">예정</option>
             <option value="CANCELLED">취소</option>
           </select>
           {recurrenceFilter && (
             <button type="button" onClick={() => setRecurrenceFilter(null)}
-              className={`rounded-r1 border border-primary px-2.5 py-1 text-xs font-bold text-primary ${FOCUS_RING}`}>
+              className={`rounded-control border border-primary px-2.5 py-1 text-xs font-bold text-primary ${FOCUS_RING}`}>
               {recurrenceFilter.name} 회차만 · 해제 ×
             </button>
           )}
@@ -439,7 +439,7 @@ export default function AdminEventsPage() {
                     <span className="ml-1 text-[11px] font-semibold text-text-3">{dayLabel(event.eventDate)}</span>
                   </td>
                   <td data-label="유형" className="px-2.5 py-2.5">
-                    <span className="inline-block rounded-r1 border border-border-2 px-1.5 py-0.5 text-[10.5px] font-extrabold text-text-2">
+                    <span className="inline-block rounded-control border border-border-2 px-1.5 py-0.5 text-[10.5px] font-extrabold text-text-2">
                       {TYPE_LABEL[event.type]}
                     </span>
                   </td>
@@ -556,7 +556,7 @@ export default function AdminEventsPage() {
           </h2>
 
           {editingRecurrence !== null && editingRecurrence.affectedFutureEvents > 0 && (
-            <div className="mt-3 rounded-r1 border-l-2 border-warn bg-warn-soft px-3 py-2.5">
+            <div className="mt-3 rounded-control border-l-2 border-warn bg-warn-soft px-3 py-2.5">
               <p className="text-[12.5px] font-extrabold text-[#8a5a08]">
                 고친 값은 앞으로 만들어질 회차부터 적용돼요
               </p>

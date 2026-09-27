@@ -188,7 +188,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                 type="button"
                 aria-pressed={statusFilter === f.key}
                 onClick={() => setStatusFilter(f.key)}
-                className={`h-10 rounded-full border px-3 text-xs font-bold transition-colors ${FOCUS_RING} ${
+                className={`h-10 rounded-control border px-3 text-xs font-bold transition-colors ${FOCUS_RING} ${
                   statusFilter === f.key ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
                 }`}
               >
@@ -199,7 +199,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
 
           <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
-          <div className="admin-table-wrap overflow-x-auto rounded-r3 border border-border bg-surface">
+          <div className="admin-table-wrap overflow-x-auto rounded-card border border-border bg-surface">
             <table role="table" className="admin-table admin-table-reports w-full min-w-[640px] border-collapse">
               <thead>
                 <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
@@ -236,7 +236,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                       <td className="px-4 py-3"><button type="button" aria-label={`${r.targetTitle ?? copy.noun} 신고 상세`} onClick={(event) => { event.stopPropagation(); void openDetail(r.targetId); }} className={`text-left ${FOCUS_RING}`}>
                         <div className="flex items-center gap-2.5">
                           {r.representativeThumbnailUrl !== null && (
-                            <span className="h-9 w-9 shrink-0 overflow-hidden rounded-r1 bg-surface-2">
+                            <span className="h-9 w-9 shrink-0 overflow-hidden rounded-control bg-surface-2">
                               {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일 */}
                               <img src={mediaUrl(r.representativeThumbnailUrl)} alt="" className="h-full w-full object-cover" />
                             </span>
@@ -248,7 +248,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                         </div>
                       </button></td>
                       <td data-label="사유" className="px-4 py-3">
-                        <span className="rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-extrabold text-text-2">
+                        <span className="rounded-control bg-surface-2 px-2 py-0.5 text-[10px] font-extrabold text-text-2">
                           {REPORT_REASON_LABEL[r.representativeReason]}
                         </span>
                       </td>
@@ -274,7 +274,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                 type="button"
                 onClick={loadMore}
                 disabled={loadingMore}
-                className={`h-10 rounded-full border border-border-2 bg-white px-5 text-[13px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 rounded-control border border-border-2 bg-white px-5 text-[13px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {loadingMore ? "불러오는 중..." : "더 보기"}
               </button>
@@ -285,15 +285,15 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
         {/* 상세 패널 */}
         <AdminDetailPane open={selectedId !== null} title="신고 상세" onBack={() => setSelectedId(null)}>
           {!selectedId ? (
-            <div className="rounded-r3 border border-dashed border-border-2 p-8 text-center text-sm text-text-3">
+            <div className="rounded-card border border-dashed border-border-2 p-8 text-center text-sm text-text-3">
               신고를 선택하면 상세 내용과 처리 기능이 표시됩니다.
             </div>
           ) : detailLoading || !detail ? (
-            <div className="rounded-r3 border border-border bg-surface p-8 text-center text-sm text-text-3">
+            <div className="rounded-card border border-border bg-surface p-8 text-center text-sm text-text-3">
               {detailLoading ? "불러오는 중..." : "정보를 불러오지 못했습니다."}
             </div>
           ) : (
-            <div className="rounded-r3 border border-border bg-surface p-4">
+            <div className="rounded-card border border-border bg-surface p-4">
               <div className="flex items-start justify-between gap-2">
                 <h2 className="font-display text-base font-extrabold text-text-1">{detail.targetTitle ?? "-"}</h2>
                 <StatusBadge tone={REPORT_STATUS_TONE[detail.reports[0]?.status ?? "RECEIVED"]} className="shrink-0">
@@ -327,11 +327,11 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
               </p>
               <div className="admin-report-items flex max-h-[220px] flex-col gap-1.5 overflow-y-auto pr-1">
                 {detail.reports.map((item) => (
-                  <div key={item.reportId} className="rounded-r2 border border-border p-2.5">
+                  <div key={item.reportId} className="rounded-control border border-border p-2.5">
                     <div className="flex items-center justify-between gap-2 text-[11px] font-bold">
                       <span className="flex items-center gap-1.5 text-text-2">
                         {item.reporterNickname}
-                        <span className="rounded-full bg-surface-2 px-1.5 py-0.5 text-[9.5px] font-extrabold text-text-2">
+                        <span className="rounded-control bg-surface-2 px-1.5 py-0.5 text-[9.5px] font-extrabold text-text-2">
                           {REPORT_REASON_LABEL[item.reasonCode]}
                         </span>
                       </span>
@@ -345,7 +345,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
               {notice && (
                 <p
                   role={notice.kind === "error" ? "alert" : "status"}
-                  className={`mt-3 rounded-r2 px-3 py-2 text-[12px] font-semibold ${
+                  className={`mt-3 rounded-control px-3 py-2 text-[12px] font-semibold ${
                     notice.kind === "error" ? "bg-accent-soft text-accent" : "bg-ok-soft text-ok"
                   }`}
                 >
@@ -361,7 +361,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                     {([detail.removalAction, "NONE"] as ResolutionAction[]).map((option) => (
                       <label
                         key={option}
-                        className={`flex cursor-pointer items-center gap-2 rounded-r2 border px-3 py-2 text-[13px] font-bold transition-colors ${
+                        className={`flex cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-[13px] font-bold transition-colors ${
                           action === option ? "border-primary bg-primary-soft text-primary" : "border-border-2 text-text-2"
                         }`}
                       >
@@ -385,13 +385,13 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="처리 사유를 입력하세요."
                     rows={2}
-                    className={`mt-2.5 w-full resize-none rounded-r2 border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+                    className={`mt-2.5 w-full resize-none rounded-control border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
                   />
                   <button
                     type="button"
                     onClick={confirmResolve}
                     disabled={submitting}
-                    className={`mt-2.5 h-10 w-full rounded-r2 bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
+                    className={`mt-2.5 h-10 w-full rounded-control bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
                   >
                     {submitting ? "처리 중..." : "처리 확정"}
                   </button>

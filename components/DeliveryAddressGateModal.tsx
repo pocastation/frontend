@@ -106,7 +106,7 @@ export default function DeliveryAddressGateModal({
       role="presentation"
     >
       <div
-        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-r3 border border-border bg-surface p-5"
+        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-card border border-border bg-surface p-5"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -141,13 +141,13 @@ export default function DeliveryAddressGateModal({
             <button
               type="button"
               onClick={openPostcode}
-              className={`shrink-0 rounded-r2 border border-border-2 bg-surface px-3 text-xs font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+              className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 text-xs font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
             >
               우편번호 찾기
             </button>
           </div>
           {postcodeOpen && (
-            <div ref={postcodeBoxRef} className="h-72 w-full overflow-hidden rounded-r2 border border-border" />
+            <div ref={postcodeBoxRef} className="h-72 w-full overflow-hidden rounded-control border border-border" />
           )}
           <input className={INPUT_CLASS} placeholder="기본 주소" value={address1} readOnly />
           <input

@@ -82,7 +82,7 @@ export default function ReviewComposerModal({
       role="presentation"
     >
       <div
-        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-r3 border border-border bg-surface p-5"
+        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-card border border-border bg-surface p-5"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -105,7 +105,7 @@ export default function ReviewComposerModal({
                 aria-label={`별점 ${n}점`}
                 onMouseEnter={() => setHover(n)}
                 onClick={() => setRating(n)}
-                className={`rounded-r2 p-0.5 text-3xl leading-none transition-colors ${FOCUS_RING} ${
+                className={`rounded-control p-0.5 text-3xl leading-none transition-colors ${FOCUS_RING} ${
                   n <= activeStars ? "text-[#f5b301]" : "text-border-2"
                 }`}
               >
@@ -128,7 +128,7 @@ export default function ReviewComposerModal({
                   type="button"
                   aria-pressed={on}
                   onClick={() => toggleTag(t.code)}
-                  className={`rounded-full border px-2.5 py-1 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+                  className={`rounded-control border px-2.5 py-1 text-xs font-semibold transition-colors ${FOCUS_RING} ${
                     on
                       ? "border-primary bg-primary-soft/40 text-primary"
                       : "border-border-2 text-text-2 hover:border-text-3"
@@ -148,7 +148,7 @@ export default function ReviewComposerModal({
             onChange={(e) => setBody(e.target.value.slice(0, 500))}
             rows={3}
             placeholder="거래하며 느낀 점을 남겨주세요. (선택, 최대 500자)"
-            className={`w-full resize-none rounded-r2 border border-border px-3 py-2.5 text-sm text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+            className={`w-full resize-none rounded-control border border-border px-3 py-2.5 text-sm text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
           />
           <p className="mt-0.5 text-right text-[11px] text-text-3">{body.length}/500</p>
         </div>

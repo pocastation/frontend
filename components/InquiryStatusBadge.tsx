@@ -5,7 +5,7 @@ export default function InquiryStatusBadge({ status }: { status: InquiryStatus }
   return (
     <span
       className={
-        "inline-flex shrink-0 rounded-full px-2.5 py-1 text-[11px] font-extrabold " +
+        "inline-flex shrink-0 rounded-control px-2.5 py-1 text-[11px] font-extrabold " +
         INQUIRY_STATUS_CLASS[status]
       }
     >

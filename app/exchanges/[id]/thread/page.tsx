@@ -220,9 +220,12 @@ export default function ExchangeThreadPage() {
                   )}
                   <p
                     className={`max-w-[250px] whitespace-pre-wrap break-words px-3 py-2.5 text-sm leading-normal ${
+                      // 말풍선 꼬리 모서리만 3px로 접는다. 카드 12px + 꼬리 조합이라 radius 토큰 예외다.
                       message.mine
-                        ? "rounded-[12px_12px_3px_12px] bg-primary text-white"
-                        : "rounded-[12px_12px_12px_3px] bg-surface-2 text-text-1"
+                        ? // eslint-disable-next-line no-restricted-syntax
+                          "rounded-[12px_12px_3px_12px] bg-primary text-white"
+                        : // eslint-disable-next-line no-restricted-syntax
+                          "rounded-[12px_12px_12px_3px] bg-surface-2 text-text-1"
                     }`}
                   >
                     {message.body}
@@ -238,7 +241,7 @@ export default function ExchangeThreadPage() {
         </div>
 
         {error && (
-          <p role="alert" className="mx-[14px] mb-2 rounded-r1 border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger">
+          <p role="alert" className="mx-[14px] mb-2 rounded-control border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger">
             {error}
           </p>
         )}
@@ -264,7 +267,7 @@ export default function ExchangeThreadPage() {
                   type="button"
                   disabled={acting}
                   onClick={() => act(`/api/exchanges/${postId}/completion/dispute`, "이의를 보내지 못했어요.")}
-                  className={`mt-2 h-10 w-full rounded-[7px] border border-border-2 bg-white text-[13.5px] font-extrabold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+                  className={`mt-2 h-10 w-full rounded-control border border-border-2 bg-white text-[13.5px] font-extrabold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
                 >
                   교환이 이뤄지지 않았어요
                 </button>
@@ -275,7 +278,7 @@ export default function ExchangeThreadPage() {
                   type="button"
                   disabled={acting}
                   onClick={() => act(`/api/exchanges/${postId}/completion`, "완료 확인에 실패했어요.")}
-                  className={`h-11 w-full rounded-[7px] border border-text-1 bg-white text-[14.5px] font-extrabold text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
+                  className={`h-11 w-full rounded-control border border-text-1 bg-white text-[14.5px] font-extrabold text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
                 >
                   교환 완료 확인
                 </button>
@@ -306,7 +309,7 @@ export default function ExchangeThreadPage() {
               maxLength={500}
               aria-label="메시지"
               placeholder="메시지 입력"
-              className={`h-11 min-w-0 flex-1 rounded-[22px] border border-border-2 px-4 text-[15px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+              className={`h-11 min-w-0 flex-1 rounded-control border border-border-2 px-4 text-[15px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
             />
             <button
               type="button"

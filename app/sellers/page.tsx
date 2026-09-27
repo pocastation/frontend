@@ -48,7 +48,7 @@ export default async function PopularSellersPage() {
         </p>
 
       {sellers.length === 0 ? (
-        <div className="mt-8 flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-20 text-center">
+        <div className="mt-8 flex flex-col items-center gap-2 rounded-card border border-dashed border-border-2 py-20 text-center">
           <p className="text-sm font-bold text-text-1">아직 소개할 판매자가 없어요</p>
           <p className="text-sm text-text-3">거래와 후기가 쌓이면 이곳에 표시돼요.</p>
         </div>
@@ -90,7 +90,7 @@ export default async function PopularSellersPage() {
                   <span className="truncate text-sm font-bold text-text-1">{seller.nickname}</span>
                   <TrustLevelBadge
                     level={seller.trustLevel}
-                    className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1 decoration-transparent hover:decoration-text-3"
+                    className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-0.5 text-[11px] font-bold text-text-1 decoration-transparent hover:decoration-text-3"
                   >
                     <span className="text-text-3">Lv.{seller.trustLevel}</span>
                     {plainLevelLabel(seller.trustLevelLabel)}

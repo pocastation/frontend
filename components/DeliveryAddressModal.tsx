@@ -153,7 +153,7 @@ export default function DeliveryAddressModal({
       role="presentation"
     >
       <div
-        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-r3 border border-border bg-surface p-5"
+        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-card border border-border bg-surface p-5"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -171,7 +171,7 @@ export default function DeliveryAddressModal({
             {addresses.map((a) => (
               <label
                 key={a.id}
-                className={`flex cursor-pointer items-start gap-2.5 rounded-r2 border p-3 text-xs transition-colors ${
+                className={`flex cursor-pointer items-start gap-2.5 rounded-card border p-3 text-xs transition-colors ${
                   selectedId === a.id ? "border-primary bg-primary-soft/30" : "border-border-2 hover:border-text-3"
                 }`}
               >
@@ -187,7 +187,6 @@ export default function DeliveryAddressModal({
                     {a.label && <span>{a.label}</span>}
                     {a.isDefault && (
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold text-primary">
-                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
                         기본
                       </span>
                     )}
@@ -203,7 +202,7 @@ export default function DeliveryAddressModal({
             ))}
 
             <label
-              className={`flex cursor-pointer items-center gap-2.5 rounded-r2 border border-dashed p-3 text-xs font-bold transition-colors ${
+              className={`flex cursor-pointer items-center gap-2.5 rounded-card border border-dashed p-3 text-xs font-bold transition-colors ${
                 selectedId === "new" ? "border-primary bg-primary-soft/30 text-primary" : "border-border-2 text-text-2 hover:border-text-3"
               }`}
             >
@@ -218,7 +217,7 @@ export default function DeliveryAddressModal({
             </label>
 
             {selectedId === "new" && (
-              <div className="mt-1 flex flex-col gap-2 rounded-r2 border border-border bg-surface-2/40 p-3">
+              <div className="mt-1 flex flex-col gap-2 rounded-card border border-border bg-surface-2/40 p-3">
                 <div className="flex gap-2">
                   <input
                     className={`${INPUT_CLASS} flex-1`}
@@ -238,13 +237,13 @@ export default function DeliveryAddressModal({
                   <button
                     type="button"
                     onClick={openPostcode}
-                    className={`shrink-0 rounded-r2 border border-border-2 bg-surface px-3 text-xs font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+                    className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 text-xs font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
                   >
                     우편번호 찾기
                   </button>
                 </div>
                 {postcodeOpen && (
-                  <div ref={postcodeBoxRef} className="h-72 w-full overflow-hidden rounded-r2 border border-border" />
+                  <div ref={postcodeBoxRef} className="h-72 w-full overflow-hidden rounded-control border border-border" />
                 )}
                 <input className={INPUT_CLASS} placeholder="기본 주소" value={address1} readOnly />
                 <input

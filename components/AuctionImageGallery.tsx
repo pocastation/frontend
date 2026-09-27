@@ -82,7 +82,7 @@ export default function AuctionImageGallery({
 
   return (
     <div>
-      <div className="relative aspect-[4/5] overflow-hidden rounded-r4 border border-border bg-surface-2">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-card border border-border bg-surface-2">
         {images.length > 0 ? (
           <>
             {/* 브라우징 페이저 — 모바일은 스와이프, 데스크탑은 화살표로 넘긴다. 슬라이드 탭=확대. */}
@@ -149,7 +149,7 @@ export default function AuctionImageGallery({
                     <ChevronRight />
                   </button>
                 )}
-                <span className="pointer-events-none absolute bottom-2 right-2 z-10 rounded-full bg-text-1/60 px-2 py-0.5 text-[11px] font-semibold text-white tabular-nums">
+                <span className="pointer-events-none absolute bottom-2 right-2 z-10 rounded-control bg-text-1/60 px-2 py-0.5 text-[11px] font-semibold text-white tabular-nums">
                   {activeIndex + 1} / {images.length}
                 </span>
               </>
@@ -172,7 +172,7 @@ export default function AuctionImageGallery({
               aria-selected={index === activeIndex}
               aria-label={`${index + 1}번째 사진 보기`}
               onClick={() => browseScrollToIndex(index)}
-              className={`aspect-square overflow-hidden rounded-r2 border-2 transition-all ${FOCUS_RING} ${
+              className={`aspect-square overflow-hidden rounded-card border-2 transition-all ${FOCUS_RING} ${
                 index === activeIndex ? "border-primary" : "border-transparent opacity-70 hover:opacity-100"
               }`}
             >

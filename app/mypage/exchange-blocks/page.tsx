@@ -78,13 +78,13 @@ export default function ExchangeBlocksPage() {
           교환 차단 목록
         </h1>
 
-        <p className="bg-surface-2 px-[14px] py-2.5 text-[11.5px] leading-relaxed text-text-2 sm:mt-3 sm:rounded-r2">
+        <p className="bg-surface-2 px-[14px] py-2.5 text-[11.5px] leading-relaxed text-text-2 sm:mt-3 sm:rounded-control">
           차단은 <b className="font-bold text-text-1">교환에서만</b> 적용돼요. 서로의 교환글이 목록에서 사라지고
           신청도 주고받을 수 없어요. 판매·구매는 막히지 않아요.
         </p>
 
         {error && (
-          <p role="alert" className="mx-[14px] mt-3 rounded-r1 border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger sm:mx-0">
+          <p role="alert" className="mx-[14px] mt-3 rounded-control border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
@@ -105,7 +105,7 @@ export default function ExchangeBlocksPage() {
                   type="button"
                   onClick={() => unblock(block.id)}
                   disabled={unblocking !== null}
-                  className={`h-9 flex-shrink-0 rounded-r1 border border-border-2 bg-white px-3.5 text-[13px] font-bold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+                  className={`h-9 flex-shrink-0 rounded-control border border-border-2 bg-white px-3.5 text-[13px] font-bold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
                 >
                   {unblocking === block.id ? "푸는 중..." : "차단 해제"}
                 </button>

@@ -37,7 +37,7 @@ function LevelSheet({ currentLevel, onClose }: { currentLevel: number | null; on
       aria-label="거래 레벨 안내"
     >
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
-      <div className="relative w-full rounded-t-r4 bg-white px-4 pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4 sm:max-w-[400px] sm:rounded-r3 sm:p-5">
+      <div className="relative w-full rounded-t-sheet bg-white px-4 pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4 sm:max-w-[400px] sm:rounded-card sm:p-5">
         <p className="text-[15px] font-extrabold text-text-1">거래 레벨</p>
         <p className="mt-1 text-[12px] leading-relaxed text-text-2">
           구매확정까지 끝난 거래 수로 올라가요. 받은 후기 평점이 낮으면 레벨이 오르지 않을 수 있어요.

@@ -361,7 +361,7 @@ function MethodChooser({
         입금이 확인되면 판매자에게 발송 요청이 전달돼요.
       </p>
 
-      <fieldset className="mt-6 rounded-r2 border border-border">
+      <fieldset className="mt-6 rounded-control border border-border">
         <legend className="sr-only">결제수단</legend>
         {METHODS.map((m, i) => {
           const selected = method === m.value;
@@ -435,7 +435,7 @@ function CopyAccountButton({ value }: { value: string }) {
       <button
         type="button"
         onClick={copy}
-        className={`mt-3 inline-flex h-9 items-center gap-1.5 rounded-r2 border border-border-2 px-3 text-[12px] font-bold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+        className={`mt-3 inline-flex h-9 items-center gap-1.5 rounded-control border border-border-2 px-3 text-[12px] font-bold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
       >
         {copied ? (
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

@@ -123,7 +123,7 @@ export default function InquiriesPage() {
         <Link
           href="/inquiries/new"
           className={
-            "inline-flex h-10 shrink-0 items-center justify-center rounded-r2 bg-primary px-4 text-sm font-extrabold text-white transition-colors hover:bg-primary-dark " +
+            "inline-flex h-10 shrink-0 items-center justify-center rounded-control bg-primary px-4 text-sm font-extrabold text-white transition-colors hover:bg-primary-dark " +
             FOCUS_RING
           }
         >
@@ -141,7 +141,7 @@ export default function InquiriesPage() {
               aria-pressed={active}
               onClick={() => setFilter(item.value)}
               className={
-                "h-9 shrink-0 rounded-full border px-4 text-sm font-bold transition-colors " +
+                "h-9 shrink-0 rounded-control border px-4 text-sm font-bold transition-colors " +
                 FOCUS_RING +
                 (active
                   ? " border-primary bg-primary text-white"
@@ -155,7 +155,7 @@ export default function InquiriesPage() {
       </div>
 
       {error && (
-        <p role="alert" className="mt-5 rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
+        <p role="alert" className="mt-5 rounded-card bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
           {error}
         </p>
       )}
@@ -172,7 +172,7 @@ export default function InquiriesPage() {
           <Link
             href="/inquiries/new"
             className={
-              "mt-5 inline-flex h-10 items-center rounded-r2 border border-border-2 bg-white px-4 text-sm font-bold text-text-2 hover:border-primary hover:text-primary " +
+              "mt-5 inline-flex h-10 items-center rounded-control border border-border-2 bg-white px-4 text-sm font-bold text-text-2 hover:border-primary hover:text-primary " +
               FOCUS_RING
             }
           >
@@ -220,7 +220,7 @@ export default function InquiriesPage() {
             disabled={loadingMore}
             onClick={loadMore}
             className={
-              "h-10 rounded-r2 border border-border-2 bg-white px-5 text-sm font-bold text-text-2 hover:border-primary hover:text-primary disabled:opacity-50 " +
+              "h-10 rounded-control border border-border-2 bg-white px-5 text-sm font-bold text-text-2 hover:border-primary hover:text-primary disabled:opacity-50 " +
               FOCUS_RING
             }
           >

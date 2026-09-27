@@ -149,7 +149,7 @@ export default function ReportButton({
       */}
       {open && typeof document !== "undefined" && createPortal(
         <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
-          <div className="w-full max-w-sm rounded-r3 bg-surface p-5 shadow-modal">
+          <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
             <h2 className="font-display text-base font-extrabold text-text-1">신고하기</h2>
             <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
               이 {TARGET_COPY[targetType].noun}의 어떤 점이 문제인지 알려주세요. 접수된 신고는 운영팀이 검토 후 필요한 조치를 취합니다.
@@ -193,7 +193,7 @@ export default function ReportButton({
                 {REPORT_REASON_OPTIONS[targetType].map((option) => (
                   <label
                     key={option}
-                    className={`flex cursor-pointer items-center gap-2 rounded-r2 border px-3 py-2 text-[13px] font-semibold transition-colors ${
+                    className={`flex cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-[13px] font-semibold transition-colors ${
                       reason === option ? "border-primary bg-primary-soft text-primary" : "border-border text-text-2"
                     }`}
                   >
@@ -220,7 +220,7 @@ export default function ReportButton({
               onChange={(e) => setDetail(e.target.value)}
               placeholder="구체적인 내용을 입력해주세요. (선택)"
               rows={3}
-              className={`w-full resize-none rounded-r2 border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+              className={`w-full resize-none rounded-control border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
             />
 
             <p className="mt-2 text-[11px] leading-relaxed text-text-3">
@@ -228,7 +228,7 @@ export default function ReportButton({
             </p>
 
             {error && (
-              <p role="alert" className="mt-2 rounded-r2 bg-accent-soft px-3 py-2 text-[12px] font-semibold text-accent">
+              <p role="alert" className="mt-2 rounded-control bg-accent-soft px-3 py-2 text-[12px] font-semibold text-accent">
                 {error}
               </p>
             )}
@@ -238,7 +238,7 @@ export default function ReportButton({
                 type="button"
                 onClick={() => setOpen(false)}
                 disabled={submitting}
-                className={`h-10 flex-1 rounded-r2 border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
               >
                 닫기
               </button>
@@ -246,7 +246,7 @@ export default function ReportButton({
                 type="button"
                 onClick={submit}
                 disabled={!reason || submitting}
-                className={`h-10 flex-1 rounded-r2 bg-accent text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control bg-accent text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {submitting ? "처리 중..." : "신고 접수"}
               </button>

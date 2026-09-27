@@ -106,7 +106,7 @@ function BrandSlide() {
       <p className="mt-2.5 whitespace-pre-line text-[13px] leading-[1.65] text-white/60">{BRAND_SUBHEAD}</p>
       <Link
         href="/auctions"
-        className={`mt-[18px] flex h-11 w-full items-center justify-center rounded-[7px] bg-primary text-sm font-extrabold text-white ${FOCUS_RING}`}
+        className={`mt-[18px] flex h-11 w-full items-center justify-center rounded-control bg-primary text-sm font-extrabold text-white ${FOCUS_RING}`}
       >
         진행 중인 판매글 보기 →
       </Link>
@@ -127,7 +127,7 @@ function AuctionSlide({ auction }: { auction: AuctionResponse }) {
     <div className="relative flex items-center gap-3.5">
       <Stars />
       <div className="min-w-0 flex-1">
-        <span className="inline-flex items-center rounded-full border border-white/20 px-2.5 py-[3px] text-[11px] font-bold text-white/85">
+        <span className="inline-flex items-center rounded-control border border-white/20 px-2.5 py-[3px] text-[11px] font-bold text-white/85">
           {LEVEL_LABEL[level]}
         </span>
         {auction.artistName && (
@@ -149,14 +149,14 @@ function AuctionSlide({ auction }: { auction: AuctionResponse }) {
         </p>
         <Link
           href={`/auctions/${auction.id}`}
-          className={`mt-3.5 inline-flex h-11 items-center justify-center whitespace-nowrap rounded-[7px] bg-primary px-4 text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+          className={`mt-3.5 inline-flex h-11 items-center justify-center whitespace-nowrap rounded-control bg-primary px-4 text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
         >
           제안하러 가기 →
         </Link>
       </div>
       {/* 3:4 · 118px(#550). 예전 108×135(4:5)는 텍스트 열보다 짧아 오른쪽 아래가 비었고,
           목록 카드(3:4)와도 비율이 달라 같은 사진이 다르게 잘렸다. */}
-      <div className="aspect-[3/4] w-[118px] flex-shrink-0 overflow-hidden rounded-[6px] border border-white/15 bg-white/[0.06]">
+      <div className="aspect-[3/4] w-[118px] flex-shrink-0 overflow-hidden rounded-card border border-white/15 bg-white/[0.06]">
         {auction.representativeThumbnailUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
           <img

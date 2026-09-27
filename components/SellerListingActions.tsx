@@ -98,7 +98,7 @@ export default function SellerListingActions({
   }
 
   const height = viewport === "desktop" ? "h-12" : "h-11";
-  const radius = viewport === "desktop" ? "rounded-r2" : "rounded-[7px]";
+  const radius = viewport === "desktop" ? "rounded-control" : "rounded-control";
   const subClass = `flex ${height} w-[96px] flex-shrink-0 items-center justify-center ${radius} border border-border-2 bg-surface text-[13px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-45 ${FOCUS_RING}`;
   const subWideClass = subClass.replace("w-[96px] flex-shrink-0", "flex-1");
   const mainClass = `flex ${height} flex-1 items-center justify-center ${radius} border-[1.5px] border-text-1 bg-surface ${viewport === "desktop" ? "text-sm" : "text-[13.5px]"} font-extrabold text-text-1 transition-colors hover:bg-surface-2 disabled:opacity-45 ${FOCUS_RING}`;
@@ -233,7 +233,7 @@ function PriceEditDialog({
   return createPortal(
     <div className="fixed inset-0 z-[500] flex items-end justify-center sm:items-center sm:p-4" role="dialog" aria-label={`${label} 수정`} aria-modal="true">
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
-      <div className="relative w-full max-w-[400px] rounded-t-r4 bg-surface p-5 pb-[calc(20px+env(safe-area-inset-bottom))] sm:rounded-r4 sm:pb-5">
+      <div className="relative w-full max-w-[400px] rounded-t-sheet bg-surface p-5 pb-[calc(20px+env(safe-area-inset-bottom))] sm:rounded-card sm:pb-5">
         <div className="flex items-baseline justify-between">
           <p className="text-[15px] font-extrabold text-text-1">{label} 수정</p>
           <button type="button" aria-label="닫기" onClick={onClose} className={`text-text-3 transition-colors hover:text-text-1 ${FOCUS_RING}`}>
@@ -254,7 +254,7 @@ function PriceEditDialog({
             autoFocus
             value={value}
             onChange={(e) => setValue(e.target.value.replace(/[^\d]/g, ""))}
-            className={`mt-1.5 h-12 w-full rounded-r2 border border-border px-3.5 font-display text-[17px] font-bold tabular-nums text-text-1 outline-none transition-colors focus:border-primary ${FOCUS_RING}`}
+            className={`mt-1.5 h-12 w-full rounded-control border border-border px-3.5 font-display text-[17px] font-bold tabular-nums text-text-1 outline-none transition-colors focus:border-primary ${FOCUS_RING}`}
           />
         </label>
         <p className="mt-1.5 text-[11px] text-text-3">
@@ -267,7 +267,7 @@ function PriceEditDialog({
           type="button"
           onClick={() => void submit()}
           disabled={busy || !valid || parsed === current}
-          className={`mt-4 flex h-12 w-full items-center justify-center rounded-r2 bg-primary text-sm font-extrabold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-45 ${FOCUS_RING}`}
+          className={`mt-4 flex h-12 w-full items-center justify-center rounded-control bg-primary text-sm font-extrabold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-45 ${FOCUS_RING}`}
         >
           {busy ? "바꾸는 중..." : valid ? `${formatKRW(parsed)}으로 바꾸기` : "금액을 확인해 주세요"}
         </button>

@@ -55,7 +55,7 @@ export default async function EventsPage({
 
         <nav
           aria-label="달 이동"
-          className="flex items-center justify-between gap-2 border-b border-border px-[14px] py-2.5 sm:mt-5 sm:rounded-r2 sm:border sm:px-3"
+          className="flex items-center justify-between gap-2 border-b border-border px-[14px] py-2.5 sm:mt-5 sm:rounded-control sm:border sm:px-3"
         >
           <Link
             href={`/events?month=${shiftMonth(month, -1)}`}

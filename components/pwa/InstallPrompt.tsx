@@ -193,9 +193,9 @@ export default function InstallPrompt() {
       // 하단탭 위에 얹는다. 셸이 없는 화면에서는 변수가 없어 화면 바닥에서 12px 뜬다.
       style={{ bottom: "calc(12px + var(--mobile-tabbar-h, 0px))" }}
     >
-      <div className="rounded-r3 border border-border bg-white p-3 shadow-card">
+      <div className="rounded-card border border-border bg-white p-3 shadow-card">
         <div className="flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element -- 정적 아이콘, 최적화 대상이 아니다 */}
+          {/* eslint-disable-next-line @next/next/no-img-element, no-restricted-syntax -- 정적 아이콘, 최적화 대상이 아니다. radius는 홈 화면 앱 아이콘 모양을 따른다 */}
           <img src="/icons/icon-192.png" alt="" width={40} height={40} className="flex-shrink-0 rounded-[9px]" />
           <div className="min-w-0 flex-1">
             <p className="text-[13px] font-extrabold text-text-1">홈 화면에 추가하기</p>
@@ -222,7 +222,7 @@ export default function InstallPrompt() {
           <button
             type="button"
             onClick={snoozeToday}
-            className={`h-9 flex-1 rounded-[7px] border border-border-2 text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
+            className={`h-9 flex-1 rounded-control border border-border-2 text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
           >
             오늘 하루 보지 않기
           </button>
@@ -230,7 +230,7 @@ export default function InstallPrompt() {
             <button
               type="button"
               onClick={install}
-              className={`h-9 flex-1 rounded-[7px] bg-primary text-[12.5px] font-extrabold text-white ${FOCUS_RING}`}
+              className={`h-9 flex-1 rounded-control bg-primary text-[12.5px] font-extrabold text-white ${FOCUS_RING}`}
             >
               추가
             </button>

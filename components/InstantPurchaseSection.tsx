@@ -82,7 +82,7 @@ export default function InstantPurchaseSection({
 
   return (
     <div className="mt-6">
-      <div className={`rounded-r3 border border-border p-4 shadow-card ${isLive ? "bg-primary-soft" : "bg-surface"}`}>
+      <div className={`rounded-card border border-border p-4 shadow-card ${isLive ? "bg-primary-soft" : "bg-surface"}`}>
         <div className="flex items-center justify-between text-xs font-semibold text-text-3">
           <span>판매가</span>
           <span>즉시판매</span>
@@ -159,7 +159,7 @@ export default function InstantPurchaseSection({
         <p
           role="alert"
           aria-live="polite"
-          className={`mt-2 rounded-r2 px-3 py-2 text-xs font-semibold ${
+          className={`mt-2 rounded-control px-3 py-2 text-xs font-semibold ${
             message.type === "ok" ? "bg-ok-soft text-ok" : "bg-accent-soft text-accent"
           }`}
         >

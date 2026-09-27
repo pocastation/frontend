@@ -116,7 +116,7 @@ export default function AdminSuggestionsPage() {
             type="button"
             aria-pressed={filter === f.value}
             onClick={() => setFilter(f.value)}
-            className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+            className={`rounded-control border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
               filter === f.value
                 ? "border-primary bg-primary text-white"
                 : "border-border text-text-2 hover:border-primary hover:text-primary"
@@ -150,7 +150,7 @@ export default function AdminSuggestionsPage() {
           {items.map((s) => (
             <li key={s.id} className="py-4">
               <div className="flex items-center gap-2">
-                <span className="rounded-full bg-surface-3 px-2 py-0.5 text-[11px] font-bold text-text-2">
+                <span className="rounded-control bg-surface-3 px-2 py-0.5 text-[11px] font-bold text-text-2">
                   {SUGGESTION_KIND_LABEL[s.kind]}
                 </span>
                 <StatusBadge tone={SUGGESTION_STATUS_TONE[s.status]}>
@@ -168,7 +168,7 @@ export default function AdminSuggestionsPage() {
                     type="button"
                     disabled={busyId === s.id}
                     onClick={() => resolve(s.id, "ACCEPTED")}
-                    className={`rounded-full bg-primary px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
+                    className={`rounded-control bg-primary px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
                   >
                     반영
                   </button>
@@ -176,7 +176,7 @@ export default function AdminSuggestionsPage() {
                     type="button"
                     disabled={busyId === s.id}
                     onClick={() => resolve(s.id, "REJECTED")}
-                    className={`rounded-full border border-border-2 bg-white px-3.5 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-accent hover:text-accent disabled:opacity-60 ${FOCUS_RING}`}
+                    className={`rounded-control border border-border-2 bg-white px-3.5 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-accent hover:text-accent disabled:opacity-60 ${FOCUS_RING}`}
                   >
                     반려
                   </button>
@@ -192,7 +192,7 @@ export default function AdminSuggestionsPage() {
           <button
             type="button"
             onClick={loadMore}
-            className={`rounded-full border border-border-2 bg-white px-6 py-2.5 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+            className={`rounded-control border border-border-2 bg-white px-6 py-2.5 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
           >
             더 보기
           </button>

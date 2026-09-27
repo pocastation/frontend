@@ -11,26 +11,22 @@ import type { ReactNode } from "react";
 export type StatusTone = "ok" | "warn" | "danger" | "neutral" | "muted";
 
 /**
- * tone → 도트 색. <b>글자는 tone과 무관하게 언제나 같은 잉크</b>이고 색은 이 5px 점에만 있다.
- *
- * <p>색을 없애는 게 아니라 <b>면적을 줄이는</b> 것이다. 예전 파스텔 필은 배지 전체가 색이라
- * 표 하나에 색이 5가지씩 떴다 — 색이 정보를 주는 게 아니라 소음이 됐다. 점 하나로 줄이면
- * 스캔 능력은 유지되고 지면은 조용해진다.
+ * tone → 글자색. 색은 글자에만 싣는다(#758). 채움 배경(파스텔 필)과 상태 도트는 쓰지 않는다 —
+ * 필은 표 하나에 색 면이 5가지씩 떠 소음이 됐고, 도트는 방침에서 뺐다.
  */
-const DOT_CLASS: Record<StatusTone, string> = {
-  ok: "bg-ok",
-  warn: "bg-[var(--color-star-line)]",
-  danger: "bg-accent",
-  neutral: "bg-text-3",
-  // 끝났거나 비활성 — 점이 거의 보이지 않아야 "지나간 것"으로 읽힌다.
-  muted: "bg-border-2",
+const TEXT_CLASS: Record<StatusTone, string> = {
+  ok: "text-ok",
+  warn: "text-star-ink",
+  danger: "text-danger",
+  neutral: "text-text-2",
+  // 끝났거나 비활성 — 흐려야 "지나간 것"으로 읽힌다.
+  muted: "text-text-3",
 };
 
 /**
  * 상태 배지.
  *
- * <p>알약(pill)이 아니라 <b>4px radius 칩</b>이다 — 알약은 「필터·태그처럼 누를 수 있는 것」에
- * 쓰고, 상태는 누를 수 없는 표시라 형태를 구분한다(홈 리뉴얼에서 확정한 radius 매핑).
+ * <p>radius는 다른 칩·버튼과 같은 `rounded-control`이다(#758). 알약(pill)은 쓰지 않는다.
  */
 export default function StatusBadge({
   tone,
@@ -43,9 +39,8 @@ export default function StatusBadge({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-[4px] border border-border-2 bg-surface px-1.5 py-0.5 text-[11px] font-bold text-text-2 ${className}`}
+      className={`inline-flex items-center whitespace-nowrap rounded-control border border-border-2 bg-surface px-1.5 py-0.5 text-[11px] font-bold ${TEXT_CLASS[tone]} ${className}`}
     >
-      <span aria-hidden="true" className={`h-[5px] w-[5px] shrink-0 rounded-full ${DOT_CLASS[tone]}`} />
       {children}
     </span>
   );

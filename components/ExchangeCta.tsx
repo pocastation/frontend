@@ -9,7 +9,7 @@ import { isClosed } from "@/lib/exchange-labels";
 import { FOCUS_RING, PRESS_ACCENT, PRESS_FADE, PRESS_INK, PRESS_OUTLINE, PRESS_PRIMARY } from "@/lib/ui";
 import type { ExchangePostDetail, ExchangeStatus, ExchangeViewer } from "@/lib/types";
 
-const BUTTON = "flex h-12 w-full items-center justify-center rounded-[7px] text-[15px] font-extrabold";
+const BUTTON = "flex h-12 w-full items-center justify-center rounded-control text-[15px] font-extrabold";
 
 /**
  * 교환글 하단 버튼. <b>자리는 하나고 역할로 갈린다.</b>
@@ -79,7 +79,7 @@ export default function ExchangeCta({
 
   // 자리를 비워 두지 않는다. 로딩 중에 버튼이 없다가 생기면 화면이 튄다.
   if (authLoading || loading) {
-    return <div aria-hidden="true" className="h-12 w-full rounded-[7px] bg-surface-2" />;
+    return <div aria-hidden="true" className="h-12 w-full rounded-control bg-surface-2" />;
   }
 
   /*
@@ -90,7 +90,7 @@ export default function ExchangeCta({
     주지 않으면 그 사용자는 뒤로가기밖에 할 것이 없다.
   */
   const closedNotice = (
-    <div className="rounded-[7px] bg-surface-2 px-3 py-3 text-center">
+    <div className="rounded-card bg-surface-2 px-3 py-3 text-center">
       <p className="text-[13px] font-semibold text-text-2">마감된 교환글이에요.</p>
       <Link
         href={`/events/${eventId}`}
@@ -163,7 +163,7 @@ export default function ExchangeCta({
   // 차단은 버튼을 남겨 두지 않는다. 눌렀을 때 400을 보여주면 왜 안 되는지 알 수 없다.
   if (viewer?.blocked) {
     return (
-      <p className="rounded-[7px] bg-surface-2 px-3 py-3.5 text-center text-[13px] font-semibold text-text-2">
+      <p className="rounded-card bg-surface-2 px-3 py-3.5 text-center text-[13px] font-semibold text-text-2">
         차단한 상대의 교환글이에요. 마이페이지에서 차단을 풀 수 있어요.
       </p>
     );
@@ -175,7 +175,7 @@ export default function ExchangeCta({
 
   if (status !== "OPEN") {
     return (
-      <p className="rounded-[7px] bg-surface-2 px-3 py-3.5 text-center text-[13px] font-semibold text-text-2">
+      <p className="rounded-card bg-surface-2 px-3 py-3.5 text-center text-[13px] font-semibold text-text-2">
         지금은 신청을 받지 않는 교환글이에요.
       </p>
     );

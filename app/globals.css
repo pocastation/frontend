@@ -3,7 +3,7 @@
 /*
  * 디자인 토큰 — 구버전(GALGALMawang/pocastation) src/styles/global.css의 :root 토큰을
  * Tailwind v4 @theme로 이식. 값 이름(color-primary 등)이 그대로 유틸리티 클래스가 된다:
- * bg-primary, text-text-2, rounded-r4, shadow-card, font-display 등.
+ * bg-primary, text-text-2, rounded-card, shadow-card, font-display 등.
  */
 @theme {
   --color-primary: #5326d9;
@@ -45,11 +45,12 @@
   --color-text-2: #484560;
   --color-text-3: #9896b2;
 
-  --radius-r1: 6px;
-  --radius-r2: 10px;
-  --radius-r3: 14px;
-  --radius-r4: 18px;
-  --radius-r5: 22px;
+  /* radius는 역할 이름 3개뿐이다(#758). 숫자 이름(r1~r5)은 역할과 무관하게 골라 쓰여
+     같은 버튼이 화면마다 6·7·10px로 갈렸다. 원형(아바타·도트·토글·진행 막대)만 rounded-full,
+     가로로 긴 알약(pill)은 쓰지 않는다. */
+  --radius-control: 8px; /* 버튼·입력·칩·배지 */
+  --radius-card: 12px; /* 카드·이미지 타일·패널·모달·토스트 */
+  --radius-sheet: 16px; /* 바텀시트 상단 */
 
   --shadow-card: 0 1px 3px rgba(17, 17, 24, 0.06), 0 4px 16px rgba(17, 17, 24, 0.04);
   /* --shadow-primary(보라 글로우)는 #277에서 제거했다. 장식 그림자라 남겨두면 다시 쓰인다. */
@@ -201,7 +202,7 @@ button:not(:disabled) {
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  border-radius: var(--radius-r1);
+  border-radius: var(--radius-control);
 }
 
 .srch {

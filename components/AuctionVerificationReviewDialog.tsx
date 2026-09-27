@@ -30,7 +30,7 @@ function formatPercentage(value: number | null) {
 
 function PhotoExpandMark() {
   return (
-    <span aria-hidden="true" className="pointer-events-none absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-r1 border border-border bg-surface/90 text-text-2">
+    <span aria-hidden="true" className="pointer-events-none absolute bottom-2 right-2 flex h-7 w-7 items-center justify-center rounded-control border border-border bg-surface/90 text-text-2">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <path d="M15 3h6v6M21 3l-7 7M9 21H3v-6M3 21l7-7" />
       </svg>
@@ -230,7 +230,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
         if (event.target === event.currentTarget && !submitting) onClose();
       }}
     >
-      <div className="verification-shell flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[960px] flex-col overflow-hidden rounded-r3 bg-surface shadow-modal sm:max-h-[calc(100dvh-3rem)]">
+      <div className="verification-shell flex max-h-[calc(100dvh-1.5rem)] w-full max-w-[960px] flex-col overflow-hidden rounded-card bg-surface shadow-modal sm:max-h-[calc(100dvh-3rem)]">
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-border bg-surface px-5 py-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
@@ -238,7 +238,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                 사진 인증 검수 내용
               </h2>
               {readOnly && (
-                <span className="shrink-0 rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-bold text-primary">
+                <span className="shrink-0 rounded-control bg-primary-soft px-2 py-0.5 text-[11px] font-bold text-primary">
                   읽기 전용
                 </span>
               )}
@@ -283,7 +283,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
         )}
         <div ref={scrollRef} className="verification-scroll min-h-0 overflow-y-auto p-4 sm:p-5">
           {readOnly && (
-            <dl className="mb-5 grid gap-3 rounded-r2 border border-border bg-surface-2 px-4 py-3 text-xs sm:grid-cols-3">
+            <dl className="mb-5 grid gap-3 rounded-card border border-border bg-surface-2 px-4 py-3 text-xs sm:grid-cols-3">
               <div>
                 <dt className="text-text-3">검수 결과</dt>
                 <dd className={`mt-1 font-extrabold ${
@@ -523,7 +523,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                   {AUCTION_REJECTION_REASON_OPTIONS.map((option) => (
                     <label
                       key={option.code}
-                      className={`flex cursor-pointer items-center gap-2 rounded-r2 border px-3 py-2 text-[13px] transition-colors ${
+                      className={`flex cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-[13px] transition-colors ${
                         reasonCode === option.code
                           ? "border-accent bg-accent-soft font-bold text-accent"
                           : "border-border text-text-2 hover:border-text-2"

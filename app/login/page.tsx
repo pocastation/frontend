@@ -130,7 +130,7 @@ function LoginForm() {
           </p>
         )}
         {needsVerification && (
-          <div className="flex flex-col gap-2 rounded-r2 border border-border bg-surface-2 p-3">
+          <div className="flex flex-col gap-2 rounded-card border border-border bg-surface-2 p-3">
             {resendState === "sent" ? (
               <p aria-live="polite" className="text-xs leading-relaxed text-text-2">
                 인증 메일을 다시 보냈어요. 메일함(스팸함 포함)을 확인해 주세요.
@@ -171,7 +171,7 @@ function LoginForm() {
       <p className="mt-3 text-center text-xs text-text-3">
         <Link
           href="/auth/forgot-password"
-          className={`rounded-r1 underline underline-offset-2 transition-colors hover:text-text-2 ${FOCUS_RING}`}
+          className={`rounded-control underline underline-offset-2 transition-colors hover:text-text-2 ${FOCUS_RING}`}
         >
           비밀번호를 잊으셨나요?
         </Link>
@@ -192,7 +192,7 @@ function LoginForm() {
             에셋을 제공하면 교체 권장. */}
         <a
           href={socialLoginUrl("kakao")}
-          className={`flex flex-col items-center gap-1.5 rounded-r2 p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
+          className={`flex flex-col items-center gap-1.5 rounded-control p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
         >
           <span className="block h-11 w-11 overflow-hidden rounded-full">
             {/* eslint-disable-next-line @next/next/no-img-element -- 공식 배포 에셋의 심볼 영역만 노출(파일 수정 없음) */}
@@ -207,7 +207,7 @@ function LoginForm() {
         </a>
         <a
           href={socialLoginUrl("naver")}
-          className={`flex flex-col items-center gap-1.5 rounded-r2 p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
+          className={`flex flex-col items-center gap-1.5 rounded-control p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- 네이버 공식 아이콘형 에셋 그대로 사용 */}
           <img src="/oauth/naver-icon.png" alt="" className="h-11 w-11" />
@@ -215,7 +215,7 @@ function LoginForm() {
         </a>
         <a
           href={socialLoginUrl("google")}
-          className={`flex flex-col items-center gap-1.5 rounded-r2 p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
+          className={`flex flex-col items-center gap-1.5 rounded-control p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
         >
           <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DADCE0] bg-white">
             <GoogleIcon />

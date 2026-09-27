@@ -52,7 +52,7 @@ export default async function NoticeDetailPage({
     <div className="mx-auto max-w-[720px] px-5 pt-9 pb-20 sm:pt-12">
       <Link
         href="/notices"
-        className={`inline-flex items-center gap-1 rounded-r2 px-1 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
+        className={`inline-flex items-center gap-1 rounded-control px-1 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
       >
         <span aria-hidden="true">←</span> 공지사항
       </Link>

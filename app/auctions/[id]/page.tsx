@@ -71,10 +71,10 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-// v0 리톤 — 파스텔 필 제거. 해시태그는 헤어라인 pill + 퍼플 텍스트, 배지는 헤어라인 + 뉴트럴 텍스트로 통일.
+// v0 리톤 — 파스텔 필 제거. 해시태그는 헤어라인 칩 + 퍼플 텍스트, 배지는 헤어라인 + 뉴트럴 텍스트로 통일.
 const CHIP_CLASS =
-  `rounded-full border border-border px-2 py-0.5 text-xs font-bold text-primary transition-colors hover:border-primary ${FOCUS_RING}`;
-const BADGE_CLASS = "rounded-full border border-border px-2 py-1 text-xs font-bold text-text-2";
+  `rounded-control border border-border px-2 py-0.5 text-xs font-bold text-primary transition-colors hover:border-primary ${FOCUS_RING}`;
+const BADGE_CLASS = "rounded-control border border-border px-2 py-1 text-xs font-bold text-text-2";
 
 export default async function AuctionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -156,7 +156,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
                 preload="metadata"
                 poster={auction.video.posterUrl ? mediaUrl(auction.video.posterUrl) : undefined}
                 src={mediaUrl(auction.video.url)}
-                className="aspect-video w-full rounded-r3 border border-border bg-black"
+                className="aspect-video w-full rounded-card border border-border bg-black"
               />
               <p className="mt-1.5 text-xs text-text-3">판매자가 올린 검수영상</p>
             </section>
@@ -202,15 +202,15 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
 
           <section className="mt-8">
             <h2 className="font-display text-xl font-bold text-text-1">판매자 정보</h2>
-            <div className="mt-3 rounded-r3 border border-border p-4">
+            <div className="mt-3 rounded-card border border-border p-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-r2 bg-surface-2 text-base font-bold text-text-2">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-control bg-surface-2 text-base font-bold text-text-2">
                     {auction.sellerNickname.slice(0, 1).toUpperCase()}
                   </span>
                   <Link
                     href={`/sellers/${auction.sellerId}`}
-                    className={`rounded-r2 text-sm font-bold text-text-1 transition-colors hover:text-primary ${FOCUS_RING}`}
+                    className={`rounded-control text-sm font-bold text-text-1 transition-colors hover:text-primary ${FOCUS_RING}`}
                   >
                     {auction.sellerNickname}
                   </Link>
@@ -249,7 +249,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             {isLive ? "판매 중" : auction.status === "MATCHED" ? "거래 성사 대기 중" : auction.status === "ENDED_SOLD" ? "거래 완료" : "판매 종료"}
           </p>
 
-          {/* 좁은 오른쪽 열에서도 pill의 둥근 테두리가 열 밖으로 잘리지 않도록 컨테이너 안에서 정렬한다. */}
+          {/* 좁은 오른쪽 열에서도 칩 테두리가 열 밖으로 잘리지 않도록 컨테이너 안에서 정렬한다. */}
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {auction.artistName && (
               <SearchLink query={auction.artistName} className={CHIP_CLASS}>
@@ -311,7 +311,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             <p className="mt-2 font-bold text-text-2">안전한 거래를 위해 안내사항을 꼭 확인해주세요.</p>
             <Link
               href="/guide"
-              className={`mt-1.5 inline-block rounded-r1 font-bold text-primary hover:underline ${FOCUS_RING}`}
+              className={`mt-1.5 inline-block rounded-control font-bold text-primary hover:underline ${FOCUS_RING}`}
             >
               자세히 보기 →
             </Link>

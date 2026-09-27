@@ -104,7 +104,7 @@ function Group({
               href={mediaUrl(photo.url)}
               target="_blank"
               rel="noreferrer"
-              className={`block overflow-hidden rounded-r2 border border-border ${FOCUS_RING}`}
+              className={`block overflow-hidden rounded-control border border-border ${FOCUS_RING}`}
             >
               {/* next/image를 쓰지 않는다 — 반품 사진은 6개월 뒤 파기돼 URL이 사라지고,
                   최적화 캐시가 남으면 파기 뒤에도 이미지가 뜬다. */}
@@ -122,7 +122,7 @@ function Group({
               href={mediaUrl(videoUrl)}
               target="_blank"
               rel="noreferrer"
-              className={`flex aspect-square items-center justify-center rounded-r2 border border-border bg-surface-2 text-[11px] font-bold text-text-2 ${FOCUS_RING}`}
+              className={`flex aspect-square items-center justify-center rounded-card border border-border bg-surface-2 text-[11px] font-bold text-text-2 ${FOCUS_RING}`}
             >
               영상
             </a>

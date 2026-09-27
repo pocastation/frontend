@@ -12,7 +12,7 @@ import AdminNotice from "@/components/AdminNotice";
 
 const PAGE_SIZE = 20;
 const SELECT_CLASS =
-  `h-10 min-w-[160px] rounded-r2 border border-border-2 bg-white px-3 text-[12.5px] font-semibold text-text-2 outline-none transition-colors focus:border-primary ${FOCUS_RING}`;
+  `h-10 min-w-[160px] rounded-control border border-border-2 bg-white px-3 text-[12.5px] font-semibold text-text-2 outline-none transition-colors focus:border-primary ${FOCUS_RING}`;
 
 function buildParams(action: AuditAction | "ALL", targetType: AuditTargetType | "ALL", page: number) {
   const params = new URLSearchParams({ size: String(PAGE_SIZE), page: String(page) });
@@ -120,7 +120,7 @@ export default function AdminAuditLogPage() {
 
       <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
-      <div className="admin-table-wrap overflow-x-auto rounded-r3 border border-border bg-surface">
+      <div className="admin-table-wrap overflow-x-auto rounded-card border border-border bg-surface">
         <table role="table" className="admin-table admin-table-audit w-full min-w-[720px] border-collapse">
           <thead>
             <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
@@ -168,7 +168,7 @@ export default function AdminAuditLogPage() {
             type="button"
             onClick={loadMore}
             disabled={loadingMore}
-            className={`h-10 rounded-full border border-border-2 bg-white px-5 text-[13px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
+            className={`h-10 rounded-control border border-border-2 bg-white px-5 text-[13px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : "더 보기"}
           </button>

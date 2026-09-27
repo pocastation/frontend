@@ -50,7 +50,7 @@ export default function VideoUploadField({ video, onSelect, onRemove }: Props) {
   if (!video) {
     return (
       <label
-        className={`flex aspect-video w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-r2 border border-dashed border-border-2 text-text-3 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+        className={`flex aspect-video w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-card border border-dashed border-border-2 text-text-3 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
       >
         <span className="text-2xl leading-none" aria-hidden="true">
           +
@@ -82,7 +82,7 @@ export default function VideoUploadField({ video, onSelect, onRemove }: Props) {
   const playSrc = video.status === "ready" && video.url ? video.url : video.previewUrl;
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-r2 border border-border bg-black">
+    <div className="relative aspect-video w-full overflow-hidden rounded-card border border-border bg-black">
       {video.status === "ready" && !playing && video.posterUrl ? (
         // 정지컷이 있으면 video 태그 대신 이미지 — 로드가 즉각이고 코덱과 무관하게 항상 보인다.
         // eslint-disable-next-line @next/next/no-img-element -- 서버 산출 정지컷, 크기 고정 슬롯.
@@ -131,7 +131,7 @@ export default function VideoUploadField({ video, onSelect, onRemove }: Props) {
       )}
       {video.status === "ready" && (
         <>
-          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-[3px] bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-control bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
             처리 완료
           </span>
           {!playing && (

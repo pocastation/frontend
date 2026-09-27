@@ -14,7 +14,7 @@ export default function ComingSoon({ title, description }: Props) {
       <span className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary-soft text-2xl text-primary">
         ★
       </span>
-      <span className="mb-3 rounded-full bg-surface-2 px-3 py-1 text-xs font-bold text-text-3">
+      <span className="mb-3 rounded-control bg-surface-2 px-3 py-1 text-xs font-bold text-text-3">
         준비 중
       </span>
       <h1 className="font-display text-2xl font-extrabold text-text-1">{title}</h1>

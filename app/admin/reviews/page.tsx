@@ -78,7 +78,7 @@ export default function AdminReviewsPage() {
       ) : (
         <ul className="mt-5 flex flex-col gap-3">
           {items.map((item) => (
-            <li key={item.reviewId} className="rounded-r3 border border-border bg-surface p-4">
+            <li key={item.reviewId} className="rounded-card border border-border bg-surface p-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   <Stars value={item.rating} />
@@ -87,7 +87,6 @@ export default function AdminReviewsPage() {
                   </span>
                   {item.reviewStatus === "BLINDED" && (
                     <span className="inline-flex items-center gap-1 text-[11px] font-bold text-accent">
-                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
                       블라인드됨
                     </span>
                   )}
@@ -96,7 +95,7 @@ export default function AdminReviewsPage() {
               </div>
 
               {item.body ? (
-                <p className="mt-2 whitespace-pre-wrap rounded-r2 bg-surface-2/50 px-3 py-2 text-sm text-text-2">
+                <p className="mt-2 whitespace-pre-wrap rounded-control bg-surface-2/50 px-3 py-2 text-sm text-text-2">
                   {item.body}
                 </p>
               ) : (
@@ -107,7 +106,7 @@ export default function AdminReviewsPage() {
                 {item.reports.map((rep, i) => (
                   <div
                     key={i}
-                    className="rounded-full border border-border px-2 py-0.5 text-[11px] font-semibold text-text-2 max-lg:w-full max-lg:rounded-r1 max-lg:py-1"
+                    className="rounded-control border border-border px-2 py-0.5 text-[11px] font-semibold text-text-2 max-lg:w-full max-lg:rounded-control max-lg:py-1"
                     title={rep.detail ?? undefined}
                   >
                     {REVIEW_REPORT_REASON_LABEL[rep.reasonCode]}
@@ -122,7 +121,7 @@ export default function AdminReviewsPage() {
                     type="button"
                     disabled={busyId === item.reviewId}
                     onClick={() => act(item.reviewId, "unblind")}
-                    className={`rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-text-3 disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`rounded-control border border-border-2 bg-surface px-3 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-text-3 disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     블라인드 해제
                   </button>
@@ -132,7 +131,7 @@ export default function AdminReviewsPage() {
                       type="button"
                       disabled={busyId === item.reviewId}
                       onClick={() => act(item.reviewId, "blind", { reason: "신고 검토 후 블라인드" })}
-                      className={`rounded-r2 bg-accent px-3 py-1.5 text-xs font-bold text-white transition-colors hover:opacity-90 disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`rounded-control bg-accent px-3 py-1.5 text-xs font-bold text-white transition-colors hover:opacity-90 disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       블라인드
                     </button>
@@ -140,7 +139,7 @@ export default function AdminReviewsPage() {
                       type="button"
                       disabled={busyId === item.reviewId}
                       onClick={() => act(item.reviewId, "dismiss-reports")}
-                      className={`rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-text-3 disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`rounded-control border border-border-2 bg-surface px-3 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-text-3 disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       반려 (정상 리뷰)
                     </button>

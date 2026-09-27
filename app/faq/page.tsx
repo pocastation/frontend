@@ -136,7 +136,7 @@ export default function FaqPage() {
           <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
             <Link
               href="/inquiries/new"
-              className={`inline-flex h-12 items-center rounded-[4px] bg-primary px-8 text-[14px] font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+              className={`inline-flex h-12 items-center rounded-control bg-primary px-8 text-[14px] font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
             >
               문의하기
             </Link>

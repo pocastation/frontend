@@ -94,7 +94,7 @@ export default function PhotoUploadGrid({ items, max, onAddFiles, onRemove, onRe
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
-      className={`rounded-r2 border border-dashed p-2 transition-colors ${
+      className={`rounded-control border border-dashed p-2 transition-colors ${
         dragActive ? "border-primary bg-primary/5" : "border-border-2"
       }`}
     >
@@ -112,7 +112,7 @@ export default function PhotoUploadGrid({ items, max, onAddFiles, onRemove, onRe
             ))}
             {canAdd && (
               <label
-                className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-r2 border border-border text-text-3 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+                className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-card border border-border text-text-3 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
               >
                 <span className="text-xl leading-none" aria-hidden="true">
                   +
@@ -173,20 +173,20 @@ function SortableTile({
         src={item.previewUrl}
         alt={`업로드 사진 ${index + 1}`}
         draggable={false}
-        className="aspect-square w-full rounded-r2 border border-border object-cover"
+        className="aspect-square w-full rounded-card border border-border object-cover"
       />
       {item.status === "uploading" && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-r2 bg-black/40 text-[10px] text-white">
+        <div className="absolute inset-0 flex items-center justify-center rounded-control bg-black/40 text-[10px] text-white">
           업로드 중…
         </div>
       )}
       {item.status === "error" && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-r2 bg-black/55 px-1 text-center text-[9px] text-white">
+        <div className="absolute inset-0 flex items-center justify-center rounded-control bg-black/55 px-1 text-center text-[9px] text-white">
           업로드 실패
         </div>
       )}
       {isCover && (
-        <span className="absolute left-1 top-1 rounded-[3px] bg-black/60 px-1 py-0.5 text-[9px] font-semibold text-white">
+        <span className="absolute left-1 top-1 rounded-control bg-black/60 px-1 py-0.5 text-[9px] font-semibold text-white">
           대표
         </span>
       )}

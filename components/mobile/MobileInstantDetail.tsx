@@ -51,7 +51,7 @@ function ConfirmSheet({
   return (
     <div className="fixed inset-0 z-[500] sm:hidden" role="dialog" aria-label="즉시구매 확인" aria-modal="true">
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
-      <div className="absolute inset-x-0 bottom-0 rounded-t-r4 bg-white px-[14px] pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
+      <div className="absolute inset-x-0 bottom-0 rounded-t-sheet bg-white px-[14px] pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
         <p className="text-[15px] font-extrabold text-text-1">이 가격으로 바로 구매할까요?</p>
         <p className="mt-1 text-[11.5px] text-text-3">확정하면 거래가 성사되고 되돌릴 수 없어요.</p>
 
@@ -74,7 +74,7 @@ function ConfirmSheet({
           type="button"
           onClick={onConfirm}
           disabled={submitting}
-          className={`mt-3.5 flex h-12 w-full items-center justify-center rounded-[7px] bg-primary text-sm font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
+          className={`mt-3.5 flex h-12 w-full items-center justify-center rounded-control bg-primary text-sm font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
         >
           {submitting ? "처리 중..." : "즉시구매 확정"}
         </button>
@@ -214,21 +214,21 @@ export default function MobileInstantDetail({
         </h1>
 
         <div className="mt-2.5 flex flex-wrap gap-1.5">
-          <span className="rounded-chip border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+          <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
             {GRADE_LABEL[auction.grade] ?? auction.grade}
           </span>
-          <span className="rounded-chip border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+          <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
             {SOURCE_LABEL[auction.source] ?? auction.source}
           </span>
           {auction.unopened && (
-            <span className="rounded-chip border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+            <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
               미개봉
             </span>
           )}
         </div>
 
         {/* 가격 카드 — 제안 패널과 같은 골격, 라벨과 안내만 다르다. */}
-        <div className="mt-4 rounded-r3 border border-border p-3.5">
+        <div className="mt-4 rounded-card border border-border p-3.5">
           <div className="flex items-center justify-between gap-3">
             <p className="text-[11px] font-semibold text-text-3">즉시판매가</p>
             <p className="text-[11px] text-text-3">
@@ -280,27 +280,27 @@ export default function MobileInstantDetail({
         >
           <AuctionWishlistButton
             auctionId={auction.id}
-            className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[7px] border border-border-2 bg-white text-text-2 ${FOCUS_RING}`}
+            className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-control border border-border-2 bg-white text-text-2 ${FOCUS_RING}`}
           />
           {isMatched && isMyOrder ? (
             <Link
               href={`/orders/${auction.id}/payment`}
-              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+              className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
             >
               결제하러 가기
             </Link>
           ) : isMatched ? (
-            <span className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-3 text-[13.5px] font-extrabold text-text-3">
+            <span className="flex h-11 flex-1 items-center justify-center rounded-control bg-surface-3 text-[13.5px] font-extrabold text-text-3">
               다른 구매자가 거래 진행 중
             </span>
           ) : isOwnSale ? (
-            <span className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-3 text-[13.5px] font-extrabold text-text-3">
+            <span className="flex h-11 flex-1 items-center justify-center rounded-control bg-surface-3 text-[13.5px] font-extrabold text-text-3">
               내 상품은 구매할 수 없어요
             </span>
           ) : !accessToken ? (
             <Link
               href={`/login?redirect=/auctions/${auction.id}`}
-              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+              className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
             >
               로그인하고 즉시구매
             </Link>
@@ -308,7 +308,7 @@ export default function MobileInstantDetail({
             <button
               type="button"
               onClick={openSheet}
-              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+              className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
             >
               즉시구매
             </button>

@@ -23,7 +23,7 @@ const GROUPS = [
 const OTHER = "기타";
 
 const INPUT_CLASS =
-  "h-12 w-full rounded-[4px] border border-border-2 bg-white px-3.5 text-[15px] text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary";
+  "h-12 w-full rounded-control border border-border-2 bg-white px-3.5 text-[15px] text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary";
 
 /**
  * 입력 중에 하이픈을 끼워 넣는다.
@@ -110,7 +110,7 @@ export default function PreRegistrationForm() {
 
   if (status === "done") {
     return (
-      <div className="rounded-[6px] border border-border-2 bg-white p-6 sm:p-7" id="apply">
+      <div className="rounded-card border border-border-2 bg-white p-6 sm:p-7" id="apply">
         <p className="text-[11px] font-extrabold tracking-[0.08em] text-primary">신청 완료</p>
         <h2 className="mt-2 font-display text-[20px] font-extrabold tracking-[-0.03em] text-text-1">
           사전 신청이 접수됐어요
@@ -121,7 +121,7 @@ export default function PreRegistrationForm() {
         </p>
         <Link
           href="/auctions"
-          className={`mt-5 inline-flex h-11 items-center rounded-[4px] border border-border-2 px-5 text-[13.5px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+          className={`mt-5 inline-flex h-11 items-center rounded-control border border-border-2 px-5 text-[13.5px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
         >
           지금 올라온 상품 둘러보기
         </Link>
@@ -134,7 +134,7 @@ export default function PreRegistrationForm() {
       id="apply"
       onSubmit={submit}
       noValidate
-      className="scroll-mt-20 rounded-[6px] border border-border-2 bg-white p-5 sm:p-6"
+      className="scroll-mt-20 rounded-card border border-border-2 bg-white p-5 sm:p-6"
     >
       <h2 className="font-display text-[17px] font-extrabold tracking-[-0.03em] text-text-1">
         사전 신청하고 혜택 받기
@@ -258,7 +258,7 @@ export default function PreRegistrationForm() {
           type="button"
           onClick={() => setOpenConsent((v) => !v)}
           aria-expanded={openConsent}
-          className={`mt-2.5 rounded-r1 text-[12px] font-bold text-text-3 underline underline-offset-4 transition-colors hover:text-text-1 ${FOCUS_RING}`}
+          className={`mt-2.5 rounded-control text-[12px] font-bold text-text-3 underline underline-offset-4 transition-colors hover:text-text-1 ${FOCUS_RING}`}
         >
           {openConsent ? "수집 항목 접기" : "수집 항목 보기"}
         </button>
@@ -303,7 +303,7 @@ export default function PreRegistrationForm() {
       <button
         type="submit"
         disabled={status === "sending"}
-        className={`mt-1 flex h-[52px] w-full items-center justify-center rounded-[4px] bg-primary text-[15px] font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
+        className={`mt-1 flex h-[52px] w-full items-center justify-center rounded-control bg-primary text-[15px] font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
       >
         {status === "sending" ? "신청 중..." : "사전 신청하기"}
       </button>

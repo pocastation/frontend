@@ -118,7 +118,7 @@ export default function PaymentMethodManager() {
       {message && (
         <p
           role={message.type === "err" ? "alert" : "status"}
-          className={`mb-4 rounded-r2 px-4 py-3 text-sm font-semibold ${
+          className={`mb-4 rounded-card px-4 py-3 text-sm font-semibold ${
             message.type === "err" ? "bg-accent-soft text-accent" : "bg-ok-soft text-ok"
           }`}
         >
@@ -127,7 +127,7 @@ export default function PaymentMethodManager() {
       )}
 
       {methods.length === 0 ? (
-        <div className="flex flex-col items-start gap-3 rounded-r3 border border-dashed border-border-2 p-6">
+        <div className="flex flex-col items-start gap-3 rounded-card border border-dashed border-border-2 p-6">
           <p className="text-sm font-bold text-text-2">등록된 카드가 없어요.</p>
           <p className="text-xs text-text-3">
             거래 성사 시 자동 결제에 사용할 카드를 미리 등록해 두세요. 카드번호는 결제사(PG) 창에서만
@@ -197,7 +197,7 @@ function CardVisual({ method }: { method: PaymentMethod }) {
   const style = getCardBrandStyle(method.cardName);
   return (
     <div
-      className="relative flex h-40 w-full flex-col justify-between rounded-r3 p-5"
+      className="relative flex h-40 w-full flex-col justify-between rounded-card p-5"
       style={{ backgroundImage: `linear-gradient(135deg, ${style.from}, ${style.to})` }}
     >
       <div className="flex items-start justify-between">
@@ -206,13 +206,12 @@ function CardVisual({ method }: { method: PaymentMethod }) {
         </span>
         {method.isDefault && (
           <span className="flex items-center gap-1.5 text-[11px] font-bold" style={{ color: style.text }}>
-            <span className="h-1.5 w-1.5 rounded-full bg-current" />
             기본
           </span>
         )}
       </div>
       {/* EMV 칩 느낌의 최소 장식 — 이미지 자산 없이 CSS만으로 "카드처럼" 보이게 한다. */}
-      <div className="h-6 w-8 rounded-[4px] bg-white/25" />
+      <div className="h-6 w-8 rounded-control bg-white/25" />
       <p className="font-mono text-[15px] tracking-[0.08em] tabular-nums" style={{ color: style.text }}>
         {method.cardNumber ? formatCardNumber(method.cardNumber) : "•••• •••• •••• ••••"}
       </p>

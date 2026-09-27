@@ -226,7 +226,7 @@ export default function NotificationsPage() {
       type="button"
       onClick={handleMarkAllRead}
       disabled={!hasUnread}
-      className={`shrink-0 rounded-full bg-white px-3.5 py-1.5 text-xs font-bold transition-colors ${FOCUS_RING} ${
+      className={`shrink-0 rounded-control bg-white px-3.5 py-1.5 text-xs font-bold transition-colors ${FOCUS_RING} ${
         hasUnread
           ? "border border-border-2 text-text-2 hover:border-primary hover:text-primary"
           : "cursor-not-allowed border border-border text-text-3"
@@ -250,7 +250,7 @@ export default function NotificationsPage() {
         </div>
 
         {error && (
-          <p role="alert" className="mx-4 mb-4 mt-4 rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent sm:mx-0 sm:mt-0">
+          <p role="alert" className="mx-4 mb-4 mt-4 rounded-card bg-accent-soft px-4 py-3 text-sm font-semibold text-accent sm:mx-0 sm:mt-0">
             {error}
           </p>
         )}
@@ -258,14 +258,14 @@ export default function NotificationsPage() {
         {loading ? (
           <p className="py-16 text-center text-sm text-text-3">불러오는 중...</p>
         ) : notifications.length === 0 ? (
-          <div className="mx-4 mt-4 flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-20 text-center text-text-3 sm:mx-0 sm:mt-0">
+          <div className="mx-4 mt-4 flex flex-col items-center gap-2 rounded-card border border-dashed border-border-2 py-20 text-center text-text-3 sm:mx-0 sm:mt-0">
             <BellIcon />
             <p className="text-sm font-bold text-text-2">아직 받은 알림이 없어요.</p>
             <p className="text-xs">거래 성사·결제·발송 소식을 여기서 받아볼 수 있어요.</p>
           </div>
         ) : (
           // 승인 시안 B — 카테고리 리딩 아이콘(의미색 톤) + 안읽음은 우측 단일 닷. 읽음 행은 배경·아이콘을 가라앉힌다.
-          <ul className="sm:overflow-hidden sm:rounded-r3 sm:border sm:border-border">
+          <ul className="sm:overflow-hidden sm:rounded-card sm:border sm:border-border">
             {notifications.map((notification) => {
               const meta = TYPE_META[notification.type] ?? UNKNOWN_META;
               const unread = !notification.isRead;
@@ -321,7 +321,7 @@ export default function NotificationsPage() {
               type="button"
               onClick={handleLoadMore}
               disabled={loadingMore}
-              className={`rounded-full border border-border-2 bg-white px-5 py-2 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-50 ${FOCUS_RING}`}
+              className={`rounded-control border border-border-2 bg-white px-5 py-2 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-50 ${FOCUS_RING}`}
             >
               {loadingMore ? "불러오는 중..." : "더 보기"}
             </button>

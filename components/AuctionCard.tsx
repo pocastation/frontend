@@ -22,7 +22,7 @@ import { AUCTION_STATUS_LABEL } from "@/lib/labels";
 // 중이라는 뜻이라, 배지를 함께 띄우면 같은 사실을 두 번 말하게 된다.
 // 칩 지면은 흰색 하나로 통일한다 — 카운트다운 칩과 언어가 갈리면 같은 카드에서 두 말을 하게 된다.
 const OVERLAY_CHIP =
-  "absolute left-1.5 top-1.5 z-[2] rounded-[4px] bg-white/95 px-1.5 py-0.5 text-[9.5px] font-extrabold leading-[1.35] text-text-1";
+  "absolute left-1.5 top-1.5 z-[2] rounded-control bg-white/95 px-1.5 py-0.5 text-[9.5px] font-extrabold leading-[1.35] text-text-1";
 
 export default function AuctionCard({
   auction,
@@ -65,7 +65,7 @@ export default function AuctionCard({
     <Link href={`/auctions/${auction.id}`} className={`group block ${FOCUS_RING}`}>
       {/* 라운드는 이 이미지 타일에만 있다. 로딩 전 지면은 단색이다 — 회색 그라디언트는
           이미지가 없다는 사실을 굳이 장식하던 것이라 걷어냈다. */}
-      <div className={`relative overflow-hidden bg-surface-2 ${compact ? "aspect-[1/1.18] rounded-r1" : "aspect-[4/5] rounded-[12px]"}`}>
+      <div className={`relative overflow-hidden bg-surface-2 ${compact ? "aspect-[1/1.18] rounded-card" : "aspect-[4/5] rounded-card"}`}>
         {showImage ? (
           <>
             {/* 로딩 중에는 shimmer가 이미지 뒤에서 비친다. 이미지는 항상 불투명하게 두어

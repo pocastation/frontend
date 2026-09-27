@@ -96,7 +96,7 @@ export default function DeliveryAddressBook() {
   return (
     <div className="max-w-xl">
       {error && (
-        <p role="alert" className="mb-4 rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
+        <p role="alert" className="mb-4 rounded-card bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
           {error}
         </p>
       )}
@@ -148,20 +148,20 @@ export default function DeliveryAddressBook() {
       ) : (
         <>
           {addresses.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-16 text-center">
+            <div className="flex flex-col items-center gap-2 rounded-card border border-dashed border-border-2 py-16 text-center">
               <p className="text-sm font-bold text-text-2">등록된 배송지가 없어요.</p>
               <p className="text-xs text-text-3">거래 성사 후 배송받을 주소를 미리 등록해두세요.</p>
             </div>
           ) : (
             <ul className="flex flex-col gap-3">
               {addresses.map((address) => (
-                <li key={address.id} className="rounded-r3 border border-border bg-surface p-4">
+                <li key={address.id} className="rounded-card border border-border bg-surface p-4">
                   <div className="flex items-center gap-2">
                     {address.label && (
                       <span className="text-sm font-extrabold text-text-1">{address.label}</span>
                     )}
                     {address.isDefault && (
-                      <span className="rounded-full bg-primary-soft px-2 py-0.5 text-[11px] font-bold text-primary">
+                      <span className="rounded-control bg-primary-soft px-2 py-0.5 text-[11px] font-bold text-primary">
                         기본 배송지
                       </span>
                     )}
@@ -301,7 +301,7 @@ function AddressForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-r3 border border-border bg-surface p-5">
+    <form onSubmit={handleSubmit} className="rounded-card border border-border bg-surface p-5">
       <h2 className="font-display text-sm font-extrabold text-text-1">
         {isEdit ? "배송지 수정" : "배송지 추가"}
       </h2>
@@ -375,7 +375,7 @@ function AddressForm({
             </button>
           </div>
           {postcodeOpen && (
-            <div className="mt-2 overflow-hidden rounded-r2 border border-border">
+            <div className="mt-2 overflow-hidden rounded-control border border-border">
               <div ref={postcodeBoxRef} className="h-[420px] w-full" />
               <button
                 type="button"

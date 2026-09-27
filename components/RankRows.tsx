@@ -36,7 +36,7 @@ export function AuctionRow({ auction, index }: { auction: AuctionResponse; index
   return (
     <Link href={`/auctions/${auction.id}`} className={`${ROW_CLASS} ${FOCUS_RING}`}>
       <RankNumber index={index} />
-      <span className="h-[34px] w-[27px] flex-shrink-0 overflow-hidden rounded-[4px] bg-surface-2">
+      <span className="h-[34px] w-[27px] flex-shrink-0 overflow-hidden rounded-control bg-surface-2">
         {auction.representativeThumbnailUrl && (
           // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
           <img

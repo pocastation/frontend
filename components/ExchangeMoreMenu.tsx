@@ -90,7 +90,7 @@ export default function ExchangeMoreMenu({
             onClick={() => setOpen(false)}
             className="absolute inset-0 bg-black/40"
           />
-          <div className="relative rounded-t-r3 bg-surface pb-[max(10px,env(safe-area-inset-bottom))] pt-2.5">
+          <div className="relative rounded-t-sheet bg-surface pb-[max(10px,env(safe-area-inset-bottom))] pt-2.5">
             <span aria-hidden="true" className="mx-auto mb-2 block h-1 w-9 rounded-full bg-border-2" />
             <ReportButton targetType="EXCHANGE_POST" targetId={postId} trigger="menu" onDone={() => setOpen(false)} />
             <button
@@ -117,7 +117,7 @@ export default function ExchangeMoreMenu({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className={`mx-3.5 flex min-h-12 w-[calc(100%-28px)] items-center justify-center rounded-[7px] border border-border-2 bg-white text-[15px] font-extrabold text-text-2 ${PRESS_OUTLINE} ${FOCUS_RING}`}
+              className={`mx-3.5 flex min-h-12 w-[calc(100%-28px)] items-center justify-center rounded-control border border-border-2 bg-white text-[15px] font-extrabold text-text-2 ${PRESS_OUTLINE} ${FOCUS_RING}`}
             >
               닫기
             </button>
@@ -132,7 +132,7 @@ export default function ExchangeMoreMenu({
       */}
       {confirmingBlock && typeof document !== "undefined" && createPortal(
         <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
-          <div className="w-full max-w-sm rounded-r3 bg-surface p-5 shadow-modal">
+          <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
             <h2 className="font-display text-base font-extrabold text-text-1">
               {authorNickname ? `${authorNickname}님을 차단할까요?` : "이 사용자를 차단할까요?"}
             </h2>
@@ -145,7 +145,7 @@ export default function ExchangeMoreMenu({
             </p>
 
             {error && (
-              <p role="alert" className="mt-2 rounded-r2 bg-accent-soft px-3 py-2 text-[12px] font-semibold text-accent">
+              <p role="alert" className="mt-2 rounded-control bg-accent-soft px-3 py-2 text-[12px] font-semibold text-accent">
                 {error}
               </p>
             )}
@@ -155,7 +155,7 @@ export default function ExchangeMoreMenu({
                 type="button"
                 onClick={() => setConfirmingBlock(false)}
                 disabled={blocking}
-                className={`h-11 flex-1 rounded-r2 border border-border-2 bg-white text-sm font-bold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-11 flex-1 rounded-control border border-border-2 bg-white text-sm font-bold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 취소
               </button>
@@ -163,7 +163,7 @@ export default function ExchangeMoreMenu({
                 type="button"
                 onClick={block}
                 disabled={blocking}
-                className={`h-11 flex-1 rounded-r2 bg-text-1 text-sm font-bold text-white disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-11 flex-1 rounded-control bg-text-1 text-sm font-bold text-white disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {blocking ? "차단하는 중..." : "차단"}
               </button>

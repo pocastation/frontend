@@ -103,7 +103,7 @@ function OfferForm({
         </span>
       </div>
       <div
-        className={`mt-2 flex h-12 items-center overflow-hidden rounded-r2 border bg-surface transition-colors ${
+        className={`mt-2 flex h-12 items-center overflow-hidden rounded-control border bg-surface transition-colors ${
           isBelowMinimum || isNotUnit ? "border-danger" : "border-border focus-within:border-primary"
         }`}
       >
@@ -149,7 +149,7 @@ function OfferForm({
           });
         }}
         disabled={submitDisabled}
-        className={`mt-4 flex h-12 w-full items-center justify-center rounded-r2 bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-primary ${FOCUS_RING}`}
+        className={`mt-4 flex h-12 w-full items-center justify-center rounded-control bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-primary ${FOCUS_RING}`}
       >
         {/* 제출 버튼이 입력 금액을 그대로 말한다(#480·#484) — 「무엇이 일어나는지」가 버튼에 있다. */}
         {submitting
@@ -220,7 +220,7 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
 
   return (
     <div className="mt-6">
-      <section className="rounded-r3 border border-border bg-surface p-5">
+      <section className="rounded-card border border-border bg-surface p-5">
         {/* 🔴 판매 상태를 여기서 말하지 않는다. 초록 도트가 있던 자리인데, 상태는 제목 위 한 줄이
             전담한다(`app/auctions/[id]/page.tsx`) — 두 곳에서 말하면 「판매 중」이 두 번 나온다. */}
         <div className="flex items-center justify-between gap-4">
@@ -290,14 +290,14 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
               <button
                 type="button"
                 onClick={() => setWithdrawOpen(true)}
-                className={`flex h-12 w-[96px] flex-shrink-0 items-center justify-center rounded-r2 border border-border-2 bg-surface text-[13px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+                className={`flex h-12 w-[96px] flex-shrink-0 items-center justify-center rounded-control border border-border-2 bg-surface text-[13px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
               >
                 취소하기
               </button>
               <button
                 type="button"
                 onClick={() => setEditOpen(true)}
-                className={`flex h-12 flex-1 items-center justify-center rounded-r2 border-[1.5px] border-text-1 bg-surface text-sm font-extrabold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+                className={`flex h-12 flex-1 items-center justify-center rounded-control border-[1.5px] border-text-1 bg-surface text-sm font-extrabold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
               >
                 금액 바꾸기
               </button>
@@ -317,7 +317,7 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
       {editOpen && myOffer && createPortal(
         <div className="fixed inset-0 z-[500] hidden items-center justify-center p-4 sm:flex" role="dialog" aria-label="제안 금액 바꾸기" aria-modal="true">
           <button type="button" aria-label="닫기" onClick={() => setEditOpen(false)} className="absolute inset-0 bg-text-1/40" />
-          <div className="relative max-h-[90vh] w-full max-w-[400px] overflow-y-auto rounded-r4 bg-surface p-5 shadow-modal">
+          <div className="relative max-h-[90vh] w-full max-w-[400px] overflow-y-auto rounded-card bg-surface p-5 shadow-modal">
             <div className="flex items-baseline justify-between">
               <p className="text-[15px] font-extrabold text-text-1">제안 금액 바꾸기</p>
               <button

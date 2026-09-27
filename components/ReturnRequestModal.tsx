@@ -83,7 +83,7 @@ export default function ReturnRequestModal({
       role="presentation"
     >
       <div
-        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-r3 border border-border bg-surface p-5"
+        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-card border border-border bg-surface p-5"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -96,7 +96,7 @@ export default function ReturnRequestModal({
 
         <fieldset className="mt-4">
           <legend className="text-xs font-bold text-text-2">반품 사유</legend>
-          <div className="mt-2 divide-y divide-border rounded-r3 border border-border">
+          <div className="mt-2 divide-y divide-border rounded-card border border-border">
             {RETURN_REASON_OPTIONS.map((code) => (
               <label
                 key={code}
@@ -156,12 +156,12 @@ export default function ReturnRequestModal({
             onChange={(e) => setDetail(e.target.value.slice(0, 500))}
             rows={3}
             placeholder="어떤 점이 달랐는지 구체적으로 적어주시면 운영팀이 빠르게 검토할 수 있어요."
-            className={`mt-1.5 w-full resize-none rounded-r3 border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+            className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
           />
           <span className="mt-1 block text-right text-[11px] text-text-3">{detail.length}/500</span>
         </label>
 
-        <div className="mt-3 rounded-r3 border border-border bg-surface-2 px-3.5 py-2.5 text-[11px] leading-relaxed text-text-2">
+        <div className="mt-3 rounded-card border border-border bg-surface-2 px-3.5 py-2.5 text-[11px] leading-relaxed text-text-2">
           요청은 <b className="font-bold text-text-1">운영팀에 접수</b>돼요. 3영업일 안에 검토해
           판매자에게 전달하고, 판매자 의견을 받아 대금 처리를 결정해요. 반품이 확정되면 물품을
           반송한 뒤 환불돼요.

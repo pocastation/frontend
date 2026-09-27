@@ -22,7 +22,7 @@ const PAGE_SIZE = 30;
 // 반품 처리(#213, #637 개편 · 정책 제16조). 목록은 오래된 순 — 먼저 접수된 건을 먼저 처리한다.
 //
 // 관리자가 실제로 손대는 단계는 둘뿐이다(접수 1차 검토 · 대금 처리). 나머지는 상대의 응답을
-// 기다리는 구간이라 목록에서 도트로 갈라 보여준다 — 여섯 단계를 같은 무게로 나열하면 무엇을
+// 기다리는 구간이라 목록에서 글자색으로 갈라 보여준다 — 여섯 단계를 같은 무게로 나열하면 무엇을
 // 먼저 볼지 알 수 없다.
 //
 // 「중재」라 부르지 않는다. 중재법 제35조에 따라 중재판정은 확정판결과 같은 효력을 갖는데
@@ -184,7 +184,7 @@ export default function AdminDisputesPage() {
         </AdminNotice>
       )}
 
-      <div className="admin-conversation min-h-[560px] overflow-hidden rounded-r3 border border-border bg-surface lg:grid lg:grid-cols-[340px_minmax(0,1fr)]">
+      <div className="admin-conversation min-h-[560px] overflow-hidden rounded-card border border-border bg-surface lg:grid lg:grid-cols-[340px_minmax(0,1fr)]">
         <section
           className={(selected ? "hidden lg:block" : "block") + " border-b border-border lg:border-b-0 lg:border-r"}
           aria-label="분쟁 목록"
@@ -216,15 +216,8 @@ export default function AdminDisputesPage() {
                       }
                     >
                       <span className="flex items-center gap-2">
-                        {/* 내가 손댈 단계만 도트로 강조 — 나머지는 진행 상황 참고용이다. */}
-                        <span
-                          className={
-                            "h-1.5 w-1.5 shrink-0 rounded-full " +
-                            (needsAction ? "bg-accent" : "bg-border-2")
-                          }
-                          aria-hidden="true"
-                        />
-                        <span className="text-[11px] font-extrabold text-text-2">
+                        {/* 내가 손댈 단계만 글자색으로 강조 — 나머지는 진행 상황 참고용이다. */}
+                        <span className={`text-[11px] font-extrabold ${needsAction ? "text-accent" : "text-text-3"}`}>
                           {DISPUTE_STATUS_LABEL[item.disputeStatus]}
                         </span>
                         <span className="ml-auto text-[11px] text-text-3">
@@ -248,7 +241,7 @@ export default function AdminDisputesPage() {
                 type="button"
                 disabled={page === 0}
                 onClick={() => setPage((p) => Math.max(p - 1, 0))}
-                className={`rounded-r2 border border-border px-2.5 py-1 text-xs font-semibold text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
+                className={`rounded-control border border-border px-2.5 py-1 text-xs font-semibold text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
               >
                 이전
               </button>
@@ -259,7 +252,7 @@ export default function AdminDisputesPage() {
                 type="button"
                 disabled={page >= totalPages - 1}
                 onClick={() => setPage((p) => p + 1)}
-                className={`rounded-r2 border border-border px-2.5 py-1 text-xs font-semibold text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
+                className={`rounded-control border border-border px-2.5 py-1 text-xs font-semibold text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
               >
                 다음
               </button>
@@ -281,7 +274,7 @@ export default function AdminDisputesPage() {
               </button>
 
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-border px-2.5 py-1 text-xs font-bold text-text-2">
+                <span className="rounded-control border border-border px-2.5 py-1 text-xs font-bold text-text-2">
                   {DISPUTE_STATUS_LABEL[selected.disputeStatus]}
                 </span>
                 <Link
@@ -294,7 +287,7 @@ export default function AdminDisputesPage() {
 
               <h2 className="mt-2 font-display text-lg font-extrabold text-text-1">{selected.title}</h2>
 
-              <dl className="mt-4 divide-y divide-border rounded-r3 border border-border text-sm">
+              <dl className="mt-4 divide-y divide-border rounded-card border border-border text-sm">
                 {[
                   ["결제 금액", formatKRW(selected.chargeAmount)],
                   ["반품 사유", selected.returnReason ? RETURN_REASON_LABEL[selected.returnReason] : "-"],
@@ -359,7 +352,7 @@ export default function AdminDisputesPage() {
               {(selected.returnDetail || selected.sellerDefense || selected.disputeNote) && (
                 <div className="mt-4 space-y-2">
                   {selected.returnDetail && (
-                    <div className="rounded-r3 bg-surface-2 px-3.5 py-2.5">
+                    <div className="rounded-card bg-surface-2 px-3.5 py-2.5">
                       <span className="block text-[10.5px] font-bold uppercase tracking-wide text-text-3">
                         구매자 주장
                       </span>
@@ -369,7 +362,7 @@ export default function AdminDisputesPage() {
                     </div>
                   )}
                   {selected.sellerDefense && (
-                    <div className="rounded-r3 bg-surface-2 px-3.5 py-2.5">
+                    <div className="rounded-card bg-surface-2 px-3.5 py-2.5">
                       <span className="block text-[10.5px] font-bold uppercase tracking-wide text-text-3">
                         판매자 의견
                       </span>
@@ -379,7 +372,7 @@ export default function AdminDisputesPage() {
                     </div>
                   )}
                   {selected.disputeNote && (
-                    <div className="rounded-r3 border border-border px-3.5 py-2.5">
+                    <div className="rounded-card border border-border px-3.5 py-2.5">
                       <span className="block text-[10.5px] font-bold uppercase tracking-wide text-text-3">
                         운영팀 기록
                       </span>
@@ -402,7 +395,7 @@ export default function AdminDisputesPage() {
                       onChange={(e) => setNote(e.target.value.slice(0, 500))}
                       rows={3}
                       placeholder="무엇이 더 필요한지 구체적으로 적어주세요. 구매자에게 그대로 전달돼요."
-                      className={`mt-1.5 w-full resize-none rounded-r3 border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+                      className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
                     />
                   </label>
                   <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -410,7 +403,7 @@ export default function AdminDisputesPage() {
                       type="button"
                       disabled={busy || !note.trim()}
                       onClick={() => void requestEvidence()}
-                      className={`h-10 flex-1 rounded-r2 border border-border-2 bg-surface text-sm font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`h-10 flex-1 rounded-control border border-border-2 bg-surface text-sm font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       자료 보완 요청
                     </button>
@@ -418,7 +411,7 @@ export default function AdminDisputesPage() {
                       type="button"
                       disabled={busy}
                       onClick={() => void forwardToSeller()}
-                      className={`h-10 flex-1 rounded-r2 bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`h-10 flex-1 rounded-control bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       판매자에게 전달
                     </button>
@@ -436,7 +429,7 @@ export default function AdminDisputesPage() {
                       onChange={(e) => setNote(e.target.value.slice(0, 500))}
                       rows={3}
                       placeholder="어떤 근거로 판단했는지 적어주세요. 감사로그에 남아요."
-                      className={`mt-1.5 w-full resize-none rounded-r3 border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+                      className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
                     />
                   </label>
                   <label className="mt-3 block">
@@ -453,7 +446,7 @@ export default function AdminDisputesPage() {
                         value={amount}
                         onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, "").slice(0, 9))}
                         placeholder="3000"
-                        className={`h-10 w-full rounded-r3 border border-border bg-surface px-3 text-sm tabular-nums text-text-1 placeholder:text-text-3 sm:w-36 ${FOCUS_RING}`}
+                        className={`h-10 w-full rounded-card border border-border bg-surface px-3 text-sm tabular-nums text-text-1 placeholder:text-text-3 sm:w-36 ${FOCUS_RING}`}
                       />
                       <span className="text-[11px] text-text-3">
                         0원 초과 · {formatKRW(selected.chargeAmount)} 미만
@@ -467,7 +460,7 @@ export default function AdminDisputesPage() {
                       type="button"
                       disabled={busy || !note.trim()}
                       onClick={() => void decide("DISMISSED")}
-                      className={`h-10 flex-1 rounded-r2 border border-border-2 bg-surface text-sm font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`h-10 flex-1 rounded-control border border-border-2 bg-surface text-sm font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       {DISPUTE_DECISION_LABEL.DISMISSED}
                     </button>
@@ -475,7 +468,7 @@ export default function AdminDisputesPage() {
                       type="button"
                       disabled={busy || !note.trim() || !amount}
                       onClick={() => void decide("PARTIAL_REFUND")}
-                      className={`h-10 flex-1 rounded-r2 border border-border-2 bg-surface text-sm font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`h-10 flex-1 rounded-control border border-border-2 bg-surface text-sm font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       {DISPUTE_DECISION_LABEL.PARTIAL_REFUND}
                     </button>
@@ -483,7 +476,7 @@ export default function AdminDisputesPage() {
                       type="button"
                       disabled={busy || !note.trim()}
                       onClick={() => void decide("FULL_REFUND")}
-                      className={`h-10 flex-1 rounded-r2 bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`h-10 flex-1 rounded-control bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       {DISPUTE_DECISION_LABEL.FULL_REFUND}
                     </button>
@@ -502,14 +495,14 @@ export default function AdminDisputesPage() {
                       onChange={(e) => setNote(e.target.value.slice(0, 500))}
                       rows={3}
                       placeholder="왜 다시 열어야 하는지 적어주세요. 감사로그에 남아요."
-                      className={`mt-1.5 w-full resize-none rounded-r3 border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+                      className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
                     />
                   </label>
                   <button
                     type="button"
                     disabled={busy || !note.trim()}
                     onClick={() => void reopen()}
-                    className={`mt-3 h-10 w-full rounded-r2 border border-border-2 bg-surface text-sm font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`mt-3 h-10 w-full rounded-control border border-border-2 bg-surface text-sm font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     다시 열어 대금 처리하기
                   </button>
@@ -518,7 +511,7 @@ export default function AdminDisputesPage() {
                   </p>
                 </div>
               ) : (
-                <p className="mt-5 rounded-r3 border border-border bg-surface-2 px-3.5 py-3 text-xs leading-relaxed text-text-2">
+                <p className="mt-5 rounded-card border border-border bg-surface-2 px-3.5 py-3 text-xs leading-relaxed text-text-2">
                   상대의 응답을 기다리는 단계예요.
                   {selected.disputeDueAt
                     ? ` ${formatDateTimeKST(selected.disputeDueAt)}까지 응답이 없으면 자동으로 다음 단계로 넘어가요.`

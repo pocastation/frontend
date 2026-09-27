@@ -207,13 +207,13 @@ export default async function GuideDocPage({ params }: { params: Promise<{ topic
             <div className="mt-2.5 flex flex-wrap gap-2">
               <Link
                 href="/faq"
-                className={`rounded-r2 border border-border-2 bg-surface px-3.5 py-2 text-[13px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+                className={`rounded-control border border-border-2 bg-surface px-3.5 py-2 text-[13px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
               >
                 자주 묻는 질문
               </Link>
               <Link
                 href="/inquiries/new"
-                className={`rounded-r2 bg-text-1 px-3.5 py-2 text-[13px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+                className={`rounded-control bg-text-1 px-3.5 py-2 text-[13px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
               >
                 1:1 문의
               </Link>

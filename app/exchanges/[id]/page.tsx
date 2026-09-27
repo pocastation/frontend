@@ -62,7 +62,7 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
             정작 「어디서 언제」가 고정 바에 가려 첫 화면에 들어오지 않았다(#718). */}
         {cover && (
           <div className="flex gap-1.5 px-[14px] pt-3 max-sm:h-[268px] sm:px-0">
-            <div className="relative flex-[1.8] overflow-hidden rounded-r1 border border-border bg-surface-2">
+            <div className="relative flex-[1.8] overflow-hidden rounded-control border border-border bg-surface-2">
               {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일 */}
               <img
                 src={mediaUrl(cover.url)}
@@ -73,7 +73,7 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
             {rest.length > 0 && (
               <div className="flex flex-1 flex-col gap-1.5">
                 {rest.map((photo) => (
-                  <div key={photo.url} className="flex-1 overflow-hidden rounded-r1 border border-border bg-surface-2">
+                  <div key={photo.url} className="flex-1 overflow-hidden rounded-control border border-border bg-surface-2">
                     {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일 */}
                     <img src={mediaUrl(photo.url)} alt="" className="h-full w-full object-cover" />
                   </div>
@@ -99,12 +99,12 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
 
         {/* 이름은 제목이 말했다. 여기는 출처와 등급만 맡는다 — 이 화면에서 유일한 강조 패널이다. */}
         <div className="px-[14px] pt-3 sm:px-0">
-          <div className="flex overflow-hidden rounded-r2 border border-border-2">
+          <div className="flex overflow-hidden rounded-control border border-border-2">
             <div className="min-w-0 flex-1 px-3 py-2.5">
               <p className="text-[10px] font-extrabold tracking-[0.04em] text-text-3">내가 줄 것</p>
               <p className="mt-1 truncate text-[12.5px] font-bold text-text-2">{itemSource(post.have)}</p>
               {post.have?.grade && (
-                <span className="mt-1.5 inline-block rounded-[3px] border border-border-2 px-1.5 py-px text-[10.5px] font-extrabold text-text-2">
+                <span className="mt-1.5 inline-block rounded-control border border-border-2 px-1.5 py-px text-[10.5px] font-extrabold text-text-2">
                   {post.have.grade}급
                 </span>
               )}
@@ -133,7 +133,7 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
                 {post.slots.map((slot) => (
                   <span
                     key={slot.id}
-                    className="rounded-[3px] border border-border-2 px-2.5 py-[5px] text-xs font-bold text-text-1"
+                    className="rounded-control border border-border-2 px-2.5 py-[5px] text-xs font-bold text-text-1"
                   >
                     {slotLabel(slot)}
                   </span>

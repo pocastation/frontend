@@ -34,7 +34,7 @@ function Stat({ label, value, href }: { label: string; value: string; href?: str
   );
 
   const className = `min-w-0 flex-1 basis-[128px] border-l border-border px-4 first:border-l-0 first:pl-0 ${
-    href ? `rounded-r2 bg-primary-soft/50 py-2 transition-colors hover:bg-primary-soft ${FOCUS_RING}` : ""
+    href ? `rounded-control bg-primary-soft/50 py-2 transition-colors hover:bg-primary-soft ${FOCUS_RING}` : ""
   }`;
 
   return href ? <Link href={href} className={className}>{content}</Link> : <div className={className}>{content}</div>;
@@ -114,7 +114,7 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
-        <section className="rounded-r3 border border-border bg-surface p-4">
+        <section className="rounded-card border border-border bg-surface p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-sm font-extrabold text-text-1">최근 가입 회원</h2>
             <Link href="/admin/members" className={`text-xs font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
@@ -146,7 +146,7 @@ export default function AdminDashboardPage() {
           )}
         </section>
 
-        <section className="rounded-r3 border border-border bg-surface p-4">
+        <section className="rounded-card border border-border bg-surface p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-sm font-extrabold text-text-1">최근 등록 판매글</h2>
             <Link href="/auctions" className={`text-xs font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
@@ -162,7 +162,7 @@ export default function AdminDashboardPage() {
               {data.recentAuctions.map((a) => (
                 <li key={a.id}>
                   <Link href={recentAuctionHref(a.status, a.id)} className={`flex items-center gap-3 py-2.5 ${FOCUS_RING}`}>
-                    <span className="h-9 w-9 shrink-0 overflow-hidden rounded-r1 bg-surface-2">
+                    <span className="h-9 w-9 shrink-0 overflow-hidden rounded-control bg-surface-2">
                       {a.representativeThumbnailUrl && (
                         // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
                         <img src={mediaUrl(a.representativeThumbnailUrl)} alt="" className="h-full w-full object-cover" />

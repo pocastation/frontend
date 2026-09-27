@@ -43,11 +43,11 @@ export default function TermsPage() {
       </header>
 
       {/* 전자상거래법 §20 — 약관에도 중개자 지위를 명시한다(본문 제20조와 동일 취지의 요약 고지). */}
-      <p className="mt-6 rounded-r3 border border-border bg-surface-2 px-4 py-3 text-sm leading-relaxed text-text-2">
+      <p className="mt-6 rounded-card border border-border bg-surface-2 px-4 py-3 text-sm leading-relaxed text-text-2">
         {INTERMEDIARY_NOTICE}
       </p>
 
-      <nav aria-label="목차" className="mt-8 rounded-r3 border border-border p-4 sm:p-5">
+      <nav aria-label="목차" className="mt-8 rounded-card border border-border p-4 sm:p-5">
         <h2 className="text-sm font-bold text-text-1">목차</h2>
         <div className="mt-3 space-y-3">
           {TERMS_CHAPTERS.map((chapter) => (
@@ -58,7 +58,7 @@ export default function TermsPage() {
                   <li key={article.no}>
                     <a
                       href={`#${anchorOf(article.no)}`}
-                      className={`rounded-r1 text-xs text-text-2 transition-colors hover:text-primary ${FOCUS_RING}`}
+                      className={`rounded-control text-xs text-text-2 transition-colors hover:text-primary ${FOCUS_RING}`}
                     >
                       {article.no} {article.title}
                     </a>

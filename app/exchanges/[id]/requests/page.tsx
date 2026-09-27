@@ -88,14 +88,14 @@ export default function ExchangeRequestsPage() {
 
       <div className="mx-auto max-w-[640px] pb-16 sm:px-4 sm:py-8">
         {pending.length > 0 && (
-          <p className="bg-surface-2 px-[14px] py-2.5 text-[11.5px] leading-relaxed text-text-2 sm:rounded-r2">
+          <p className="bg-surface-2 px-[14px] py-2.5 text-[11.5px] leading-relaxed text-text-2 sm:rounded-control">
             한 명을 고르면 교환이 확정되고 <b className="font-bold text-text-1">나머지 신청은 자동으로 마감</b>돼요.
             고른 분과는 대화가 열려요.
           </p>
         )}
 
         {error && (
-          <p role="alert" className="mx-[14px] mt-3 rounded-r1 border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger sm:mx-0">
+          <p role="alert" className="mx-[14px] mt-3 rounded-control border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
@@ -111,7 +111,7 @@ export default function ExchangeRequestsPage() {
             <p className="text-[12.5px] text-text-3">이미 교환이 확정됐어요.</p>
             <Link
               href={`/exchanges/${postId}/thread`}
-              className={`mt-2.5 inline-flex h-11 items-center justify-center rounded-[7px] bg-text-1 px-5 text-[14px] font-extrabold text-white ${FOCUS_RING}`}
+              className={`mt-2.5 inline-flex h-11 items-center justify-center rounded-control bg-text-1 px-5 text-[14px] font-extrabold text-white ${FOCUS_RING}`}
             >
               대화 열기
             </Link>
@@ -124,7 +124,7 @@ export default function ExchangeRequestsPage() {
                   {request.photos.length > 0 && (
                     <div className="flex flex-shrink-0 gap-1">
                       {request.photos.slice(0, 2).map((photo) => (
-                        <span key={photo.url} className="block h-16 w-[54px] overflow-hidden rounded-[4px] border border-border bg-surface-2">
+                        <span key={photo.url} className="block h-16 w-[54px] overflow-hidden rounded-control border border-border bg-surface-2">
                           {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일 */}
                           <img src={mediaUrl(photo.thumbnailUrl)} alt="" className="h-full w-full object-cover" />
                         </span>
@@ -151,7 +151,7 @@ export default function ExchangeRequestsPage() {
                     type="button"
                     onClick={() => accept(request.id)}
                     disabled={accepting !== null}
-                    className={`h-10 min-w-[88px] rounded-r1 px-5 text-sm font-extrabold disabled:opacity-60 ${
+                    className={`h-10 min-w-[88px] rounded-control px-5 text-sm font-extrabold disabled:opacity-60 ${
                       index === 0 ? "bg-primary text-white" : "border border-border-2 bg-white text-text-2"
                     } ${FOCUS_RING}`}
                   >

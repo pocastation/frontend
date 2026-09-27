@@ -78,7 +78,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[500] sm:hidden" role="dialog" aria-label={isEditMode ? "제안 금액 바꾸기" : "가격 제안하기"} aria-modal="true">
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
-      <div className="absolute inset-x-0 bottom-0 rounded-t-r4 bg-white px-[14px] pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
+      <div className="absolute inset-x-0 bottom-0 rounded-t-sheet bg-white px-[14px] pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
         <div className="flex items-baseline justify-between border-b border-border pb-3">
           <p className="text-[15px] font-extrabold text-text-1">{isEditMode ? "제안 금액 바꾸기" : "가격 제안하기"}</p>
           <p className="text-[11.5px] text-text-3">
@@ -101,7 +101,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
           </span>
         </div>
 
-        <div className={`flex h-[52px] items-center overflow-hidden rounded-r2 border bg-white ${
+        <div className={`flex h-[52px] items-center overflow-hidden rounded-control border bg-white ${
           isBelowMinimum || isNotUnit ? "border-danger" : "border-border focus-within:border-primary"
         }`}>
           <span className="flex h-full w-[52px] items-center justify-center border-r border-border font-display text-lg font-bold">₩</span>
@@ -120,7 +120,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
           />
         </div>
 
-        <div className="mt-3.5 rounded-r2 bg-surface-2 p-3 text-[12.5px]">
+        <div className="mt-3.5 rounded-card bg-surface-2 p-3 text-[12.5px]">
           <div className="flex items-center justify-between py-0.5 text-text-3">
             <span>가격 제안</span>
             <span className="font-medium tabular-nums text-text-2">{formatKRW(amount)}</span>
@@ -152,7 +152,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
             });
           }}
           disabled={submitting || !hasValidAmount}
-          className={`mt-3 flex h-12 w-full items-center justify-center rounded-[7px] bg-primary text-sm font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
+          className={`mt-3 flex h-12 w-full items-center justify-center rounded-control bg-primary text-sm font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
         >
           {/* 제출 버튼이 입력 금액을 그대로 말한다(#480) — 「무엇이 일어나는지」가 버튼에 있다. */}
           {submitting
@@ -252,14 +252,14 @@ export default function MobileAuctionDetail({
         </h1>
 
         <div className="mt-2.5 flex flex-wrap gap-1.5">
-          <span className="rounded-chip border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+          <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
             {GRADE_LABEL[auction.grade] ?? auction.grade}
           </span>
-          <span className="rounded-chip border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+          <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
             {SOURCE_LABEL[auction.source] ?? auction.source}
           </span>
           {auction.unopened && (
-            <span className="rounded-chip border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+            <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
               미개봉
             </span>
           )}
@@ -279,7 +279,7 @@ export default function MobileAuctionDetail({
             />
           </div>
         ) : (
-          <div className="mt-4 rounded-r3 border border-border p-3.5">
+          <div className="mt-4 rounded-card border border-border p-3.5">
             <div className="flex items-center justify-between gap-3">
               <p className="text-[11px] font-semibold text-text-3">판매자 최소 제안 금액</p>
               <span aria-live="polite">
@@ -336,12 +336,12 @@ export default function MobileAuctionDetail({
       >
         <AuctionWishlistButton
           auctionId={auctionId}
-          className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[7px] border border-border-2 bg-white text-text-2 ${FOCUS_RING}`}
+          className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-control border border-border-2 bg-white text-text-2 ${FOCUS_RING}`}
         />
         {isOwnAuction && (isLive || status === "MATCHED") ? (
           <a
             href="#seller-offer-list-mobile"
-            className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+            className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
           >
             제안 목록 보기
           </a>
@@ -357,7 +357,7 @@ export default function MobileAuctionDetail({
           */
           <Link
             href={`/orders/${auctionId}/payment`}
-            className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+            className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
           >
             결제하기
           </Link>
@@ -365,7 +365,7 @@ export default function MobileAuctionDetail({
           <button
             type="button"
             disabled
-            className="flex h-11 flex-1 items-center justify-center rounded-[7px] bg-surface-2 text-[13.5px] font-extrabold text-text-3"
+            className="flex h-11 flex-1 items-center justify-center rounded-control bg-surface-2 text-[13.5px] font-extrabold text-text-3"
           >
             {status === "MATCHED"
               ? "거래 판매 중인 상품이에요"
@@ -376,7 +376,7 @@ export default function MobileAuctionDetail({
         ) : !accessToken ? (
           <Link
             href={`/login?redirect=/auctions/${auctionId}`}
-            className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+            className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
           >
             로그인하고 제안하기
           </Link>
@@ -387,14 +387,14 @@ export default function MobileAuctionDetail({
             <button
               type="button"
               onClick={() => setWithdrawOpen(true)}
-              className={`flex h-11 w-[96px] flex-shrink-0 items-center justify-center rounded-[7px] border border-border-2 bg-white text-[13px] font-bold text-text-2 ${FOCUS_RING}`}
+              className={`flex h-11 w-[96px] flex-shrink-0 items-center justify-center rounded-control border border-border-2 bg-white text-[13px] font-bold text-text-2 ${FOCUS_RING}`}
             >
               취소하기
             </button>
             <button
               type="button"
               onClick={() => setSheetOpen(true)}
-              className={`flex h-11 flex-1 items-center justify-center rounded-[7px] border-[1.5px] border-text-1 bg-white text-[13.5px] font-extrabold text-text-1 ${FOCUS_RING}`}
+              className={`flex h-11 flex-1 items-center justify-center rounded-control border-[1.5px] border-text-1 bg-white text-[13.5px] font-extrabold text-text-1 ${FOCUS_RING}`}
             >
               금액 바꾸기
             </button>
@@ -403,7 +403,7 @@ export default function MobileAuctionDetail({
           <button
             type="button"
             onClick={() => setSheetOpen(true)}
-            className={`flex h-11 flex-1 items-center justify-center rounded-[7px] bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+            className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
           >
             제안하기
           </button>

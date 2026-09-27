@@ -91,7 +91,7 @@ export default function ConsentFields({
   }
 
   return (
-    <fieldset className="rounded-r3 border border-border">
+    <fieldset className="rounded-card border border-border">
       <legend className="sr-only">약관 및 개인정보 동의</legend>
 
       <label
@@ -131,7 +131,7 @@ export default function ConsentFields({
                 href={item.href}
                 target="_blank"
                 rel="noreferrer"
-                className={`shrink-0 rounded-r1 text-xs font-semibold text-text-3 underline-offset-2 hover:text-primary hover:underline ${FOCUS_RING}`}
+                className={`shrink-0 rounded-control text-xs font-semibold text-text-3 underline-offset-2 hover:text-primary hover:underline ${FOCUS_RING}`}
               >
                 보기
               </Link>

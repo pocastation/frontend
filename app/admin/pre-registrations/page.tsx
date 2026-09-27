@@ -219,13 +219,12 @@ export default function AdminPreRegistrationsPage() {
         </div>
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 text-xs font-bold text-text-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true" />
             {updatedAt ? `${formatRelativeTime(updatedAt)} 갱신` : "불러오는 중..."}
           </span>
           <button
             type="button"
             onClick={() => void load()}
-            className={`h-8 rounded-r2 border border-border-2 px-3 text-xs font-bold text-text-2 transition-colors hover:bg-bg ${FOCUS_RING}`}
+            className={`h-8 rounded-control border border-border-2 px-3 text-xs font-bold text-text-2 transition-colors hover:bg-bg ${FOCUS_RING}`}
           >
             지금 새로고침
           </button>
@@ -283,6 +282,7 @@ export default function AdminPreRegistrationsPage() {
                     {/* 막대는 잉크, 지금 시간대만 보라다 — 보라는 「현재」라는 상태를 말하는 자리에만 쓴다.
                         연보라 배경으로 칠하지 않는다(디자인 규칙). */}
                     <span
+                      // eslint-disable-next-line no-restricted-syntax -- 차트 막대 끝 처리라 UI radius 토큰 대상이 아니다
                       className={`w-full rounded-t-[2px] ${b.hour === nowHour ? "bg-primary" : "bg-text-1"}`}
                       style={{ height: `${Math.max(2, (b.count / barMax) * 100)}%` }}
                     />
@@ -335,7 +335,7 @@ export default function AdminPreRegistrationsPage() {
               <button
                 type="button"
                 onClick={() => setRevealed((on) => !on)}
-                className={`h-8 rounded-r2 border border-border-2 px-3 text-xs font-bold text-text-2 transition-colors hover:bg-bg ${FOCUS_RING}`}
+                className={`h-8 rounded-control border border-border-2 px-3 text-xs font-bold text-text-2 transition-colors hover:bg-bg ${FOCUS_RING}`}
               >
                 {revealed ? "번호 가리기" : "번호 원문 보기"}
               </button>
@@ -386,7 +386,7 @@ export default function AdminPreRegistrationsPage() {
                     type="button"
                     onClick={() => void loadMore()}
                     disabled={loadingMore}
-                    className={`h-10 rounded-r2 border border-border-2 px-6 text-[13px] font-bold text-text-2 transition-colors hover:bg-bg disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`h-10 rounded-control border border-border-2 px-6 text-[13px] font-bold text-text-2 transition-colors hover:bg-bg disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     {loadingMore ? "불러오는 중..." : `${PAGE_SIZE}건 더보기`}
                   </button>

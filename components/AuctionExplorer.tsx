@@ -143,7 +143,7 @@ export default function AuctionExplorer({
             type="button"
             aria-pressed={sortBy === option.key}
             onClick={() => setSortBy(option.key)}
-            className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+            className={`shrink-0 rounded-control border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
               sortBy === option.key
                 ? "border-primary bg-primary text-white"
                 : "border-border text-text-2 hover:border-primary hover:text-primary"

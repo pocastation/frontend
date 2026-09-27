@@ -118,7 +118,7 @@ export default function AdminBannerPage() {
         </AdminNotice>
       )}
 
-      <div className="overflow-hidden rounded-r3 border border-border bg-surface">
+      <div className="overflow-hidden rounded-card border border-border bg-surface">
         {loading ? (
           <p className="py-20 text-center text-sm text-text-3">불러오는 중...</p>
         ) : items.length === 0 ? (
@@ -138,7 +138,7 @@ export default function AdminBannerPage() {
                 >
                   {i + 1}
                 </span>
-                <span className="h-[45px] w-[34px] flex-shrink-0 overflow-hidden rounded-[4px] bg-surface-2">
+                <span className="h-[45px] w-[34px] flex-shrink-0 overflow-hidden rounded-control bg-surface-2">
                   {item.representativeThumbnailUrl && (
                     // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
                     <img
@@ -176,7 +176,7 @@ export default function AdminBannerPage() {
                   type="button"
                   disabled={busy}
                   onClick={() => void drop(item)}
-                  className={`h-[30px] flex-shrink-0 rounded-r2 border border-border-2 px-3 text-xs font-bold text-text-2 transition-colors hover:border-text-1 hover:text-text-1 disabled:opacity-40 ${FOCUS_RING}`}
+                  className={`h-[30px] flex-shrink-0 rounded-control border border-border-2 px-3 text-xs font-bold text-text-2 transition-colors hover:border-text-1 hover:text-text-1 disabled:opacity-40 ${FOCUS_RING}`}
                 >
                   내리기
                 </button>
@@ -221,7 +221,7 @@ function MoveButton({
       disabled={disabled}
       onClick={onClick}
       aria-label={dir === "up" ? "위로 옮기기" : "아래로 옮기기"}
-      className={`flex h-7 w-7 items-center justify-center rounded-[6px] border border-border-2 text-text-2 transition-colors hover:border-text-1 hover:text-text-1 disabled:border-border disabled:text-border-2 disabled:hover:border-border ${FOCUS_RING}`}
+      className={`flex h-7 w-7 items-center justify-center rounded-control border border-border-2 text-text-2 transition-colors hover:border-text-1 hover:text-text-1 disabled:border-border disabled:text-border-2 disabled:hover:border-border ${FOCUS_RING}`}
     >
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden="true">
         {dir === "up" ? <path d="m6 15 6-6 6 6" /> : <path d="m6 9 6 6 6-6" />}

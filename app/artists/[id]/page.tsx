@@ -135,10 +135,10 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
             {/* 타입·활동상태를 같은 무게의 뉴트럴 태그로 둔다 — 예전에는 타입만 연보라 알약이라
                 정보 중요도와 무관하게 그것만 튀었다. */}
             <div className="mt-2 flex flex-wrap gap-1.5">
-              <span className="rounded-r1 border border-border-2 px-1.5 py-px text-[10.5px] font-bold text-text-2">
+              <span className="rounded-control border border-border-2 px-1.5 py-px text-[10.5px] font-bold text-text-2">
                 {ARTIST_TYPE_LABEL[artist.type]}
               </span>
-              <span className="rounded-r1 border border-border-2 px-1.5 py-px text-[10.5px] font-bold text-text-2">
+              <span className="rounded-control border border-border-2 px-1.5 py-px text-[10.5px] font-bold text-text-2">
                 {ARTIST_STATUS_LABEL[artist.status]}
               </span>
             </div>

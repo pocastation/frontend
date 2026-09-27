@@ -69,7 +69,7 @@ export default function EventList({
         <li key={event.id} className="border-b border-border last:border-b-0">
           <Link href={`/events/${event.id}`} className={`flex items-center gap-2.5 py-[11px] ${FOCUS_RING}`}>
             <span
-              className={`shrink-0 rounded-r1 border px-1.5 py-0.5 text-[10px] font-extrabold ${TYPE_CHIP[event.type]}`}
+              className={`shrink-0 rounded-control border px-1.5 py-0.5 text-[10px] font-extrabold ${TYPE_CHIP[event.type]}`}
             >
               {TYPE_LABEL[event.type]}
             </span>
@@ -99,7 +99,7 @@ function FillerRow({ "aria-hidden": ariaHidden }: { "aria-hidden"?: boolean } = 
   return (
     <li aria-hidden={ariaHidden} className={ariaHidden ? "invisible" : undefined}>
       <span className="flex items-center gap-2.5 py-[11px]">
-        <span className="shrink-0 rounded-r1 border px-1.5 py-0.5 text-[10px] font-extrabold">행사</span>
+        <span className="shrink-0 rounded-control border px-1.5 py-0.5 text-[10px] font-extrabold">행사</span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13.5px] font-bold tracking-[-0.01em]">&nbsp;</span>
           <span className="mt-px block truncate text-[11px]">&nbsp;</span>

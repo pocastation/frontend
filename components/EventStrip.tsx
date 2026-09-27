@@ -88,7 +88,7 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
               /* 칸 테두리를 걷는다(#741, #744). 14칸의 테두리가 화면에서 선을 가장 많이 만드는데,
                  고른 날만 칠해도 점이 남아 행사 있는 날은 그대로 읽힌다. 테두리 폭은 남겨 둔다 —
                  빼면 고른 날만 1px씩 커져 격자가 흔들린다. */
-              className={`rounded-[3px] border py-1.5 ${PRESS_CHIP} ${FOCUS_RING} ${
+              className={`rounded-control border py-1.5 ${PRESS_CHIP} ${FOCUS_RING} ${
                 on ? "border-primary bg-primary text-white" : "border-transparent bg-white"
               }`}
             >
@@ -99,10 +99,9 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
               >
                 {day.getDate()}
               </span>
-              <span className="mt-[3px] flex h-1 justify-center gap-[2px]" aria-hidden="true">
-                {Array.from({ length: Math.min(count, 3) }).map((_, i) => (
-                  <i key={i} className={`h-[3px] w-[3px] rounded-full ${on ? "bg-white/85" : "bg-border-2"}`} />
-                ))}
+              {/* 행사가 있는 날은 날짜 밑 짧은 선 하나(EventCalendar와 같은 표시, #758). */}
+              <span className="mt-[3px] flex h-1 items-end justify-center" aria-hidden="true">
+                {count > 0 && <i className={`h-[2px] w-3 ${on ? "bg-white/85" : "bg-text-3"}`} />}
               </span>
             </button>
           );

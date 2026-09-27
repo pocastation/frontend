@@ -48,7 +48,7 @@ const COPY = {
 
 // 라벨보다 입력칸이 커야 눈이 입력할 곳으로 먼저 간다(CLAUDE.md 「디자인」).
 const FIELD =
-  `h-12 w-full rounded-r2 border border-border px-3.5 text-[15px] text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`;
+  `h-12 w-full rounded-control border border-border px-3.5 text-[15px] text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`;
 
 type Step = "view" | "form" | "confirm";
 
@@ -236,7 +236,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
                 type="button"
                 onClick={() => void copyFromSettlement()}
                 disabled={busy}
-                className={`shrink-0 rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 동일하게 사용
               </button>

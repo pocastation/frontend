@@ -205,7 +205,7 @@ export default function SearchScreen({
         e.preventDefault();
         submit(query);
       }}
-      className="flex h-9 flex-1 items-center gap-2 rounded-full border border-border-2 px-3.5 text-text-3 focus-within:border-text-1"
+      className="flex h-9 flex-1 items-center gap-2 rounded-control border border-border-2 px-3.5 text-text-3 focus-within:border-text-1"
     >
       <SearchIcon />
       <label htmlFor="search-field" className="sr-only">
@@ -283,7 +283,7 @@ export default function SearchScreen({
                     <button
                       type="button"
                       onClick={() => clearRecentSearches()}
-                      className={`rounded-r1 text-[11.5px] font-semibold text-text-3 hover:text-text-1 ${FOCUS_RING}`}
+                      className={`rounded-control text-[11.5px] font-semibold text-text-3 hover:text-text-1 ${FOCUS_RING}`}
                     >
                       전체 삭제
                     </button>
@@ -292,12 +292,12 @@ export default function SearchScreen({
                     {recent.map((item) => (
                       <span
                         key={item}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-full border border-border-2 pl-3 pr-2 text-[12.5px] font-bold text-text-2"
+                        className="inline-flex h-8 items-center gap-1.5 rounded-control border border-border-2 pl-3 pr-2 text-[12.5px] font-bold text-text-2"
                       >
                         <button
                           type="button"
                           onClick={() => submit(item)}
-                          className={`rounded-r1 hover:text-text-1 ${FOCUS_RING}`}
+                          className={`rounded-control hover:text-text-1 ${FOCUS_RING}`}
                         >
                           {item}
                         </button>
@@ -334,7 +334,7 @@ export default function SearchScreen({
                       <button
                         type="button"
                         onClick={() => submit(artist.name)}
-                        className={`flex w-full flex-col items-center rounded-r2 ${FOCUS_RING}`}
+                        className={`flex w-full flex-col items-center rounded-control ${FOCUS_RING}`}
                       >
                         <Avatar artist={artist} size={56} />
                         <span className="mt-1.5 w-full truncate text-center text-[11px] font-bold text-text-2">
@@ -355,7 +355,7 @@ export default function SearchScreen({
                   type="button"
                   aria-pressed={!narrowed}
                   onClick={() => setQuery(baseQuery)}
-                  className={`inline-flex h-8 shrink-0 items-center rounded-full border px-3.5 text-[12.5px] font-bold transition-colors ${FOCUS_RING} ${
+                  className={`inline-flex h-8 shrink-0 items-center rounded-control border px-3.5 text-[12.5px] font-bold transition-colors ${FOCUS_RING} ${
                     narrowed ? "border-border-2 bg-white text-text-2" : "border-text-1 bg-text-1 text-white"
                   }`}
                 >
@@ -369,7 +369,7 @@ export default function SearchScreen({
                       type="button"
                       aria-pressed={on}
                       onClick={() => narrowTo(artist.name)}
-                      className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-full border py-0 pl-1 pr-3 text-[12px] font-bold transition-colors ${FOCUS_RING} ${
+                      className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-control border py-0 pl-1 pr-3 text-[12px] font-bold transition-colors ${FOCUS_RING} ${
                         on ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
                       }`}
                     >
@@ -390,7 +390,7 @@ export default function SearchScreen({
                     type="button"
                     aria-pressed={on}
                     onClick={() => setSaleType(tab.key)}
-                    className={`min-h-8 shrink-0 rounded-full border px-3.5 text-[12.5px] font-bold transition-colors ${FOCUS_RING} ${
+                    className={`min-h-8 shrink-0 rounded-control border px-3.5 text-[12.5px] font-bold transition-colors ${FOCUS_RING} ${
                       on ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
                     }`}
                   >
@@ -456,7 +456,7 @@ export default function SearchScreen({
                       type="button"
                       onClick={loadMore}
                       disabled={loadingMore}
-                      className={`min-h-10 rounded-r2 border border-border-2 px-5 text-[13px] font-bold text-text-1 disabled:text-text-3 ${FOCUS_RING}`}
+                      className={`min-h-10 rounded-control border border-border-2 px-5 text-[13px] font-bold text-text-1 disabled:text-text-3 ${FOCUS_RING}`}
                     >
                       {loadingMore ? <InlineSpinner /> : "더보기"}
                     </button>

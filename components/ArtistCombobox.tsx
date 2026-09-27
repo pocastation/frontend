@@ -101,7 +101,7 @@ export default function ArtistCombobox({
         <ul
           id={`${id}-listbox`}
           role="listbox"
-          className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-r2 border border-border bg-surface py-1 shadow-modal"
+          className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-card border border-border bg-surface py-1 shadow-modal"
         >
           {filtered.length === 0 ? (
             <li className="px-3.5 py-2 text-sm text-text-3">검색 결과가 없어요</li>

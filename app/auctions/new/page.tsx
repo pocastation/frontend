@@ -463,7 +463,7 @@ export default function NewAuctionPage() {
           <div className="flex flex-shrink-0 items-center gap-0.5">
             <Link
               href="/guide/sell"
-              className={`flex min-h-[30px] items-center whitespace-nowrap rounded-full border border-border-2 px-2.5 text-[11.5px] font-bold text-text-2 ${FOCUS_RING}`}
+              className={`flex min-h-[30px] items-center whitespace-nowrap rounded-control border border-border-2 px-2.5 text-[11.5px] font-bold text-text-2 ${FOCUS_RING}`}
             >
               판매 가이드
             </Link>
@@ -497,7 +497,7 @@ export default function NewAuctionPage() {
         </div>
         <Link
           href="/guide/sell"
-          className={`flex shrink-0 items-center gap-1 rounded-full border border-border-2 px-3 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+          className={`flex shrink-0 items-center gap-1 rounded-control border border-border-2 px-3 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
         >
           판매 가이드
         </Link>
@@ -509,7 +509,7 @@ export default function NewAuctionPage() {
         // 모바일 우선 — 기본이 모바일 지면(전체폭)이고 `sm:`가 데스크탑 카드를 얹는다.
         // **임의값(px-[14px])을 쓰지 않는다**: Tailwind가 임의값 유틸리티를 `sm:` 변형보다 뒤에
         // 배치해 데스크탑에서 모바일 패딩이 이겨버린다(양방향으로 실측해 확인). 표준 스케일만 쓴다.
-        className="bg-surface px-3.5 pt-4.5 sm:rounded-r4 sm:border sm:border-border sm:px-7 sm:py-7 sm:shadow-card"
+        className="bg-surface px-3.5 pt-4.5 sm:rounded-card sm:border sm:border-border sm:px-7 sm:py-7 sm:shadow-card"
       >
         {/* 진행 표시 — 모바일은 sticky 머리가 대신한다. */}
         <div className="mb-6 max-sm:hidden">

@@ -16,9 +16,9 @@ type SignUpConfirmResponse = {
 };
 
 const PRIMARY =
-  "inline-flex h-12 items-center rounded-[4px] bg-primary px-7 text-[14.5px] font-bold text-white transition-colors hover:bg-primary-dark";
+  "inline-flex h-12 items-center rounded-control bg-primary px-7 text-[14.5px] font-bold text-white transition-colors hover:bg-primary-dark";
 const SECONDARY =
-  "inline-flex h-12 items-center rounded-[4px] border border-border-2 px-6 text-[14px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary";
+  "inline-flex h-12 items-center rounded-control border border-border-2 px-6 text-[14px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();

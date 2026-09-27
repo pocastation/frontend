@@ -45,7 +45,7 @@ export default function MobileShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-[300] border-b border-border bg-white sm:hidden">
         <div className="flex h-12 items-center justify-between pl-[14px] pr-1">
           {/* 글자 높이는 19px이지만 탭 영역은 44px을 채운다(모바일 터치 타깃 최소치). */}
-          <Link href="/" aria-label="포카스테이션 홈" className={`flex h-11 items-center rounded-r1 ${FOCUS_RING}`}>
+          <Link href="/" aria-label="포카스테이션 홈" className={`flex h-11 items-center rounded-control ${FOCUS_RING}`}>
             <Wordmark className="text-[19px] leading-none" />
           </Link>
           <div className="flex items-center">

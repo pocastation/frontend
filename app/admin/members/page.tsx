@@ -235,7 +235,7 @@ export default function AdminMembersPage() {
             테이블은 내부(overflow-x-auto)에서만 가로 스크롤되게 한다. */}
         <div className={`min-w-0 ${selectedId !== null ? "max-lg:hidden" : ""}`}>
           <div className="mb-3 flex flex-wrap items-center gap-2.5">
-            <label className="flex h-10 min-w-[200px] flex-1 items-center gap-2 rounded-full border border-border px-4">
+            <label className="flex h-10 min-w-[200px] flex-1 items-center gap-2 rounded-control border border-border px-4">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
               </svg>
@@ -256,7 +256,7 @@ export default function AdminMembersPage() {
                   aria-pressed={statusFilter === f.key}
                   onClick={() => setStatusFilter(f.key)}
                   disabled={unverifiedOnly}
-                  className={`h-10 rounded-full border px-3 text-xs font-bold transition-colors disabled:opacity-40 ${FOCUS_RING} ${
+                  className={`h-10 rounded-control border px-3 text-xs font-bold transition-colors disabled:opacity-40 ${FOCUS_RING} ${
                     statusFilter === f.key && !unverifiedOnly ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
                   }`}
                 >
@@ -270,7 +270,7 @@ export default function AdminMembersPage() {
               type="button"
               aria-pressed={unverifiedOnly}
               onClick={() => setUnverifiedOnly((v) => !v)}
-              className={`h-10 rounded-full border px-3 text-xs font-bold transition-colors ${FOCUS_RING} ${
+              className={`h-10 rounded-control border px-3 text-xs font-bold transition-colors ${FOCUS_RING} ${
                 unverifiedOnly ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
               }`}
             >
@@ -286,7 +286,7 @@ export default function AdminMembersPage() {
             </p>
           )}
 
-          <div className="admin-table-wrap overflow-x-auto rounded-r3 border border-border bg-surface">
+          <div className="admin-table-wrap overflow-x-auto rounded-card border border-border bg-surface">
             <table role="table" className="admin-table admin-table-members w-full min-w-[560px] border-collapse">
               <thead>
                 <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
@@ -355,7 +355,7 @@ export default function AdminMembersPage() {
                 type="button"
                 onClick={loadMore}
                 disabled={loadingMore}
-                className={`h-10 rounded-full border border-border-2 bg-white px-5 text-[13px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 rounded-control border border-border-2 bg-white px-5 text-[13px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {loadingMore ? "불러오는 중..." : "더 보기"}
               </button>
@@ -366,15 +366,15 @@ export default function AdminMembersPage() {
         {/* 상세 패널 */}
         <AdminDetailPane open={selectedId !== null} title="회원 상세" onBack={() => setSelectedId(null)}>
           {!selectedId ? (
-            <div className="rounded-r3 border border-dashed border-border-2 p-8 text-center text-sm text-text-3">
+            <div className="rounded-card border border-dashed border-border-2 p-8 text-center text-sm text-text-3">
               회원을 선택하면 상세 정보와 관리 기능이 표시됩니다.
             </div>
           ) : detailLoading || !detail ? (
-            <div className="rounded-r3 border border-border bg-surface p-8 text-center text-sm text-text-3">
+            <div className="rounded-card border border-border bg-surface p-8 text-center text-sm text-text-3">
               {detailLoading ? "불러오는 중..." : "정보를 불러오지 못했습니다."}
             </div>
           ) : (
-            <div className="rounded-r3 border border-border bg-surface p-4">
+            <div className="rounded-card border border-border bg-surface p-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <h2 className="font-display text-base font-extrabold text-text-1">{detail.nickname}</h2>
@@ -414,18 +414,18 @@ export default function AdminMembersPage() {
               </dl>
 
               <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3">
-                <div className="rounded-r2 bg-surface-2 px-3 py-2 text-center">
+                <div className="rounded-control bg-surface-2 px-3 py-2 text-center">
                   <p className="text-[11px] text-text-3">판매</p>
                   <p className="font-display text-sm font-extrabold text-text-1">{detail.sellingCount}건</p>
                 </div>
-                <div className="rounded-r2 bg-surface-2 px-3 py-2 text-center">
+                <div className="rounded-control bg-surface-2 px-3 py-2 text-center">
                   <p className="text-[11px] text-text-3">제안</p>
                   <p className="font-display text-sm font-extrabold text-text-1">{detail.biddingCount}건</p>
                 </div>
               </div>
 
               {detail.status === "SUSPENDED" && detail.suspensionReason && (
-                <p className="mt-3 rounded-r2 bg-accent-soft px-3 py-2 text-[12px] text-accent">
+                <p className="mt-3 rounded-control bg-accent-soft px-3 py-2 text-[12px] text-accent">
                   정지 사유: {detail.suspensionReason}
                 </p>
               )}
@@ -433,7 +433,7 @@ export default function AdminMembersPage() {
               {notice && (
                 <p
                   role={notice.kind === "error" ? "alert" : "status"}
-                  className={`mt-3 rounded-r2 px-3 py-2 text-[12px] font-semibold ${
+                  className={`mt-3 rounded-control px-3 py-2 text-[12px] font-semibold ${
                     notice.kind === "error" ? "bg-accent-soft text-accent" : "bg-ok-soft text-ok"
                   }`}
                 >
@@ -453,14 +453,14 @@ export default function AdminMembersPage() {
                         onChange={(e) => setReason(e.target.value)}
                         placeholder="정지 사유를 입력하세요."
                         rows={2}
-                        className={`w-full resize-none rounded-r2 border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+                        className={`w-full resize-none rounded-control border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
                       />
                       <div className="mt-2 flex gap-2">
                         <button
                           type="button"
                           onClick={() => changeStatus("SUSPEND")}
                           disabled={submitting}
-                          className={`h-10 flex-1 rounded-r2 bg-accent text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+                          className={`h-10 flex-1 rounded-control bg-accent text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
                         >
                           정지 처리
                         </button>
@@ -468,7 +468,7 @@ export default function AdminMembersPage() {
                           type="button"
                           onClick={() => changeStatus("WITHDRAW")}
                           disabled={submitting}
-                          className={`h-10 rounded-r2 border border-border-2 bg-white px-4 text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+                          className={`h-10 rounded-control border border-border-2 bg-white px-4 text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
                         >
                           탈퇴
                         </button>
@@ -480,7 +480,7 @@ export default function AdminMembersPage() {
                         type="button"
                         onClick={() => changeStatus("UNSUSPEND")}
                         disabled={submitting}
-                        className={`h-10 flex-1 rounded-r2 bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
+                        className={`h-10 flex-1 rounded-control bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
                       >
                         정지 해제
                       </button>
@@ -488,7 +488,7 @@ export default function AdminMembersPage() {
                         type="button"
                         onClick={() => changeStatus("WITHDRAW")}
                         disabled={submitting}
-                        className={`h-10 rounded-r2 border border-border-2 bg-white px-4 text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+                        className={`h-10 rounded-control border border-border-2 bg-white px-4 text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
                       >
                         탈퇴
                       </button>
@@ -505,12 +505,12 @@ export default function AdminMembersPage() {
               <div className="mt-4 border-t border-border pt-4">
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-[11px] font-extrabold text-text-3">권한</p>
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-extrabold ${detail.role === "ADMIN" ? "bg-primary-soft text-primary" : "bg-surface-2 text-text-2"}`}>
+                  <span className={`rounded-control px-2 py-0.5 text-[10px] font-extrabold ${detail.role === "ADMIN" ? "bg-primary-soft text-primary" : "bg-surface-2 text-text-2"}`}>
                     {MEMBER_ROLE_LABEL[detail.role as MemberRole]}
                   </span>
                 </div>
                 {me?.id === detail.id ? (
-                  <p className="rounded-r2 bg-surface-2 px-3 py-2 text-center text-[11.5px] leading-relaxed text-text-3">
+                  <p className="rounded-control bg-surface-2 px-3 py-2 text-center text-[11.5px] leading-relaxed text-text-3">
                     본인 계정의 역할은 변경할 수 없어요
                   </p>
                 ) : detail.role === "ADMIN" ? (
@@ -518,7 +518,7 @@ export default function AdminMembersPage() {
                     type="button"
                     onClick={() => { setRoleTarget("USER"); setRoleReason(""); setRoleError(null); }}
                     // 하드코딩 주황을 별빛 골드 토큰으로(#294). 배경 필 대신 테두리.
-                    className={`h-10 w-full rounded-r2 border border-[var(--color-star-line)] text-sm font-bold text-[var(--color-star-ink)] transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+                    className={`h-10 w-full rounded-control border border-[var(--color-star-line)] text-sm font-bold text-[var(--color-star-ink)] transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
                   >
                     관리자 권한 회수
                   </button>
@@ -526,12 +526,12 @@ export default function AdminMembersPage() {
                   <button
                     type="button"
                     onClick={() => { setRoleTarget("ADMIN"); setRoleReason(""); setRoleError(null); }}
-                    className={`h-10 w-full rounded-r2 bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+                    className={`h-10 w-full rounded-control bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
                   >
                     관리자로 승격
                   </button>
                 ) : (
-                  <p className="rounded-r2 bg-surface-2 px-3 py-2 text-center text-[11.5px] leading-relaxed text-text-3">
+                  <p className="rounded-control bg-surface-2 px-3 py-2 text-center text-[11.5px] leading-relaxed text-text-3">
                     활동 상태인 회원만 승격할 수 있어요
                   </p>
                 )}
@@ -542,7 +542,7 @@ export default function AdminMembersPage() {
               <div className="mt-4 border-t border-border pt-4">
                 <p className="mb-2 text-[11px] font-extrabold text-text-3">개인정보</p>
                 {detail.email === null ? (
-                  <p className="rounded-r2 bg-surface-2 px-3 py-2 text-center text-[11.5px] leading-relaxed text-text-3">
+                  <p className="rounded-control bg-surface-2 px-3 py-2 text-center text-[11.5px] leading-relaxed text-text-3">
                     이미 파기된 계정이에요
                   </p>
                 ) : (
@@ -558,7 +558,7 @@ export default function AdminMembersPage() {
                         setPurgeReason("");
                         setPurgeError(null);
                       }}
-                      className={`h-10 w-full rounded-r2 border border-accent bg-white text-sm font-bold text-accent transition-colors hover:bg-accent hover:text-white ${FOCUS_RING}`}
+                      className={`h-10 w-full rounded-control border border-accent bg-white text-sm font-bold text-accent transition-colors hover:bg-accent hover:text-white ${FOCUS_RING}`}
                     >
                       개인정보 파기
                     </button>
@@ -572,7 +572,7 @@ export default function AdminMembersPage() {
 
       {purging && detail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
-          <div className="w-full max-w-sm rounded-r3 bg-surface p-5 shadow-modal">
+          <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
             <h2 className="font-display text-base font-extrabold text-text-1">개인정보 파기</h2>
             <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
               &quot;{detail.nickname}&quot;님의 이메일·비밀번호·배송지·결제수단·본인인증 결과를 지우고
@@ -591,7 +591,7 @@ export default function AdminMembersPage() {
               rows={3}
               autoFocus
               maxLength={200}
-              className={`mt-3 w-full resize-none rounded-r2 border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+              className={`mt-3 w-full resize-none rounded-control border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
             />
             {purgeError && (
               <p role="alert" className="mt-2 text-[12px] font-bold text-danger">{purgeError}</p>
@@ -601,7 +601,7 @@ export default function AdminMembersPage() {
                 type="button"
                 onClick={() => setPurging(false)}
                 disabled={purgeSubmitting}
-                className={`h-10 flex-1 rounded-r2 border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
               >
                 취소
               </button>
@@ -609,7 +609,7 @@ export default function AdminMembersPage() {
                 type="button"
                 onClick={purge}
                 disabled={purgeSubmitting}
-                className={`h-10 flex-1 rounded-r2 bg-accent text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control bg-accent text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {purgeSubmitting ? "파기 중..." : "파기"}
               </button>
@@ -620,7 +620,7 @@ export default function AdminMembersPage() {
 
       {roleTarget && detail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
-          <div className="w-full max-w-sm rounded-r3 bg-surface p-5 shadow-modal">
+          <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
             <h2 className="font-display text-base font-extrabold text-text-1">
               {roleTarget === "ADMIN" ? "관리자로 승격" : "관리자 권한 회수"}
             </h2>
@@ -637,7 +637,7 @@ export default function AdminMembersPage() {
               placeholder={roleTarget === "ADMIN" ? "승격 사유를 입력하세요." : "회수 사유를 입력하세요."}
               rows={3}
               autoFocus
-              className={`mt-3 w-full resize-none rounded-r2 border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+              className={`mt-3 w-full resize-none rounded-control border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
             />
             {roleError && (
               <AdminNotice kind="error" className="mt-2">
@@ -649,7 +649,7 @@ export default function AdminMembersPage() {
                 type="button"
                 onClick={() => setRoleTarget(null)}
                 disabled={roleSubmitting}
-                className={`h-10 flex-1 rounded-r2 border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
               >
                 취소
               </button>
@@ -657,7 +657,7 @@ export default function AdminMembersPage() {
                 type="button"
                 onClick={confirmRoleChange}
                 disabled={roleSubmitting}
-                className={`h-10 flex-1 rounded-r2 bg-primary text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control bg-primary text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {roleSubmitting ? "처리 중..." : roleTarget === "ADMIN" ? "승격 확정" : "회수 확정"}
               </button>
@@ -669,7 +669,7 @@ export default function AdminMembersPage() {
       {roleToast && (
         // 떠 있는 토스트는 지면 위에 얹히므로 배경·그림자를 남긴다 — 인라인 알림과 성격이 다르다.
         // 하드코딩 테두리만 토큰으로 바꿨다(#294).
-        <div className="fixed bottom-6 left-1/2 z-50 flex max-w-sm -translate-x-1/2 items-start gap-2.5 rounded-r3 border border-ok/30 bg-ok-soft px-4 py-3 shadow-modal">
+        <div className="fixed bottom-6 left-1/2 z-50 flex max-w-sm -translate-x-1/2 items-start gap-2.5 rounded-card border border-ok/30 bg-ok-soft px-4 py-3 shadow-modal">
           <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ok text-[11px] font-bold text-white">✓</span>
           <p className="text-[12.5px] font-semibold leading-relaxed text-ok">{roleToast}</p>
         </div>

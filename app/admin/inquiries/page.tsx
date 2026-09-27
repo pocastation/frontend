@@ -147,7 +147,7 @@ export default function AdminInquiriesPage() {
                 setFilter(item.value);
               }}
               className={
-                "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors " +
+                "rounded-control border px-3 py-1.5 text-xs font-semibold transition-colors " +
                 FOCUS_RING +
                 (active
                   ? " border-primary bg-primary text-white"
@@ -172,7 +172,7 @@ export default function AdminInquiriesPage() {
         </AdminNotice>
       )}
 
-      <div className="admin-conversation min-h-[560px] overflow-hidden rounded-r3 border border-border bg-surface lg:grid lg:grid-cols-[320px_minmax(0,1fr)]">
+      <div className="admin-conversation min-h-[560px] overflow-hidden rounded-card border border-border bg-surface lg:grid lg:grid-cols-[320px_minmax(0,1fr)]">
         <section
           className={(selected ? "hidden lg:block" : "block") + " border-b border-border lg:border-b-0 lg:border-r"}
           aria-label="문의 목록"
@@ -228,7 +228,7 @@ export default function AdminInquiriesPage() {
                       setPage((current) => current - 1);
                     }}
                     className={
-                      "h-8 rounded-r2 px-2.5 text-xs font-bold text-text-2 hover:text-primary disabled:opacity-35 " +
+                      "h-8 rounded-control px-2.5 text-xs font-bold text-text-2 hover:text-primary disabled:opacity-35 " +
                       FOCUS_RING
                     }
                   >
@@ -247,7 +247,7 @@ export default function AdminInquiriesPage() {
                       setPage((current) => current + 1);
                     }}
                     className={
-                      "h-8 rounded-r2 px-2.5 text-xs font-bold text-text-2 hover:text-primary disabled:opacity-35 " +
+                      "h-8 rounded-control px-2.5 text-xs font-bold text-text-2 hover:text-primary disabled:opacity-35 " +
                       FOCUS_RING
                     }
                   >
@@ -315,7 +315,7 @@ export default function AdminInquiriesPage() {
                   onChange={(event) => setAnswer(event.target.value)}
                   placeholder="사용자에게 전달할 답변을 입력해 주세요."
                   className={
-                    "min-h-[180px] w-full resize-y rounded-r2 border border-border-2 p-3.5 text-sm leading-relaxed text-text-1 outline-none placeholder:text-text-3 focus:border-primary " +
+                    "min-h-[180px] w-full resize-y rounded-control border border-border-2 p-3.5 text-sm leading-relaxed text-text-1 outline-none placeholder:text-text-3 focus:border-primary " +
                     FOCUS_RING
                   }
                 />
@@ -326,7 +326,7 @@ export default function AdminInquiriesPage() {
                       disabled={busy}
                       onClick={markChecking}
                       className={
-                        "h-10 rounded-r2 border border-border-2 bg-white px-4 text-sm font-bold text-text-2 hover:border-primary hover:text-primary disabled:opacity-50 " +
+                        "h-10 rounded-control border border-border-2 bg-white px-4 text-sm font-bold text-text-2 hover:border-primary hover:text-primary disabled:opacity-50 " +
                         FOCUS_RING
                       }
                     >
@@ -337,7 +337,7 @@ export default function AdminInquiriesPage() {
                     type="submit"
                     disabled={busy || !answer.trim()}
                     className={
-                      "h-10 rounded-r2 bg-primary px-5 text-sm font-extrabold text-white hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-45 " +
+                      "h-10 rounded-control bg-primary px-5 text-sm font-extrabold text-white hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-45 " +
                       FOCUS_RING
                     }
                   >

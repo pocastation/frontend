@@ -58,13 +58,13 @@ export default function SuggestArtistButton() {
 
   return (
     <>
-      <div className="mt-8 flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-8 text-center">
+      <div className="mt-8 flex flex-col items-center gap-2 rounded-card border border-dashed border-border-2 py-8 text-center">
         <p className="text-sm font-bold text-text-2">찾는 스타·기획사·멤버가 없나요?</p>
         <p className="text-xs text-text-3">등록을 건의하면 검토 후 추가해드려요.</p>
         <button
           type="button"
           onClick={openModal}
-          className={`mt-1 rounded-full border border-border-2 bg-white px-4 py-2 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+          className={`mt-1 rounded-control border border-border-2 bg-white px-4 py-2 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
         >
           등록 건의하기
         </button>
@@ -84,7 +84,7 @@ export default function SuggestArtistButton() {
           aria-modal="true"
           aria-label="등록 건의"
         >
-          <form onSubmit={submit} className="w-full max-w-sm rounded-r3 bg-surface p-5 shadow-modal">
+          <form onSubmit={submit} className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
             <h2 className="font-display text-base font-extrabold text-text-1">등록 건의</h2>
             <p className="mt-1 text-xs text-text-3">추가됐으면 하는 스타·기획사·멤버를 알려주세요.</p>
 
@@ -97,7 +97,7 @@ export default function SuggestArtistButton() {
                     type="button"
                     aria-pressed={kind === k}
                     onClick={() => setKind(k)}
-                    className={`flex-1 rounded-r2 border px-2 py-2 text-sm font-semibold transition-colors ${FOCUS_RING} ${
+                    className={`flex-1 rounded-control border px-2 py-2 text-sm font-semibold transition-colors ${FOCUS_RING} ${
                       kind === k
                         ? "border-primary bg-primary-soft text-primary"
                         : "border-border text-text-2 hover:border-primary"
@@ -120,7 +120,7 @@ export default function SuggestArtistButton() {
               required
               maxLength={100}
               placeholder={kind === "MEMBER" ? "멤버 이름" : kind === "AGENCY" ? "기획사 이름" : "그룹/솔로 이름"}
-              className={`w-full rounded-r2 border border-border px-3.5 py-2.5 text-sm text-text-1 outline-none focus:border-primary ${FOCUS_RING}`}
+              className={`w-full rounded-control border border-border px-3.5 py-2.5 text-sm text-text-1 outline-none focus:border-primary ${FOCUS_RING}`}
             />
 
             <label htmlFor={noteId} className="mt-3 mb-1.5 block text-xs font-bold text-text-2">
@@ -133,11 +133,11 @@ export default function SuggestArtistButton() {
               maxLength={500}
               rows={3}
               placeholder="소속 그룹·기획사 등 참고할 내용을 적어주세요."
-              className={`w-full resize-none rounded-r2 border border-border px-3.5 py-2.5 text-sm text-text-1 outline-none focus:border-primary ${FOCUS_RING}`}
+              className={`w-full resize-none rounded-control border border-border px-3.5 py-2.5 text-sm text-text-1 outline-none focus:border-primary ${FOCUS_RING}`}
             />
 
             {error && (
-              <p role="alert" className="mt-3 rounded-r2 bg-accent-soft px-3 py-2 text-xs font-semibold text-accent">
+              <p role="alert" className="mt-3 rounded-control bg-accent-soft px-3 py-2 text-xs font-semibold text-accent">
                 {error}
               </p>
             )}
@@ -146,14 +146,14 @@ export default function SuggestArtistButton() {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className={`h-10 flex-1 rounded-full border border-border-2 bg-white text-sm font-bold text-text-2 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-sm font-bold text-text-2 ${FOCUS_RING}`}
               >
                 닫기
               </button>
               <button
                 type="submit"
                 disabled={!name.trim() || submitting}
-                className={`h-10 flex-1 rounded-full bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {submitting ? "보내는 중..." : "건의하기"}
               </button>

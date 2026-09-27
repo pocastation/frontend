@@ -64,7 +64,7 @@ export default function SellerDefenseModal({
       role="presentation"
     >
       <div
-        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-r3 border border-border bg-surface p-5"
+        className="max-h-[85vh] w-full max-w-md overflow-y-auto rounded-card border border-border bg-surface p-5"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -77,7 +77,7 @@ export default function SellerDefenseModal({
 
         {/* 구매자 주장을 먼저 보여준다 — 무엇에 답하는지 모르고 쓰면 반박이 어긋난다. */}
         {returnReason && (
-          <div className="mt-4 rounded-r3 border border-border bg-surface-2 px-3.5 py-2.5">
+          <div className="mt-4 rounded-card border border-border bg-surface-2 px-3.5 py-2.5">
             <span className="block text-[10.5px] font-bold uppercase tracking-wide text-text-3">
               구매자 주장
             </span>
@@ -95,12 +95,12 @@ export default function SellerDefenseModal({
             onChange={(e) => setNote(e.target.value.slice(0, 500))}
             rows={5}
             placeholder="어떤 점이 사실과 다른지, 발송 당시 상태가 어땠는지 구체적으로 적어주세요."
-            className={`mt-1.5 w-full resize-none rounded-r3 border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+            className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
           />
           <span className="mt-1 block text-right text-[11px] text-text-3">{note.length}/500</span>
         </label>
 
-        <div className="mt-3 rounded-r3 border border-border bg-surface-2 px-3.5 py-2.5 text-[11px] leading-relaxed text-text-2">
+        <div className="mt-3 rounded-card border border-border bg-surface-2 px-3.5 py-2.5 text-[11px] leading-relaxed text-text-2">
           제출하면 <b className="font-bold text-text-1">운영팀이 양쪽 자료를 보고 대금 처리를 결정</b>해요.
           반품을 받아들일 생각이면 의견 대신 <b className="font-bold text-text-1">수락</b>을 눌러 주세요 —
           바로 반품이 확정돼 더 빨리 끝나요.

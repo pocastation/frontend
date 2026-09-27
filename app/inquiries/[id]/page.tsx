@@ -77,7 +77,7 @@ export default function InquiryDetailPage() {
           <button
             type="button"
             onClick={() => void load()}
-            className={"mt-4 rounded-r2 border border-border-2 px-4 py-2 text-sm font-bold text-text-2 hover:text-primary " + FOCUS_RING}
+            className={"mt-4 rounded-control border border-border-2 px-4 py-2 text-sm font-bold text-text-2 hover:text-primary " + FOCUS_RING}
           >
             다시 시도
           </button>
@@ -184,7 +184,7 @@ export default function InquiryDetailPage() {
             <Link
               href="/inquiries/new"
               className={
-                "inline-flex h-10 items-center rounded-r2 border border-border-2 bg-white px-4 text-sm font-bold text-text-2 hover:border-primary hover:text-primary " +
+                "inline-flex h-10 items-center rounded-control border border-border-2 bg-white px-4 text-sm font-bold text-text-2 hover:border-primary hover:text-primary " +
                 FOCUS_RING
               }
             >

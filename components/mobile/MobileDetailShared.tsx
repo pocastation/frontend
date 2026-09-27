@@ -43,7 +43,7 @@ export function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: 
   return (
     <Link
       href={`/sellers/${sellerId}`}
-      className={`mt-3.5 flex items-center gap-2.5 rounded-r3 border border-border p-3 ${FOCUS_RING}`}
+      className={`mt-3.5 flex items-center gap-2.5 rounded-card border border-border p-3 ${FOCUS_RING}`}
     >
       <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary-soft font-display text-sm font-extrabold text-primary">
         {nickname.slice(0, 1).toUpperCase()}

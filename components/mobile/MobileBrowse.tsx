@@ -106,7 +106,7 @@ export default function MobileBrowse({
       </div>
 
       <div className="px-[14px] pt-3">
-        <label className="flex h-10 items-center gap-2 rounded-full border border-border px-3.5">
+        <label className="flex h-10 items-center gap-2 rounded-control border border-border px-3.5">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
@@ -132,7 +132,7 @@ export default function MobileBrowse({
               type="button"
               aria-pressed={on}
               onClick={() => setSort(option.key)}
-              className={`min-h-9 flex-shrink-0 whitespace-nowrap rounded-full border px-3.5 text-[12.5px] font-bold transition-colors ${FOCUS_RING} ${
+              className={`min-h-9 flex-shrink-0 whitespace-nowrap rounded-control border px-3.5 text-[12.5px] font-bold transition-colors ${FOCUS_RING} ${
                 on ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
               }`}
             >
@@ -186,7 +186,7 @@ export default function MobileBrowse({
             type="button"
             onClick={loadMore}
             disabled={loadingMore || loading}
-            className={`flex h-11 w-full items-center justify-center rounded-[7px] border border-border-2 bg-white text-[13px] font-bold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+            className={`flex h-11 w-full items-center justify-center rounded-control border border-border-2 bg-white text-[13px] font-bold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : moreError ? "다시 시도" : "더 보기"}
           </button>

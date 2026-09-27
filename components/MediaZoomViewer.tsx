@@ -431,7 +431,7 @@ export default function MediaZoomViewer({
     <div ref={overlayRef} role="dialog" aria-modal="true" aria-label="사진 확대" tabIndex={-1} className="fixed inset-0 z-[410] flex flex-col bg-[rgba(8,7,12,0.94)]">
       {/* 페이지 카운터 — 본 화면과 통일해 우하단. 여러 장일 때만 노출. */}
       {hasMultiple && (
-        <span className="pointer-events-none absolute bottom-3 right-3.5 z-10 rounded-full bg-white/15 px-2.5 py-0.5 text-[12px] font-semibold text-white tabular-nums">
+        <span className="pointer-events-none absolute bottom-3 right-3.5 z-10 rounded-control bg-white/15 px-2.5 py-0.5 text-[12px] font-semibold text-white tabular-nums">
           {index + 1} / {images.length}
         </span>
       )}

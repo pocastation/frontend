@@ -200,7 +200,7 @@ export default function Header() {
               href="/notifications"
               onClick={closeMenu}
               aria-label={member && unreadCount > 0 ? `알림 ${unreadCount}개` : "알림"}
-              className={`relative ml-auto mr-1 flex h-9 w-9 items-center justify-center rounded-r2 text-text-1 sm:hidden ${FOCUS_RING}`}
+              className={`relative ml-auto mr-1 flex h-9 w-9 items-center justify-center rounded-control text-text-1 sm:hidden ${FOCUS_RING}`}
             >
               <BellIcon />
               {member && unreadCount > 0 && (
@@ -216,7 +216,7 @@ export default function Header() {
               aria-expanded={isMenuOpen}
               aria-controls="mobile-menu"
               onClick={() => setIsMenuOpen((open) => !open)}
-              className={`flex h-9 w-9 items-center justify-center rounded-r2 text-text-1 sm:hidden ${FOCUS_RING}`}
+              className={`flex h-9 w-9 items-center justify-center rounded-control text-text-1 sm:hidden ${FOCUS_RING}`}
             >
               <svg
                 width="20"
@@ -262,7 +262,7 @@ export default function Header() {
               placeholder="스타, 멤버, 앨범 검색..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className={`w-full rounded-full border border-border bg-bg py-2 pl-9 pr-3.5 text-sm outline-none focus:border-primary ${FOCUS_RING}`}
+              className={`w-full rounded-control border border-border bg-bg py-2 pl-9 pr-3.5 text-sm outline-none focus:border-primary ${FOCUS_RING}`}
             />
           </form>
 
@@ -272,7 +272,7 @@ export default function Header() {
                 key={link.label}
                 href={link.href}
                 onClick={closeMenu}
-                className={`rounded-r2 px-2 py-2.5 text-sm font-semibold text-text-2 transition-colors hover:bg-primary-soft hover:text-primary ${FOCUS_RING}`}
+                className={`rounded-control px-2 py-2.5 text-sm font-semibold text-text-2 transition-colors hover:bg-primary-soft hover:text-primary ${FOCUS_RING}`}
               >
                 {link.label}
               </Link>
@@ -284,7 +284,7 @@ export default function Header() {
                 <Link
                   href="/auctions/new"
                   onClick={closeMenu}
-                  className={`flex h-11 items-center justify-center rounded-r3 bg-primary text-sm font-bold text-white ${FOCUS_RING}`}
+                  className={`flex h-11 items-center justify-center rounded-card bg-primary text-sm font-bold text-white ${FOCUS_RING}`}
                 >
                   판매 등록
                 </Link>
@@ -294,7 +294,7 @@ export default function Header() {
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className={`rounded-full border border-border-2 bg-white px-4 py-1.5 text-sm font-bold text-text-2 ${FOCUS_RING}`}
+                    className={`rounded-control border border-border-2 bg-white px-4 py-1.5 text-sm font-bold text-text-2 ${FOCUS_RING}`}
                   >
                     로그아웃
                   </button>
@@ -304,7 +304,7 @@ export default function Header() {
               <Link
                 href="/login"
                 onClick={closeMenu}
-                className={`flex h-11 items-center justify-center rounded-r3 bg-primary text-sm font-bold text-white ${FOCUS_RING}`}
+                className={`flex h-11 items-center justify-center rounded-card bg-primary text-sm font-bold text-white ${FOCUS_RING}`}
               >
                 로그인
               </Link>

@@ -96,7 +96,7 @@ type SellingListItem = AuctionResponse | MySellingAuctionResponse;
 // 제안 철회 줄의 버튼(#428). 판매 관리의 아웃라인 버튼과 같은 무게로 둔다 — 취소는 예외적인
 // 행동이 아니라 §1.2가 보장한 권리라, 눈에 띄게 만들 이유도 숨길 이유도 없다.
 const OFFER_ACTION_CLASS =
-  `shrink-0 rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`;
+  `shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`;
 
 // 탭 키·제목·딥링크 해석은 lib/mypage-tabs.ts에 있다 — 모바일 메뉴 목록이 같은 정의를 읽는다.
 type Tab = MypageTab;
@@ -667,7 +667,7 @@ function MyPageBody() {
       )}
 
       <aside className="hidden sm:block">
-        <div className="rounded-r3 border border-border bg-surface p-5 text-center">
+        <div className="rounded-card border border-border bg-surface p-5 text-center">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary-soft text-xl font-extrabold text-primary">
             {member?.nickname.slice(0, 1).toUpperCase()}
           </span>
@@ -679,7 +679,7 @@ function MyPageBody() {
               {member?.trustLevel != null && (
                 <TrustLevelBadge
                   level={member.trustLevel}
-                  className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[11px] font-bold text-text-1 decoration-transparent hover:decoration-text-3"
+                  className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-0.5 text-[11px] font-bold text-text-1 decoration-transparent hover:decoration-text-3"
                 >
                   <span className="text-text-3">Lv.{member.trustLevel}</span>
                   {member.trustLevelLabel ? plainLevelLabel(member.trustLevelLabel) : null}
@@ -690,7 +690,7 @@ function MyPageBody() {
           )}
         </div>
 
-        <div className="mt-4 rounded-r3 border border-border bg-surface p-2">
+        <div className="mt-4 rounded-card border border-border bg-surface p-2">
           <p className="px-2.5 pb-1.5 pt-1 text-[11px] font-extrabold text-text-3">거래 관리</p>
           <nav aria-label="거래 관리 메뉴" className="flex flex-col">
             {TRADE_NAV.map(({ key, label, icon: Icon }) => (
@@ -698,7 +698,7 @@ function MyPageBody() {
                 key={key}
                 type="button"
                 onClick={() => selectTab(key)}
-                className={`flex items-center gap-2.5 rounded-r2 px-2.5 py-2 text-left text-sm font-bold transition-colors ${FOCUS_RING} ${
+                className={`flex items-center gap-2.5 rounded-control px-2.5 py-2 text-left text-sm font-bold transition-colors ${FOCUS_RING} ${
                   activeTab === key ? "bg-primary-soft text-primary" : "text-text-2 hover:bg-surface-2"
                 }`}
               >
@@ -715,7 +715,7 @@ function MyPageBody() {
                 key={key}
                 type="button"
                 onClick={() => selectTab(key)}
-                className={`flex items-center gap-2.5 rounded-r2 px-2.5 py-2 text-left text-sm font-bold transition-colors ${FOCUS_RING} ${
+                className={`flex items-center gap-2.5 rounded-control px-2.5 py-2 text-left text-sm font-bold transition-colors ${FOCUS_RING} ${
                   activeTab === key ? "bg-primary-soft text-primary" : "text-text-2 hover:bg-surface-2"
                 }`}
               >
@@ -732,7 +732,7 @@ function MyPageBody() {
           */}
           <Link
             href="/mypage/exchange-blocks"
-            className={`mt-1 flex items-center gap-2.5 rounded-r2 px-2.5 py-2 text-sm font-bold text-text-2 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+            className={`mt-1 flex items-center gap-2.5 rounded-control px-2.5 py-2 text-sm font-bold text-text-2 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
           >
             <BlockIcon />
             교환 차단 목록
@@ -742,7 +742,7 @@ function MyPageBody() {
         <button
           type="button"
           onClick={handleLogout}
-          className={`mt-4 flex w-full items-center justify-center gap-2 rounded-r3 border border-border-2 bg-surface py-2.5 text-sm font-bold text-text-2 ${FOCUS_RING}`}
+          className={`mt-4 flex w-full items-center justify-center gap-2 rounded-card border border-border-2 bg-surface py-2.5 text-sm font-bold text-text-2 ${FOCUS_RING}`}
         >
           <LogoutIcon />
           로그아웃
@@ -757,13 +757,13 @@ function MyPageBody() {
         className={`scroll-mt-4 px-3.5 pb-8 pt-3.5 sm:px-0 sm:pb-0 sm:pt-0 ${tab === null ? "hidden sm:block" : ""}`}
       >
         {error && (
-          <p role="alert" className="mb-4 rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
+          <p role="alert" className="mb-4 rounded-card bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
             {error}
           </p>
         )}
 
         {STUB_TABS.has(activeTab) ? (
-          <div className="flex flex-col items-center gap-2 rounded-r3 border border-dashed border-border-2 py-24 text-center">
+          <div className="flex flex-col items-center gap-2 rounded-card border border-dashed border-border-2 py-24 text-center">
             <h1 className="font-display text-lg font-extrabold text-text-1">{TAB_TITLE[activeTab]}</h1>
             <p className="text-sm text-text-3">
               {activeTab === "wishlist" ? "관심 목록 기능은 준비 중이에요." : "이 메뉴는 아직 준비 중이에요."}
@@ -785,7 +785,7 @@ function MyPageBody() {
             {/* 내 신뢰 레벨 진행도(§12.7) — 레벨·배지는 왼쪽 사용자 카드로 옮겼고(#275)
                 여기는 "다음 레벨까지 얼마나"만 남긴다. 같은 정보를 두 곳에 두면 시선이 갈린다. */}
             {member?.trustLevel != null && (
-              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-r3 border border-border bg-surface p-4">
+              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-card border border-border bg-surface p-4">
                 <span className="text-xs text-text-3">거래 {member.tradeCount ?? 0}회</span>
                 <span className="min-w-0 flex-1 text-xs text-text-2">
                   {member.levelCappedByTrust ? (
@@ -804,7 +804,7 @@ function MyPageBody() {
             )}
 
             {reviewable.length > 0 && (
-              <div className="mt-6 rounded-r3 border border-border bg-surface p-4">
+              <div className="mt-6 rounded-card border border-border bg-surface p-4">
                 <p className="text-sm font-bold text-text-1">작성할 수 있는 거래 후기 {reviewable.length}건</p>
                 <p className="mt-0.5 text-xs text-text-3">구매확정한 거래의 후기를 남겨 판매자에게 힘을 실어주세요.</p>
                 <ul className="mt-3 flex flex-col divide-y divide-border/70">
@@ -817,7 +817,7 @@ function MyPageBody() {
                       <button
                         type="button"
                         onClick={() => setReviewModalOrder(r)}
-                        className={`shrink-0 rounded-full bg-primary px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+                        className={`shrink-0 rounded-control bg-primary px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
                       >
                         후기 쓰기
                       </button>
@@ -1087,7 +1087,7 @@ export default function MyPage() {
 
 function Thumb({ url, alt }: { url: string | null; alt: string }) {
   return (
-    <span className="block h-12 w-12 shrink-0 overflow-hidden rounded-r2 bg-surface-2">
+    <span className="block h-12 w-12 shrink-0 overflow-hidden rounded-control bg-surface-2">
       {url && (
         // loading="lazy"는 목록 스크롤만을 위한 게 아니다. 모바일에서는 이 목록들이 통째로
         // 접혀 있는데(메뉴 화면), eager면 화면에 없는 썸네일 6장이 그대로 내려온다(#341과 같은 함정).
@@ -1126,7 +1126,7 @@ function DashboardPanel({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-r3 border border-border bg-surface p-4">
+    <section className="rounded-card border border-border bg-surface p-4">
       <div className="mb-3 flex items-center justify-between">
         <h2 className="font-display text-sm font-extrabold text-text-1">{title}</h2>
         <button type="button" onClick={onSeeAll} className={`text-xs font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
@@ -1257,7 +1257,7 @@ function SellingList({
           <li key={item.id} className="border-b border-border">
             <div className="py-3.5">
               {canOpenDetail ? (
-                <Link href={`/auctions/${item.id}`} className={`flex items-start gap-3 rounded-r1 ${FOCUS_RING}`}>
+                <Link href={`/auctions/${item.id}`} className={`flex items-start gap-3 rounded-control ${FOCUS_RING}`}>
                   {summary}
                 </Link>
               ) : (
@@ -1359,7 +1359,7 @@ function WishlistTabList({
           : "종료";
         return (
           <li key={item.id}>
-            <div className="flex items-center gap-3 rounded-r2 border border-border bg-surface p-2.5">
+            <div className="flex items-center gap-3 rounded-control border border-border bg-surface p-2.5">
               <Link
                 href={`/auctions/${item.id}`}
                 className={`flex min-w-0 flex-1 items-center gap-3 ${FOCUS_RING}`}
@@ -1396,7 +1396,7 @@ function WishlistTabList({
   );
 }
 
-// 주문 결제 상태 푸터(#113, 승인 시안 v2) — 도트 인디케이터 + 안내문 + (필요 시) 액션 버튼.
+// 주문 결제 상태 푸터(#113, 승인 시안 v2) — 상태 아이콘 + 안내문 + (필요 시) 액션 버튼.
 // 색은 의미로만: 완료=ok, 조치 필요=accent, 재시도 대기=warn, 진행=primary, 취소=중립.
 function OrderStatusFooter({
   order,
@@ -1486,7 +1486,7 @@ function OrderStatusFooter({
         (body.action.href ? (
           <Link
             href={body.action.href}
-            className={`shrink-0 rounded-r1 bg-primary px-4 py-2 text-[12.5px] font-extrabold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+            className={`shrink-0 rounded-control bg-primary px-4 py-2 text-[12.5px] font-extrabold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
           >
             {body.action.label}
           </Link>
@@ -1494,7 +1494,7 @@ function OrderStatusFooter({
           <button
             type="button"
             onClick={onGoPayment}
-            className={`shrink-0 rounded-r1 px-4 py-2 text-[12.5px] font-extrabold transition-colors ${FOCUS_RING} ${
+            className={`shrink-0 rounded-control px-4 py-2 text-[12.5px] font-extrabold transition-colors ${FOCUS_RING} ${
               body.action.solid
                 ? "bg-primary text-white hover:bg-primary-dark"
                 : "border border-border-2 bg-surface text-text-2 hover:border-text-3 hover:text-text-1"
@@ -1609,7 +1609,7 @@ function BuyerFulfillmentFooter({
               <button
                 type="button"
                 onClick={() => setReturnOpen(true)}
-                className={`shrink-0 rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
               >
                 반품 요청
               </button>
@@ -1618,7 +1618,7 @@ function BuyerFulfillmentFooter({
               type="button"
               onClick={confirm}
               disabled={confirming}
-              className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+              className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
             >
               구매 확정
             </button>
@@ -1641,7 +1641,7 @@ function BuyerFulfillmentFooter({
             <button
               type="button"
               onClick={onOpenAddressModal}
-              className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+              className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
             >
               배송지 입력
             </button>
@@ -1662,7 +1662,7 @@ function BuyerFulfillmentFooter({
                 type="button"
                 onClick={cancel}
                 disabled={cancelling}
-                className={`shrink-0 rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 주문 취소
               </button>
@@ -1825,7 +1825,7 @@ function BuyerDisputeFooter({
             type="button"
             disabled={busy}
             onClick={() => setEvidenceOpen(true)}
-            className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+            className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
           >
             자료 제출
           </button>
@@ -1834,7 +1834,7 @@ function BuyerDisputeFooter({
           <button
             type="button"
             onClick={() => setShipOpen(true)}
-            className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+            className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
           >
             운송장 등록
           </button>
@@ -2051,7 +2051,7 @@ function SellerFulfillmentFooter({
                 type="button"
                 disabled={preparing}
                 onClick={() => void startPreparing()}
-                className={`shrink-0 rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 물품 준비
               </button>
@@ -2059,7 +2059,7 @@ function SellerFulfillmentFooter({
             <button
               type="button"
               onClick={() => setShipOpen((v) => !v)}
-              className={`shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+              className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
             >
               발송 처리
             </button>
@@ -2125,8 +2125,8 @@ function SellerDisputeFooter({
     void act(path, note);
   }
 
-  const outlineBtn = `shrink-0 rounded-r2 border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`;
-  const solidBtn = `shrink-0 rounded-r2 bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`;
+  const outlineBtn = `shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`;
+  const solidBtn = `shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`;
 
   const body = ((): { pill: ReactNode; message: ReactNode; sub?: ReactNode; actions: ReactNode } => {
     switch (soldOrder.disputeStatus) {
@@ -2338,7 +2338,7 @@ function MyBiddingList({
             <div className="group py-3.5">
               <Link
                 href={`/auctions/${item.id}`}
-                className={`flex items-start gap-3 rounded-r1 ${FOCUS_RING}`}
+                className={`flex items-start gap-3 rounded-control ${FOCUS_RING}`}
               >
                 <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
                 <span className="min-w-0 flex-1">

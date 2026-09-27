@@ -36,7 +36,7 @@ type Slot = { fromMinuteOfDay: number; toMinuteOfDay: number };
 
 const LABEL = "mb-1.5 text-[12.5px] font-extrabold text-text-2";
 const INPUT =
-  "h-12 w-full rounded-r1 border border-border-2 bg-white px-3 text-[15px] font-semibold text-text-1";
+  "h-12 w-full rounded-control border border-border-2 bg-white px-3 text-[15px] font-semibold text-text-1";
 const HELP = "mt-1.5 text-[11.5px] leading-relaxed text-text-3";
 
 export default function NewExchangePage() {
@@ -206,7 +206,7 @@ function NewExchangeForm() {
         </div>
 
         {error && (
-          <p role="alert" className="mx-[14px] mt-3 rounded-r1 border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger sm:mx-0">
+          <p role="alert" className="mx-[14px] mt-3 rounded-control border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
@@ -281,7 +281,7 @@ function NewExchangeForm() {
                 <button
                   type="button"
                   onClick={() => setWants([...wants, { artistId: "", idolId: "", source: "BROADCAST" }])}
-                  className={`mt-2 h-10 w-full rounded-r1 border border-border-2 bg-white text-[13px] font-extrabold text-text-2 ${FOCUS_RING}`}
+                  className={`mt-2 h-10 w-full rounded-control border border-border-2 bg-white text-[13px] font-extrabold text-text-2 ${FOCUS_RING}`}
                 >
                   받고 싶은 포카 추가
                 </button>
@@ -294,7 +294,7 @@ function NewExchangeForm() {
                 type="button"
                 disabled={!step1Ready}
                 onClick={() => setStep(2)}
-                className={`h-12 w-full rounded-[7px] bg-primary text-[15px] font-extrabold text-white disabled:opacity-50 ${PRESS_PRIMARY} ${FOCUS_RING}`}
+                className={`h-12 w-full rounded-control bg-primary text-[15px] font-extrabold text-white disabled:opacity-50 ${PRESS_PRIMARY} ${FOCUS_RING}`}
               >
                 다음
               </button>
@@ -332,7 +332,7 @@ function NewExchangeForm() {
                 <button
                   type="button"
                   onClick={() => setSlots([...slots, { fromMinuteOfDay: 20 * 60, toMinuteOfDay: 21 * 60 }])}
-                  className={`mt-2 h-10 w-full rounded-r1 border border-border-2 bg-white text-[13px] font-extrabold text-text-2 ${FOCUS_RING}`}
+                  className={`mt-2 h-10 w-full rounded-control border border-border-2 bg-white text-[13px] font-extrabold text-text-2 ${FOCUS_RING}`}
                 >
                   시간대 추가
                 </button>
@@ -346,7 +346,7 @@ function NewExchangeForm() {
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className={`h-12 flex-1 rounded-[7px] border border-border-2 bg-white text-[15px] font-extrabold text-text-2 ${FOCUS_RING}`}
+                className={`h-12 flex-1 rounded-control border border-border-2 bg-white text-[15px] font-extrabold text-text-2 ${FOCUS_RING}`}
               >
                 이전
               </button>
@@ -354,7 +354,7 @@ function NewExchangeForm() {
                 type="button"
                 disabled={!step2Ready || submitting}
                 onClick={submit}
-                className={`h-12 flex-[2] rounded-[7px] bg-primary text-[15px] font-extrabold text-white disabled:opacity-50 ${FOCUS_RING}`}
+                className={`h-12 flex-[2] rounded-control bg-primary text-[15px] font-extrabold text-white disabled:opacity-50 ${FOCUS_RING}`}
               >
                 {submitting ? "등록 중…" : "교환글 등록"}
               </button>
@@ -420,7 +420,7 @@ function WantRow({
           type="button"
           onClick={onRemove}
           aria-label="이 항목 삭제"
-          className={`h-12 w-11 shrink-0 rounded-r1 border border-border-2 bg-white text-text-3 ${FOCUS_RING}`}
+          className={`h-12 w-11 shrink-0 rounded-control border border-border-2 bg-white text-text-3 ${FOCUS_RING}`}
         >
           ×
         </button>
@@ -468,7 +468,7 @@ function SlotRow({
           type="button"
           onClick={onRemove}
           aria-label="이 시간대 삭제"
-          className={`h-12 w-10 shrink-0 rounded-r1 border border-border-2 bg-white text-text-3 ${FOCUS_RING}`}
+          className={`h-12 w-10 shrink-0 rounded-control border border-border-2 bg-white text-text-3 ${FOCUS_RING}`}
         >
           ×
         </button>

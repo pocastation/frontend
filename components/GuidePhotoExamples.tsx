@@ -27,7 +27,7 @@ export default function GuidePhotoExamples({ shots }: { shots: GuidePhotoShot[] 
               className={`relative block w-full cursor-zoom-in overflow-hidden border border-border bg-surface-2 hover:border-text-3 ${FOCUS_RING}`}
             >
               <Image src={shot.src} alt={shot.alt} width={1060} height={1484} sizes="(max-width: 639px) 25vw, 123px" className="block aspect-[5/7] h-auto w-full object-cover" />
-              <span aria-hidden="true" className="absolute bottom-1 right-1 grid size-5 place-items-center rounded-[3px] bg-white/90 text-text-2 sm:bottom-[5px] sm:right-[5px] sm:size-[23px]">
+              <span aria-hidden="true" className="absolute bottom-1 right-1 grid size-5 place-items-center rounded-control bg-white/90 text-text-2 sm:bottom-[5px] sm:right-[5px] sm:size-[23px]">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5" /></svg>
               </span>
             </button>

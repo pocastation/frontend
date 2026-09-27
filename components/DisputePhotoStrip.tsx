@@ -46,7 +46,7 @@ export default function DisputePhotoStrip({ auctionId }: { auctionId: number }) 
           href={mediaUrl(photo.url)}
           target="_blank"
           rel="noreferrer"
-          className={`block overflow-hidden rounded-r1 border border-border ${FOCUS_RING}`}
+          className={`block overflow-hidden rounded-control border border-border ${FOCUS_RING}`}
           aria-label={`첨부 사진 ${index + 1} 원본 보기`}
         >
           {/* next/image를 쓰지 않는다 — 반품 사진은 6개월 뒤 파기돼 URL이 사라지고, 최적화

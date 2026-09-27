@@ -37,16 +37,14 @@ export default function SellerShipPanel({ auctionId }: { auctionId: number }) {
   const addr = order.deliveryAddress;
 
   return (
-    <div className="mt-4 rounded-r3 border border-border bg-surface-2/40 p-4">
+    <div className="mt-4 rounded-card border border-border bg-surface-2/40 p-4">
       <p className="text-sm font-bold text-text-1">판매자 · 배송 관리</p>
       {fs === "CONFIRMED" ? (
         <p className="mt-1.5 flex items-center gap-2 text-[13px] text-text-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-ok" aria-hidden="true" />
           구매가 확정됐어요. 정산 예정 {formatKRW(order.payoutAmount)} · 정산 준비 중
         </p>
       ) : fs === "SHIPPED" ? (
         <p className="mt-1.5 flex items-center gap-2 text-[13px] text-text-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary" aria-hidden="true" />
           발송 완료 · {order.carrier} {order.trackingNumber}
         </p>
       ) : addr ? (
@@ -60,7 +58,7 @@ export default function SellerShipPanel({ auctionId }: { auctionId: number }) {
           <button
             type="button"
             onClick={() => setShipOpen((v) => !v)}
-            className="mt-2 rounded-r2 bg-text-1 px-4 py-2 text-[13px] font-bold text-white transition-colors hover:bg-text-2"
+            className="mt-2 rounded-control bg-text-1 px-4 py-2 text-[13px] font-bold text-white transition-colors hover:bg-text-2"
           >
             발송 처리
           </button>
@@ -76,7 +74,6 @@ export default function SellerShipPanel({ auctionId }: { auctionId: number }) {
         </>
       ) : (
         <p className="mt-1.5 flex items-center gap-2 text-[13px] text-text-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-text-3" aria-hidden="true" />
           구매자가 배송지를 입력하면 발송할 수 있어요.
         </p>
       )}

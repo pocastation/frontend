@@ -102,7 +102,7 @@ function NewInquiryForm() {
             value={category}
             onChange={(event) => setCategory(event.target.value as InquiryCategory)}
             className={
-              "h-12 w-full rounded-r2 border border-border-2 bg-white px-3.5 text-sm font-medium text-text-1 outline-none transition-colors hover:border-primary focus:border-primary " +
+              "h-12 w-full rounded-control border border-border-2 bg-white px-3.5 text-sm font-medium text-text-1 outline-none transition-colors hover:border-primary focus:border-primary " +
               FOCUS_RING
             }
           >
@@ -130,7 +130,7 @@ function NewInquiryForm() {
             onChange={(event) => setTitle(event.target.value)}
             placeholder="문의 제목을 입력해 주세요"
             className={
-              "h-12 w-full rounded-r2 border border-border-2 bg-white px-3.5 text-sm text-text-1 outline-none placeholder:text-text-3 transition-colors hover:border-primary focus:border-primary " +
+              "h-12 w-full rounded-control border border-border-2 bg-white px-3.5 text-sm text-text-1 outline-none placeholder:text-text-3 transition-colors hover:border-primary focus:border-primary " +
               FOCUS_RING
             }
           />
@@ -152,7 +152,7 @@ function NewInquiryForm() {
             onChange={(event) => setContent(event.target.value)}
             placeholder={"문의 상황과 궁금한 점을 자세히 적어주세요.\n판매글 관련 문의라면 상품명이나 판매글 번호를 함께 남겨주세요."}
             className={
-              "min-h-[240px] w-full resize-y rounded-r2 border border-border-2 bg-white p-3.5 text-sm leading-relaxed text-text-1 outline-none placeholder:text-text-3 transition-colors hover:border-primary focus:border-primary " +
+              "min-h-[240px] w-full resize-y rounded-control border border-border-2 bg-white p-3.5 text-sm leading-relaxed text-text-1 outline-none placeholder:text-text-3 transition-colors hover:border-primary focus:border-primary " +
               FOCUS_RING
             }
           />
@@ -162,7 +162,7 @@ function NewInquiryForm() {
         </div>
 
         {error && (
-          <p role="alert" className="rounded-r2 bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
+          <p role="alert" className="rounded-card bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
             {error}
           </p>
         )}
@@ -171,7 +171,7 @@ function NewInquiryForm() {
           <Link
             href="/inquiries"
             className={
-              "inline-flex h-11 items-center justify-center rounded-r2 border border-border-2 bg-white px-5 text-sm font-bold text-text-2 hover:border-primary hover:text-primary " +
+              "inline-flex h-11 items-center justify-center rounded-control border border-border-2 bg-white px-5 text-sm font-bold text-text-2 hover:border-primary hover:text-primary " +
               FOCUS_RING
             }
           >
@@ -181,7 +181,7 @@ function NewInquiryForm() {
             type="submit"
             disabled={!canSubmit}
             className={
-              "h-11 rounded-r2 bg-primary px-6 text-sm font-extrabold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-45 " +
+              "h-11 rounded-control bg-primary px-6 text-sm font-extrabold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-45 " +
               FOCUS_RING
             }
           >

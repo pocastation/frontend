@@ -126,7 +126,8 @@ export default function Header() {
     <header className={pathname === "/admin" || pathname.startsWith("/admin/") ? "hdr max-lg:hidden" : foldOnMobile ? "hdr max-sm:hidden" : "hdr"}>
       <div className="pg hdr-in">
         <Link href="/" onClick={closeMenu} className="logo" aria-label="포카스테이션 홈">
-          <Wordmark className="text-title-s leading-none" />
+          {/* eslint-disable-next-line no-restricted-syntax -- 로고는 글자 크기 단계 밖이다(#769) */}
+          <Wordmark className="text-[19px] leading-none" />
         </Link>
 
         <form className="srch" role="search" onSubmit={handleSearchSubmit}>

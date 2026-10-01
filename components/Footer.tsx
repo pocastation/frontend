@@ -83,7 +83,8 @@ export default function Footer() {
         <div>
           {/* 로고는 홈으로 가는 길이다(#548). 헤더 워드마크와 같은 동작. */}
           <Link href="/" aria-label="포카스테이션 홈" className={`inline-block ${FOCUS_RING}`}>
-            <Wordmark className="text-title leading-none" />
+            {/* eslint-disable-next-line no-restricted-syntax -- 로고는 글자 크기 단계 밖이다(#769) */}
+            <Wordmark className="text-[22px] leading-none" />
           </Link>
         </div>
         {FOOTER_COLUMNS.map((column) => (

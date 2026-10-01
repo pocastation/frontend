@@ -754,7 +754,9 @@ function MyPageBody() {
           모바일에만 준다. 데스크탑은 좌우 여백이 있어 경계가 이미 읽힌다. */}
       <div
         ref={contentRef}
-        className={`scroll-mt-4 px-3.5 pb-8 pt-3.5 sm:px-0 sm:pb-0 sm:pt-0 ${tab === null ? "hidden sm:block" : ""}`}
+        // min-w-0: 그리드 칸은 기본 최소 너비가 내용 너비라, 긴 상품명이 말줄임 대신 칸을 밀어 375px 화면이
+        // 가로로 넘쳤다(판매 중인 상품 탭 실측 419px). 칸을 화면 폭에 묶어 truncate가 걸리게 한다.
+        className={`min-w-0 scroll-mt-4 px-3.5 pb-8 pt-3.5 sm:px-0 sm:pb-0 sm:pt-0 ${tab === null ? "hidden sm:block" : ""}`}
       >
         {error && (
           <p role="alert" className="mb-4 rounded-card bg-surface-2 px-4 py-3 text-body font-semibold text-danger">

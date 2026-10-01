@@ -5,7 +5,7 @@ import ExchangeMoreMenu from "@/components/ExchangeMoreMenu";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { itemName, itemSource, slotLabel } from "@/lib/exchange-labels";
-import { FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE } from "@/lib/ui";
+import { FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE, LABEL_NEUTRAL } from "@/lib/ui";
 import type { ExchangePostDetail } from "@/lib/types";
 
 /**
@@ -104,7 +104,7 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
               <p className="text-[10px] font-extrabold tracking-[0.04em] text-text-3">내가 줄 것</p>
               <p className="mt-1 truncate text-[12.5px] font-bold text-text-2">{itemSource(post.have)}</p>
               {post.have?.grade && (
-                <span className="mt-1.5 inline-block rounded-control border border-border-2 px-1.5 py-px text-[10.5px] font-extrabold text-text-2">
+                <span className={`mt-1.5 ${LABEL_NEUTRAL}`}>
                   {post.have.grade}급
                 </span>
               )}

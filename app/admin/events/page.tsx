@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, LABEL_NEUTRAL } from "@/lib/ui";
 import type {
   AdminEventListResponse,
   EventRecurrenceListResponse,
@@ -439,7 +439,7 @@ export default function AdminEventsPage() {
                     <span className="ml-1 text-[11px] font-semibold text-text-3">{dayLabel(event.eventDate)}</span>
                   </td>
                   <td data-label="유형" className="px-2.5 py-2.5">
-                    <span className="inline-block rounded-control border border-border-2 px-1.5 py-0.5 text-[10.5px] font-extrabold text-text-2">
+                    <span className={LABEL_NEUTRAL}>
                       {TYPE_LABEL[event.type]}
                     </span>
                   </td>

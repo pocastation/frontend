@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { INPUT_CLASS, PRIMARY_BUTTON_CLASS } from "@/lib/ui";
+import { INPUT_CLASS, PRIMARY_BUTTON_CLASS, LABEL_NEUTRAL } from "@/lib/ui";
 
 const PROVIDER_LABEL: Record<string, string> = {
   EMAIL: "이메일",
@@ -122,7 +122,7 @@ export default function ProfileTab() {
             <dt className="text-sm font-bold text-text-3">가입 수단</dt>
             <dd className="text-sm font-semibold text-text-1">
               {provider ? (
-                <span className="rounded-control bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary">
+                <span className={LABEL_NEUTRAL}>
                   {provider}
                 </span>
               ) : (

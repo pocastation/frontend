@@ -228,7 +228,7 @@ export default function ReportButton({
             </p>
 
             {error && (
-              <p role="alert" className="mt-2 rounded-control bg-accent-soft px-3 py-2 text-[12px] font-semibold text-accent">
+              <p role="alert" className="mt-2 rounded-card bg-surface-2 px-3 py-2 text-[12px] font-semibold text-danger">
                 {error}
               </p>
             )}

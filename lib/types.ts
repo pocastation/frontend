@@ -945,6 +945,8 @@ export type NotificationResponse = {
   // 교환 알림은 auctionId를 비우고 이 값을 채운다. 둘을 함께 채우지 않는다 —
   // 채우면 화면이 어느 쪽으로 보낼지 정할 수 없다.
   exchangePostId: number | null;
+  // 판매글 알림의 대표 사진 썸네일(BE #554). 교환 알림·사진 없는 판매글·구버전 서버는 null/없음.
+  thumbnailUrl?: string | null;
   title: string;
   message: string;
   isRead: boolean;

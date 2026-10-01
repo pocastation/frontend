@@ -270,7 +270,7 @@ export default function AdminAuctionsPage() {
         <p
           role={notice.kind === "error" ? "alert" : "status"}
           className={`mt-4 rounded-card px-4 py-3 text-sm font-semibold ${
-            notice.kind === "error" ? "bg-accent-soft text-accent" : "bg-ok-soft text-ok"
+            notice.kind === "error" ? "bg-surface-2 text-danger" : "bg-surface-2 text-text-1"
           }`}
         >
           {notice.text}

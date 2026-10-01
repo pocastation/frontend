@@ -158,10 +158,8 @@ export default function InquiryDetailPage() {
           </article>
 
           <section
-            className={
-              "border-y px-5 py-7 sm:px-6 " +
-              (inquiry.status === "ANSWERED" ? "border-ok/20 bg-ok-soft/60" : "border-border bg-surface-2/60")
-            }
+            // 답변 여부는 위 상태 글자가 말한다 — 답변 칸을 초록으로 칠하지 않는다(#767).
+            className="border-y border-border bg-surface-2/60 px-5 py-7 sm:px-6"
             aria-labelledby="inquiry-answer-title"
           >
             <div className="flex items-center justify-between gap-3">

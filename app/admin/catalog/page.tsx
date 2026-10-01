@@ -324,8 +324,8 @@ export default function AdminCatalogPage() {
           role="status"
           className={`mt-5 rounded-card border px-4 py-3 text-sm font-semibold ${
             notice.kind === "success"
-              ? "border-ok/20 bg-ok-soft text-ok"
-              : "border-accent/20 bg-accent-soft text-accent"
+              ? "border-border bg-surface-2 text-text-1"
+              : "border-border bg-surface-2 text-danger"
           }`}
         >
           {notice.text}

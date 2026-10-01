@@ -3,7 +3,7 @@
 import Link from "next/link";
 import TrustLevelBadge from "@/components/TrustLevelBadge";
 import type { ReactNode } from "react";
-import { FOCUS_RING, PRESS_ROW, PRESS_FADE } from "@/lib/ui";
+import { FOCUS_RING, PRESS_ROW, PRESS_FADE, LABEL_STRONG } from "@/lib/ui";
 import type { MypageTab } from "@/lib/mypage-tabs";
 
 /**
@@ -51,7 +51,7 @@ function RowShell({
       <span className="text-[15px] font-medium tracking-[-0.35px] text-text-1">{label}</span>
       <span className="inline-flex shrink-0 items-center gap-[9px]">
         {badge ? (
-          <span aria-label={`확인이 필요한 항목 ${badge}건`} className="rounded-control bg-primary-soft px-[7px] py-px text-[11px] font-semibold tabular-nums text-primary">새 소식 {badge}</span>
+          <span aria-label={`확인이 필요한 항목 ${badge}건`} className={`${LABEL_STRONG} tabular-nums`}>새 소식 {badge}</span>
         ) : null}
         {value != null && <span className="text-sm font-semibold tabular-nums text-text-1">{value}<span className="ml-0.5 text-xs font-normal text-text-2">{unit}</span></span>}
         <span className="inline-flex text-text-3">
@@ -203,13 +203,13 @@ export default function MobileMypageMenu({
           <button
             type="button"
             onClick={() => onOpenAddress(pendingAddress.auctionId, pendingAddress.title)}
-            className={`flex w-full items-center gap-2.5 rounded-control border border-danger bg-danger-soft px-3 py-[11px] text-left ${FOCUS_RING}`}
+            className={`flex w-full items-center gap-2.5 rounded-card bg-surface-2 px-3.5 py-3 text-left ${FOCUS_RING}`}
           >
             <span className="min-w-0 flex-1">
               <span className="block text-[13px] font-extrabold text-danger">배송지를 입력해 주세요</span>
               <span className="mt-0.5 block truncate text-[11.5px] text-text-2">{pendingAddress.title} · 결제 완료</span>
             </span>
-            <span className="flex-shrink-0 rounded-control bg-danger px-2.5 py-1.5 text-xs font-extrabold text-white">입력</span>
+            <span className="flex-shrink-0 rounded-control bg-primary px-2.5 py-1.5 text-xs font-extrabold text-white">입력</span>
           </button>
         </div>
       )}

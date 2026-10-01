@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { isClosed, isClosingSoon, itemDetail, itemName, slotLabel } from "@/lib/exchange-labels";
 import { mediaUrl } from "@/lib/api";
-import { FOCUS_RING, PRESS_ROW } from "@/lib/ui";
+import { FOCUS_RING, PRESS_ROW, LABEL_NEUTRAL, LABEL_STRONG } from "@/lib/ui";
 import type { ExchangeFeedItem } from "@/lib/types";
 
 /**
@@ -61,23 +61,20 @@ export default function ExchangeFeedRow({ item }: { item: ExchangeFeedItem }) {
         </span>
 
         <span className="min-w-0 flex-1">
-          <span className="flex items-center gap-1.5 text-[15px] font-extrabold tracking-[-0.018em] text-text-1">
+          {/* 마감된 줄은 제목까지 흐리게 — 「지나간 것」으로 읽혀야 한다(#767). */}
+          <span className={`flex items-center gap-1.5 text-[15px] font-extrabold tracking-[-0.018em] ${closed ? "text-text-3" : "text-text-1"}`}>
             <span className="truncate">{itemName(item.have)}</span>
             <span aria-label="교환" className="shrink-0 text-xs font-semibold text-text-3">→</span>
-            <span className="truncate text-primary">
+            <span className={`truncate ${closed ? "" : "text-primary"}`}>
               {item.wants.map(itemName).join(" · ") || "—"}
             </span>
           </span>
           <span className="mt-0.5 block truncate text-[11.5px] text-text-3">{itemDetail(item.have)}</span>
           <span className="mt-1.5 flex items-center gap-1.5 text-[11.5px] text-text-2">
             {closed ? (
-              <span className="rounded-control border border-border-2 px-1 text-[10px] font-extrabold text-text-3">
-                마감
-              </span>
+              <span className={LABEL_NEUTRAL}>마감</span>
             ) : soon ? (
-              <span className="rounded-control border border-[#f0d9ae] px-1 text-[10px] font-extrabold text-warn">
-                마감 임박
-              </span>
+              <span className={LABEL_STRONG}>마감 임박</span>
             ) : null}
             {firstSlot && <span className="shrink-0">{slotLabel(firstSlot)}</span>}
             {firstSlot && <i aria-hidden="true" className="h-[2px] w-[2px] shrink-0 rounded-full bg-border-2" />}

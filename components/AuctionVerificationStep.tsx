@@ -249,7 +249,7 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
               </p>
             </div>
           ) : passed ? (
-            <div className="border border-ok/30 bg-ok-soft px-4 py-3" role="status">
+            <div className="rounded-card bg-surface-2 px-4 py-3" role="status">
               <p className="text-sm font-extrabold text-ok">사진 인증 완료</p>
               <p className="mt-1 text-xs text-text-2">
                 위 남은 시간 안에 등록을 완료해주세요. 이후 관리자 검수를 거쳐 판매글이 공개됩니다.
@@ -290,8 +290,8 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
               )}
 
               {result && !result.passed && result.failureReason && (
-                <div className="border border-accent/30 bg-accent-soft px-4 py-3" role="alert">
-                  <p className="text-sm font-extrabold text-accent">재촬영이 필요합니다</p>
+                <div className="rounded-card bg-surface-2 px-4 py-3" role="alert">
+                  <p className="text-sm font-extrabold text-danger">재촬영이 필요합니다</p>
                   <p className="mt-1 text-xs leading-5 text-text-2">{FAILURE_MESSAGE[result.failureReason]}</p>
                 </div>
               )}

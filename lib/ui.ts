@@ -41,6 +41,18 @@ export const PRESS_FADE = `${PRESS_BASE} active:opacity-55`;
 /** 하단 탭. 바탕이 흰색이라 배경 변화가 보이지 않는다. 아이콘과 글자를 함께 흐린다. */
 export const PRESS_TAB = `${PRESS_BASE} active:opacity-50`;
 
+/**
+ * 라벨(#767) — 속성이나 짧은 상태를 붙이는 작은 채움 사각. 색은 둘뿐이다.
+ *
+ * <p>중립(회색 바탕)이 기본이고, 강조(잉크 바탕)는 「손댈 일이 있다·곧 끝난다」를 말하는 자리에만
+ * 한 줄에 하나 쓴다. 파스텔 채움·색 테두리 칩은 쓰지 않는다 — 색이 늘수록 무엇이 특별한지 사라진다.
+ * 누르는 칩(정렬·필터)이 아니라 붙어 있는 표시라 테두리 없이 면으로 그린다.
+ */
+const LABEL_BASE =
+  "inline-flex h-5 shrink-0 items-center whitespace-nowrap rounded-control px-[7px] text-[11px] font-bold leading-none";
+export const LABEL_NEUTRAL = `${LABEL_BASE} bg-surface-2 text-text-2`;
+export const LABEL_STRONG = `${LABEL_BASE} bg-text-1 text-white`;
+
 export const INPUT_CLASS =
   `w-full rounded-control border border-border px-3.5 py-2.5 text-sm text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`;
 

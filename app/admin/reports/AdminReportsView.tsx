@@ -346,7 +346,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                 <p
                   role={notice.kind === "error" ? "alert" : "status"}
                   className={`mt-3 rounded-control px-3 py-2 text-[12px] font-semibold ${
-                    notice.kind === "error" ? "bg-accent-soft text-accent" : "bg-ok-soft text-ok"
+                    notice.kind === "error" ? "bg-surface-2 text-danger" : "bg-surface-2 text-text-1"
                   }`}
                 >
                   {notice.text}

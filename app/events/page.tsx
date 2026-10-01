@@ -49,8 +49,8 @@ export default async function EventsPage({
 
       <div className="mx-auto max-w-[760px] px-0 pb-10 pt-0 sm:px-4 sm:py-8">
         <div className="hidden items-baseline justify-between gap-3 sm:flex">
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">행사 캘린더</h1>
-          <p className="text-[13px] text-text-3">음악방송과 공연 일정</p>
+          <h1 className="font-display text-title-l font-extrabold text-text-1">행사 캘린더</h1>
+          <p className="text-body-s text-text-3">음악방송과 공연 일정</p>
         </div>
 
         <nav
@@ -66,7 +66,7 @@ export default async function EventsPage({
               <polyline points="15 18 9 12 15 6" />
             </svg>
           </Link>
-          <span className="font-display text-[15px] font-extrabold tracking-tight text-text-1">
+          <span className="font-display text-body-l font-extrabold text-text-1">
             {monthLabel(month)}
           </span>
           <Link
@@ -81,7 +81,7 @@ export default async function EventsPage({
         </nav>
 
         {events === null ? (
-          <p className="px-[14px] py-12 text-center text-[12.5px] text-text-3 sm:px-0">
+          <p className="px-[14px] py-12 text-center text-body-s text-text-3 sm:px-0">
             일정을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.
           </p>
         ) : (

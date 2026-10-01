@@ -83,12 +83,13 @@ export default function Footer() {
         <div>
           {/* 로고는 홈으로 가는 길이다(#548). 헤더 워드마크와 같은 동작. */}
           <Link href="/" aria-label="포카스테이션 홈" className={`inline-block ${FOCUS_RING}`}>
+            {/* eslint-disable-next-line no-restricted-syntax -- 로고는 글자 크기 단계 밖이다(#769) */}
             <Wordmark className="text-[22px] leading-none" />
           </Link>
         </div>
         {FOOTER_COLUMNS.map((column) => (
           <div key={column.title} className="border-b border-border py-[25px] sm:border-0 sm:py-0">
-            <h4 className="mb-[17px] text-[13px] font-extrabold tracking-wide text-text-1 sm:mb-3 sm:text-[11px]">
+            <h4 className="mb-[17px] text-body-s font-extrabold tracking-wide text-text-1 sm:mb-3 sm:text-caption">
               {column.title}
             </h4>
             <div className="grid grid-cols-2 gap-x-5 gap-y-[6px] sm:block">
@@ -100,8 +101,8 @@ export default function Footer() {
                     // 구분은 하되 과하지 않게 — 크기 반 포인트·굵기·명도 세 축을 조금씩만 쓴다.
                     // 푸터에서 혼자 튀면 법 요구를 넘어 디자인을 깨뜨린다.
                     "emphasis" in link && link.emphasis
-                      ? "text-[12.5px] font-bold text-text-1 hover:text-primary"
-                      : "text-xs text-text-2 hover:text-text-1"
+                      ? "text-body-s font-bold text-text-1 hover:text-primary"
+                      : "text-label text-text-2 hover:text-text-1"
                   }`}
                 >
                   {link.label}
@@ -116,7 +117,7 @@ export default function Footer() {
           MobileChromeGate가 홈·목록·매물 상세에서 이걸 접었고, 그 사이 §10 표시사항이 모바일
           주요 화면에서 사라져 있었다. 게이트를 걷어내 지금은 실제로 전 화면에 뜬다 —
           **모바일에서 접는 처리를 다시 넣지 말 것.** */}
-      <address className="mx-auto mt-6 max-w-[1160px] text-[11px] not-italic leading-relaxed sm:mt-10 sm:border-t sm:border-border sm:pt-5">
+      <address className="mx-auto mt-6 max-w-[1160px] text-caption not-italic leading-relaxed sm:mt-10 sm:border-t sm:border-border sm:pt-5">
         <dl className="flex flex-wrap gap-x-3 gap-y-1">
           {rows.map((row) => (
             <div key={row.label} className="flex gap-1.5">
@@ -128,11 +129,11 @@ export default function Footer() {
       </address>
 
       {/* 전자상거래법 §20 — 통신판매중개자 고지. 미고지 시 판매자 채무불이행에 연대책임. */}
-      <p className="mx-auto mt-3 max-w-[1160px] text-[11px] leading-relaxed text-text-2">
+      <p className="mx-auto mt-3 max-w-[1160px] text-caption leading-relaxed text-text-2">
         {INTERMEDIARY_NOTICE}
       </p>
 
-      <div className="mx-auto mt-4 max-w-[1160px] text-[11px] text-text-3">
+      <div className="mx-auto mt-4 max-w-[1160px] text-caption text-text-3">
         © {new Date().getFullYear()} Pocastation. All rights reserved.
       </div>
     </footer>

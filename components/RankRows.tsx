@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { markNavForward } from "@/lib/nav-transition";
 import { mediaUrl } from "@/lib/api";
 import { formatKRW } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
@@ -21,7 +22,7 @@ import type { AuctionResponse, PopularSellerResponse } from "@/lib/types";
 export function RankNumber({ index }: { index: number }) {
   return (
     <span
-      className={`w-4 flex-shrink-0 font-display text-sm font-extrabold tabular-nums ${
+      className={`w-4 flex-shrink-0 font-display text-body font-extrabold tabular-nums ${
         index === 0 ? "text-danger" : "text-text-3"
       }`}
     >
@@ -34,7 +35,7 @@ export const ROW_CLASS = "flex w-full items-center gap-2.5 border-b border-borde
 
 export function AuctionRow({ auction, index }: { auction: AuctionResponse; index: number }) {
   return (
-    <Link href={`/auctions/${auction.id}`} className={`${ROW_CLASS} ${FOCUS_RING}`}>
+    <Link href={`/auctions/${auction.id}`} onNavigate={markNavForward} className={`${ROW_CLASS} ${FOCUS_RING}`}>
       <RankNumber index={index} />
       <span className="h-[34px] w-[27px] flex-shrink-0 overflow-hidden rounded-control bg-surface-2">
         {auction.representativeThumbnailUrl && (
@@ -49,11 +50,11 @@ export function AuctionRow({ auction, index }: { auction: AuctionResponse; index
       </span>
       <span className="min-w-0 flex-1">
         {auction.artistName && (
-          <span className="block truncate text-[11px] font-extrabold text-text-3">{auction.artistName}</span>
+          <span className="block truncate text-caption font-extrabold text-text-3">{auction.artistName}</span>
         )}
-        <span className="block truncate text-[12.5px] text-text-1">{auction.title}</span>
+        <span className="block truncate text-body-s text-text-1">{auction.title}</span>
       </span>
-      <span className="flex-shrink-0 font-display text-[13px] font-extrabold tabular-nums text-text-1">
+      <span className="flex-shrink-0 font-display text-body-s font-extrabold tabular-nums text-text-1">
         {formatKRW(auction.startPrice)}
       </span>
     </Link>
@@ -62,19 +63,19 @@ export function AuctionRow({ auction, index }: { auction: AuctionResponse; index
 
 export function SellerRow({ seller, index }: { seller: PopularSellerResponse; index: number }) {
   return (
-    <Link href={`/sellers/${seller.sellerId}`} className={`${ROW_CLASS} ${FOCUS_RING}`}>
+    <Link href={`/sellers/${seller.sellerId}`} onNavigate={markNavForward} className={`${ROW_CLASS} ${FOCUS_RING}`}>
       <RankNumber index={index} />
-      <span className="flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center rounded-full bg-surface-2 text-[13px] font-bold text-text-2">
+      <span className="flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center rounded-full bg-surface-2 text-body-s font-bold text-text-2">
         {seller.nickname.slice(0, 1).toUpperCase()}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[12.5px] font-bold text-text-1">{seller.nickname}</span>
-        <span className="block truncate text-[11px] text-text-3">
+        <span className="block truncate text-body-s font-bold text-text-1">{seller.nickname}</span>
+        <span className="block truncate text-caption text-text-3">
           거래 {seller.tradeCount.toLocaleString("ko-KR")}건
           {seller.reviewCount > 0 && ` · 후기 ${seller.reviewCount.toLocaleString("ko-KR")}`}
         </span>
       </span>
-      <span className="flex-shrink-0 text-[11px] font-bold text-text-3">Lv.{seller.trustLevel}</span>
+      <span className="flex-shrink-0 text-caption font-bold text-text-3">Lv.{seller.trustLevel}</span>
     </Link>
   );
 }

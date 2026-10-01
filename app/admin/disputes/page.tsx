@@ -148,14 +148,14 @@ export default function AdminDisputesPage() {
   return (
     <div>
       <header className="mb-5">
-        <h1 className="font-display text-xl font-extrabold text-text-1">반품 처리</h1>
-        <p className="mt-1 text-sm text-text-3">
+        <h1 className="font-display text-title font-extrabold text-text-1">반품 처리</h1>
+        <p className="mt-1 text-body text-text-3">
           진행 중인 반품 건을 확인하고, 내 차례인 건에 검토·대금 처리를 진행해요.
         </p>
       </header>
 
       <div className="mb-4 flex items-center">
-        <label className="flex cursor-pointer items-center gap-2 text-xs text-text-2">
+        <label className="flex cursor-pointer items-center gap-2 text-label text-text-2">
           <input
             type="checkbox"
             checked={includeResolved}
@@ -168,7 +168,7 @@ export default function AdminDisputesPage() {
           />
           종결 건 포함
         </label>
-        <span className="ml-auto text-xs text-text-3">
+        <span className="ml-auto text-label text-text-3">
           {includeResolved ? "전체" : "진행 중"} {totalElements}건
         </span>
       </div>
@@ -190,9 +190,9 @@ export default function AdminDisputesPage() {
           aria-label="분쟁 목록"
         >
           {loading ? (
-            <p className="py-20 text-center text-sm text-text-3">불러오는 중...</p>
+            <p className="py-20 text-center text-body text-text-3">불러오는 중...</p>
           ) : items.length === 0 ? (
-            <p className="py-20 text-center text-sm text-text-3">
+            <p className="py-20 text-center text-body text-text-3">
               {includeResolved ? "반품 건이 없어요." : "진행 중인 반품 건이 없어요."}
             </p>
           ) : (
@@ -212,20 +212,20 @@ export default function AdminDisputesPage() {
                       className={
                         "w-full px-4 py-4 text-left transition-colors " +
                         FOCUS_RING +
-                        (active ? " bg-primary-soft/70" : " hover:bg-surface-2")
+                        (active ? " bg-surface-2" : " hover:bg-surface-2")
                       }
                     >
                       <span className="flex items-center gap-2">
                         {/* 내가 손댈 단계만 글자색으로 강조 — 나머지는 진행 상황 참고용이다. */}
-                        <span className={`text-[11px] font-extrabold ${needsAction ? "text-accent" : "text-text-3"}`}>
+                        <span className={`text-caption font-extrabold ${needsAction ? "text-danger" : "text-text-3"}`}>
                           {DISPUTE_STATUS_LABEL[item.disputeStatus]}
                         </span>
-                        <span className="ml-auto text-[11px] text-text-3">
+                        <span className="ml-auto text-caption text-text-3">
                           {item.returnRequestedAt ? formatDateTimeKST(item.returnRequestedAt) : ""}
                         </span>
                       </span>
-                      <span className="mt-1 block truncate text-sm font-bold text-text-1">{item.title}</span>
-                      <span className="mt-0.5 block truncate text-xs text-text-3">
+                      <span className="mt-1 block truncate text-body font-bold text-text-1">{item.title}</span>
+                      <span className="mt-0.5 block truncate text-label text-text-3">
                         {item.returnReason ? RETURN_REASON_LABEL[item.returnReason] : "사유 미기재"}
                       </span>
                     </button>
@@ -241,18 +241,18 @@ export default function AdminDisputesPage() {
                 type="button"
                 disabled={page === 0}
                 onClick={() => setPage((p) => Math.max(p - 1, 0))}
-                className={`rounded-control border border-border px-2.5 py-1 text-xs font-semibold text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
+                className={`rounded-control border border-border px-2.5 py-1 text-label font-semibold text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
               >
                 이전
               </button>
-              <span className="text-xs text-text-3">
+              <span className="text-label text-text-3">
                 {page + 1} / {totalPages}
               </span>
               <button
                 type="button"
                 disabled={page >= totalPages - 1}
                 onClick={() => setPage((p) => p + 1)}
-                className={`rounded-control border border-border px-2.5 py-1 text-xs font-semibold text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
+                className={`rounded-control border border-border px-2.5 py-1 text-label font-semibold text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
               >
                 다음
               </button>
@@ -262,32 +262,32 @@ export default function AdminDisputesPage() {
 
         <section className={(selected ? "block" : "hidden lg:block") + " p-5"} aria-label="분쟁 상세">
           {!selected ? (
-            <p className="py-20 text-center text-sm text-text-3">왼쪽에서 분쟁을 선택해 주세요.</p>
+            <p className="py-20 text-center text-body text-text-3">왼쪽에서 분쟁을 선택해 주세요.</p>
           ) : (
             <>
               <button
                 type="button"
                 onClick={() => setSelectedId(null)}
-                className={`mb-3 text-xs font-semibold text-text-3 hover:text-text-1 lg:hidden ${FOCUS_RING}`}
+                className={`mb-3 text-label font-semibold text-text-3 hover:text-text-1 lg:hidden ${FOCUS_RING}`}
               >
                 ← 목록으로
               </button>
 
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-control border border-border px-2.5 py-1 text-xs font-bold text-text-2">
+                <span className="rounded-control border border-border px-2.5 py-1 text-label font-bold text-text-2">
                   {DISPUTE_STATUS_LABEL[selected.disputeStatus]}
                 </span>
                 <Link
                   href={`/auctions/${selected.auctionId}`}
-                  className={`text-xs font-semibold text-primary hover:underline ${FOCUS_RING}`}
+                  className={`text-label font-semibold text-primary hover:underline ${FOCUS_RING}`}
                 >
                   판매글 보기 →
                 </Link>
               </div>
 
-              <h2 className="mt-2 font-display text-lg font-extrabold text-text-1">{selected.title}</h2>
+              <h2 className="mt-2 font-display text-title-s font-extrabold text-text-1">{selected.title}</h2>
 
-              <dl className="mt-4 divide-y divide-border rounded-card border border-border text-sm">
+              <dl className="mt-4 divide-y divide-border rounded-card border border-border text-body">
                 {[
                   ["결제 금액", formatKRW(selected.chargeAmount)],
                   ["반품 사유", selected.returnReason ? RETURN_REASON_LABEL[selected.returnReason] : "-"],
@@ -353,30 +353,30 @@ export default function AdminDisputesPage() {
                 <div className="mt-4 space-y-2">
                   {selected.returnDetail && (
                     <div className="rounded-card bg-surface-2 px-3.5 py-2.5">
-                      <span className="block text-[10.5px] font-bold uppercase tracking-wide text-text-3">
+                      <span className="block text-caption font-bold uppercase tracking-wide text-text-3">
                         구매자 주장
                       </span>
-                      <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-text-2">
+                      <p className="mt-1 whitespace-pre-wrap break-words text-body-s leading-relaxed text-text-2">
                         {selected.returnDetail}
                       </p>
                     </div>
                   )}
                   {selected.sellerDefense && (
                     <div className="rounded-card bg-surface-2 px-3.5 py-2.5">
-                      <span className="block text-[10.5px] font-bold uppercase tracking-wide text-text-3">
+                      <span className="block text-caption font-bold uppercase tracking-wide text-text-3">
                         판매자 의견
                       </span>
-                      <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-text-2">
+                      <p className="mt-1 whitespace-pre-wrap break-words text-body-s leading-relaxed text-text-2">
                         {selected.sellerDefense}
                       </p>
                     </div>
                   )}
                   {selected.disputeNote && (
                     <div className="rounded-card border border-border px-3.5 py-2.5">
-                      <span className="block text-[10.5px] font-bold uppercase tracking-wide text-text-3">
+                      <span className="block text-caption font-bold uppercase tracking-wide text-text-3">
                         운영팀 기록
                       </span>
-                      <p className="mt-1 whitespace-pre-wrap break-words text-[13px] leading-relaxed text-text-2">
+                      <p className="mt-1 whitespace-pre-wrap break-words text-body-s leading-relaxed text-text-2">
                         {selected.disputeNote}
                       </p>
                     </div>
@@ -389,13 +389,13 @@ export default function AdminDisputesPage() {
               {selected.disputeStatus === "RETURN_REQUESTED" ? (
                 <div className="mt-5">
                   <label className="block">
-                    <span className="text-xs font-bold text-text-2">보완 요청 내용</span>
+                    <span className="text-label font-bold text-text-2">보완 요청 내용</span>
                     <textarea
                       value={note}
                       onChange={(e) => setNote(e.target.value.slice(0, 500))}
                       rows={3}
                       placeholder="무엇이 더 필요한지 구체적으로 적어주세요. 구매자에게 그대로 전달돼요."
-                      className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+                      className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-body text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
                     />
                   </label>
                   <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -403,7 +403,7 @@ export default function AdminDisputesPage() {
                       type="button"
                       disabled={busy || !note.trim()}
                       onClick={() => void requestEvidence()}
-                      className={`h-10 flex-1 rounded-control border border-border-2 bg-surface text-sm font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`h-10 flex-1 rounded-control border border-border-2 bg-surface text-body font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       자료 보완 요청
                     </button>
@@ -411,29 +411,29 @@ export default function AdminDisputesPage() {
                       type="button"
                       disabled={busy}
                       onClick={() => void forwardToSeller()}
-                      className={`h-10 flex-1 rounded-control bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`h-10 flex-1 rounded-control bg-primary text-body font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       판매자에게 전달
                     </button>
                   </div>
-                  <p className="mt-2 text-[11px] leading-relaxed text-text-3">
+                  <p className="mt-2 text-caption leading-relaxed text-text-3">
                     각하는 없어요. 자료가 부족해도 있는 자료로 판매자 의견을 받고 판단해요.
                   </p>
                 </div>
               ) : selected.disputeStatus === "ADMIN_DECISION" ? (
                 <div className="mt-5">
                   <label className="block">
-                    <span className="text-xs font-bold text-text-2">판정 근거 (필수)</span>
+                    <span className="text-label font-bold text-text-2">판정 근거 (필수)</span>
                     <textarea
                       value={note}
                       onChange={(e) => setNote(e.target.value.slice(0, 500))}
                       rows={3}
                       placeholder="어떤 근거로 판단했는지 적어주세요. 감사로그에 남아요."
-                      className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+                      className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-body text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
                     />
                   </label>
                   <label className="mt-3 block">
-                    <span className="text-xs font-bold text-text-2">
+                    <span className="text-label font-bold text-text-2">
                       일부 환불 금액{" "}
                       <span className="font-normal text-text-3">— 일부환불을 고를 때만</span>
                     </span>
@@ -446,9 +446,9 @@ export default function AdminDisputesPage() {
                         value={amount}
                         onChange={(e) => setAmount(e.target.value.replace(/[^0-9]/g, "").slice(0, 9))}
                         placeholder="3000"
-                        className={`h-10 w-full rounded-card border border-border bg-surface px-3 text-sm tabular-nums text-text-1 placeholder:text-text-3 sm:w-36 ${FOCUS_RING}`}
+                        className={`h-10 w-full rounded-card border border-border bg-surface px-3 text-body tabular-nums text-text-1 placeholder:text-text-3 sm:w-36 ${FOCUS_RING}`}
                       />
-                      <span className="text-[11px] text-text-3">
+                      <span className="text-caption text-text-3">
                         0원 초과 · {formatKRW(selected.chargeAmount)} 미만
                       </span>
                     </span>
@@ -460,7 +460,7 @@ export default function AdminDisputesPage() {
                       type="button"
                       disabled={busy || !note.trim()}
                       onClick={() => void decide("DISMISSED")}
-                      className={`h-10 flex-1 rounded-control border border-border-2 bg-surface text-sm font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`h-10 flex-1 rounded-control border border-border-2 bg-surface text-body font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       {DISPUTE_DECISION_LABEL.DISMISSED}
                     </button>
@@ -468,7 +468,7 @@ export default function AdminDisputesPage() {
                       type="button"
                       disabled={busy || !note.trim() || !amount}
                       onClick={() => void decide("PARTIAL_REFUND")}
-                      className={`h-10 flex-1 rounded-control border border-border-2 bg-surface text-sm font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`h-10 flex-1 rounded-control border border-border-2 bg-surface text-body font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       {DISPUTE_DECISION_LABEL.PARTIAL_REFUND}
                     </button>
@@ -476,12 +476,12 @@ export default function AdminDisputesPage() {
                       type="button"
                       disabled={busy || !note.trim()}
                       onClick={() => void decide("FULL_REFUND")}
-                      className={`h-10 flex-1 rounded-control bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`h-10 flex-1 rounded-control bg-primary text-body font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       {DISPUTE_DECISION_LABEL.FULL_REFUND}
                     </button>
                   </div>
-                  <p className="mt-2 text-[11px] leading-relaxed text-text-3">
+                  <p className="mt-2 text-caption leading-relaxed text-text-3">
                     전액환불은 바로 환불되지 않고 구매자 반송 대기로 넘어가요. 일부환불은 반송 없이
                     종결되고, 실지급은 PG 연동 후에 나가요.
                   </p>
@@ -489,29 +489,29 @@ export default function AdminDisputesPage() {
               ) : REOPENABLE_DISPUTE.includes(selected.disputeStatus) ? (
                 <div className="mt-5">
                   <label className="block">
-                    <span className="text-xs font-bold text-text-2">재오픈 사유 (필수)</span>
+                    <span className="text-label font-bold text-text-2">재오픈 사유 (필수)</span>
                     <textarea
                       value={note}
                       onChange={(e) => setNote(e.target.value.slice(0, 500))}
                       rows={3}
                       placeholder="왜 다시 열어야 하는지 적어주세요. 감사로그에 남아요."
-                      className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+                      className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-body text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
                     />
                   </label>
                   <button
                     type="button"
                     disabled={busy || !note.trim()}
                     onClick={() => void reopen()}
-                    className={`mt-3 h-10 w-full rounded-control border border-border-2 bg-surface text-sm font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`mt-3 h-10 w-full rounded-control border border-border-2 bg-surface text-body font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     다시 열어 대금 처리하기
                   </button>
-                  <p className="mt-2 text-[11px] leading-relaxed text-text-3">
+                  <p className="mt-2 text-caption leading-relaxed text-text-3">
                     환불로 끝난 건은 되돌릴 수 없어요. 기각·철회만 다시 열 수 있어요.
                   </p>
                 </div>
               ) : (
-                <p className="mt-5 rounded-card border border-border bg-surface-2 px-3.5 py-3 text-xs leading-relaxed text-text-2">
+                <p className="mt-5 rounded-card border border-border bg-surface-2 px-3.5 py-3 text-label leading-relaxed text-text-2">
                   상대의 응답을 기다리는 단계예요.
                   {selected.disputeDueAt
                     ? ` ${formatDateTimeKST(selected.disputeDueAt)}까지 응답이 없으면 자동으로 다음 단계로 넘어가요.`

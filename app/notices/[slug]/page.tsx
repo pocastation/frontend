@@ -52,17 +52,17 @@ export default async function NoticeDetailPage({
     <div className="mx-auto max-w-[720px] px-5 pt-9 pb-20 sm:pt-12">
       <Link
         href="/notices"
-        className={`inline-flex items-center gap-1 rounded-control px-1 py-1 text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
+        className={`inline-flex items-center gap-1 rounded-control px-1 py-1 text-label font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
       >
         <span aria-hidden="true">←</span> 공지사항
       </Link>
 
       <header className="mt-4 border-b border-text-1/25 pb-5">
-        <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11.5px]">
+        <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-label">
           <span className="font-bold text-text-3">{NOTICE_CATEGORY_LABEL[notice.category]}</span>
           <span className="tabular-nums text-text-3">{formatDate(notice.date)}</span>
         </p>
-        <h1 className="mt-2 font-display text-[24px] font-extrabold leading-[1.3] tracking-[-0.035em] text-text-1 sm:text-[27px]">
+        <h1 className="mt-2 font-display text-title-l font-extrabold text-text-1 sm:text-display">
           {notice.title}
         </h1>
       </header>
@@ -70,7 +70,7 @@ export default async function NoticeDetailPage({
       {/* 본문은 읽는 글이라 줄 길이를 제한한다 — 한 줄이 너무 길면 다음 줄을 찾기 어렵다. */}
       <div className="mt-6 max-w-[38rem]">
         {notice.body.map((paragraph) => (
-          <p key={paragraph} className="mt-4 text-[14.5px] leading-[1.85] text-text-2 first:mt-0">
+          <p key={paragraph} className="mt-4 text-body-l text-text-2 first:mt-0">
             {paragraph}
           </p>
         ))}
@@ -79,13 +79,13 @@ export default async function NoticeDetailPage({
       <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 border-t border-border pt-6">
         <Link
           href="/notices"
-          className={`text-[13px] font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-text-1 hover:decoration-text-1 ${FOCUS_RING}`}
+          className={`text-body-s font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-text-1 hover:decoration-text-1 ${FOCUS_RING}`}
         >
           목록으로
         </Link>
         <Link
           href="/inquiries/new"
-          className={`text-[13px] font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-text-1 hover:decoration-text-1 ${FOCUS_RING}`}
+          className={`text-body-s font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-text-1 hover:decoration-text-1 ${FOCUS_RING}`}
         >
           문의하기
         </Link>

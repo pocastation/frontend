@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { kstHm } from "@/lib/event-dates";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, LABEL_NEUTRAL } from "@/lib/ui";
 import type { EventResponse, EventType } from "@/lib/types";
+import NavLink from "@/components/NavLink";
 
 const TYPE_LABEL: Record<EventType, string> = {
   MUSIC_SHOW: "음악방송",
@@ -9,18 +9,8 @@ const TYPE_LABEL: Record<EventType, string> = {
   ETC: "행사",
 };
 
-/*
-  종류를 색으로 가른다(#726). 채우기를 쓰지 않는다 — 기록된 톤이 파스텔 필 배지를 금지하고
-  뉴트럴 + 헤어라인을 기준으로 둔다. 테두리와 글자만 색을 맡는다.
-
-  보라(primary)는 상태를 말하는 자리에만 쓰므로 종류 색으로 쓰지 않는다. 기타(ETC)는 이름
-  그대로 나머지라 색을 주지 않는다 — 색이 셋이면 무엇이 특별한지 사라진다.
-*/
-const TYPE_CHIP: Record<EventType, string> = {
-  MUSIC_SHOW: "border-[#1d4ed8] text-[#1d4ed8]",
-  CONCERT: "border-warn text-warn",
-  ETC: "border-border-2 text-text-2",
-};
+// 종류는 색이 아니라 글자로 구분한다(#767) — 셋 모두 중립 라벨이다. 예전(#726)에는 테두리·글자
+// 색으로 갈랐는데, 음악방송 파랑이 서비스 어디에도 없는 색이라 이 칩만 다른 서비스처럼 보였다.
 
 /**
  * 행사 줄 목록. 캘린더와 홈 스트립이 같은 줄을 쓴다.
@@ -47,7 +37,7 @@ export default function EventList({
   if (events.length === 0) {
     // 빈 안내는 확보한 칸 안에서 가운데로 선다. 잡아 둔 칸이 없으면 예전처럼 제 높이를 쓴다.
     if (fillers === 0) {
-      return <p className="py-8 text-center text-[12.5px] text-text-3">이 날짜에 등록된 행사가 없어요.</p>;
+      return <p className="py-8 text-center text-body-s text-text-3">이 날짜에 등록된 행사가 없어요.</p>;
     }
     return (
       <div className="relative">
@@ -56,7 +46,7 @@ export default function EventList({
             <FillerRow key={i} />
           ))}
         </ul>
-        <p className="absolute inset-0 flex items-center justify-center text-[12.5px] text-text-3">
+        <p className="absolute inset-0 flex items-center justify-center text-body-s text-text-3">
           이 날짜에 등록된 행사가 없어요.
         </p>
       </div>
@@ -67,24 +57,24 @@ export default function EventList({
     <ul>
       {events.map((event) => (
         <li key={event.id} className="border-b border-border last:border-b-0">
-          <Link href={`/events/${event.id}`} className={`flex items-center gap-2.5 py-[11px] ${FOCUS_RING}`}>
+          <NavLink nav="forward" href={`/events/${event.id}`} className={`flex items-center gap-2.5 py-[11px] ${FOCUS_RING}`}>
             <span
-              className={`shrink-0 rounded-control border px-1.5 py-0.5 text-[10px] font-extrabold ${TYPE_CHIP[event.type]}`}
+              className={LABEL_NEUTRAL}
             >
               {TYPE_LABEL[event.type]}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13.5px] font-bold tracking-[-0.01em] text-text-1">
+              <span className="block truncate text-body font-bold text-text-1">
                 {event.name}
               </span>
-              <span className="mt-px block truncate text-[11px] text-text-3">
+              <span className="mt-px block truncate text-caption text-text-3">
                 {event.venue} · {kstHm(event.startsAt)}
               </span>
             </span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0 text-text-3">
               <polyline points="9 18 15 12 9 6" />
             </svg>
-          </Link>
+          </NavLink>
         </li>
       ))}
       {Array.from({ length: fillers }).map((_, i) => (
@@ -99,10 +89,10 @@ function FillerRow({ "aria-hidden": ariaHidden }: { "aria-hidden"?: boolean } = 
   return (
     <li aria-hidden={ariaHidden} className={ariaHidden ? "invisible" : undefined}>
       <span className="flex items-center gap-2.5 py-[11px]">
-        <span className="shrink-0 rounded-control border px-1.5 py-0.5 text-[10px] font-extrabold">행사</span>
+        <span className={LABEL_NEUTRAL}>행사</span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[13.5px] font-bold tracking-[-0.01em]">&nbsp;</span>
-          <span className="mt-px block truncate text-[11px]">&nbsp;</span>
+          <span className="block truncate text-body font-bold">&nbsp;</span>
+          <span className="mt-px block truncate text-caption">&nbsp;</span>
         </span>
       </span>
     </li>

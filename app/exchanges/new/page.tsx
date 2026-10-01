@@ -34,10 +34,10 @@ const MAX_WANTS = 5;
 type Want = { artistId: string; idolId: string; source: PhotocardSource };
 type Slot = { fromMinuteOfDay: number; toMinuteOfDay: number };
 
-const LABEL = "mb-1.5 text-[12.5px] font-extrabold text-text-2";
+const LABEL = "mb-1.5 text-body-s font-extrabold text-text-2";
 const INPUT =
-  "h-12 w-full rounded-control border border-border-2 bg-white px-3 text-[15px] font-semibold text-text-1";
-const HELP = "mt-1.5 text-[11.5px] leading-relaxed text-text-3";
+  "h-12 w-full rounded-control border border-border-2 bg-white px-3 text-body-l font-semibold text-text-1";
+const HELP = "mt-1.5 text-label leading-relaxed text-text-3";
 
 export default function NewExchangePage() {
   return (
@@ -54,6 +54,14 @@ function NewExchangeForm() {
   const { member, fetchWithAuth, isLoading: authLoading } = useAuth();
 
   const [step, setStep] = useState<1 | 2>(1);
+  // 단계 이동 방향. 판매 등록 위저드와 같은 옆 이동(240ms)을 쓴다. 처음 그릴 때는 움직이지 않는다.
+  const [stepDir, setStepDir] = useState<"next" | "prev" | null>(null);
+  const stepAnim =
+    stepDir === "next"
+      ? "animate-[wizardInRight_240ms_ease-out]"
+      : stepDir === "prev"
+        ? "animate-[wizardInLeft_240ms_ease-out]"
+        : "";
   const [event, setEvent] = useState<EventResponse | null>(null);
   const [artists, setArtists] = useState<{ id: number; name: string }[]>([]);
   const [idols, setIdols] = useState<ArtistMemberResponse[]>([]);
@@ -162,8 +170,8 @@ function NewExchangeForm() {
   if (!eventId) {
     return (
       <>
-        <MobilePageHead title="교환글 작성" variant="close" backHref="/events" />
-        <p className="px-[14px] py-16 text-center text-[12.5px] text-text-3">
+        <MobilePageHead title="교환글 작성" variant="dismiss" backHref="/events" />
+        <p className="px-[14px] py-16 text-center text-body-s text-text-3">
           어느 행사의 교환글인지 알 수 없어요. 캘린더에서 행사를 골라 주세요.
         </p>
       </>
@@ -180,8 +188,8 @@ function NewExchangeForm() {
   if (writeWindow !== "open") {
     return (
       <>
-        <MobilePageHead title="교환글 작성" sub={event?.name} variant="close" backHref={`/events/${eventId}`} />
-        <p className="px-[14px] py-16 text-center text-[12.5px] leading-relaxed text-text-3">
+        <MobilePageHead title="교환글 작성" sub={event?.name} variant="dismiss" backHref={`/events/${eventId}`} />
+        <p className="px-[14px] py-16 text-center text-body-s leading-relaxed text-text-3">
           {writeWindow === "tooEarly"
             ? "교환글은 행사 전날 낮 12시부터 올릴 수 있어요."
             : "교환글을 올릴 수 있는 시간이 지났어요."}
@@ -195,7 +203,7 @@ function NewExchangeForm() {
       <MobilePageHead
         title="교환글 작성"
         sub={event?.name}
-        variant="close"
+        variant="dismiss"
         backHref={`/events/${eventId}`}
       />
 
@@ -206,14 +214,14 @@ function NewExchangeForm() {
         </div>
 
         {error && (
-          <p role="alert" className="mx-[14px] mt-3 rounded-control border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger sm:mx-0">
+          <p role="alert" className="mx-[14px] mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
 
         {step === 1 ? (
           <>
-            <section className="px-[14px] pt-4 sm:px-0">
+            <section className={`px-[14px] pt-4 sm:px-0 ${stepAnim}`}>
               <p className={LABEL}>
                 내가 가진 포카<span className="ml-0.5 text-primary">*</span>
               </p>
@@ -227,7 +235,7 @@ function NewExchangeForm() {
               <p className={HELP}>최대 {MAX_PHOTOS}장. 행사가 끝나고 30일 뒤 자동으로 지워져요.</p>
             </section>
 
-            <section className="mt-6 px-[14px] sm:px-0">
+            <section className={`mt-6 px-[14px] sm:px-0 ${stepAnim}`}>
               <p className={LABEL}>
                 어떤 포카인가요<span className="ml-0.5 text-primary">*</span>
               </p>
@@ -281,7 +289,7 @@ function NewExchangeForm() {
                 <button
                   type="button"
                   onClick={() => setWants([...wants, { artistId: "", idolId: "", source: "BROADCAST" }])}
-                  className={`mt-2 h-10 w-full rounded-control border border-border-2 bg-white text-[13px] font-extrabold text-text-2 ${FOCUS_RING}`}
+                  className={`mt-2 h-10 w-full rounded-control border border-border-2 bg-white text-body-s font-extrabold text-text-2 ${FOCUS_RING}`}
                 >
                   받고 싶은 포카 추가
                 </button>
@@ -293,8 +301,11 @@ function NewExchangeForm() {
               <button
                 type="button"
                 disabled={!step1Ready}
-                onClick={() => setStep(2)}
-                className={`h-12 w-full rounded-control bg-primary text-[15px] font-extrabold text-white disabled:opacity-50 ${PRESS_PRIMARY} ${FOCUS_RING}`}
+                onClick={() => {
+                  setStepDir("next");
+                  setStep(2);
+                }}
+                className={`h-12 w-full rounded-control bg-primary text-body-l font-extrabold text-white disabled:opacity-50 ${PRESS_PRIMARY} ${FOCUS_RING}`}
               >
                 다음
               </button>
@@ -302,7 +313,7 @@ function NewExchangeForm() {
           </>
         ) : (
           <>
-            <section className="px-[14px] pt-4 sm:px-0">
+            <section className={`px-[14px] pt-4 sm:px-0 ${stepAnim}`}>
               <p className={LABEL}>
                 만날 곳<span className="ml-0.5 text-primary">*</span>
               </p>
@@ -316,7 +327,7 @@ function NewExchangeForm() {
               <p className={HELP}>행사장 안에서 서로 찾을 수 있는 지점으로 적어 주세요.</p>
             </section>
 
-            <section className="mt-6 px-[14px] sm:px-0">
+            <section className={`mt-6 px-[14px] sm:px-0 ${stepAnim}`}>
               <p className={LABEL}>
                 만날 수 있는 시간<span className="ml-0.5 text-primary">*</span>
               </p>
@@ -332,7 +343,7 @@ function NewExchangeForm() {
                 <button
                   type="button"
                   onClick={() => setSlots([...slots, { fromMinuteOfDay: 20 * 60, toMinuteOfDay: 21 * 60 }])}
-                  className={`mt-2 h-10 w-full rounded-control border border-border-2 bg-white text-[13px] font-extrabold text-text-2 ${FOCUS_RING}`}
+                  className={`mt-2 h-10 w-full rounded-control border border-border-2 bg-white text-body-s font-extrabold text-text-2 ${FOCUS_RING}`}
                 >
                   시간대 추가
                 </button>
@@ -345,8 +356,11 @@ function NewExchangeForm() {
             <div className={`flex gap-2 ${FORM_ACTION_BAR}`} style={FORM_ACTION_BAR_STYLE}>
               <button
                 type="button"
-                onClick={() => setStep(1)}
-                className={`h-12 flex-1 rounded-control border border-border-2 bg-white text-[15px] font-extrabold text-text-2 ${FOCUS_RING}`}
+                onClick={() => {
+                  setStepDir("prev");
+                  setStep(1);
+                }}
+                className={`h-12 flex-1 rounded-control border border-border-2 bg-white text-body-l font-extrabold text-text-2 ${FOCUS_RING}`}
               >
                 이전
               </button>
@@ -354,7 +368,7 @@ function NewExchangeForm() {
                 type="button"
                 disabled={!step2Ready || submitting}
                 onClick={submit}
-                className={`h-12 flex-[2] rounded-control bg-primary text-[15px] font-extrabold text-white disabled:opacity-50 ${FOCUS_RING}`}
+                className={`h-12 flex-[2] rounded-control bg-primary text-body-l font-extrabold text-white disabled:opacity-50 ${FOCUS_RING}`}
               >
                 {submitting ? "등록 중…" : "교환글 등록"}
               </button>
@@ -456,7 +470,7 @@ function SlotRow({
         value={slot.fromMinuteOfDay}
         onChange={(h, m) => setPart("from", h, m)}
       />
-      <span aria-hidden="true" className="shrink-0 text-[13px] font-bold text-text-3">–</span>
+      <span aria-hidden="true" className="shrink-0 text-body-s font-bold text-text-3">–</span>
       <TimePicker
         label="종료"
         value={slot.toMinuteOfDay}

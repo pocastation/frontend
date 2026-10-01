@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { mediaUrl } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
 import { useDialogFocus } from "@/lib/use-dialog-focus";
-import type { AuctionImageResponse } from "@/lib/types";
+import type { AuctionImageResponse, AuctionVideoResponse } from "@/lib/types";
 
 /**
  * 사진 확대 뷰어 — 전체화면 라이트박스.
@@ -19,8 +19,10 @@ import type { AuctionImageResponse } from "@/lib/types";
  * 핀치·팬·휠·더블탭·키보드·아래로 당겨 닫기까지 이미 갖춰져 있었다 — 새로 짜는 대신 꺼내서
  * 양쪽이 같이 쓴다. 동작은 한 줄도 바꾸지 않았다.
  *
- * <p><b>사진만 받는다.</b> 검수영상은 캐러셀에서 `controls playsInline`으로 재생되고 전체화면은
- * 기기 기본 재생기가 준다 — 영상은 확대해 뜯어보는 게 아니라 재생해서 보는 것이다.
+ * <p><b>영상은 선택적으로 마지막 장에 붙는다(#763).</b> 모바일 상세 캐러셀이 검수영상을 마지막
+ * 슬라이드로 두므로(#478) 확대 화면도 같은 장 수여야 한다 — 사진만 받던 시절엔 마지막 사진에서
+ * 멈춰 영상으로 넘어갈 수 없었다. 영상은 확대해 뜯어보는 게 아니라 재생해서 보는 것이라, 영상
+ * 장에서는 핀치·더블탭·휠 확대를 끄고 `controls`로만 다룬다. 아래로 당겨 닫기는 그대로 둔다.
  *
  * <p>인덱스는 <b>바깥이 쥔다</b>(controlled). 데스크탑은 뷰어에서 넘긴 사진이 닫은 뒤 본 화면에도
  * 그대로 남아야 하고, 모바일은 캐러셀이 이미 자기 인덱스를 갖고 있기 때문이다.
@@ -28,6 +30,7 @@ import type { AuctionImageResponse } from "@/lib/types";
 export default function MediaZoomViewer({
   open,
   images,
+  video = null,
   title,
   index,
   onIndexChange,
@@ -35,21 +38,31 @@ export default function MediaZoomViewer({
 }: {
   open: boolean;
   images: AuctionImageResponse[];
+  /** 마지막 장으로 붙는 검수영상. 사진 인덱스는 그대로이고 영상은 `images.length`번째 장이다. */
+  video?: AuctionVideoResponse | null;
   title: string;
   index: number;
   onIndexChange: (next: number) => void;
   onClose: () => void;
 }) {
+  const total = images.length + (video ? 1 : 0);
   const overlayRef = useRef<HTMLDivElement>(null); // 아래로 당겨 닫기 시 translateY가 걸리는 루트
-  useDialogFocus(overlayRef, open && images.length > 0, onClose);
+  useDialogFocus(overlayRef, open && total > 0, onClose);
   const pagerRef = useRef<HTMLDivElement>(null);
   const slideRefs = useRef<(HTMLImageElement | null)[]>([]);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const rafRef = useRef(0);
   // 현재(활성) 슬라이드의 변환 상태. boxW/H=슬라이드 크기, pw/ph=object-contain으로 맞춰진 실제 그려지는 크기.
   const z = useRef({ scale: 1, tx: 0, ty: 0, maxScale: 4, boxW: 1, boxH: 1, pw: 1, ph: 1 });
   const [locked, setLocked] = useState(false); // scale>1이면 true → 페이저 스크롤 잠금
 
-  const hasMultiple = images.length > 1;
+  const hasMultiple = total > 1;
+  const onVideo = video !== null && index === images.length;
+
+  // 영상 장을 떠나면 멈춘다. 옆 장으로 넘겨도 소리가 계속 나면 어디서 나는지 알 수 없다.
+  useEffect(() => {
+    if (!onVideo) videoRef.current?.pause();
+  }, [onVideo]);
 
   // 화살표는 마우스 기기에만 — 터치는 스와이프로 넘긴다.
   const [isTouch, setIsTouch] = useState(false);
@@ -154,13 +167,13 @@ export default function MediaZoomViewer({
     const pager = pagerRef.current;
     if (!pager) return;
     const idx = Math.round(pager.scrollLeft / pager.clientWidth);
-    if (idx !== index && idx >= 0 && idx < images.length) {
+    if (idx !== index && idx >= 0 && idx < total) {
       onIndexChange(idx);
       z.current.scale = 1;
       z.current.tx = 0;
       z.current.ty = 0;
     }
-  }, [locked, index, images.length, onIndexChange]);
+  }, [locked, index, total, onIndexChange]);
 
   // 화살표/키보드용 — 인덱스를 즉시 갱신(스무스 스크롤 이벤트에 의존하지 않음)하고 해당 슬라이드로 부드럽게 이동.
   // navLock으로 애니메이션 중 onPagerScroll이 중간 위치를 이전 인덱스로 되돌리는 깜빡임을 막는다.
@@ -168,7 +181,7 @@ export default function MediaZoomViewer({
     (i: number) => {
       const pager = pagerRef.current;
       if (!pager) return;
-      const idx = Math.max(0, Math.min(images.length - 1, i));
+      const idx = Math.max(0, Math.min(total - 1, i));
       navLock.current = true;
       onIndexChange(idx);
       z.current.scale = 1;
@@ -180,7 +193,7 @@ export default function MediaZoomViewer({
         navLock.current = false;
       }, 500);
     },
-    [images.length, onIndexChange],
+    [total, onIndexChange],
   );
 
   // 데스크탑 휠 = 확대/축소(커서 기준). React onWheel은 passive라 네이티브 리스너로 preventDefault.
@@ -189,6 +202,7 @@ export default function MediaZoomViewer({
     const pager = pagerRef.current;
     if (!pager) return;
     const onWheel = (e: WheelEvent) => {
+      if (onVideo) return;
       e.preventDefault();
       measureActive(); // 캐시된 이미지로 onLoad를 놓쳤을 때 대비해 상호작용 시점에 재측정.
       const r = pager.getBoundingClientRect();
@@ -198,7 +212,7 @@ export default function MediaZoomViewer({
     };
     pager.addEventListener("wheel", onWheel, { passive: false });
     return () => pager.removeEventListener("wheel", onWheel);
-  }, [open, zoomTo, applyActive, measureActive]);
+  }, [open, onVideo, zoomTo, applyActive, measureActive]);
 
   // 데스크탑 마우스 드래그 = 확대(scale>1) 상태에서만 팬. 전체보기(fit)에선 팬 안 하고 화살표/스크롤에 맡긴다.
   // (터치 팬은 별도 touch 핸들러가 처리 — 여기선 마우스만.)
@@ -276,7 +290,7 @@ export default function MediaZoomViewer({
     };
     const onStart = (e: TouchEvent) => {
       const g = gesture.current;
-      if (e.touches.length === 2) {
+      if (e.touches.length === 2 && !onVideo) {
         const a = e.touches[0],
           b = e.touches[1];
         g.pinch = true;
@@ -397,42 +411,42 @@ export default function MediaZoomViewer({
       pager.removeEventListener("touchend", onEnd);
       pager.removeEventListener("touchcancel", onEnd);
     };
-  }, [open, locked, measureActive, clampActive, scheduleApply, resetActive, applyActive, onClose]);
+  }, [open, onVideo, locked, measureActive, clampActive, scheduleApply, resetActive, applyActive, onClose]);
 
   // 키보드: ← → 전환. Esc·포커스·스크롤 잠금은 useDialogFocus에서 처리한다.
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") scrollToIndex(Math.max(0, index - 1));
-      else if (e.key === "ArrowRight") scrollToIndex(Math.min(images.length - 1, index + 1));
+      else if (e.key === "ArrowRight") scrollToIndex(Math.min(total - 1, index + 1));
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, index, images.length, scrollToIndex, onClose]);
+  }, [open, index, total, scrollToIndex, onClose]);
 
   // 더블클릭/더블탭 = 전체보기 ↔ 2배 토글.
   const onDoubleClick = useCallback(
     (e: React.MouseEvent) => {
       const pager = pagerRef.current;
-      if (!pager) return;
+      if (!pager || onVideo) return;
       measureActive(); // 상호작용 시점 재측정(onLoad 누락 대비).
       const r = pager.getBoundingClientRect();
       if (z.current.scale > 1.001) resetActive();
       else zoomTo(2, e.clientX - r.left, e.clientY - r.top);
       applyActive();
     },
-    [resetActive, zoomTo, applyActive, measureActive],
+    [onVideo, resetActive, zoomTo, applyActive, measureActive],
   );
 
-  if (!open || images.length === 0 || typeof document === "undefined") return null;
+  if (!open || total === 0 || typeof document === "undefined") return null;
 
   // 헤더(.hdr, z-index:300)보다 위에 오도록 body로 portal + z-[400]. 조상 스택 컨텍스트에도 안 갇힌다.
   return createPortal(
-    <div ref={overlayRef} role="dialog" aria-modal="true" aria-label="사진 확대" tabIndex={-1} className="fixed inset-0 z-[410] flex flex-col bg-[rgba(8,7,12,0.94)]">
-      {/* 페이지 카운터 — 본 화면과 통일해 우하단. 여러 장일 때만 노출. */}
-      {hasMultiple && (
-        <span className="pointer-events-none absolute bottom-3 right-3.5 z-10 rounded-control bg-white/15 px-2.5 py-0.5 text-[12px] font-semibold text-white tabular-nums">
-          {index + 1} / {images.length}
+    <div ref={overlayRef} role="dialog" aria-modal="true" aria-label={video ? "사진·영상 확대" : "사진 확대"} tabIndex={-1} className="fixed inset-0 z-[410] flex flex-col bg-[rgba(8,7,12,0.94)]">
+      {/* 페이지 카운터 — 본 화면과 통일해 우하단. 여러 장일 때만, 영상 장에서는 숨긴다(본 화면과 같다). */}
+      {hasMultiple && !onVideo && (
+        <span className="pointer-events-none absolute bottom-3 right-3.5 z-10 rounded-control bg-white/15 px-2.5 py-0.5 text-label font-semibold text-white tabular-nums">
+          {index + 1} / {total}
         </span>
       )}
       {/* 닫기 — 항상 잘 보이도록 우상단 고정 원형 버튼(Esc·아래로 당기기로도 닫힌다). */}
@@ -474,6 +488,20 @@ export default function MediaZoomViewer({
             />
           </div>
         ))}
+        {video && (
+          <div key={video.url} className="relative flex h-full w-full shrink-0 snap-center snap-always items-center overflow-hidden">
+            <video
+              ref={videoRef}
+              controls
+              playsInline
+              preload="metadata"
+              poster={video.posterUrl ? mediaUrl(video.posterUrl) : undefined}
+              src={mediaUrl(video.url)}
+              aria-label={`${title} 검수영상`}
+              className="h-full w-full object-contain"
+            />
+          </div>
+        )}
       </div>
       {/* 화살표는 데스크탑(마우스)에서만 — 모바일은 스와이프로 넘긴다.
           끝(첫/마지막 사진)에선 그 방향 화살표를 숨겨 경계임을 알린다. */}
@@ -481,7 +509,7 @@ export default function MediaZoomViewer({
         <button
           type="button"
           onClick={() => scrollToIndex(index - 1)}
-          aria-label="이전 사진"
+          aria-label="이전"
           className={`absolute left-3.5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 ${FOCUS_RING}`}
         >
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -489,11 +517,11 @@ export default function MediaZoomViewer({
           </svg>
         </button>
       )}
-      {hasMultiple && !isTouch && index < images.length - 1 && (
+      {hasMultiple && !isTouch && index < total - 1 && (
         <button
           type="button"
           onClick={() => scrollToIndex(index + 1)}
-          aria-label="다음 사진"
+          aria-label="다음"
           className={`absolute right-3.5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/15 text-white hover:bg-white/25 ${FOCUS_RING}`}
         >
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

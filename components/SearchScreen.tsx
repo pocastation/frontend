@@ -219,7 +219,7 @@ export default function SearchScreen({
         onChange={(e) => handleChange(e.target.value)}
         placeholder="스타, 멤버, 앨범 검색"
         autoComplete="off"
-        className="w-full border-0 bg-transparent text-[13.5px] text-text-1 outline-none placeholder:text-text-3"
+        className="w-full border-0 bg-transparent text-body text-text-1 outline-none placeholder:text-text-3"
       />
       {hasQuery && (
         <button
@@ -279,11 +279,11 @@ export default function SearchScreen({
               <>
                 <section className="px-[14px] sm:px-0">
                   <div className="flex items-center justify-between pt-3.5 sm:pt-0">
-                    <h2 className="text-sm font-extrabold tracking-[-0.02em] text-text-1">최근 검색어</h2>
+                    <h2 className="text-body font-extrabold text-text-1">최근 검색어</h2>
                     <button
                       type="button"
                       onClick={() => clearRecentSearches()}
-                      className={`rounded-control text-[11.5px] font-semibold text-text-3 hover:text-text-1 ${FOCUS_RING}`}
+                      className={`rounded-control text-label font-semibold text-text-3 hover:text-text-1 ${FOCUS_RING}`}
                     >
                       전체 삭제
                     </button>
@@ -292,7 +292,7 @@ export default function SearchScreen({
                     {recent.map((item) => (
                       <span
                         key={item}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-control border border-border-2 pl-3 pr-2 text-[12.5px] font-bold text-text-2"
+                        className="inline-flex h-8 items-center gap-1.5 rounded-control border border-border-2 pl-3 pr-2 text-body-s font-bold text-text-2"
                       >
                         <button
                           type="button"
@@ -323,10 +323,10 @@ export default function SearchScreen({
                 검색을 제출하므로 섹션 자체는 그대로 쓴다. */}
             <section className="px-[14px] sm:mt-8 sm:px-0">
               <div className="flex items-center pt-3.5 sm:pt-0">
-                <h2 className="text-sm font-extrabold tracking-[-0.02em] text-text-1">인기 스타</h2>
+                <h2 className="text-body font-extrabold text-text-1">인기 스타</h2>
               </div>
               {popularArtists.length === 0 ? (
-                <p className="py-8 text-center text-[12.5px] text-text-3">불러올 스타가 없어요.</p>
+                <p className="py-8 text-center text-body-s text-text-3">불러올 스타가 없어요.</p>
               ) : (
                 <ul className="grid grid-cols-4 gap-x-3 gap-y-4 pt-3 sm:grid-cols-6">
                   {popularArtists.map((artist) => (
@@ -337,7 +337,7 @@ export default function SearchScreen({
                         className={`flex w-full flex-col items-center rounded-control ${FOCUS_RING}`}
                       >
                         <Avatar artist={artist} size={56} />
-                        <span className="mt-1.5 w-full truncate text-center text-[11px] font-bold text-text-2">
+                        <span className="mt-1.5 w-full truncate text-center text-caption font-bold text-text-2">
                           {artist.name}
                         </span>
                       </button>
@@ -355,7 +355,7 @@ export default function SearchScreen({
                   type="button"
                   aria-pressed={!narrowed}
                   onClick={() => setQuery(baseQuery)}
-                  className={`inline-flex h-8 shrink-0 items-center rounded-control border px-3.5 text-[12.5px] font-bold transition-colors ${FOCUS_RING} ${
+                  className={`inline-flex h-8 shrink-0 items-center rounded-control border px-3.5 text-body-s font-bold transition-colors ${FOCUS_RING} ${
                     narrowed ? "border-border-2 bg-white text-text-2" : "border-text-1 bg-text-1 text-white"
                   }`}
                 >
@@ -369,7 +369,7 @@ export default function SearchScreen({
                       type="button"
                       aria-pressed={on}
                       onClick={() => narrowTo(artist.name)}
-                      className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-control border py-0 pl-1 pr-3 text-[12px] font-bold transition-colors ${FOCUS_RING} ${
+                      className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-control border py-0 pl-1 pr-3 text-label font-bold transition-colors ${FOCUS_RING} ${
                         on ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
                       }`}
                     >
@@ -390,7 +390,7 @@ export default function SearchScreen({
                     type="button"
                     aria-pressed={on}
                     onClick={() => setSaleType(tab.key)}
-                    className={`min-h-8 shrink-0 rounded-control border px-3.5 text-[12.5px] font-bold transition-colors ${FOCUS_RING} ${
+                    className={`min-h-8 shrink-0 rounded-control border px-3.5 text-body-s font-bold transition-colors ${FOCUS_RING} ${
                       on ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
                     }`}
                   >
@@ -411,7 +411,7 @@ export default function SearchScreen({
               화면 최상단 막대가 알린다.
             */}
             {tooShort ? (
-              <p className="py-10 text-center text-[12.5px] text-text-3">두 글자 이상 입력해 주세요.</p>
+              <p className="py-10 text-center text-body-s text-text-3">두 글자 이상 입력해 주세요.</p>
             ) : error ? (
               <div className="pt-6">
                 <ExploreError onRetry={retry} />
@@ -436,7 +436,7 @@ export default function SearchScreen({
               )
             ) : (
               <>
-                <p className="pt-3 text-[11.5px] tabular-nums text-text-3">
+                <p className="pt-3 text-label tabular-nums text-text-3">
                   상품 <b className="font-bold text-text-2">{totalElements.toLocaleString()}</b>
                 </p>
                 <div className="grid grid-cols-2 gap-x-2 gap-y-[18px] pt-2.5 sm:grid-cols-3">
@@ -456,11 +456,11 @@ export default function SearchScreen({
                       type="button"
                       onClick={loadMore}
                       disabled={loadingMore}
-                      className={`min-h-10 rounded-control border border-border-2 px-5 text-[13px] font-bold text-text-1 disabled:text-text-3 ${FOCUS_RING}`}
+                      className={`min-h-10 rounded-control border border-border-2 px-5 text-body-s font-bold text-text-1 disabled:text-text-3 ${FOCUS_RING}`}
                     >
                       {loadingMore ? <InlineSpinner /> : "더보기"}
                     </button>
-                    {moreError && <p className="pt-2 text-[11.5px] text-accent">더 불러오지 못했어요. 다시 눌러 주세요.</p>}
+                    {moreError && <p className="pt-2 text-label text-accent">더 불러오지 못했어요. 다시 눌러 주세요.</p>}
                   </div>
                 )}
               </>

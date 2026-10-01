@@ -38,27 +38,27 @@ export default function SellerShipPanel({ auctionId }: { auctionId: number }) {
 
   return (
     <div className="mt-4 rounded-card border border-border bg-surface-2/40 p-4">
-      <p className="text-sm font-bold text-text-1">판매자 · 배송 관리</p>
+      <p className="text-body font-bold text-text-1">판매자 · 배송 관리</p>
       {fs === "CONFIRMED" ? (
-        <p className="mt-1.5 flex items-center gap-2 text-[13px] text-text-2">
+        <p className="mt-1.5 flex items-center gap-2 text-body-s text-text-2">
           구매가 확정됐어요. 정산 예정 {formatKRW(order.payoutAmount)} · 정산 준비 중
         </p>
       ) : fs === "SHIPPED" ? (
-        <p className="mt-1.5 flex items-center gap-2 text-[13px] text-text-2">
+        <p className="mt-1.5 flex items-center gap-2 text-body-s text-text-2">
           발송 완료 · {order.carrier} {order.trackingNumber}
         </p>
       ) : addr ? (
         <>
-          <p className="mt-1.5 text-[13px] text-text-2">
+          <p className="mt-1.5 text-body-s text-text-2">
             받는 분 <b className="font-bold text-text-1">{addr.recipientName}</b> · {addr.phone}
           </p>
-          <p className="text-[13px] text-text-2">
+          <p className="text-body-s text-text-2">
             ({addr.postalCode}) {addr.address1} {addr.address2 ?? ""}
           </p>
           <button
             type="button"
             onClick={() => setShipOpen((v) => !v)}
-            className="mt-2 rounded-control bg-text-1 px-4 py-2 text-[13px] font-bold text-white transition-colors hover:bg-text-2"
+            className="mt-2 rounded-control bg-text-1 px-4 py-2 text-body-s font-bold text-white transition-colors hover:bg-text-2"
           >
             발송 처리
           </button>
@@ -73,7 +73,7 @@ export default function SellerShipPanel({ auctionId }: { auctionId: number }) {
           )}
         </>
       ) : (
-        <p className="mt-1.5 flex items-center gap-2 text-[13px] text-text-2">
+        <p className="mt-1.5 flex items-center gap-2 text-body-s text-text-2">
           구매자가 배송지를 입력하면 발송할 수 있어요.
         </p>
       )}

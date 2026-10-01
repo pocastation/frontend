@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { markNav } from "@/lib/nav-transition";
 import { usePathname, useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -9,7 +10,7 @@ import { isClosed } from "@/lib/exchange-labels";
 import { FOCUS_RING, PRESS_ACCENT, PRESS_FADE, PRESS_INK, PRESS_OUTLINE, PRESS_PRIMARY } from "@/lib/ui";
 import type { ExchangePostDetail, ExchangeStatus, ExchangeViewer } from "@/lib/types";
 
-const BUTTON = "flex h-12 w-full items-center justify-center rounded-control text-[15px] font-extrabold";
+const BUTTON = "flex h-12 w-full items-center justify-center rounded-control text-body-l font-extrabold";
 
 /**
  * 교환글 하단 버튼. <b>자리는 하나고 역할로 갈린다.</b>
@@ -91,10 +92,10 @@ export default function ExchangeCta({
   */
   const closedNotice = (
     <div className="rounded-card bg-surface-2 px-3 py-3 text-center">
-      <p className="text-[13px] font-semibold text-text-2">마감된 교환글이에요.</p>
+      <p className="text-body-s font-semibold text-text-2">마감된 교환글이에요.</p>
       <Link
         href={`/events/${eventId}`}
-        className={`mt-1 inline-block text-[12.5px] font-bold text-primary ${PRESS_FADE} ${FOCUS_RING}`}
+        className={`mt-1 inline-block text-body-s font-bold text-primary ${PRESS_FADE} ${FOCUS_RING}`}
       >
         같은 행사의 다른 교환글 보기
       </Link>
@@ -134,7 +135,7 @@ export default function ExchangeCta({
       >
         받은 신청
         {count > 0 && (
-          <span className="min-w-5 rounded-full bg-primary px-1.5 py-px text-[11.5px] font-extrabold text-white">
+          <span className="min-w-5 rounded-full bg-primary px-1.5 py-px text-label font-extrabold text-white">
             {count}
           </span>
         )}
@@ -154,7 +155,7 @@ export default function ExchangeCta({
           {withdrawing ? "취소하는 중..." : "신청함 · 취소하기"}
         </button>
         {error && (
-          <p role="alert" className="pt-2 text-center text-[11.5px] font-semibold text-danger">{error}</p>
+          <p role="alert" className="pt-2 text-center text-label font-semibold text-danger">{error}</p>
         )}
       </>
     );
@@ -163,7 +164,7 @@ export default function ExchangeCta({
   // 차단은 버튼을 남겨 두지 않는다. 눌렀을 때 400을 보여주면 왜 안 되는지 알 수 없다.
   if (viewer?.blocked) {
     return (
-      <p className="rounded-card bg-surface-2 px-3 py-3.5 text-center text-[13px] font-semibold text-text-2">
+      <p className="rounded-card bg-surface-2 px-3 py-3.5 text-center text-body-s font-semibold text-text-2">
         차단한 상대의 교환글이에요. 마이페이지에서 차단을 풀 수 있어요.
       </p>
     );
@@ -175,7 +176,7 @@ export default function ExchangeCta({
 
   if (status !== "OPEN") {
     return (
-      <p className="rounded-card bg-surface-2 px-3 py-3.5 text-center text-[13px] font-semibold text-text-2">
+      <p className="rounded-card bg-surface-2 px-3 py-3.5 text-center text-body-s font-semibold text-text-2">
         지금은 신청을 받지 않는 교환글이에요.
       </p>
     );
@@ -184,7 +185,10 @@ export default function ExchangeCta({
   return (
     <button
       type="button"
-      onClick={() => router.push(`/exchanges/${postId}/apply`)}
+      onClick={() => {
+        markNav("open");
+        router.push(`/exchanges/${postId}/apply`);
+      }}
       className={`${BUTTON} bg-primary text-white ${PRESS_PRIMARY} ${FOCUS_RING}`}
     >
       교환 신청하기

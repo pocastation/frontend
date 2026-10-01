@@ -95,14 +95,14 @@ export default function AdminBannerPage() {
   return (
     <div>
       <header className="mb-1">
-        <h1 className="font-display text-xl font-extrabold text-text-1">홈 배너</h1>
-        <p className="mt-1 text-sm text-text-3">
+        <h1 className="font-display text-title font-extrabold text-text-1">홈 배너</h1>
+        <p className="mt-1 text-body text-text-3">
           홈 첫 화면에 세울 판매글이에요. 위에서부터 차례로 넘어가고, 5초마다 다음 장으로 바뀌어요.
         </p>
       </header>
 
       <div className="mb-4 flex items-center">
-        <span className="ml-auto text-xs tabular-nums text-text-3">
+        <span className="ml-auto text-label tabular-nums text-text-3">
           {items.length} / {MAX_FEATURED} 지정
         </span>
       </div>
@@ -120,11 +120,11 @@ export default function AdminBannerPage() {
 
       <div className="overflow-hidden rounded-card border border-border bg-surface">
         {loading ? (
-          <p className="py-20 text-center text-sm text-text-3">불러오는 중...</p>
+          <p className="py-20 text-center text-body text-text-3">불러오는 중...</p>
         ) : items.length === 0 ? (
           <div className="py-20 text-center">
-            <p className="text-sm font-bold text-text-2">지정된 판매글이 없어요</p>
-            <p className="mt-1 text-sm text-text-3">홈에는 브랜드 소개 한 장만 보여요.</p>
+            <p className="text-body font-bold text-text-2">지정된 판매글이 없어요</p>
+            <p className="mt-1 text-body text-text-3">홈에는 브랜드 소개 한 장만 보여요.</p>
           </div>
         ) : (
           <ul className="divide-y divide-border">
@@ -132,7 +132,7 @@ export default function AdminBannerPage() {
               <li key={item.id} className="admin-banner-row flex items-center gap-3.5 px-4 py-3.5">
                 {/* 1번만 보라다. 순위가 아니라 「지금 첫 화면인 것」을 가리키므로 하나면 충분하다. */}
                 <span
-                  className={`w-[22px] flex-shrink-0 text-center font-display text-[15px] font-extrabold tabular-nums ${
+                  className={`w-[22px] flex-shrink-0 text-center font-display text-body-l font-extrabold tabular-nums ${
                     i === 0 ? "text-primary" : "text-text-3"
                   }`}
                 >
@@ -151,22 +151,22 @@ export default function AdminBannerPage() {
                 </span>
                 <span className="admin-banner-identity min-w-0 flex-1">
                   {item.artistName && (
-                    <span className="block truncate text-[11px] font-extrabold text-text-3">{item.artistName}</span>
+                    <span className="block truncate text-caption font-extrabold text-text-3">{item.artistName}</span>
                   )}
                   <Link
                     href={`/auctions/${item.id}`}
-                    className={`block truncate text-[13.5px] font-bold text-text-1 hover:text-primary ${FOCUS_RING}`}
+                    className={`block truncate text-body font-bold text-text-1 hover:text-primary ${FOCUS_RING}`}
                   >
                     {item.title}
                   </Link>
-                  <span className="block truncate text-[11.5px] tabular-nums text-text-3">
+                  <span className="block truncate text-label tabular-nums text-text-3">
                     제안 {item.bidCount}회{item.endAt && ` · 마감 ${formatTimeLeft(item.endAt)}`}
                   </span>
                 </span>
                 <div className="admin-banner-actions flex items-center gap-3.5">
-                <span className="flex-shrink-0 text-right text-[13px]">
+                <span className="flex-shrink-0 text-right text-body-s">
                   <b className="block font-display font-extrabold tabular-nums">{formatKRW(item.currentPrice)}</b>
-                  <span className="block text-[11px] font-medium text-text-3">최소가</span>
+                  <span className="block text-caption font-medium text-text-3">최소가</span>
                 </span>
                 <span className="flex flex-shrink-0 gap-1">
                   <MoveButton dir="up" disabled={busy || i === 0} onClick={() => void move(i, -1)} />
@@ -176,7 +176,7 @@ export default function AdminBannerPage() {
                   type="button"
                   disabled={busy}
                   onClick={() => void drop(item)}
-                  className={`h-[30px] flex-shrink-0 rounded-control border border-border-2 px-3 text-xs font-bold text-text-2 transition-colors hover:border-text-1 hover:text-text-1 disabled:opacity-40 ${FOCUS_RING}`}
+                  className={`h-[30px] flex-shrink-0 rounded-control border border-border-2 px-3 text-label font-bold text-text-2 transition-colors hover:border-text-1 hover:text-text-1 disabled:opacity-40 ${FOCUS_RING}`}
                 >
                   내리기
                 </button>
@@ -187,7 +187,7 @@ export default function AdminBannerPage() {
         )}
       </div>
 
-      <p className="mt-4 text-xs leading-relaxed text-text-3">
+      <p className="mt-4 text-label leading-relaxed text-text-3">
         판매글을 새로 올리려면{" "}
         <Link href="/admin/auctions?status=LIVE" className={`font-bold text-text-2 hover:text-primary ${FOCUS_RING}`}>
           판매글 관리
@@ -197,7 +197,7 @@ export default function AdminBannerPage() {
       </p>
 
       {items.length >= MAX_FEATURED && (
-        <p className="mt-4 border-l-2 border-warn py-2 pl-3 text-[12.5px] text-text-2">
+        <p className="mt-4 rounded-card bg-surface-2 px-3.5 py-3 text-body-s text-text-2">
           자리가 다 찼어요. 판매글 관리에서 「배너」를 켜려 하면 막히고, 먼저 여기서 한 건을 내려야 해요.
         </p>
       )}

@@ -88,12 +88,12 @@ function OfferForm({
   return (
     <div>
       <div className="flex items-baseline justify-between gap-3">
-        <label htmlFor="proposal-amount" className="text-[13px] font-bold text-text-1">
+        <label htmlFor="proposal-amount" className="text-body-s font-bold text-text-1">
           가격 제안
         </label>
         <span
           id="proposal-amount-help"
-          className={`text-[11px] ${isBelowMinimum || isNotUnit ? "font-semibold text-danger" : "text-text-3"}`}
+          className={`text-caption ${isBelowMinimum || isNotUnit ? "font-semibold text-danger" : "text-text-3"}`}
         >
           {isBelowMinimum
             ? `${formatKRW(minimumProposalAmount)} 이상 입력해주세요.`
@@ -107,7 +107,7 @@ function OfferForm({
           isBelowMinimum || isNotUnit ? "border-danger" : "border-border focus-within:border-primary"
         }`}
       >
-        <span className="flex h-full w-12 shrink-0 items-center justify-center border-r border-border font-display text-lg font-bold text-text-1">
+        <span className="flex h-full w-12 shrink-0 items-center justify-center border-r border-border font-display text-title-s font-bold text-text-1">
           ₩
         </span>
         <input
@@ -121,11 +121,11 @@ function OfferForm({
           onFocus={() => setIsEditing(true)}
           onChange={(event) => changeProposal(event.target.value)}
           onBlur={finishEditing}
-          className={`h-full min-w-0 flex-1 bg-transparent px-4 font-display text-lg font-bold tabular-nums text-text-1 outline-none placeholder:font-sans placeholder:text-base placeholder:font-medium placeholder:text-text-3 ${FOCUS_RING}`}
+          className={`h-full min-w-0 flex-1 bg-transparent px-4 font-display text-title-s font-bold tabular-nums text-text-1 outline-none placeholder:font-sans placeholder:text-body-l placeholder:font-medium placeholder:text-text-3 ${FOCUS_RING}`}
           placeholder="금액을 입력해주세요"
         />
       </div>
-      <div className="mt-5 bg-surface-2 px-4 py-3.5 text-[13px]">
+      <div className="mt-5 bg-surface-2 px-4 py-3.5 text-body-s">
         <div className="flex items-center justify-between text-text-3">
           <span>가격 제안</span>
           <span className="font-medium tabular-nums text-text-2">{formatKRW(amount)}</span>
@@ -136,9 +136,9 @@ function OfferForm({
         </div>
         <div className="mt-3 flex items-baseline justify-between border-t border-border pt-3">
           <span className="font-bold text-text-1">예상 결제 총액</span>
-          <span className="font-display text-lg font-bold tabular-nums text-text-1">{formatKRW(total)}</span>
+          <span className="font-display text-title-s font-bold tabular-nums text-text-1">{formatKRW(total)}</span>
         </div>
-        <p className="mt-1.5 text-[11px] text-text-3">거래 성사 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
+        <p className="mt-1.5 text-caption text-text-3">거래 성사 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
       </div>
 
       <button
@@ -149,7 +149,7 @@ function OfferForm({
           });
         }}
         disabled={submitDisabled}
-        className={`mt-4 flex h-12 w-full items-center justify-center rounded-control bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-primary ${FOCUS_RING}`}
+        className={`mt-4 flex h-12 w-full items-center justify-center rounded-control bg-primary text-body font-semibold text-white transition-colors hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:bg-primary ${FOCUS_RING}`}
       >
         {/* 제출 버튼이 입력 금액을 그대로 말한다(#480·#484) — 「무엇이 일어나는지」가 버튼에 있다. */}
         {submitting
@@ -163,12 +163,12 @@ function OfferForm({
                 : `${formatKRW(typedAmount)}으로 제안하기`}
       </button>
       {editMode && (
-        <p className="mt-2.5 text-[11px] leading-relaxed text-text-3">
+        <p className="mt-2.5 text-caption leading-relaxed text-text-3">
           새 금액으로 보내면 이전 제안을 대신해요. 판매자에게는 바뀐 금액만 보여요.
         </p>
       )}
       {needsAddress && (
-        <p className="mt-2 text-[11.5px] leading-[1.6] text-text-3">
+        <p className="mt-2 text-label text-text-3">
           거래가 성사되면 바로 보내드릴 수 있게 받을 주소를 먼저 등록해요.{" "}
           <b className="font-bold text-text-2">한 번만 하면 다음부터는 물어보지 않아요.</b>
         </p>
@@ -224,15 +224,15 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
         {/* 🔴 판매 상태를 여기서 말하지 않는다. 초록 도트가 있던 자리인데, 상태는 제목 위 한 줄이
             전담한다(`app/auctions/[id]/page.tsx`) — 두 곳에서 말하면 「판매 중」이 두 번 나온다. */}
         <div className="flex items-center justify-between gap-4">
-          <p className="text-xs font-semibold text-text-3">판매자 최소 제안 금액</p>
+          <p className="text-label font-semibold text-text-3">판매자 최소 제안 금액</p>
           <OfferCounts offerCount={offerCount} wishlistCount={wishlistCount} size="md" />
         </div>
-        <p className="mt-1.5 font-display text-3xl font-extrabold tabular-nums text-text-1">
+        <p className="mt-1.5 font-display text-display font-extrabold tabular-nums text-text-1">
           {formatKRW(minimumProposalAmount)}
         </p>
         {/* 내 제안 행(#484) — 제안한 사람에게만. 보라는 상태를 말하는 자리에 쓴다(디자인 절). */}
         {myOffer && (
-          <div className="mt-3.5 flex items-center justify-between border-t border-border pt-3 text-[13px]">
+          <div className="mt-3.5 flex items-center justify-between border-t border-border pt-3 text-body-s">
             <span className="font-extrabold text-primary">
               {myOffer.status === "ACCEPTED" ? "내 제안 · 선택됨" : "내 제안"}
             </span>
@@ -243,13 +243,13 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
         )}
         {/* 0건일 때만 — 아이콘 줄에서 뺀 자리를 여기서 채운다(§2.9 D1). */}
         {offerCount === 0 && (
-          <p className="mt-3.5 border-t border-border pt-3 text-[12.5px] font-bold text-text-2">
+          <p className="mt-3.5 border-t border-border pt-3 text-body-s font-bold text-text-2">
             {OFFER_EMPTY_HINT}
           </p>
         )}
         {/* 구매자가 처음 보는 메커니즘이라 「왜 최고가가 안 보이지」에 여기서 답한다. */}
         <p
-          className={`text-[11px] leading-relaxed text-text-3 ${
+          className={`text-caption leading-relaxed text-text-3 ${
             offerCount === 0 ? "mt-1.5" : "mt-3.5 border-t border-border pt-3"
           }`}
         >
@@ -290,14 +290,14 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
               <button
                 type="button"
                 onClick={() => setWithdrawOpen(true)}
-                className={`flex h-12 w-[96px] flex-shrink-0 items-center justify-center rounded-control border border-border-2 bg-surface text-[13px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+                className={`flex h-12 w-[96px] flex-shrink-0 items-center justify-center rounded-control border border-border-2 bg-surface text-body-s font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
               >
                 취소하기
               </button>
               <button
                 type="button"
                 onClick={() => setEditOpen(true)}
-                className={`flex h-12 flex-1 items-center justify-center rounded-control border-[1.5px] border-text-1 bg-surface text-sm font-extrabold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+                className={`flex h-12 flex-1 items-center justify-center rounded-control border-[1.5px] border-text-1 bg-surface text-body font-extrabold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
               >
                 금액 바꾸기
               </button>
@@ -319,7 +319,7 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
           <button type="button" aria-label="닫기" onClick={() => setEditOpen(false)} className="absolute inset-0 bg-text-1/40" />
           <div className="relative max-h-[90vh] w-full max-w-[400px] overflow-y-auto rounded-card bg-surface p-5 shadow-modal">
             <div className="flex items-baseline justify-between">
-              <p className="text-[15px] font-extrabold text-text-1">제안 금액 바꾸기</p>
+              <p className="text-body-l font-extrabold text-text-1">제안 금액 바꾸기</p>
               <button
                 type="button"
                 aria-label="닫기"
@@ -331,7 +331,7 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
                 </svg>
               </button>
             </div>
-            <p className="mt-1 text-[11.5px] text-text-3">
+            <p className="mt-1 text-label text-text-3">
               지금 제안{" "}
               <b className="font-display font-bold tabular-nums text-text-2">{formatKRW(myOffer.amount)}</b>
             </p>

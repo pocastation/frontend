@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { markNavForward } from "@/lib/nav-transition";
 import AuctionCountdown from "@/components/AuctionCountdown";
 import WishlistHeart from "@/components/WishlistHeart";
 import { mediaUrl } from "@/lib/api";
@@ -22,6 +23,7 @@ import { AUCTION_STATUS_LABEL } from "@/lib/labels";
 // 중이라는 뜻이라, 배지를 함께 띄우면 같은 사실을 두 번 말하게 된다.
 // 칩 지면은 흰색 하나로 통일한다 — 카운트다운 칩과 언어가 갈리면 같은 카드에서 두 말을 하게 된다.
 const OVERLAY_CHIP =
+  // eslint-disable-next-line no-restricted-syntax -- 사진 위 시간 칩은 9.5px를 유지한다(#769, 2026-10-01 결정)
   "absolute left-1.5 top-1.5 z-[2] rounded-control bg-white/95 px-1.5 py-0.5 text-[9.5px] font-extrabold leading-[1.35] text-text-1";
 
 export default function AuctionCard({
@@ -62,7 +64,7 @@ export default function AuctionCard({
   }
 
   return (
-    <Link href={`/auctions/${auction.id}`} className={`group block ${FOCUS_RING}`}>
+    <Link href={`/auctions/${auction.id}`} onNavigate={markNavForward} className={`group block ${FOCUS_RING}`}>
       {/* 라운드는 이 이미지 타일에만 있다. 로딩 전 지면은 단색이다 — 회색 그라디언트는
           이미지가 없다는 사실을 굳이 장식하던 것이라 걷어냈다. */}
       <div className={`relative overflow-hidden bg-surface-2 ${compact ? "aspect-[1/1.18] rounded-card" : "aspect-[4/5] rounded-card"}`}>
@@ -104,7 +106,7 @@ export default function AuctionCard({
 
         {/* 거래가 끝난 매물은 칩이 아니라 지면 전체가 상태를 말한다. */}
         {isEnded && (
-          <span className="absolute inset-0 z-[2] grid place-items-center bg-white/70 text-xs font-extrabold text-text-2">
+          <span className="absolute inset-0 z-[2] grid place-items-center bg-white/70 text-label font-extrabold text-text-2">
             {isInstantSale ? "판매 완료" : AUCTION_STATUS_LABEL[auction.status]}
           </span>
         )}
@@ -125,18 +127,18 @@ export default function AuctionCard({
         // 킷 리듬 — 스타명(11.5/800) → 상품명(12.5, 2줄) → 가격(현재/즉시 라벨 + 15.5/800) → 메타(11)
         <div className="pt-[7px]">
           {auction.artistName && (
-            <p className="truncate text-[11.5px] font-extrabold text-text-1">{auction.artistName}</p>
+            <p className="truncate text-label font-extrabold text-text-1">{auction.artistName}</p>
           )}
-          <p className="mt-0.5 line-clamp-2 text-[12.5px] leading-[1.4] text-text-2">{auction.title}</p>
+          <p className="mt-0.5 line-clamp-2 text-body-s text-text-2">{auction.title}</p>
           <p className="mt-[5px] flex items-baseline gap-1">
-            <span className={`text-[11px] font-extrabold ${isInstantSale ? "text-text-3" : "text-primary"}`}>
+            <span className={`text-caption font-extrabold ${isInstantSale ? "text-text-3" : "text-primary"}`}>
               {isInstantSale ? "즉시" : "현재"}
             </span>
-            <span className={`font-display text-[15.5px] font-extrabold tracking-[-0.02em] tabular-nums ${isEnded ? "text-text-3" : "text-text-1"}`}>
+            <span className={`font-display text-body-l font-extrabold tabular-nums ${isEnded ? "text-text-3" : "text-text-1"}`}>
               {formatKRW(displayPrice)}
             </span>
           </p>
-          <p className="mt-[3px] text-[11px] tabular-nums text-text-3">
+          <p className="mt-[3px] text-caption tabular-nums text-text-3">
             {isInstantSale
               ? "즉시구매"
               : auction.status === "ENDED_NO_BIDS"
@@ -148,13 +150,13 @@ export default function AuctionCard({
         // 기본형(데스크탑) — 가격이 첫 줄이다. 제안판매에서 가장 먼저 읽는 수치가 카드 바닥에서
         // 제안 횟수와 같은 크기로 눌려 있었다(#277). 이 순서는 그대로 둔다.
         <div className="px-0.5 pt-2.5">
-        <p className={`font-display text-[17px] font-extrabold tracking-[-0.03em] tabular-nums ${isEnded ? "text-text-3" : "text-text-1"}`}>
+        <p className={`font-display text-title-s font-extrabold tabular-nums ${isEnded ? "text-text-3" : "text-text-1"}`}>
           {formatKRW(displayPrice)}
         </p>
-        <h3 className="mt-0.5 truncate text-[12.5px] text-text-2">
+        <h3 className="mt-0.5 truncate text-body-s text-text-2">
           {auction.artistName ? `${auction.artistName} ${auction.title}` : auction.title}
         </h3>
-        <p className="mt-1 text-[11px] text-text-3">
+        <p className="mt-1 text-caption text-text-3">
           {isInstantSale
             ? "즉시구매"
             : auction.status === "ENDED_NO_BIDS"

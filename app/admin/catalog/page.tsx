@@ -306,8 +306,8 @@ export default function AdminCatalogPage() {
     <div>
       <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">카탈로그 관리</h1>
-          <p className="mt-1.5 text-sm text-text-3">스타·멤버 마스터데이터를 등록하고 관리합니다.</p>
+          <h1 className="font-display text-title-l font-extrabold text-text-1">카탈로그 관리</h1>
+          <p className="mt-1.5 text-body text-text-3">스타·멤버 마스터데이터를 등록하고 관리합니다.</p>
         </div>
         <button
           type="button"
@@ -322,10 +322,10 @@ export default function AdminCatalogPage() {
       {notice && (
         <div
           role="status"
-          className={`mt-5 rounded-card border px-4 py-3 text-sm font-semibold ${
+          className={`mt-5 rounded-card border px-4 py-3 text-body font-semibold ${
             notice.kind === "success"
-              ? "border-ok/20 bg-ok-soft text-ok"
-              : "border-accent/20 bg-accent-soft text-accent"
+              ? "border-border bg-surface-2 text-text-1"
+              : "border-border bg-surface-2 text-danger"
           }`}
         >
           {notice.text}
@@ -334,29 +334,29 @@ export default function AdminCatalogPage() {
 
       <div className="mt-5 lg:hidden">
         {mobileForm ? (
-          <button type="button" onClick={() => setMobileForm(null)} className={`text-sm font-bold text-text-2 ${FOCUS_RING}`}>‹ 목록으로</button>
+          <button type="button" onClick={() => setMobileForm(null)} className={`text-body font-bold text-text-2 ${FOCUS_RING}`}>‹ 목록으로</button>
         ) : (
           <div className="grid grid-cols-3 gap-2">
             {([['artist', '스타 등록'], ['idol', '멤버 등록'], ['membership', '멤버 연결']] as const).map(([form, label]) => (
-              <button key={form} type="button" onClick={() => setMobileForm(form)} className={`border border-border-2 px-2 text-xs font-bold text-text-2 ${FOCUS_RING}`}>{label}</button>
+              <button key={form} type="button" onClick={() => setMobileForm(form)} className={`border border-border-2 px-2 text-label font-bold text-text-2 ${FOCUS_RING}`}>{label}</button>
             ))}
           </div>
         )}
       </div>
       <section className={`mt-6 rounded-card border border-border bg-white p-4 ${mobileForm ? "hidden lg:block" : ""}`}>
-        <h2 className="font-display text-base font-extrabold text-text-1">카탈로그 요약</h2>
-        <p className="mt-1 text-xs text-text-3">등록된 스타와 운영 상태입니다.</p>
+        <h2 className="font-display text-body-l font-extrabold text-text-1">카탈로그 요약</h2>
+        <p className="mt-1 text-label text-text-3">등록된 스타와 운영 상태입니다.</p>
 
         <div className="mt-4 grid grid-cols-2 gap-2 sm:max-w-xs">
           <div className="rounded-card bg-surface-2 p-3">
-            <p className="text-xs text-text-3">스타</p>
-            <p className="mt-1 font-display text-xl font-extrabold text-text-1">
+            <p className="text-label text-text-3">스타</p>
+            <p className="mt-1 font-display text-title font-extrabold text-text-1">
               {artistTotal.toLocaleString("ko-KR")}
             </p>
           </div>
           <div className="rounded-card bg-surface-2 p-3">
-            <p className="text-xs text-text-3">활동중</p>
-            <p className="mt-1 font-display text-xl font-extrabold text-primary">
+            <p className="text-label text-text-3">활동중</p>
+            <p className="mt-1 font-display text-title font-extrabold text-primary">
               {artists.filter((artist) => artist.status === "ACTIVE").length.toLocaleString("ko-KR")}
             </p>
           </div>
@@ -378,22 +378,22 @@ export default function AdminCatalogPage() {
                   className={`flex flex-1 items-center justify-between gap-3 text-left ${FOCUS_RING}`}
                 >
                   <span>
-                    <span className="block text-sm font-bold text-text-1">
+                    <span className="block text-body font-bold text-text-1">
                       {artist.name}
-                      {!artist.visible && <span className="ml-1 text-[11px] font-semibold text-text-3">· 숨김</span>}
+                      {!artist.visible && <span className="ml-1 text-caption font-semibold text-text-3">· 숨김</span>}
                     </span>
-                    <span className="text-xs text-text-3">
+                    <span className="text-label text-text-3">
                       {ARTIST_TYPE_LABEL[artist.type]} · {artist.agency ?? "소속사 미입력"}
                     </span>
                   </span>
-                  <span className="shrink-0 rounded-control bg-surface-3 px-2 py-1 text-[11px] font-bold text-text-2">
+                  <span className="shrink-0 rounded-control bg-surface-3 px-2 py-1 text-caption font-bold text-text-2">
                     {ARTIST_STATUS_LABEL[artist.status]}
                   </span>
                 </button>
                 <button
                   type="button"
                   onClick={() => openEdit(artist)}
-                  className={`shrink-0 rounded-control border border-border-2 px-2.5 py-1 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+                  className={`shrink-0 rounded-control border border-border-2 px-2.5 py-1 text-label font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
                 >
                   편집
                 </button>
@@ -404,7 +404,7 @@ export default function AdminCatalogPage() {
 
       <section className={`admin-catalog-forms mt-6 gap-4 lg:grid lg:grid-cols-3 ${mobileForm ? "grid" : "hidden"}`}>
         <form onSubmit={handleCreateArtist} className={`rounded-card border border-border bg-white p-4 ${mobileForm === "artist" ? "" : "hidden lg:block"}`}>
-          <h2 className="font-display text-base font-extrabold text-text-1">스타 등록</h2>
+          <h2 className="font-display text-body-l font-extrabold text-text-1">스타 등록</h2>
           <div className="mt-4 flex flex-col gap-3">
             <input
               required
@@ -477,7 +477,7 @@ export default function AdminCatalogPage() {
         </form>
 
         <form onSubmit={handleCreateIdol} className={`rounded-card border border-border bg-white p-4 ${mobileForm === "idol" ? "" : "hidden lg:block"}`}>
-          <h2 className="font-display text-base font-extrabold text-text-1">멤버 등록</h2>
+          <h2 className="font-display text-body-l font-extrabold text-text-1">멤버 등록</h2>
           <div className="mt-4 flex flex-col gap-3">
             <input
               required
@@ -516,7 +516,7 @@ export default function AdminCatalogPage() {
               className={INPUT_CLASS}
             />
             {recentIdol && (
-              <p className="rounded-control bg-surface-2 px-3 py-2 text-xs font-semibold text-text-2">
+              <p className="rounded-control bg-surface-2 px-3 py-2 text-label font-semibold text-text-2">
                 최근 생성 ID: {recentIdol.id} · {recentIdol.stageName}
               </p>
             )}
@@ -527,7 +527,7 @@ export default function AdminCatalogPage() {
         </form>
 
         <form onSubmit={handleAddMembership} className={`rounded-card border border-border bg-white p-4 ${mobileForm === "membership" ? "" : "hidden lg:block"}`}>
-          <h2 className="font-display text-base font-extrabold text-text-1">스타-멤버 연결</h2>
+          <h2 className="font-display text-body-l font-extrabold text-text-1">스타-멤버 연결</h2>
           <div className="mt-4 flex flex-col gap-3">
             <select
               required
@@ -571,22 +571,22 @@ export default function AdminCatalogPage() {
           </div>
 
           <div className="mt-5 border-t border-border pt-4">
-            <h3 className="text-xs font-extrabold text-text-3">선택 스타 멤버</h3>
+            <h3 className="text-label font-extrabold text-text-3">선택 스타 멤버</h3>
             <div className="mt-2 max-h-[160px] overflow-y-auto">
               {artistMembers.length > 0 ? (
                 <div className="divide-y divide-border">
                   {artistMembers.map((artistMember) => (
                     <div
                       key={`${artistMember.idolId}-${artistMember.joinedAt ?? "none"}`}
-                      className="flex justify-between gap-3 py-2 text-sm"
+                      className="flex justify-between gap-3 py-2 text-body"
                     >
                       <span className="font-bold text-text-1">{artistMember.stageName}</span>
-                      <span className="text-xs text-text-3">{artistMember.active ? "활동" : "비활동"}</span>
+                      <span className="text-label text-text-3">{artistMember.active ? "활동" : "비활동"}</span>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="py-4 text-sm text-text-3">스타를 선택하면 연결된 멤버가 표시됩니다.</p>
+                <p className="py-4 text-body text-text-3">스타를 선택하면 연결된 멤버가 표시됩니다.</p>
               )}
             </div>
           </div>
@@ -605,7 +605,7 @@ export default function AdminCatalogPage() {
             className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-card bg-surface p-5 shadow-modal"
           >
             <div className="flex items-center justify-between">
-              <h2 className="font-display text-base font-extrabold text-text-1">
+              <h2 className="font-display text-body-l font-extrabold text-text-1">
                 스타 편집 · {editing.name}
               </h2>
               <button
@@ -620,7 +620,7 @@ export default function AdminCatalogPage() {
                 ×
               </button>
             </div>
-            <p className="mt-1 text-[11px] text-text-3">
+            <p className="mt-1 text-caption text-text-3">
               타입({ARTIST_TYPE_LABEL[editing.type]})은 여기서 바꿀 수 없어요. 이미지는 자체제작·라이선스 보유분만 권장.
             </p>
 
@@ -696,7 +696,7 @@ export default function AdminCatalogPage() {
                   ))}
                 </select>
               </div>
-              <label className="flex w-fit items-center gap-2 text-sm text-text-2">
+              <label className="flex w-fit items-center gap-2 text-body text-text-2">
                 <input
                   type="checkbox"
                   checked={editForm.visible}

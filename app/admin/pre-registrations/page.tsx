@@ -80,16 +80,17 @@ function Stat({ label, value, detail, tone, lead }: {
 }) {
   return (
     <div className="min-w-0 flex-1 basis-[140px] border-l border-border px-5 first:border-l-0 first:pl-0">
-      <p className="text-xs font-bold text-text-3">{label}</p>
+      <p className="text-label font-bold text-text-3">{label}</p>
       <p
         className={`mt-1 font-display font-extrabold tabular-nums tracking-[-0.04em] text-text-1 ${
-          lead ? "text-[44px] leading-none" : "text-[30px] leading-tight"
+          // eslint-disable-next-line no-restricted-syntax -- 대시보드 첫 숫자는 스케일 밖의 큰 숫자(44px)다
+          lead ? "text-[44px] leading-none" : "text-display leading-tight"
         }`}
       >
         {value}
       </p>
       {detail && (
-        <p className={`mt-1 text-[11.5px] tabular-nums ${tone === "up" ? "font-bold text-ok" : "text-text-3"}`}>
+        <p className={`mt-1 text-label tabular-nums ${tone === "up" ? "font-bold text-ok" : "text-text-3"}`}>
           {detail}
         </p>
       )}
@@ -212,19 +213,19 @@ export default function AdminPreRegistrationsPage() {
     <div>
       <header className="mb-5 flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b border-border pb-4">
         <div>
-          <h1 className="font-display text-xl font-extrabold text-text-1">사전예약 현황</h1>
-          <p className="mt-1 text-sm text-text-3">
+          <h1 className="font-display text-title font-extrabold text-text-1">사전예약 현황</h1>
+          <p className="mt-1 text-body text-text-3">
             접수 중인 사전예약을 15초마다 새로 읽어요. 「오늘」은 한국시간 자정 기준이에요.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-xs font-bold text-text-2">
+          <span className="flex items-center gap-1.5 text-label font-bold text-text-2">
             {updatedAt ? `${formatRelativeTime(updatedAt)} 갱신` : "불러오는 중..."}
           </span>
           <button
             type="button"
             onClick={() => void load()}
-            className={`h-8 rounded-control border border-border-2 px-3 text-xs font-bold text-text-2 transition-colors hover:bg-bg ${FOCUS_RING}`}
+            className={`h-8 rounded-control border border-border-2 px-3 text-label font-bold text-text-2 transition-colors hover:bg-bg ${FOCUS_RING}`}
           >
             지금 새로고침
           </button>
@@ -238,7 +239,7 @@ export default function AdminPreRegistrationsPage() {
       )}
 
       {!stats ? (
-        <p className="py-24 text-center text-sm text-text-3">불러오는 중...</p>
+        <p className="py-24 text-center text-body text-text-3">불러오는 중...</p>
       ) : (
         <>
           <div className="flex flex-wrap gap-y-5">
@@ -269,8 +270,8 @@ export default function AdminPreRegistrationsPage() {
           <div className="mt-9 grid gap-9 lg:grid-cols-[1.45fr_1fr]">
             <section>
               <div className="flex items-baseline justify-between gap-3">
-                <h2 className="font-display text-sm font-extrabold text-text-1">오늘 시간대별 신청</h2>
-                <span className="text-[11.5px] tabular-nums text-text-3">
+                <h2 className="font-display text-body font-extrabold text-text-1">오늘 시간대별 신청</h2>
+                <span className="text-label tabular-nums text-text-3">
                   {startHour}시 ~ {endHour}시 · 총 {stats.today.toLocaleString()}건
                 </span>
               </div>
@@ -278,7 +279,7 @@ export default function AdminPreRegistrationsPage() {
               <div className="mt-3 flex h-[120px] items-end gap-1.5 border-b border-border pt-1">
                 {bars.map((b) => (
                   <div key={b.hour} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
-                    <span className="text-[10px] font-bold tabular-nums text-text-3">{b.count || ""}</span>
+                    <span className="text-caption font-bold tabular-nums text-text-3">{b.count || ""}</span>
                     {/* 막대는 잉크, 지금 시간대만 보라다 — 보라는 「현재」라는 상태를 말하는 자리에만 쓴다.
                         연보라 배경으로 칠하지 않는다(디자인 규칙). */}
                     <span
@@ -291,7 +292,7 @@ export default function AdminPreRegistrationsPage() {
               </div>
               <div className="flex gap-1.5 pt-1.5">
                 {bars.map((b) => (
-                  <span key={b.hour} className="flex-1 text-center text-[10px] tabular-nums text-text-3">
+                  <span key={b.hour} className="flex-1 text-center text-caption tabular-nums text-text-3">
                     {String(b.hour).padStart(2, "0")}
                   </span>
                 ))}
@@ -304,19 +305,19 @@ export default function AdminPreRegistrationsPage() {
                   옛 신청의 값은 DB에 남아 있으므로 나중에 필요하면 기간을 넓혀 되살릴 수 있다. */}
               <section>
                 <div className="flex items-baseline justify-between gap-3">
-                  <h2 className="font-display text-sm font-extrabold text-text-1">좋아하는 가수 상위</h2>
-                  <span className="text-[11.5px] text-text-3">오늘 신청 기준</span>
+                  <h2 className="font-display text-body font-extrabold text-text-1">좋아하는 가수 상위</h2>
+                  <span className="text-label text-text-3">오늘 신청 기준</span>
                 </div>
                 {stats.topGroups.length === 0 ? (
-                  <p className="mt-3 text-sm text-text-3">오늘 신청이 아직 없어요.</p>
+                  <p className="mt-3 text-body text-text-3">오늘 신청이 아직 없어요.</p>
                 ) : (
                   <ol className="mt-3 border-t border-border">
                     {stats.topGroups.map((g, i) => (
                       <li
                         key={g.idolGroup}
-                        className="grid grid-cols-[20px_1fr_auto] items-center gap-2.5 border-b border-border py-2 text-sm"
+                        className="grid grid-cols-[20px_1fr_auto] items-center gap-2.5 border-b border-border py-2 text-body"
                       >
-                        <span className="font-display text-[11px] font-extrabold tabular-nums text-text-3">
+                        <span className="font-display text-caption font-extrabold tabular-nums text-text-3">
                           {String(i + 1).padStart(2, "0")}
                         </span>
                         <span className="truncate text-text-1">{g.idolGroup}</span>
@@ -331,44 +332,44 @@ export default function AdminPreRegistrationsPage() {
 
           <section className="mt-10">
             <div className="flex flex-wrap items-baseline justify-between gap-3">
-              <h2 className="font-display text-sm font-extrabold text-text-1">최근 신청</h2>
+              <h2 className="font-display text-body font-extrabold text-text-1">최근 신청</h2>
               <button
                 type="button"
                 onClick={() => setRevealed((on) => !on)}
-                className={`h-8 rounded-control border border-border-2 px-3 text-xs font-bold text-text-2 transition-colors hover:bg-bg ${FOCUS_RING}`}
+                className={`h-8 rounded-control border border-border-2 px-3 text-label font-bold text-text-2 transition-colors hover:bg-bg ${FOCUS_RING}`}
               >
                 {revealed ? "번호 가리기" : "번호 원문 보기"}
               </button>
             </div>
 
-            <p className="mt-1.5 text-xs text-text-3">
+            <p className="mt-1.5 text-label text-text-3">
               번호는 기본으로 가려요. 화면을 띄워둔 채 자리를 비우면 지나가는 사람에게 보일 수 있어요.
             </p>
 
             <div className="mt-3 overflow-x-auto">
               {recent.length === 0 ? (
-                <p className="py-16 text-center text-sm text-text-3">아직 신청이 없어요.</p>
+                <p className="py-16 text-center text-body text-text-3">아직 신청이 없어요.</p>
               ) : (
                 <table className="w-full min-w-[600px] border-collapse">
                   <thead>
                     <tr className="border-b border-border-2 text-left">
-                      <th className="py-2 pr-4 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-text-3">시각</th>
-                      <th className="py-2 pr-4 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-text-3">휴대폰</th>
-                      <th className="py-2 pr-4 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-text-3">좋아하는 가수</th>
-                      <th className="py-2 text-[10.5px] font-extrabold uppercase tracking-[0.07em] text-text-3">이메일</th>
+                      <th className="py-2 pr-4 text-caption font-extrabold uppercase tracking-[0.07em] text-text-3">시각</th>
+                      <th className="py-2 pr-4 text-caption font-extrabold uppercase tracking-[0.07em] text-text-3">휴대폰</th>
+                      <th className="py-2 pr-4 text-caption font-extrabold uppercase tracking-[0.07em] text-text-3">좋아하는 가수</th>
+                      <th className="py-2 text-caption font-extrabold uppercase tracking-[0.07em] text-text-3">이메일</th>
                     </tr>
                   </thead>
                   <tbody>
                     {recent.map((a) => (
-                      <tr key={a.id} className="border-b border-border text-sm">
+                      <tr key={a.id} className="border-b border-border text-body">
                         <td className="whitespace-nowrap py-2.5 pr-4 tabular-nums text-text-3">
                           {formatRelativeTime(a.createdAt)}
                         </td>
-                        <td className="whitespace-nowrap py-2.5 pr-4 font-mono text-[12.5px] tabular-nums text-text-1">
+                        <td className="whitespace-nowrap py-2.5 pr-4 font-mono text-body-s tabular-nums text-text-1">
                           {revealed ? formatPhone(a.phone) : maskPhone(a.phone)}
                         </td>
                         <td className="whitespace-nowrap py-2.5 pr-4 text-text-1">{a.idolGroup}</td>
-                        <td className="whitespace-nowrap py-2.5 text-xs text-text-3">{a.email ? "남김" : "—"}</td>
+                        <td className="whitespace-nowrap py-2.5 text-label text-text-3">{a.email ? "남김" : "—"}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -378,7 +379,7 @@ export default function AdminPreRegistrationsPage() {
 
             {recent.length > 0 && (
               <div className="mt-4 flex flex-col items-center gap-2">
-                <p className="text-[11.5px] tabular-nums text-text-3">
+                <p className="text-label tabular-nums text-text-3">
                   {recent.length.toLocaleString()} / {totalCount.toLocaleString()}건
                 </p>
                 {recent.length < totalCount && (
@@ -386,7 +387,7 @@ export default function AdminPreRegistrationsPage() {
                     type="button"
                     onClick={() => void loadMore()}
                     disabled={loadingMore}
-                    className={`h-10 rounded-control border border-border-2 px-6 text-[13px] font-bold text-text-2 transition-colors hover:bg-bg disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`h-10 rounded-control border border-border-2 px-6 text-body-s font-bold text-text-2 transition-colors hover:bg-bg disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     {loadingMore ? "불러오는 중..." : `${PAGE_SIZE}건 더보기`}
                   </button>

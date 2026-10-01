@@ -24,11 +24,11 @@ export default function NoticesPage() {
   return (
     <div className="mx-auto max-w-[820px] px-5 pt-11 pb-20 sm:pt-14">
       <header>
-        <p className="text-[12px] font-bold text-text-3">고객지원</p>
-        <h1 className="mt-2 font-display text-[27px] font-extrabold leading-[1.15] tracking-[-0.04em] text-text-1 sm:text-[32px]">
+        <p className="text-label font-bold text-text-3">고객지원</p>
+        <h1 className="mt-2 font-display text-display font-extrabold text-text-1 sm:text-display">
           공지사항
         </h1>
-        <p className="mt-3.5 max-w-[33rem] text-[13.5px] leading-[1.75] text-text-2">
+        <p className="mt-3.5 max-w-[33rem] text-body text-text-2">
           약관·정책이 바뀌거나 서비스에 변화가 있을 때 여기에 먼저 알려드려요.
         </p>
       </header>
@@ -40,7 +40,7 @@ export default function NoticesPage() {
               href={`/notices/${notice.slug}`}
               className={`group block py-5 ${FOCUS_RING}`}
             >
-              <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[11.5px]">
+              <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-label">
                 {/* 고정은 알약이나 색 배지가 아니라 글자로 말한다 — 목록에 색이 늘어나면
                     분류·날짜와 뒤섞여 무엇이 중요한지가 흐려진다. */}
                 {notice.pinned && <span className="font-extrabold text-text-1">고정</span>}
@@ -49,10 +49,10 @@ export default function NoticesPage() {
                 </span>
                 <span className="tabular-nums text-text-3">{formatDate(notice.date)}</span>
               </span>
-              <span className="mt-1.5 block font-display text-[16.5px] font-extrabold leading-[1.45] tracking-[-0.025em] text-text-1 transition-colors group-hover:text-primary">
+              <span className="mt-1.5 block font-display text-body-l font-extrabold text-text-1 transition-colors group-hover:text-primary">
                 {notice.title}
               </span>
-              <span className="mt-1 block text-[13px] leading-[1.7] text-text-2">
+              <span className="mt-1 block text-body-s text-text-2">
                 {notice.summary}
               </span>
             </Link>
@@ -60,7 +60,7 @@ export default function NoticesPage() {
         ))}
       </ul>
 
-      <p className="mt-8 text-[12.5px] leading-[1.8] text-text-3">
+      <p className="mt-8 text-body-s text-text-3">
         문의가 있으시면{" "}
         <Link
           href="/inquiries/new"

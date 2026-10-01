@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { MEMBER_ROLE_LABEL, MEMBER_STATUS_TONE, MEMBER_STATUS_LABEL, PROVIDER_LABEL } from "@/lib/labels";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, LABEL_NEUTRAL, LABEL_STRONG } from "@/lib/ui";
 import type {
   AdminMemberDetailResponse,
   AdminMemberListResponse,
@@ -227,8 +227,8 @@ export default function AdminMembersPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">회원 관리</h1>
-      <p className="mt-1.5 text-sm text-text-3">회원 정보를 검색하고 계정 상태를 관리합니다.</p>
+      <h1 className="font-display text-title-l font-extrabold text-text-1">회원 관리</h1>
+      <p className="mt-1.5 text-body text-text-3">회원 정보를 검색하고 계정 상태를 관리합니다.</p>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_320px]">
         {/* 목록 — min-w-0로 그리드 컬럼이 테이블(min-w) 너비만큼 늘어나 페이지가 넘치는 걸 막고,
@@ -245,7 +245,7 @@ export default function AdminMembersPage() {
                 placeholder="닉네임 또는 이메일 검색"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full border-0 bg-transparent text-[13.5px] text-text-1 outline-none placeholder:text-text-3"
+                className="w-full border-0 bg-transparent text-body text-text-1 outline-none placeholder:text-text-3"
               />
             </label>
             <div className="flex gap-1.5" role="group" aria-label="상태 필터">
@@ -256,8 +256,8 @@ export default function AdminMembersPage() {
                   aria-pressed={statusFilter === f.key}
                   onClick={() => setStatusFilter(f.key)}
                   disabled={unverifiedOnly}
-                  className={`h-10 rounded-control border px-3 text-xs font-bold transition-colors disabled:opacity-40 ${FOCUS_RING} ${
-                    statusFilter === f.key && !unverifiedOnly ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+                  className={`h-10 rounded-control border px-3 text-label font-bold transition-colors disabled:opacity-40 ${FOCUS_RING} ${
+                    statusFilter === f.key && !unverifiedOnly ? "border-text-1 bg-text-1 text-white" : "border-border text-text-2 hover:border-text-3 hover:text-text-1"
                   }`}
                 >
                   {f.label}
@@ -270,17 +270,17 @@ export default function AdminMembersPage() {
               type="button"
               aria-pressed={unverifiedOnly}
               onClick={() => setUnverifiedOnly((v) => !v)}
-              className={`h-10 rounded-control border px-3 text-xs font-bold transition-colors ${FOCUS_RING} ${
-                unverifiedOnly ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+              className={`h-10 rounded-control border px-3 text-label font-bold transition-colors ${FOCUS_RING} ${
+                unverifiedOnly ? "border-text-1 bg-text-1 text-white" : "border-border text-text-2 hover:border-text-3 hover:text-text-1"
               }`}
             >
               미인증만
             </button>
           </div>
 
-          <p className="mb-2 text-xs text-text-3">총 {totalElements}명{loading && " · 불러오는 중..."}</p>
+          <p className="mb-2 text-label text-text-3">총 {totalElements}명{loading && " · 불러오는 중..."}</p>
           {unverifiedOnly && (
-            <p className="mb-3 border-l-[3px] border-border-2 pl-3 text-[12px] leading-relaxed text-text-3">
+            <p className="mb-3 rounded-card bg-surface-2 px-3.5 py-3 text-label leading-relaxed text-text-2">
               인증 후 가입으로 바꾼 뒤로는 미인증 회원이 새로 생기지 않아요. 여기 남은 건 전환 이전
               가입자이고, <b className="font-bold text-text-2">이 수가 0이 되면 정리가 끝난 거예요.</b>
             </p>
@@ -289,7 +289,7 @@ export default function AdminMembersPage() {
           <div className="admin-table-wrap overflow-x-auto rounded-card border border-border bg-surface">
             <table role="table" className="admin-table admin-table-members w-full min-w-[560px] border-collapse">
               <thead>
-                <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
+                <tr className="border-b border-border text-left text-caption font-bold text-text-3">
                   <th className="px-4 py-2.5">회원</th>
                   <th className="px-4 py-2.5">이메일</th>
                   <th className="whitespace-nowrap px-4 py-2.5">상태</th>
@@ -300,7 +300,7 @@ export default function AdminMembersPage() {
               <tbody>
                 {members.length === 0 && !loading ? (
                   <tr>
-                    <td colSpan={5} className="px-4 py-12 text-center text-sm text-text-3">
+                    <td colSpan={5} className="px-4 py-12 text-center text-body text-text-3">
                       {query ? "검색 결과가 없습니다." : "회원이 없습니다."}
                     </td>
                   </tr>
@@ -309,26 +309,23 @@ export default function AdminMembersPage() {
                     <tr
                       key={m.id}
                       onClick={() => openDetail(m.id)}
-                      // 선택 상태(연보라)는 규칙상 허용되는 「선택」이라 남긴다. 정지 행만
-                      // 전체 배경 워시에서 좌측 규칙선으로 바꿨다(#294).
-                      className={`cursor-pointer border-b border-border text-[13px] transition-colors last:border-0 hover:bg-surface-2 ${
-                        selectedId === m.id ? "bg-primary-soft/50" : ""
+                      // 선택한 줄은 회색(#771). 정지 여부는 상태 칸이 말하므로 행 왼쪽 세로줄은 걷었다.
+                      className={`cursor-pointer border-b border-border text-body-s transition-colors last:border-0 hover:bg-surface-2 ${
+                        selectedId === m.id ? "bg-surface-2" : ""
                       }`}
                     >
                       {/* 가입 방식을 이메일 칸에서 여기로 옮겼다(#291) — 이메일에 온전한 폭을 주기 위해서다. */}
                       <td
-                        className={`px-4 py-3 font-bold text-text-1 ${
-                          m.status === "SUSPENDED" ? "border-l-2 border-l-accent" : "border-l-2 border-l-transparent"
-                        }`}
+                        className="px-4 py-3 font-bold text-text-1"
                       ><button type="button" aria-label={`${m.nickname} 회원 상세`} onClick={(event) => { event.stopPropagation(); void openDetail(m.id); }} className={`text-left ${FOCUS_RING}`}>
                         <span className="block">{m.nickname}</span>
                         {/* 변하지 않는 짧은 식별자(UUID 앞 8자리) — 닉 변경·동명이인과 무관하게 특정용. */}
-                        <span className="font-mono text-[11px] font-normal text-text-3">#{m.id.slice(0, 8)}</span>
-                        <span className="block text-[11px] font-normal text-text-3">
+                        <span className="font-mono text-caption font-normal text-text-3">#{m.id.slice(0, 8)}</span>
+                        <span className="block text-caption font-normal text-text-3">
                           {PROVIDER_LABEL[m.provider] ?? m.provider}
                           {/* 소셜은 인증 개념이 없어 항상 null이다 — 이메일 가입자만 미인증으로 읽는다. */}
                           {m.provider === "EMAIL" && m.emailVerifiedAt === null && m.email !== null && (
-                            <span className="ml-1.5 font-bold text-accent">미인증</span>
+                            <span className="ml-1.5 font-bold text-danger">미인증</span>
                           )}
                         </span>
                       </button></td>
@@ -355,7 +352,7 @@ export default function AdminMembersPage() {
                 type="button"
                 onClick={loadMore}
                 disabled={loadingMore}
-                className={`h-10 rounded-control border border-border-2 bg-white px-5 text-[13px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 rounded-control border border-border-2 bg-white px-5 text-body-s font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {loadingMore ? "불러오는 중..." : "더 보기"}
               </button>
@@ -366,27 +363,27 @@ export default function AdminMembersPage() {
         {/* 상세 패널 */}
         <AdminDetailPane open={selectedId !== null} title="회원 상세" onBack={() => setSelectedId(null)}>
           {!selectedId ? (
-            <div className="rounded-card border border-dashed border-border-2 p-8 text-center text-sm text-text-3">
+            <div className="rounded-card border border-dashed border-border-2 p-8 text-center text-body text-text-3">
               회원을 선택하면 상세 정보와 관리 기능이 표시됩니다.
             </div>
           ) : detailLoading || !detail ? (
-            <div className="rounded-card border border-border bg-surface p-8 text-center text-sm text-text-3">
+            <div className="rounded-card border border-border bg-surface p-8 text-center text-body text-text-3">
               {detailLoading ? "불러오는 중..." : "정보를 불러오지 못했습니다."}
             </div>
           ) : (
             <div className="rounded-card border border-border bg-surface p-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h2 className="font-display text-base font-extrabold text-text-1">{detail.nickname}</h2>
+                  <h2 className="font-display text-body-l font-extrabold text-text-1">{detail.nickname}</h2>
                   {/* 변하지 않는 짧은 식별자(UUID 앞 8자리). 전체 UUID는 조치 API 경로에 그대로 쓰인다. */}
-                  <span className="font-mono text-[11px] text-text-3">#{detail.id.slice(0, 8)}</span>
+                  <span className="font-mono text-caption text-text-3">#{detail.id.slice(0, 8)}</span>
                 </div>
                 <StatusBadge tone={MEMBER_STATUS_TONE[detail.status]} className="shrink-0">
                   {MEMBER_STATUS_LABEL[detail.status]}
                 </StatusBadge>
               </div>
 
-              <dl className="mt-3 flex flex-col gap-1.5 border-t border-border pt-3 text-[12.5px]">
+              <dl className="mt-3 flex flex-col gap-1.5 border-t border-border pt-3 text-body-s">
                 <div className="flex justify-between gap-2">
                   <dt className="text-text-3">이메일</dt>
                   <dd className="truncate font-semibold text-text-1">{detail.email ?? "—"}</dd>
@@ -406,7 +403,7 @@ export default function AdminMembersPage() {
                 {detail.provider === "EMAIL" && detail.email !== null && (
                   <div className="flex justify-between gap-2">
                     <dt className="text-text-3">이메일 인증</dt>
-                    <dd className={`font-semibold ${detail.emailVerifiedAt ? "text-text-1" : "text-accent"}`}>
+                    <dd className={`font-semibold ${detail.emailVerifiedAt ? "text-text-1" : "text-danger"}`}>
                       {detail.emailVerifiedAt ? formatDate(detail.emailVerifiedAt) : "미인증"}
                     </dd>
                   </div>
@@ -415,17 +412,17 @@ export default function AdminMembersPage() {
 
               <div className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3">
                 <div className="rounded-control bg-surface-2 px-3 py-2 text-center">
-                  <p className="text-[11px] text-text-3">판매</p>
-                  <p className="font-display text-sm font-extrabold text-text-1">{detail.sellingCount}건</p>
+                  <p className="text-caption text-text-3">판매</p>
+                  <p className="font-display text-body font-extrabold text-text-1">{detail.sellingCount}건</p>
                 </div>
                 <div className="rounded-control bg-surface-2 px-3 py-2 text-center">
-                  <p className="text-[11px] text-text-3">제안</p>
-                  <p className="font-display text-sm font-extrabold text-text-1">{detail.biddingCount}건</p>
+                  <p className="text-caption text-text-3">제안</p>
+                  <p className="font-display text-body font-extrabold text-text-1">{detail.biddingCount}건</p>
                 </div>
               </div>
 
               {detail.status === "SUSPENDED" && detail.suspensionReason && (
-                <p className="mt-3 rounded-control bg-accent-soft px-3 py-2 text-[12px] text-accent">
+                <p className="mt-3 rounded-card bg-surface-2 px-3 py-2 text-label font-semibold text-danger">
                   정지 사유: {detail.suspensionReason}
                 </p>
               )}
@@ -433,8 +430,8 @@ export default function AdminMembersPage() {
               {notice && (
                 <p
                   role={notice.kind === "error" ? "alert" : "status"}
-                  className={`mt-3 rounded-control px-3 py-2 text-[12px] font-semibold ${
-                    notice.kind === "error" ? "bg-accent-soft text-accent" : "bg-ok-soft text-ok"
+                  className={`mt-3 rounded-control px-3 py-2 text-label font-semibold ${
+                    notice.kind === "error" ? "bg-surface-2 text-danger" : "bg-surface-2 text-text-1"
                   }`}
                 >
                   {notice.text}
@@ -443,7 +440,7 @@ export default function AdminMembersPage() {
 
               {detail.status !== "WITHDRAWN" ? (
                 <div className="mt-4 border-t border-border pt-4">
-                  <p className="mb-2 text-[11px] font-extrabold text-text-3">상태 변경</p>
+                  <p className="mb-2 text-caption font-extrabold text-text-3">상태 변경</p>
                   {detail.status === "ACTIVE" ? (
                     <>
                       <label className="sr-only" htmlFor="suspend-reason">정지 사유</label>
@@ -453,14 +450,14 @@ export default function AdminMembersPage() {
                         onChange={(e) => setReason(e.target.value)}
                         placeholder="정지 사유를 입력하세요."
                         rows={2}
-                        className={`w-full resize-none rounded-control border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+                        className={`w-full resize-none rounded-control border border-border px-3 py-2 text-body-s outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
                       />
                       <div className="mt-2 flex gap-2">
                         <button
                           type="button"
                           onClick={() => changeStatus("SUSPEND")}
                           disabled={submitting}
-                          className={`h-10 flex-1 rounded-control bg-accent text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+                          className={`h-10 flex-1 rounded-control bg-danger text-body font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
                         >
                           정지 처리
                         </button>
@@ -468,7 +465,7 @@ export default function AdminMembersPage() {
                           type="button"
                           onClick={() => changeStatus("WITHDRAW")}
                           disabled={submitting}
-                          className={`h-10 rounded-control border border-border-2 bg-white px-4 text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+                          className={`h-10 rounded-control border border-border-2 bg-white px-4 text-body font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
                         >
                           탈퇴
                         </button>
@@ -480,7 +477,7 @@ export default function AdminMembersPage() {
                         type="button"
                         onClick={() => changeStatus("UNSUSPEND")}
                         disabled={submitting}
-                        className={`h-10 flex-1 rounded-control bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
+                        className={`h-10 flex-1 rounded-control bg-primary text-body font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
                       >
                         정지 해제
                       </button>
@@ -488,7 +485,7 @@ export default function AdminMembersPage() {
                         type="button"
                         onClick={() => changeStatus("WITHDRAW")}
                         disabled={submitting}
-                        className={`h-10 rounded-control border border-border-2 bg-white px-4 text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+                        className={`h-10 rounded-control border border-border-2 bg-white px-4 text-body font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
                       >
                         탈퇴
                       </button>
@@ -496,7 +493,7 @@ export default function AdminMembersPage() {
                   )}
                 </div>
               ) : (
-                <p className="mt-4 border-t border-border pt-4 text-center text-[12px] text-text-3">
+                <p className="mt-4 border-t border-border pt-4 text-center text-label text-text-3">
                   탈퇴 처리된 계정입니다.
                 </p>
               )}
@@ -504,13 +501,13 @@ export default function AdminMembersPage() {
               {/* 권한 — 본인 계정은 변경 금지(락아웃 방지), 정지된 회원은 승격 불가(백엔드 제약과 정합). */}
               <div className="mt-4 border-t border-border pt-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="text-[11px] font-extrabold text-text-3">권한</p>
-                  <span className={`rounded-control px-2 py-0.5 text-[10px] font-extrabold ${detail.role === "ADMIN" ? "bg-primary-soft text-primary" : "bg-surface-2 text-text-2"}`}>
+                  <p className="text-caption font-extrabold text-text-3">권한</p>
+                  <span className={detail.role === "ADMIN" ? LABEL_STRONG : LABEL_NEUTRAL}>
                     {MEMBER_ROLE_LABEL[detail.role as MemberRole]}
                   </span>
                 </div>
                 {me?.id === detail.id ? (
-                  <p className="rounded-control bg-surface-2 px-3 py-2 text-center text-[11.5px] leading-relaxed text-text-3">
+                  <p className="rounded-control bg-surface-2 px-3 py-2 text-center text-label leading-relaxed text-text-3">
                     본인 계정의 역할은 변경할 수 없어요
                   </p>
                 ) : detail.role === "ADMIN" ? (
@@ -518,7 +515,7 @@ export default function AdminMembersPage() {
                     type="button"
                     onClick={() => { setRoleTarget("USER"); setRoleReason(""); setRoleError(null); }}
                     // 하드코딩 주황을 별빛 골드 토큰으로(#294). 배경 필 대신 테두리.
-                    className={`h-10 w-full rounded-control border border-[var(--color-star-line)] text-sm font-bold text-[var(--color-star-ink)] transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+                    className={`h-10 w-full rounded-control border border-[var(--color-star-line)] text-body font-bold text-[var(--color-star-ink)] transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
                   >
                     관리자 권한 회수
                   </button>
@@ -526,12 +523,12 @@ export default function AdminMembersPage() {
                   <button
                     type="button"
                     onClick={() => { setRoleTarget("ADMIN"); setRoleReason(""); setRoleError(null); }}
-                    className={`h-10 w-full rounded-control bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+                    className={`h-10 w-full rounded-control bg-primary text-body font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
                   >
                     관리자로 승격
                   </button>
                 ) : (
-                  <p className="rounded-control bg-surface-2 px-3 py-2 text-center text-[11.5px] leading-relaxed text-text-3">
+                  <p className="rounded-control bg-surface-2 px-3 py-2 text-center text-label leading-relaxed text-text-3">
                     활동 상태인 회원만 승격할 수 있어요
                   </p>
                 )}
@@ -540,14 +537,14 @@ export default function AdminMembersPage() {
               {/* 개인정보 파기 — 정지·탈퇴와 다른 조치다. 그쪽은 되돌릴 수 있고 이건 아니다.
                   처리방침 제6조 "삭제 요구"를 이행하는 경로이기도 하다. */}
               <div className="mt-4 border-t border-border pt-4">
-                <p className="mb-2 text-[11px] font-extrabold text-text-3">개인정보</p>
+                <p className="mb-2 text-caption font-extrabold text-text-3">개인정보</p>
                 {detail.email === null ? (
-                  <p className="rounded-control bg-surface-2 px-3 py-2 text-center text-[11.5px] leading-relaxed text-text-3">
+                  <p className="rounded-control bg-surface-2 px-3 py-2 text-center text-label leading-relaxed text-text-3">
                     이미 파기된 계정이에요
                   </p>
                 ) : (
                   <>
-                    <p className="mb-2 text-[11.5px] leading-relaxed text-text-3">
+                    <p className="mb-2 text-label leading-relaxed text-text-3">
                       이메일·비밀번호·배송지·결제수단을 지우고 프로필을 가명화해요.{" "}
                       <b className="font-bold text-text-2">되돌릴 수 없어요.</b>
                     </p>
@@ -558,7 +555,7 @@ export default function AdminMembersPage() {
                         setPurgeReason("");
                         setPurgeError(null);
                       }}
-                      className={`h-10 w-full rounded-control border border-accent bg-white text-sm font-bold text-accent transition-colors hover:bg-accent hover:text-white ${FOCUS_RING}`}
+                      className={`h-10 w-full rounded-control border border-danger bg-white text-body font-bold text-danger transition-colors hover:bg-danger hover:text-white ${FOCUS_RING}`}
                     >
                       개인정보 파기
                     </button>
@@ -573,12 +570,12 @@ export default function AdminMembersPage() {
       {purging && detail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
-            <h2 className="font-display text-base font-extrabold text-text-1">개인정보 파기</h2>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
+            <h2 className="font-display text-body-l font-extrabold text-text-1">개인정보 파기</h2>
+            <p className="mt-1.5 text-body-s leading-relaxed text-text-3">
               &quot;{detail.nickname}&quot;님의 이메일·비밀번호·배송지·결제수단·본인인증 결과를 지우고
               프로필을 가명화합니다. 그 주소의 발송 금지도 함께 풀립니다.
             </p>
-            <p className="mt-2 border-l-[3px] border-accent pl-3 text-[12.5px] leading-relaxed text-text-2">
+            <p className="mt-2 rounded-card bg-surface-2 px-3.5 py-3 text-body-s leading-relaxed text-text-2">
               <b className="font-extrabold text-text-1">되돌릴 수 없습니다.</b> 진행 중인 거래가 있으면
               거절되니, 거래를 먼저 정리한 뒤 다시 시도하세요.
             </p>
@@ -591,17 +588,17 @@ export default function AdminMembersPage() {
               rows={3}
               autoFocus
               maxLength={200}
-              className={`mt-3 w-full resize-none rounded-control border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+              className={`mt-3 w-full resize-none rounded-control border border-border px-3 py-2 text-body-s outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
             />
             {purgeError && (
-              <p role="alert" className="mt-2 text-[12px] font-bold text-danger">{purgeError}</p>
+              <p role="alert" className="mt-2 text-label font-bold text-danger">{purgeError}</p>
             )}
             <div className="mt-4 flex gap-2">
               <button
                 type="button"
                 onClick={() => setPurging(false)}
                 disabled={purgeSubmitting}
-                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-body font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
               >
                 취소
               </button>
@@ -609,7 +606,7 @@ export default function AdminMembersPage() {
                 type="button"
                 onClick={purge}
                 disabled={purgeSubmitting}
-                className={`h-10 flex-1 rounded-control bg-accent text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control bg-danger text-body font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {purgeSubmitting ? "파기 중..." : "파기"}
               </button>
@@ -621,10 +618,10 @@ export default function AdminMembersPage() {
       {roleTarget && detail && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
-            <h2 className="font-display text-base font-extrabold text-text-1">
+            <h2 className="font-display text-body-l font-extrabold text-text-1">
               {roleTarget === "ADMIN" ? "관리자로 승격" : "관리자 권한 회수"}
             </h2>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
+            <p className="mt-1.5 text-body-s leading-relaxed text-text-3">
               {roleTarget === "ADMIN"
                 ? <>&quot;{detail.nickname}&quot;님을 관리자로 승격합니다. 회원 정지·판매글 취소·신고 처리 권한이 부여됩니다.</>
                 : <>&quot;{detail.nickname}&quot;님의 관리자 권한을 회수합니다. 더 이상 관리 기능을 사용할 수 없습니다.</>}
@@ -637,7 +634,7 @@ export default function AdminMembersPage() {
               placeholder={roleTarget === "ADMIN" ? "승격 사유를 입력하세요." : "회수 사유를 입력하세요."}
               rows={3}
               autoFocus
-              className={`mt-3 w-full resize-none rounded-control border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+              className={`mt-3 w-full resize-none rounded-control border border-border px-3 py-2 text-body-s outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
             />
             {roleError && (
               <AdminNotice kind="error" className="mt-2">
@@ -649,7 +646,7 @@ export default function AdminMembersPage() {
                 type="button"
                 onClick={() => setRoleTarget(null)}
                 disabled={roleSubmitting}
-                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-body font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
               >
                 취소
               </button>
@@ -657,7 +654,7 @@ export default function AdminMembersPage() {
                 type="button"
                 onClick={confirmRoleChange}
                 disabled={roleSubmitting}
-                className={`h-10 flex-1 rounded-control bg-primary text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control bg-primary text-body font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {roleSubmitting ? "처리 중..." : roleTarget === "ADMIN" ? "승격 확정" : "회수 확정"}
               </button>
@@ -670,8 +667,8 @@ export default function AdminMembersPage() {
         // 떠 있는 토스트는 지면 위에 얹히므로 배경·그림자를 남긴다 — 인라인 알림과 성격이 다르다.
         // 하드코딩 테두리만 토큰으로 바꿨다(#294).
         <div className="fixed bottom-6 left-1/2 z-50 flex max-w-sm -translate-x-1/2 items-start gap-2.5 rounded-card border border-ok/30 bg-ok-soft px-4 py-3 shadow-modal">
-          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ok text-[11px] font-bold text-white">✓</span>
-          <p className="text-[12.5px] font-semibold leading-relaxed text-ok">{roleToast}</p>
+          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ok text-caption font-bold text-white">✓</span>
+          <p className="text-body-s font-semibold leading-relaxed text-ok">{roleToast}</p>
         </div>
       )}
     </div>

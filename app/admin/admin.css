@@ -66,7 +66,8 @@
   .verification-actions { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
   .verification-reasons { margin-top: 0; border-top: 0; padding-top: 0; }
   .verification-reasons label { min-height: 48px; }
-  .verification-info [class*="text-xs"], .verification-info [class*="text-[11px]"] { font-size: 13px; }
+  /* 모바일 검수 정보의 작은 글자를 키운다. 클래스 이름으로 잡으므로 타입 토큰 이관(#769) 뒤 이름을 따라 바꿨다. */
+  .verification-info .text-label, .verification-info .text-caption { font-size: 13px; }
   .verification-info p { line-height: 1.8; }
   .verification-info > dl { grid-template-columns: minmax(0, 1fr); }
   .verification-info > dl dd { text-align: left; overflow-wrap: anywhere; }

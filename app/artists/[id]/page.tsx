@@ -7,6 +7,7 @@ import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { ARTIST_STATUS_LABEL, ARTIST_TYPE_LABEL } from "@/lib/labels";
 import { DEFAULT_OG_IMAGE } from "@/lib/site";
 import type { ArtistDetailResponse, AuctionListResponse } from "@/lib/types";
+import { LABEL_NEUTRAL } from "@/lib/ui";
 
 // cache()로 감싸 generateMetadata와 본문이 한 번만 페치하도록 dedup.
 const getArtist = cache(async (id: string): Promise<ArtistDetailResponse | null> => {
@@ -69,7 +70,7 @@ async function getArtistAuctions(artistName: string): Promise<AuctionListRespons
  */
 function MetaRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex gap-3 border-b border-border py-2.5 text-[13px]">
+    <div className="flex gap-3 border-b border-border py-2.5 text-body-s">
       <span className="w-[62px] shrink-0 text-text-3">{label}</span>
       <span className="min-w-0 font-bold text-text-1">{value}</span>
     </div>
@@ -115,7 +116,7 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
         <div className="flex items-center gap-4 sm:gap-6">
           <span
             aria-hidden={artist.imageUrl ? undefined : "true"}
-            className="grid h-[84px] w-[84px] shrink-0 place-items-center overflow-hidden rounded-full bg-surface-2 font-display text-[20px] font-extrabold text-text-3 sm:h-[112px] sm:w-[112px] sm:text-[26px]"
+            className="grid h-[84px] w-[84px] shrink-0 place-items-center overflow-hidden rounded-full bg-surface-2 font-display text-title font-extrabold text-text-3 sm:h-[112px] sm:w-[112px] sm:text-title-l"
           >
             {artist.imageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
@@ -127,18 +128,18 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
 
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-              <h1 className="font-display text-[21px] font-extrabold tracking-[-0.03em] text-text-1 sm:text-[28px]">
+              <h1 className="font-display text-title font-extrabold text-text-1 sm:text-display">
                 {artist.name}
               </h1>
-              {artist.nameEn && <span className="text-[12px] font-semibold text-text-3 sm:text-sm">{artist.nameEn}</span>}
+              {artist.nameEn && <span className="text-label font-semibold text-text-3 sm:text-body">{artist.nameEn}</span>}
             </div>
             {/* 타입·활동상태를 같은 무게의 뉴트럴 태그로 둔다 — 예전에는 타입만 연보라 알약이라
                 정보 중요도와 무관하게 그것만 튀었다. */}
             <div className="mt-2 flex flex-wrap gap-1.5">
-              <span className="rounded-control border border-border-2 px-1.5 py-px text-[10.5px] font-bold text-text-2">
+              <span className={LABEL_NEUTRAL}>
                 {ARTIST_TYPE_LABEL[artist.type]}
               </span>
-              <span className="rounded-control border border-border-2 px-1.5 py-px text-[10.5px] font-bold text-text-2">
+              <span className={LABEL_NEUTRAL}>
                 {ARTIST_STATUS_LABEL[artist.status]}
               </span>
             </div>
@@ -155,14 +156,14 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
           <>
             {/* 멤버는 보조 정보 — 여백을 조금만 열고 제목도 작게. 가로 스크롤이 지면을 만든다. */}
             <section className="mt-6 sm:mt-8">
-              <h2 className="text-[12.5px] font-bold text-text-2 sm:text-sm">
+              <h2 className="text-body-s font-bold text-text-2 sm:text-body">
                 멤버 <span className="font-bold text-text-3">{artist.members.length}</span>
               </h2>
               <div className="mt-3 flex gap-3 overflow-x-auto pb-1">
                 {[...activeMembers, ...withdrawnMembers].map((member) => (
                   <div key={member.idolId} className="flex w-[64px] shrink-0 flex-col items-center text-center">
                     <span
-                      className={`grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-surface-2 font-display text-[12px] font-extrabold text-text-3 ${
+                      className={`grid h-14 w-14 place-items-center overflow-hidden rounded-full bg-surface-2 font-display text-label font-extrabold text-text-3 ${
                         member.active ? "" : "opacity-45 grayscale"
                       }`}
                     >
@@ -173,10 +174,10 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
                         member.stageName.slice(0, 2)
                       )}
                     </span>
-                    <p className={`mt-1.5 w-full truncate text-[11px] font-bold ${member.active ? "text-text-2" : "text-text-3"}`}>
+                    <p className={`mt-1.5 w-full truncate text-caption font-bold ${member.active ? "text-text-2" : "text-text-3"}`}>
                       {member.stageName}
                     </p>
-                    {!member.active && <span className="text-[9.5px] font-bold text-text-3">탈퇴</span>}
+                    {!member.active && <span className="text-caption font-bold text-text-3">탈퇴</span>}
                   </div>
                 ))}
               </div>
@@ -186,7 +187,7 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
 
         {/* 매물은 이 화면의 목적지 — 여백을 크게 열고 제목을 키운다. 격자가 지면을 만든다. */}
         <section className="mt-9 sm:mt-10">
-          <h2 className="mb-3 font-display text-base font-extrabold text-text-1 sm:text-[17px]">
+          <h2 className="mb-3 font-display text-body-l font-extrabold text-text-1 sm:text-title-s">
             판매 중인 상품
           </h2>
           {/* 좌우 14px 지면에 2열. 카드는 홈·목록·검색과 같은 compact 리듬을 쓴다. */}

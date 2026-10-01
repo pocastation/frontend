@@ -175,8 +175,8 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
   return (
     <div className="space-y-4">
       <div className="border-b border-border pb-4">
-        <p className="text-sm font-extrabold text-text-1">판매 물품 소유 인증</p>
-        <p className="mt-1 text-xs leading-5 text-text-3">
+        <p className="text-body font-extrabold text-text-1">판매 물품 소유 인증</p>
+        <p className="mt-1 text-label leading-5 text-text-3">
           발급 코드를 손으로 써서 포토카드와 함께 촬영해주세요. 코드는 발급 후 3분 뒤 만료되며,
           분석을 통과해도 시간이 연장되지 않습니다.
         </p>
@@ -201,8 +201,8 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
           */}
           <div className="bg-surface-2 px-4 py-3.5">
             <div className="flex items-center justify-between gap-3">
-              <span className="text-[11px] font-extrabold uppercase tracking-[0.06em] text-text-3">Verification code</span>
-              <span className={`text-xs font-bold ${expired && !processing ? "text-accent" : "text-text-2"}`}>
+              <span className="text-caption font-extrabold uppercase tracking-[0.06em] text-text-3">Verification code</span>
+              <span className={`text-label font-bold ${expired && !processing ? "text-accent" : "text-text-2"}`}>
                 {processing
                   ? "사진 접수 완료"
                   : expired
@@ -210,11 +210,11 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
                     : `${Math.floor(secondsLeft / 60)}:${String(secondsLeft % 60).padStart(2, "0")}`}
               </span>
             </div>
-            <p className="mt-2 font-mono text-3xl text-text-1" aria-label={`인증 코드 ${challenge.code}`}>
+            <p className="mt-2 font-mono text-display text-text-1" aria-label={`인증 코드 ${challenge.code}`}>
               {challenge.code}
             </p>
             {!processing && secondsLeft > 0 && secondsLeft <= 60 && (
-              <p className="mt-2 text-xs font-bold text-accent" role="status">
+              <p className="mt-2 text-label font-bold text-accent" role="status">
                 {passed
                   ? "인증이 곧 만료됩니다. 지금 판매 등록을 완료해주세요."
                   : "코드가 곧 만료됩니다. 1분 안에 사진 확인을 완료해주세요."}
@@ -226,7 +226,7 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
                   type="button"
                   onClick={issueChallenge}
                   disabled={issuing}
-                  className={`h-9 px-3 text-xs ${SECONDARY_BUTTON_CLASS}`}
+                  className={`h-9 px-3 text-label ${SECONDARY_BUTTON_CLASS}`}
                 >
                   {issuing ? "재발급 중..." : "인증 코드 재발급"}
                 </button>
@@ -239,19 +239,19 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
                지면을 걷고 헤어라인 하나로 구분한다. 아래 「인증 완료」는 성공을 색으로 말해야
                하므로 ok 지면을 그대로 둔다(연보라 반복과 달리 의미가 있는 색이다). */
             <div className="border-t border-border pt-3" role="status">
-              <p className="text-sm font-extrabold text-text-1">
+              <p className="text-body font-extrabold text-text-1">
                 {result?.status === "ANALYZING" ? "인증 사진 분석 중" : "인증 사진 분석 대기 중"}
               </p>
-              <p className="mt-1 text-xs leading-5 text-text-3">
+              <p className="mt-1 text-label leading-5 text-text-3">
                 {result?.status === "QUEUED" && result.queuePosition
                   ? `현재 대기 순서 ${result.queuePosition}번째입니다. 순서대로 확인하고 있습니다.`
                   : "코드와 카드 형태를 확인하고 있습니다. 잠시만 기다려주세요."}
               </p>
             </div>
           ) : passed ? (
-            <div className="border border-ok/30 bg-ok-soft px-4 py-3" role="status">
-              <p className="text-sm font-extrabold text-ok">사진 인증 완료</p>
-              <p className="mt-1 text-xs text-text-2">
+            <div className="rounded-card bg-surface-2 px-4 py-3" role="status">
+              <p className="text-body font-extrabold text-ok">사진 인증 완료</p>
+              <p className="mt-1 text-label text-text-2">
                 위 남은 시간 안에 등록을 완료해주세요. 이후 관리자 검수를 거쳐 판매글이 공개됩니다.
               </p>
             </div>
@@ -264,10 +264,10 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
               <label
                 className={`block cursor-pointer border-2 border-dashed border-border-2 p-3 transition-colors hover:border-primary ${FOCUS_RING}`}
               >
-                <span className="block text-center text-sm font-bold text-text-2">
+                <span className="block text-center text-body font-bold text-text-2">
                   {file ? "다른 인증 사진 선택" : "인증 사진 촬영 또는 선택"}
                 </span>
-                <span className="mt-1 block text-center text-[11px] text-text-3">JPG, PNG, WebP · 최대 10MB</span>
+                <span className="mt-1 block text-center text-caption text-text-3">JPG, PNG, WebP · 최대 10MB</span>
                 <input
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
@@ -290,9 +290,9 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
               )}
 
               {result && !result.passed && result.failureReason && (
-                <div className="border border-accent/30 bg-accent-soft px-4 py-3" role="alert">
-                  <p className="text-sm font-extrabold text-accent">재촬영이 필요합니다</p>
-                  <p className="mt-1 text-xs leading-5 text-text-2">{FAILURE_MESSAGE[result.failureReason]}</p>
+                <div className="rounded-card bg-surface-2 px-4 py-3" role="alert">
+                  <p className="text-body font-extrabold text-danger">재촬영이 필요합니다</p>
+                  <p className="mt-1 text-label leading-5 text-text-2">{FAILURE_MESSAGE[result.failureReason]}</p>
                 </div>
               )}
 
@@ -310,7 +310,7 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
       )}
 
       {error && (
-        <p className="text-xs text-accent" role="alert">
+        <p className="text-label text-accent" role="alert">
           {error}
         </p>
       )}

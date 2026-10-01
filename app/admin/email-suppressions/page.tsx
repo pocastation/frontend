@@ -98,39 +98,39 @@ export default function AdminEmailSuppressionsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">발송 금지 목록</h1>
-      <p className="mt-1.5 max-w-[46rem] text-sm leading-relaxed text-text-3">
+      <h1 className="font-display text-title-l font-extrabold text-text-1">발송 금지 목록</h1>
+      <p className="mt-1.5 max-w-[46rem] text-body leading-relaxed text-text-3">
         하드 바운스·스팸 신고가 확인된 주소예요. 이 목록에 있으면 인증 메일도 비밀번호 재설정 메일도
         나가지 않아, 그 계정으로 들어갈 방법이 사라집니다.
       </p>
 
       {/* 해제의 무게를 화면에서도 드러낸다 — 이건 "다시 보내겠다"는 결정이고,
           근거 없이 반복하면 발신 도메인 평판 관리가 무력해진다. */}
-      <p className="mt-4 border-l-[3px] border-accent pl-4 text-[13px] leading-relaxed text-text-2">
+      <p className="mt-4 rounded-card bg-surface-2 px-4 py-3.5 text-body-s leading-relaxed text-text-2">
         <b className="font-extrabold text-text-1">해제는 본인 확인 후에만 하세요.</b> 신고당한 주소로
         계속 보내면 발신 도메인 평판이 깎여 <b className="font-bold text-text-1">다른 회원의 메일까지
         스팸함으로</b> 갑니다.
       </p>
 
       <div className="mt-7 flex items-baseline justify-between gap-3">
-        <p className="text-[12.5px] text-text-3">
+        <p className="text-body-s text-text-3">
           {loading ? "불러오는 중..." : `총 ${total.toLocaleString()}건`}
         </p>
         {toast && (
-          <p aria-live="polite" className="text-[12.5px] font-bold text-ok">
+          <p aria-live="polite" className="text-body-s font-bold text-ok">
             {toast}
           </p>
         )}
       </div>
 
       {error && (
-        <p role="alert" className="mt-3 text-[13px] font-bold text-danger">
+        <p role="alert" className="mt-3 text-body-s font-bold text-danger">
           {error}
         </p>
       )}
 
       {!loading && rows.length === 0 && !error && (
-        <p className="mt-6 border-y border-border py-10 text-center text-[13px] text-text-3">
+        <p className="mt-6 border-y border-border py-10 text-center text-body-s text-text-3">
           발송이 막힌 주소가 없어요.
         </p>
       )}
@@ -141,16 +141,16 @@ export default function AdminEmailSuppressionsPage() {
             <li key={row.id} className="border-b border-border py-4 sm:flex sm:items-start sm:gap-6">
               <div className="min-w-0 sm:flex-1">
                 <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
-                  <span className="text-[13.5px] font-extrabold break-all text-text-1">{row.email}</span>
-                  <span className="text-[11.5px] font-bold text-text-3">
+                  <span className="text-body font-extrabold break-all text-text-1">{row.email}</span>
+                  <span className="text-label font-bold text-text-3">
                     {REASON_LABEL[row.reason]}
                     {row.detail && ` · ${row.detail}`}
                   </span>
                 </div>
-                <p className="mt-1 text-[12px] leading-relaxed text-text-3">
+                <p className="mt-1 text-label leading-relaxed text-text-3">
                   {REASON_NOTE[row.reason]}
                 </p>
-                <p className="mt-1 text-[11.5px] tabular-nums text-text-3">
+                <p className="mt-1 text-label tabular-nums text-text-3">
                   {formatDate(row.suppressedAt)}
                 </p>
               </div>
@@ -161,7 +161,7 @@ export default function AdminEmailSuppressionsPage() {
                   setReason("");
                   setModalError(null);
                 }}
-                className={`mt-3 h-10 shrink-0 rounded-control border border-border-2 bg-white px-4 text-[13px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary sm:mt-0 ${FOCUS_RING}`}
+                className={`mt-3 h-10 shrink-0 rounded-control border border-border-2 bg-white px-4 text-body-s font-bold text-text-1 transition-colors hover:border-primary hover:text-primary sm:mt-0 ${FOCUS_RING}`}
               >
                 해제
               </button>
@@ -177,8 +177,8 @@ export default function AdminEmailSuppressionsPage() {
           aria-modal="true"
         >
           <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
-            <h2 className="font-display text-base font-extrabold text-text-1">발송 금지 해제</h2>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
+            <h2 className="font-display text-body-l font-extrabold text-text-1">발송 금지 해제</h2>
+            <p className="mt-1.5 text-body-s leading-relaxed text-text-3">
               <b className="font-bold break-all text-text-1">{target.email}</b> 로 다시 메일을 보낼 수
               있게 됩니다. {REASON_LABEL[target.reason]}으로 등록된 주소예요.
             </p>
@@ -193,10 +193,10 @@ export default function AdminEmailSuppressionsPage() {
               rows={3}
               autoFocus
               maxLength={200}
-              className={`mt-3 w-full resize-none rounded-control border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+              className={`mt-3 w-full resize-none rounded-control border border-border px-3 py-2 text-body-s outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
             />
             {modalError && (
-              <p role="alert" className="mt-2 text-[12px] font-bold text-danger">
+              <p role="alert" className="mt-2 text-label font-bold text-danger">
                 {modalError}
               </p>
             )}
@@ -205,7 +205,7 @@ export default function AdminEmailSuppressionsPage() {
                 type="button"
                 onClick={() => setTarget(null)}
                 disabled={submitting}
-                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-body font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
               >
                 취소
               </button>
@@ -213,7 +213,7 @@ export default function AdminEmailSuppressionsPage() {
                 type="button"
                 onClick={release}
                 disabled={submitting}
-                className={`h-10 flex-1 rounded-control bg-primary text-sm font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control bg-primary text-body font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {submitting ? "해제 중..." : "해제"}
               </button>

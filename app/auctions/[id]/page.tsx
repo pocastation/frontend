@@ -18,7 +18,7 @@ import { AuctionBiddingProvider } from "@/lib/auction-bidding-context";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { INTERMEDIARY_NOTICE } from "@/lib/business";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
-import { ACTION_ICON_BUTTON, FOCUS_RING } from "@/lib/ui";
+import { ACTION_ICON_BUTTON, FOCUS_RING, LABEL_NEUTRAL } from "@/lib/ui";
 import type { AuctionDetailResponse } from "@/lib/types";
 
 // cache()로 감싸 generateMetadata와 페이지 본문이 같은 요청에서 한 번만 페치하도록 dedup한다.
@@ -73,8 +73,9 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 // v0 리톤 — 파스텔 필 제거. 해시태그는 헤어라인 칩 + 퍼플 텍스트, 배지는 헤어라인 + 뉴트럴 텍스트로 통일.
 const CHIP_CLASS =
-  `rounded-control border border-border px-2 py-0.5 text-xs font-bold text-primary transition-colors hover:border-primary ${FOCUS_RING}`;
-const BADGE_CLASS = "rounded-control border border-border px-2 py-1 text-xs font-bold text-text-2";
+  `rounded-control border border-border px-2 py-0.5 text-label font-bold text-primary transition-colors hover:border-primary ${FOCUS_RING}`;
+// 상품 정보는 라벨(#767). 회색 면에 글자만 둔다.
+const BADGE_CLASS = LABEL_NEUTRAL;
 
 export default async function AuctionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -158,7 +159,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
                 src={mediaUrl(auction.video.url)}
                 className="aspect-video w-full rounded-card border border-border bg-black"
               />
-              <p className="mt-1.5 text-xs text-text-3">판매자가 올린 검수영상</p>
+              <p className="mt-1.5 text-label text-text-3">판매자가 올린 검수영상</p>
             </section>
           )}
 
@@ -166,15 +167,15 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
               그것이다. 화면이 폼과 다른 이름으로 부르면 판매자는 자기가 쓴 글이 어디로 갔는지 모른다. */}
           {auction.description && (
             <section className="mt-8">
-              <h2 className="font-display text-xl font-bold text-text-1">상세 설명</h2>
-              <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-text-2">
+              <h2 className="font-display text-title font-bold text-text-1">상세 설명</h2>
+              <p className="mt-3 whitespace-pre-wrap text-body leading-relaxed text-text-2">
                 {auction.description}
               </p>
             </section>
           )}
 
           <section className="mt-8">
-            <h2 className="font-display text-xl font-bold text-text-1">상품 정보</h2>
+            <h2 className="font-display text-title font-bold text-text-1">상품 정보</h2>
             {/* 🔴 카드를 걷고 규칙선만 남긴다(#406). 한 페이지에 강조 패널은 하나면 충분한데
                 우측 제안 패널이 이미 그 자리라, 스펙표까지 테두리를 두르면 둘이 경쟁한다.
                 2열로 접으면 6줄이 3줄이 되고, 라벨 폭을 고정해 값이 같은 자리에서 시작한다. */}
@@ -182,7 +183,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
               {specRows.map((row) => (
                 <div
                   key={row.label}
-                  className="grid grid-cols-[92px_1fr] gap-3 border-b border-border py-3 text-sm"
+                  className="grid grid-cols-[92px_1fr] gap-3 border-b border-border py-3 text-body"
                 >
                   <dt className="text-text-3">{row.label}</dt>
                   <dd className="font-semibold text-text-1">{row.value}</dd>
@@ -201,16 +202,16 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
               ⚠️ 통합 이전에 등록된 판매글의 conditionNote는 화면에서 보이지 않게 된다(로컬 2건). */}
 
           <section className="mt-8">
-            <h2 className="font-display text-xl font-bold text-text-1">판매자 정보</h2>
+            <h2 className="font-display text-title font-bold text-text-1">판매자 정보</h2>
             <div className="mt-3 rounded-card border border-border p-4">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-control bg-surface-2 text-base font-bold text-text-2">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-control bg-surface-2 text-body-l font-bold text-text-2">
                     {auction.sellerNickname.slice(0, 1).toUpperCase()}
                   </span>
                   <Link
                     href={`/sellers/${auction.sellerId}`}
-                    className={`rounded-control text-sm font-bold text-text-1 transition-colors hover:text-primary ${FOCUS_RING}`}
+                    className={`rounded-control text-body font-bold text-text-1 transition-colors hover:text-primary ${FOCUS_RING}`}
                   >
                     {auction.sellerNickname}
                   </Link>
@@ -218,7 +219,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
                 {auction.artistName && (
                   <SearchLink
                     query={auction.artistName}
-                    className={`text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
+                    className={`text-label font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
                   >
                     {auction.artistName} 다른 판매글 보기 →
                   </SearchLink>
@@ -245,7 +246,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
           {/* 🔴 판매 상태(#404) — 모바일은 제목 위 한 줄이 이 역할을 하는데 데스크탑에는 없었다.
               제안 패널 안 초록 도트가 대신하고 있었으나 그건 「AI 티」라 걷어냈고, 지우기만 하면
               데스크탑에서 상태가 통째로 사라진다. 모바일과 같은 자리·같은 문구로 맞춘다. */}
-          <p className={`text-[11.5px] font-bold ${isLive || auction.status === "MATCHED" ? "text-ok" : "text-text-3"}`}>
+          <p className={`text-label font-bold ${isLive || auction.status === "MATCHED" ? "text-ok" : "text-text-3"}`}>
             {isLive ? "판매 중" : auction.status === "MATCHED" ? "거래 성사 대기 중" : auction.status === "ENDED_SOLD" ? "거래 완료" : "판매 종료"}
           </p>
 
@@ -263,7 +264,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             )}
           </div>
 
-          <h1 className="mt-2 font-display text-xl font-extrabold text-text-1 sm:text-2xl">
+          <h1 className="mt-2 font-display text-title font-extrabold text-text-1 sm:text-title-l">
             {auction.title}
           </h1>
 
@@ -306,7 +307,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
               ① 제안 버튼에서 한참 떨어져 **누르기 전에 읽힐 자리가 아니었고** ② 한 페이지에 강조 패널은
               하나면 충분한데 우측 제안 패널과 둘이 경쟁했다. 두 문장이 같은 말(안전한 거래)을 하므로
               한 덩어리로 두고, 강조는 링크 하나에만 준다. */}
-          <div className="mt-4 text-[11.5px] leading-relaxed text-text-3">
+          <div className="mt-4 text-label leading-relaxed text-text-3">
             <p>{INTERMEDIARY_NOTICE}</p>
             <p className="mt-2 font-bold text-text-2">안전한 거래를 위해 안내사항을 꼭 확인해주세요.</p>
             <Link

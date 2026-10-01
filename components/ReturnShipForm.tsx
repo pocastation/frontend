@@ -89,12 +89,12 @@ export default function ReturnShipForm({
           onChange={(e) => setTrackingNumber(e.target.value)}
         />
       </div>
-      {error && <p role="alert" className="text-[12px] font-semibold text-accent">{error}</p>}
+      {error && <p role="alert" className="text-label font-semibold text-accent">{error}</p>}
       <button
         type="button"
         onClick={submit}
         disabled={saving}
-        className={`self-end rounded-control bg-text-1 px-4 py-2 text-[13px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+        className={`self-end rounded-control bg-text-1 px-4 py-2 text-body-s font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
       >
         반송 등록
       </button>

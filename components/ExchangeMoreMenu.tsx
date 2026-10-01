@@ -103,7 +103,7 @@ export default function ExchangeMoreMenu({
                 setError(null);
                 setConfirmingBlock(true);
               }}
-              className={`flex min-h-[52px] w-full items-center gap-3 px-[18px] text-left text-[15px] font-bold text-text-1 hover:bg-surface-2 ${PRESS_ROW} ${FOCUS_RING}`}
+              className={`flex min-h-[52px] w-full items-center gap-3 px-[18px] text-left text-body-l font-bold text-text-1 hover:bg-surface-2 ${PRESS_ROW} ${FOCUS_RING}`}
             >
               <span className="text-text-2">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
@@ -117,7 +117,7 @@ export default function ExchangeMoreMenu({
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className={`mx-3.5 flex min-h-12 w-[calc(100%-28px)] items-center justify-center rounded-control border border-border-2 bg-white text-[15px] font-extrabold text-text-2 ${PRESS_OUTLINE} ${FOCUS_RING}`}
+              className={`mx-3.5 flex min-h-12 w-[calc(100%-28px)] items-center justify-center rounded-control border border-border-2 bg-white text-body-l font-extrabold text-text-2 ${PRESS_OUTLINE} ${FOCUS_RING}`}
             >
               닫기
             </button>
@@ -133,19 +133,19 @@ export default function ExchangeMoreMenu({
       {confirmingBlock && typeof document !== "undefined" && createPortal(
         <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
-            <h2 className="font-display text-base font-extrabold text-text-1">
+            <h2 className="font-display text-body-l font-extrabold text-text-1">
               {authorNickname ? `${authorNickname}님을 차단할까요?` : "이 사용자를 차단할까요?"}
             </h2>
-            <p className="mt-2 text-[13px] leading-relaxed text-text-2">
+            <p className="mt-2 text-body-s leading-relaxed text-text-2">
               서로의 교환글이 보이지 않고 신청도 주고받을 수 없어요.{" "}
               <b className="font-bold text-text-1">이미 확정된 교환</b>은 그대로 진행돼요.
             </p>
-            <p className="mt-2 text-[11.5px] leading-relaxed text-text-3">
+            <p className="mt-2 text-label leading-relaxed text-text-3">
               상대에게는 알리지 않아요. 마이페이지에서 언제든 풀 수 있어요.
             </p>
 
             {error && (
-              <p role="alert" className="mt-2 rounded-control bg-accent-soft px-3 py-2 text-[12px] font-semibold text-accent">
+              <p role="alert" className="mt-2 rounded-card bg-surface-2 px-3 py-2 text-label font-semibold text-danger">
                 {error}
               </p>
             )}
@@ -155,7 +155,7 @@ export default function ExchangeMoreMenu({
                 type="button"
                 onClick={() => setConfirmingBlock(false)}
                 disabled={blocking}
-                className={`h-11 flex-1 rounded-control border border-border-2 bg-white text-sm font-bold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-11 flex-1 rounded-control border border-border-2 bg-white text-body font-bold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 취소
               </button>
@@ -163,7 +163,7 @@ export default function ExchangeMoreMenu({
                 type="button"
                 onClick={block}
                 disabled={blocking}
-                className={`h-11 flex-1 rounded-control bg-text-1 text-sm font-bold text-white disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-11 flex-1 rounded-control bg-text-1 text-body font-bold text-white disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {blocking ? "차단하는 중..." : "차단"}
               </button>

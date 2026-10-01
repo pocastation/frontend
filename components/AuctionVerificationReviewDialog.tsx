@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { AUCTION_REJECTION_REASON_OPTIONS } from "@/lib/labels";
 import MediaZoomViewer from "@/components/MediaZoomViewer";
 import { useDialogFocus } from "@/lib/use-dialog-focus";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, LABEL_NEUTRAL } from "@/lib/ui";
 import type {
   AdminAuctionSummary,
   AdminAuctionVerificationResponse,
@@ -57,27 +57,27 @@ function AnalysisSection({
   const statusText = advisory
     ? analyzed ? "참고 지표" : "미분석"
     : passed === null ? "미분석" : passed ? "통과" : "미통과";
-  const statusColor = advisory || passed === null ? "text-text-3" : passed ? "text-ok" : "text-accent";
+  const statusColor = advisory || passed === null ? "text-text-3" : passed ? "text-ok" : "text-danger";
   return (
     <div className="border-b border-border py-3 last:border-0">
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-xs font-extrabold text-text-2">{title}</h3>
-        <span className={`text-xs font-extrabold ${statusColor}`}>
+        <h3 className="text-label font-extrabold text-text-2">{title}</h3>
+        <span className={`text-label font-extrabold ${statusColor}`}>
           {statusText}
         </span>
       </div>
-      <dl className="mt-2 grid gap-1.5 text-xs">
+      <dl className="mt-2 grid gap-1.5 text-label">
         {metrics.map((metric) => (
           <div key={metric.label} className="flex items-center justify-between gap-3">
             <dt className="text-text-3">{metric.label}</dt>
-            <dd className={`font-bold ${metric.passed == null ? "text-text-2" : metric.passed ? "text-ok" : "text-accent"}`}>
+            <dd className={`font-bold ${metric.passed == null ? "text-text-2" : metric.passed ? "text-ok" : "text-danger"}`}>
               {metric.value}
             </dd>
           </div>
         ))}
       </dl>
       {children}
-      <p className="mt-2 border-l-2 border-border-2 pl-2 text-[11px] leading-5 text-text-3">
+      <p className="mt-2 text-caption leading-5 text-text-3">
         <span className="font-extrabold text-text-2">{advisory ? "산출 방식" : "통과 조건"} · </span>{condition}
       </p>
     </div>
@@ -234,16 +234,16 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
         <div className="flex shrink-0 items-start justify-between gap-4 border-b border-border bg-surface px-5 py-4">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h2 id="verification-review-title" className="truncate font-display text-lg font-extrabold text-text-1">
+              <h2 id="verification-review-title" className="truncate font-display text-title-s font-extrabold text-text-1">
                 사진 인증 검수 내용
               </h2>
               {readOnly && (
-                <span className="shrink-0 rounded-control bg-primary-soft px-2 py-0.5 text-[11px] font-bold text-primary">
+                <span className={LABEL_NEUTRAL}>
                   읽기 전용
                 </span>
               )}
             </div>
-            <p className="mt-0.5 truncate text-xs text-text-3">{auction.title} · {auction.sellerNickname ?? "판매자 미상"}</p>
+            <p className="mt-0.5 truncate text-label text-text-3">{auction.title} · {auction.sellerNickname ?? "판매자 미상"}</p>
           </div>
           {/* 닫기는 얇은 '×' 글리프였을 때 배경과 구분이 안 돼 "버튼이 없다"고 읽혔다.
               테두리 있는 원형 + Lucide 계열 X SVG로 교체한다(글리프는 폰트에 따라 광학 중심도 어긋난다). */}
@@ -275,7 +275,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                   selectTab(next);
                   document.getElementById(`verification-tab-${next}`)?.focus();
                 }}
-                className={`min-h-12 border-b-2 text-sm font-bold ${FOCUS_RING} ${mobileTab === tab ? "border-primary text-primary" : "border-transparent text-text-3"}`}>
+                className={`min-h-12 border-b-2 text-body font-bold ${FOCUS_RING} ${mobileTab === tab ? "border-primary text-primary" : "border-transparent text-text-3"}`}>
                 {tab === "media" ? "사진·영상" : "검수 정보"}
               </button>
             ))}
@@ -283,11 +283,11 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
         )}
         <div ref={scrollRef} className="verification-scroll min-h-0 overflow-y-auto p-4 sm:p-5">
           {readOnly && (
-            <dl className="mb-5 grid gap-3 rounded-card border border-border bg-surface-2 px-4 py-3 text-xs sm:grid-cols-3">
+            <dl className="mb-5 grid gap-3 rounded-card border border-border bg-surface-2 px-4 py-3 text-label sm:grid-cols-3">
               <div>
                 <dt className="text-text-3">검수 결과</dt>
                 <dd className={`mt-1 font-extrabold ${
-                  auction.status === "REJECTED" ? "text-accent" : auction.reviewedAt ? "text-ok" : "text-text-3"
+                  auction.status === "REJECTED" ? "text-danger" : auction.reviewedAt ? "text-ok" : "text-text-3"
                 }`}>
                   {reviewResult}
                 </dd>
@@ -305,18 +305,18 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
             </dl>
           )}
           {loading ? (
-            <p className="py-16 text-center text-sm text-text-3">인증 자료를 불러오는 중...</p>
+            <p className="py-16 text-center text-body text-text-3">인증 자료를 불러오는 중...</p>
           ) : error && !verification ? (
-            <p className="bg-accent-soft px-4 py-3 text-sm text-accent" role="alert">{error}</p>
+            <p className="rounded-card bg-surface-2 px-4 py-3 text-body font-semibold text-danger" role="alert">{error}</p>
           ) : verification ? (
             <>
               {readOnly && error && (
-                <p className="mb-4 border-l-2 border-accent px-3 py-2 text-sm text-accent" role="alert">{error}</p>
+                <p className="mb-4 rounded-card bg-surface-2 px-3.5 py-3 text-body font-semibold text-danger" role="alert">{error}</p>
               )}
               <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.62fr)]">
                 <section id="verification-panel-media" role="tabpanel" aria-labelledby="verification-tab-media" className={mobileRejectOpen || mobileTab !== "media" ? "hidden lg:block" : ""}>
                   <figure>
-                    <figcaption className="mb-2 text-xs font-extrabold text-text-2">관리자 전용 인증 사진</figcaption>
+                    <figcaption className="mb-2 text-label font-extrabold text-text-2">관리자 전용 인증 사진</figcaption>
                     <div className="flex aspect-[4/3] items-center justify-center overflow-hidden border border-border bg-surface-2">
                       {verificationImageUrl ? (
                         <button type="button" aria-label="관리자 전용 인증 사진 확대" className={`relative h-full w-full ${FOCUS_RING}`}
@@ -326,13 +326,13 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                           <PhotoExpandMark />
                         </button>
                       ) : (
-                        <span className="text-xs text-text-3">인증 사진 없음</span>
+                        <span className="text-label text-text-3">인증 사진 없음</span>
                       )}
                     </div>
                   </figure>
 
                   <div className="mt-4">
-                    <p className="mb-2 text-xs font-extrabold text-text-2">틸팅 검수영상</p>
+                    <p className="mb-2 text-label font-extrabold text-text-2">틸팅 검수영상</p>
                     {reviewVideo ? (
                       <video
                         ref={videoRef}
@@ -346,14 +346,14 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                         브라우저가 영상 재생을 지원하지 않습니다.
                       </video>
                     ) : (
-                      <div className="flex aspect-video items-center justify-center border border-border bg-surface-2 text-xs text-text-3">
+                      <div className="flex aspect-video items-center justify-center border border-border bg-surface-2 text-label text-text-3">
                         등록된 검수영상 없음
                       </div>
                     )}
                   </div>
 
                   <div className="mt-4">
-                    <p className="mb-2 text-xs font-extrabold text-text-2">공개 판매 사진 {publicImages.length}장</p>
+                    <p className="mb-2 text-label font-extrabold text-text-2">공개 판매 사진 {publicImages.length}장</p>
                     {publicImages.length > 0 ? (
                       <div className="grid grid-cols-2 gap-3">
                         {publicImages.map((image, index) => (
@@ -376,7 +376,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                         ))}
                       </div>
                     ) : (
-                      <div className="flex aspect-[4/3] items-center justify-center border border-border bg-surface-2 text-xs text-text-3">
+                      <div className="flex aspect-[4/3] items-center justify-center border border-border bg-surface-2 text-label text-text-3">
                         공개 판매 사진 없음
                       </div>
                     )}
@@ -385,12 +385,12 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
 
                 <section id="verification-panel-info" role="tabpanel" aria-labelledby="verification-tab-info" className={`verification-info ${mobileRejectOpen || mobileTab !== "info" ? "hidden lg:block" : ""}`}>
                   <div className="flex items-baseline justify-between border-b border-border pb-3">
-                    <span className="text-xs font-bold text-text-3">발급 코드</span>
-                    <strong className="font-mono text-xl text-text-1">{verification.issuedCode}</strong>
+                    <span className="text-label font-bold text-text-3">발급 코드</span>
+                    <strong className="font-mono text-title text-text-1">{verification.issuedCode}</strong>
                   </div>
                   <div className="flex items-baseline justify-between border-b border-border py-3">
-                    <span className="text-xs font-bold text-text-3">인식 코드</span>
-                    <strong className="font-mono text-xl text-text-1">{verification.detectedCode ?? "—"}</strong>
+                    <span className="text-label font-bold text-text-3">인식 코드</span>
+                    <strong className="font-mono text-title text-text-1">{verification.detectedCode ?? "—"}</strong>
                   </div>
                   <div
                     className={`mt-3 border px-3 py-3 ${
@@ -398,18 +398,18 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                         ? "border-border bg-surface-2"
                         : isTrocrV6
                           ? "border-border"
-                          : "border-accent bg-accent-soft"
+                          : "rounded-card border-transparent bg-surface-2 text-danger"
                     }`}
                     role={!modelVersionPending && !isTrocrV6 ? "alert" : undefined}
                   >
                     <div className="flex items-center justify-between gap-3">
-                      <h3 className="text-xs font-extrabold text-text-1">OCR 실행 구성</h3>
-                      <span className={`text-xs font-extrabold ${modelVersionPending ? "text-text-3" : isTrocrV6 ? "text-ok" : "text-accent"}`}>
+                      <h3 className="text-label font-extrabold text-text-1">OCR 실행 구성</h3>
+                      <span className={`text-label font-extrabold ${modelVersionPending ? "text-text-3" : isTrocrV6 ? "text-ok" : "text-danger"}`}>
                         {modelVersionPending ? "분석 정보 대기" : isTrocrV6 ? "TrOCR v6 가중치" : "v6 아님"}
                       </span>
                     </div>
                     {isTrocrV6 ? (
-                      <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-[11px]">
+                      <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-caption">
                         <dt className="text-text-3">입력 처리</dt>
                         <dd className="text-right font-bold text-text-2">원근 보정 · 명암 보정 없음</dd>
                         <dt className="text-text-3">디코딩</dt>
@@ -418,7 +418,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                         <dd className="text-right font-bold text-text-2">사용 안 함</dd>
                       </dl>
                     ) : (
-                      <p className="mt-2 text-[11px] leading-5 text-text-3">
+                      <p className="mt-2 text-caption leading-5 text-text-3">
                         {modelVersionPending
                           ? "모델 버전은 분석이 끝난 뒤 표시됩니다."
                           : "TrOCR v6 가중치 결과가 아닙니다. 모델 버전과 분석 결과를 확인하세요."}
@@ -440,12 +440,12 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                         ? "Greedy 디코딩이 각 생성 단계에서 선택한 토큰 점수의 기하평균입니다. 정답 확률이나 자동 통과 기준은 아닙니다."
                         : "모델이 최종 선택한 인식 단위의 참고 지표입니다. 확률 보정값이 아니며 최종 통과를 직접 결정하지 않습니다."}
                     >
-                      <p className="mt-1 text-[11px] leading-5 text-text-3">
+                      <p className="mt-1 text-caption leading-5 text-text-3">
                         높을수록 생성 과정에서 선택한 토큰들을 모델이 상대적으로 강하게 지지했다는 뜻입니다. 낮은 토큰을 사진과 대조하세요.
                       </p>
                       <div className="mt-3 border-t border-border pt-2">
-                        <p className="text-[11px] font-extrabold text-text-3">인식 단위별 참고 점수</p>
-                        <p className="mt-1 text-[11px] leading-5 text-text-3">
+                        <p className="text-caption font-extrabold text-text-3">인식 단위별 참고 점수</p>
+                        <p className="mt-1 text-caption leading-5 text-text-3">
                           {isTrocrV6
                             ? "Greedy 디코딩이 각 단계에서 선택한 토큰의 점수입니다. 한 토큰에 여러 문자가 포함될 수 있습니다."
                             : "모델이 반환한 토큰 단위 참고 점수입니다."}
@@ -453,14 +453,14 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                         {verification.ocrTokenConfidences?.length ? (
                           <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
                             {verification.ocrTokenConfidences.map((item, index) => (
-                              <div key={`${item.token}-${index}`} className="flex items-center justify-between gap-2 text-xs">
+                              <div key={`${item.token}-${index}`} className="flex items-center justify-between gap-2 text-label">
                                 <span className="font-mono font-bold text-text-2">{item.token}</span>
                                 <span className="font-bold text-text-1">{formatPercentage(item.confidence)}</span>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <p className="mt-1 text-xs text-text-3">미분석</p>
+                          <p className="mt-1 text-label text-text-3">미분석</p>
                         )}
                       </div>
                     </AnalysisSection>
@@ -488,23 +488,23 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     />
                     <div className="mt-4 border border-border px-3 py-3">
                       <div className="flex items-center justify-between gap-3">
-                        <h3 className="text-xs font-extrabold text-text-1">최종 자동 판정</h3>
-                        <span className={`text-xs font-extrabold ${!finalAnalyzed ? "text-text-3" : finalPassed ? "text-ok" : "text-accent"}`}>
+                        <h3 className="text-label font-extrabold text-text-1">최종 자동 판정</h3>
+                        <span className={`text-label font-extrabold ${!finalAnalyzed ? "text-text-3" : finalPassed ? "text-ok" : "text-danger"}`}>
                           {!finalAnalyzed ? "미분석" : finalPassed ? "통과" : "미통과"}
                         </span>
                       </div>
-                      <p className="mt-2 text-[11px] leading-5 text-text-3">
+                      <p className="mt-2 text-caption leading-5 text-text-3">
                         코드 영역 통과 + 유효한 6자리 코드 + 발급 코드 정확히 일치 + 판매 물품 형태 통과를 모두 충족해야 합니다.
                       </p>
-                      <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-xs">
+                      <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-label">
                         <span className="text-text-3">발급 코드 일치 여부</span>
-                        <strong className={verification.codeExact === null ? "text-text-3" : verification.codeExact ? "text-ok" : "text-accent"}>
+                        <strong className={verification.codeExact === null ? "text-text-3" : verification.codeExact ? "text-ok" : "text-danger"}>
                           {verification.codeExact === null ? "미분석" : verification.codeExact ? "일치" : "불일치"}
                         </strong>
                       </div>
                     </div>
                   </div>
-                  <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                  <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 text-label">
                     <dt className="text-text-3">분석 모델</dt>
                     <dd className="break-all text-right font-bold text-text-2" title={modelVersion ?? undefined}>
                       {modelVersion ?? "—"}
@@ -518,14 +518,14 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     흔들리고, 사유별 집계도 불가능하다. 선택한 문구가 그대로 판매자에게 전달되므로
                     아래에 미리보기를 노출한다. */
                 <fieldset ref={reasonRef} className={`verification-reasons mt-6 border-t border-border pt-5 ${mobileRejectOpen ? "" : "hidden lg:block"}`}>
-                <legend className="text-xs font-extrabold text-text-2">승인 거절 사유</legend>
+                <legend className="text-label font-extrabold text-text-2">승인 거절 사유</legend>
                 <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
                   {AUCTION_REJECTION_REASON_OPTIONS.map((option) => (
                     <label
                       key={option.code}
-                      className={`flex cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-[13px] transition-colors ${
+                      className={`flex cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-body-s transition-colors ${
                         reasonCode === option.code
-                          ? "border-accent bg-accent-soft font-bold text-accent"
+                          ? "border-danger font-bold text-danger"
                           : "border-border text-text-2 hover:border-text-2"
                       }`}
                     >
@@ -538,20 +538,20 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                           setReasonCode(option.code);
                           setError(null);
                         }}
-                        className="h-3.5 w-3.5 shrink-0 accent-[var(--color-accent)]"
+                        className="h-3.5 w-3.5 shrink-0 accent-[var(--color-danger)]"
                       />
                       {option.label}
                     </label>
                   ))}
                 </div>
                 {selectedReason && (
-                  <p className="mt-3 border-l-2 border-border-2 bg-surface-2 px-3 py-2 text-[12px] leading-5 text-text-2">
+                  <p className="mt-3 rounded-card bg-surface-2 px-3 py-2 text-label leading-5 text-text-2">
                     <span className="font-extrabold text-text-3">판매자에게 전달될 문구 · </span>
                     {selectedReason.preview}
                   </p>
                 )}
                 {error && (
-                  <p className="mt-2 text-xs text-accent" role="alert">{error}</p>
+                  <p className="mt-2 text-label text-danger" role="alert">{error}</p>
                 )}
                 <div className="mt-4 hidden gap-2 lg:flex lg:justify-end">
                   {/* 헤더 닫기까지 스크롤을 올려야 했던 문제 — 액션 줄에도 닫기를 둔다. */}
@@ -559,7 +559,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     type="button"
                     onClick={onClose}
                     disabled={submitting}
-                    className={`h-11 border border-border-2 px-5 text-sm font-extrabold text-text-2 hover:border-text-2 hover:bg-surface-2 disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`h-11 border border-border-2 px-5 text-body font-extrabold text-text-2 hover:border-text-2 hover:bg-surface-2 disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     닫기
                   </button>
@@ -567,7 +567,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     type="button"
                     onClick={reject}
                     disabled={submitting}
-                    className={`h-11 border border-accent px-5 text-sm font-extrabold text-accent hover:bg-accent-soft disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`h-11 rounded-control border border-danger bg-white px-5 text-body font-extrabold text-danger hover:bg-danger-soft disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     승인 거절
                   </button>
@@ -575,7 +575,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     type="button"
                     onClick={approve}
                     disabled={submitting}
-                    className={`h-11 bg-ok px-7 text-sm font-extrabold text-white hover:opacity-90 disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`h-11 bg-ok px-7 text-body font-extrabold text-white hover:opacity-90 disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     {submitting ? "처리 중..." : "승인하고 공개"}
                   </button>
@@ -589,7 +589,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
               <button
                 type="button"
                 onClick={onClose}
-                className={`h-11 border border-border-2 px-5 text-sm font-extrabold text-text-2 hover:border-text-2 hover:bg-surface-2 ${FOCUS_RING}`}
+                className={`h-11 border border-border-2 px-5 text-body font-extrabold text-text-2 hover:border-text-2 hover:bg-surface-2 ${FOCUS_RING}`}
               >
                 닫기
               </button>
@@ -597,22 +597,22 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
           )}
         </div>
         <div className="verification-actions shrink-0 border-t border-border bg-surface p-4 lg:hidden">
-          {error && verification && !mobileRejectOpen && !readOnly && <p role="alert" className="mb-3 text-sm text-accent">{error}</p>}
+          {error && verification && !mobileRejectOpen && !readOnly && <p role="alert" className="mb-3 text-body text-danger">{error}</p>}
           {readOnly || !verification ? (
-            <button type="button" onClick={onClose} className={`min-h-12 w-full border border-border-2 text-sm font-bold text-text-2 ${FOCUS_RING}`}>닫기</button>
+            <button type="button" onClick={onClose} className={`min-h-12 w-full border border-border-2 text-body font-bold text-text-2 ${FOCUS_RING}`}>닫기</button>
           ) : mobileRejectOpen ? (
             <div className="grid grid-cols-2 gap-2">
               <button type="button" onClick={() => showRejection(false)} disabled={submitting}
-                className={`min-h-12 border border-border-2 text-sm font-bold text-text-2 disabled:opacity-50 ${FOCUS_RING}`}>취소</button>
+                className={`min-h-12 border border-border-2 text-body font-bold text-text-2 disabled:opacity-50 ${FOCUS_RING}`}>취소</button>
               <button type="button" onClick={reject} disabled={submitting}
-                className={`min-h-12 bg-accent text-sm font-bold text-white disabled:opacity-50 ${FOCUS_RING}`}>{submitting ? "처리 중..." : "승인 거절"}</button>
+                className={`min-h-12 bg-danger text-body font-bold text-white disabled:opacity-50 ${FOCUS_RING}`}>{submitting ? "처리 중..." : "승인 거절"}</button>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2">
               <button type="button" onClick={() => showRejection(true)} disabled={submitting || loading}
-                className={`min-h-12 border border-accent text-sm font-bold text-accent disabled:opacity-50 ${FOCUS_RING}`}>승인 거절</button>
+                className={`min-h-12 border border-danger text-body font-bold text-danger disabled:opacity-50 ${FOCUS_RING}`}>승인 거절</button>
               <button type="button" onClick={approve} disabled={submitting || loading}
-                className={`min-h-12 bg-ok text-sm font-bold text-white disabled:opacity-50 ${FOCUS_RING}`}>{submitting ? "처리 중..." : "승인하고 공개"}</button>
+                className={`min-h-12 bg-ok text-body font-bold text-white disabled:opacity-50 ${FOCUS_RING}`}>{submitting ? "처리 중..." : "승인하고 공개"}</button>
             </div>
           )}
         </div>

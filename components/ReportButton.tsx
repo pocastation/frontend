@@ -109,7 +109,7 @@ export default function ReportButton({
         <button
           type="button"
           onClick={openModal}
-          className={`flex min-h-[52px] w-full items-center gap-3 px-[18px] text-left text-[15px] font-bold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+          className={`flex min-h-[52px] w-full items-center gap-3 px-[18px] text-left text-body-l font-bold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
         >
           <span className="text-text-2">{siren}</span>
           신고하기
@@ -150,8 +150,8 @@ export default function ReportButton({
       {open && typeof document !== "undefined" && createPortal(
         <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
-            <h2 className="font-display text-base font-extrabold text-text-1">신고하기</h2>
-            <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">
+            <h2 className="font-display text-body-l font-extrabold text-text-1">신고하기</h2>
+            <p className="mt-1.5 text-body-s leading-relaxed text-text-3">
               이 {TARGET_COPY[targetType].noun}의 어떤 점이 문제인지 알려주세요. 접수된 신고는 운영팀이 검토 후 필요한 조치를 취합니다.
             </p>
 
@@ -167,7 +167,7 @@ export default function ReportButton({
             {targetType === "AUCTION" ? (
               // 링크는 `/mypage`로 보낸다. 이 화면은 그 사람이 이 매물의 당사자인지 모르고,
               // 당사자가 아니면 거래 카드가 없으니 링크만으로도 갈림길이 맞다.
-              <p className="mt-2.5 text-[11.5px] leading-relaxed text-text-2">
+              <p className="mt-2.5 text-label leading-relaxed text-text-2">
                 이미 결제한 거래에 문제가 있다면(물건이 오지 않음 · 파손 · 환불){" "}
                 <b className="font-bold text-text-1">신고가 아니라</b> 마이페이지 거래 내역의{" "}
                 <Link
@@ -181,20 +181,20 @@ export default function ReportButton({
             ) : (
               // 노쇼 신고는 백엔드에 아직 없다(P4). 여기서 받아 두면 운영팀이 처리할 수단이
               // 없는 신고만 쌓이므로, 지금은 대화로 먼저 확인하도록 안내한다.
-              <p className="mt-2.5 text-[11.5px] leading-relaxed text-text-2">
+              <p className="mt-2.5 text-label leading-relaxed text-text-2">
                 약속 시간에 상대가 오지 않았다면 <b className="font-bold text-text-1">신고가 아니라</b>{" "}
                 교환 대화에서 먼저 확인해 주세요. 노쇼 신고는 준비 중이에요.
               </p>
             )}
 
             <fieldset className="mt-3.5">
-              <legend className="mb-2 text-xs font-bold text-text-2">신고 사유 선택 (필수)</legend>
+              <legend className="mb-2 text-label font-bold text-text-2">신고 사유 선택 (필수)</legend>
               <div className="flex flex-col gap-1.5">
                 {REPORT_REASON_OPTIONS[targetType].map((option) => (
                   <label
                     key={option}
-                    className={`flex cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-[13px] font-semibold transition-colors ${
-                      reason === option ? "border-primary bg-primary-soft text-primary" : "border-border text-text-2"
+                    className={`flex cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-body-s font-semibold transition-colors ${
+                      reason === option ? "border-primary font-bold text-text-1" : "border-border text-text-2"
                     }`}
                   >
                     <input
@@ -211,7 +211,7 @@ export default function ReportButton({
               </div>
             </fieldset>
 
-            <label className="mt-3.5 mb-1.5 block text-xs font-bold text-text-2" htmlFor="report-detail">
+            <label className="mt-3.5 mb-1.5 block text-label font-bold text-text-2" htmlFor="report-detail">
               상세 내용 (선택)
             </label>
             <textarea
@@ -220,15 +220,15 @@ export default function ReportButton({
               onChange={(e) => setDetail(e.target.value)}
               placeholder="구체적인 내용을 입력해주세요. (선택)"
               rows={3}
-              className={`w-full resize-none rounded-control border border-border px-3 py-2 text-[13px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+              className={`w-full resize-none rounded-control border border-border px-3 py-2 text-body-s outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
             />
 
-            <p className="mt-2 text-[11px] leading-relaxed text-text-3">
+            <p className="mt-2 text-caption leading-relaxed text-text-3">
               ⓘ 이미 접수한 신고가 있는 경우 새 신고 대신 기존 신고에 신고자로 추가됩니다.
             </p>
 
             {error && (
-              <p role="alert" className="mt-2 rounded-control bg-accent-soft px-3 py-2 text-[12px] font-semibold text-accent">
+              <p role="alert" className="mt-2 rounded-card bg-surface-2 px-3 py-2 text-label font-semibold text-danger">
                 {error}
               </p>
             )}
@@ -238,7 +238,7 @@ export default function ReportButton({
                 type="button"
                 onClick={() => setOpen(false)}
                 disabled={submitting}
-                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-body font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
               >
                 닫기
               </button>
@@ -246,7 +246,7 @@ export default function ReportButton({
                 type="button"
                 onClick={submit}
                 disabled={!reason || submitting}
-                className={`h-10 flex-1 rounded-control bg-accent text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control bg-accent text-body font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {submitting ? "처리 중..." : "신고 접수"}
               </button>

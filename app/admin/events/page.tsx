@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, LABEL_NEUTRAL } from "@/lib/ui";
 import type {
   AdminEventListResponse,
   EventRecurrenceListResponse,
@@ -97,13 +97,13 @@ function dayLabel(eventDate: string): string {
 }
 
 const PANEL = "mt-6 rounded-card border border-border bg-white p-4";
-const LABEL = "mb-1.5 text-[11.5px] font-bold text-text-2";
+const LABEL = "mb-1.5 text-label font-bold text-text-2";
 const INPUT =
-  "h-9 w-full rounded-control border border-border-2 bg-white px-2.5 text-[13px] font-semibold text-text-1";
-const BTN = `inline-flex h-9 items-center justify-center rounded-control bg-primary px-3.5 text-[13px] font-extrabold text-white ${FOCUS_RING}`;
-const BTN_GHOST = `inline-flex h-9 items-center justify-center rounded-control border border-border-2 bg-white px-3.5 text-[13px] font-extrabold text-text-2 ${FOCUS_RING}`;
-const LINK = `text-xs font-bold text-text-2 underline decoration-border-2 underline-offset-2 ${FOCUS_RING}`;
-const LINK_D = `text-xs font-bold text-danger underline decoration-danger/30 underline-offset-2 ${FOCUS_RING}`;
+  "h-9 w-full rounded-control border border-border-2 bg-white px-2.5 text-body-s font-semibold text-text-1";
+const BTN = `inline-flex h-9 items-center justify-center rounded-control bg-primary px-3.5 text-body-s font-extrabold text-white ${FOCUS_RING}`;
+const BTN_GHOST = `inline-flex h-9 items-center justify-center rounded-control border border-border-2 bg-white px-3.5 text-body-s font-extrabold text-text-2 ${FOCUS_RING}`;
+const LINK = `text-label font-bold text-text-2 underline decoration-border-2 underline-offset-2 ${FOCUS_RING}`;
+const LINK_D = `text-label font-bold text-danger underline decoration-danger/30 underline-offset-2 ${FOCUS_RING}`;
 
 type EventForm = {
   type: EventType;
@@ -293,8 +293,8 @@ export default function AdminEventsPage() {
     <div>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">행사 관리</h1>
-          <p className="mt-1 text-[12.5px] text-text-3">
+          <h1 className="font-display text-title-l font-extrabold text-text-1">행사 관리</h1>
+          <p className="mt-1 text-body-s text-text-3">
             교환글이 붙는 일정이에요. 회차를 지우지 않고 취소로 꺼요.
           </p>
         </div>
@@ -302,19 +302,19 @@ export default function AdminEventsPage() {
       </div>
 
       {error && (
-        <p role="alert" className="mt-4 rounded-control border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger">
+        <p role="alert" className="mt-4 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger">
           {error}
         </p>
       )}
       {notice && (
-        <p role="status" className="mt-4 rounded-control border-l-2 border-primary bg-surface-2 px-3 py-2 text-[12.5px] font-semibold text-text-2">
+        <p role="status" className="mt-4 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-text-2">
           {notice}
         </p>
       )}
 
       {eventForm && (
         <section className={PANEL}>
-          <h2 className="font-display text-base font-extrabold text-text-1">
+          <h2 className="font-display text-body-l font-extrabold text-text-1">
             {editingEventId === null ? "행사 등록" : "행사 수정"}
           </h2>
           <form onSubmit={submitEvent} className="mt-3 grid gap-3.5 lg:grid-cols-3">
@@ -331,7 +331,7 @@ export default function AdminEventsPage() {
                 ))}
               </select>
               {editingEventId !== null && (
-                <p className="mt-1.5 text-[11px] text-text-3">유형은 바꿀 수 없어요.</p>
+                <p className="mt-1.5 text-caption text-text-3">유형은 바꿀 수 없어요.</p>
               )}
             </div>
             <div>
@@ -357,7 +357,7 @@ export default function AdminEventsPage() {
               <input required type="datetime-local" value={eventForm.endsAt}
                 onChange={(e) => setEventForm({ ...eventForm, endsAt: e.target.value })}
                 className={INPUT} />
-              <p className="mt-1.5 text-[11px] text-text-3">
+              <p className="mt-1.5 text-caption text-text-3">
                 교환글 마감과 사진 파기가 이 시각을 기준으로 계산돼요.
               </p>
             </div>
@@ -377,8 +377,8 @@ export default function AdminEventsPage() {
             {[{ v: -1, l: "지난달" }, { v: 0, l: "이번 달" }, { v: 1, l: "다음 달" }].map((o) => (
               <button key={o.v} type="button" onClick={() => setRangeOffset(o.v)}
                 aria-pressed={rangeOffset === o.v}
-                className={`border-l border-border-2 px-2.5 py-1.5 text-xs font-bold first:border-l-0 ${FOCUS_RING} ${
-                  rangeOffset === o.v ? "bg-primary text-white" : "text-text-2"
+                className={`border-l border-border-2 px-2.5 py-1.5 text-label font-bold first:border-l-0 ${FOCUS_RING} ${
+                  rangeOffset === o.v ? "bg-text-1 text-white" : "text-text-2"
                 }`}>
                 {o.l}
               </button>
@@ -386,7 +386,7 @@ export default function AdminEventsPage() {
           </div>
           <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value as EventType | "")}
             aria-label="유형 필터"
-            className="h-[30px] rounded-control border border-border-2 bg-white px-2 text-xs font-semibold text-text-2">
+            className="h-[30px] rounded-control border border-border-2 bg-white px-2 text-label font-semibold text-text-2">
             <option value="">전체 유형</option>
             {(Object.keys(TYPE_LABEL) as EventType[]).map((t) => (
               <option key={t} value={t}>{TYPE_LABEL[t]}</option>
@@ -394,18 +394,18 @@ export default function AdminEventsPage() {
           </select>
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as EventStatus | "")}
             aria-label="상태 필터"
-            className="h-[30px] rounded-control border border-border-2 bg-white px-2 text-xs font-semibold text-text-2">
+            className="h-[30px] rounded-control border border-border-2 bg-white px-2 text-label font-semibold text-text-2">
             <option value="">전체 상태</option>
             <option value="SCHEDULED">예정</option>
             <option value="CANCELLED">취소</option>
           </select>
           {recurrenceFilter && (
             <button type="button" onClick={() => setRecurrenceFilter(null)}
-              className={`rounded-control border border-primary px-2.5 py-1 text-xs font-bold text-primary ${FOCUS_RING}`}>
+              className={`rounded-control border border-primary px-2.5 py-1 text-label font-bold text-primary ${FOCUS_RING}`}>
               {recurrenceFilter.name} 회차만 · 해제 ×
             </button>
           )}
-          <p className="ml-auto text-xs font-semibold text-text-3">
+          <p className="ml-auto text-label font-semibold text-text-3">
             전체 <b className="font-display text-text-1">{events.length}</b>건
             {cancelledCount > 0 && <> · 취소 <b className="font-display text-text-1">{cancelledCount}</b>건</>}
           </p>
@@ -413,7 +413,7 @@ export default function AdminEventsPage() {
 
         <table className="admin-table mt-3 w-full">
           <thead>
-            <tr className="border-b border-border-2 text-left text-[11px] font-bold text-text-3">
+            <tr className="border-b border-border-2 text-left text-caption font-bold text-text-3">
               <th className="whitespace-nowrap px-2.5 py-2">날짜</th>
               <th className="whitespace-nowrap px-2.5 py-2">유형</th>
               <th className="px-2.5 py-2">이름 · 장소</th>
@@ -425,36 +425,36 @@ export default function AdminEventsPage() {
           </thead>
           <tbody>
             {loading && (
-              <tr><td colSpan={7} className="py-8 text-center text-[12.5px] text-text-3">불러오는 중…</td></tr>
+              <tr><td colSpan={7} className="py-8 text-center text-body-s text-text-3">불러오는 중…</td></tr>
             )}
             {!loading && shown.length === 0 && (
-              <tr><td colSpan={7} className="py-8 text-center text-[12.5px] text-text-3">이 기간에 등록된 행사가 없어요.</td></tr>
+              <tr><td colSpan={7} className="py-8 text-center text-body-s text-text-3">이 기간에 등록된 행사가 없어요.</td></tr>
             )}
             {!loading && shown.map((event) => {
               const cancelled = event.status === "CANCELLED";
               return (
                 <tr key={event.id} className={`border-b border-border ${cancelled ? "bg-surface-2" : ""}`}>
                   <td data-label="날짜" className="whitespace-nowrap px-2.5 py-2.5">
-                    <span className="font-display text-[13.5px] font-bold">{event.eventDate.slice(5)}</span>
-                    <span className="ml-1 text-[11px] font-semibold text-text-3">{dayLabel(event.eventDate)}</span>
+                    <span className="font-display text-body font-bold">{event.eventDate.slice(5)}</span>
+                    <span className="ml-1 text-caption font-semibold text-text-3">{dayLabel(event.eventDate)}</span>
                   </td>
                   <td data-label="유형" className="px-2.5 py-2.5">
-                    <span className="inline-block rounded-control border border-border-2 px-1.5 py-0.5 text-[10.5px] font-extrabold text-text-2">
+                    <span className={LABEL_NEUTRAL}>
                       {TYPE_LABEL[event.type]}
                     </span>
                   </td>
                   <td data-label="이름" className="px-2.5 py-2.5">
-                    <span className="text-[13px] font-bold tracking-[-0.01em]">{event.name}</span>
-                    <span className="block text-[11px] text-text-3">{event.venue}</span>
+                    <span className="text-body-s font-bold">{event.name}</span>
+                    <span className="block text-caption text-text-3">{event.venue}</span>
                   </td>
-                  <td data-label="시각" className="whitespace-nowrap px-2.5 py-2.5 font-display text-[12.5px] font-semibold text-text-2">
+                  <td data-label="시각" className="whitespace-nowrap px-2.5 py-2.5 font-display text-body-s font-semibold text-text-2">
                     {kstTime(event.startsAt)}–{kstTime(event.endsAt)}
                   </td>
-                  <td data-label="출처" className="px-2.5 py-2.5 text-[11.5px] text-text-3">
+                  <td data-label="출처" className="px-2.5 py-2.5 text-label text-text-3">
                     {recurrenceFilter ? recurrenceFilter.name : "—"}
                   </td>
                   <td data-label="상태" className="whitespace-nowrap px-2.5 py-2.5">
-                    <span className={`text-[11.5px] font-bold ${cancelled ? "text-danger" : "text-text-2"}`}>
+                    <span className={`text-label font-bold ${cancelled ? "text-danger" : "text-text-2"}`}>
                       {cancelled ? "취소" : "예정"}
                     </span>
                   </td>
@@ -482,15 +482,15 @@ export default function AdminEventsPage() {
       <section className={PANEL}>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="font-display text-base font-extrabold text-text-1">반복 규칙</h2>
-            <p className="mt-1 text-xs text-text-3">활성 규칙에서 8주 앞까지 회차를 매일 새벽 채워요.</p>
+            <h2 className="font-display text-body-l font-extrabold text-text-1">반복 규칙</h2>
+            <p className="mt-1 text-label text-text-3">활성 규칙에서 8주 앞까지 회차를 매일 새벽 채워요.</p>
           </div>
           <button type="button" onClick={openCreateRecurrence} className={BTN_GHOST}>규칙 추가</button>
         </div>
 
         <table className="admin-table mt-3 w-full">
           <thead>
-            <tr className="border-b border-border-2 text-left text-[11px] font-bold text-text-3">
+            <tr className="border-b border-border-2 text-left text-caption font-bold text-text-3">
               <th className="whitespace-nowrap px-2.5 py-2">요일</th>
               <th className="px-2.5 py-2">이름 · 장소</th>
               <th className="whitespace-nowrap px-2.5 py-2">시각</th>
@@ -502,21 +502,21 @@ export default function AdminEventsPage() {
           </thead>
           <tbody>
             {!loading && recurrences.length === 0 && (
-              <tr><td colSpan={7} className="py-8 text-center text-[12.5px] text-text-3">등록된 규칙이 없어요.</td></tr>
+              <tr><td colSpan={7} className="py-8 text-center text-body-s text-text-3">등록된 규칙이 없어요.</td></tr>
             )}
             {recurrences.map((rule) => (
               <tr key={rule.id} className={`border-b border-border ${rule.active ? "" : "bg-surface-2"}`}>
-                <td data-label="요일" className="whitespace-nowrap px-2.5 py-2.5 font-display text-[13.5px] font-bold">
+                <td data-label="요일" className="whitespace-nowrap px-2.5 py-2.5 font-display text-body font-bold">
                   {WEEKDAY_LABEL[rule.weekday]}
                 </td>
                 <td data-label="이름" className="px-2.5 py-2.5">
-                  <span className="text-[13px] font-bold tracking-[-0.01em]">{rule.name}</span>
-                  <span className="block text-[11px] text-text-3">{rule.venue}</span>
+                  <span className="text-body-s font-bold">{rule.name}</span>
+                  <span className="block text-caption text-text-3">{rule.venue}</span>
                 </td>
-                <td data-label="시각" className="whitespace-nowrap px-2.5 py-2.5 font-display text-[12.5px] font-semibold text-text-2">
+                <td data-label="시각" className="whitespace-nowrap px-2.5 py-2.5 font-display text-body-s font-semibold text-text-2">
                   {rule.startsAtTime.slice(0, 5)}–{rule.endsAtTime.slice(0, 5)}
                 </td>
-                <td data-label="활성 구간" className="whitespace-nowrap px-2.5 py-2.5 text-[11.5px] text-text-3">
+                <td data-label="활성 구간" className="whitespace-nowrap px-2.5 py-2.5 text-label text-text-3">
                   {rule.activeFrom} ~ {rule.activeUntil ?? "무기한"}
                 </td>
                 <td data-label="앞으로 회차" className="whitespace-nowrap px-2.5 py-2.5">
@@ -525,11 +525,11 @@ export default function AdminEventsPage() {
                       {rule.affectedFutureEvents}건
                     </button>
                   ) : (
-                    <span className="text-[12px] text-text-3">0건</span>
+                    <span className="text-label text-text-3">0건</span>
                   )}
                 </td>
                 <td data-label="상태" className="whitespace-nowrap px-2.5 py-2.5">
-                  <span className={`text-[11.5px] font-bold ${rule.active ? "text-text-2" : "text-danger"}`}>
+                  <span className={`text-label font-bold ${rule.active ? "text-text-2" : "text-danger"}`}>
                     {rule.active ? "활성" : "중단"}
                   </span>
                 </td>
@@ -551,16 +551,16 @@ export default function AdminEventsPage() {
 
       {recurrenceForm && (
         <section className={PANEL}>
-          <h2 className="font-display text-base font-extrabold text-text-1">
+          <h2 className="font-display text-body-l font-extrabold text-text-1">
             {editingRecurrence === null ? "규칙 추가" : `규칙 수정 — ${editingRecurrence.name}`}
           </h2>
 
           {editingRecurrence !== null && editingRecurrence.affectedFutureEvents > 0 && (
-            <div className="mt-3 rounded-control border-l-2 border-warn bg-warn-soft px-3 py-2.5">
-              <p className="text-[12.5px] font-extrabold text-[#8a5a08]">
+            <div className="mt-3 rounded-card bg-surface-2 px-3.5 py-3">
+              <p className="text-body-s font-extrabold text-text-1">
                 고친 값은 앞으로 만들어질 회차부터 적용돼요
               </p>
-              <p className="mt-0.5 text-[12px] leading-relaxed text-[#8a5a08]/90">
+              <p className="mt-0.5 text-label leading-relaxed text-text-2">
                 이미 만들어진 앞으로의 회차{" "}
                 <button type="button" onClick={() => { setRecurrenceFilter(editingRecurrence); setRangeOffset(0); }}
                   className="font-extrabold underline underline-offset-2">
@@ -583,7 +583,7 @@ export default function AdminEventsPage() {
                 {WEEKDAYS.map((d) => <option key={d} value={d}>{WEEKDAY_LABEL[d]}요일</option>)}
               </select>
               {editingRecurrence !== null && (
-                <p className="mt-1.5 text-[11px] font-semibold text-warn">
+                <p className="mt-1.5 text-caption font-semibold text-warn">
                   요일은 바꿀 수 없어요. 편성이 바뀌면 이 규칙을 중단하고 새 규칙을 만들어 주세요.
                 </p>
               )}
@@ -624,7 +624,7 @@ export default function AdminEventsPage() {
               <input required type="time" value={recurrenceForm.endsAtTime}
                 onChange={(e) => setRecurrenceForm({ ...recurrenceForm, endsAtTime: e.target.value })}
                 className={INPUT} />
-              <p className="mt-1.5 text-[11px] text-text-3">
+              <p className="mt-1.5 text-caption text-text-3">
                 교환글 마감과 사진 파기가 이 시각을 기준으로 계산돼요.
               </p>
             </div>
@@ -639,7 +639,7 @@ export default function AdminEventsPage() {
               <input type="date" value={recurrenceForm.activeUntil}
                 onChange={(e) => setRecurrenceForm({ ...recurrenceForm, activeUntil: e.target.value })}
                 className={INPUT} />
-              <p className="mt-1.5 text-[11px] text-text-3">비워 두면 무기한이에요.</p>
+              <p className="mt-1.5 text-caption text-text-3">비워 두면 무기한이에요.</p>
             </div>
             <div className="flex items-end justify-end gap-2 lg:col-span-3">
               <button type="button" onClick={() => { setRecurrenceForm(null); setEditingRecurrence(null); }} className={BTN_GHOST}>

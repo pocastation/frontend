@@ -20,7 +20,7 @@ export default function PreProductionBar() {
   return (
     <div
       role="note"
-      className="flex flex-wrap items-center justify-center gap-x-2 bg-text-1 px-3 py-1 text-center text-[11px] leading-tight text-white"
+      className="flex flex-wrap items-center justify-center gap-x-2 bg-text-1 px-3 py-1 text-center text-caption leading-tight text-white"
     >
       <span className="font-extrabold tabular-nums">{host}</span>
       <span className="text-white/70">상용이 아닙니다 · 실 데이터를 그대로 씁니다</span>

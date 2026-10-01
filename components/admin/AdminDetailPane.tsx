@@ -26,7 +26,7 @@ export default function AdminDetailPane({ open, title, onBack, children }: {
   }, [open]);
   return (
     <aside ref={pane} aria-label={title} className={`admin-detail-pane scroll-mt-16 lg:sticky lg:top-20 lg:self-start ${open ? "" : "hidden lg:block"}`}>
-      {open && <button ref={back} type="button" onClick={onBack} className={`mb-3 flex min-h-11 items-center gap-1 text-sm font-bold text-text-2 lg:hidden ${FOCUS_RING}`}>‹ 목록으로</button>}
+      {open && <button ref={back} type="button" onClick={onBack} className={`mb-3 flex min-h-11 items-center gap-1 text-body font-bold text-text-2 lg:hidden ${FOCUS_RING}`}>‹ 목록으로</button>}
       {children}
     </aside>
   );

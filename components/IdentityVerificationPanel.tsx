@@ -146,26 +146,26 @@ export default function IdentityVerificationPanel({
   }, [submitReceipt]);
 
   if (!status) {
-    return <p className={`text-sm text-text-3 ${className}`}>확인하는 중...</p>;
+    return <p className={`text-body text-text-3 ${className}`}>확인하는 중...</p>;
   }
 
   if (status.verified) {
     return (
       <div className={className}>
-        <p className="text-[15px] font-bold text-text-1">본인인증이 완료되었습니다.</p>
-        <p className="mt-2 text-xs text-text-3">
+        <p className="text-body-l font-bold text-text-1">본인인증이 완료되었습니다.</p>
+        <p className="mt-2 text-label text-text-3">
           기기나 번호가 바뀌었다면 다시 인증할 수 있어요.
         </p>
         <button
           type="button"
           onClick={handleVerify}
           disabled={isSubmitting}
-          className="mt-3 text-xs font-bold text-text-2 underline underline-offset-4 hover:text-text-1"
+          className="mt-3 text-label font-bold text-text-2 underline underline-offset-4 hover:text-text-1"
         >
           다시 인증하기
         </button>
         {message && (
-          <p role="status" aria-live="polite" className="mt-2 text-xs text-text-3">
+          <p role="status" aria-live="polite" className="mt-2 text-label text-text-3">
             {message}
           </p>
         )}
@@ -175,7 +175,7 @@ export default function IdentityVerificationPanel({
 
   return (
     <div className={className}>
-      <p className="text-[13.5px] leading-relaxed text-text-2">
+      <p className="text-body leading-relaxed text-text-2">
         안전한 거래를 위해 휴대폰으로 본인 명의를 확인해요.
       </p>
 
@@ -189,14 +189,14 @@ export default function IdentityVerificationPanel({
       </button>
 
       {message && (
-        <p role="status" aria-live="polite" className="mt-3 text-xs text-text-3">
+        <p role="status" aria-live="polite" className="mt-3 text-label text-text-3">
           {message}
         </p>
       )}
 
       {/* 무엇을 받는지는 화면에 남긴다. CI는 주민번호 대체 식별자라 근거 없이 요구하는
           화면으로 읽히면 안 된다. 자세한 것은 처리방침으로 넘긴다. */}
-      <p className="mt-4 text-[11.5px] leading-relaxed text-text-3">
+      <p className="mt-4 text-label leading-relaxed text-text-3">
         이름·생년월일·성별·휴대폰번호와 본인확인기관이 발급한 식별값을 보관해요.{" "}
         <Link href="/privacy" className="underline underline-offset-2 hover:text-text-2">
           개인정보 처리방침

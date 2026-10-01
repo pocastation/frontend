@@ -33,18 +33,18 @@ export default function ForgotPasswordPage() {
   if (isSent) {
     return (
       <div className="mx-auto max-w-sm px-4 py-16 text-center">
-        <h1 className="mb-4 font-display text-xl font-extrabold text-text-1">메일을 보냈어요</h1>
+        <h1 className="mb-4 font-display text-title font-extrabold text-text-1">메일을 보냈어요</h1>
         {/*
           ★ "가입된 이메일이면"이라고 쓰는 이유 — 서버는 가입 여부와 무관하게 같은 응답을 준다.
           여기서 "메일을 보냈습니다"라고 단정하면 화면이 곧 계정 존재 여부 확인 도구가 되고,
           유출된 이메일 목록에서 우리 회원만 골라내 표적 피싱에 쓸 수 있다. 문구가 방어의 일부다.
         */}
-        <p aria-live="polite" className="text-sm leading-relaxed text-text-2">
+        <p aria-live="polite" className="text-body leading-relaxed text-text-2">
           <span className="font-bold text-text-1">{email}</span> 이 가입된 주소라면
           <br />
           비밀번호 재설정 링크를 보냈어요.
         </p>
-        <p className="mt-3 text-xs leading-relaxed text-text-3">
+        <p className="mt-3 text-label leading-relaxed text-text-3">
           메일이 보이지 않으면 스팸함도 확인해 주세요.
           <br />
           링크는 30분 동안만 유효해요.
@@ -63,10 +63,10 @@ export default function ForgotPasswordPage() {
 
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="mb-2 text-center font-display text-xl font-extrabold text-text-1">
+      <h1 className="mb-2 text-center font-display text-title font-extrabold text-text-1">
         비밀번호 찾기
       </h1>
-      <p className="mb-6 text-center text-xs leading-relaxed text-text-3">
+      <p className="mb-6 text-center text-label leading-relaxed text-text-3">
         가입할 때 쓴 이메일 주소를 입력하면
         <br />
         재설정 링크를 보내드려요.
@@ -87,7 +87,7 @@ export default function ForgotPasswordPage() {
           className={INPUT_CLASS}
         />
         {error && (
-          <p role="alert" aria-live="polite" className="text-xs text-accent">
+          <p role="alert" aria-live="polite" className="text-label text-accent">
             {error}
           </p>
         )}

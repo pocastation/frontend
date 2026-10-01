@@ -93,9 +93,9 @@ function Group({
 }) {
   return (
     <div>
-      <p className="text-xs font-bold text-text-2">{label}</p>
+      <p className="text-label font-bold text-text-2">{label}</p>
       {photos.length === 0 && !videoUrl ? (
-        <p className="mt-1.5 text-[11px] text-text-3">{empty}</p>
+        <p className="mt-1.5 text-caption text-text-3">{empty}</p>
       ) : (
         <div className="mt-1.5 grid grid-cols-4 gap-2 sm:grid-cols-5">
           {photos.map((photo) => (
@@ -122,7 +122,7 @@ function Group({
               href={mediaUrl(videoUrl)}
               target="_blank"
               rel="noreferrer"
-              className={`flex aspect-square items-center justify-center rounded-card border border-border bg-surface-2 text-[11px] font-bold text-text-2 ${FOCUS_RING}`}
+              className={`flex aspect-square items-center justify-center rounded-card border border-border bg-surface-2 text-caption font-bold text-text-2 ${FOCUS_RING}`}
             >
               영상
             </a>

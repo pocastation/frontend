@@ -149,15 +149,20 @@ export default function AuctionImageGallery({
                     <ChevronRight />
                   </button>
                 )}
-                <span className="pointer-events-none absolute bottom-2 right-2 z-10 rounded-control bg-text-1/60 px-2 py-0.5 text-[11px] font-semibold text-white tabular-nums">
+                <span className="pointer-events-none absolute bottom-2 right-2 z-10 rounded-control bg-text-1/60 px-2 py-0.5 text-caption font-semibold text-white tabular-nums">
                   {activeIndex + 1} / {images.length}
                 </span>
               </>
             )}
           </>
         ) : (
-          <div className="flex h-full items-center justify-center text-6xl" aria-hidden="true">
-            🎴
+          // 사진이 없을 때는 상품 카드·모바일 상세와 같은 선 아이콘(#765). 이모지를 쓰지 않는다.
+          <div className="flex h-full items-center justify-center text-text-3" aria-hidden="true">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+              <rect x="3" y="3" width="18" height="18" rx="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <path d="m21 15-5-5L5 21" />
+            </svg>
           </div>
         )}
       </div>

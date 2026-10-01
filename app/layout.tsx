@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata, Viewport } from "next";
-import { Noto_Sans_KR, Plus_Jakarta_Sans } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PreProductionBar from "@/components/PreProductionBar";
@@ -14,14 +14,12 @@ import { NotificationProvider } from "@/lib/notification-context";
 import { ToastProvider } from "@/lib/toast-context";
 import MobileTabBar from "@/components/mobile/MobileTabBar";
 import IdentityGateRedirect from "@/components/IdentityGateRedirect";
+import NavTransition from "@/components/NavTransition";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL, X_HANDLE } from "@/lib/site";
+// 본문 글꼴 Pretendard(OFL, #769). 가변 다이나믹 서브셋 CSS를 번들해 글꼴 조각을 우리 도메인에서
+// 내려준다 — 외부 CDN을 쓰지 않고, 페이지에 쓰인 글자의 조각만 받는다. 라이선스: /licenses/pretendard-OFL.txt
+import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 import "./globals.css";
-
-const notoSansKr = Noto_Sans_KR({
-  variable: "--font-noto-sans-kr",
-  subsets: ["latin"],
-  weight: ["400", "500", "700", "900"],
-});
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta-sans",
@@ -106,7 +104,7 @@ export default function RootLayout({
     <html
       lang="ko"
       data-scroll-behavior="smooth"
-      className={`${notoSansKr.variable} ${plusJakartaSans.variable} h-full antialiased`}
+      className={`${plusJakartaSans.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider>
@@ -118,6 +116,8 @@ export default function RootLayout({
                   <IdentityGateRedirect />
                 </Suspense>
                 {/* 상용에서는 아무것도 렌더하지 않는다. staging·로컬에서만 맨 위에 띠가 붙는다. */}
+                {/* 모바일 화면 전환 표식 — 그림이 없다. 들어가기·뒤로 이동에서만 화면을 민다. */}
+                <NavTransition />
                 <PreProductionBar />
                 <Header />
                 {/* 이메일 미인증 안내(#244) — 스스로 조건을 판단해 해당 없으면 아무것도 렌더하지 않는다. */}

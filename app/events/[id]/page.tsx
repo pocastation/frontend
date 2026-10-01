@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ExchangeFeedRow from "@/components/ExchangeFeedRow";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
+import NavLink from "@/components/NavLink";
 import { apiFetch, ApiError } from "@/lib/api";
 import { kstHm, weekdayKo } from "@/lib/event-dates";
 import { exchangeWindow } from "@/lib/exchange-labels";
@@ -79,15 +80,15 @@ export default async function EventFeedPage({
 
       <div className={`mx-auto max-w-[760px] ${FORM_ACTION_BAR_PAD} sm:px-4 sm:py-8`}>
         <div className="hidden sm:mb-5 sm:block">
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">{event.name}</h1>
-          <p className="mt-1 text-[13px] text-text-3">
+          <h1 className="font-display text-title-l font-extrabold text-text-1">{event.name}</h1>
+          <p className="mt-1 text-body-s text-text-3">
             {dateLabel} · {event.venue} · {kstHm(event.startsAt)}
           </p>
         </div>
 
         {event.status === "CANCELLED" && (
-          <p className="mx-[14px] mt-3 rounded-control border-l-2 border-warn bg-warn-soft px-3 py-2 text-[12.5px] font-semibold text-[#8a5a08] sm:mx-0">
-            휴방·취소된 회차예요. 새 교환글은 올릴 수 없어요.
+          <p className="mx-[14px] mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s text-text-1 sm:mx-0">
+            <b className="font-bold">휴방·취소된 회차예요.</b> 새 교환글은 올릴 수 없어요.
           </p>
         )}
 
@@ -110,11 +111,11 @@ export default async function EventFeedPage({
 
         <div className="px-[14px] sm:px-0">
           {feed === null ? (
-            <p className="py-12 text-center text-[12.5px] text-text-3">
+            <p className="py-12 text-center text-body-s text-text-3">
               교환글을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.
             </p>
           ) : feed.content.length === 0 ? (
-            <p className="py-12 text-center text-[12.5px] text-text-3">
+            <p className="py-12 text-center text-body-s text-text-3">
               {selected ? "이 스타의 교환글이 아직 없어요." : "이 행사의 교환글이 아직 없어요."}
             </p>
           ) : (
@@ -131,14 +132,15 @@ export default async function EventFeedPage({
         {event.status !== "CANCELLED" && (
           <div className={FORM_ACTION_BAR} style={FORM_ACTION_BAR_STYLE}>
             {writeWindow === "open" ? (
-              <Link
+              <NavLink
+                nav="open"
                 href={`/exchanges/new?eventId=${id}`}
-                className={`flex h-12 items-center justify-center rounded-control bg-primary text-[15px] font-extrabold text-white ${PRESS_PRIMARY} ${FOCUS_RING}`}
+                className={`flex h-12 items-center justify-center rounded-control bg-primary text-body-l font-extrabold text-white ${PRESS_PRIMARY} ${FOCUS_RING}`}
               >
                 교환글 등록
-              </Link>
+              </NavLink>
             ) : (
-              <p className="rounded-card bg-surface-2 px-3 py-3.5 text-center text-[13px] font-semibold text-text-2">
+              <p className="rounded-card bg-surface-2 px-3 py-3.5 text-center text-body-s font-semibold text-text-2">
                 {writeWindow === "tooEarly"
                   ? "교환글은 행사 전날 낮 12시부터 올릴 수 있어요."
                   : "교환글을 올릴 수 있는 시간이 지났어요."}
@@ -157,7 +159,7 @@ function FilterChip({ href, on, children }: { href: string; on: boolean; childre
       href={href}
       aria-current={on ? "true" : undefined}
       /* 선택된 칩(보라)에는 눌림 배경을 주지 않는다 — 선택 결과와 눌림이 섞인다(#720). */
-      className={`shrink-0 rounded-control border px-2.5 py-[5px] text-xs font-bold ${FOCUS_RING} ${
+      className={`shrink-0 rounded-control border px-2.5 py-[5px] text-label font-bold ${FOCUS_RING} ${
         on ? "border-primary bg-primary text-white" : `border-border-2 text-text-2 ${PRESS_CHIP}`
       }`}
     >

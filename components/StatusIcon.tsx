@@ -1,16 +1,9 @@
 import type { ReactNode } from "react";
 
-// 상태 카테고리 아이콘 — 알림함(#121)에서 만든 세트를 공용화. 알림함·마이페이지 상태 표시가 공유한다.
-// tone은 소프트 색 원형 배경 + 아이콘 색(승인 시안 A). 크기는 부모 font-size(1em)로 제어한다.
+// 상태 카테고리 아이콘 — 알림함(#121)의 선 아이콘 세트. 색 원 배경(소프트 톤)은 #767에서 걷었다:
+// 알림 30종을 다섯 색으로 나눠 목록을 알록달록하게만 했다. 알림함은 이제 상품 사진을 앞에 두고,
+// 사진이 없을 때만 이 글리프를 색 없이 그린다. tone은 알림 종류의 뜻을 기록으로만 남긴다.
 export type StatusTone = "primary" | "ok" | "accent" | "warn" | "neutral";
-
-export const STATUS_TONE_CLASS: Record<StatusTone, string> = {
-  primary: "bg-primary-soft text-primary",
-  ok: "bg-ok-soft text-ok",
-  accent: "bg-accent-soft text-accent",
-  warn: "bg-warn-soft text-warn",
-  neutral: "bg-surface-3 text-text-3",
-};
 
 // 24x24 stroke 아이콘(굵기 1.8, currentColor 상속).
 const ICON_PATH: Record<string, ReactNode> = {
@@ -36,23 +29,3 @@ export function StatusGlyph({ name }: { name: string }) {
   );
 }
 
-// 소프트 원형 배경 + 글리프. size(원 지름)와 glyph(글리프 크기)를 지정한다.
-export function StatusIconCircle({
-  name,
-  tone,
-  size = "h-10 w-10",
-  glyph = "text-[20px]",
-  className = "",
-}: {
-  name: string;
-  tone: StatusTone;
-  size?: string;
-  glyph?: string;
-  className?: string;
-}) {
-  return (
-    <span className={`flex shrink-0 items-center justify-center rounded-full ${STATUS_TONE_CLASS[tone]} ${size} ${glyph} ${className}`}>
-      <StatusGlyph name={name} />
-    </span>
-  );
-}

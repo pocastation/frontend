@@ -92,12 +92,12 @@ export default function AuctionBrowser({
           placeholder={resolvedPlaceholder}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full border-0 bg-transparent text-[13.5px] text-text-1 outline-none placeholder:text-text-3"
+          className="w-full border-0 bg-transparent text-body text-text-1 outline-none placeholder:text-text-3"
         />
       </label>
 
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
-        <span className="flex items-center gap-2 text-xs text-text-3">
+        <span className="flex items-center gap-2 text-label text-text-3">
           <span>
             총 <strong className="font-bold text-text-1">{totalElements}</strong>개
           </span>
@@ -114,7 +114,7 @@ export default function AuctionBrowser({
                 전부 그렇게 하는데 이 컴포넌트만 보라였다 — 보라는 CTA·필수 표시·포커스처럼
                 **행동을 요구하는 자리**에 남겨 둔다. 정렬 선택은 상태 표시지 행동 요구가 아니다.
               */
-              className={`min-h-8 rounded-control border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+              className={`min-h-8 rounded-control border px-3 py-1.5 text-label font-semibold transition-colors ${FOCUS_RING} ${
                 sort === option.key
                   ? "border-text-1 bg-text-1 text-white"
                   : "border-border-2 bg-white text-text-2"
@@ -158,13 +158,13 @@ export default function AuctionBrowser({
       {hasMore && (
         <div className="mt-8 flex flex-col items-center gap-2">
           {moreError && (
-            <p className="text-xs font-semibold text-accent">더 불러오지 못했어요. 다시 시도해 주세요.</p>
+            <p className="text-label font-semibold text-accent">더 불러오지 못했어요. 다시 시도해 주세요.</p>
           )}
           <button
             type="button"
             onClick={loadMore}
             disabled={loadingMore || loading}
-            className={`flex h-11 items-center gap-2 rounded-control border border-border-2 bg-white px-6 text-[13.5px] font-bold text-text-1 transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+            className={`flex h-11 items-center gap-2 rounded-control border border-border-2 bg-white px-6 text-body font-bold text-text-1 transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : moreError ? "다시 시도" : "더 보기"}
           </button>

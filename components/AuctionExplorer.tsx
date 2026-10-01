@@ -119,18 +119,18 @@ export default function AuctionExplorer({
       {/* (1) 제목 + 전체보기 한 줄  (2) 부제  (3) 정렬칩 가로 스크롤 — 모바일에서 칩이 2줄로
           접히거나 전체보기·부제가 밀리지 않게 한다. 칩 줄은 스와이프 가능(스크롤바는 숨김). */}
       <div className="flex items-center justify-between gap-4">
-        <h2 className="font-display text-xl font-extrabold tracking-tight text-text-1">
+        <h2 className="font-display text-title font-extrabold text-text-1">
           {heading}
         </h2>
         <Link
           href={allHref}
-          className={`shrink-0 text-xs font-bold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
+          className={`shrink-0 text-label font-bold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
         >
           전체 보기 →
         </Link>
       </div>
 
-      {subcopy && <p className="mt-1 text-[13px] text-text-3">{subcopy}</p>}
+      {subcopy && <p className="mt-1 text-body-s text-text-3">{subcopy}</p>}
 
       <div
         className="mt-4 mb-6 flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -143,7 +143,7 @@ export default function AuctionExplorer({
             type="button"
             aria-pressed={sortBy === option.key}
             onClick={() => setSortBy(option.key)}
-            className={`shrink-0 rounded-control border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+            className={`shrink-0 rounded-control border px-3 py-1.5 text-label font-semibold transition-colors ${FOCUS_RING} ${
               sortBy === option.key
                 ? "border-primary bg-primary text-white"
                 : "border-border text-text-2 hover:border-primary hover:text-primary"

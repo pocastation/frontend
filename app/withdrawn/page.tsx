@@ -42,11 +42,11 @@ export default function WithdrawnPage() {
       {/* 레이아웃이 이미 <main>으로 감싼다 — 여기서 또 쓰면 main이 중첩된다(#515). */}
       <div className="mx-auto w-full max-w-[560px] px-[14px] py-9 sm:px-5 sm:py-20">
         <span aria-hidden="true" className="block h-[3px] w-7 bg-primary" />
-        <p className="mt-4 text-[11.5px] font-bold tracking-[0.08em] text-text-3">회원 탈퇴</p>
-        <h1 className="mt-2 font-display text-[24px] font-extrabold leading-[1.25] tracking-[-0.03em] text-text-1 sm:text-[26px]">
+        <p className="mt-4 text-label font-bold tracking-[0.08em] text-text-3">회원 탈퇴</p>
+        <h1 className="mt-2 font-display text-title-l font-extrabold text-text-1 sm:text-title-l">
           탈퇴가 완료됐어요
         </h1>
-        <p className="mt-3 text-[13.5px] leading-relaxed text-text-2">
+        <p className="mt-3 text-body leading-relaxed text-text-2">
           그동안 포카스테이션을 이용해 주셔서 고마워요. 계정 정보는 파기됐고, 되돌릴 수 없어요.
         </p>
 
@@ -54,7 +54,7 @@ export default function WithdrawnPage() {
           {FACTS.map((fact) => (
             <div
               key={fact.term}
-              className="grid grid-cols-[84px_1fr] gap-3 border-b border-border py-3 text-[12.5px] leading-[1.55] sm:grid-cols-[110px_1fr] sm:text-[13px]"
+              className="grid grid-cols-[84px_1fr] gap-3 border-b border-border py-3 text-body-s sm:grid-cols-[110px_1fr] sm:text-body-s"
             >
               <dt className="font-bold text-text-3">{fact.term}</dt>
               <dd className="m-0 text-text-2">{fact.detail}</dd>
@@ -71,7 +71,7 @@ export default function WithdrawnPage() {
           </Link>
           <Link
             href="/privacy"
-            className="text-center text-[12.5px] text-text-3 underline decoration-text-3 underline-offset-[3px] hover:text-text-2"
+            className="text-center text-body-s text-text-3 underline decoration-text-3 underline-offset-[3px] hover:text-text-2"
           >
             개인정보 처리방침에서 보관 기간 보기
           </Link>

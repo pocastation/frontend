@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { FOCUS_RING, PRESS_ICON } from "@/lib/ui";
+import { dismiss, markNav } from "@/lib/nav-transition";
 
 /**
  * 모바일 서브 화면 앱바 — 뒤로 44px + 제목 17px + 우측 액션 슬롯.
@@ -30,15 +31,26 @@ export default function MobilePageHead({
    * `"close"`는 뒤로 대신 **닫기(X)를 오른쪽에** 둔다 — 되돌아갈 데가 없는 종착 화면용(#515).
    * 등록완료가 그렇다: 폼은 이미 제출됐고 뒤로 가면 방금 보낸 위저드로 돌아간다.
    * 이때 `backHref`는 뒤로가 아니라 **닫고 갈 곳**이다(없으면 히스토리 뒤로).
+   *
+   * `"dismiss"`는 같은 닫기(X)지만 위저드용이다. 앱 안에서 들어왔으면 들어온 길로 되돌아가고(히스토리 뒤로),
+   * 주소로 바로 들어왔으면 `backHref`로 갈아 끼운다. 정해진 경로로 push하면 거기서 뒤로를 눌렀을 때 방금
+   * 닫은 위저드가 다시 열린다.
    */
-  variant?: "back" | "close";
+  variant?: "back" | "close" | "dismiss";
 }) {
   const router = useRouter();
-  const leave = () => (backHref ? router.push(backHref) : router.back());
+  // 뒤로(variant="back")로 정해진 경로에 갈 때만 화면을 뒤로 민다. 히스토리 뒤로는 NavTransition이
+  // popstate에서 표시하고, 닫기(X)는 들어온 길을 되짚는 이동이 아니라 밀지 않는다.
+  const leave = () => {
+    if (variant === "dismiss") return backHref ? dismiss(router, backHref) : router.back();
+    if (!backHref) return router.back();
+    if (variant === "back") markNav("back");
+    router.push(backHref);
+  };
 
   return (
     <header className="sticky top-0 z-[300] border-b border-border bg-white sm:hidden">
-      <div className={`flex min-h-12 items-center gap-1 pr-[14px] ${variant === "close" ? "pl-[14px]" : "pl-1"}`}>
+      <div className={`flex min-h-12 items-center gap-1 pr-[14px] ${variant === "back" ? "pl-1" : "pl-[14px]"}`}>
         {variant === "back" && (
           <button
             type="button"
@@ -52,11 +64,11 @@ export default function MobilePageHead({
           </button>
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-[17px] font-extrabold tracking-tight text-text-1">{title}</h1>
-          {sub && <p className="truncate text-[11.5px] text-text-3">{sub}</p>}
+          <h1 className="truncate text-title-s font-extrabold text-text-1">{title}</h1>
+          {sub && <p className="truncate text-label text-text-3">{sub}</p>}
         </div>
         {action && <div className="flex flex-shrink-0 items-center">{action}</div>}
-        {variant === "close" && (
+        {variant !== "back" && (
           <button
             type="button"
             aria-label="닫기"

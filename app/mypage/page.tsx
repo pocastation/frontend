@@ -37,6 +37,7 @@ import {
   plainLevelLabel,
 } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
+import { markNav } from "@/lib/nav-transition";
 import type {
   AuctionListResponse,
   AuctionResponse,
@@ -96,7 +97,7 @@ type SellingListItem = AuctionResponse | MySellingAuctionResponse;
 // 제안 철회 줄의 버튼(#428). 판매 관리의 아웃라인 버튼과 같은 무게로 둔다 — 취소는 예외적인
 // 행동이 아니라 §1.2가 보장한 권리라, 눈에 띄게 만들 이유도 숨길 이유도 없다.
 const OFFER_ACTION_CLASS =
-  `shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`;
+  `shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-caption font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`;
 
 // 탭 키·제목·딥링크 해석은 lib/mypage-tabs.ts에 있다 — 모바일 메뉴 목록이 같은 정의를 읽는다.
 type Tab = MypageTab;
@@ -253,8 +254,8 @@ const STUB_TABS = new Set<Tab>([]);
 function TabHead({ title, sub }: { title: string; sub: ReactNode }) {
   return (
     <div className="hidden sm:block">
-      <h1 className="font-display text-xl font-extrabold text-text-1">{title}</h1>
-      <p className="mt-1 text-sm text-text-3">{sub}</p>
+      <h1 className="font-display text-title font-extrabold text-text-1">{title}</h1>
+      <p className="mt-1 text-body text-text-3">{sub}</p>
     </div>
   );
 }
@@ -282,14 +283,14 @@ function FilterChips<T extends string>({
           type="button"
           aria-pressed={value === option.key}
           onClick={() => onChange(option.key)}
-          className={`-mb-px border-b-2 pb-2.5 text-[13px] transition-colors ${FOCUS_RING} ${
+          className={`-mb-px border-b-2 pb-2.5 text-body-s transition-colors ${FOCUS_RING} ${
             value === option.key
               ? "border-primary font-extrabold text-text-1"
               : "border-transparent font-bold text-text-3 hover:text-text-2"
           }`}
         >
           {option.label}
-          <span className={`ml-1.5 text-xs tabular-nums ${value === option.key ? "text-text-2" : "text-text-3"}`}>
+          <span className={`ml-1.5 text-label tabular-nums ${value === option.key ? "text-text-2" : "text-text-3"}`}>
             {option.count}
           </span>
         </button>
@@ -321,6 +322,8 @@ function MyPageBody() {
   // 지금 보고 있는 화면을 그대로 공유·북마크할 수 있다.
   const selectTab = useCallback(
     (next: Tab) => {
+      // 모바일에서는 메뉴 → 서브 화면으로 한 단계 들어가는 이동이라 화면을 민다(데스크탑은 표시가 무시된다).
+      markNav("forward");
       router.push(`/mypage?tab=${next}`, { scroll: false });
     },
     [router],
@@ -570,7 +573,7 @@ function MyPageBody() {
 
   if (isLoading || !accessToken) {
     return (
-      <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">
+      <div className="mx-auto max-w-sm px-4 py-24 text-center text-body text-text-3">
         마이페이지를 불러오는 중...
       </div>
     );
@@ -668,10 +671,10 @@ function MyPageBody() {
 
       <aside className="hidden sm:block">
         <div className="rounded-card border border-border bg-surface p-5 text-center">
-          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary-soft text-xl font-extrabold text-primary">
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary-soft text-title font-extrabold text-primary">
             {member?.nickname.slice(0, 1).toUpperCase()}
           </span>
-          <p className="mt-2.5 font-display text-sm font-extrabold text-text-1">{member?.nickname}</p>
+          <p className="mt-2.5 font-display text-body font-extrabold text-text-1">{member?.nickname}</p>
           {/* 레벨·배지는 대시보드가 아니라 여기다(#275) — 어느 탭에 있든 보이는 자리라
               "나는 누구인가"에 해당하는 정보의 제자리다. 진행도 안내는 대시보드에 남긴다. */}
           {(member?.trustLevel != null || (member?.badges?.length ?? 0) > 0) && (
@@ -679,7 +682,7 @@ function MyPageBody() {
               {member?.trustLevel != null && (
                 <TrustLevelBadge
                   level={member.trustLevel}
-                  className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-0.5 text-[11px] font-bold text-text-1 decoration-transparent hover:decoration-text-3"
+                  className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-0.5 text-caption font-bold text-text-1 decoration-transparent hover:decoration-text-3"
                 >
                   <span className="text-text-3">Lv.{member.trustLevel}</span>
                   {member.trustLevelLabel ? plainLevelLabel(member.trustLevelLabel) : null}
@@ -691,15 +694,15 @@ function MyPageBody() {
         </div>
 
         <div className="mt-4 rounded-card border border-border bg-surface p-2">
-          <p className="px-2.5 pb-1.5 pt-1 text-[11px] font-extrabold text-text-3">거래 관리</p>
+          <p className="px-2.5 pb-1.5 pt-1 text-caption font-extrabold text-text-3">거래 관리</p>
           <nav aria-label="거래 관리 메뉴" className="flex flex-col">
             {TRADE_NAV.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => selectTab(key)}
-                className={`flex items-center gap-2.5 rounded-control px-2.5 py-2 text-left text-sm font-bold transition-colors ${FOCUS_RING} ${
-                  activeTab === key ? "bg-primary-soft text-primary" : "text-text-2 hover:bg-surface-2"
+                className={`flex items-center gap-2.5 rounded-control px-2.5 py-2 text-left text-body font-bold transition-colors ${FOCUS_RING} ${
+                  activeTab === key ? "bg-surface-2 font-extrabold text-text-1" : "text-text-2 hover:bg-surface-2"
                 }`}
               >
                 <Icon />
@@ -708,15 +711,15 @@ function MyPageBody() {
             ))}
           </nav>
 
-          <p className="mt-2 px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold text-text-3">계정 관리</p>
+          <p className="mt-2 px-2.5 pb-1.5 pt-2 text-caption font-extrabold text-text-3">계정 관리</p>
           <nav aria-label="계정 관리 메뉴" className="flex flex-col">
             {ACCOUNT_NAV.filter((item) => !item.hidden).map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => selectTab(key)}
-                className={`flex items-center gap-2.5 rounded-control px-2.5 py-2 text-left text-sm font-bold transition-colors ${FOCUS_RING} ${
-                  activeTab === key ? "bg-primary-soft text-primary" : "text-text-2 hover:bg-surface-2"
+                className={`flex items-center gap-2.5 rounded-control px-2.5 py-2 text-left text-body font-bold transition-colors ${FOCUS_RING} ${
+                  activeTab === key ? "bg-surface-2 font-extrabold text-text-1" : "text-text-2 hover:bg-surface-2"
                 }`}
               >
                 <Icon />
@@ -732,7 +735,7 @@ function MyPageBody() {
           */}
           <Link
             href="/mypage/exchange-blocks"
-            className={`mt-1 flex items-center gap-2.5 rounded-control px-2.5 py-2 text-sm font-bold text-text-2 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+            className={`mt-1 flex items-center gap-2.5 rounded-control px-2.5 py-2 text-body font-bold text-text-2 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
           >
             <BlockIcon />
             교환 차단 목록
@@ -742,7 +745,7 @@ function MyPageBody() {
         <button
           type="button"
           onClick={handleLogout}
-          className={`mt-4 flex w-full items-center justify-center gap-2 rounded-card border border-border-2 bg-surface py-2.5 text-sm font-bold text-text-2 ${FOCUS_RING}`}
+          className={`mt-4 flex w-full items-center justify-center gap-2 rounded-card border border-border-2 bg-surface py-2.5 text-body font-bold text-text-2 ${FOCUS_RING}`}
         >
           <LogoutIcon />
           로그아웃
@@ -754,18 +757,20 @@ function MyPageBody() {
           모바일에만 준다. 데스크탑은 좌우 여백이 있어 경계가 이미 읽힌다. */}
       <div
         ref={contentRef}
-        className={`scroll-mt-4 px-3.5 pb-8 pt-3.5 sm:px-0 sm:pb-0 sm:pt-0 ${tab === null ? "hidden sm:block" : ""}`}
+        // min-w-0: 그리드 칸은 기본 최소 너비가 내용 너비라, 긴 상품명이 말줄임 대신 칸을 밀어 375px 화면이
+        // 가로로 넘쳤다(판매 중인 상품 탭 실측 419px). 칸을 화면 폭에 묶어 truncate가 걸리게 한다.
+        className={`min-w-0 scroll-mt-4 px-3.5 pb-8 pt-3.5 sm:px-0 sm:pb-0 sm:pt-0 ${tab === null ? "hidden sm:block" : ""}`}
       >
         {error && (
-          <p role="alert" className="mb-4 rounded-card bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
+          <p role="alert" className="mb-4 rounded-card bg-surface-2 px-4 py-3 text-body font-semibold text-danger">
             {error}
           </p>
         )}
 
         {STUB_TABS.has(activeTab) ? (
           <div className="flex flex-col items-center gap-2 rounded-card border border-dashed border-border-2 py-24 text-center">
-            <h1 className="font-display text-lg font-extrabold text-text-1">{TAB_TITLE[activeTab]}</h1>
-            <p className="text-sm text-text-3">
+            <h1 className="font-display text-title-s font-extrabold text-text-1">{TAB_TITLE[activeTab]}</h1>
+            <p className="text-body text-text-3">
               {activeTab === "wishlist" ? "관심 목록 기능은 준비 중이에요." : "이 메뉴는 아직 준비 중이에요."}
             </p>
           </div>
@@ -786,8 +791,8 @@ function MyPageBody() {
                 여기는 "다음 레벨까지 얼마나"만 남긴다. 같은 정보를 두 곳에 두면 시선이 갈린다. */}
             {member?.trustLevel != null && (
               <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-card border border-border bg-surface p-4">
-                <span className="text-xs text-text-3">거래 {member.tradeCount ?? 0}회</span>
-                <span className="min-w-0 flex-1 text-xs text-text-2">
+                <span className="text-label text-text-3">거래 {member.tradeCount ?? 0}회</span>
+                <span className="min-w-0 flex-1 text-label text-text-2">
                   {member.levelCappedByTrust ? (
                     // 거래 요건은 넘었지만 신뢰도가 낮아 상한에 걸린 상태 — 거래를 더 하라고 안내하면 오해를 준다.
                     <>좋은 거래 후기를 쌓으면 레벨이 더 올라가요.</>
@@ -805,19 +810,19 @@ function MyPageBody() {
 
             {reviewable.length > 0 && (
               <div className="mt-6 rounded-card border border-border bg-surface p-4">
-                <p className="text-sm font-bold text-text-1">작성할 수 있는 거래 후기 {reviewable.length}건</p>
-                <p className="mt-0.5 text-xs text-text-3">구매확정한 거래의 후기를 남겨 판매자에게 힘을 실어주세요.</p>
+                <p className="text-body font-bold text-text-1">작성할 수 있는 거래 후기 {reviewable.length}건</p>
+                <p className="mt-0.5 text-label text-text-3">구매확정한 거래의 후기를 남겨 판매자에게 힘을 실어주세요.</p>
                 <ul className="mt-3 flex flex-col divide-y divide-border/70">
                   {reviewable.map((r) => (
                     <li key={r.orderId} className="flex items-center justify-between gap-3 py-2.5">
                       <span className="min-w-0">
-                        <span className="block truncate text-sm font-semibold text-text-1">{r.title}</span>
-                        <span className="block text-xs text-text-3">{r.sellerNickname ?? "판매자"}님과의 거래</span>
+                        <span className="block truncate text-body font-semibold text-text-1">{r.title}</span>
+                        <span className="block text-label text-text-3">{r.sellerNickname ?? "판매자"}님과의 거래</span>
                       </span>
                       <button
                         type="button"
                         onClick={() => setReviewModalOrder(r)}
-                        className={`shrink-0 rounded-control bg-primary px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+                        className={`shrink-0 rounded-control bg-primary px-3.5 py-1.5 text-label font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
                       >
                         후기 쓰기
                       </button>
@@ -923,9 +928,9 @@ function MyPageBody() {
           <>
             <TabHead title="판매 중인 상품" sub={<>등록한 판매글과 검수 상태 {activeSelling.length}건</>} />
             {loading ? (
-              <p className="mt-6 text-sm text-text-3">불러오는 중...</p>
+              <p className="mt-6 text-body text-text-3">불러오는 중...</p>
             ) : activeSelling.length === 0 ? (
-              <p className="mt-6 text-sm text-text-3">
+              <p className="mt-6 text-body text-text-3">
                 아직 등록한 판매글이 없어요.{" "}
                 <Link href="/auctions/new" className={`font-bold text-primary hover:underline ${FOCUS_RING}`}>
                   판매 등록하기 →
@@ -959,7 +964,7 @@ function MyPageBody() {
               패널이 제목을 들고 있으면 같은 말이 두 번 나온다.
             */}
             <div className="mt-8 border-t border-border pt-6">
-              <h2 className="text-sm font-bold text-text-1">본인인증</h2>
+              <h2 className="text-body font-bold text-text-1">본인인증</h2>
               <IdentityVerificationPanel className="mt-3" />
             </div>
           </>
@@ -1003,8 +1008,8 @@ function MyPageBody() {
             <TabHead title="관심 목록" sub={<>찜한 상품 {wishlist.length}건</>} />
             {/* 관심 목록은 하단탭의 루트 화면이라 모바일에서도 제목을 갖는다(서브 화면 앱바가 없다). */}
             <div className="flex items-baseline gap-2 pt-0.5 sm:hidden">
-              <h1 className="font-display text-xl font-extrabold text-text-1">관심 목록</h1>
-              <span className="text-[12.5px] tabular-nums text-text-3">{wishlist.length}개</span>
+              <h1 className="font-display text-title font-extrabold text-text-1">관심 목록</h1>
+              <span className="text-body-s tabular-nums text-text-3">{wishlist.length}개</span>
             </div>
             {/* 지면이 갈리는 자리라 트리를 둘로 둔다 — 모바일은 킷대로 2열 카드, 데스크탑은 줄 목록. */}
             {wishlist.length > 0 ? (
@@ -1021,7 +1026,7 @@ function MyPageBody() {
               </div>
             ) : (
               !loading && (
-                <p className="mt-8 text-center text-[13px] text-text-3 sm:hidden">
+                <p className="mt-8 text-center text-body-s text-text-3 sm:hidden">
                   아직 찜한 상품이 없어요.
                 </p>
               )
@@ -1075,7 +1080,7 @@ export default function MyPage() {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">
+        <div className="mx-auto max-w-sm px-4 py-24 text-center text-body text-text-3">
           마이페이지를 불러오는 중...
         </div>
       }
@@ -1110,8 +1115,8 @@ function Thumb({ url, alt }: { url: string | null; alt: string }) {
 function DashboardStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0 flex-1 basis-[112px] border-l border-border px-4 first:border-l-0 first:pl-0">
-      <p className="text-xs font-bold text-text-3">{label}</p>
-      <p className="mt-1 font-display text-lg font-extrabold tabular-nums text-text-1">{value}</p>
+      <p className="text-label font-bold text-text-3">{label}</p>
+      <p className="mt-1 font-display text-title-s font-extrabold tabular-nums text-text-1">{value}</p>
     </div>
   );
 }
@@ -1128,8 +1133,8 @@ function DashboardPanel({
   return (
     <section className="rounded-card border border-border bg-surface p-4">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-display text-sm font-extrabold text-text-1">{title}</h2>
-        <button type="button" onClick={onSeeAll} className={`text-xs font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
+        <h2 className="font-display text-body font-extrabold text-text-1">{title}</h2>
+        <button type="button" onClick={onSeeAll} className={`text-label font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
           전체 보기 →
         </button>
       </div>
@@ -1190,8 +1195,8 @@ function SellingList({
   // 손댈 것이 없다. 목록 컴포넌트를 셋이 공유하므로 켜는 쪽에서만 켠다.
   showListingActions?: boolean;
 }) {
-  if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
-  if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
+  if (loading) return <p className="text-body text-text-3">불러오는 중...</p>;
+  if (items.length === 0) return <p className="text-body text-text-3">{emptyText}</p>;
 
   // 🔴 카드에서 규칙선 행으로(#419). 항목마다 테두리를 두르면 열 개가 열 개의 상자가 되어
   // 눈이 쉴 곳이 없다 — 목록은 원래 표에 가깝고, 규칙선만 남기면 썸네일·제목·금액이 세로로
@@ -1233,18 +1238,18 @@ function SellingList({
           <>
             <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13.5px] font-bold text-text-1">{item.title}</span>
-              <span className="mt-0.5 block truncate text-[11.5px] text-text-3">
+              <span className="block truncate text-body font-bold text-text-1">{item.title}</span>
+              <span className="mt-0.5 block truncate text-label text-text-3">
                 {item.artistName ? `${item.artistName} · ` : ""}
                 {item.saleType === "INSTANT" ? "즉시판매" : "제안판매"}
               </span>
             </span>
             <span className="shrink-0 text-right">
-              <span className="block font-display text-[13.5px] font-bold tabular-nums text-text-1">
+              <span className="block font-display text-body font-bold tabular-nums text-text-1">
                 {formatKRW(displayPrice)}
               </span>
               <span
-                className={`mt-0.5 block text-[11.5px] ${
+                className={`mt-0.5 block text-label ${
                   needsAttention ? "font-bold text-text-1" : "text-text-3"
                 }`}
               >
@@ -1268,13 +1273,13 @@ function SellingList({
                 // 회색 채움 대신 들여쓰기 + 헤어라인으로 지면을 나눈다. 카드가 사라진 자리에
                 // 전폭 회색 블록이 남으면 행에서 떨어져 나온 것처럼 보인다.
                 <div className="mt-2.5 border-t border-border pl-[56px] pt-2.5">
-                  <p className="text-[11.5px] font-extrabold text-text-1">{moderationReason.label}</p>
-                  <p className="mt-1 whitespace-pre-wrap break-words text-xs leading-5 text-text-2">
+                  <p className="text-label font-extrabold text-text-1">{moderationReason.label}</p>
+                  <p className="mt-1 whitespace-pre-wrap break-words text-label leading-5 text-text-2">
                     {moderationReason.text}
                   </p>
                   {/* 사유는 정해진 템플릿이라 개별 사정까지는 담기지 않는다 — 더 물어볼 게 있으면
                       1:1 문의로 보낸다(관리자와 판매자 사이의 유일한 양방향 창구). */}
-                  <p className="mt-2 text-[11px] leading-5 text-text-3">
+                  <p className="mt-2 text-caption leading-5 text-text-3">
                     안내가 충분하지 않다면{" "}
                     <Link
                       href={`/inquiries/new?subject=${encodeURIComponent(`[${moderationReason.inquiryTag}] ${item.title}`)}`}
@@ -1346,8 +1351,8 @@ function WishlistTabList({
   emptyText: string;
   onRemove: (auctionId: number) => void;
 }) {
-  if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
-  if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
+  if (loading) return <p className="text-body text-text-3">불러오는 중...</p>;
+  if (items.length === 0) return <p className="text-body text-text-3">{emptyText}</p>;
 
   return (
     <ul className="flex flex-col gap-2">
@@ -1367,15 +1372,15 @@ function WishlistTabList({
                 <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
                 <span className="min-w-0 flex-1">
                   {item.artistName && (
-                    <span className="block truncate text-[11px] font-extrabold text-primary">{item.artistName}</span>
+                    <span className="block truncate text-caption font-extrabold text-primary">{item.artistName}</span>
                   )}
-                  <span className="block truncate text-sm font-bold text-text-1">{item.title}</span>
+                  <span className="block truncate text-body font-bold text-text-1">{item.title}</span>
                 </span>
                 <span className="shrink-0 text-right">
-                  <span className="block font-display text-sm font-extrabold text-text-1">
+                  <span className="block font-display text-body font-extrabold text-text-1">
                     {formatKRW(displayPrice)}
                   </span>
-                  <span className="block text-[10.5px] text-text-3">
+                  <span className="block text-caption text-text-3">
                     {timeLabel}
                   </span>
                 </span>
@@ -1479,14 +1484,14 @@ function OrderStatusFooter({
     // **토글처럼** 보였고(조작할 수 있는 것처럼), 카드마다 회색 띠가 붙어 모든 안내가 alert box가
     // 됐다. 상태는 위 행의 오른쪽 텍스트가 이미 말하므로 여기서는 **할 일과 버튼만** 남긴다 —
     // 그 행에서 유일하게 채워진 요소라 장치를 더 붙이지 않아도 눈에 걸린다.
-    <div className="mt-2.5 flex flex-wrap items-center gap-3 pl-[56px] text-xs text-text-2">
+    <div className="mt-2.5 flex flex-wrap items-center gap-3 pl-[56px] text-label text-text-2">
       <span className="min-w-0 flex-1">{body.message}</span>
       {body.action &&
         // 결제창 경로는 별도 페이지라 링크로 나간다. 나머지(카드 등록·변경)는 기존처럼 탭 전환이다.
         (body.action.href ? (
           <Link
             href={body.action.href}
-            className={`shrink-0 rounded-control bg-primary px-4 py-2 text-[12.5px] font-extrabold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+            className={`shrink-0 rounded-control bg-primary px-4 py-2 text-body-s font-extrabold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
           >
             {body.action.label}
           </Link>
@@ -1494,7 +1499,7 @@ function OrderStatusFooter({
           <button
             type="button"
             onClick={onGoPayment}
-            className={`shrink-0 rounded-control px-4 py-2 text-[12.5px] font-extrabold transition-colors ${FOCUS_RING} ${
+            className={`shrink-0 rounded-control px-4 py-2 text-body-s font-extrabold transition-colors ${FOCUS_RING} ${
               body.action.solid
                 ? "bg-primary text-white hover:bg-primary-dark"
                 : "border border-border-2 bg-surface text-text-2 hover:border-text-3 hover:text-text-1"
@@ -1511,7 +1516,7 @@ function OrderStatusFooter({
 // 이름은 그대로 두어 호출부 20여 곳을 건드리지 않는다. 아이콘·톤 인자는 더 쓰지 않지만
 // 시그니처를 유지해 다음 사람이 「왜 인자가 사라졌지」를 되묻지 않게 한다.
 const fulfillmentPill = (_icon: string, _tone: StatusTone, label: string) => (
-  <span className="shrink-0 text-[11.5px] font-bold text-text-1">{label}</span>
+  <span className="shrink-0 text-label font-bold text-text-1">{label}</span>
 );
 
 // 구매자 관점 배송/확정 푸터(#119) — 결제 완료(PAID) 주문에만. 배송지 입력(모달 트리거)·구매확정 포함.
@@ -1577,7 +1582,7 @@ function BuyerFulfillmentFooter({
 
   return (
     // 결제 푸터와 같은 지면 규칙(#419) — 회색 띠 없이 썸네일 폭만큼 들여 쓴 행동 줄.
-    <div className="mt-2.5 pl-[56px] text-xs text-text-2">
+    <div className="mt-2.5 pl-[56px] text-label text-text-2">
       {returnOpen && (
         <ReturnRequestModal
           auctionId={order.auctionId}
@@ -1609,7 +1614,7 @@ function BuyerFulfillmentFooter({
               <button
                 type="button"
                 onClick={() => setReturnOpen(true)}
-                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-caption font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
               >
                 반품 요청
               </button>
@@ -1618,7 +1623,7 @@ function BuyerFulfillmentFooter({
               type="button"
               onClick={confirm}
               disabled={confirming}
-              className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+              className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-caption font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
             >
               구매 확정
             </button>
@@ -1641,7 +1646,7 @@ function BuyerFulfillmentFooter({
             <button
               type="button"
               onClick={onOpenAddressModal}
-              className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+              className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-caption font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
             >
               배송지 입력
             </button>
@@ -1662,7 +1667,7 @@ function BuyerFulfillmentFooter({
                 type="button"
                 onClick={cancel}
                 disabled={cancelling}
-                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-caption font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 주문 취소
               </button>
@@ -1816,7 +1821,7 @@ function BuyerDisputeFooter({
 
   return (
     // 회색 띠 없이 썸네일 폭만큼 들여 쓴 행동 줄(#422) — 목록 전체가 같은 지면 규칙을 쓴다.
-    <div className="mt-2.5 pl-[56px] text-xs text-text-2">
+    <div className="mt-2.5 pl-[56px] text-label text-text-2">
       <div className="flex flex-wrap items-center gap-2.5">
         {body.pill}
         <span className="min-w-0 flex-1">{body.message}</span>
@@ -1825,7 +1830,7 @@ function BuyerDisputeFooter({
             type="button"
             disabled={busy}
             onClick={() => setEvidenceOpen(true)}
-            className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+            className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-caption font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
           >
             자료 제출
           </button>
@@ -1834,7 +1839,7 @@ function BuyerDisputeFooter({
           <button
             type="button"
             onClick={() => setShipOpen(true)}
-            className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+            className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-caption font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
           >
             운송장 등록
           </button>
@@ -1862,16 +1867,16 @@ function BuyerDisputeFooter({
       {/* 자기가 무엇을 냈는지 보여준다(#647). 종결 6개월 뒤에는 파기돼 줄이 사라진다. */}
       <DisputePhotoStrip auctionId={order.auctionId} />
       {/* 운송장은 도착이 확인된 뒤 보조 정보로 내려온다 — 그 줄의 자리를 「도착했다」가 쓴다. */}
-      {body.sub && <p className="mt-1.5 text-[11px] text-text-3">{body.sub}</p>}
+      {body.sub && <p className="mt-1.5 text-caption text-text-3">{body.sub}</p>}
       {order.returnReason && (
-        <p className="mt-1.5 text-[11px] text-text-3">
+        <p className="mt-1.5 text-caption text-text-3">
           사유 {RETURN_REASON_LABEL[order.returnReason]}
           {order.returnDetail ? ` · ${order.returnDetail}` : ""}
         </p>
       )}
       {/* 반송 기한의 결과를 미리 말한다 — 미이행이 기각이라 「그냥 늦어도 되는 기한」이 아니다. */}
       {order.disputeStatus === "RETURN_PENDING" && (
-        <p className="mt-1 text-[11px] text-text-3">
+        <p className="mt-1 text-caption text-text-3">
           기한이 지나면 거래가 그대로 확정돼요 · 반송비는{" "}
           {order.returnReason === "CHANGE_OF_MIND" ? "구매자 부담이에요" : "사유에 따라 안내해 드려요"}
         </p>
@@ -1880,7 +1885,7 @@ function BuyerDisputeFooter({
           문의 진입 줄(#633)과 같은 헬퍼 텍스트로 둔다. 버튼으로 만들면 반송·확정 같은 실제
           액션과 무게가 같아진다. */}
       {WITHDRAWABLE_DISPUTE.includes(order.disputeStatus) && (
-        <p className="mt-1 text-[11px] text-text-3">
+        <p className="mt-1 text-caption text-text-3">
           요청을{" "}
           <button
             type="button"
@@ -1987,7 +1992,7 @@ function SellerFulfillmentFooter({
   // 환불로 끝난 거래는 발송 UI를 띄우지 않는다(취소·미발송 자동취소 포함).
   if (soldOrder.orderStatus === "REFUNDING" || soldOrder.orderStatus === "REFUNDED") {
     return (
-      <div className="mt-2.5 flex flex-wrap items-center gap-3 pl-[56px] text-xs text-text-2">
+      <div className="mt-2.5 flex flex-wrap items-center gap-3 pl-[56px] text-label text-text-2">
         {fulfillmentPill("xCircle", "neutral", "거래 취소")}
         <span className="min-w-0 flex-1">거래가 취소돼 구매자에게 환불됐어요 · 정산 대상이 아니에요.</span>
       </div>
@@ -2003,7 +2008,7 @@ function SellerFulfillmentFooter({
   if (!paid) {
     const waiting = sellerPaymentWaitCopy(soldOrder.orderStatus);
     return (
-      <div className="mt-2.5 flex flex-wrap items-center gap-3 pl-[56px] text-xs text-text-2">
+      <div className="mt-2.5 flex flex-wrap items-center gap-3 pl-[56px] text-label text-text-2">
         {fulfillmentPill("clock", "neutral", waiting.label)}
         <span className="min-w-0 flex-1">{waiting.message}</span>
       </div>
@@ -2012,7 +2017,7 @@ function SellerFulfillmentFooter({
 
   return (
     // 회색 띠 없이 썸네일 폭만큼 들여 쓴 행동 줄(#422) — 목록 전체가 같은 지면 규칙을 쓴다.
-    <div className="mt-2.5 pl-[56px] text-xs text-text-2">
+    <div className="mt-2.5 pl-[56px] text-label text-text-2">
       <div className="flex flex-wrap items-center gap-2.5">
         {fs === "CONFIRMED" ? (
           <>
@@ -2051,7 +2056,7 @@ function SellerFulfillmentFooter({
                 type="button"
                 disabled={preparing}
                 onClick={() => void startPreparing()}
-                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-caption font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 물품 준비
               </button>
@@ -2059,7 +2064,7 @@ function SellerFulfillmentFooter({
             <button
               type="button"
               onClick={() => setShipOpen((v) => !v)}
-              className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+              className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-caption font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
             >
               발송 처리
             </button>
@@ -2071,7 +2076,7 @@ function SellerFulfillmentFooter({
           </>
         )}
       </div>
-      {prepareError && <p className="mt-2 text-[11px] font-bold text-accent">{prepareError}</p>}
+      {prepareError && <p className="mt-2 text-caption font-bold text-accent">{prepareError}</p>}
       {shipOpen && isBeforeShipment(fs) && addr && (
         <OrderShipForm
           auctionId={soldOrder.auctionId}
@@ -2125,8 +2130,8 @@ function SellerDisputeFooter({
     void act(path, note);
   }
 
-  const outlineBtn = `shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`;
-  const solidBtn = `shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-[11px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`;
+  const outlineBtn = `shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-caption font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`;
+  const solidBtn = `shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-caption font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`;
 
   const body = ((): { pill: ReactNode; message: ReactNode; sub?: ReactNode; actions: ReactNode } => {
     switch (soldOrder.disputeStatus) {
@@ -2248,28 +2253,28 @@ function SellerDisputeFooter({
 
   return (
     // 회색 띠 없이 썸네일 폭만큼 들여 쓴 행동 줄(#422) — 목록 전체가 같은 지면 규칙을 쓴다.
-    <div className="mt-2.5 pl-[56px] text-xs text-text-2">
+    <div className="mt-2.5 pl-[56px] text-label text-text-2">
       <div className="flex flex-wrap items-center gap-2.5">
         {body.pill}
         <span className="min-w-0 flex-1">{body.message}</span>
         {body.actions}
       </div>
       {/* 기한이 당겨진 이유 — 사유보다 위에 둔다. 지금 행동을 정하는 정보라서다(#639). */}
-      {body.sub && <p className="mt-1.5 text-[11px] font-semibold text-text-2">{body.sub}</p>}
+      {body.sub && <p className="mt-1.5 text-caption font-semibold text-text-2">{body.sub}</p>}
       {/* 무엇을 근거로 다투는지 판매자도 봐야 한다(#647). 관리자가 전달하기 전에는 서버가
           403으로 답하고 줄이 렌더되지 않는다 — 그전에는 건의 존재조차 알려 주지 않는다. */}
       {SELLER_VISIBLE_DISPUTE.includes(soldOrder.disputeStatus) && (
         <DisputePhotoStrip auctionId={soldOrder.auctionId} />
       )}
       {soldOrder.returnReason && (
-        <p className="mt-1.5 text-[11px] text-text-3">
+        <p className="mt-1.5 text-caption text-text-3">
           사유 {RETURN_REASON_LABEL[soldOrder.returnReason]}
           {soldOrder.returnDetail ? ` · ${soldOrder.returnDetail}` : ""}
         </p>
       )}
       {/* 관리자 판단 근거 — 기각·일부환불로 끝난 이유를 판매자도 알아야 한다(BE #496). */}
       {soldOrder.disputeNote && soldOrder.disputeDecision && (
-        <p className="mt-1 text-[11px] text-text-3">운영팀 판단 · {soldOrder.disputeNote}</p>
+        <p className="mt-1 text-caption text-text-3">운영팀 판단 · {soldOrder.disputeNote}</p>
       )}
       {defenseOpen && (
         <SellerDefenseModal
@@ -2310,8 +2315,8 @@ function MyBiddingList({
   onConfirmed?: (auctionId: number) => void;
   onWithdrawOffer?: (item: MyBiddingResponse) => void;
 }) {
-  if (loading) return <p className="text-sm text-text-3">불러오는 중...</p>;
-  if (items.length === 0) return <p className="text-sm text-text-3">{emptyText}</p>;
+  if (loading) return <p className="text-body text-text-3">불러오는 중...</p>;
+  if (items.length === 0) return <p className="text-body text-text-3">{emptyText}</p>;
 
   return (
     <ul className="border-t border-border">
@@ -2342,11 +2347,11 @@ function MyBiddingList({
               >
                 <Thumb url={item.representativeThumbnailUrl} alt={item.title} />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-[13.5px] font-bold text-text-1">{item.title}</span>
+                  <span className="block truncate text-body font-bold text-text-1">{item.title}</span>
                   {/* 🔴 아티스트명을 보라 굵은 글씨에서 이 메타 줄로 내렸다(#419).
                       「보라는 상태를 말하는 자리에만 — 제목에는 쓰지 않는다」는 규칙을 어기고
                       있었고, 목록에서 가장 먼저 읽혀야 할 것은 판매글 제목이지 아티스트가 아니다. */}
-                  <span className="mt-0.5 block truncate text-[11.5px] text-text-3">
+                  <span className="mt-0.5 block truncate text-label text-text-3">
                     {item.artistName ? `${item.artistName} · ` : ""}
                     최소가 {formatKRW(item.startPrice)}
                   </span>
@@ -2356,12 +2361,12 @@ function MyBiddingList({
                       그 값이 사라졌고, 이 화면에서 사용자가 가장 알고 싶은 건 자기가 낸 금액이다. */}
                   {/* 전부 거둬들이면 금액이 없다 — 그때는 「취소함」이라고 말한다.
                       0원을 그리면 「0원에 제안했다」로 읽힌다. */}
-                  <span className="block font-display text-[13.5px] font-bold tabular-nums text-text-1">
+                  <span className="block font-display text-body font-bold tabular-nums text-text-1">
                     {item.myBidAmount == null ? "취소함" : formatKRW(item.myBidAmount)}
                   </span>
                   {/* 손볼 것이 있는 상태만 잉크색으로 올린다 — 나머지는 회색으로 물러난다. */}
                   <span
-                    className={`mt-0.5 block text-[11.5px] ${
+                    className={`mt-0.5 block text-label ${
                       order || item.status === "MATCHED" ? "font-bold text-text-1" : "text-text-3"
                     }`}
                   >
@@ -2377,7 +2382,7 @@ function MyBiddingList({
                   버튼을 「눌리지만 서버가 거절하는」 상태로 두지 않는다. 그건 잘못된 안내다. */}
               {canWithdraw && (
                 <div className="mt-2.5 flex items-center gap-2 pl-[56px]">
-                  <span className="flex-1 text-[11.5px] leading-relaxed text-text-3">
+                  <span className="flex-1 text-label leading-relaxed text-text-3">
                     {isLive
                       ? "판매자가 선택하기 전까지 바꾸거나 거둬들일 수 있어요."
                       : "아직 유효해요. 결제가 이뤄지지 않으면 다시 선택될 수 있어요."}

@@ -14,10 +14,10 @@ export default function InquiryNotices() {
       className="mt-9 border-t border-border bg-surface-2/60 px-5 py-7 sm:px-7"
       aria-labelledby="inquiry-notices-title"
     >
-      <h2 id="inquiry-notices-title" className="text-base font-extrabold text-text-1">
+      <h2 id="inquiry-notices-title" className="text-body-l font-extrabold text-text-1">
         유의사항
       </h2>
-      <ul className="mt-4 space-y-2.5 text-sm leading-relaxed text-text-3">
+      <ul className="mt-4 space-y-2.5 text-body leading-relaxed text-text-3">
         {NOTICES.map((notice) => (
           <li key={notice} className="flex gap-2">
             <span aria-hidden="true">·</span>

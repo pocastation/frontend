@@ -21,6 +21,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { markNavForward } from "@/lib/nav-transition";
 import { useRouter } from "next/navigation";
 import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
@@ -34,7 +35,7 @@ import { useDeliveryAddressGate } from "@/lib/use-delivery-address-gate";
 import { buyerFee, estimatedTotal } from "@/lib/fees";
 import { formatKRW } from "@/lib/format";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, LABEL_NEUTRAL } from "@/lib/ui";
 import type { AuctionDetailResponse, AuctionPurchaseResponse, MyOrderStatusResponse } from "@/lib/types";
 
 function ConfirmSheet({
@@ -52,10 +53,10 @@ function ConfirmSheet({
     <div className="fixed inset-0 z-[500] sm:hidden" role="dialog" aria-label="즉시구매 확인" aria-modal="true">
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
       <div className="absolute inset-x-0 bottom-0 rounded-t-sheet bg-white px-[14px] pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
-        <p className="text-[15px] font-extrabold text-text-1">이 가격으로 바로 구매할까요?</p>
-        <p className="mt-1 text-[11.5px] text-text-3">확정하면 거래가 성사되고 되돌릴 수 없어요.</p>
+        <p className="text-body-l font-extrabold text-text-1">이 가격으로 바로 구매할까요?</p>
+        <p className="mt-1 text-label text-text-3">확정하면 거래가 성사되고 되돌릴 수 없어요.</p>
 
-        <div className="mt-3.5 border-t border-border pt-3 text-[12.5px]">
+        <div className="mt-3.5 border-t border-border pt-3 text-body-s">
           <div className="flex items-center justify-between">
             <span className="text-text-2">즉시판매가</span>
             <b className="font-bold tabular-nums text-text-1">{formatKRW(price)}</b>
@@ -66,7 +67,7 @@ function ConfirmSheet({
           </div>
           <div className="mt-2.5 flex items-center justify-between border-t border-border pt-2.5">
             <b className="font-bold text-text-1">예상 결제 총액</b>
-            <b className="font-bold tabular-nums text-[15px] text-text-1">{formatKRW(estimatedTotal(price))}</b>
+            <b className="font-bold tabular-nums text-body-l text-text-1">{formatKRW(estimatedTotal(price))}</b>
           </div>
         </div>
 
@@ -74,11 +75,11 @@ function ConfirmSheet({
           type="button"
           onClick={onConfirm}
           disabled={submitting}
-          className={`mt-3.5 flex h-12 w-full items-center justify-center rounded-control bg-primary text-sm font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
+          className={`mt-3.5 flex h-12 w-full items-center justify-center rounded-control bg-primary text-body font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
         >
           {submitting ? "처리 중..." : "즉시구매 확정"}
         </button>
-        <p className="mt-2 text-[11px] text-text-3">확정 후 안내되는 가상계좌로 48시간 안에 입금하면 돼요.</p>
+        <p className="mt-2 text-caption text-text-3">확정 후 안내되는 가상계좌로 48시간 안에 입금하면 돼요.</p>
       </div>
     </div>
   );
@@ -196,32 +197,33 @@ export default function MobileInstantDetail({
 
       <div className="px-4 pt-4">
         <div className="flex items-center gap-2">
-          <span className={`text-[11.5px] font-bold ${isLive || isMatched ? "text-ok" : "text-text-3"}`}>
+          <span className={`text-label font-bold ${isLive || isMatched ? "text-ok" : "text-text-3"}`}>
             {isLive ? "판매 중" : isMatched ? "거래 진행 중" : status === "ENDED_SOLD" ? "거래 완료" : "판매 종료"}
           </span>
           {auction.artistName && (
             <Link
               href={`/artists/${auction.artistId}`}
-              className={`min-w-0 truncate text-[11.5px] font-extrabold text-text-2 ${FOCUS_RING}`}
+              onNavigate={markNavForward}
+              className={`min-w-0 truncate text-label font-extrabold text-text-2 ${FOCUS_RING}`}
             >
               {auction.artistName}
             </Link>
           )}
         </div>
 
-        <h1 className="mt-2 text-[19px] font-extrabold leading-[1.4] tracking-[-0.01em] text-text-1">
+        <h1 className="mt-2 text-title-s font-extrabold text-text-1">
           {auction.title}
         </h1>
 
         <div className="mt-2.5 flex flex-wrap gap-1.5">
-          <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+          <span className={LABEL_NEUTRAL}>
             {GRADE_LABEL[auction.grade] ?? auction.grade}
           </span>
-          <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+          <span className={LABEL_NEUTRAL}>
             {SOURCE_LABEL[auction.source] ?? auction.source}
           </span>
           {auction.unopened && (
-            <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+            <span className={LABEL_NEUTRAL}>
               미개봉
             </span>
           )}
@@ -230,15 +232,15 @@ export default function MobileInstantDetail({
         {/* 가격 카드 — 제안 패널과 같은 골격, 라벨과 안내만 다르다. */}
         <div className="mt-4 rounded-card border border-border p-3.5">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-[11px] font-semibold text-text-3">즉시판매가</p>
-            <p className="text-[11px] text-text-3">
+            <p className="text-caption font-semibold text-text-3">즉시판매가</p>
+            <p className="text-caption text-text-3">
               조회 <b className="font-semibold text-text-2 tabular-nums">{auction.viewCount.toLocaleString("ko-KR")}</b>
               {" · ♡ "}
               <b className="font-semibold text-text-2 tabular-nums">{wishlistCount.toLocaleString("ko-KR")}</b>
             </p>
           </div>
-          <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1">{formatKRW(price)}</p>
-          <p className="mt-3 border-t border-border pt-2.5 text-[10.5px] leading-relaxed text-text-3">
+          <p className="mt-1 font-display text-title-l font-extrabold tabular-nums text-text-1">{formatKRW(price)}</p>
+          <p className="mt-3 border-t border-border pt-2.5 text-caption leading-relaxed text-text-3">
             구매를 확정하면 그 순간 거래가 성사돼요. 예상 결제 총액{" "}
             <b className="font-bold text-text-2 tabular-nums">{formatKRW(estimatedTotal(price))}</b>
             (수수료 포함).
@@ -285,22 +287,23 @@ export default function MobileInstantDetail({
           {isMatched && isMyOrder ? (
             <Link
               href={`/orders/${auction.id}/payment`}
-              className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+            onNavigate={markNavForward}
+              className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-body font-extrabold text-white ${FOCUS_RING}`}
             >
               결제하러 가기
             </Link>
           ) : isMatched ? (
-            <span className="flex h-11 flex-1 items-center justify-center rounded-control bg-surface-3 text-[13.5px] font-extrabold text-text-3">
+            <span className="flex h-11 flex-1 items-center justify-center rounded-control bg-surface-3 text-body font-extrabold text-text-3">
               다른 구매자가 거래 진행 중
             </span>
           ) : isOwnSale ? (
-            <span className="flex h-11 flex-1 items-center justify-center rounded-control bg-surface-3 text-[13.5px] font-extrabold text-text-3">
+            <span className="flex h-11 flex-1 items-center justify-center rounded-control bg-surface-3 text-body font-extrabold text-text-3">
               내 상품은 구매할 수 없어요
             </span>
           ) : !accessToken ? (
             <Link
               href={`/login?redirect=/auctions/${auction.id}`}
-              className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+              className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-body font-extrabold text-white ${FOCUS_RING}`}
             >
               로그인하고 즉시구매
             </Link>
@@ -308,7 +311,7 @@ export default function MobileInstantDetail({
             <button
               type="button"
               onClick={openSheet}
-              className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+              className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-body font-extrabold text-white ${FOCUS_RING}`}
             >
               즉시구매
             </button>

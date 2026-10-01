@@ -177,7 +177,7 @@ export default function ExchangeThreadPage() {
     return (
       <>
         <MobilePageHead title="교환 대화" backHref={`/exchanges/${postId}`} />
-        <p className="px-[14px] py-16 text-center text-[12.5px] text-text-3">{loadError}</p>
+        <p className="px-[14px] py-16 text-center text-body-s text-text-3">{loadError}</p>
       </>
     );
   }
@@ -197,10 +197,10 @@ export default function ExchangeThreadPage() {
         {thread && (
           <div className="sticky top-12 z-[2] flex items-center gap-2.5 border-b border-border bg-surface-2 px-[14px] py-2.5">
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13.5px] font-extrabold tracking-[-0.015em] text-text-1">{thread.place}</p>
-              {thread.slot && <p className="mt-px text-[11.5px] text-text-2">{slotLabel(thread.slot)}</p>}
+              <p className="truncate text-body font-extrabold text-text-1">{thread.place}</p>
+              {thread.slot && <p className="mt-px text-label text-text-2">{slotLabel(thread.slot)}</p>}
             </div>
-            <Link href={`/exchanges/${postId}`} className={`shrink-0 text-[11.5px] font-bold text-primary ${FOCUS_RING}`}>
+            <Link href={`/exchanges/${postId}`} className={`shrink-0 text-label font-bold text-primary ${FOCUS_RING}`}>
               교환글 →
             </Link>
           </div>
@@ -212,14 +212,14 @@ export default function ExchangeThreadPage() {
             return (
               <div key={message.id}>
                 {showDay && (
-                  <p className="mb-3 mt-1 text-center text-[11px] text-text-3">{dayLabel(message.createdAt)}</p>
+                  <p className="mb-3 mt-1 text-center text-caption text-text-3">{dayLabel(message.createdAt)}</p>
                 )}
                 <div className={`mb-2 flex ${message.mine ? "justify-end" : ""}`}>
                   {message.mine && (
-                    <span className="mr-1.5 self-end text-[10.5px] text-text-3">{hhmm(message.createdAt)}</span>
+                    <span className="mr-1.5 self-end text-caption text-text-3">{hhmm(message.createdAt)}</span>
                   )}
                   <p
-                    className={`max-w-[250px] whitespace-pre-wrap break-words px-3 py-2.5 text-sm leading-normal ${
+                    className={`max-w-[250px] whitespace-pre-wrap break-words px-3 py-2.5 text-body leading-normal ${
                       // 말풍선 꼬리 모서리만 3px로 접는다. 카드 12px + 꼬리 조합이라 radius 토큰 예외다.
                       message.mine
                         ? // eslint-disable-next-line no-restricted-syntax
@@ -231,7 +231,7 @@ export default function ExchangeThreadPage() {
                     {message.body}
                   </p>
                   {!message.mine && (
-                    <span className="ml-1.5 self-end text-[10.5px] text-text-3">{hhmm(message.createdAt)}</span>
+                    <span className="ml-1.5 self-end text-caption text-text-3">{hhmm(message.createdAt)}</span>
                   )}
                 </div>
               </div>
@@ -241,7 +241,7 @@ export default function ExchangeThreadPage() {
         </div>
 
         {error && (
-          <p role="alert" className="mx-[14px] mb-2 rounded-control border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger">
+          <p role="alert" className="mx-[14px] mb-2 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger">
             {error}
           </p>
         )}
@@ -250,16 +250,16 @@ export default function ExchangeThreadPage() {
         {completion && (completion.confirmable || completion.confirmed || !thread?.writable) && (
           <div className="border-t border-border px-[14px] py-2.5">
             {completion.confirmed && completion.disputed ? (
-              <p className="text-[13px] leading-relaxed text-text-2">
+              <p className="text-body-s leading-relaxed text-text-2">
                 교환이 이뤄지지 않은 것으로 정리됐어요. 기록은 남지 않아요.
               </p>
             ) : completion.confirmed && completion.confirmedByMe ? (
-              <p className="text-[13px] leading-relaxed text-text-2">
+              <p className="text-body-s leading-relaxed text-text-2">
                 교환 완료로 확인했어요. 상대가 이의 없이 24시간이 지나면 기록에 남아요.
               </p>
             ) : completion.confirmed ? (
               <>
-                <p className="text-[13px] leading-relaxed text-text-2">
+                <p className="text-body-s leading-relaxed text-text-2">
                   {thread?.counterpartNickname ?? "상대"}님이 <b className="font-bold text-text-1">교환 완료를 확인</b>했어요.
                   사실과 다르면 알려주세요.
                 </p>
@@ -267,7 +267,7 @@ export default function ExchangeThreadPage() {
                   type="button"
                   disabled={acting}
                   onClick={() => act(`/api/exchanges/${postId}/completion/dispute`, "이의를 보내지 못했어요.")}
-                  className={`mt-2 h-10 w-full rounded-control border border-border-2 bg-white text-[13.5px] font-extrabold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+                  className={`mt-2 h-10 w-full rounded-control border border-border-2 bg-white text-body font-extrabold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
                 >
                   교환이 이뤄지지 않았어요
                 </button>
@@ -278,16 +278,16 @@ export default function ExchangeThreadPage() {
                   type="button"
                   disabled={acting}
                   onClick={() => act(`/api/exchanges/${postId}/completion`, "완료 확인에 실패했어요.")}
-                  className={`h-11 w-full rounded-control border border-text-1 bg-white text-[14.5px] font-extrabold text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
+                  className={`h-11 w-full rounded-control border border-text-1 bg-white text-body-l font-extrabold text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
                 >
                   교환 완료 확인
                 </button>
-                <p className="mt-1.5 text-[11px] leading-relaxed text-text-3">
+                <p className="mt-1.5 text-caption leading-relaxed text-text-3">
                   한 분만 눌러도 완료돼요. 상대는 24시간 안에 아니라고 알릴 수 있어요.
                 </p>
               </>
             ) : (
-              <p className="text-[13px] leading-relaxed text-text-3">
+              <p className="text-body-s leading-relaxed text-text-3">
                 행사가 끝나고 3일이 지나 대화가 잠겼어요. 지난 대화는 계속 볼 수 있어요.
               </p>
             )}
@@ -309,7 +309,7 @@ export default function ExchangeThreadPage() {
               maxLength={500}
               aria-label="메시지"
               placeholder="메시지 입력"
-              className={`h-11 min-w-0 flex-1 rounded-control border border-border-2 px-4 text-[15px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+              className={`h-11 min-w-0 flex-1 rounded-control border border-border-2 px-4 text-body-l outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
             />
             <button
               type="button"

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import { markNavForward } from "@/lib/nav-transition";
 import TrustLevelBadge from "@/components/TrustLevelBadge";
 import type { ReactNode } from "react";
-import { FOCUS_RING, PRESS_ROW, PRESS_FADE } from "@/lib/ui";
+import { FOCUS_RING, PRESS_ROW, PRESS_FADE, LABEL_STRONG } from "@/lib/ui";
 import type { MypageTab } from "@/lib/mypage-tabs";
 
 /**
@@ -48,13 +49,13 @@ function RowShell({
 }) {
   return (
     <span className="flex min-h-[49px] w-full items-center justify-between gap-[9px] text-left">
-      <span className="text-[15px] font-medium tracking-[-0.35px] text-text-1">{label}</span>
+      <span className="text-body-l font-medium text-text-1">{label}</span>
       <span className="inline-flex shrink-0 items-center gap-[9px]">
         {badge ? (
-          <span aria-label={`확인이 필요한 항목 ${badge}건`} className="rounded-control bg-primary-soft px-[7px] py-px text-[11px] font-semibold tabular-nums text-primary">새 소식 {badge}</span>
+          <span aria-label={`확인이 필요한 항목 ${badge}건`} className={`${LABEL_STRONG} tabular-nums`}>새 소식 {badge}</span>
         ) : null}
-        {value != null && <span className="text-sm font-semibold tabular-nums text-text-1">{value}<span className="ml-0.5 text-xs font-normal text-[#686873]">{unit}</span></span>}
-        <span className="inline-flex text-[#686873]">
+        {value != null && <span className="text-body font-semibold tabular-nums text-text-1">{value}<span className="ml-0.5 text-label font-normal text-text-2">{unit}</span></span>}
+        <span className="inline-flex text-text-3">
           <Chevron />
         </span>
       </span>
@@ -84,14 +85,14 @@ function TabRow({
 
 function LinkRow({ label, href }: { label: string; href: string }) {
   return (
-    <Link href={href} className={`block w-full rounded-control ${PRESS_ROW} ${FOCUS_RING}`}>
+    <Link href={href} onNavigate={markNavForward} className={`block w-full rounded-control ${PRESS_ROW} ${FOCUS_RING}`}>
       <RowShell label={label} />
     </Link>
   );
 }
 
 function GroupHead({ children }: { children: ReactNode }) {
-  return <h2 className="pb-[9px] pt-6 text-[13px] font-semibold text-[#686873]">{children}</h2>;
+  return <h2 className="pb-[9px] pt-6 text-body-s font-semibold text-text-2">{children}</h2>;
 }
 
 function Group({ children }: { children: ReactNode }) {
@@ -160,16 +161,16 @@ export default function MobileMypageMenu({
         }}
         className={`flex w-full cursor-pointer items-center gap-[13px] text-left ${PRESS_FADE} ${FOCUS_RING}`}
       >
-        <span className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full bg-primary-soft text-xl font-semibold text-primary">
+        <span className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full bg-primary-soft text-title font-semibold text-primary">
           {nickname.slice(0, 1).toUpperCase()}
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-lg font-semibold tracking-[-0.4px] text-text-1">{nickname}</span>
-          <span className="mt-[3px] flex flex-wrap items-center gap-1.5 text-xs text-[#686873]">
+          <span className="block truncate text-title-s font-semibold text-text-1">{nickname}</span>
+          <span className="mt-[3px] flex flex-wrap items-center gap-1.5 text-label text-text-2">
             {trustLevel != null && (
               <TrustLevelBadge
                 level={trustLevel}
-                className="shrink-0 whitespace-nowrap rounded-control border border-border-2 px-1.5 py-px text-[10.5px] font-bold text-text-2 no-underline"
+                className="shrink-0 whitespace-nowrap rounded-control border border-border-2 px-1.5 py-px text-caption font-bold text-text-2 no-underline"
               >
                 {trustLevelLabel ?? `신뢰 ${trustLevel}`}
               </TrustLevelBadge>
@@ -178,7 +179,7 @@ export default function MobileMypageMenu({
             <span className="tabular-nums">거래 {tradeCount ?? 0}회</span>
           </span>
         </span>
-        <span className="inline-flex text-[#686873]">
+        <span className="inline-flex text-text-3">
           <Chevron size={16} />
         </span>
       </div>
@@ -191,8 +192,8 @@ export default function MobileMypageMenu({
             onClick={() => onSelectTab(tab)}
             className={`relative flex min-w-0 flex-col items-center justify-center gap-[3px] rounded-control ${i ? "before:absolute before:bottom-[5px] before:left-0 before:top-2 before:w-px before:bg-border" : ""} ${PRESS_ROW} ${FOCUS_RING}`}
           >
-            <span className="text-[25px] font-semibold leading-[1.2] tracking-[-0.6px] tabular-nums text-text-1">{value}</span>
-            <span className="text-xs text-[#686873]">{label}</span>
+            <span className="text-title-l font-semibold tabular-nums text-text-1">{value}</span>
+            <span className="text-label text-text-2">{label}</span>
           </button>
         ))}
       </nav>
@@ -203,13 +204,13 @@ export default function MobileMypageMenu({
           <button
             type="button"
             onClick={() => onOpenAddress(pendingAddress.auctionId, pendingAddress.title)}
-            className={`flex w-full items-center gap-2.5 rounded-control border border-danger bg-danger-soft px-3 py-[11px] text-left ${FOCUS_RING}`}
+            className={`flex w-full items-center gap-2.5 rounded-card bg-surface-2 px-3.5 py-3 text-left ${FOCUS_RING}`}
           >
             <span className="min-w-0 flex-1">
-              <span className="block text-[13px] font-extrabold text-danger">배송지를 입력해 주세요</span>
-              <span className="mt-0.5 block truncate text-[11.5px] text-text-2">{pendingAddress.title} · 결제 완료</span>
+              <span className="block text-body-s font-extrabold text-danger">배송지를 입력해 주세요</span>
+              <span className="mt-0.5 block truncate text-label text-text-2">{pendingAddress.title} · 결제 완료</span>
             </span>
-            <span className="flex-shrink-0 rounded-control bg-danger px-2.5 py-1.5 text-xs font-extrabold text-white">입력</span>
+            <span className="flex-shrink-0 rounded-control bg-primary px-2.5 py-1.5 text-label font-extrabold text-white">입력</span>
           </button>
         </div>
       )}
@@ -236,13 +237,13 @@ export default function MobileMypageMenu({
         {/* 교환에서만 적용되는 차단이라 「계정」에 둔다 — 거래 그룹에 넣으면 판매까지 막는 것으로 읽힌다. */}
         <LinkRow label="교환 차단 목록" href="/mypage/exchange-blocks" />
         {isAdmin && (
-          <Link href="/admin" className={`mt-2 flex min-h-[49px] items-center gap-[9px] rounded-control border-t border-border pt-[9px] text-[15px] font-medium text-primary ${PRESS_ROW} ${FOCUS_RING}`}>
+          <Link href="/admin" className={`mt-2 flex min-h-[49px] items-center gap-[9px] rounded-control border-t border-border pt-[9px] text-body-l font-medium text-primary ${PRESS_ROW} ${FOCUS_RING}`}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M12 3 20 6v7c0 4-4 7-8 9-4-2-8-5-8-9V6z" />
               <path d="m9 12 2 2 4-4" />
             </svg>
             <span className="flex-1">관리자</span>
-            <span className="inline-flex text-[#686873]"><Chevron /></span>
+            <span className="inline-flex text-text-3"><Chevron /></span>
           </Link>
         )}
       </Group>
@@ -251,7 +252,7 @@ export default function MobileMypageMenu({
         <button
           type="button"
           onClick={onLogout}
-          className={`min-h-11 text-xs text-[#686873] ${PRESS_FADE} ${FOCUS_RING}`}
+          className={`min-h-11 text-label text-text-2 ${PRESS_FADE} ${FOCUS_RING}`}
         >
           로그아웃
         </button>

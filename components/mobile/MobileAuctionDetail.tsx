@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { markNavForward } from "@/lib/nav-transition";
 import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
 import MobileDetailGallery from "@/components/mobile/MobileDetailGallery";
@@ -14,7 +15,7 @@ import { useAuctionBidding } from "@/lib/auction-bidding-context";
 import { OFFER_UNIT, buyerFee, estimatedTotal } from "@/lib/fees";
 import { formatKRW } from "@/lib/format";
 import { GRADE_LABEL, OFFER_EMPTY_HINT, SOURCE_LABEL } from "@/lib/labels";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, LABEL_NEUTRAL } from "@/lib/ui";
 import type { AuctionDetailResponse } from "@/lib/types";
 
 /**
@@ -80,8 +81,8 @@ function BidSheet({ onClose }: { onClose: () => void }) {
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
       <div className="absolute inset-x-0 bottom-0 rounded-t-sheet bg-white px-[14px] pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
         <div className="flex items-baseline justify-between border-b border-border pb-3">
-          <p className="text-[15px] font-extrabold text-text-1">{isEditMode ? "제안 금액 바꾸기" : "가격 제안하기"}</p>
-          <p className="text-[11.5px] text-text-3">
+          <p className="text-body-l font-extrabold text-text-1">{isEditMode ? "제안 금액 바꾸기" : "가격 제안하기"}</p>
+          <p className="text-label text-text-3">
             {isEditMode ? (
               <>지금 제안 <b className="font-display font-bold tabular-nums text-text-2">{formatKRW(myOfferAmount)}</b></>
             ) : (
@@ -91,8 +92,8 @@ function BidSheet({ onClose }: { onClose: () => void }) {
         </div>
 
         <div className="mb-2.5 mt-3 flex items-baseline justify-between gap-3">
-          <label htmlFor="mobile-proposal-amount" className="text-[13px] font-extrabold text-text-1">가격 제안</label>
-          <span className={`text-[11px] ${isBelowMinimum || isNotUnit ? "font-semibold text-danger" : "text-text-3"}`}>
+          <label htmlFor="mobile-proposal-amount" className="text-body-s font-extrabold text-text-1">가격 제안</label>
+          <span className={`text-caption ${isBelowMinimum || isNotUnit ? "font-semibold text-danger" : "text-text-3"}`}>
             {isBelowMinimum
               ? `${formatKRW(floor)} 이상 입력해주세요.`
               : isNotUnit
@@ -104,7 +105,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
         <div className={`flex h-[52px] items-center overflow-hidden rounded-control border bg-white ${
           isBelowMinimum || isNotUnit ? "border-danger" : "border-border focus-within:border-primary"
         }`}>
-          <span className="flex h-full w-[52px] items-center justify-center border-r border-border font-display text-lg font-bold">₩</span>
+          <span className="flex h-full w-[52px] items-center justify-center border-r border-border font-display text-title-s font-bold">₩</span>
           <input
             id="mobile-proposal-amount"
             type="text"
@@ -116,11 +117,11 @@ function BidSheet({ onClose }: { onClose: () => void }) {
             onChange={(event) => changeProposal(event.target.value)}
             onBlur={finishEditing}
             placeholder="금액을 입력해주세요"
-            className={`h-full min-w-0 flex-1 bg-transparent px-4 font-display text-lg font-bold tabular-nums outline-none placeholder:font-sans placeholder:text-sm placeholder:font-medium placeholder:text-text-3 ${FOCUS_RING}`}
+            className={`h-full min-w-0 flex-1 bg-transparent px-4 font-display text-title-s font-bold tabular-nums outline-none placeholder:font-sans placeholder:text-body placeholder:font-medium placeholder:text-text-3 ${FOCUS_RING}`}
           />
         </div>
 
-        <div className="mt-3.5 rounded-card bg-surface-2 p-3 text-[12.5px]">
+        <div className="mt-3.5 rounded-card bg-surface-2 p-3 text-body-s">
           <div className="flex items-center justify-between py-0.5 text-text-3">
             <span>가격 제안</span>
             <span className="font-medium tabular-nums text-text-2">{formatKRW(amount)}</span>
@@ -131,9 +132,9 @@ function BidSheet({ onClose }: { onClose: () => void }) {
           </div>
           <div className="mt-1.5 flex items-baseline justify-between border-t border-border pt-2">
             <span className="font-bold text-text-1">예상 결제 총액</span>
-            <span className="font-display text-base font-bold tabular-nums text-text-1">{formatKRW(total)}</span>
+            <span className="font-display text-body-l font-bold tabular-nums text-text-1">{formatKRW(total)}</span>
           </div>
-          <p className="mt-1.5 text-[11px] text-text-3">거래 성사 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
+          <p className="mt-1.5 text-caption text-text-3">거래 성사 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
         </div>
 
         {/* 🔴 제안 뒤에도 잠그지 않는다(#428) — 다시 제안하는 것이 곧 수정이다(§2.1).
@@ -152,7 +153,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
             });
           }}
           disabled={submitting || !hasValidAmount}
-          className={`mt-3 flex h-12 w-full items-center justify-center rounded-control bg-primary text-sm font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
+          className={`mt-3 flex h-12 w-full items-center justify-center rounded-control bg-primary text-body font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
         >
           {/* 제출 버튼이 입력 금액을 그대로 말한다(#480) — 「무엇이 일어나는지」가 버튼에 있다. */}
           {submitting
@@ -166,13 +167,13 @@ function BidSheet({ onClose }: { onClose: () => void }) {
                   : `${formatKRW(typedAmount)}으로 제안하기`}
         </button>
         {needsAddress && (
-          <p className="mt-2 text-[11.5px] leading-[1.6] text-text-3">
+          <p className="mt-2 text-label text-text-3">
             거래가 성사되면 바로 보내드릴 수 있게 받을 주소를 먼저 등록해요.{" "}
             <b className="font-bold text-text-2">한 번만 하면 다음부터는 물어보지 않아요.</b>
           </p>
         )}
         {isEditMode && (
-          <p className="mt-3 border-t border-border pt-2.5 text-[11.5px] leading-[1.6] text-text-3">
+          <p className="mt-3 border-t border-border pt-2.5 text-label text-text-3">
             새 금액으로 보내면 이전 제안을 대신해요. 판매자에게는 바뀐 금액만 보여요.
           </p>
         )}
@@ -233,33 +234,34 @@ export default function MobileAuctionDetail({
 
       <div className="px-4 pt-4">
         <div className="flex items-center gap-2">
-          <span className={`text-[11.5px] font-bold ${isLive || status === "MATCHED" ? "text-ok" : "text-text-3"}`}>
+          <span className={`text-label font-bold ${isLive || status === "MATCHED" ? "text-ok" : "text-text-3"}`}>
             {isLive ? "판매 중" : status === "MATCHED" ? "거래 성사 대기 중" : status === "ENDED_SOLD" ? "거래 완료" : "판매 종료"}
           </span>
           {/* 스타 이름을 누르면 그 스타의 페이지로 간다 — 같은 스타 매물을 이어 보는 가장 짧은 길이다. */}
           {auction.artistName && (
             <Link
               href={`/artists/${auction.artistId}`}
-              className={`min-w-0 truncate text-[11.5px] font-extrabold text-text-2 ${FOCUS_RING}`}
+              onNavigate={markNavForward}
+              className={`min-w-0 truncate text-label font-extrabold text-text-2 ${FOCUS_RING}`}
             >
               {auction.artistName}
             </Link>
           )}
         </div>
 
-        <h1 className="mt-2 text-[19px] font-extrabold leading-[1.4] tracking-[-0.01em] text-text-1">
+        <h1 className="mt-2 text-title-s font-extrabold text-text-1">
           {auction.title}
         </h1>
 
         <div className="mt-2.5 flex flex-wrap gap-1.5">
-          <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+          <span className={LABEL_NEUTRAL}>
             {GRADE_LABEL[auction.grade] ?? auction.grade}
           </span>
-          <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+          <span className={LABEL_NEUTRAL}>
             {SOURCE_LABEL[auction.source] ?? auction.source}
           </span>
           {auction.unopened && (
-            <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+            <span className={LABEL_NEUTRAL}>
               미개봉
             </span>
           )}
@@ -281,17 +283,17 @@ export default function MobileAuctionDetail({
         ) : (
           <div className="mt-4 rounded-card border border-border p-3.5">
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[11px] font-semibold text-text-3">판매자 최소 제안 금액</p>
+              <p className="text-caption font-semibold text-text-3">판매자 최소 제안 금액</p>
               <span aria-live="polite">
                 <OfferCounts offerCount={offerCount} wishlistCount={wishlistCount} />
               </span>
             </div>
-            <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1">
+            <p className="mt-1 font-display text-title-l font-extrabold tabular-nums text-text-1">
               {formatKRW(auction.startPrice)}
             </p>
             {/* 내 제안 행(#480) — 제안한 사람에게만. 보라는 상태를 말하는 자리에 쓴다(디자인 절). */}
             {myOffer && (
-              <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-[12.5px]">
+              <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-body-s">
                 <span className="font-extrabold text-primary">
                   {myOffer.status === "ACCEPTED" ? "내 제안 · 선택됨" : "내 제안"}
                 </span>
@@ -302,14 +304,14 @@ export default function MobileAuctionDetail({
             )}
             {/* 0건일 때만 — 아이콘 줄에서 뺀 자리를 여기서 채운다(§2.9 D1). */}
             {offerCount === 0 && (
-              <p className="mt-3 border-t border-border pt-2.5 text-[11.5px] font-bold text-text-2">
+              <p className="mt-3 border-t border-border pt-2.5 text-label font-bold text-text-2">
                 {OFFER_EMPTY_HINT}
               </p>
             )}
             {/* 구매자가 처음 보는 메커니즘이라 「왜 최고가가 안 보이지」에 여기서 답한다.
                 마감을 표시하지 않기로 하면서 더 중요해졌다. */}
             <p
-              className={`text-[10.5px] leading-relaxed text-text-3 ${
+              className={`text-caption leading-relaxed text-text-3 ${
                 offerCount === 0 ? "mt-1.5" : "mt-3 border-t border-border pt-2.5"
               }`}
             >
@@ -341,7 +343,7 @@ export default function MobileAuctionDetail({
         {isOwnAuction && (isLive || status === "MATCHED") ? (
           <a
             href="#seller-offer-list-mobile"
-            className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+            className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-body font-extrabold text-white ${FOCUS_RING}`}
           >
             제안 목록 보기
           </a>
@@ -357,7 +359,8 @@ export default function MobileAuctionDetail({
           */
           <Link
             href={`/orders/${auctionId}/payment`}
-            className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+            onNavigate={markNavForward}
+            className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-body font-extrabold text-white ${FOCUS_RING}`}
           >
             결제하기
           </Link>
@@ -365,7 +368,7 @@ export default function MobileAuctionDetail({
           <button
             type="button"
             disabled
-            className="flex h-11 flex-1 items-center justify-center rounded-control bg-surface-2 text-[13.5px] font-extrabold text-text-3"
+            className="flex h-11 flex-1 items-center justify-center rounded-control bg-surface-2 text-body font-extrabold text-text-3"
           >
             {status === "MATCHED"
               ? "거래 판매 중인 상품이에요"
@@ -376,7 +379,7 @@ export default function MobileAuctionDetail({
         ) : !accessToken ? (
           <Link
             href={`/login?redirect=/auctions/${auctionId}`}
-            className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+            className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-body font-extrabold text-white ${FOCUS_RING}`}
           >
             로그인하고 제안하기
           </Link>
@@ -387,14 +390,14 @@ export default function MobileAuctionDetail({
             <button
               type="button"
               onClick={() => setWithdrawOpen(true)}
-              className={`flex h-11 w-[96px] flex-shrink-0 items-center justify-center rounded-control border border-border-2 bg-white text-[13px] font-bold text-text-2 ${FOCUS_RING}`}
+              className={`flex h-11 w-[96px] flex-shrink-0 items-center justify-center rounded-control border border-border-2 bg-white text-body-s font-bold text-text-2 ${FOCUS_RING}`}
             >
               취소하기
             </button>
             <button
               type="button"
               onClick={() => setSheetOpen(true)}
-              className={`flex h-11 flex-1 items-center justify-center rounded-control border-[1.5px] border-text-1 bg-white text-[13.5px] font-extrabold text-text-1 ${FOCUS_RING}`}
+              className={`flex h-11 flex-1 items-center justify-center rounded-control border-[1.5px] border-text-1 bg-white text-body font-extrabold text-text-1 ${FOCUS_RING}`}
             >
               금액 바꾸기
             </button>
@@ -403,7 +406,7 @@ export default function MobileAuctionDetail({
           <button
             type="button"
             onClick={() => setSheetOpen(true)}
-            className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+            className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-body font-extrabold text-white ${FOCUS_RING}`}
           >
             제안하기
           </button>

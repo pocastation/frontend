@@ -46,7 +46,7 @@ function IdentityOnboarding() {
   );
 
   if (skipping) {
-    return <p className="py-16 text-center text-sm text-text-3">확인하는 중...</p>;
+    return <p className="py-16 text-center text-body text-text-3">확인하는 중...</p>;
   }
 
   return (
@@ -60,11 +60,11 @@ function IdentityOnboarding() {
 export default function IdentityOnboardingPage() {
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="mb-6 text-center font-display text-xl font-extrabold text-text-1">
+      <h1 className="mb-6 text-center font-display text-title font-extrabold text-text-1">
         본인인증
       </h1>
       {/* useSearchParams는 Suspense 경계가 필요하다(App Router). */}
-      <Suspense fallback={<p className="py-16 text-center text-sm text-text-3">확인하는 중...</p>}>
+      <Suspense fallback={<p className="py-16 text-center text-body text-text-3">확인하는 중...</p>}>
         <IdentityOnboarding />
       </Suspense>
     </div>

@@ -117,9 +117,9 @@ function ToastViewport({ toasts, onDismiss }: { toasts: ToastItem[]; onDismiss: 
           <span className={`mt-px shrink-0 ${VARIANT_TEXT[t.variant]}`}>
             <VariantIcon variant={t.variant} />
           </span>
-          <p className="flex-1 text-sm leading-snug text-text-1">
+          <p className="flex-1 text-body leading-snug text-text-1">
             {t.text}
-            {t.sub && <span className="mt-0.5 block text-[13px] text-text-2">{t.sub}</span>}
+            {t.sub && <span className="mt-0.5 block text-body-s text-text-2">{t.sub}</span>}
           </p>
           <button
             type="button"

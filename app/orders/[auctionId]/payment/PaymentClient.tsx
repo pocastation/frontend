@@ -239,7 +239,7 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
     return (
       <>
         <MobilePageHead title="결제" backHref={BACK_HREF} />
-        <main className="mx-auto max-w-lg px-[14px] py-16 text-sm text-text-3 sm:px-5">
+        <main className="mx-auto max-w-lg px-[14px] py-16 text-body text-text-3 sm:px-5">
           결제 정보를 불러오는 중이에요.
         </main>
       </>
@@ -265,15 +265,15 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         100dvh에서 앱바(48px)를 뺀 값이라 스크롤 없이도 화면이 꽉 찬다.
       */}
       <main className="mx-auto max-w-lg px-[14px] pb-5 pt-4 max-sm:min-h-[calc(100dvh-48px)] max-sm:pb-[132px] sm:px-5 sm:py-10">
-        <h1 className="hidden font-display text-xl font-extrabold text-text-1 sm:block">결제</h1>
+        <h1 className="hidden font-display text-title font-extrabold text-text-1 sm:block">결제</h1>
 
         {/* 주문 요약 — 카드로 감싸지 않는다. 규칙선과 여백만으로 가른다. */}
         {result ? (
           <div className="border-b border-border pb-4 sm:mt-4 sm:border-t sm:pt-4">
-            <p className="truncate text-[13px] text-text-2">{result.orderName}</p>
+            <p className="truncate text-body-s text-text-2">{result.orderName}</p>
             <div className="mt-1.5 flex items-baseline justify-between gap-3">
-              <span className="text-xs text-text-3">{issued ? "입금할 금액" : "결제 금액"}</span>
-              <span className="font-display text-2xl font-extrabold text-text-1 tabular-nums">
+              <span className="text-label text-text-3">{issued ? "입금할 금액" : "결제 금액"}</span>
+              <span className="font-display text-title-l font-extrabold text-text-1 tabular-nums">
                 {formatKRW(result.amount)}
               </span>
             </div>
@@ -293,8 +293,8 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         )}
 
         {error ? (
-          // 진짜 오류만 강조한다 — 좌측 규칙선. 일반 안내는 helper text로 녹인다.
-          <p className="mt-5 border-l-2 border-danger pl-3 text-[13px] leading-relaxed text-text-2">{error}</p>
+          // 진짜 오류만 강조한다 — 회색 안내 상자 + 빨간 글자(#765). 일반 안내는 helper text로 녹인다.
+          <p className="mt-5 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold leading-relaxed text-danger">{error}</p>
         ) : null}
 
         {/* 데스크탑 액션 — 모바일은 아래 고정 바가 대신한다. */}
@@ -329,8 +329,8 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
           <>
             {result ? (
               <div className="mb-2 flex items-baseline justify-between">
-                <span className="text-[11.5px] text-text-3">결제 금액</span>
-                <span className="font-display text-[19px] font-extrabold text-text-1 tabular-nums">
+                <span className="text-label text-text-3">결제 금액</span>
+                <span className="font-display text-title-s font-extrabold text-text-1 tabular-nums">
                   {formatKRW(result.amount)}
                 </span>
               </div>
@@ -357,7 +357,7 @@ function MethodChooser({
 }) {
   return (
     <>
-      <p className="mt-2 text-[13px] leading-relaxed text-text-3">
+      <p className="mt-2 text-body-s leading-relaxed text-text-3">
         입금이 확인되면 판매자에게 발송 요청이 전달돼요.
       </p>
 
@@ -382,10 +382,10 @@ function MethodChooser({
               />
               <span className="min-w-0">
                 {/* 선택 상태에만 보라를 쓴다 — 제목·배경에는 쓰지 않는다. */}
-                <span className={`block text-sm font-bold ${selected ? "text-primary" : "text-text-1"}`}>
+                <span className={`block text-body font-bold ${selected ? "text-primary" : "text-text-1"}`}>
                   {m.label}
                 </span>
-                <span className="mt-0.5 block text-xs leading-relaxed text-text-3">{m.hint}</span>
+                <span className="mt-0.5 block text-label leading-relaxed text-text-3">{m.hint}</span>
               </span>
             </label>
           );
@@ -393,7 +393,7 @@ function MethodChooser({
       </fieldset>
 
       {previousAttemptFailed ? (
-        <p className="mt-4 border-l-2 border-danger pl-3 text-[13px] leading-relaxed text-text-2">
+        <p className="mt-4 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold leading-relaxed text-danger">
           지난 결제가 완료되지 않았어요. 다시 시도해 주세요.
         </p>
       ) : null}
@@ -435,7 +435,7 @@ function CopyAccountButton({ value }: { value: string }) {
       <button
         type="button"
         onClick={copy}
-        className={`mt-3 inline-flex h-9 items-center gap-1.5 rounded-control border border-border-2 px-3 text-[12px] font-bold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+        className={`mt-3 inline-flex h-9 items-center gap-1.5 rounded-control border border-border-2 px-3 text-label font-bold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
       >
         {copied ? (
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -454,7 +454,7 @@ function CopyAccountButton({ value }: { value: string }) {
         {copied ? "계좌번호를 복사했어요." : ""}
       </span>
       {failed ? (
-        <p className="mt-2 text-[11.5px] leading-relaxed text-text-3">
+        <p className="mt-2 text-label leading-relaxed text-text-3">
           복사가 안 됐어요. 위 번호를 길게 눌러 직접 복사해 주세요.
         </p>
       ) : null}
@@ -484,14 +484,14 @@ function RemainingTime({ expiresAt }: { expiresAt: string }) {
   }, [expiresAt]);
 
   if (!label) return null;
-  return <span className="text-[11.5px] font-bold text-danger">{label}</span>;
+  return <span className="text-label font-bold text-danger">{label}</span>;
 }
 
 // 가상계좌 발급 완료 — **결제 완료가 아니다.** 화면도 "입금 대기"로 말해야 한다.
 function VirtualAccountNotice({ result }: { result: PaymentWindowResult }) {
   return (
     <>
-      <p className="mt-2 text-[13px] leading-relaxed text-text-3">
+      <p className="mt-2 text-body-s leading-relaxed text-text-3">
         아래 계좌로 입금하면 결제가 완료돼요. 입금 전까지는 거래가 시작되지 않아요.
       </p>
 
@@ -514,7 +514,7 @@ function VirtualAccountNotice({ result }: { result: PaymentWindowResult }) {
           외워서 건너가는 것은 실수하면 돈이 잘못 가는 종류의 불편이라, 복사를 붙인다(#502). */}
       {result.accountNumber ? <CopyAccountButton value={result.accountNumber} /> : null}
 
-      <p className="mt-5 text-xs leading-relaxed text-text-3">
+      <p className="mt-5 text-label leading-relaxed text-text-3">
         입금자명이 달라도 괜찮아요. 발급된 계좌로 들어온 금액으로 확인해요.
       </p>
     </>
@@ -524,8 +524,8 @@ function VirtualAccountNotice({ result }: { result: PaymentWindowResult }) {
 function PaidNotice() {
   return (
     <>
-      <p className="mt-2 text-[13px] leading-relaxed text-text-2">결제가 완료됐어요.</p>
-      <p className="mt-1 text-xs leading-relaxed text-text-3">
+      <p className="mt-2 text-body-s leading-relaxed text-text-2">결제가 완료됐어요.</p>
+      <p className="mt-1 text-label leading-relaxed text-text-3">
         판매자에게 발송 요청이 전달됐어요. 진행 상황은 구매내역에서 볼 수 있어요.
       </p>
     </>
@@ -546,13 +546,13 @@ function Row({
 }) {
   return (
     <div className="flex items-baseline justify-between gap-4 border-b border-border py-3">
-      <dt className="shrink-0 text-[13px] text-text-3">{label}</dt>
+      <dt className="shrink-0 text-body-s text-text-3">{label}</dt>
       <dd className="flex items-baseline gap-2">
         <span
           className={
             emphasis
-              ? "font-display text-lg font-extrabold text-text-1 tabular-nums"
-              : "text-sm font-semibold text-text-2 tabular-nums"
+              ? "font-display text-title-s font-extrabold text-text-1 tabular-nums"
+              : "text-body font-semibold text-text-2 tabular-nums"
           }
         >
           {value}

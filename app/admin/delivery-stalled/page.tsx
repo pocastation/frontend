@@ -84,15 +84,15 @@ export default function AdminDeliveryStalledPage() {
   return (
     <div>
       <header className="mb-5">
-        <h1 className="font-display text-xl font-extrabold text-text-1">배송 확인</h1>
-        <p className="mt-1 text-sm text-text-3">
+        <h1 className="font-display text-title font-extrabold text-text-1">배송 확인</h1>
+        <p className="mt-1 text-body text-text-3">
           발송 후 7일이 지나도 배송완료가 확인되지 않은 주문이에요. 택배사 사이트에서 운송장을 조회해
           배송이 끝났으면 수동으로 기록해 주세요.
         </p>
       </header>
 
       <div className="mb-4 flex items-center">
-        <span className="ml-auto text-xs text-text-3">확인 필요 {items.length}건</span>
+        <span className="ml-auto text-label text-text-3">확인 필요 {items.length}건</span>
       </div>
 
       {notice && (
@@ -108,9 +108,9 @@ export default function AdminDeliveryStalledPage() {
 
       <div className="overflow-hidden rounded-card border border-border bg-surface">
         {loading ? (
-          <p className="py-20 text-center text-sm text-text-3">불러오는 중...</p>
+          <p className="py-20 text-center text-body text-text-3">불러오는 중...</p>
         ) : items.length === 0 ? (
-          <p className="py-20 text-center text-sm text-text-3">배송 확인이 필요한 주문이 없어요.</p>
+          <p className="py-20 text-center text-body text-text-3">배송 확인이 필요한 주문이 없어요.</p>
         ) : (
           <ul className="divide-y divide-border">
             {items.map((item) => (
@@ -118,15 +118,15 @@ export default function AdminDeliveryStalledPage() {
                 <div className="min-w-0 flex-1 basis-56">
                   <Link
                     href={`/auctions/${item.auctionId}`}
-                    className={`block truncate text-sm font-bold text-text-1 hover:text-primary ${FOCUS_RING}`}
+                    className={`block truncate text-body font-bold text-text-1 hover:text-primary ${FOCUS_RING}`}
                   >
                     {item.title}
                   </Link>
-                  <p className="mt-0.5 text-xs text-text-3">
+                  <p className="mt-0.5 text-label text-text-3">
                     주문 #{item.orderId} · 발송 {formatDateTimeKST(item.shippedAt)}
                   </p>
                 </div>
-                <div className="shrink-0 text-right text-xs">
+                <div className="shrink-0 text-right text-label">
                   <p className="font-bold text-text-2">{item.carrier ?? "택배사 미상"}</p>
                   <p className="mt-0.5 tabular-nums text-text-3">{item.trackingNumber ?? "운송장 없음"}</p>
                 </div>
@@ -134,7 +134,7 @@ export default function AdminDeliveryStalledPage() {
                   type="button"
                   disabled={busyId !== null}
                   onClick={() => void markDelivered(item)}
-                  className={`h-9 shrink-0 rounded-control bg-text-1 px-3.5 text-xs font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-50 ${FOCUS_RING}`}
+                  className={`h-9 shrink-0 rounded-control bg-text-1 px-3.5 text-label font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-50 ${FOCUS_RING}`}
                 >
                   {busyId === item.orderId ? "기록 중..." : "배송완료 기록"}
                 </button>
@@ -144,7 +144,7 @@ export default function AdminDeliveryStalledPage() {
         )}
       </div>
 
-      <p className="mt-4 text-xs leading-relaxed text-text-3">
+      <p className="mt-4 text-label leading-relaxed text-text-3">
         기록하면 구매자에게 배송완료·자동확정 예고 알림이 발송되고, 3일 뒤 거래가 자동 확정돼요. 즉시
         확정되는 게 아니라 구매자의 검수 기간 3일은 그대로 보장돼요.
       </p>

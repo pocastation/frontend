@@ -28,7 +28,7 @@ export default function NicknameSuggestButton({
       type="button"
       onClick={handleClick}
       disabled={loading}
-      className={`flex items-center gap-1.5 self-start rounded-control border border-border-2 bg-white px-3 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
+      className={`flex items-center gap-1.5 self-start rounded-control border border-border-2 bg-white px-3 py-1.5 text-label font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
     >
       <svg
         width="13"

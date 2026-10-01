@@ -20,7 +20,7 @@ function anchorOf(no: string) {
 function PolicyLineRow({ line }: { line: PolicyLine }) {
   return (
     <li
-      className={`flex gap-2 text-sm leading-relaxed text-text-2 ${
+      className={`flex gap-2 text-body leading-relaxed text-text-2 ${
         line.level === 1 ? "pl-4 sm:pl-6" : ""
       }`}
     >
@@ -58,7 +58,7 @@ function PolicyTableBlock({ table }: { table: PolicyTable }) {
 function PolicyTableWide({ table }: { table: PolicyTable }) {
   return (
     <div className="mt-3 hidden overflow-x-auto md:block">
-      <table className="w-full min-w-[520px] border-collapse text-left text-[13px]">
+      <table className="w-full min-w-[520px] border-collapse text-left text-body-s">
         <thead>
           <tr className="border-y border-border">
             {table.head.map((cell) => (
@@ -99,20 +99,20 @@ function PolicyTableStacked({ table }: { table: PolicyTable }) {
           key={rowIndex}
           className="border-t border-border py-3 last:border-b"
         >
-          <p className="text-[13px] font-bold tracking-[-0.01em] text-text-1">{row[0]}</p>
+          <p className="text-body-s font-bold text-text-1">{row[0]}</p>
           {row.slice(1).map((cell, cellIndex) =>
             row.length > 2 ? (
               <p
                 key={cellIndex}
-                className="mt-2 grid grid-cols-[4.5rem_minmax(0,1fr)] gap-2.5 text-[13px] leading-relaxed"
+                className="mt-2 grid grid-cols-[4.5rem_minmax(0,1fr)] gap-2.5 text-body-s leading-relaxed"
               >
-                <span className="text-[11.5px] font-bold text-text-3">
+                <span className="text-label font-bold text-text-3">
                   {table.head[cellIndex + 1]}
                 </span>
                 <span className="text-text-2">{cell}</span>
               </p>
             ) : (
-              <p key={cellIndex} className="mt-1.5 text-[13px] leading-relaxed text-text-2">
+              <p key={cellIndex} className="mt-1.5 text-body-s leading-relaxed text-text-2">
                 {cell}
               </p>
             ),
@@ -133,21 +133,21 @@ export default function PolicyPage() {
   return (
     <div className="mx-auto max-w-[860px] px-4 py-10 sm:py-14">
       <header>
-        <h1 className="font-display text-2xl font-extrabold text-text-1 sm:text-3xl">운영정책</h1>
-        <p className="mt-2 text-sm text-text-3">
+        <h1 className="font-display text-title-l font-extrabold text-text-1 sm:text-display">운영정책</h1>
+        <p className="mt-2 text-body text-text-3">
           포카스테이션(Poca Station) · 제안판매 · 즉시판매 거래 세부 기준
         </p>
-        <p className="mt-1 text-xs text-text-3">시행일 {POLICY_EFFECTIVE_DATE}</p>
+        <p className="mt-1 text-label text-text-3">시행일 {POLICY_EFFECTIVE_DATE}</p>
       </header>
 
-      <p className="mt-6 rounded-card border border-border bg-surface-2 px-4 py-3 text-sm leading-relaxed text-text-2">
+      <p className="mt-6 rounded-card border border-border bg-surface-2 px-4 py-3 text-body leading-relaxed text-text-2">
         이 정책은 이용약관이 위임한 하위 기준입니다. 여기서 정하지 않은 사항과 이 정책이 이용약관과
         어긋나는 부분은 이용약관을 따릅니다.
       </p>
 
       <section className="mt-8">
-        <h2 className="text-sm font-bold text-text-1">거래의 전체 흐름</h2>
-        <p className="mt-1 text-xs leading-relaxed text-text-3">
+        <h2 className="text-body font-bold text-text-1">거래의 전체 흐름</h2>
+        <p className="mt-1 text-label leading-relaxed text-text-3">
           포카스테이션의 모든 거래는 아래 8단계를 따릅니다. 각 단계의 세부 규칙은 본문 각 장에서
           정합니다.
         </p>
@@ -155,17 +155,17 @@ export default function PolicyPage() {
       </section>
 
       <nav aria-label="목차" className="mt-8 rounded-card border border-border p-4 sm:p-5">
-        <h2 className="text-sm font-bold text-text-1">목차</h2>
+        <h2 className="text-body font-bold text-text-1">목차</h2>
         <div className="mt-3 space-y-3">
           {POLICY_CHAPTERS.map((chapter) => (
             <div key={chapter.title}>
-              <p className="text-xs font-bold text-text-3">{chapter.title}</p>
+              <p className="text-label font-bold text-text-3">{chapter.title}</p>
               <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
                 {chapter.articles.map((article) => (
                   <li key={article.no}>
                     <a
                       href={`#${anchorOf(article.no)}`}
-                      className={`rounded-control text-xs text-text-2 transition-colors hover:text-primary ${FOCUS_RING}`}
+                      className={`rounded-control text-label text-text-2 transition-colors hover:text-primary ${FOCUS_RING}`}
                     >
                       {article.no} {article.title}
                     </a>
@@ -180,13 +180,13 @@ export default function PolicyPage() {
       <div className="mt-10 space-y-10">
         {POLICY_CHAPTERS.map((chapter) => (
           <section key={chapter.title}>
-            <h2 className="border-b border-border pb-2 font-display text-lg font-extrabold text-text-1">
+            <h2 className="border-b border-border pb-2 font-display text-title-s font-extrabold text-text-1">
               {chapter.title}
             </h2>
             <div className="mt-5 space-y-6">
               {chapter.articles.map((article) => (
                 <article key={article.no} id={anchorOf(article.no)} className="scroll-mt-24">
-                  <h3 className="text-sm font-bold text-text-1">
+                  <h3 className="text-body font-bold text-text-1">
                     {article.no} ({article.title})
                   </h3>
                   {article.lines && (
@@ -212,10 +212,10 @@ export default function PolicyPage() {
       </div>
 
       <section className="mt-10 border-t border-border pt-5">
-        <h2 className="text-sm font-bold text-text-1">부칙</h2>
+        <h2 className="text-body font-bold text-text-1">부칙</h2>
         <ul className="mt-2 space-y-1.5">
           {POLICY_ADDENDUM.map((line, index) => (
-            <li key={index} className="flex gap-2 text-sm leading-relaxed text-text-2">
+            <li key={index} className="flex gap-2 text-body leading-relaxed text-text-2">
               <span className="shrink-0 font-semibold text-text-3">
                 {["①", "②", "③", "④"][index] ?? ""}
               </span>

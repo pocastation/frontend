@@ -114,10 +114,10 @@ export default function PhotoUploadGrid({ items, max, onAddFiles, onRemove, onRe
               <label
                 className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-card border border-border text-text-3 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
               >
-                <span className="text-xl leading-none" aria-hidden="true">
+                <span className="text-title leading-none" aria-hidden="true">
                   +
                 </span>
-                <span className="text-[10px] font-semibold">사진 추가</span>
+                <span className="text-caption font-semibold">사진 추가</span>
                 <input
                   type="file"
                   accept={ACCEPT}
@@ -133,7 +133,7 @@ export default function PhotoUploadGrid({ items, max, onAddFiles, onRemove, onRe
           </div>
         </SortableContext>
       </DndContext>
-      <p className="mt-2 text-center text-[11px] text-text-3">
+      <p className="mt-2 text-center text-caption text-text-3">
         {dragActive
           ? "여기에 놓으면 업로드돼요"
           : "사진을 끌어다 놓거나 클릭해서 올리고, 드래그로 순서를 바꿀 수 있어요"}
@@ -176,17 +176,17 @@ function SortableTile({
         className="aspect-square w-full rounded-card border border-border object-cover"
       />
       {item.status === "uploading" && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-control bg-black/40 text-[10px] text-white">
+        <div className="absolute inset-0 flex items-center justify-center rounded-control bg-black/40 text-caption text-white">
           업로드 중…
         </div>
       )}
       {item.status === "error" && (
-        <div className="absolute inset-0 flex items-center justify-center rounded-control bg-black/55 px-1 text-center text-[9px] text-white">
+        <div className="absolute inset-0 flex items-center justify-center rounded-control bg-black/55 px-1 text-center text-caption text-white">
           업로드 실패
         </div>
       )}
       {isCover && (
-        <span className="absolute left-1 top-1 rounded-control bg-black/60 px-1 py-0.5 text-[9px] font-semibold text-white">
+        <span className="absolute left-1 top-1 rounded-control bg-black/60 px-1 py-0.5 text-caption font-semibold text-white">
           대표
         </span>
       )}
@@ -198,7 +198,7 @@ function SortableTile({
           e.stopPropagation();
           onRemove(item.id);
         }}
-        className={`absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-xs text-white transition-transform hover:scale-110 active:scale-95 ${FOCUS_RING}`}
+        className={`absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-label text-white transition-transform hover:scale-110 active:scale-95 ${FOCUS_RING}`}
       >
         ×
       </button>

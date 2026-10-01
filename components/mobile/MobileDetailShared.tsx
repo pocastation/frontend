@@ -8,6 +8,7 @@
 
 import { useEffect, useState, Fragment } from "react";
 import Link from "next/link";
+import { markNavForward } from "@/lib/nav-transition";
 import TrustLevelBadge from "@/components/TrustLevelBadge";
 import { apiFetch } from "@/lib/api";
 import { INTERMEDIARY_NOTICE } from "@/lib/business";
@@ -43,6 +44,7 @@ export function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: 
   return (
     <Link
       href={`/sellers/${sellerId}`}
+      onNavigate={markNavForward}
       className={`mt-3.5 flex items-center gap-2.5 rounded-card border border-border p-3 ${FOCUS_RING}`}
     >
       <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary-soft font-display text-body font-extrabold text-primary">

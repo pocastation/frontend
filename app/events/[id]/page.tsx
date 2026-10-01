@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import ExchangeFeedRow from "@/components/ExchangeFeedRow";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
+import NavLink from "@/components/NavLink";
 import { apiFetch, ApiError } from "@/lib/api";
 import { kstHm, weekdayKo } from "@/lib/event-dates";
 import { exchangeWindow } from "@/lib/exchange-labels";
@@ -131,12 +132,13 @@ export default async function EventFeedPage({
         {event.status !== "CANCELLED" && (
           <div className={FORM_ACTION_BAR} style={FORM_ACTION_BAR_STYLE}>
             {writeWindow === "open" ? (
-              <Link
+              <NavLink
+                nav="open"
                 href={`/exchanges/new?eventId=${id}`}
                 className={`flex h-12 items-center justify-center rounded-control bg-primary text-body-l font-extrabold text-white ${PRESS_PRIMARY} ${FOCUS_RING}`}
               >
                 교환글 등록
-              </Link>
+              </NavLink>
             ) : (
               <p className="rounded-card bg-surface-2 px-3 py-3.5 text-center text-body-s font-semibold text-text-2">
                 {writeWindow === "tooEarly"

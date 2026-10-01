@@ -133,7 +133,7 @@ export default function ExchangeApplyPage() {
       <MobilePageHead
         title="교환 신청"
         sub={wanted ? `${wanted}을(를) 찾아요` : post?.authorNickname ?? undefined}
-        variant="close"
+        variant="dismiss"
         backHref={`/exchanges/${postId}`}
       />
 

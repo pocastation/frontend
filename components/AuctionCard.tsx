@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { markNavForward } from "@/lib/nav-transition";
 import AuctionCountdown from "@/components/AuctionCountdown";
 import WishlistHeart from "@/components/WishlistHeart";
 import { mediaUrl } from "@/lib/api";
@@ -63,7 +64,7 @@ export default function AuctionCard({
   }
 
   return (
-    <Link href={`/auctions/${auction.id}`} className={`group block ${FOCUS_RING}`}>
+    <Link href={`/auctions/${auction.id}`} onNavigate={markNavForward} className={`group block ${FOCUS_RING}`}>
       {/* 라운드는 이 이미지 타일에만 있다. 로딩 전 지면은 단색이다 — 회색 그라디언트는
           이미지가 없다는 사실을 굳이 장식하던 것이라 걷어냈다. */}
       <div className={`relative overflow-hidden bg-surface-2 ${compact ? "aspect-[1/1.18] rounded-card" : "aspect-[4/5] rounded-card"}`}>

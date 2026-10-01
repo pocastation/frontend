@@ -17,6 +17,7 @@ import {
   validateVideo,
 } from "@/lib/video-validate";
 import { useAuth } from "@/lib/auth-context";
+import { dismiss } from "@/lib/nav-transition";
 import { GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
 import type {
@@ -417,7 +418,15 @@ export default function NewAuctionPage() {
             정산계좌 등록하러 가기
           </Link>
           {/* 손으로 짠 보조 버튼이었다(모서리 4px·글자 14px). 앱이 공유하는 보조 버튼으로 맞춘다(#515). */}
-          <Link href="/" className={`inline-flex h-12 items-center px-6 ${SECONDARY_BUTTON_CLASS}`}>
+          {/* 닫기와 같이 들어온 길로 되돌아간다(홈으로 push하면 홈에서 뒤로가 이 안내로 돌아온다). */}
+          <Link
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              dismiss(router, "/");
+            }}
+            className={`inline-flex h-12 items-center px-6 ${SECONDARY_BUTTON_CLASS}`}
+          >
             나중에 하기
           </Link>
         </div>
@@ -467,9 +476,15 @@ export default function NewAuctionPage() {
             >
               판매 가이드
             </Link>
+            {/* 닫기는 들어온 길로 되돌아간다. 홈으로 push하면 홈에서 뒤로를 눌렀을 때 위저드가 다시 열린다.
+                주소로 바로 들어왔으면 홈으로 갈아 끼운다. */}
             <Link
               href="/"
               aria-label="닫기"
+              onClick={(e) => {
+                e.preventDefault();
+                dismiss(router, "/");
+              }}
               className={`flex h-[30px] w-[30px] items-center justify-center text-text-3 ${FOCUS_RING}`}
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">

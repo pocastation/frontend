@@ -49,8 +49,9 @@ export default function MobileDetailGallery({
   const router = useRouter();
   const [index, setIndex] = useState(0);
   const trackRef = useRef<HTMLDivElement | null>(null);
-  // 확대 뷰어 — 열려 있으면 보고 있는 **사진** 인덱스, 닫혀 있으면 null(#527).
-  // 캐러셀 인덱스(`index`)와 따로 두는 이유: 캐러셀은 영상까지 세지만 뷰어는 사진만 받는다.
+  // 확대 뷰어 — 열려 있으면 보고 있는 장의 인덱스, 닫혀 있으면 null(#527).
+  // 뷰어도 영상을 마지막 장으로 받아(#763) 캐러셀과 장 수·순서가 같다. 캐러셀 인덱스(`index`)와
+  // 따로 두는 것은 뷰어 안에서 넘긴 위치가 닫기 전까지 본 화면을 움직이지 않게 하려는 것이다.
   const [zoomAt, setZoomAt] = useState<number | null>(null);
 
   if (slides.length === 0) {
@@ -167,10 +168,12 @@ export default function MobileDetailGallery({
         </>
       )}
 
-      {/* 데스크탑 상세와 같은 뷰어를 쓴다 — 핀치·더블탭 확대, 좌우 스와이프, 아래로 당겨 닫기. */}
+      {/* 데스크탑 상세와 같은 뷰어를 쓴다 — 핀치·더블탭 확대, 좌우 스와이프, 아래로 당겨 닫기.
+          모바일은 검수영상까지 넘긴다(#763). 데스크탑은 영상이 본문 아래 별도 블록이라 넘기지 않는다. */}
       <MediaZoomViewer
         open={zoomAt !== null}
         images={images}
+        video={video ?? null}
         title={title}
         index={zoomAt ?? 0}
         onIndexChange={setZoomAt}

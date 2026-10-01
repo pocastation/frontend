@@ -118,8 +118,8 @@ export default function AdminSuggestionsPage() {
             onClick={() => setFilter(f.value)}
             className={`rounded-control border px-3 py-1.5 text-label font-semibold transition-colors ${FOCUS_RING} ${
               filter === f.value
-                ? "border-primary bg-primary text-white"
-                : "border-border text-text-2 hover:border-primary hover:text-primary"
+                ? "border-text-1 bg-text-1 text-white"
+                : "border-border text-text-2 hover:border-text-3 hover:text-text-1"
             }`}
           >
             {f.label}
@@ -176,7 +176,7 @@ export default function AdminSuggestionsPage() {
                     type="button"
                     disabled={busyId === s.id}
                     onClick={() => resolve(s.id, "REJECTED")}
-                    className={`rounded-control border border-border-2 bg-white px-3.5 py-1.5 text-label font-bold text-text-2 transition-colors hover:border-accent hover:text-accent disabled:opacity-60 ${FOCUS_RING}`}
+                    className={`rounded-control border border-border-2 bg-white px-3.5 py-1.5 text-label font-bold text-text-2 transition-colors hover:border-danger hover:text-danger disabled:opacity-60 ${FOCUS_RING}`}
                   >
                     반려
                   </button>

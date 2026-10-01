@@ -212,12 +212,12 @@ export default function AdminDisputesPage() {
                       className={
                         "w-full px-4 py-4 text-left transition-colors " +
                         FOCUS_RING +
-                        (active ? " bg-primary-soft/70" : " hover:bg-surface-2")
+                        (active ? " bg-surface-2" : " hover:bg-surface-2")
                       }
                     >
                       <span className="flex items-center gap-2">
                         {/* 내가 손댈 단계만 글자색으로 강조 — 나머지는 진행 상황 참고용이다. */}
-                        <span className={`text-caption font-extrabold ${needsAction ? "text-accent" : "text-text-3"}`}>
+                        <span className={`text-caption font-extrabold ${needsAction ? "text-danger" : "text-text-3"}`}>
                           {DISPUTE_STATUS_LABEL[item.disputeStatus]}
                         </span>
                         <span className="ml-auto text-caption text-text-3">

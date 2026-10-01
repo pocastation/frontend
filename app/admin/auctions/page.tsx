@@ -65,7 +65,7 @@ function AuctionIdentity({ auction }: { auction: AdminAuctionSummary }) {
         )}
       </span>
       <span className="min-w-0">
-        {auction.artistName && <span className="block truncate text-caption font-bold text-primary">{auction.artistName}</span>}
+        {auction.artistName && <span className="block truncate text-caption font-bold text-text-2">{auction.artistName}</span>}
         {/* 제목의 max-w-[200px]를 걷어냈다(#291) — 980px 표에서 가장 중요한 정보에 가장 좁은 칸을
             주고 있었다. 지면이 1720까지 넓어진 만큼 그 여유를 제목이 쓴다. */}
         <span className="block truncate font-bold text-text-1">{auction.title}</span>
@@ -313,7 +313,7 @@ export default function AdminAuctionsPage() {
               aria-pressed={statusFilter === f.key}
               onClick={() => setStatusFilter(f.key)}
               className={`h-10 rounded-control border px-3 text-label font-bold transition-colors ${FOCUS_RING} ${
-                statusFilter === f.key ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+                statusFilter === f.key ? "border-text-1 bg-text-1 text-white" : "border-border text-text-2 hover:border-text-3 hover:text-text-1"
               }`}
             >
               {f.label}
@@ -328,7 +328,7 @@ export default function AdminAuctionsPage() {
               aria-pressed={saleTypeFilter === f.key}
               onClick={() => setSaleTypeFilter(f.key)}
               className={`h-10 rounded-control border px-3 text-label font-bold transition-colors ${FOCUS_RING} ${
-                saleTypeFilter === f.key ? "border-text-1 bg-text-1 text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+                saleTypeFilter === f.key ? "border-text-1 bg-text-1 text-white" : "border-border text-text-2 hover:border-text-3 hover:text-text-1"
               }`}
             >
               {f.label}
@@ -362,18 +362,11 @@ export default function AdminAuctionsPage() {
                 </td>
               </tr>
             ) : (
-              // 행 전체를 파스텔로 칠하던 것을 첫 칸의 좌측 규칙선으로 바꿨다(#294).
-              // 같은 정보를 주면서 색 면적은 2px로 줄고, 하드코딩 주황도 사라진다.
               auctions.map((a) => (
                 <tr key={a.id} className="border-b border-border text-body-s last:border-0">
                   <td
-                    className={`px-4 py-3 ${
-                      a.status === "PENDING_REVIEW"
-                        ? "border-l-2 border-l-[var(--color-star-line)]"
-                        : a.status === "REJECTED"
-                          ? "border-l-2 border-l-accent"
-                          : "border-l-2 border-l-transparent"
-                    }`}
+                    // 상태는 같은 줄의 상태 칸이 말한다 — 행 왼쪽 세로줄은 걷었다(#771).
+                    className="px-4 py-3"
                   >
                     {a.status === "PENDING_REVIEW" ? (
                       <button
@@ -453,7 +446,7 @@ export default function AdminAuctionsPage() {
                         <button
                           type="button"
                           onClick={() => openCancelDialog(a)}
-                          className={`rounded-control border border-accent/40 bg-accent-soft px-3 py-1 text-label font-bold text-accent transition-colors hover:bg-accent hover:text-white ${FOCUS_RING}`}
+                          className={`rounded-control border border-danger bg-white px-3 py-1 text-label font-bold text-danger transition-colors hover:bg-danger hover:text-white ${FOCUS_RING}`}
                         >
                           취소
                         </button>
@@ -505,7 +498,7 @@ export default function AdminAuctionsPage() {
                     key={option.code}
                     className={`flex cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-body-s transition-colors ${
                       reasonCode === option.code
-                        ? "border-accent bg-accent-soft font-bold text-accent"
+                        ? "border-danger font-bold text-danger"
                         : "border-border text-text-2 hover:border-text-2"
                     }`}
                   >
@@ -515,7 +508,7 @@ export default function AdminAuctionsPage() {
                       value={option.code}
                       checked={reasonCode === option.code}
                       onChange={() => setReasonCode(option.code)}
-                      className="h-3.5 w-3.5 shrink-0 accent-[var(--color-accent)]"
+                      className="h-3.5 w-3.5 shrink-0 accent-[var(--color-danger)]"
                     />
                     {option.label}
                   </label>
@@ -541,7 +534,7 @@ export default function AdminAuctionsPage() {
                 type="button"
                 onClick={confirmCancel}
                 disabled={submitting}
-                className={`h-10 flex-1 rounded-control bg-accent text-body font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control bg-danger text-body font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {submitting ? "처리 중..." : "취소 확정"}
               </button>

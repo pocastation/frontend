@@ -150,8 +150,8 @@ export default function AdminInquiriesPage() {
                 "rounded-control border px-3 py-1.5 text-label font-semibold transition-colors " +
                 FOCUS_RING +
                 (active
-                  ? " border-primary bg-primary text-white"
-                  : " border-border text-text-2 hover:border-primary hover:text-primary")
+                  ? " border-text-1 bg-text-1 text-white"
+                  : " border-border text-text-2 hover:border-text-3 hover:text-text-1")
               }
             >
               {item.label}
@@ -194,7 +194,7 @@ export default function AdminInquiriesPage() {
                       className={
                         "w-full px-4 py-4 text-left transition-colors " +
                         FOCUS_RING +
-                        (active ? " bg-primary-soft/70" : " hover:bg-surface-2")
+                        (active ? " bg-surface-2" : " hover:bg-surface-2")
                       }
                     >
                       <span className="flex items-center gap-2">

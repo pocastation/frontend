@@ -86,7 +86,7 @@ export default function AdminReviewsPage() {
                     {item.reviewerNickname ?? "구매자"} → {item.sellerNickname ?? "판매자"}
                   </span>
                   {item.reviewStatus === "BLINDED" && (
-                    <span className="inline-flex items-center gap-1 text-caption font-bold text-accent">
+                    <span className="inline-flex items-center gap-1 text-caption font-bold text-danger">
                       블라인드됨
                     </span>
                   )}
@@ -131,7 +131,7 @@ export default function AdminReviewsPage() {
                       type="button"
                       disabled={busyId === item.reviewId}
                       onClick={() => act(item.reviewId, "blind", { reason: "신고 검토 후 블라인드" })}
-                      className={`rounded-control bg-accent px-3 py-1.5 text-label font-bold text-white transition-colors hover:opacity-90 disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`rounded-control bg-danger px-3 py-1.5 text-label font-bold text-white transition-colors hover:opacity-90 disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       블라인드
                     </button>

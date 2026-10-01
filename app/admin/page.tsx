@@ -34,7 +34,7 @@ function Stat({ label, value, href }: { label: string; value: string; href?: str
   );
 
   const className = `min-w-0 flex-1 basis-[128px] border-l border-border px-4 first:border-l-0 first:pl-0 ${
-    href ? `rounded-control bg-primary-soft/50 py-2 transition-colors hover:bg-primary-soft ${FOCUS_RING}` : ""
+    href ? `rounded-control bg-surface-2 py-2 transition-colors hover:bg-surface-3 ${FOCUS_RING}` : ""
   }`;
 
   return href ? <Link href={href} className={className}>{content}</Link> : <div className={className}>{content}</div>;
@@ -169,7 +169,7 @@ export default function AdminDashboardPage() {
                       )}
                     </span>
                     <span className="min-w-0 flex-1">
-                      {a.artistName && <span className="block truncate text-caption font-bold text-primary">{a.artistName}</span>}
+                      {a.artistName && <span className="block truncate text-caption font-bold text-text-2">{a.artistName}</span>}
                       <span className="block truncate text-body font-bold text-text-1">{a.title}</span>
                     </span>
                     <span className="shrink-0 text-right">

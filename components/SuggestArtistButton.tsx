@@ -99,7 +99,7 @@ export default function SuggestArtistButton() {
                     onClick={() => setKind(k)}
                     className={`flex-1 rounded-control border px-2 py-2 text-sm font-semibold transition-colors ${FOCUS_RING} ${
                       kind === k
-                        ? "border-primary bg-primary-soft text-primary"
+                        ? "border-primary font-bold text-text-1"
                         : "border-border text-text-2 hover:border-primary"
                     }`}
                   >

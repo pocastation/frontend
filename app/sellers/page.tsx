@@ -27,7 +27,7 @@ async function getPopularSellers(): Promise<PopularSellerResponse[]> {
 function Stars({ value }: { value: number }) {
   const full = Math.round(value);
   return (
-    <span className="text-[#f5b301]" aria-label={`별점 ${value.toFixed(1)}점`}>
+    <span className="text-star" aria-label={`별점 ${value.toFixed(1)}점`}>
       {"★★★★★".slice(0, full)}
       <span className="text-border-2">{"★★★★★".slice(full)}</span>
     </span>

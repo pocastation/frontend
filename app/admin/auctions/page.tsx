@@ -522,7 +522,7 @@ export default function AdminAuctionsPage() {
                 ))}
               </div>
               {selectedCancelReason && (
-                <p className="mt-3 border-l-2 border-border-2 bg-surface-2 px-3 py-2 text-[12px] leading-5 text-text-2">
+                <p className="mt-3 rounded-card bg-surface-2 px-3 py-2 text-[12px] leading-5 text-text-2">
                   <span className="font-extrabold text-text-3">판매자에게 전달될 문구 · </span>
                   {selectedCancelReason.preview}
                 </p>

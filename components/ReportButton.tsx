@@ -194,7 +194,7 @@ export default function ReportButton({
                   <label
                     key={option}
                     className={`flex cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-[13px] font-semibold transition-colors ${
-                      reason === option ? "border-primary bg-primary-soft text-primary" : "border-border text-text-2"
+                      reason === option ? "border-primary font-bold text-text-1" : "border-border text-text-2"
                     }`}
                   >
                     <input

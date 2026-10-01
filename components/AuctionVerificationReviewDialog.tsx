@@ -77,7 +77,7 @@ function AnalysisSection({
         ))}
       </dl>
       {children}
-      <p className="mt-2 border-l-2 border-border-2 pl-2 text-[11px] leading-5 text-text-3">
+      <p className="mt-2 text-[11px] leading-5 text-text-3">
         <span className="font-extrabold text-text-2">{advisory ? "산출 방식" : "통과 조건"} · </span>{condition}
       </p>
     </div>
@@ -311,7 +311,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
           ) : verification ? (
             <>
               {readOnly && error && (
-                <p className="mb-4 border-l-2 border-accent px-3 py-2 text-sm text-accent" role="alert">{error}</p>
+                <p className="mb-4 rounded-card bg-surface-2 px-3.5 py-3 text-sm font-semibold text-danger" role="alert">{error}</p>
               )}
               <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.62fr)]">
                 <section id="verification-panel-media" role="tabpanel" aria-labelledby="verification-tab-media" className={mobileRejectOpen || mobileTab !== "media" ? "hidden lg:block" : ""}>
@@ -545,7 +545,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                   ))}
                 </div>
                 {selectedReason && (
-                  <p className="mt-3 border-l-2 border-border-2 bg-surface-2 px-3 py-2 text-[12px] leading-5 text-text-2">
+                  <p className="mt-3 rounded-card bg-surface-2 px-3 py-2 text-[12px] leading-5 text-text-2">
                     <span className="font-extrabold text-text-3">판매자에게 전달될 문구 · </span>
                     {selectedReason.preview}
                   </p>

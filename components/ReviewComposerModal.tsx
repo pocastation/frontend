@@ -106,7 +106,7 @@ export default function ReviewComposerModal({
                 onMouseEnter={() => setHover(n)}
                 onClick={() => setRating(n)}
                 className={`rounded-control p-0.5 text-3xl leading-none transition-colors ${FOCUS_RING} ${
-                  n <= activeStars ? "text-[#f5b301]" : "text-border-2"
+                  n <= activeStars ? "text-star" : "text-border-2"
                 }`}
               >
                 {n <= activeStars ? "★" : "☆"}
@@ -130,7 +130,7 @@ export default function ReviewComposerModal({
                   onClick={() => toggleTag(t.code)}
                   className={`rounded-control border px-2.5 py-1 text-xs font-semibold transition-colors ${FOCUS_RING} ${
                     on
-                      ? "border-primary bg-primary-soft/40 text-primary"
+                      ? "border-text-1 bg-text-1 text-white"
                       : "border-border-2 text-text-2 hover:border-text-3"
                   }`}
                 >

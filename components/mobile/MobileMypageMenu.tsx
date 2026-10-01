@@ -53,8 +53,8 @@ function RowShell({
         {badge ? (
           <span aria-label={`확인이 필요한 항목 ${badge}건`} className="rounded-control bg-primary-soft px-[7px] py-px text-[11px] font-semibold tabular-nums text-primary">새 소식 {badge}</span>
         ) : null}
-        {value != null && <span className="text-sm font-semibold tabular-nums text-text-1">{value}<span className="ml-0.5 text-xs font-normal text-[#686873]">{unit}</span></span>}
-        <span className="inline-flex text-[#686873]">
+        {value != null && <span className="text-sm font-semibold tabular-nums text-text-1">{value}<span className="ml-0.5 text-xs font-normal text-text-2">{unit}</span></span>}
+        <span className="inline-flex text-text-3">
           <Chevron />
         </span>
       </span>
@@ -91,7 +91,7 @@ function LinkRow({ label, href }: { label: string; href: string }) {
 }
 
 function GroupHead({ children }: { children: ReactNode }) {
-  return <h2 className="pb-[9px] pt-6 text-[13px] font-semibold text-[#686873]">{children}</h2>;
+  return <h2 className="pb-[9px] pt-6 text-[13px] font-semibold text-text-2">{children}</h2>;
 }
 
 function Group({ children }: { children: ReactNode }) {
@@ -165,7 +165,7 @@ export default function MobileMypageMenu({
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-lg font-semibold tracking-[-0.4px] text-text-1">{nickname}</span>
-          <span className="mt-[3px] flex flex-wrap items-center gap-1.5 text-xs text-[#686873]">
+          <span className="mt-[3px] flex flex-wrap items-center gap-1.5 text-xs text-text-2">
             {trustLevel != null && (
               <TrustLevelBadge
                 level={trustLevel}
@@ -178,7 +178,7 @@ export default function MobileMypageMenu({
             <span className="tabular-nums">거래 {tradeCount ?? 0}회</span>
           </span>
         </span>
-        <span className="inline-flex text-[#686873]">
+        <span className="inline-flex text-text-3">
           <Chevron size={16} />
         </span>
       </div>
@@ -192,7 +192,7 @@ export default function MobileMypageMenu({
             className={`relative flex min-w-0 flex-col items-center justify-center gap-[3px] rounded-control ${i ? "before:absolute before:bottom-[5px] before:left-0 before:top-2 before:w-px before:bg-border" : ""} ${PRESS_ROW} ${FOCUS_RING}`}
           >
             <span className="text-[25px] font-semibold leading-[1.2] tracking-[-0.6px] tabular-nums text-text-1">{value}</span>
-            <span className="text-xs text-[#686873]">{label}</span>
+            <span className="text-xs text-text-2">{label}</span>
           </button>
         ))}
       </nav>
@@ -242,7 +242,7 @@ export default function MobileMypageMenu({
               <path d="m9 12 2 2 4-4" />
             </svg>
             <span className="flex-1">관리자</span>
-            <span className="inline-flex text-[#686873]"><Chevron /></span>
+            <span className="inline-flex text-text-3"><Chevron /></span>
           </Link>
         )}
       </Group>
@@ -251,7 +251,7 @@ export default function MobileMypageMenu({
         <button
           type="button"
           onClick={onLogout}
-          className={`min-h-11 text-xs text-[#686873] ${PRESS_FADE} ${FOCUS_RING}`}
+          className={`min-h-11 text-xs text-text-2 ${PRESS_FADE} ${FOCUS_RING}`}
         >
           로그아웃
         </button>

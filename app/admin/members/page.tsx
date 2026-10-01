@@ -280,7 +280,7 @@ export default function AdminMembersPage() {
 
           <p className="mb-2 text-xs text-text-3">총 {totalElements}명{loading && " · 불러오는 중..."}</p>
           {unverifiedOnly && (
-            <p className="mb-3 border-l-[3px] border-border-2 pl-3 text-[12px] leading-relaxed text-text-3">
+            <p className="mb-3 rounded-card bg-surface-2 px-3.5 py-3 text-[12px] leading-relaxed text-text-2">
               인증 후 가입으로 바꾼 뒤로는 미인증 회원이 새로 생기지 않아요. 여기 남은 건 전환 이전
               가입자이고, <b className="font-bold text-text-2">이 수가 0이 되면 정리가 끝난 거예요.</b>
             </p>
@@ -578,7 +578,7 @@ export default function AdminMembersPage() {
               &quot;{detail.nickname}&quot;님의 이메일·비밀번호·배송지·결제수단·본인인증 결과를 지우고
               프로필을 가명화합니다. 그 주소의 발송 금지도 함께 풀립니다.
             </p>
-            <p className="mt-2 border-l-[3px] border-accent pl-3 text-[12.5px] leading-relaxed text-text-2">
+            <p className="mt-2 rounded-card bg-surface-2 px-3.5 py-3 text-[12.5px] leading-relaxed text-text-2">
               <b className="font-extrabold text-text-1">되돌릴 수 없습니다.</b> 진행 중인 거래가 있으면
               거절되니, 거래를 먼저 정리한 뒤 다시 시도하세요.
             </p>

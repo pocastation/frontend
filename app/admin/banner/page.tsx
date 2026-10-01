@@ -197,7 +197,7 @@ export default function AdminBannerPage() {
       </p>
 
       {items.length >= MAX_FEATURED && (
-        <p className="mt-4 border-l-2 border-warn py-2 pl-3 text-[12.5px] text-text-2">
+        <p className="mt-4 rounded-card bg-surface-2 px-3.5 py-3 text-[12.5px] text-text-2">
           자리가 다 찼어요. 판매글 관리에서 「배너」를 켜려 하면 막히고, 먼저 여기서 한 건을 내려야 해요.
         </p>
       )}

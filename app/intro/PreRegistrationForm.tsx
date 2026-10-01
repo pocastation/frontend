@@ -245,7 +245,7 @@ export default function PreRegistrationForm() {
           </span>
         </label>
 
-        <div className="mt-3 border-l-2 border-primary pl-3.5">
+        <div className="mt-3 rounded-card bg-surface-2 px-4 py-3.5">
           <p className="text-[16px] font-extrabold leading-[1.5] tracking-[-0.01em] text-text-1">
             보유·이용기간 — {PRE_REGISTRATION_CONSENT.retention}
           </p>
@@ -264,7 +264,7 @@ export default function PreRegistrationForm() {
         </button>
 
         {openConsent && (
-          <dl className="mt-2.5 flex flex-col gap-1.5 border-l-2 border-border-2 pl-3.5 text-[12px] leading-[1.7] text-text-3">
+          <dl className="mt-2.5 flex flex-col gap-1.5 text-[12px] leading-[1.7] text-text-3">
             <div className="flex gap-2">
               <dt className="w-[52px] shrink-0 font-bold text-text-2">필수 항목</dt>
               <dd>{PRE_REGISTRATION_CONSENT.itemsRequired}</dd>

@@ -139,7 +139,7 @@ export default function ExchangeApplyPage() {
 
       <div className={`mx-auto max-w-[640px] ${FORM_ACTION_BAR_PAD} sm:px-4 sm:py-8`}>
         {error && (
-          <p role="alert" className="mx-[14px] mt-3 rounded-control border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger sm:mx-0">
+          <p role="alert" className="mx-[14px] mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-[13px] font-semibold leading-[1.55] text-danger sm:mx-0">
             {error}
           </p>
         )}
@@ -193,7 +193,7 @@ export default function ExchangeApplyPage() {
               <label
                 key={slot.id}
                 className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-control border px-3 text-[14px] font-bold transition-colors ${
-                  slotId === slot.id ? "border-primary bg-primary-soft text-primary" : "border-border bg-white text-text-2"
+                  slotId === slot.id ? "border-primary bg-white text-text-1" : "border-border bg-white text-text-2"
                 }`}
               >
                 <input

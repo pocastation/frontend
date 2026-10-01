@@ -135,9 +135,9 @@ function VerifyEmailContent() {
           </p>
 
           {/* 조용히 바꿔놓으면 나중에 "내 닉네임이 왜 이래"가 된다. 이건 진짜 알려야 하는 사실이라
-              helper가 아니라 좌측 규칙선으로 세운다. */}
+              helper가 아니라 회색 안내 상자로 세운다(#765, 왼쪽 세로줄 강조는 쓰지 않는다). */}
           {confirmed.nicknameChanged && (
-            <p className="mt-5 border-l-[3px] border-accent pl-4 text-[13px] leading-[1.75] text-text-2">
+            <p className="mt-5 rounded-card bg-surface-2 px-4 py-3.5 text-[13px] leading-[1.75] text-text-2">
               <b className="font-extrabold text-text-1">
                 닉네임이 {confirmed.nickname}으로 정해졌어요.
               </b>{" "}

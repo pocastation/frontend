@@ -302,12 +302,12 @@ export default function AdminEventsPage() {
       </div>
 
       {error && (
-        <p role="alert" className="mt-4 rounded-control border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger">
+        <p role="alert" className="mt-4 rounded-card bg-surface-2 px-3.5 py-3 text-[13px] font-semibold leading-[1.55] text-danger">
           {error}
         </p>
       )}
       {notice && (
-        <p role="status" className="mt-4 rounded-control border-l-2 border-primary bg-surface-2 px-3 py-2 text-[12.5px] font-semibold text-text-2">
+        <p role="status" className="mt-4 rounded-card bg-surface-2 px-3.5 py-3 text-[13px] font-semibold text-text-2">
           {notice}
         </p>
       )}
@@ -556,11 +556,11 @@ export default function AdminEventsPage() {
           </h2>
 
           {editingRecurrence !== null && editingRecurrence.affectedFutureEvents > 0 && (
-            <div className="mt-3 rounded-control border-l-2 border-warn bg-warn-soft px-3 py-2.5">
-              <p className="text-[12.5px] font-extrabold text-[#8a5a08]">
+            <div className="mt-3 rounded-card bg-surface-2 px-3.5 py-3">
+              <p className="text-[13px] font-extrabold text-text-1">
                 고친 값은 앞으로 만들어질 회차부터 적용돼요
               </p>
-              <p className="mt-0.5 text-[12px] leading-relaxed text-[#8a5a08]/90">
+              <p className="mt-0.5 text-[12px] leading-relaxed text-text-2">
                 이미 만들어진 앞으로의 회차{" "}
                 <button type="button" onClick={() => { setRecurrenceFilter(editingRecurrence); setRangeOffset(0); }}
                   className="font-extrabold underline underline-offset-2">

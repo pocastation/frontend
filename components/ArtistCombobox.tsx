@@ -117,7 +117,7 @@ export default function ArtistCombobox({
                 }}
                 onMouseEnter={() => setHighlightedIndex(index)}
                 className={`cursor-pointer px-3.5 py-2 text-sm ${
-                  index === highlightedIndex ? "bg-primary-soft text-primary" : "text-text-1"
+                  index === highlightedIndex ? "bg-surface-2 text-text-1" : "text-text-1"
                 } ${option.id === value ? "font-bold" : ""}`}
               >
                 {option.name}

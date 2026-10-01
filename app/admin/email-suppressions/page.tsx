@@ -106,7 +106,7 @@ export default function AdminEmailSuppressionsPage() {
 
       {/* 해제의 무게를 화면에서도 드러낸다 — 이건 "다시 보내겠다"는 결정이고,
           근거 없이 반복하면 발신 도메인 평판 관리가 무력해진다. */}
-      <p className="mt-4 border-l-[3px] border-accent pl-4 text-[13px] leading-relaxed text-text-2">
+      <p className="mt-4 rounded-card bg-surface-2 px-4 py-3.5 text-[13px] leading-relaxed text-text-2">
         <b className="font-extrabold text-text-1">해제는 본인 확인 후에만 하세요.</b> 신고당한 주소로
         계속 보내면 발신 도메인 평판이 깎여 <b className="font-bold text-text-1">다른 회원의 메일까지
         스팸함으로</b> 갑니다.

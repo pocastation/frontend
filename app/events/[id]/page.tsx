@@ -86,8 +86,8 @@ export default async function EventFeedPage({
         </div>
 
         {event.status === "CANCELLED" && (
-          <p className="mx-[14px] mt-3 rounded-control border-l-2 border-warn bg-warn-soft px-3 py-2 text-[12.5px] font-semibold text-[#8a5a08] sm:mx-0">
-            휴방·취소된 회차예요. 새 교환글은 올릴 수 없어요.
+          <p className="mx-[14px] mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-[13px] leading-[1.55] text-text-1 sm:mx-0">
+            <b className="font-bold">휴방·취소된 회차예요.</b> 새 교환글은 올릴 수 없어요.
           </p>
         )}
 

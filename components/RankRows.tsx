@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { markNavForward } from "@/lib/nav-transition";
 import { mediaUrl } from "@/lib/api";
 import { formatKRW } from "@/lib/format";
 import { FOCUS_RING } from "@/lib/ui";
@@ -34,7 +35,7 @@ export const ROW_CLASS = "flex w-full items-center gap-2.5 border-b border-borde
 
 export function AuctionRow({ auction, index }: { auction: AuctionResponse; index: number }) {
   return (
-    <Link href={`/auctions/${auction.id}`} className={`${ROW_CLASS} ${FOCUS_RING}`}>
+    <Link href={`/auctions/${auction.id}`} onNavigate={markNavForward} className={`${ROW_CLASS} ${FOCUS_RING}`}>
       <RankNumber index={index} />
       <span className="h-[34px] w-[27px] flex-shrink-0 overflow-hidden rounded-control bg-surface-2">
         {auction.representativeThumbnailUrl && (
@@ -62,7 +63,7 @@ export function AuctionRow({ auction, index }: { auction: AuctionResponse; index
 
 export function SellerRow({ seller, index }: { seller: PopularSellerResponse; index: number }) {
   return (
-    <Link href={`/sellers/${seller.sellerId}`} className={`${ROW_CLASS} ${FOCUS_RING}`}>
+    <Link href={`/sellers/${seller.sellerId}`} onNavigate={markNavForward} className={`${ROW_CLASS} ${FOCUS_RING}`}>
       <RankNumber index={index} />
       <span className="flex h-[34px] w-[34px] flex-shrink-0 items-center justify-center rounded-full bg-surface-2 text-body-s font-bold text-text-2">
         {seller.nickname.slice(0, 1).toUpperCase()}

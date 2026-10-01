@@ -154,6 +154,74 @@ body {
   }
 }
 
+/* 화면 전환(푸시 전환). components/NavTransition.tsx가 「들어가기」(nav-forward)·「뒤로」(nav-back)
+   타입으로 연 View Transition에서만 돈다. 화면 전체 스냅숏(root)을 민다 — 새 화면이 오른쪽에서 덮고,
+   아래 화면은 왼쪽으로 30% 밀리며 어두워진다. 뒤로는 정확히 반대다.
+   모바일(sm 미만)에서만 열린다. 데스크탑과 모션을 줄인 사용자는 전환을 열지 않는다. */
+@keyframes navCoverIn {
+  from { transform: translateX(100%); }
+}
+@keyframes navUnderOut {
+  to { transform: translateX(-30%); filter: brightness(0.9); }
+}
+@keyframes navCoverOut {
+  to { transform: translateX(100%); }
+}
+@keyframes navUnderIn {
+  from { transform: translateX(-30%); filter: brightness(0.9); }
+}
+/* 위저드는 아래에서 올라와 덮고, 닫으면 아래로 내려간다. 아래 화면은 움직이지 않고 어두워지기만 한다. */
+@keyframes navSheetUp {
+  from { transform: translateY(100%); }
+}
+@keyframes navSheetDown {
+  to { transform: translateY(100%); }
+}
+@keyframes navDim {
+  to { filter: brightness(0.85); }
+}
+@keyframes navUndim {
+  from { filter: brightness(0.85); }
+}
+
+@media (max-width: 639.98px) {
+  :root:active-view-transition-type(nav-forward)::view-transition-old(root) {
+    animation: navUnderOut 300ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  :root:active-view-transition-type(nav-forward)::view-transition-new(root) {
+    animation: navCoverIn 300ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  /* 뒤로는 나가는 화면이 위에 있어야 한다. image-pair 안에서 기본은 새 화면이 위다. */
+  :root:active-view-transition-type(nav-back)::view-transition-old(root) {
+    z-index: 1;
+    animation: navCoverOut 300ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  :root:active-view-transition-type(nav-back)::view-transition-new(root) {
+    animation: navUnderIn 300ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  :root:active-view-transition-type(nav-open)::view-transition-old(root) {
+    animation: navDim 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  :root:active-view-transition-type(nav-open)::view-transition-new(root) {
+    animation: navSheetUp 340ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  :root:active-view-transition-type(nav-close)::view-transition-old(root) {
+    z-index: 1;
+    animation: navSheetDown 300ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+  :root:active-view-transition-type(nav-close)::view-transition-new(root) {
+    animation: navUndim 300ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
 /* prefers-reduced-motion 사용자에게는 트랜지션/애니메이션을 사실상 없앤다(접근성). */
 @media (prefers-reduced-motion: reduce) {
   *,

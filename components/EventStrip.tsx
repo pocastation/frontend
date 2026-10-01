@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { markNavForward } from "@/lib/nav-transition";
 import EventList from "@/components/EventList";
 import { addDays, todayInKst, weekStart, weekdayIndex, ymd } from "@/lib/event-dates";
 import { FOCUS_RING, PRESS_CHIP } from "@/lib/ui";
@@ -52,7 +53,7 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
         <h2 className="text-title-s font-extrabold text-text-1 sm:font-display sm:text-title sm:font-extrabold">
           다가오는 행사
         </h2>
-        <Link href="/events" className={`flex items-center gap-0.5 text-label font-semibold text-text-3 ${FOCUS_RING}`}>
+        <Link href="/events" onNavigate={markNavForward} className={`flex items-center gap-0.5 text-label font-semibold text-text-3 ${FOCUS_RING}`}>
           캘린더
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <polyline points="9 18 15 12 9 6" />

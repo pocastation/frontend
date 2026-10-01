@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { markNavForward } from "@/lib/nav-transition";
 import TrustLevelBadge from "@/components/TrustLevelBadge";
 import type { ReactNode } from "react";
 import { FOCUS_RING, PRESS_ROW, PRESS_FADE, LABEL_STRONG } from "@/lib/ui";
@@ -84,7 +85,7 @@ function TabRow({
 
 function LinkRow({ label, href }: { label: string; href: string }) {
   return (
-    <Link href={href} className={`block w-full rounded-control ${PRESS_ROW} ${FOCUS_RING}`}>
+    <Link href={href} onNavigate={markNavForward} className={`block w-full rounded-control ${PRESS_ROW} ${FOCUS_RING}`}>
       <RowShell label={label} />
     </Link>
   );

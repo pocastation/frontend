@@ -37,6 +37,7 @@ import {
   plainLevelLabel,
 } from "@/lib/labels";
 import { FOCUS_RING } from "@/lib/ui";
+import { markNav } from "@/lib/nav-transition";
 import type {
   AuctionListResponse,
   AuctionResponse,
@@ -321,6 +322,8 @@ function MyPageBody() {
   // 지금 보고 있는 화면을 그대로 공유·북마크할 수 있다.
   const selectTab = useCallback(
     (next: Tab) => {
+      // 모바일에서는 메뉴 → 서브 화면으로 한 단계 들어가는 이동이라 화면을 민다(데스크탑은 표시가 무시된다).
+      markNav("forward");
       router.push(`/mypage?tab=${next}`, { scroll: false });
     },
     [router],

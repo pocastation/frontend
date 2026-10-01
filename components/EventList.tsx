@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { kstHm } from "@/lib/event-dates";
 import { FOCUS_RING, LABEL_NEUTRAL } from "@/lib/ui";
 import type { EventResponse, EventType } from "@/lib/types";
+import NavLink from "@/components/NavLink";
 
 const TYPE_LABEL: Record<EventType, string> = {
   MUSIC_SHOW: "음악방송",
@@ -57,7 +57,7 @@ export default function EventList({
     <ul>
       {events.map((event) => (
         <li key={event.id} className="border-b border-border last:border-b-0">
-          <Link href={`/events/${event.id}`} className={`flex items-center gap-2.5 py-[11px] ${FOCUS_RING}`}>
+          <NavLink nav="forward" href={`/events/${event.id}`} className={`flex items-center gap-2.5 py-[11px] ${FOCUS_RING}`}>
             <span
               className={LABEL_NEUTRAL}
             >
@@ -74,7 +74,7 @@ export default function EventList({
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="shrink-0 text-text-3">
               <polyline points="9 18 15 12 9 6" />
             </svg>
-          </Link>
+          </NavLink>
         </li>
       ))}
       {Array.from({ length: fillers }).map((_, i) => (

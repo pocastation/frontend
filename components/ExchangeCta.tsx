@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { markNav } from "@/lib/nav-transition";
 import { usePathname, useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -184,7 +185,10 @@ export default function ExchangeCta({
   return (
     <button
       type="button"
-      onClick={() => router.push(`/exchanges/${postId}/apply`)}
+      onClick={() => {
+        markNav("open");
+        router.push(`/exchanges/${postId}/apply`);
+      }}
       className={`${BUTTON} bg-primary text-white ${PRESS_PRIMARY} ${FOCUS_RING}`}
     >
       교환 신청하기

@@ -21,6 +21,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { markNavForward } from "@/lib/nav-transition";
 import { useRouter } from "next/navigation";
 import AuctionWishlistButton from "@/components/AuctionWishlistButton";
 import DeliveryAddressGateModal from "@/components/DeliveryAddressGateModal";
@@ -202,6 +203,7 @@ export default function MobileInstantDetail({
           {auction.artistName && (
             <Link
               href={`/artists/${auction.artistId}`}
+              onNavigate={markNavForward}
               className={`min-w-0 truncate text-label font-extrabold text-text-2 ${FOCUS_RING}`}
             >
               {auction.artistName}
@@ -285,6 +287,7 @@ export default function MobileInstantDetail({
           {isMatched && isMyOrder ? (
             <Link
               href={`/orders/${auction.id}/payment`}
+            onNavigate={markNavForward}
               className={`flex h-11 flex-1 items-center justify-center rounded-control bg-primary text-body font-extrabold text-white ${FOCUS_RING}`}
             >
               결제하러 가기

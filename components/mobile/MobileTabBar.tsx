@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { FOCUS_RING, PRESS_TAB } from "@/lib/ui";
+import { markNavOpen } from "@/lib/nav-transition";
 
 /**
  * 모바일 하단 5탭 — 전역(#554).
@@ -136,6 +137,8 @@ export default function MobileTabBar() {
             <Link
               key={tab.key}
               href={tab.href}
+              // 판매등록은 탭이 아니라 위저드를 연다. 아래에서 덮는다. 나머지 탭끼리는 밀지 않는다.
+              onNavigate={tab.href === "/auctions/new" ? markNavOpen : undefined}
               aria-current={on ? "page" : undefined}
               /* 눌림은 아이콘과 글자를 함께 흐린다(#720). 탭 바탕이 흰색이라 배경 변화는 보이지
                  않고, scale을 주면 옆 탭과 높이가 어긋나 보인다. */

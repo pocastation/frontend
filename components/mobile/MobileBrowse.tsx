@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { markNavForward } from "@/lib/nav-transition";
 import AuctionCard from "@/components/AuctionCard";
 import { SORT_OPTIONS, type SortKey } from "@/components/AuctionExplorer";
 import { ExploreEmpty, ExploreError } from "@/components/explore-states";
@@ -200,6 +201,7 @@ export default function MobileBrowse({
       {!isInstant && (
         <Link
           href="/auctions/ended"
+          onNavigate={markNavForward}
           className={`mt-6 block border-t border-border px-[14px] py-4 text-center text-body-s font-bold text-text-2 ${FOCUS_RING}`}
         >
           거래 완료된 상품 보기

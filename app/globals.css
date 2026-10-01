@@ -308,20 +308,6 @@ button:not(:disabled) {
   margin-left: auto;
 }
 
-.user-cr {
-  display: inline-flex;
-  height: 28px;
-  min-width: 52px;
-  align-items: center;
-  justify-content: center;
-  border-radius: 9999px;
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 800;
-}
-
 .ic-btn {
   position: relative;
   display: inline-flex;

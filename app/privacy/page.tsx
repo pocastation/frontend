@@ -101,7 +101,7 @@ function Block({ block }: { block: PrivacyBlock }) {
       {/* 아직 시행되지 않은 내용은 정보주체가 오인하지 않도록 규칙선으로 떼어 놓는다.
           페이지 전체에서 이 강조를 쓰는 곳은 여기뿐이다. */}
       {block.note && (
-        <p className="mt-2 border-l-2 border-border-2 pl-3 text-[13px] leading-relaxed text-text-2">
+        <p className="mt-2 rounded-card bg-surface-2 px-3.5 py-3 text-[13px] leading-relaxed text-text-2">
           {block.note}
         </p>
       )}

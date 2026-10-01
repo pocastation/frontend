@@ -21,14 +21,14 @@ export default function AdminNotice({
 }) {
   const tone =
     kind === "error"
-      ? "border-accent text-accent"
+      ? "text-danger"
       : kind === "success"
-        ? "border-ok text-ok"
-        : "border-border-2 text-text-2";
+        ? "text-ok"
+        : "text-text-2";
   return (
     <p
       role={kind === "error" ? "alert" : "status"}
-      className={`border-l-2 py-1 pl-3 text-[13px] font-semibold ${tone} ${className}`}
+      className={`rounded-card bg-surface-2 px-3.5 py-2.5 text-[13px] font-semibold ${tone} ${className}`}
     >
       {children}
     </p>

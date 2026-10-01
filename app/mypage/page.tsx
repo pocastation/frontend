@@ -699,7 +699,7 @@ function MyPageBody() {
                 type="button"
                 onClick={() => selectTab(key)}
                 className={`flex items-center gap-2.5 rounded-control px-2.5 py-2 text-left text-sm font-bold transition-colors ${FOCUS_RING} ${
-                  activeTab === key ? "bg-primary-soft text-primary" : "text-text-2 hover:bg-surface-2"
+                  activeTab === key ? "bg-surface-2 font-extrabold text-text-1" : "text-text-2 hover:bg-surface-2"
                 }`}
               >
                 <Icon />
@@ -716,7 +716,7 @@ function MyPageBody() {
                 type="button"
                 onClick={() => selectTab(key)}
                 className={`flex items-center gap-2.5 rounded-control px-2.5 py-2 text-left text-sm font-bold transition-colors ${FOCUS_RING} ${
-                  activeTab === key ? "bg-primary-soft text-primary" : "text-text-2 hover:bg-surface-2"
+                  activeTab === key ? "bg-surface-2 font-extrabold text-text-1" : "text-text-2 hover:bg-surface-2"
                 }`}
               >
                 <Icon />

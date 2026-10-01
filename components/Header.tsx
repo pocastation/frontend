@@ -272,7 +272,7 @@ export default function Header() {
                 key={link.label}
                 href={link.href}
                 onClick={closeMenu}
-                className={`rounded-control px-2 py-2.5 text-sm font-semibold text-text-2 transition-colors hover:bg-primary-soft hover:text-primary ${FOCUS_RING}`}
+                className={`rounded-control px-2 py-2.5 text-sm font-semibold text-text-2 transition-colors hover:bg-surface-2 hover:text-text-1 ${FOCUS_RING}`}
               >
                 {link.label}
               </Link>

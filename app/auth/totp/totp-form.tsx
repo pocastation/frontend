@@ -522,7 +522,7 @@ export default function AdminTotpForm() {
           )}
           {screen === "backup" && completion && (
             <>
-              <p className="border-l-2 border-border-2 pl-3 text-xs leading-6 text-text-2">
+              <p className="text-xs leading-6 text-text-2">
                 이 화면에서 한 번만 보여드려요.
                 <br />각 코드는 한 번만 사용할 수 있어요.
               </p>
@@ -651,7 +651,7 @@ export default function AdminTotpForm() {
 
 function RecoveryNotice() {
   return (
-    <p className="my-6 border-l-2 border-border-2 pl-3 text-xs leading-6 text-text-2">
+    <p className="my-6 rounded-card bg-surface-2 px-3.5 py-3 text-xs leading-6 text-text-2">
       본인 확인을 완료하면 기존 인증 앱과 복구 코드가 해제되고, 모든 기기에서
       로그아웃돼요.
     </p>

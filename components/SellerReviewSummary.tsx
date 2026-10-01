@@ -16,7 +16,7 @@ const PAGE_SIZE = 5;
 function Stars({ value, className = "" }: { value: number; className?: string }) {
   const full = Math.round(value);
   return (
-    <span className={`tracking-tight text-[#f5b301] ${className}`} aria-label={`별점 ${value.toFixed(1)}점`}>
+    <span className={`tracking-tight text-star ${className}`} aria-label={`별점 ${value.toFixed(1)}점`}>
       {"★★★★★".slice(0, full)}
       <span className="text-border-2">{"★★★★★".slice(full)}</span>
     </span>

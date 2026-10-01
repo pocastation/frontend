@@ -172,7 +172,7 @@ export default function DeliveryAddressModal({
               <label
                 key={a.id}
                 className={`flex cursor-pointer items-start gap-2.5 rounded-card border p-3 text-xs transition-colors ${
-                  selectedId === a.id ? "border-primary bg-primary-soft/30" : "border-border-2 hover:border-text-3"
+                  selectedId === a.id ? "border-primary" : "border-border-2 hover:border-text-3"
                 }`}
               >
                 <input
@@ -203,7 +203,7 @@ export default function DeliveryAddressModal({
 
             <label
               className={`flex cursor-pointer items-center gap-2.5 rounded-card border border-dashed p-3 text-xs font-bold transition-colors ${
-                selectedId === "new" ? "border-primary bg-primary-soft/30 text-primary" : "border-border-2 text-text-2 hover:border-text-3"
+                selectedId === "new" ? "border-primary text-text-1" : "border-border-2 text-text-2 hover:border-text-3"
               }`}
             >
               <input

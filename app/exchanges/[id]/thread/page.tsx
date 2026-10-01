@@ -241,7 +241,7 @@ export default function ExchangeThreadPage() {
         </div>
 
         {error && (
-          <p role="alert" className="mx-[14px] mb-2 rounded-control border-l-2 border-danger bg-danger-soft px-3 py-2 text-[12.5px] font-semibold text-danger">
+          <p role="alert" className="mx-[14px] mb-2 rounded-card bg-surface-2 px-3.5 py-3 text-[13px] font-semibold leading-[1.55] text-danger">
             {error}
           </p>
         )}

@@ -82,7 +82,7 @@ export default function InstantPurchaseSection({
 
   return (
     <div className="mt-6">
-      <div className={`rounded-card border border-border p-4 shadow-card ${isLive ? "bg-primary-soft" : "bg-surface"}`}>
+      <div className="rounded-card border border-border bg-surface p-4">
         <div className="flex items-center justify-between text-xs font-semibold text-text-3">
           <span>판매가</span>
           <span>즉시판매</span>
@@ -105,7 +105,7 @@ export default function InstantPurchaseSection({
         </div>
         <div className="mt-2 flex items-center justify-between text-[11px] text-text-3">
           <span className="font-semibold text-text-2">예상 결제 총액</span>
-          <span className="font-display text-sm font-extrabold text-primary tabular-nums">{formatKRW(total)}</span>
+          <span className="font-display text-sm font-extrabold text-text-1 tabular-nums">{formatKRW(total)}</span>
         </div>
       </div>
 

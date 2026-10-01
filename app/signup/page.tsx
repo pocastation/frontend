@@ -329,7 +329,7 @@ function PasswordRules({
   return (
     <div
       // 떠 있는 층이라 그림자를 쓴다 — 장식이 아니라 아래 내용과 겹친다는 신호다.
-      className="absolute inset-x-0 top-full z-20 mt-1.5 rounded-card border border-border-2 bg-white p-3.5 shadow-[0_4px_16px_rgba(17,17,24,0.08)]"
+      className="absolute inset-x-0 top-full z-20 mt-1.5 rounded-card border border-border-2 bg-white p-3.5 shadow-card"
     >
       <div className="h-[3px] w-full overflow-hidden rounded-full bg-surface-2">
         <div

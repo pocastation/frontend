@@ -293,8 +293,8 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         )}
 
         {error ? (
-          // 진짜 오류만 강조한다 — 좌측 규칙선. 일반 안내는 helper text로 녹인다.
-          <p className="mt-5 border-l-2 border-danger pl-3 text-[13px] leading-relaxed text-text-2">{error}</p>
+          // 진짜 오류만 강조한다 — 회색 안내 상자 + 빨간 글자(#765). 일반 안내는 helper text로 녹인다.
+          <p className="mt-5 rounded-card bg-surface-2 px-3.5 py-3 text-[13px] font-semibold leading-relaxed text-danger">{error}</p>
         ) : null}
 
         {/* 데스크탑 액션 — 모바일은 아래 고정 바가 대신한다. */}
@@ -393,7 +393,7 @@ function MethodChooser({
       </fieldset>
 
       {previousAttemptFailed ? (
-        <p className="mt-4 border-l-2 border-danger pl-3 text-[13px] leading-relaxed text-text-2">
+        <p className="mt-4 rounded-card bg-surface-2 px-3.5 py-3 text-[13px] font-semibold leading-relaxed text-danger">
           지난 결제가 완료되지 않았어요. 다시 시도해 주세요.
         </p>
       ) : null}

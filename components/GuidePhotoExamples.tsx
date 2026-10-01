@@ -12,7 +12,7 @@ export default function GuidePhotoExamples({ shots }: { shots: GuidePhotoShot[] 
 
   return (
     <section className="mt-5 max-w-[520px]" aria-label="필수 4컷 예시">
-      <div className="mb-[9px] flex items-baseline justify-between gap-3 text-[#77738c]">
+      <div className="mb-[9px] flex items-baseline justify-between gap-3 text-text-2">
         <p className="text-[12.5px]">필수 4컷</p>
         <span className="text-[11px]">사진을 누르면 확대돼요</span>
       </div>
@@ -35,7 +35,7 @@ export default function GuidePhotoExamples({ shots }: { shots: GuidePhotoShot[] 
           </figure>
         ))}
       </div>
-      <p className="mt-[9px] text-[11px] leading-relaxed text-[#77738c]">촬영 방법 설명을 위한 AI 생성 예시입니다.</p>
+      <p className="mt-[9px] text-[11px] leading-relaxed text-text-2">촬영 방법 설명을 위한 AI 생성 예시입니다.</p>
       {initialIndex !== null && (
         <GuidePhotoViewer shots={shots} initialIndex={initialIndex} onClose={() => setInitialIndex(null)} />
       )}

@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
-import { STATUS_TONE_CLASS, StatusGlyph, type StatusTone } from "@/components/StatusIcon";
+import { StatusGlyph, type StatusTone } from "@/components/StatusIcon";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ApiError } from "@/lib/api";
+import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { useNotifications } from "@/lib/notification-context";
 import { formatRelativeTime } from "@/lib/format";
@@ -250,7 +250,7 @@ export default function NotificationsPage() {
         </div>
 
         {error && (
-          <p role="alert" className="mx-4 mb-4 mt-4 rounded-card bg-accent-soft px-4 py-3 text-sm font-semibold text-accent sm:mx-0 sm:mt-0">
+          <p role="alert" className="mx-4 mb-4 mt-4 rounded-card bg-surface-2 px-4 py-3 text-sm font-semibold text-danger sm:mx-0 sm:mt-0">
             {error}
           </p>
         )}
@@ -264,7 +264,7 @@ export default function NotificationsPage() {
             <p className="text-xs">거래 성사·결제·발송 소식을 여기서 받아볼 수 있어요.</p>
           </div>
         ) : (
-          // 승인 시안 B — 카테고리 리딩 아이콘(의미색 톤) + 안읽음은 우측 단일 닷. 읽음 행은 배경·아이콘을 가라앉힌다.
+          // 앞자리 상품 사진(없으면 선 아이콘) + 안읽음은 우측 단일 닷(#767). 읽음 행은 배경·사진을 가라앉힌다.
           <ul className="sm:overflow-hidden sm:rounded-card sm:border sm:border-border">
             {notifications.map((notification) => {
               const meta = TYPE_META[notification.type] ?? UNKNOWN_META;
@@ -280,12 +280,27 @@ export default function NotificationsPage() {
                       unread ? "bg-surface" : "bg-surface-2/40"
                     }`}
                   >
-                    <span
-                      className={`mt-px flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[20px] ${STATUS_TONE_CLASS[meta.tone]} ${unread ? "" : "opacity-70"}`}
-                      aria-label={meta.label}
-                    >
-                      <StatusGlyph name={meta.icon} />
-                    </span>
+                    {/*
+                      앞자리는 그 알림이 가리키는 상품 사진이다(#767, BE #554). 종류별 색 원은 알림 30종을
+                      다섯 색으로 나눠 목록을 알록달록하게만 했다. 사진이 없는 알림(교환·사진 없는
+                      판매글)은 색 없는 선 아이콘으로 대신한다.
+                    */}
+                    {notification.thumbnailUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
+                      <img
+                        src={mediaUrl(notification.thumbnailUrl)}
+                        alt=""
+                        loading="lazy"
+                        className={`mt-px h-12 w-10 shrink-0 rounded-control bg-surface-2 object-cover ${unread ? "" : "opacity-70"}`}
+                      />
+                    ) : (
+                      <span
+                        className={`mt-px flex h-10 w-10 shrink-0 items-center justify-center text-[22px] text-text-3 ${unread ? "" : "opacity-70"}`}
+                        aria-label={meta.label}
+                      >
+                        <StatusGlyph name={meta.icon} />
+                      </span>
+                    )}
                     <span className="min-w-0 flex-1">
                       <span className="flex items-baseline gap-2">
                         <span className={`min-w-0 flex-1 truncate text-sm ${unread ? "font-bold text-text-1" : "text-text-2"}`}>

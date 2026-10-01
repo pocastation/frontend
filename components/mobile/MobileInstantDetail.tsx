@@ -34,7 +34,7 @@ import { useDeliveryAddressGate } from "@/lib/use-delivery-address-gate";
 import { buyerFee, estimatedTotal } from "@/lib/fees";
 import { formatKRW } from "@/lib/format";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, LABEL_NEUTRAL } from "@/lib/ui";
 import type { AuctionDetailResponse, AuctionPurchaseResponse, MyOrderStatusResponse } from "@/lib/types";
 
 function ConfirmSheet({
@@ -214,14 +214,14 @@ export default function MobileInstantDetail({
         </h1>
 
         <div className="mt-2.5 flex flex-wrap gap-1.5">
-          <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+          <span className={LABEL_NEUTRAL}>
             {GRADE_LABEL[auction.grade] ?? auction.grade}
           </span>
-          <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+          <span className={LABEL_NEUTRAL}>
             {SOURCE_LABEL[auction.source] ?? auction.source}
           </span>
           {auction.unopened && (
-            <span className="rounded-control border border-border-2 px-2 py-[3px] text-[11px] font-extrabold text-text-2">
+            <span className={LABEL_NEUTRAL}>
               미개봉
             </span>
           )}

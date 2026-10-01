@@ -159,8 +159,8 @@ export default function InstantPurchaseSection({
         <p
           role="alert"
           aria-live="polite"
-          className={`mt-2 rounded-control px-3 py-2 text-xs font-semibold ${
-            message.type === "ok" ? "bg-ok-soft text-ok" : "bg-accent-soft text-accent"
+          className={`mt-2 rounded-card bg-surface-2 px-3 py-2 text-xs font-semibold ${
+            message.type === "ok" ? "text-text-1" : "text-danger"
           }`}
         >
           {message.text}

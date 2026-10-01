@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
-import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
+import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS, LABEL_NEUTRAL } from "@/lib/ui";
 import { loadPostcodeScript } from "@/lib/postcode";
 import { formatPhoneInput } from "@/lib/phone";
 import type { DeliveryAddress } from "@/lib/types";
@@ -96,7 +96,7 @@ export default function DeliveryAddressBook() {
   return (
     <div className="max-w-xl">
       {error && (
-        <p role="alert" className="mb-4 rounded-card bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
+        <p role="alert" className="mb-4 rounded-card bg-surface-2 px-4 py-3 text-sm font-semibold text-danger">
           {error}
         </p>
       )}
@@ -161,7 +161,7 @@ export default function DeliveryAddressBook() {
                       <span className="text-sm font-extrabold text-text-1">{address.label}</span>
                     )}
                     {address.isDefault && (
-                      <span className="rounded-control bg-primary-soft px-2 py-0.5 text-[11px] font-bold text-primary">
+                      <span className={LABEL_NEUTRAL}>
                         기본 배송지
                       </span>
                     )}

@@ -7,7 +7,7 @@ import { useAuth } from "@/lib/auth-context";
 import { AUCTION_REJECTION_REASON_OPTIONS } from "@/lib/labels";
 import MediaZoomViewer from "@/components/MediaZoomViewer";
 import { useDialogFocus } from "@/lib/use-dialog-focus";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, LABEL_NEUTRAL } from "@/lib/ui";
 import type {
   AdminAuctionSummary,
   AdminAuctionVerificationResponse,
@@ -238,7 +238,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                 사진 인증 검수 내용
               </h2>
               {readOnly && (
-                <span className="shrink-0 rounded-control bg-primary-soft px-2 py-0.5 text-[11px] font-bold text-primary">
+                <span className={LABEL_NEUTRAL}>
                   읽기 전용
                 </span>
               )}
@@ -307,7 +307,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
           {loading ? (
             <p className="py-16 text-center text-sm text-text-3">인증 자료를 불러오는 중...</p>
           ) : error && !verification ? (
-            <p className="bg-accent-soft px-4 py-3 text-sm text-accent" role="alert">{error}</p>
+            <p className="rounded-card bg-surface-2 px-4 py-3 text-sm font-semibold text-danger" role="alert">{error}</p>
           ) : verification ? (
             <>
               {readOnly && error && (

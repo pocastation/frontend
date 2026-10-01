@@ -18,7 +18,7 @@ import { AuctionBiddingProvider } from "@/lib/auction-bidding-context";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { INTERMEDIARY_NOTICE } from "@/lib/business";
 import { GRADE_LABEL, SOURCE_LABEL } from "@/lib/labels";
-import { ACTION_ICON_BUTTON, FOCUS_RING } from "@/lib/ui";
+import { ACTION_ICON_BUTTON, FOCUS_RING, LABEL_NEUTRAL } from "@/lib/ui";
 import type { AuctionDetailResponse } from "@/lib/types";
 
 // cache()로 감싸 generateMetadata와 페이지 본문이 같은 요청에서 한 번만 페치하도록 dedup한다.
@@ -74,7 +74,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 // v0 리톤 — 파스텔 필 제거. 해시태그는 헤어라인 칩 + 퍼플 텍스트, 배지는 헤어라인 + 뉴트럴 텍스트로 통일.
 const CHIP_CLASS =
   `rounded-control border border-border px-2 py-0.5 text-xs font-bold text-primary transition-colors hover:border-primary ${FOCUS_RING}`;
-const BADGE_CLASS = "rounded-control border border-border px-2 py-1 text-xs font-bold text-text-2";
+// 상품 정보는 라벨(#767). 회색 면에 글자만 둔다.
+const BADGE_CLASS = LABEL_NEUTRAL;
 
 export default async function AuctionDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

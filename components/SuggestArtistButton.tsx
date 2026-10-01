@@ -137,7 +137,7 @@ export default function SuggestArtistButton() {
             />
 
             {error && (
-              <p role="alert" className="mt-3 rounded-control bg-accent-soft px-3 py-2 text-xs font-semibold text-accent">
+              <p role="alert" className="mt-3 rounded-card bg-surface-2 px-3 py-2 text-xs font-semibold text-danger">
                 {error}
               </p>
             )}

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { kstHm } from "@/lib/event-dates";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, LABEL_NEUTRAL } from "@/lib/ui";
 import type { EventResponse, EventType } from "@/lib/types";
 
 const TYPE_LABEL: Record<EventType, string> = {
@@ -9,18 +9,8 @@ const TYPE_LABEL: Record<EventType, string> = {
   ETC: "행사",
 };
 
-/*
-  종류를 색으로 가른다(#726). 채우기를 쓰지 않는다 — 기록된 톤이 파스텔 필 배지를 금지하고
-  뉴트럴 + 헤어라인을 기준으로 둔다. 테두리와 글자만 색을 맡는다.
-
-  보라(primary)는 상태를 말하는 자리에만 쓰므로 종류 색으로 쓰지 않는다. 기타(ETC)는 이름
-  그대로 나머지라 색을 주지 않는다 — 색이 셋이면 무엇이 특별한지 사라진다.
-*/
-const TYPE_CHIP: Record<EventType, string> = {
-  MUSIC_SHOW: "border-[#1d4ed8] text-[#1d4ed8]",
-  CONCERT: "border-warn text-warn",
-  ETC: "border-border-2 text-text-2",
-};
+// 종류는 색이 아니라 글자로 구분한다(#767) — 셋 모두 중립 라벨이다. 예전(#726)에는 테두리·글자
+// 색으로 갈랐는데, 음악방송 파랑이 서비스 어디에도 없는 색이라 이 칩만 다른 서비스처럼 보였다.
 
 /**
  * 행사 줄 목록. 캘린더와 홈 스트립이 같은 줄을 쓴다.
@@ -69,7 +59,7 @@ export default function EventList({
         <li key={event.id} className="border-b border-border last:border-b-0">
           <Link href={`/events/${event.id}`} className={`flex items-center gap-2.5 py-[11px] ${FOCUS_RING}`}>
             <span
-              className={`shrink-0 rounded-control border px-1.5 py-0.5 text-[10px] font-extrabold ${TYPE_CHIP[event.type]}`}
+              className={LABEL_NEUTRAL}
             >
               {TYPE_LABEL[event.type]}
             </span>
@@ -99,7 +89,7 @@ function FillerRow({ "aria-hidden": ariaHidden }: { "aria-hidden"?: boolean } = 
   return (
     <li aria-hidden={ariaHidden} className={ariaHidden ? "invisible" : undefined}>
       <span className="flex items-center gap-2.5 py-[11px]">
-        <span className="shrink-0 rounded-control border px-1.5 py-0.5 text-[10px] font-extrabold">행사</span>
+        <span className={LABEL_NEUTRAL}>행사</span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[13.5px] font-bold tracking-[-0.01em]">&nbsp;</span>
           <span className="mt-px block truncate text-[11px]">&nbsp;</span>

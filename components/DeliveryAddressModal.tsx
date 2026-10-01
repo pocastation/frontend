@@ -5,7 +5,7 @@ import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { loadPostcodeScript } from "@/lib/postcode";
 import { formatPhoneInput } from "@/lib/phone";
-import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
+import { FOCUS_RING, INPUT_CLASS, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS, LABEL_NEUTRAL } from "@/lib/ui";
 import type { DeliveryAddress } from "@/lib/types";
 
 // 거래 성사 즉시 배송지 입력 팝업(§13 "배송지 자동채움"과 연결) — 기본배송지가 없어 자동 확정되지
@@ -186,7 +186,7 @@ export default function DeliveryAddressModal({
                   <span className="flex items-center gap-1.5 font-bold text-text-1">
                     {a.label && <span>{a.label}</span>}
                     {a.isDefault && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-primary">
+                      <span className={LABEL_NEUTRAL}>
                         기본
                       </span>
                     )}

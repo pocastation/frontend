@@ -155,7 +155,7 @@ export default function InquiriesPage() {
       </div>
 
       {error && (
-        <p role="alert" className="mt-5 rounded-card bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
+        <p role="alert" className="mt-5 rounded-card bg-surface-2 px-4 py-3 text-sm font-semibold text-danger">
           {error}
         </p>
       )}

@@ -5,7 +5,7 @@ import { apiFetch, ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { REVIEW_REPORT_REASON_LABEL, REVIEW_REPORT_REASON_OPTIONS, plainLevelLabel } from "@/lib/labels";
 import { formatRelativeTime } from "@/lib/format";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, LABEL_NEUTRAL } from "@/lib/ui";
 import BadgeChips from "@/components/BadgeChips";
 import TrustLevelBadge from "@/components/TrustLevelBadge";
 import type { ReviewReportReason, ReviewResponse, SellerRatingResponse, SellerReviewListResponse } from "@/lib/types";
@@ -219,7 +219,7 @@ function ReviewRow({
       {review.tags.length > 0 && (
         <div className="mt-1.5 flex flex-wrap gap-1">
           {review.tags.map((t) => (
-            <span key={t.code} className="rounded-control border border-border px-1.5 py-0.5 text-[10px] font-semibold text-text-2">
+            <span key={t.code} className={LABEL_NEUTRAL}>
               {t.label}
             </span>
           ))}

@@ -13,9 +13,9 @@ export const INQUIRY_STATUS_LABEL: Record<InquiryStatus, string> = {
 };
 
 export const INQUIRY_STATUS_CLASS: Record<InquiryStatus, string> = {
-  RECEIVED: "bg-surface-3 text-text-2",
-  CHECKING: "bg-primary-soft text-primary",
-  ANSWERED: "bg-ok-soft text-ok",
+  RECEIVED: "font-semibold text-text-2",
+  CHECKING: "font-semibold text-text-2",
+  ANSWERED: "font-bold text-text-1",
 };
 
 export const INQUIRY_CATEGORY_LABEL: Record<InquiryCategory, string> = {

@@ -425,7 +425,7 @@ export default function AdminMembersPage() {
               </div>
 
               {detail.status === "SUSPENDED" && detail.suspensionReason && (
-                <p className="mt-3 rounded-control bg-accent-soft px-3 py-2 text-[12px] text-accent">
+                <p className="mt-3 rounded-card bg-surface-2 px-3 py-2 text-[12px] font-semibold text-danger">
                   정지 사유: {detail.suspensionReason}
                 </p>
               )}
@@ -434,7 +434,7 @@ export default function AdminMembersPage() {
                 <p
                   role={notice.kind === "error" ? "alert" : "status"}
                   className={`mt-3 rounded-control px-3 py-2 text-[12px] font-semibold ${
-                    notice.kind === "error" ? "bg-accent-soft text-accent" : "bg-ok-soft text-ok"
+                    notice.kind === "error" ? "bg-surface-2 text-danger" : "bg-surface-2 text-text-1"
                   }`}
                 >
                   {notice.text}

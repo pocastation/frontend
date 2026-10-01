@@ -117,9 +117,9 @@ export function ExploreError({
   return (
     <div
       role="alert"
-      className="flex items-center gap-3 rounded-card border border-accent/25 bg-accent-soft px-4 py-3.5"
+      className="flex items-center gap-3 rounded-card bg-surface-2 px-4 py-3.5"
     >
-      <span className="shrink-0 text-accent" aria-hidden="true">
+      <span className="shrink-0 text-danger" aria-hidden="true">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="8" x2="12" y2="12" />

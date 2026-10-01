@@ -757,7 +757,7 @@ function MyPageBody() {
         className={`scroll-mt-4 px-3.5 pb-8 pt-3.5 sm:px-0 sm:pb-0 sm:pt-0 ${tab === null ? "hidden sm:block" : ""}`}
       >
         {error && (
-          <p role="alert" className="mb-4 rounded-card bg-accent-soft px-4 py-3 text-sm font-semibold text-accent">
+          <p role="alert" className="mb-4 rounded-card bg-surface-2 px-4 py-3 text-sm font-semibold text-danger">
             {error}
           </p>
         )}

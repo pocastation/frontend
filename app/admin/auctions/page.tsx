@@ -370,7 +370,7 @@ export default function AdminAuctionsPage() {
                     className={`px-4 py-3 ${
                       a.status === "PENDING_REVIEW"
                         ? "border-l-2 border-l-[var(--color-star-line)]"
-                        : a.status === "REJECTED" || a.status === "CANCELLED"
+                        : a.status === "REJECTED"
                           ? "border-l-2 border-l-accent"
                           : "border-l-2 border-l-transparent"
                     }`}

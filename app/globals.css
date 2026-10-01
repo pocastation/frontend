@@ -52,6 +52,32 @@
   --radius-card: 12px; /* 카드·이미지 타일·패널·모달·토스트 */
   --radius-sheet: 16px; /* 바텀시트 상단 */
 
+  /* 타입 스케일(#761). 글자 크기는 이 9단계만 쓴다. 실측에서 사용이 몰린 지점을 골랐다 —
+     0.5px 단위(12.5·11.5·13.5px)는 눈으로 구분되지 않아 위계 없이 어수선하기만 했다.
+     클래스는 text-caption·text-body 식이고 줄간격·자간이 함께 따라온다. */
+  --text-caption: 11px; /* 배지·오버레이 칩·메타 */
+  --text-caption--line-height: 1.45;
+  --text-label: 12px; /* 폼 라벨·보조 메타·helper */
+  --text-label--line-height: 1.5;
+  --text-body-s: 13px; /* 보조 본문·목록 본문·상품명 */
+  --text-body-s--line-height: 1.55;
+  --text-body: 14px; /* 기본 본문·버튼 */
+  --text-body--line-height: 1.6;
+  --text-body-l: 15px; /* 입력칸 값·강조 본문 */
+  --text-body-l--line-height: 1.6;
+  --text-title-s: 18px; /* 카드·시트 제목 */
+  --text-title-s--line-height: 1.4;
+  --text-title-s--letter-spacing: -0.01em;
+  --text-title: 20px; /* 섹션 제목 */
+  --text-title--line-height: 1.35;
+  --text-title--letter-spacing: -0.02em;
+  --text-title-l: 24px; /* 페이지 제목 */
+  --text-title-l--line-height: 1.3;
+  --text-title-l--letter-spacing: -0.02em;
+  --text-display: 28px; /* 히어로·브랜드 면 */
+  --text-display--line-height: 1.25;
+  --text-display--letter-spacing: -0.03em;
+
   --shadow-card: 0 1px 3px rgba(17, 17, 24, 0.06), 0 4px 16px rgba(17, 17, 24, 0.04);
   /* --shadow-primary(보라 글로우)는 #277에서 제거했다. 장식 그림자라 남겨두면 다시 쓰인다. */
   --shadow-modal: 0 24px 64px rgba(17, 17, 24, 0.16);

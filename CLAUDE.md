@@ -104,7 +104,8 @@
 - **카드는 실제로 분리돼야 하는 콘텐츠에만.** 한 페이지에 강조 패널은 하나면 충분하다
 - **정보 중요도에 따라 시각적 weight를 다르게.** 모든 섹션이 같은 패턴일 필요 없다 — **일관성과 반복을 구분한다**
 - **radius는 역할 토큰 3개만 쓴다**(#758). `rounded-control` 8px(버튼·입력·칩·배지) / `rounded-card` 12px(카드·이미지 타일·패널·모달·토스트) / `rounded-sheet` 16px(바텀시트 상단) / 배경띠 0. `rounded-[Npx]`·숫자 토큰·Tailwind 기본 radius는 lint 에러다
-- **폼에서는 입력 UI가 설명보다 앞선다** — 라벨 13px → 입력칸 15px·높이 48px → helper 12px
+- **글자 크기는 타입 토큰 9단계만 쓴다**(#761). `text-caption` 11 / `text-label` 12 / `text-body-s` 13 / `text-body` 14 / `text-body-l` 15 / `text-title-s` 18 / `text-title` 20 / `text-title-l` 24 / `text-display` 28. 줄간격·자간이 토큰에 붙어 있으니 `leading-*`·`tracking-*`를 따로 얹지 않는다. 새 코드에 `text-[Npx]`·`text-xs` 같은 값을 쓰지 않는다(기존 코드는 이관 예정)
+- **폼에서는 입력 UI가 설명보다 앞선다** — 라벨 13px(`text-body-s`) → 입력칸 15px(`text-body-l`)·높이 48px → helper 12px(`text-label`)
 - **보라(`primary`)는 상태를 말하는 자리에만** — primary CTA, 선택된 상태, 활성 탭, 필수 표시, focus. 배경·아이콘·제목에는 쓰지 않는다
 - 나머지는 white / near-white / gray / ink
 - 진짜 경고만 강조(좌측 규칙선). 일반 안내는 helper text로 녹인다

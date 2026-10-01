@@ -52,12 +52,12 @@ export default function VideoUploadField({ video, onSelect, onRemove }: Props) {
       <label
         className={`flex aspect-video w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-card border border-dashed border-border-2 text-text-3 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
       >
-        <span className="text-2xl leading-none" aria-hidden="true">
+        <span className="text-title-l leading-none" aria-hidden="true">
           +
         </span>
-        <span className="text-xs font-semibold">영상 선택</span>
+        <span className="text-label font-semibold">영상 선택</span>
         {/* 규칙 문구는 검증 상수에서 그대로 만든다 — 문구와 실제 판정이 어긋나면 그게 더 나쁘다. */}
-        <span className="text-[11px]">
+        <span className="text-caption">
           MP4·MOV·WebM · {MIN_VIDEO_DURATION_SEC}~{MAX_VIDEO_DURATION_SEC}초 · {MAX_VIDEO_SIZE_MB}MB 이하
         </span>
         <input
@@ -103,13 +103,13 @@ export default function VideoUploadField({ video, onSelect, onRemove }: Props) {
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/60 text-white">
           {progressPercent != null ? (
             <>
-              <span className="font-display text-lg font-bold tabular-nums">{progressPercent}%</span>
-              <span className="text-[10.5px] text-white/70 tabular-nums">
+              <span className="font-display text-title-s font-bold tabular-nums">{progressPercent}%</span>
+              <span className="text-caption text-white/70 tabular-nums">
                 업로드 중 · {formatMb(video.uploadedBytes ?? 0)} / {formatMb(video.totalBytes ?? 0)}
               </span>
             </>
           ) : (
-            <span className="text-xs">업로드 중…</span>
+            <span className="text-label">업로드 중…</span>
           )}
           <span className="absolute inset-x-0 bottom-0 h-[3px] bg-white/20" aria-hidden="true">
             <span className="block h-full bg-primary" style={{ width: `${progressPercent ?? 0}%` }} />
@@ -119,19 +119,19 @@ export default function VideoUploadField({ video, onSelect, onRemove }: Props) {
       {video.status === "processing" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-black/60 text-white">
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" aria-hidden="true" />
-          <span className="text-xs">영상 처리 중…</span>
+          <span className="text-label">영상 처리 중…</span>
           {/* 폼이 잠긴 게 아니라는 걸 문구가 말해준다 — 등록 버튼만 처리 완료를 기다린다. */}
-          <span className="text-[10px] text-white/60">그동안 다른 항목을 계속 작성하셔도 돼요</span>
+          <span className="text-caption text-white/60">그동안 다른 항목을 계속 작성하셔도 돼요</span>
         </div>
       )}
       {video.status === "error" && (
-        <div className="absolute inset-0 flex items-center justify-center bg-black/60 px-3 text-center text-xs text-white">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60 px-3 text-center text-label text-white">
           {video.error ?? "영상 처리에 실패했어요"}
         </div>
       )}
       {video.status === "ready" && (
         <>
-          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-control bg-black/60 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-control bg-black/60 px-1.5 py-0.5 text-caption font-semibold text-white">
             처리 완료
           </span>
           {!playing && (
@@ -141,7 +141,7 @@ export default function VideoUploadField({ video, onSelect, onRemove }: Props) {
               onClick={() => setPlaying(true)}
               className={`absolute inset-0 flex items-center justify-center ${FOCUS_RING}`}
             >
-              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/55 pl-0.5 text-[15px] text-white">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/55 pl-0.5 text-body-l text-white">
                 ▶
               </span>
             </button>
@@ -153,7 +153,7 @@ export default function VideoUploadField({ video, onSelect, onRemove }: Props) {
         type="button"
         aria-label="영상 삭제"
         onClick={onRemove}
-        className={`absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-sm text-white transition-transform hover:scale-110 active:scale-95 ${FOCUS_RING}`}
+        className={`absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-body text-white transition-transform hover:scale-110 active:scale-95 ${FOCUS_RING}`}
       >
         ×
       </button>

@@ -28,8 +28,8 @@ import AdminNotice from "@/components/AdminNotice";
 function Stat({ label, value, href }: { label: string; value: string; href?: string }) {
   const content = (
     <>
-      <p className="text-xs font-bold text-text-3">{label}</p>
-      <p className="mt-1 font-display text-2xl font-extrabold tabular-nums text-text-1">{value}</p>
+      <p className="text-label font-bold text-text-3">{label}</p>
+      <p className="mt-1 font-display text-title-l font-extrabold tabular-nums text-text-1">{value}</p>
     </>
   );
 
@@ -85,8 +85,8 @@ export default function AdminDashboardPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">대시보드</h1>
-      <p className="mt-1.5 text-sm text-text-3">Pocastation 운영 현황을 한눈에 확인하세요.</p>
+      <h1 className="font-display text-title-l font-extrabold text-text-1">대시보드</h1>
+      <p className="mt-1.5 text-body text-text-3">Pocastation 운영 현황을 한눈에 확인하세요.</p>
 
       {error && (
         <AdminNotice kind="error" className="mt-5">
@@ -116,30 +116,30 @@ export default function AdminDashboardPage() {
       <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-2">
         <section className="rounded-card border border-border bg-surface p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-sm font-extrabold text-text-1">최근 가입 회원</h2>
-            <Link href="/admin/members" className={`text-xs font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
+            <h2 className="font-display text-body font-extrabold text-text-1">최근 가입 회원</h2>
+            <Link href="/admin/members" className={`text-label font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
               전체 보기 →
             </Link>
           </div>
           {loading ? (
-            <p className="py-6 text-center text-sm text-text-3">불러오는 중...</p>
+            <p className="py-6 text-center text-body text-text-3">불러오는 중...</p>
           ) : !data || data.recentMembers.length === 0 ? (
-            <p className="py-6 text-center text-sm text-text-3">가입한 회원이 없습니다.</p>
+            <p className="py-6 text-center text-body text-text-3">가입한 회원이 없습니다.</p>
           ) : (
             <ul className="flex flex-col divide-y divide-border">
               {data.recentMembers.map((m) => (
                 <li key={m.id} className="flex items-center gap-3 py-2.5">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-soft text-xs font-bold text-primary">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-soft text-label font-bold text-primary">
                     {m.nickname.slice(0, 1).toUpperCase()}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-bold text-text-1">{m.nickname}</span>
-                    <span className="block truncate text-[11px] text-text-3">{PROVIDER_LABEL[m.provider] ?? m.provider}</span>
+                    <span className="block truncate text-body font-bold text-text-1">{m.nickname}</span>
+                    <span className="block truncate text-caption text-text-3">{PROVIDER_LABEL[m.provider] ?? m.provider}</span>
                   </span>
                   <StatusBadge tone={MEMBER_STATUS_TONE[m.status]} className="shrink-0">
                     {MEMBER_STATUS_LABEL[m.status]}
                   </StatusBadge>
-                  <span className="shrink-0 text-[11px] tabular-nums text-text-3">{formatDate(m.createdAt)}</span>
+                  <span className="shrink-0 text-caption tabular-nums text-text-3">{formatDate(m.createdAt)}</span>
                 </li>
               ))}
             </ul>
@@ -148,15 +148,15 @@ export default function AdminDashboardPage() {
 
         <section className="rounded-card border border-border bg-surface p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-sm font-extrabold text-text-1">최근 등록 판매글</h2>
-            <Link href="/auctions" className={`text-xs font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
+            <h2 className="font-display text-body font-extrabold text-text-1">최근 등록 판매글</h2>
+            <Link href="/auctions" className={`text-label font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
               전체 보기 →
             </Link>
           </div>
           {loading ? (
-            <p className="py-6 text-center text-sm text-text-3">불러오는 중...</p>
+            <p className="py-6 text-center text-body text-text-3">불러오는 중...</p>
           ) : !data || data.recentAuctions.length === 0 ? (
-            <p className="py-6 text-center text-sm text-text-3">등록된 판매글이 없습니다.</p>
+            <p className="py-6 text-center text-body text-text-3">등록된 판매글이 없습니다.</p>
           ) : (
             <ul className="flex flex-col divide-y divide-border">
               {data.recentAuctions.map((a) => (
@@ -169,11 +169,11 @@ export default function AdminDashboardPage() {
                       )}
                     </span>
                     <span className="min-w-0 flex-1">
-                      {a.artistName && <span className="block truncate text-[11px] font-bold text-primary">{a.artistName}</span>}
-                      <span className="block truncate text-sm font-bold text-text-1">{a.title}</span>
+                      {a.artistName && <span className="block truncate text-caption font-bold text-primary">{a.artistName}</span>}
+                      <span className="block truncate text-body font-bold text-text-1">{a.title}</span>
                     </span>
                     <span className="shrink-0 text-right">
-                      <span className="block font-display text-xs font-extrabold text-text-1">{formatKRW(a.startPrice)}</span>
+                      <span className="block font-display text-label font-extrabold text-text-1">{formatKRW(a.startPrice)}</span>
                       {/* 공개 전 상태는 눌러도 상세가 안 열리므로, 왜 그런지 상태로 알려준다. */}
                       {!PUBLIC_AUCTION_STATUSES.has(a.status) && (
                         <StatusBadge tone={AUCTION_STATUS_TONE[a.status]} className="mt-1">

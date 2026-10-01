@@ -21,6 +21,15 @@ const eslintConfig = defineConfig([
           selector: "TemplateElement[value.raw=/\\brounded(-[a-z]{1,2})?-(\\[|r[0-9]\\b|(sm|md|lg|xl|2xl|3xl)\\b)/]",
           message: "radius는 rounded-control·rounded-card·rounded-sheet(원형은 rounded-full)만 씁니다.",
         },
+        // 글자 크기는 타입 토큰 9단계만 쓴다(#769). 0.5px 단위 임의 크기가 30종까지 늘었었다.
+        {
+          selector: "Literal[value=/(^|[\\s:])text-(\\[[0-9.]+px\\]|(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl)\\b)/]",
+          message: "글자 크기는 text-caption·label·body-s·body·body-l·title-s·title·title-l·display만 씁니다.",
+        },
+        {
+          selector: "TemplateElement[value.raw=/(^|[\\s:])text-(\\[[0-9.]+px\\]|(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl)\\b)/]",
+          message: "글자 크기는 text-caption·label·body-s·body·body-l·title-s·title·title-l·display만 씁니다.",
+        },
       ],
     },
   },

@@ -110,7 +110,7 @@ export default function PaymentMethodManager() {
   }
 
   if (loading) {
-    return <p className="py-10 text-center text-sm text-text-3">불러오는 중...</p>;
+    return <p className="py-10 text-center text-body text-text-3">불러오는 중...</p>;
   }
 
   return (
@@ -118,7 +118,7 @@ export default function PaymentMethodManager() {
       {message && (
         <p
           role={message.type === "err" ? "alert" : "status"}
-          className={`mb-4 rounded-card px-4 py-3 text-sm font-semibold ${
+          className={`mb-4 rounded-card px-4 py-3 text-body font-semibold ${
             message.type === "err" ? "bg-accent-soft text-accent" : "bg-ok-soft text-ok"
           }`}
         >
@@ -128,8 +128,8 @@ export default function PaymentMethodManager() {
 
       {methods.length === 0 ? (
         <div className="flex flex-col items-start gap-3 rounded-card border border-dashed border-border-2 p-6">
-          <p className="text-sm font-bold text-text-2">등록된 카드가 없어요.</p>
-          <p className="text-xs text-text-3">
+          <p className="text-body font-bold text-text-2">등록된 카드가 없어요.</p>
+          <p className="text-label text-text-3">
             거래 성사 시 자동 결제에 사용할 카드를 미리 등록해 두세요. 카드번호는 결제사(PG) 창에서만
             입력되고 서버에 저장되지 않아요.
           </p>
@@ -154,7 +154,7 @@ export default function PaymentMethodManager() {
                       type="button"
                       onClick={() => handleSetDefault(method)}
                       disabled={busy}
-                      className={`px-3 py-1.5 text-xs disabled:opacity-50 ${SECONDARY_BUTTON_CLASS}`}
+                      className={`px-3 py-1.5 text-label disabled:opacity-50 ${SECONDARY_BUTTON_CLASS}`}
                     >
                       기본으로 설정
                     </button>
@@ -163,7 +163,7 @@ export default function PaymentMethodManager() {
                     type="button"
                     onClick={() => handleDelete(method)}
                     disabled={busy}
-                    className={`px-3 py-1.5 text-xs font-bold text-text-3 transition-colors hover:text-accent disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`px-3 py-1.5 text-label font-bold text-text-3 transition-colors hover:text-accent disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     삭제
                   </button>
@@ -173,14 +173,14 @@ export default function PaymentMethodManager() {
           </ul>
 
           <div className="mt-4 flex items-center justify-between">
-            <p className="text-xs text-text-3">
+            <p className="text-label text-text-3">
               {methods.length}/{MAX_METHODS}장 등록됨
             </p>
             <button
               type="button"
               onClick={handleRegister}
               disabled={busy || methods.length >= MAX_METHODS}
-              className={`px-4 py-2 text-sm disabled:opacity-50 ${SECONDARY_BUTTON_CLASS}`}
+              className={`px-4 py-2 text-body disabled:opacity-50 ${SECONDARY_BUTTON_CLASS}`}
             >
               {busy ? "진행 중..." : "카드 추가"}
             </button>
@@ -201,18 +201,18 @@ function CardVisual({ method }: { method: PaymentMethod }) {
       style={{ backgroundImage: `linear-gradient(135deg, ${style.from}, ${style.to})` }}
     >
       <div className="flex items-start justify-between">
-        <span className="text-sm font-extrabold tracking-tight" style={{ color: style.text }}>
+        <span className="text-body font-extrabold" style={{ color: style.text }}>
           {method.cardName ?? "등록된 카드"}
         </span>
         {method.isDefault && (
-          <span className="flex items-center gap-1.5 text-[11px] font-bold" style={{ color: style.text }}>
+          <span className="flex items-center gap-1.5 text-caption font-bold" style={{ color: style.text }}>
             기본
           </span>
         )}
       </div>
       {/* EMV 칩 느낌의 최소 장식 — 이미지 자산 없이 CSS만으로 "카드처럼" 보이게 한다. */}
       <div className="h-6 w-8 rounded-control bg-white/25" />
-      <p className="font-mono text-[15px] tracking-[0.08em] tabular-nums" style={{ color: style.text }}>
+      <p className="font-mono text-body-l tracking-[0.08em] tabular-nums" style={{ color: style.text }}>
         {method.cardNumber ? formatCardNumber(method.cardNumber) : "•••• •••• •••• ••••"}
       </p>
     </div>

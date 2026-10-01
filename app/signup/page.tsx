@@ -27,15 +27,15 @@ import {
 // 입력칸 — 라벨(13px)보다 크고(15px·높이 48px) helper(12px)보다 확실히 앞선다.
 // 가입 폼에서 시각적으로 가장 앞에 있어야 하는 건 설명이 아니라 실제로 조작하는 칸이다.
 const FIELD =
-  "h-12 w-full rounded-control border border-border-2 bg-white px-3.5 text-[15px] text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary";
+  "h-12 w-full rounded-control border border-border-2 bg-white px-3.5 text-body-l text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary";
 
 function Label({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
     <span className="flex items-baseline gap-1">
-      <span className="text-[13px] font-extrabold tracking-[-0.01em] text-text-1">{children}</span>
+      <span className="text-body-s font-extrabold text-text-1">{children}</span>
       {required && (
         <>
-          <span aria-hidden="true" className="text-[13px] font-extrabold text-primary">
+          <span aria-hidden="true" className="text-body-s font-extrabold text-primary">
             *
           </span>
           <span className="sr-only">필수</span>
@@ -150,7 +150,7 @@ export default function SignupPage() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-[380px] px-5 py-24 text-center text-sm text-text-3">
+      <div className="mx-auto max-w-[380px] px-5 py-24 text-center text-body text-text-3">
         불러오는 중...
       </div>
     );
@@ -166,10 +166,10 @@ export default function SignupPage() {
   return (
     <div className="mx-auto max-w-[380px] px-5 pt-12 pb-16">
       <header>
-        <h1 className="font-display text-[24px] font-extrabold tracking-[-0.035em] text-text-1">
+        <h1 className="font-display text-title-l font-extrabold text-text-1">
           회원가입
         </h1>
-        <p className="mt-2 text-[13px] leading-[1.7] text-text-2">
+        <p className="mt-2 text-body-s text-text-2">
           {identityRequired
             ? "휴대폰 본인인증을 마치면 입력하신 주소로 인증 메일을 보내드려요. 링크를 눌러야 가입이 끝나요."
             : "입력하신 주소로 인증 메일을 보내드려요. 링크를 눌러야 가입이 끝나요."}
@@ -191,7 +191,7 @@ export default function SignupPage() {
             onChange={(e) => setEmail(e.target.value)}
             className={`mt-2 ${FIELD} ${FOCUS_RING}`}
           />
-          <p className="mt-1.5 text-[12px] leading-[1.65] text-text-3">
+          <p className="mt-1.5 text-label text-text-3">
             이 주소로 인증 링크가 가요. 오타가 있으면 메일을 받을 수 없어요.
           </p>
         </div>
@@ -242,7 +242,7 @@ export default function SignupPage() {
             className={`mt-2 ${FIELD} ${FOCUS_RING} ${confirmMismatch ? "border-danger" : ""}`}
           />
           {/* 제출까지 기다리지 않고 치는 중에 알려준다 — 그래야 다시 치는 수고가 줄어든다. */}
-          <p aria-live="polite" className="mt-1.5 min-h-[16px] text-[12px] text-danger">
+          <p aria-live="polite" className="mt-1.5 min-h-[16px] text-label text-danger">
             {confirmMismatch ? "비밀번호가 서로 달라요." : ""}
           </p>
         </div>
@@ -271,14 +271,14 @@ export default function SignupPage() {
           <ConsentFields values={consents} onChange={setConsents} />
         </div>
 
-        <p role="alert" aria-live="polite" className="min-h-[18px] text-[12.5px] font-bold text-danger">
+        <p role="alert" aria-live="polite" className="min-h-[18px] text-body-s font-bold text-danger">
           {error}
         </p>
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className={`flex h-[52px] w-full items-center justify-center rounded-control bg-primary text-[15px] font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
+          className={`flex h-[52px] w-full items-center justify-center rounded-control bg-primary text-body-l font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
         >
           {/* 문구가 다음에 무슨 일이 일어나는지 말한다 — 관문이 켜져 있으면 이 버튼이 인증창을 띄운다.
               "가입하기"로 두면 눌렀을 때 인증창이 뜨는 게 예고 없는 일이 된다. */}
@@ -290,7 +290,7 @@ export default function SignupPage() {
         </button>
       </form>
 
-      <p className="mt-6 text-center text-[12.5px] text-text-3">
+      <p className="mt-6 text-center text-body-s text-text-3">
         이미 계정이 있으신가요?{" "}
         <Link
           href="/login"
@@ -340,10 +340,10 @@ function PasswordRules({
 
       <ul className="mt-3 flex flex-col gap-1.5">
         {checks.map((c) => (
-          <li key={c.label} className="flex items-center gap-2 text-[12.5px] leading-[1.5]">
+          <li key={c.label} className="flex items-center gap-2 text-body-s">
             <span
               aria-hidden="true"
-              className={`w-3 shrink-0 text-center text-[11px] font-bold ${
+              className={`w-3 shrink-0 text-center text-caption font-bold ${
                 !touched ? "text-text-3" : c.ok ? "text-ok" : "text-danger"
               }`}
             >
@@ -409,11 +409,11 @@ function MailSentNotice({ email }: { email: string }) {
 
   return (
     <div className="mx-auto max-w-[420px] px-5 pt-14 pb-16">
-      <p className="text-[11px] font-extrabold tracking-[0.08em] text-text-3">한 단계 남았어요</p>
-      <h1 className="mt-2 font-display text-[24px] font-extrabold tracking-[-0.035em] text-text-1">
+      <p className="text-caption font-extrabold tracking-[0.08em] text-text-3">한 단계 남았어요</p>
+      <h1 className="mt-2 font-display text-title-l font-extrabold text-text-1">
         메일함을 확인해 주세요
       </h1>
-      <p className="mt-3 text-[13.5px] leading-[1.8] text-text-2">
+      <p className="mt-3 text-body text-text-2">
         <b className="font-extrabold text-text-1">{email}</b> 으로 인증 링크를 보냈어요.{" "}
         <b className="font-extrabold text-text-1">링크를 눌러야 가입이 끝나요.</b>
       </p>
@@ -425,8 +425,8 @@ function MailSentNotice({ email }: { email: string }) {
           ["주소를 잘못 적었다면", "처음부터 다시 가입하면 돼요"],
         ].map(([k, v]) => (
           <div key={k} className="flex gap-4 py-3">
-            <dt className="w-[104px] shrink-0 text-[12.5px] font-extrabold text-text-1">{k}</dt>
-            <dd className="text-[12.5px] leading-[1.65] text-text-2">{v}</dd>
+            <dt className="w-[104px] shrink-0 text-body-s font-extrabold text-text-1">{k}</dt>
+            <dd className="text-body-s text-text-2">{v}</dd>
           </div>
         ))}
       </dl>
@@ -436,19 +436,19 @@ function MailSentNotice({ email }: { email: string }) {
           type="button"
           onClick={resend}
           disabled={status === "sending"}
-          className={`inline-flex h-11 items-center rounded-control border border-border-2 px-5 text-[13.5px] font-bold text-text-1 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
+          className={`inline-flex h-11 items-center rounded-control border border-border-2 px-5 text-body font-bold text-text-1 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
         >
           {status === "sending" ? "보내는 중..." : "인증 메일 다시 보내기"}
         </button>
         <Link
           href="/login"
-          className={`text-[13px] font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-text-1 hover:decoration-text-1 ${FOCUS_RING}`}
+          className={`text-body-s font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-text-1 hover:decoration-text-1 ${FOCUS_RING}`}
         >
           로그인 화면으로
         </Link>
       </div>
 
-      <p aria-live="polite" className="mt-3 min-h-[18px] text-[12.5px] font-bold text-text-2">
+      <p aria-live="polite" className="mt-3 min-h-[18px] text-body-s font-bold text-text-2">
         {message}
       </p>
     </div>

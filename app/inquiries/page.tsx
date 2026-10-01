@@ -109,21 +109,21 @@ export default function InquiriesPage() {
   }
 
   if (isLoading || !accessToken) {
-    return <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">문의 내역을 불러오는 중...</div>;
+    return <div className="mx-auto max-w-sm px-4 py-24 text-center text-body text-text-3">문의 내역을 불러오는 중...</div>;
   }
 
   return (
     <main className="mx-auto w-full max-w-[880px] px-4 py-8 sm:py-11">
       <header className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-extrabold text-primary">고객지원</p>
-          <h1 className="mt-1 font-display text-2xl font-extrabold text-text-1 sm:text-[28px]">1:1 문의</h1>
-          <p className="mt-2 text-sm text-text-3">접수한 문의와 답변을 한곳에서 확인하세요.</p>
+          <p className="text-label font-extrabold text-primary">고객지원</p>
+          <h1 className="mt-1 font-display text-title-l font-extrabold text-text-1 sm:text-display">1:1 문의</h1>
+          <p className="mt-2 text-body text-text-3">접수한 문의와 답변을 한곳에서 확인하세요.</p>
         </div>
         <Link
           href="/inquiries/new"
           className={
-            "inline-flex h-10 shrink-0 items-center justify-center rounded-control bg-primary px-4 text-sm font-extrabold text-white transition-colors hover:bg-primary-dark " +
+            "inline-flex h-10 shrink-0 items-center justify-center rounded-control bg-primary px-4 text-body font-extrabold text-white transition-colors hover:bg-primary-dark " +
             FOCUS_RING
           }
         >
@@ -141,7 +141,7 @@ export default function InquiriesPage() {
               aria-pressed={active}
               onClick={() => setFilter(item.value)}
               className={
-                "h-9 shrink-0 rounded-control border px-4 text-sm font-bold transition-colors " +
+                "h-9 shrink-0 rounded-control border px-4 text-body font-bold transition-colors " +
                 FOCUS_RING +
                 (active
                   ? " border-primary bg-primary text-white"
@@ -155,24 +155,24 @@ export default function InquiriesPage() {
       </div>
 
       {error && (
-        <p role="alert" className="mt-5 rounded-card bg-surface-2 px-4 py-3 text-sm font-semibold text-danger">
+        <p role="alert" className="mt-5 rounded-card bg-surface-2 px-4 py-3 text-body font-semibold text-danger">
           {error}
         </p>
       )}
 
       {loading ? (
-        <p className="py-24 text-center text-sm text-text-3">불러오는 중...</p>
+        <p className="py-24 text-center text-body text-text-3">불러오는 중...</p>
       ) : items.length === 0 ? (
         <section className="mt-5 flex min-h-[360px] flex-col items-center justify-center border-y border-border bg-surface-2/40 px-4 text-center text-text-3">
           <EmptyInquiryIcon />
-          <p className="mt-4 text-base font-bold text-text-2">
+          <p className="mt-4 text-body-l font-bold text-text-2">
             {filter === "ALL" ? "아직 문의 내역이 없어요" : "해당 상태의 문의가 없어요"}
           </p>
-          <p className="mt-1 text-sm">궁금한 점이 있다면 문의하기를 이용해 주세요.</p>
+          <p className="mt-1 text-body">궁금한 점이 있다면 문의하기를 이용해 주세요.</p>
           <Link
             href="/inquiries/new"
             className={
-              "mt-5 inline-flex h-10 items-center rounded-control border border-border-2 bg-white px-4 text-sm font-bold text-text-2 hover:border-primary hover:text-primary " +
+              "mt-5 inline-flex h-10 items-center rounded-control border border-border-2 bg-white px-4 text-body font-bold text-text-2 hover:border-primary hover:text-primary " +
               FOCUS_RING
             }
           >
@@ -189,19 +189,19 @@ export default function InquiriesPage() {
               >
                 <span className="min-w-0 flex-1">
                   <span className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-primary">{INQUIRY_CATEGORY_LABEL[inquiry.category]}</span>
-                    <span className="text-[11px] text-text-3">{formatInquiryDate(inquiry.createdAt)}</span>
+                    <span className="text-label font-bold text-primary">{INQUIRY_CATEGORY_LABEL[inquiry.category]}</span>
+                    <span className="text-caption text-text-3">{formatInquiryDate(inquiry.createdAt)}</span>
                   </span>
-                  <span className="mt-2 block truncate text-sm font-bold text-text-1 sm:text-[15px]">{inquiry.title}</span>
+                  <span className="mt-2 block truncate text-body font-bold text-text-1 sm:text-body-l">{inquiry.title}</span>
                   {/* 거래 문의(#633)는 「어느 거래」가 내용 미리보기보다 먼저다. 행 전체가 이미
                       Link라 판매글 링크는 걸지 않는다 — 상세에서 건너간다. */}
                   {inquiry.order && inquiry.orderTopic && (
-                    <span className="mt-1 block truncate text-xs text-text-3">
+                    <span className="mt-1 block truncate text-label text-text-3">
                       {ORDER_INQUIRY_TOPIC_SHORT[inquiry.orderTopic]} ·{" "}
                       {orderInquiryStateLabel(inquiry.order)} · {inquiry.order.auctionTitle}
                     </span>
                   )}
-                  <span className="mt-1 block truncate text-xs text-text-3">{inquiry.content}</span>
+                  <span className="mt-1 block truncate text-label text-text-3">{inquiry.content}</span>
                 </span>
                 <InquiryStatusBadge status={inquiry.status} />
                 <span className="shrink-0 text-text-3">
@@ -220,7 +220,7 @@ export default function InquiriesPage() {
             disabled={loadingMore}
             onClick={loadMore}
             className={
-              "h-10 rounded-control border border-border-2 bg-white px-5 text-sm font-bold text-text-2 hover:border-primary hover:text-primary disabled:opacity-50 " +
+              "h-10 rounded-control border border-border-2 bg-white px-5 text-body font-bold text-text-2 hover:border-primary hover:text-primary disabled:opacity-50 " +
               FOCUS_RING
             }
           >

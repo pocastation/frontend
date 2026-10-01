@@ -65,13 +65,13 @@ function AuctionIdentity({ auction }: { auction: AdminAuctionSummary }) {
         )}
       </span>
       <span className="min-w-0">
-        {auction.artistName && <span className="block truncate text-[11px] font-bold text-primary">{auction.artistName}</span>}
+        {auction.artistName && <span className="block truncate text-caption font-bold text-primary">{auction.artistName}</span>}
         {/* 제목의 max-w-[200px]를 걷어냈다(#291) — 980px 표에서 가장 중요한 정보에 가장 좁은 칸을
             주고 있었다. 지면이 1720까지 넓어진 만큼 그 여유를 제목이 쓴다. */}
         <span className="block truncate font-bold text-text-1">{auction.title}</span>
         {/* 유형을 컬럼에서 여기로 내렸다 — 두세 글자짜리 값에 컬럼 하나를 주는 것보다,
             제목을 읽을 때 함께 읽히는 편이 낫다. 정보는 사라지지 않는다. */}
-        <span className="block text-[11px] text-text-3">{AUCTION_SALE_TYPE_LABEL[auction.saleType]}</span>
+        <span className="block text-caption text-text-3">{AUCTION_SALE_TYPE_LABEL[auction.saleType]}</span>
       </span>
     </>
   );
@@ -263,13 +263,13 @@ export default function AdminAuctionsPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">판매글 관리</h1>
-      <p className="mt-1.5 text-sm text-text-3">인증사진을 검수해 판매글을 승인하거나 거절하고, 공개된 판매글을 관리합니다.</p>
+      <h1 className="font-display text-title-l font-extrabold text-text-1">판매글 관리</h1>
+      <p className="mt-1.5 text-body text-text-3">인증사진을 검수해 판매글을 승인하거나 거절하고, 공개된 판매글을 관리합니다.</p>
 
       {notice && (
         <p
           role={notice.kind === "error" ? "alert" : "status"}
-          className={`mt-4 rounded-card px-4 py-3 text-sm font-semibold ${
+          className={`mt-4 rounded-card px-4 py-3 text-body font-semibold ${
             notice.kind === "error" ? "bg-surface-2 text-danger" : "bg-surface-2 text-text-1"
           }`}
         >
@@ -288,17 +288,17 @@ export default function AdminAuctionsPage() {
             placeholder="판매글 제목, 스타, 판매자 검색"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full border-0 bg-transparent text-[13.5px] text-text-1 outline-none placeholder:text-text-3"
+            className="w-full border-0 bg-transparent text-body text-text-1 outline-none placeholder:text-text-3"
           />
         </label>
         <div className="grid w-full grid-cols-2 gap-2 lg:hidden">
-          <label className="min-w-0 text-xs font-bold text-text-3">상태
+          <label className="min-w-0 text-label font-bold text-text-3">상태
             <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as AuctionStatus | "ALL")}
               className={`mt-1 w-full rounded-control border border-border bg-surface px-3 text-text-2 ${FOCUS_RING}`}>
               {STATUS_FILTERS.map((filter) => <option key={filter.key} value={filter.key}>{filter.label}</option>)}
             </select>
           </label>
-          <label className="min-w-0 text-xs font-bold text-text-3">판매 유형
+          <label className="min-w-0 text-label font-bold text-text-3">판매 유형
             <select value={saleTypeFilter} onChange={(event) => setSaleTypeFilter(event.target.value as AuctionSaleType | "ALL")}
               className={`mt-1 w-full rounded-control border border-border bg-surface px-3 text-text-2 ${FOCUS_RING}`}>
               {SALE_TYPE_FILTERS.map((filter) => <option key={filter.key} value={filter.key}>{filter.label}</option>)}
@@ -312,7 +312,7 @@ export default function AdminAuctionsPage() {
               type="button"
               aria-pressed={statusFilter === f.key}
               onClick={() => setStatusFilter(f.key)}
-              className={`h-10 rounded-control border px-3 text-xs font-bold transition-colors ${FOCUS_RING} ${
+              className={`h-10 rounded-control border px-3 text-label font-bold transition-colors ${FOCUS_RING} ${
                 statusFilter === f.key ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
               }`}
             >
@@ -327,7 +327,7 @@ export default function AdminAuctionsPage() {
               type="button"
               aria-pressed={saleTypeFilter === f.key}
               onClick={() => setSaleTypeFilter(f.key)}
-              className={`h-10 rounded-control border px-3 text-xs font-bold transition-colors ${FOCUS_RING} ${
+              className={`h-10 rounded-control border px-3 text-label font-bold transition-colors ${FOCUS_RING} ${
                 saleTypeFilter === f.key ? "border-text-1 bg-text-1 text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
               }`}
             >
@@ -337,14 +337,14 @@ export default function AdminAuctionsPage() {
         </div>
       </div>
 
-      <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
+      <p className="mb-2 text-label text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
       <div className="admin-table-wrap overflow-x-auto rounded-card border border-border bg-surface">
         {/* 유형 컬럼을 제목 아래로 내려 8열 → 7열, 최소폭 980 → 900(#291).
             지면 상한이 1720이라 1440 모니터에서 콘텐츠 1164px — 이제 여유가 264px 있다. */}
         <table role="table" className="admin-table admin-table-auctions w-full min-w-[900px] border-collapse">
           <thead>
-            <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
+            <tr className="border-b border-border text-left text-caption font-bold text-text-3">
               <th className="whitespace-nowrap px-4 py-2.5">판매글</th>
               <th className="whitespace-nowrap px-4 py-2.5">판매자</th>
               <th className="whitespace-nowrap px-4 py-2.5">현재가</th>
@@ -357,7 +357,7 @@ export default function AdminAuctionsPage() {
           <tbody>
             {auctions.length === 0 && !loading ? (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-sm text-text-3">
+                <td colSpan={7} className="px-4 py-12 text-center text-body text-text-3">
                   {query ? "검색 결과가 없습니다." : "판매글이 없습니다."}
                 </td>
               </tr>
@@ -365,7 +365,7 @@ export default function AdminAuctionsPage() {
               // 행 전체를 파스텔로 칠하던 것을 첫 칸의 좌측 규칙선으로 바꿨다(#294).
               // 같은 정보를 주면서 색 면적은 2px로 줄고, 하드코딩 주황도 사라진다.
               auctions.map((a) => (
-                <tr key={a.id} className="border-b border-border text-[13px] last:border-0">
+                <tr key={a.id} className="border-b border-border text-body-s last:border-0">
                   <td
                     className={`px-4 py-3 ${
                       a.status === "PENDING_REVIEW"
@@ -404,10 +404,10 @@ export default function AdminAuctionsPage() {
                       {AUCTION_STATUS_LABEL[a.status]}
                     </StatusBadge>
                     {a.status === "CANCELLED" && a.cancellationReason && (
-                      <span className="mt-1 block text-[10.5px] text-text-3">사유: {a.cancellationReason}</span>
+                      <span className="mt-1 block text-caption text-text-3">사유: {a.cancellationReason}</span>
                     )}
                     {a.status === "REJECTED" && a.reviewReason && (
-                      <span className="mt-1 block text-[10.5px] text-text-3">사유: {a.reviewReason}</span>
+                      <span className="mt-1 block text-caption text-text-3">사유: {a.reviewReason}</span>
                     )}
                   </td>
                   <td data-label="마감" className="whitespace-nowrap px-4 py-3 text-text-3">{getEndLabel(a)}</td>
@@ -419,7 +419,7 @@ export default function AdminAuctionsPage() {
                           setReviewTarget(a);
                           setNotice(null);
                         }}
-                        className={`rounded-control border px-3 py-1 text-xs font-bold transition-colors hover:bg-surface-2 ${FOCUS_RING} ${
+                        className={`rounded-control border px-3 py-1 text-label font-bold transition-colors hover:bg-surface-2 ${FOCUS_RING} ${
                           a.status === "PENDING_REVIEW"
                             ? "border-[var(--color-star-line)] text-[var(--color-star-ink)]"
                             : "border-border-2 text-text-2 hover:border-primary hover:text-primary"
@@ -441,7 +441,7 @@ export default function AdminAuctionsPage() {
                               ? "홈 배너에 세워요 (최대 5건)"
                               : "홈 배너에는 제안판매 판매글만 지정할 수 있습니다"
                           }
-                          className={`inline-flex items-center gap-1 whitespace-nowrap rounded-control border px-3 py-1 text-xs font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING} ${
+                          className={`inline-flex items-center gap-1 whitespace-nowrap rounded-control border px-3 py-1 text-label font-bold transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING} ${
                             a.featured
                               ? "border-primary text-primary hover:bg-primary/5"
                               : "border-border-2 text-text-3 hover:border-primary hover:text-primary"
@@ -453,7 +453,7 @@ export default function AdminAuctionsPage() {
                         <button
                           type="button"
                           onClick={() => openCancelDialog(a)}
-                          className={`rounded-control border border-accent/40 bg-accent-soft px-3 py-1 text-xs font-bold text-accent transition-colors hover:bg-accent hover:text-white ${FOCUS_RING}`}
+                          className={`rounded-control border border-accent/40 bg-accent-soft px-3 py-1 text-label font-bold text-accent transition-colors hover:bg-accent hover:text-white ${FOCUS_RING}`}
                         >
                           취소
                         </button>
@@ -474,7 +474,7 @@ export default function AdminAuctionsPage() {
             type="button"
             onClick={loadMore}
             disabled={loadingMore}
-            className={`h-10 rounded-control border border-border-2 bg-white px-5 text-[13px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
+            className={`h-10 rounded-control border border-border-2 bg-white px-5 text-body-s font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : "더 보기"}
           </button>
@@ -492,8 +492,8 @@ export default function AdminAuctionsPage() {
       {cancelTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
-            <h2 className="font-display text-base font-extrabold text-text-1">판매글 취소</h2>
-            <p className="mt-1.5 text-[13px] text-text-3">
+            <h2 className="font-display text-body-l font-extrabold text-text-1">판매글 취소</h2>
+            <p className="mt-1.5 text-body-s text-text-3">
               &quot;{cancelTarget.title}&quot;을(를) 취소합니다. 이 작업은 되돌릴 수 없고, 선택한 사유가 판매자에게 알림으로 전달됩니다.
             </p>
             {/* 사유는 템플릿 선택 — 검수 거절과 같은 이유(문구 일관성·집계). */}
@@ -503,7 +503,7 @@ export default function AdminAuctionsPage() {
                 {AUCTION_CANCELLATION_REASON_OPTIONS.map((option) => (
                   <label
                     key={option.code}
-                    className={`flex cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-[13px] transition-colors ${
+                    className={`flex cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-body-s transition-colors ${
                       reasonCode === option.code
                         ? "border-accent bg-accent-soft font-bold text-accent"
                         : "border-border text-text-2 hover:border-text-2"
@@ -522,7 +522,7 @@ export default function AdminAuctionsPage() {
                 ))}
               </div>
               {selectedCancelReason && (
-                <p className="mt-3 rounded-card bg-surface-2 px-3 py-2 text-[12px] leading-5 text-text-2">
+                <p className="mt-3 rounded-card bg-surface-2 px-3 py-2 text-label leading-5 text-text-2">
                   <span className="font-extrabold text-text-3">판매자에게 전달될 문구 · </span>
                   {selectedCancelReason.preview}
                 </p>
@@ -533,7 +533,7 @@ export default function AdminAuctionsPage() {
                 type="button"
                 onClick={() => setCancelTarget(null)}
                 disabled={submitting}
-                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-sm font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control border border-border-2 bg-white text-body font-bold text-text-2 transition-colors hover:border-primary disabled:opacity-60 ${FOCUS_RING}`}
               >
                 닫기
               </button>
@@ -541,7 +541,7 @@ export default function AdminAuctionsPage() {
                 type="button"
                 onClick={confirmCancel}
                 disabled={submitting}
-                className={`h-10 flex-1 rounded-control bg-accent text-sm font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control bg-accent text-body font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {submitting ? "처리 중..." : "취소 확정"}
               </button>

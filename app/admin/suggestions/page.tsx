@@ -103,8 +103,8 @@ export default function AdminSuggestionsPage() {
   return (
     <div>
       <div className="mb-5">
-        <h1 className="font-display text-xl font-extrabold text-text-1">건의 관리</h1>
-        <p className="mt-1 text-sm text-text-3">
+        <h1 className="font-display text-title font-extrabold text-text-1">건의 관리</h1>
+        <p className="mt-1 text-body text-text-3">
           사용자가 낸 스타·기획사·멤버 등록 건의를 검토해요. 반영은 카탈로그 관리에서 직접 추가하세요.
         </p>
       </div>
@@ -116,7 +116,7 @@ export default function AdminSuggestionsPage() {
             type="button"
             aria-pressed={filter === f.value}
             onClick={() => setFilter(f.value)}
-            className={`rounded-control border px-3 py-1.5 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+            className={`rounded-control border px-3 py-1.5 text-label font-semibold transition-colors ${FOCUS_RING} ${
               filter === f.value
                 ? "border-primary bg-primary text-white"
                 : "border-border text-text-2 hover:border-primary hover:text-primary"
@@ -125,7 +125,7 @@ export default function AdminSuggestionsPage() {
             {f.label}
           </button>
         ))}
-        <span className="ml-auto self-center text-xs text-text-3">총 {totalElements}건</span>
+        <span className="ml-auto self-center text-label text-text-3">총 {totalElements}건</span>
       </div>
 
       {notice && (
@@ -140,9 +140,9 @@ export default function AdminSuggestionsPage() {
       )}
 
       {loading ? (
-        <p className="py-16 text-center text-sm text-text-3">불러오는 중...</p>
+        <p className="py-16 text-center text-body text-text-3">불러오는 중...</p>
       ) : items.length === 0 ? (
-        <p className="py-16 text-center text-sm text-text-3">해당 상태의 건의가 없어요.</p>
+        <p className="py-16 text-center text-body text-text-3">해당 상태의 건의가 없어요.</p>
       ) : (
         // 균일 반복 카드를 헤어라인 행으로(#294) — 같은 껍데기가 N번 반복되면 각 건이
         // 분리돼 보일 뿐 어느 것이 급한지는 말해주지 않는다. 구분은 선이 한다.
@@ -150,17 +150,17 @@ export default function AdminSuggestionsPage() {
           {items.map((s) => (
             <li key={s.id} className="py-4">
               <div className="flex items-center gap-2">
-                <span className="rounded-control bg-surface-3 px-2 py-0.5 text-[11px] font-bold text-text-2">
+                <span className="rounded-control bg-surface-3 px-2 py-0.5 text-caption font-bold text-text-2">
                   {SUGGESTION_KIND_LABEL[s.kind]}
                 </span>
                 <StatusBadge tone={SUGGESTION_STATUS_TONE[s.status]}>
                   {SUGGESTION_STATUS_LABEL[s.status]}
                 </StatusBadge>
-                <span className="ml-auto text-[11px] text-text-3">{formatRelativeTime(s.createdAt)}</span>
+                <span className="ml-auto text-caption text-text-3">{formatRelativeTime(s.createdAt)}</span>
               </div>
-              <p className="mt-2 text-sm font-bold text-text-1">{s.name}</p>
-              {s.note && <p className="mt-0.5 text-sm text-text-2">{s.note}</p>}
-              <p className="mt-1.5 text-[11px] text-text-3">제출: {s.submitterNickname ?? "-"}</p>
+              <p className="mt-2 text-body font-bold text-text-1">{s.name}</p>
+              {s.note && <p className="mt-0.5 text-body text-text-2">{s.note}</p>}
+              <p className="mt-1.5 text-caption text-text-3">제출: {s.submitterNickname ?? "-"}</p>
 
               {s.status === "RECEIVED" && (
                 <div className="mt-3 flex gap-2">
@@ -168,7 +168,7 @@ export default function AdminSuggestionsPage() {
                     type="button"
                     disabled={busyId === s.id}
                     onClick={() => resolve(s.id, "ACCEPTED")}
-                    className={`rounded-control bg-primary px-3.5 py-1.5 text-xs font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
+                    className={`rounded-control bg-primary px-3.5 py-1.5 text-label font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
                   >
                     반영
                   </button>
@@ -176,7 +176,7 @@ export default function AdminSuggestionsPage() {
                     type="button"
                     disabled={busyId === s.id}
                     onClick={() => resolve(s.id, "REJECTED")}
-                    className={`rounded-control border border-border-2 bg-white px-3.5 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-accent hover:text-accent disabled:opacity-60 ${FOCUS_RING}`}
+                    className={`rounded-control border border-border-2 bg-white px-3.5 py-1.5 text-label font-bold text-text-2 transition-colors hover:border-accent hover:text-accent disabled:opacity-60 ${FOCUS_RING}`}
                   >
                     반려
                   </button>
@@ -192,7 +192,7 @@ export default function AdminSuggestionsPage() {
           <button
             type="button"
             onClick={loadMore}
-            className={`rounded-control border border-border-2 bg-white px-6 py-2.5 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+            className={`rounded-control border border-border-2 bg-white px-6 py-2.5 text-body font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
           >
             더 보기
           </button>

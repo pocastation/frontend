@@ -48,7 +48,7 @@ export default function EmailVerificationBanner() {
   return (
     <div className="border-b border-border bg-surface-2">
       <div className="mx-auto flex max-w-[1160px] items-center gap-3 px-4 py-2.5">
-        <p className="flex-1 text-xs leading-relaxed text-text-2">
+        <p className="flex-1 text-label leading-relaxed text-text-2">
           이메일 인증이 아직이에요.{" "}
           <span className="text-text-3">
             {/* 서버 게이트가 꺼져 있는데 "인증해야 이용할 수 있다"고 쓰면 켜지지도 않은 제한을
@@ -64,7 +64,7 @@ export default function EmailVerificationBanner() {
           type="button"
           onClick={handleResend}
           disabled={isSending}
-          className={`shrink-0 rounded-control border border-border-2 bg-white px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+          className={`shrink-0 rounded-control border border-border-2 bg-white px-3 py-1.5 text-caption font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
         >
           {isSending ? "보내는 중..." : "메일 다시 받기"}
         </button>

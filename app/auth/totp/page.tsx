@@ -12,7 +12,7 @@ export default function AdminTotpPage() {
   return (
     <Suspense
       fallback={
-        <p className="py-24 text-center text-sm text-text-2">
+        <p className="py-24 text-center text-body text-text-2">
           인증 정보를 확인하고 있어요...
         </p>
       }

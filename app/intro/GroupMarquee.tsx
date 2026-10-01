@@ -22,7 +22,7 @@ function Chips({ hidden = false }: { hidden?: boolean }) {
       {GROUPS.map((g) => (
         <li
           key={g}
-          className="mr-2 inline-flex h-7 items-center rounded-control border border-border-2 bg-white px-2.5 text-[12px] font-bold text-text-1"
+          className="mr-2 inline-flex h-7 items-center rounded-control border border-border-2 bg-white px-2.5 text-label font-bold text-text-1"
         >
           {g}
         </li>
@@ -34,7 +34,7 @@ function Chips({ hidden = false }: { hidden?: boolean }) {
 export default function GroupMarquee() {
   return (
     <section aria-label="사전 신청자가 찾는 그룹" className="mx-auto max-w-[1080px] pt-8 sm:pt-10">
-      <p className="px-5 text-[11px] font-extrabold tracking-[0.08em] text-text-3">사전 신청자가 찾는 그룹</p>
+      <p className="px-5 text-caption font-extrabold tracking-[0.08em] text-text-3">사전 신청자가 찾는 그룹</p>
       <div className="mt-3 overflow-hidden pl-5 whitespace-nowrap">
         <div className="flex w-max animate-[pocaMarquee_26s_linear_infinite]">
           <Chips />

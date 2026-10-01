@@ -49,18 +49,18 @@ export const PRESS_TAB = `${PRESS_BASE} active:opacity-50`;
  * 누르는 칩(정렬·필터)이 아니라 붙어 있는 표시라 테두리 없이 면으로 그린다.
  */
 const LABEL_BASE =
-  "inline-flex h-5 shrink-0 items-center whitespace-nowrap rounded-control px-[7px] text-[11px] font-bold leading-none";
+  "inline-flex h-5 shrink-0 items-center whitespace-nowrap rounded-control px-[7px] text-caption font-bold leading-none";
 export const LABEL_NEUTRAL = `${LABEL_BASE} bg-surface-2 text-text-2`;
 export const LABEL_STRONG = `${LABEL_BASE} bg-text-1 text-white`;
 
 export const INPUT_CLASS =
-  `w-full rounded-control border border-border px-3.5 py-2.5 text-sm text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`;
+  `w-full rounded-control border border-border px-3.5 py-2.5 text-body text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`;
 
 export const PRIMARY_BUTTON_CLASS =
-  `rounded-control bg-primary text-sm font-bold text-white transition-all hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 ${FOCUS_RING}`;
+  `rounded-control bg-primary text-body font-bold text-white transition-all hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 ${FOCUS_RING}`;
 
 export const SECONDARY_BUTTON_CLASS =
-  `rounded-control border border-border-2 bg-white text-sm font-bold text-text-2 transition-all hover:border-primary hover:text-primary active:scale-[0.98] ${FOCUS_RING}`;
+  `rounded-control border border-border-2 bg-white text-body font-bold text-text-2 transition-all hover:border-primary hover:text-primary active:scale-[0.98] ${FOCUS_RING}`;
 
 // 상세 페이지 상단 액션(공유·찜·신고)이 공유하는 아이콘 버튼 — 라벨 없이 아웃라인 아이콘만,
 // 색 없는(gray) 통일 스타일. 찜의 활성(빨간 하트)만 예외로 자기 상태를 색으로 표시한다.

@@ -48,7 +48,7 @@ const COPY = {
 
 // 라벨보다 입력칸이 커야 눈이 입력할 곳으로 먼저 간다(CLAUDE.md 「디자인」).
 const FIELD =
-  `h-12 w-full rounded-control border border-border px-3.5 text-[15px] text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`;
+  `h-12 w-full rounded-control border border-border px-3.5 text-body-l text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`;
 
 type Step = "view" | "form" | "confirm";
 
@@ -200,7 +200,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
   }
 
   if (loading) {
-    return <p className="py-10 text-center text-sm text-text-3">불러오는 중...</p>;
+    return <p className="py-10 text-center text-body text-text-3">불러오는 중...</p>;
   }
 
   const selectedBankName = banks.find((b) => b.code === bank)?.name ?? bank;
@@ -210,7 +210,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
       {message && (
         <p
           role={message.type === "err" ? "alert" : "status"}
-          className={`mb-4 text-sm font-bold ${message.type === "err" ? "text-accent" : "text-ok"}`}
+          className={`mb-4 text-body font-bold ${message.type === "err" ? "text-accent" : "text-ok"}`}
         >
           {message.text}
         </p>
@@ -225,7 +225,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
               없으면 줄 자체를 그리지 않는다 — 누를 수 없는 버튼을 보여줄 이유가 없다. */}
           {purpose === "refund" && settlementAccount && (
             <div className="mb-4 flex items-center gap-2.5 border-b border-border pb-3">
-              <span className="flex-1 text-[12.5px] leading-relaxed text-text-2">
+              <span className="flex-1 text-body-s leading-relaxed text-text-2">
                 정산계좌로{" "}
                 <b className="font-bold text-text-1">
                   {settlementAccount.bankName} {settlementAccount.maskedAccountNumber}
@@ -236,7 +236,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
                 type="button"
                 onClick={() => void copyFromSettlement()}
                 disabled={busy}
-                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-caption font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 동일하게 사용
               </button>
@@ -244,7 +244,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
           )}
           <div className="flex flex-col gap-4">
             <div>
-              <label htmlFor="bank" className="mb-1.5 block text-[13px] font-bold text-text-2">
+              <label htmlFor="bank" className="mb-1.5 block text-body-s font-bold text-text-2">
                 은행
               </label>
               <select
@@ -263,7 +263,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
             </div>
 
             <div>
-              <label htmlFor="accountNumber" className="mb-1.5 block text-[13px] font-bold text-text-2">
+              <label htmlFor="accountNumber" className="mb-1.5 block text-body-s font-bold text-text-2">
                 계좌번호
               </label>
               <input
@@ -275,11 +275,11 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
                 placeholder="계좌번호 입력"
                 className={FIELD}
               />
-              <p className="mt-1.5 text-[12px] text-text-3">- 없이 입력해도 되고, 있어도 괜찮아요.</p>
+              <p className="mt-1.5 text-label text-text-3">- 없이 입력해도 되고, 있어도 괜찮아요.</p>
             </div>
 
             <div>
-              <label htmlFor="holderName" className="mb-1.5 block text-[13px] font-bold text-text-2">
+              <label htmlFor="holderName" className="mb-1.5 block text-body-s font-bold text-text-2">
                 예금주
               </label>
               <input
@@ -290,12 +290,12 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
                 placeholder="예금주 입력"
                 className={FIELD}
               />
-              <p className="mt-1.5 text-[12px] text-text-3">본인 명의 계좌만 등록할 수 있어요.</p>
+              <p className="mt-1.5 text-label text-text-3">본인 명의 계좌만 등록할 수 있어요.</p>
             </div>
           </div>
 
           {error && (
-            <p role="alert" className="mt-3 text-[13px] font-bold text-accent">
+            <p role="alert" className="mt-3 text-body-s font-bold text-accent">
               {error}
             </p>
           )}
@@ -321,12 +321,12 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
         <div>
           {/* 계좌를 잘못 넣으면 남에게 송금되고 되돌릴 수 없다. 저장 직전에 한 번 더 눈으로
               확인시키는 단계가 이 화면에만 있는 이유다. */}
-          <p className="text-[13px] leading-relaxed text-text-2">
+          <p className="text-body-s leading-relaxed text-text-2">
             {copy.confirmLead} <b className="font-extrabold text-text-1">한 글자라도 다르면
             다른 사람에게 송금되고 되돌릴 수 없어요.</b> 다시 한 번 확인해 주세요.
           </p>
 
-          <dl className="mt-4 border-t border-text-1/20 text-[14px]">
+          <dl className="mt-4 border-t border-text-1/20 text-body">
             <div className="flex justify-between gap-3 border-b border-border py-3">
               <dt className="text-text-3">은행</dt>
               <dd className="font-bold text-text-1">{selectedBankName}</dd>
@@ -342,7 +342,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
           </dl>
 
           {error && (
-            <p role="alert" className="mt-3 text-[13px] font-bold text-accent">
+            <p role="alert" className="mt-3 text-body-s font-bold text-accent">
               {error}
             </p>
           )}
@@ -373,8 +373,8 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
   function Empty() {
     return (
       <div>
-        <p className="text-sm font-bold text-text-2">{copy.emptyTitle}</p>
-        <p className="mt-1.5 text-[13px] leading-relaxed text-text-3">{copy.emptyDesc}</p>
+        <p className="text-body font-bold text-text-2">{copy.emptyTitle}</p>
+        <p className="mt-1.5 text-body-s leading-relaxed text-text-3">{copy.emptyDesc}</p>
         <button
           type="button"
           onClick={startEditing}
@@ -390,7 +390,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
     if (!account) return null;
     return (
       <div>
-        <dl className="border-t border-text-1/20 text-[14px]">
+        <dl className="border-t border-text-1/20 text-body">
           <div className="flex justify-between gap-3 border-b border-border py-3">
             <dt className="text-text-3">은행</dt>
             <dd className="font-bold text-text-1">{account.bankName}</dd>
@@ -406,7 +406,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
         </dl>
 
         {/* 보안상 뒤 4자리만 돌려받는다 — "왜 다 안 보이나"를 묻기 전에 먼저 말해 준다. */}
-        <p className="mt-2.5 text-[12px] leading-relaxed text-text-3">
+        <p className="mt-2.5 text-label leading-relaxed text-text-3">
           계좌번호는 안전하게 암호화해 보관하고 있어 뒤 4자리만 보여드려요.
         </p>
 
@@ -423,7 +423,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
             type="button"
             onClick={remove}
             disabled={busy}
-            className={`px-3 py-2.5 text-sm font-bold text-text-3 transition-colors hover:text-accent disabled:opacity-50 ${FOCUS_RING}`}
+            className={`px-3 py-2.5 text-body font-bold text-text-3 transition-colors hover:text-accent disabled:opacity-50 ${FOCUS_RING}`}
           >
             삭제
           </button>

@@ -38,11 +38,11 @@ export default function NotFound() {
       {/* 레이아웃이 이미 <main>으로 감싼다 — 여기서 또 쓰면 main이 중첩된다. */}
       <div className="mx-auto w-full max-w-[560px] px-[14px] py-9 sm:px-5 sm:py-20">
         <span aria-hidden="true" className="block h-[3px] w-7 bg-primary" />
-        <p className="mt-4 text-[11.5px] font-bold tracking-[0.08em] text-text-3">404</p>
-        <h1 className="mt-2 font-display text-[24px] font-extrabold leading-[1.25] tracking-[-0.03em] text-text-1 sm:text-[26px]">
+        <p className="mt-4 text-label font-bold tracking-[0.08em] text-text-3">404</p>
+        <h1 className="mt-2 font-display text-title-l font-extrabold text-text-1 sm:text-title-l">
           이 페이지를 찾을 수 없어요
         </h1>
-        <p className="mt-3 text-[13.5px] leading-relaxed text-text-2">
+        <p className="mt-3 text-body leading-relaxed text-text-2">
           주소가 바뀌었거나, 글이 지워졌거나, 운영 기준에 따라 내려간 글일 수 있어요.
         </p>
 
@@ -53,10 +53,10 @@ export default function NotFound() {
               href={route.href}
               className={`flex items-baseline gap-2.5 border-b border-border py-3 ${FOCUS_RING}`}
             >
-              <span className="w-[74px] shrink-0 text-[12.5px] font-extrabold text-text-1 sm:w-[96px]">
+              <span className="w-[74px] shrink-0 text-body-s font-extrabold text-text-1 sm:w-[96px]">
                 {route.label}
               </span>
-              <span className="text-[12.5px] leading-[1.55] text-text-3">{route.detail}</span>
+              <span className="text-body-s text-text-3">{route.detail}</span>
             </Link>
           ))}
         </nav>
@@ -71,7 +71,7 @@ export default function NotFound() {
           {/* 내려간 글의 작성자가 이유를 물을 자리다. 404에서 가장 필요한 링크가 이것이다. */}
           <Link
             href="/inquiries/new"
-            className="text-center text-[12.5px] text-text-3 underline decoration-text-3 underline-offset-[3px] hover:text-text-2"
+            className="text-center text-body-s text-text-3 underline decoration-text-3 underline-offset-[3px] hover:text-text-2"
           >
             글이 내려간 이유를 문의하기
           </Link>

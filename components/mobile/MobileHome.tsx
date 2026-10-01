@@ -33,8 +33,8 @@ const SECTION_GAP = "pt-[38px]";
 function SectionHead({ title, href }: { title: string; href: string }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <h2 className="text-[17px] font-extrabold tracking-[-0.02em]">{title}</h2>
-      <Link href={href} className={`flex items-center gap-0.5 text-xs font-semibold text-text-3 ${FOCUS_RING}`}>
+      <h2 className="text-title-s font-extrabold">{title}</h2>
+      <Link href={href} className={`flex items-center gap-0.5 text-label font-semibold text-text-3 ${FOCUS_RING}`}>
         더보기
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <polyline points="9 18 15 12 9 6" />
@@ -50,7 +50,7 @@ function Grid({ children }: { children: ReactNode }) {
 }
 
 function Empty({ message }: { message: string }) {
-  return <p className="py-8 text-center text-[12.5px] text-text-3">{message}</p>;
+  return <p className="py-8 text-center text-body-s text-text-3">{message}</p>;
 }
 
 export default function MobileHome({

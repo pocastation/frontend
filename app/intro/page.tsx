@@ -85,23 +85,24 @@ export default function IntroPage() {
       <section id="intro-hero" className="overflow-hidden border-b border-border bg-surface-2">
         <div className="mx-auto grid max-w-[1080px] items-start gap-8 px-5 pt-10 pb-8 sm:pt-14 sm:pb-14 lg:grid-cols-[1fr_400px] lg:gap-14">
           <div>
-            <p className="flex items-center gap-2 text-[12px] font-extrabold text-primary">
+            <p className="flex items-center gap-2 text-label font-extrabold text-primary">
               사전 신청 모집 중
             </p>
-            <h1 className="mt-3.5 font-display text-[30px] font-extrabold leading-[1.18] tracking-[-0.045em] text-text-1 sm:text-[42px]">
+            {/* eslint-disable-next-line no-restricted-syntax -- 사전 신청 히어로는 데스크탑에서 스케일 밖 42px */}
+            <h1 className="mt-3.5 font-display text-display font-extrabold text-text-1 sm:text-[42px]">
               포카 한 장에도
               <br />
               확인이 필요하니까,
               <span className="block font-sans font-black text-primary">포카스테이션</span>
             </h1>
-            <p className="mt-4 max-w-[32rem] text-[14.5px] leading-[1.8] text-text-2 sm:text-[15.5px]">
+            <p className="mt-4 max-w-[32rem] text-body-l text-text-2 sm:text-body-l">
               사진만 퍼온 상품, 입금하고 잠수, 마감 직전 낚아채기. 이 세 가지를 시스템으로 막아요.
             </p>
             <ul className="mt-[18px] flex flex-wrap gap-2">
               {CHIPS.map((c) => (
                 <li
                   key={c}
-                  className="inline-flex h-7 items-center rounded-control border border-border-2 bg-white px-2.5 text-[12px] font-bold text-text-1"
+                  className="inline-flex h-7 items-center rounded-control border border-border-2 bg-white px-2.5 text-label font-bold text-text-1"
                 >
                   {c}
                 </li>
@@ -121,8 +122,8 @@ export default function IntroPage() {
 
       {/* ── 거래 흐름 ── 실제 순서라 번호를 둔다. 카드로 감싸지 않고 규칙선 행으로 나열한다. */}
       <section className="mx-auto max-w-[1080px] px-5 pt-10 sm:pt-14">
-        <p className="text-[11px] font-extrabold tracking-[0.08em] text-text-3">거래 흐름</p>
-        <h2 className="mt-2 font-display text-[24px] font-extrabold tracking-[-0.035em] text-text-1 sm:text-[28px]">
+        <p className="text-caption font-extrabold tracking-[0.08em] text-text-3">거래 흐름</p>
+        <h2 className="mt-2 font-display text-title-l font-extrabold text-text-1 sm:text-display">
           등록부터 정산까지, 네 걸음이에요
         </h2>
         <ol className="mt-[18px] border-t border-border sm:grid sm:grid-cols-4 sm:gap-x-7">
@@ -133,14 +134,14 @@ export default function IntroPage() {
             >
               <span
                 aria-hidden="true"
-                className="pt-[3px] font-display text-[12px] font-extrabold tabular-nums text-text-3 sm:mb-2 sm:block sm:pt-0"
+                className="pt-[3px] font-display text-label font-extrabold tabular-nums text-text-3 sm:mb-2 sm:block sm:pt-0"
               >
                 {String(i + 1).padStart(2, "0")}
               </span>
               <div>
-                <p className="text-[11px] font-extrabold tracking-[0.02em] text-primary">{st.who}</p>
-                <h3 className="mt-[3px] text-[15px] font-extrabold tracking-[-0.02em] text-text-1">{st.title}</h3>
-                <p className="mt-1 text-[13px] leading-[1.7] text-text-2">{st.body}</p>
+                <p className="text-caption font-extrabold tracking-[0.02em] text-primary">{st.who}</p>
+                <h3 className="mt-[3px] text-body-l font-extrabold text-text-1">{st.title}</h3>
+                <p className="mt-1 text-body-s text-text-2">{st.body}</p>
               </div>
             </li>
           ))}
@@ -149,17 +150,17 @@ export default function IntroPage() {
 
       {/* ── 왜 ── 없앤 문제를 취소선으로 적고 그 아래 해법을 둔다. */}
       <section className="mx-auto max-w-[1080px] px-5 pt-10 sm:pt-14">
-        <p className="text-[11px] font-extrabold tracking-[0.08em] text-text-3">왜 포카스테이션인가</p>
-        <h2 className="mt-2 font-display text-[24px] font-extrabold tracking-[-0.035em] text-text-1 sm:text-[28px]">
+        <p className="text-caption font-extrabold tracking-[0.08em] text-text-3">왜 포카스테이션인가</p>
+        <h2 className="mt-2 font-display text-title-l font-extrabold text-text-1 sm:text-display">
           거래가 무서웠던 이유를
           <br className="sm:hidden" /> 하나씩 없앴어요
         </h2>
         <ul className="mt-[18px] border-t border-border sm:grid sm:grid-cols-2 sm:gap-x-12">
           {FEATURES.map((f) => (
             <li key={f.title} className="border-b border-border py-4">
-              <p className="text-[11.5px] font-extrabold text-text-3 line-through decoration-border-2">{f.problem}</p>
-              <h3 className="mt-1 text-[15px] font-extrabold tracking-[-0.02em] text-text-1">{f.title}</h3>
-              <p className="mt-1 text-[13px] leading-[1.7] text-text-2">{f.body}</p>
+              <p className="text-label font-extrabold text-text-3 line-through decoration-border-2">{f.problem}</p>
+              <h3 className="mt-1 text-body-l font-extrabold text-text-1">{f.title}</h3>
+              <p className="mt-1 text-body-s text-text-2">{f.body}</p>
             </li>
           ))}
         </ul>
@@ -167,16 +168,16 @@ export default function IntroPage() {
 
       {/* ── 혜택 ── */}
       <section className="mx-auto max-w-[1080px] px-5 py-10 sm:py-14">
-        <p className="text-[11px] font-extrabold tracking-[0.08em] text-text-3">사전 신청 혜택</p>
-        <h2 className="mt-2 font-display text-[24px] font-extrabold tracking-[-0.035em] text-text-1 sm:text-[28px]">
+        <p className="text-caption font-extrabold tracking-[0.08em] text-text-3">사전 신청 혜택</p>
+        <h2 className="mt-2 font-display text-title-l font-extrabold text-text-1 sm:text-display">
           지금 신청하면 드리는 것
         </h2>
 
         <ul className="mt-[18px] flex flex-col border-t border-border sm:max-w-[640px]">
           {BENEFITS.map((b) => (
             <li key={b.title} className="border-b border-border py-4">
-              <h3 className="text-[14px] font-extrabold tracking-[-0.02em] text-text-1">{b.title}</h3>
-              <p className="mt-1 text-[13px] leading-[1.7] text-text-2">{b.body}</p>
+              <h3 className="text-body font-extrabold text-text-1">{b.title}</h3>
+              <p className="mt-1 text-body-s text-text-2">{b.body}</p>
             </li>
           ))}
         </ul>
@@ -184,13 +185,13 @@ export default function IntroPage() {
         <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3">
           <a
             href="#apply"
-            className={`inline-flex h-12 items-center rounded-control bg-primary px-7 text-[14.5px] font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+            className={`inline-flex h-12 items-center rounded-control bg-primary px-7 text-body-l font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
           >
             사전 신청하기
           </a>
           <Link
             href="/auctions"
-            className={`text-[13px] font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-text-1 hover:decoration-text-1 ${FOCUS_RING}`}
+            className={`text-body-s font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-text-1 hover:decoration-text-1 ${FOCUS_RING}`}
           >
             지금 올라온 상품 둘러보기
           </Link>

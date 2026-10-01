@@ -8,7 +8,7 @@ import { MIN_LISTING_PRICE, PRICE_UNIT } from "@/lib/fees";
 import { FOCUS_RING } from "@/lib/ui";
 import type { MySellingAuctionResponse } from "@/lib/types";
 
-const OUTLINE = `shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-[11px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-45 disabled:hover:border-border-2 disabled:hover:text-text-2 ${FOCUS_RING}`;
+const OUTLINE = `shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-caption font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-45 disabled:hover:border-border-2 disabled:hover:text-text-2 ${FOCUS_RING}`;
 
 /**
  * 판매 중인 상품의 판매자 행동 — 기간 연장(§1.3·§2.4)과 최소가 수정(§1.1, #434).
@@ -60,7 +60,7 @@ export default function SellingListingActions({
   return (
     <div className="mt-2.5 pl-[56px]">
       <div className="flex flex-wrap items-center gap-2.5">
-        <span className="min-w-0 flex-1 text-[11.5px] leading-relaxed text-text-3">
+        <span className="min-w-0 flex-1 text-label leading-relaxed text-text-3">
           {isInstant ? (
             <>판매 중에는 언제든 가격을 바꿀 수 있어요</>
           ) : exhausted ? (
@@ -132,13 +132,13 @@ export default function SellingListingActions({
               onChange={(e) => setPrice(e.target.value.replace(/[^\d]/g, ""))}
               inputMode="numeric"
               aria-label="최소 제안가"
-              className={`h-[38px] w-full max-w-[190px] rounded-control border border-border px-3 font-display text-[15px] font-bold tabular-nums text-text-1 outline-none transition-colors focus:border-primary ${FOCUS_RING}`}
+              className={`h-[38px] w-full max-w-[190px] rounded-control border border-border px-3 font-display text-body-l font-bold tabular-nums text-text-1 outline-none transition-colors focus:border-primary ${FOCUS_RING}`}
             />
             <button
               type="button"
               disabled={busy}
               onClick={() => void run(`/api/auctions/${auction.id}/start-price`, { startPrice: Number(price) })}
-              className={`shrink-0 rounded-control bg-text-1 px-3.5 py-2 text-[11.5px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+              className={`shrink-0 rounded-control bg-text-1 px-3.5 py-2 text-label font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
             >
               저장
             </button>
@@ -147,7 +147,7 @@ export default function SellingListingActions({
             </button>
           </div>
           {/* 🔴 「하나라도 들어오면 잠긴다」를 미리 말한다. 나중에 눌렀다가 막히면 이유를 알 수 없다. */}
-          <p className="mt-1.5 text-[11.5px] leading-relaxed text-text-3">
+          <p className="mt-1.5 text-label leading-relaxed text-text-3">
             최저 {formatKRW(MIN_LISTING_PRICE)}부터 {PRICE_UNIT.toLocaleString("ko-KR")}원 단위 ·{" "}
             <b className="font-bold text-text-2">제안이 하나라도 들어오면 더는 바꿀 수 없어요.</b>
           </p>
@@ -155,7 +155,7 @@ export default function SellingListingActions({
       )}
 
       {error && (
-        <p role="alert" className="mt-2 text-[11.5px] font-bold text-accent">
+        <p role="alert" className="mt-2 text-label font-bold text-accent">
           {error}
         </p>
       )}

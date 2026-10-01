@@ -88,30 +88,30 @@ export default function ExchangeRequestsPage() {
 
       <div className="mx-auto max-w-[640px] pb-16 sm:px-4 sm:py-8">
         {pending.length > 0 && (
-          <p className="bg-surface-2 px-[14px] py-2.5 text-[11.5px] leading-relaxed text-text-2 sm:rounded-control">
+          <p className="bg-surface-2 px-[14px] py-2.5 text-label leading-relaxed text-text-2 sm:rounded-control">
             한 명을 고르면 교환이 확정되고 <b className="font-bold text-text-1">나머지 신청은 자동으로 마감</b>돼요.
             고른 분과는 대화가 열려요.
           </p>
         )}
 
         {error && (
-          <p role="alert" className="mx-[14px] mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-[13px] font-semibold leading-[1.55] text-danger sm:mx-0">
+          <p role="alert" className="mx-[14px] mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
 
         {loading ? (
-          <p className="px-[14px] py-16 text-center text-[12.5px] text-text-3">불러오는 중...</p>
+          <p className="px-[14px] py-16 text-center text-body-s text-text-3">불러오는 중...</p>
         ) : requests.length === 0 ? (
-          <p className="px-[14px] py-16 text-center text-[12.5px] text-text-3">아직 받은 신청이 없어요.</p>
+          <p className="px-[14px] py-16 text-center text-body-s text-text-3">아직 받은 신청이 없어요.</p>
         ) : alreadySettled ? (
           // 「대화에서 이어가 주세요」라고만 적어 두면 뒤로 → 상세 → 「대화 열기」로 두 번 더
           // 움직여야 한다. 말한 곳으로 가는 길을 같은 자리에 둔다.
           <div className="px-[14px] py-16 text-center">
-            <p className="text-[12.5px] text-text-3">이미 교환이 확정됐어요.</p>
+            <p className="text-body-s text-text-3">이미 교환이 확정됐어요.</p>
             <Link
               href={`/exchanges/${postId}/thread`}
-              className={`mt-2.5 inline-flex h-11 items-center justify-center rounded-control bg-text-1 px-5 text-[14px] font-extrabold text-white ${FOCUS_RING}`}
+              className={`mt-2.5 inline-flex h-11 items-center justify-center rounded-control bg-text-1 px-5 text-body font-extrabold text-white ${FOCUS_RING}`}
             >
               대화 열기
             </Link>
@@ -132,9 +132,9 @@ export default function ExchangeRequestsPage() {
                     </div>
                   )}
                   <div className="min-w-0 flex-1">
-                    <p className="text-[14.5px] font-extrabold tracking-[-0.015em] text-text-1">{itemName(request.offer)}</p>
-                    <p className="mt-px text-[11.5px] text-text-3">{itemDetail(request.offer)}</p>
-                    <p className="mt-1.5 text-xs font-bold text-text-2">
+                    <p className="text-body-l font-extrabold text-text-1">{itemName(request.offer)}</p>
+                    <p className="mt-px text-label text-text-3">{itemDetail(request.offer)}</p>
+                    <p className="mt-1.5 text-label font-bold text-text-2">
                       {request.requesterNickname ?? "알 수 없음"}
                       {request.slot && ` · ${slotLabel(request.slot)}`}
                     </p>
@@ -142,16 +142,16 @@ export default function ExchangeRequestsPage() {
                 </div>
 
                 {request.message && (
-                  <p className="mt-2 text-[13px] leading-relaxed text-text-2">{request.message}</p>
+                  <p className="mt-2 text-body-s leading-relaxed text-text-2">{request.message}</p>
                 )}
 
                 <div className="mt-2.5 flex items-center justify-between gap-2">
-                  <span className="text-[11px] text-text-3">{formatRelativeTime(request.createdAt)}</span>
+                  <span className="text-caption text-text-3">{formatRelativeTime(request.createdAt)}</span>
                   <button
                     type="button"
                     onClick={() => accept(request.id)}
                     disabled={accepting !== null}
-                    className={`h-10 min-w-[88px] rounded-control px-5 text-sm font-extrabold disabled:opacity-60 ${
+                    className={`h-10 min-w-[88px] rounded-control px-5 text-body font-extrabold disabled:opacity-60 ${
                       index === 0 ? "bg-primary text-white" : "border border-border-2 bg-white text-text-2"
                     } ${FOCUS_RING}`}
                   >

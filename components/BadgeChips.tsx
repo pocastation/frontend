@@ -16,7 +16,7 @@ export default function BadgeChips({ badges, className = "" }: { badges: BadgeVi
           key={badge.code}
           // title로 설명을 붙인다 — 칭호만 보고 "이게 뭔데"가 되지 않도록.
           title={badge.description}
-          className={`inline-flex items-center rounded-control border border-star-line px-2 py-0.5 text-[11px] font-bold text-star-ink ${className}`}
+          className={`inline-flex items-center rounded-control border border-star-line px-2 py-0.5 text-caption font-bold text-star-ink ${className}`}
         >
           {badge.label}
         </span>

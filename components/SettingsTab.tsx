@@ -36,17 +36,17 @@ export default function SettingsTab() {
   return (
     <div className="max-w-xl">
       <section className="rounded-card border border-accent/30 bg-surface p-5">
-        <h2 className="font-display text-sm font-extrabold text-accent">회원 탈퇴</h2>
-        <div className="mt-3 space-y-1.5 text-sm text-text-2">
+        <h2 className="font-display text-body font-extrabold text-accent">회원 탈퇴</h2>
+        <div className="mt-3 space-y-1.5 text-body text-text-2">
           <p>탈퇴하면 계정을 다시 사용할 수 없고, 되돌릴 수 없어요.</p>
-          <ul className="ml-4 list-disc space-y-1 text-[13px] text-text-3">
+          <ul className="ml-4 list-disc space-y-1 text-body-s text-text-3">
             <li>닉네임·이메일 등 개인정보는 파기돼요.</li>
             <li>법령에 따라 가격 제안·거래 기록은 보관되지만, 누구인지 알 수 없게 처리돼요.</li>
             <li>진행 중인 거래·주문(결제·배송·정산)이 있으면 탈퇴할 수 없어요.</li>
           </ul>
         </div>
 
-        <label htmlFor="withdraw-confirm" className="mt-4 block text-[13px] font-bold text-text-2">
+        <label htmlFor="withdraw-confirm" className="mt-4 block text-body-s font-bold text-text-2">
           계속하려면 <span className="text-accent">탈퇴</span>라고 입력해 주세요.
         </label>
         <input
@@ -62,7 +62,7 @@ export default function SettingsTab() {
           className={`mt-1.5 ${INPUT_CLASS}`}
         />
         {error && (
-          <p role="alert" className="mt-2 text-xs font-semibold text-accent">
+          <p role="alert" className="mt-2 text-label font-semibold text-accent">
             {error}
           </p>
         )}
@@ -70,7 +70,7 @@ export default function SettingsTab() {
           type="button"
           onClick={handleWithdraw}
           disabled={!armed || isSubmitting}
-          className="mt-4 w-full rounded-control bg-accent px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="mt-4 w-full rounded-control bg-accent px-4 py-2.5 text-body font-bold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
         >
           {isSubmitting ? "처리 중..." : "회원 탈퇴"}
         </button>

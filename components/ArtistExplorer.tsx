@@ -117,7 +117,7 @@ export default function ArtistExplorer({
             placeholder="그룹명 또는 영문명 검색"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full border-0 bg-transparent text-[13.5px] text-text-1 outline-none placeholder:text-text-3"
+            className="w-full border-0 bg-transparent text-body text-text-1 outline-none placeholder:text-text-3"
           />
         </label>
 
@@ -128,7 +128,7 @@ export default function ArtistExplorer({
             type="button"
             aria-pressed={type === null}
             onClick={() => setType(null)}
-            className={`min-h-9 rounded-control border px-3.5 text-[12.5px] font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-[13px] ${FOCUS_RING} ${
+            className={`min-h-9 rounded-control border px-3.5 text-body-s font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-body-s ${FOCUS_RING} ${
               type === null ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
             }`}
           >
@@ -140,7 +140,7 @@ export default function ArtistExplorer({
               type="button"
               aria-pressed={type === option}
               onClick={() => setType(option)}
-              className={`min-h-9 rounded-control border px-3.5 text-[12.5px] font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-[13px] ${FOCUS_RING} ${
+              className={`min-h-9 rounded-control border px-3.5 text-body-s font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-body-s ${FOCUS_RING} ${
                 type === option ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
               }`}
             >
@@ -150,7 +150,7 @@ export default function ArtistExplorer({
         </div>
       </div>
 
-      <p className="mb-3 flex items-center gap-2 text-xs text-text-3">
+      <p className="mb-3 flex items-center gap-2 text-label text-text-3">
         <span>{totalElements}개</span>
       </p>
 
@@ -189,13 +189,13 @@ export default function ArtistExplorer({
       {hasMore && (
         <div className="mt-8 flex flex-col items-center gap-2">
           {moreError && (
-            <p className="text-xs font-semibold text-accent">더 불러오지 못했어요. 다시 시도해 주세요.</p>
+            <p className="text-label font-semibold text-accent">더 불러오지 못했어요. 다시 시도해 주세요.</p>
           )}
           <button
             type="button"
             onClick={loadMore}
             disabled={loadingMore || loading}
-            className={`flex h-11 items-center gap-2 rounded-control border border-border-2 bg-white px-6 text-[13.5px] font-bold text-text-1 transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+            className={`flex h-11 items-center gap-2 rounded-control border border-border-2 bg-white px-6 text-body font-bold text-text-1 transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : moreError ? "다시 시도" : "더 보기"}
           </button>

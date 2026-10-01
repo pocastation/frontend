@@ -31,7 +31,7 @@ export default function ArtistRow({ artist }: { artist: ArtistResponse }) {
     >
       <span
         aria-hidden={artist.imageUrl ? undefined : "true"}
-        className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-surface-2 font-display text-[13px] font-extrabold text-text-3"
+        className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-surface-2 font-display text-body-s font-extrabold text-text-3"
       >
         {artist.imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일
@@ -43,7 +43,7 @@ export default function ArtistRow({ artist }: { artist: ArtistResponse }) {
 
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-1.5">
-          <span className="truncate text-[14px] font-bold text-text-1">{artist.name}</span>
+          <span className="truncate text-body font-bold text-text-1">{artist.name}</span>
           {/* 상태 배지는 예외 상태(휴식기·해체)만 띄운다 — 대부분이 활동 중이라 전 줄에 같은
               배지가 붙으면 정보량 없이 시선만 끈다. 구 카드에서 확정된 판단을 그대로 잇는다. */}
           {artist.status !== "ACTIVE" && (
@@ -52,11 +52,11 @@ export default function ArtistRow({ artist }: { artist: ArtistResponse }) {
             </span>
           )}
         </span>
-        {sub && <span className="mt-0.5 block truncate text-[11.5px] text-text-3">{sub}</span>}
+        {sub && <span className="mt-0.5 block truncate text-label text-text-3">{sub}</span>}
       </span>
 
       {artist.nameEn && (
-        <span className="hidden shrink-0 text-[11.5px] text-text-3 sm:block">{artist.nameEn}</span>
+        <span className="hidden shrink-0 text-label text-text-3 sm:block">{artist.nameEn}</span>
       )}
     </Link>
   );

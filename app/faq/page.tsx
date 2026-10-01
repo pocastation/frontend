@@ -25,14 +25,14 @@ export default function FaqPage() {
     <>
       <div className="mx-auto max-w-[820px] px-5 pt-11 pb-16 sm:pt-14">
         <header>
-          <p className="text-[12px] font-bold text-text-3">고객지원</p>
-          <h1 className="mt-2 font-display text-[27px] font-extrabold leading-[1.15] tracking-[-0.04em] text-text-1 sm:text-[32px]">
+          <p className="text-label font-bold text-text-3">고객지원</p>
+          <h1 className="mt-2 font-display text-display font-extrabold text-text-1 sm:text-display">
             자주 묻는 질문
           </h1>
-          <p className="mt-3.5 max-w-[33rem] text-[13.5px] leading-[1.75] text-text-2">
+          <p className="mt-3.5 max-w-[33rem] text-body text-text-2">
             거래하다 자주 나오는 질문을 모았어요. 궁금한 항목을 눌러 펼쳐 보세요.
           </p>
-          <p className="mt-3 text-[12px] text-text-3">
+          <p className="mt-3 text-label text-text-3">
             총 {FAQ_TOTAL}개 · 거래 흐름 전체가 궁금하다면{" "}
             <Link
               href="/guide"
@@ -51,11 +51,11 @@ export default function FaqPage() {
             <a
               key={c.id}
               href={`#${c.id}`}
-              className={`flex items-baseline gap-2 border-b border-border py-2.5 text-[12.5px] text-text-2 transition-colors hover:text-primary ${FOCUS_RING}`}
+              className={`flex items-baseline gap-2 border-b border-border py-2.5 text-body-s text-text-2 transition-colors hover:text-primary ${FOCUS_RING}`}
             >
               <span
                 aria-hidden="true"
-                className="font-display text-[11px] font-extrabold tabular-nums text-text-3"
+                className="font-display text-caption font-extrabold tabular-nums text-text-3"
               >
                 {String(i + 1).padStart(2, "0")}
               </span>
@@ -69,14 +69,14 @@ export default function FaqPage() {
             <div className="border-t border-text-1/25 pt-4">
               <span
                 aria-hidden="true"
-                className="block font-display text-[11px] font-extrabold tabular-nums tracking-[0.08em] text-text-3"
+                className="block font-display text-caption font-extrabold tabular-nums tracking-[0.08em] text-text-3"
               >
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <h2 className="mt-1.5 font-display text-[21px] font-extrabold tracking-[-0.035em] text-text-1">
+              <h2 className="mt-1.5 font-display text-title font-extrabold text-text-1">
                 {category.title}
               </h2>
-              <p className="mt-2 text-[13px] text-text-3">{category.lead}</p>
+              <p className="mt-2 text-body-s text-text-3">{category.lead}</p>
             </div>
 
             <div className="mt-4">
@@ -84,7 +84,7 @@ export default function FaqPage() {
               {category.items.map((item) => (
                 <details key={item.q} className="border-b border-border-2/60">
                   <summary
-                    className={`flex cursor-pointer list-none items-start gap-3 py-3.5 text-[14px] font-bold leading-[1.6] tracking-[-0.01em] text-text-1 transition-colors hover:text-primary ${FOCUS_RING} [&::-webkit-details-marker]:hidden`}
+                    className={`flex cursor-pointer list-none items-start gap-3 py-3.5 text-body font-bold text-text-1 transition-colors hover:text-primary ${FOCUS_RING} [&::-webkit-details-marker]:hidden`}
                   >
                     <span className="min-w-0 flex-1">{item.q}</span>
                     {/* 열림/닫힘은 방향으로만 말한다. +/− 기호는 버튼처럼 읽혀 오해를 준다. */}
@@ -107,7 +107,7 @@ export default function FaqPage() {
                     {item.a.map((paragraph) => (
                       <p
                         key={paragraph}
-                        className="mt-1.5 text-[13.5px] leading-[1.8] text-text-2 first:mt-0"
+                        className="mt-1.5 text-body text-text-2 first:mt-0"
                       >
                         {paragraph}
                       </p>
@@ -125,30 +125,30 @@ export default function FaqPage() {
         <div className="mx-auto max-w-[820px] px-5 py-12 sm:py-14">
           <h2
             id="faq-more"
-            className="font-display text-[19px] font-extrabold tracking-[-0.03em] text-text-1"
+            className="font-display text-title-s font-extrabold text-text-1"
           >
             찾는 답이 없다면
           </h2>
-          <p className="mt-1.5 max-w-[34rem] text-[13px] leading-[1.75] text-text-3">
+          <p className="mt-1.5 max-w-[34rem] text-body-s text-text-3">
             문의를 남겨 주시면 확인 후 답변드려요. 거래 중인 건이라면 어떤 상품인지 함께 적어 주시면
             훨씬 빠릅니다.
           </p>
           <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3">
             <Link
               href="/inquiries/new"
-              className={`inline-flex h-12 items-center rounded-control bg-primary px-8 text-[14px] font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+              className={`inline-flex h-12 items-center rounded-control bg-primary px-8 text-body font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
             >
               문의하기
             </Link>
             <Link
               href="/guide"
-              className={`text-[13px] font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-text-1 hover:decoration-text-1 ${FOCUS_RING}`}
+              className={`text-body-s font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-text-1 hover:decoration-text-1 ${FOCUS_RING}`}
             >
               이용 가이드
             </Link>
             <Link
               href="/terms"
-              className={`text-[13px] font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-text-1 hover:decoration-text-1 ${FOCUS_RING}`}
+              className={`text-body-s font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-text-1 hover:decoration-text-1 ${FOCUS_RING}`}
             >
               이용약관
             </Link>

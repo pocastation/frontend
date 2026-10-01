@@ -87,7 +87,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
   }
 
   if (!rating) {
-    return <p className="mt-1.5 text-[11px] text-text-3">후기를 불러오는 중...</p>;
+    return <p className="mt-1.5 text-caption text-text-3">후기를 불러오는 중...</p>;
   }
 
   return (
@@ -96,7 +96,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
       <div className="flex flex-wrap items-center gap-1.5">
         <TrustLevelBadge
           level={rating.trustLevel}
-          className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-0.5 text-[11px] font-bold text-text-1 decoration-transparent hover:decoration-text-3"
+          className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-0.5 text-caption font-bold text-text-1 decoration-transparent hover:decoration-text-3"
         >
           <span className="text-text-3">Lv.{rating.trustLevel}</span>
           {plainLevelLabel(rating.trustLevelLabel)}
@@ -104,7 +104,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
         {/* 배지(#264)는 레벨 바로 뒤 — 레벨과 나란히 놓여야 "두 번째 자격"으로 읽힌다. */}
         <BadgeChips badges={rating.badges} />
         {rating.tradeCount > 0 && (
-          <span className="text-[11px] text-text-3">거래 {rating.tradeCount}회</span>
+          <span className="text-caption text-text-3">거래 {rating.tradeCount}회</span>
         )}
       </div>
 
@@ -117,7 +117,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
         후기는 **보조 정보라 헤어라인 하나로 조용히**, 매물은 **여백과 큰 제목으로** 가른다.
       */}
       <div className="mt-4 border-t border-border pt-3">
-        <p className="text-[12.5px] font-bold text-text-2">
+        <p className="text-body-s font-bold text-text-2">
           받은 후기 <span className="font-bold text-text-3">{rating.reviewCount}</span>
         </p>
       </div>
@@ -125,17 +125,17 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
       {/* 별점 + 후기 보기 + 매너 태그를 한 줄에(시안). 후기 0건이면 안내 문구만. */}
       <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
         {rating.reviewCount === 0 ? (
-          <span className="text-[11px] text-text-3">아직 받은 거래 후기가 없어요.</span>
+          <span className="text-caption text-text-3">아직 받은 거래 후기가 없어요.</span>
         ) : (
           <>
             <span className="flex items-center gap-1.5">
-              <Stars value={rating.averageRating ?? 0} className="text-sm" />
-              <span className="text-sm font-bold text-text-1">{(rating.averageRating ?? 0).toFixed(1)}</span>
+              <Stars value={rating.averageRating ?? 0} className="text-body" />
+              <span className="text-body font-bold text-text-1">{(rating.averageRating ?? 0).toFixed(1)}</span>
             </span>
             <button
               type="button"
               onClick={toggleExpand}
-              className={`rounded-control text-xs font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
+              className={`rounded-control text-label font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}
             >
               거래 후기 {rating.reviewCount}개 {expanded ? "접기" : "보기"}
             </button>
@@ -147,7 +147,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
             {rating.tags.map((t) => (
               <span
                 key={t.code}
-                className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-0.5 text-[11px] font-semibold text-text-2"
+                className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-0.5 text-caption font-semibold text-text-2"
               >
                 {t.label}
                 <span className="text-text-3">{t.count}</span>
@@ -167,7 +167,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
               type="button"
               onClick={() => loadPage(page + 1)}
               disabled={loadingList}
-              className={`mt-2 rounded-control py-2 text-xs font-semibold text-text-3 transition-colors hover:text-primary disabled:opacity-50 ${FOCUS_RING}`}
+              className={`mt-2 rounded-control py-2 text-label font-semibold text-text-3 transition-colors hover:text-primary disabled:opacity-50 ${FOCUS_RING}`}
             >
               {loadingList ? "불러오는 중..." : "후기 더 보기"}
             </button>
@@ -210,10 +210,10 @@ function ReviewRow({
     <div className="py-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <Stars value={review.rating} className="text-xs" />
-          <span className="text-xs font-bold text-text-1">{review.reviewerNickname ?? "구매자"}</span>
+          <Stars value={review.rating} className="text-label" />
+          <span className="text-label font-bold text-text-1">{review.reviewerNickname ?? "구매자"}</span>
         </div>
-        <span className="text-[11px] text-text-3">{formatRelativeTime(review.createdAt)}</span>
+        <span className="text-caption text-text-3">{formatRelativeTime(review.createdAt)}</span>
       </div>
 
       {review.tags.length > 0 && (
@@ -226,7 +226,7 @@ function ReviewRow({
         </div>
       )}
 
-      {review.body && <p className="mt-1.5 whitespace-pre-wrap text-xs text-text-2">{review.body}</p>}
+      {review.body && <p className="mt-1.5 whitespace-pre-wrap text-label text-text-2">{review.body}</p>}
 
       {canReport && !done && (
         <div className="mt-2">
@@ -235,7 +235,7 @@ function ReviewRow({
               <select
                 value={reason}
                 onChange={(e) => setReason(e.target.value as ReviewReportReason)}
-                className={`rounded-control border border-border-2 bg-surface px-2 py-1 text-[11px] text-text-2 ${FOCUS_RING}`}
+                className={`rounded-control border border-border-2 bg-surface px-2 py-1 text-caption text-text-2 ${FOCUS_RING}`}
               >
                 {REVIEW_REPORT_REASON_OPTIONS.map((code) => (
                   <option key={code} value={code}>
@@ -246,31 +246,31 @@ function ReviewRow({
               <button
                 type="button"
                 onClick={submitReport}
-                className={`rounded-control bg-text-1 px-2 py-1 text-[11px] font-bold text-white ${FOCUS_RING}`}
+                className={`rounded-control bg-text-1 px-2 py-1 text-caption font-bold text-white ${FOCUS_RING}`}
               >
                 신고 접수
               </button>
               <button
                 type="button"
                 onClick={() => setReporting(false)}
-                className={`rounded-control px-1.5 py-1 text-[11px] font-semibold text-text-3 ${FOCUS_RING}`}
+                className={`rounded-control px-1.5 py-1 text-caption font-semibold text-text-3 ${FOCUS_RING}`}
               >
                 취소
               </button>
-              {error && <span className="text-[11px] font-semibold text-accent">{error}</span>}
+              {error && <span className="text-caption font-semibold text-accent">{error}</span>}
             </div>
           ) : (
             <button
               type="button"
               onClick={() => setReporting(true)}
-              className={`text-[11px] font-semibold text-text-3 transition-colors hover:text-accent ${FOCUS_RING}`}
+              className={`text-caption font-semibold text-text-3 transition-colors hover:text-accent ${FOCUS_RING}`}
             >
               신고
             </button>
           )}
         </div>
       )}
-      {done && <p className="mt-2 text-[11px] font-semibold text-text-3">신고가 접수됐어요. 검토 후 처리돼요.</p>}
+      {done && <p className="mt-2 text-caption font-semibold text-text-3">신고가 접수됐어요. 검토 후 처리돼요.</p>}
     </div>
   );
 }

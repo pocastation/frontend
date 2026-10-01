@@ -35,8 +35,8 @@ export default function AuctionGrid({
           <path d="m3.3 7 8.7 5 8.7-5M12 22V12" />
         </svg>
         <div>
-          <p className="font-display text-sm font-extrabold text-text-1">{emptyTitle}</p>
-          <p className="mt-1 text-xs text-text-3">{emptyDescription}</p>
+          <p className="font-display text-body font-extrabold text-text-1">{emptyTitle}</p>
+          <p className="mt-1 text-label text-text-3">{emptyDescription}</p>
         </div>
       </div>
     );

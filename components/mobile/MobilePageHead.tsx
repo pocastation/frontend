@@ -52,8 +52,8 @@ export default function MobilePageHead({
           </button>
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-[17px] font-extrabold tracking-tight text-text-1">{title}</h1>
-          {sub && <p className="truncate text-[11.5px] text-text-3">{sub}</p>}
+          <h1 className="truncate text-title-s font-extrabold text-text-1">{title}</h1>
+          {sub && <p className="truncate text-label text-text-3">{sub}</p>}
         </div>
         {action && <div className="flex flex-shrink-0 items-center">{action}</div>}
         {variant === "close" && (

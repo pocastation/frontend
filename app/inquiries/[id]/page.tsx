@@ -58,14 +58,14 @@ export default function InquiryDetailPage() {
   }, [accessToken, isLoading, load, params.id, router]);
 
   if (isLoading || !accessToken) {
-    return <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">문의를 불러오는 중...</div>;
+    return <div className="mx-auto max-w-sm px-4 py-24 text-center text-body text-text-3">문의를 불러오는 중...</div>;
   }
 
   return (
     <main className="mx-auto w-full max-w-[760px] px-4 py-8 sm:py-11">
       <Link
         href="/inquiries"
-        className={"inline-flex items-center gap-1 text-sm font-bold text-text-3 hover:text-primary " + FOCUS_RING}
+        className={"inline-flex items-center gap-1 text-body font-bold text-text-3 hover:text-primary " + FOCUS_RING}
       >
         <ArrowLeft />
         문의 내역
@@ -73,11 +73,11 @@ export default function InquiryDetailPage() {
 
       {error && (
         <div className="mt-8 border-y border-border py-16 text-center">
-          <p role="alert" className="text-sm font-semibold text-accent">{error}</p>
+          <p role="alert" className="text-body font-semibold text-accent">{error}</p>
           <button
             type="button"
             onClick={() => void load()}
-            className={"mt-4 rounded-control border border-border-2 px-4 py-2 text-sm font-bold text-text-2 hover:text-primary " + FOCUS_RING}
+            className={"mt-4 rounded-control border border-border-2 px-4 py-2 text-body font-bold text-text-2 hover:text-primary " + FOCUS_RING}
           >
             다시 시도
           </button>
@@ -85,21 +85,21 @@ export default function InquiryDetailPage() {
       )}
 
       {loading ? (
-        <p className="py-24 text-center text-sm text-text-3">불러오는 중...</p>
+        <p className="py-24 text-center text-body text-text-3">불러오는 중...</p>
       ) : inquiry ? (
         <>
           <header className="mt-6 border-b border-border pb-6">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-xs font-extrabold text-primary">{INQUIRY_CATEGORY_LABEL[inquiry.category]}</span>
+              <span className="text-label font-extrabold text-primary">{INQUIRY_CATEGORY_LABEL[inquiry.category]}</span>
               <InquiryStatusBadge status={inquiry.status} />
             </div>
-            <h1 className="mt-3 break-words font-display text-xl font-extrabold leading-snug text-text-1 sm:text-2xl">
+            <h1 className="mt-3 break-words font-display text-title font-extrabold leading-snug text-text-1 sm:text-title-l">
               {inquiry.title}
             </h1>
-            <p className="mt-2 text-xs text-text-3">접수일 {formatInquiryDate(inquiry.createdAt)}</p>
+            <p className="mt-2 text-label text-text-3">접수일 {formatInquiryDate(inquiry.createdAt)}</p>
             {/* 거래 문의(#633) — 어느 거래로 넣었는지. 여기서 그 거래로 바로 건너간다. */}
             {inquiry.order && inquiry.orderTopic && (
-              <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-3">
+              <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-label text-text-3">
                 <span className="font-bold text-text-2">
                   {ORDER_INQUIRY_TOPIC_SHORT[inquiry.orderTopic]}
                 </span>
@@ -138,13 +138,13 @@ export default function InquiryDetailPage() {
                   )}
                   <span
                     className={
-                      "relative z-10 flex h-6 w-6 items-center justify-center rounded-full border text-[10px] font-extrabold " +
+                      "relative z-10 flex h-6 w-6 items-center justify-center rounded-full border text-caption font-extrabold " +
                       (reached ? "border-primary bg-primary text-white" : "border-border-2 bg-white text-text-3")
                     }
                   >
                     {index + 1}
                   </span>
-                  <span className={"mt-2 text-xs font-bold " + (reached ? "text-text-1" : "text-text-3")}>
+                  <span className={"mt-2 text-label font-bold " + (reached ? "text-text-1" : "text-text-3")}>
                     {INQUIRY_STATUS_LABEL[step]}
                   </span>
                 </li>
@@ -153,8 +153,8 @@ export default function InquiryDetailPage() {
           </ol>
 
           <article className="py-7" aria-labelledby="inquiry-content-title">
-            <h2 id="inquiry-content-title" className="text-sm font-extrabold text-text-1">문의 내용</h2>
-            <p className="mt-4 whitespace-pre-wrap break-words text-sm leading-7 text-text-2">{inquiry.content}</p>
+            <h2 id="inquiry-content-title" className="text-body font-extrabold text-text-1">문의 내용</h2>
+            <p className="mt-4 whitespace-pre-wrap break-words text-body leading-7 text-text-2">{inquiry.content}</p>
           </article>
 
           <section
@@ -163,17 +163,17 @@ export default function InquiryDetailPage() {
             aria-labelledby="inquiry-answer-title"
           >
             <div className="flex items-center justify-between gap-3">
-              <h2 id="inquiry-answer-title" className="text-sm font-extrabold text-text-1">답변</h2>
-              {inquiry.answeredAt && <span className="text-xs text-text-3">{formatInquiryDate(inquiry.answeredAt)}</span>}
+              <h2 id="inquiry-answer-title" className="text-body font-extrabold text-text-1">답변</h2>
+              {inquiry.answeredAt && <span className="text-label text-text-3">{formatInquiryDate(inquiry.answeredAt)}</span>}
             </div>
             {inquiry.answer ? (
-              <p className="mt-4 whitespace-pre-wrap break-words text-sm leading-7 text-text-2">{inquiry.answer}</p>
+              <p className="mt-4 whitespace-pre-wrap break-words text-body leading-7 text-text-2">{inquiry.answer}</p>
             ) : (
               <div className="mt-4">
-                <p className="text-sm font-bold text-text-2">
+                <p className="text-body font-bold text-text-2">
                   {inquiry.status === "CHECKING" ? "담당자가 문의 내용을 확인하고 있어요." : "문의가 정상적으로 접수됐어요."}
                 </p>
-                <p className="mt-1 text-xs leading-relaxed text-text-3">답변이 등록되면 알림으로 알려드릴게요.</p>
+                <p className="mt-1 text-label leading-relaxed text-text-3">답변이 등록되면 알림으로 알려드릴게요.</p>
               </div>
             )}
           </section>
@@ -182,7 +182,7 @@ export default function InquiryDetailPage() {
             <Link
               href="/inquiries/new"
               className={
-                "inline-flex h-10 items-center rounded-control border border-border-2 bg-white px-4 text-sm font-bold text-text-2 hover:border-primary hover:text-primary " +
+                "inline-flex h-10 items-center rounded-control border border-border-2 bg-white px-4 text-body font-bold text-text-2 hover:border-primary hover:text-primary " +
                 FOCUS_RING
               }
             >

@@ -37,7 +37,7 @@ export default function EventList({
   if (events.length === 0) {
     // 빈 안내는 확보한 칸 안에서 가운데로 선다. 잡아 둔 칸이 없으면 예전처럼 제 높이를 쓴다.
     if (fillers === 0) {
-      return <p className="py-8 text-center text-[12.5px] text-text-3">이 날짜에 등록된 행사가 없어요.</p>;
+      return <p className="py-8 text-center text-body-s text-text-3">이 날짜에 등록된 행사가 없어요.</p>;
     }
     return (
       <div className="relative">
@@ -46,7 +46,7 @@ export default function EventList({
             <FillerRow key={i} />
           ))}
         </ul>
-        <p className="absolute inset-0 flex items-center justify-center text-[12.5px] text-text-3">
+        <p className="absolute inset-0 flex items-center justify-center text-body-s text-text-3">
           이 날짜에 등록된 행사가 없어요.
         </p>
       </div>
@@ -64,10 +64,10 @@ export default function EventList({
               {TYPE_LABEL[event.type]}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block truncate text-[13.5px] font-bold tracking-[-0.01em] text-text-1">
+              <span className="block truncate text-body font-bold text-text-1">
                 {event.name}
               </span>
-              <span className="mt-px block truncate text-[11px] text-text-3">
+              <span className="mt-px block truncate text-caption text-text-3">
                 {event.venue} · {kstHm(event.startsAt)}
               </span>
             </span>
@@ -91,8 +91,8 @@ function FillerRow({ "aria-hidden": ariaHidden }: { "aria-hidden"?: boolean } = 
       <span className="flex items-center gap-2.5 py-[11px]">
         <span className={LABEL_NEUTRAL}>행사</span>
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-[13.5px] font-bold tracking-[-0.01em]">&nbsp;</span>
-          <span className="mt-px block truncate text-[11px]">&nbsp;</span>
+          <span className="block truncate text-body font-bold">&nbsp;</span>
+          <span className="mt-px block truncate text-caption">&nbsp;</span>
         </span>
       </span>
     </li>

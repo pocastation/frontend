@@ -88,8 +88,8 @@ export default function OrderInquiryModal({
       >
         {doneId !== null ? (
           <>
-            <p className="text-sm font-bold text-text-1">문의를 접수했어요</p>
-            <p className="mt-1.5 text-xs leading-relaxed text-text-2">
+            <p className="text-body font-bold text-text-1">문의를 접수했어요</p>
+            <p className="mt-1.5 text-label leading-relaxed text-text-2">
               운영팀이 이 거래의 결제·배송 기록을 함께 보고 답변해요. 답변이 등록되면 알림으로
               알려드려요.
             </p>
@@ -107,19 +107,19 @@ export default function OrderInquiryModal({
           </>
         ) : (
           <>
-            <p className="text-sm font-bold text-text-1">이 거래로 문의하기</p>
-            <p className="mt-1 text-xs text-text-3">
+            <p className="text-body font-bold text-text-1">이 거래로 문의하기</p>
+            <p className="mt-1 text-label text-text-3">
               <b className="font-bold text-text-2">{title}</b> 거래예요 ·{" "}
               {role === "BUYER" ? "구매자" : "판매자"}로 접수돼요
             </p>
 
             <fieldset className="mt-4">
-              <legend className="text-xs font-bold text-text-2">무엇을 문의하시나요?</legend>
+              <legend className="text-label font-bold text-text-2">무엇을 문의하시나요?</legend>
               <div className="mt-2 divide-y divide-border rounded-card border border-border">
                 {ORDER_INQUIRY_TOPICS.map((code) => (
                   <label
                     key={code}
-                    className={`flex cursor-pointer items-center gap-2.5 px-3.5 py-2.5 text-sm ${
+                    className={`flex cursor-pointer items-center gap-2.5 px-3.5 py-2.5 text-body ${
                       topic === code ? "font-bold text-text-1" : "font-semibold text-text-2"
                     }`}
                   >
@@ -138,35 +138,35 @@ export default function OrderInquiryModal({
             </fieldset>
 
             <label className="mt-4 block">
-              <span className="text-xs font-bold text-text-2">제목</span>
+              <span className="text-label font-bold text-text-2">제목</span>
               <input
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value.slice(0, 100))}
                 placeholder="발송 12일째인데 배송 조회가 멈춰 있어요"
-                className={`mt-1.5 h-12 w-full rounded-card border border-border bg-surface px-3 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+                className={`mt-1.5 h-12 w-full rounded-card border border-border bg-surface px-3 text-body text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
               />
             </label>
 
             <label className="mt-3.5 block">
-              <span className="text-xs font-bold text-text-2">자세한 내용</span>
+              <span className="text-label font-bold text-text-2">자세한 내용</span>
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value.slice(0, 3000))}
                 rows={4}
                 placeholder="언제부터 어떤 상태인지, 택배사에 확인한 내용이 있으면 함께 적어주세요."
-                className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-sm text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+                className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-body text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
               />
-              <span className="mt-1 block text-right text-[11px] text-text-3">{content.length}/3000</span>
+              <span className="mt-1 block text-right text-caption text-text-3">{content.length}/3000</span>
             </label>
 
-            <div className="mt-3 rounded-card border border-border bg-surface-2 px-3.5 py-2.5 text-[11px] leading-relaxed text-text-2">
+            <div className="mt-3 rounded-card border border-border bg-surface-2 px-3.5 py-2.5 text-caption leading-relaxed text-text-2">
               운영팀이 <b className="font-bold text-text-1">이 거래의 결제·배송 기록을 함께 보고</b>{" "}
               답변해요. 답변은 알림과 <b className="font-bold text-text-1">문의 내역</b>에서 확인할 수
               있어요. 하루에 접수할 수 있는 문의는 10건이에요.
             </div>
 
-            {error && <p className="mt-3 text-xs font-semibold text-accent">{error}</p>}
+            {error && <p className="mt-3 text-label font-semibold text-accent">{error}</p>}
 
             <div className="mt-4 flex gap-2">
               <button type="button" onClick={onClose} className={`h-10 flex-1 ${SECONDARY_BUTTON_CLASS}`}>

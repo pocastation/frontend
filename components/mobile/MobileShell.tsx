@@ -46,7 +46,7 @@ export default function MobileShell({ children }: { children: ReactNode }) {
         <div className="flex h-12 items-center justify-between pl-[14px] pr-1">
           {/* 글자 높이는 19px이지만 탭 영역은 44px을 채운다(모바일 터치 타깃 최소치). */}
           <Link href="/" aria-label="포카스테이션 홈" className={`flex h-11 items-center rounded-control ${FOCUS_RING}`}>
-            <Wordmark className="text-[19px] leading-none" />
+            <Wordmark className="text-title-s leading-none" />
           </Link>
           <div className="flex items-center">
             {/* 검색 전용 화면(#493). 도착하면 입력에 포커스가 잡혀 바로 칠 수 있다 —
@@ -65,7 +65,7 @@ export default function MobileShell({ children }: { children: ReactNode }) {
             >
               <BellIcon />
               {member && unreadCount > 0 && (
-                <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 font-display text-[10px] font-extrabold leading-none tabular-nums text-white">
+                <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 font-display text-caption font-extrabold leading-none tabular-nums text-white">
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}

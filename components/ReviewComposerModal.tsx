@@ -88,10 +88,10 @@ export default function ReviewComposerModal({
         aria-modal="true"
         aria-label="거래 후기 작성"
       >
-        <p className="text-sm font-bold text-text-1">
+        <p className="text-body font-bold text-text-1">
           {sellerNickname ? `${sellerNickname}님과의 거래는 어떠셨어요?` : "거래는 어떠셨어요?"}
         </p>
-        <p className="mt-1 text-xs text-text-3">
+        <p className="mt-1 text-label text-text-3">
           <b className="font-bold text-text-2">{title}</b> 거래 후기예요. 다른 구매자에게 큰 도움이 돼요.
         </p>
 
@@ -105,7 +105,7 @@ export default function ReviewComposerModal({
                 aria-label={`별점 ${n}점`}
                 onMouseEnter={() => setHover(n)}
                 onClick={() => setRating(n)}
-                className={`rounded-control p-0.5 text-3xl leading-none transition-colors ${FOCUS_RING} ${
+                className={`rounded-control p-0.5 text-display leading-none transition-colors ${FOCUS_RING} ${
                   n <= activeStars ? "text-star" : "text-border-2"
                 }`}
               >
@@ -113,12 +113,12 @@ export default function ReviewComposerModal({
               </button>
             ))}
           </div>
-          <span className="h-4 text-xs font-semibold text-text-2">{RATING_HINT[activeStars] ?? ""}</span>
+          <span className="h-4 text-label font-semibold text-text-2">{RATING_HINT[activeStars] ?? ""}</span>
         </div>
 
         {/* 매너 태그 칩 */}
         <div className="mt-4">
-          <p className="text-xs font-bold text-text-2">이런 점이 좋았어요 (선택)</p>
+          <p className="text-label font-bold text-text-2">이런 점이 좋았어요 (선택)</p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {REVIEW_MANNER_TAGS.map((t) => {
               const on = tags.includes(t.code);
@@ -128,7 +128,7 @@ export default function ReviewComposerModal({
                   type="button"
                   aria-pressed={on}
                   onClick={() => toggleTag(t.code)}
-                  className={`rounded-control border px-2.5 py-1 text-xs font-semibold transition-colors ${FOCUS_RING} ${
+                  className={`rounded-control border px-2.5 py-1 text-label font-semibold transition-colors ${FOCUS_RING} ${
                     on
                       ? "border-text-1 bg-text-1 text-white"
                       : "border-border-2 text-text-2 hover:border-text-3"
@@ -148,13 +148,13 @@ export default function ReviewComposerModal({
             onChange={(e) => setBody(e.target.value.slice(0, 500))}
             rows={3}
             placeholder="거래하며 느낀 점을 남겨주세요. (선택, 최대 500자)"
-            className={`w-full resize-none rounded-control border border-border px-3 py-2.5 text-sm text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+            className={`w-full resize-none rounded-control border border-border px-3 py-2.5 text-body text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
           />
-          <p className="mt-0.5 text-right text-[11px] text-text-3">{body.length}/500</p>
+          <p className="mt-0.5 text-right text-caption text-text-3">{body.length}/500</p>
         </div>
 
         {error && (
-          <p role="alert" className="mt-2 text-xs font-semibold text-accent">
+          <p role="alert" className="mt-2 text-label font-semibold text-accent">
             {error}
           </p>
         )}

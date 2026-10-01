@@ -64,24 +64,24 @@ export default function OfferWithdrawModal({
         aria-modal="true"
         aria-label="제안 취소 확인"
       >
-        <h3 className="text-[15px] font-bold tracking-[-0.01em] text-text-1">이 제안을 거둬들일까요?</h3>
-        <p className="mt-1.5 truncate text-[11.5px] text-text-3">{title}</p>
+        <h3 className="text-body-l font-bold text-text-1">이 제안을 거둬들일까요?</h3>
+        <p className="mt-1.5 truncate text-label text-text-3">{title}</p>
 
-        <p className="mt-3 text-[12.5px] leading-relaxed text-text-2">
+        <p className="mt-3 text-body-s leading-relaxed text-text-2">
           제안이 판매자의 목록에서 사라지고, <b className="font-bold text-text-1">다시 되돌릴 수 없어요.</b>
         </p>
-        <p className="mt-1.5 text-[11.5px] leading-relaxed text-text-3">
+        <p className="mt-1.5 text-label leading-relaxed text-text-3">
           같은 상품에 새로 제안하는 건 언제든 가능해요.
         </p>
 
-        {error && <p className="mt-3 text-[11.5px] leading-relaxed text-accent">{error}</p>}
+        {error && <p className="mt-3 text-label leading-relaxed text-accent">{error}</p>}
 
         <div className="mt-5 flex gap-2">
           <button
             type="button"
             onClick={onClose}
             disabled={busy}
-            className={`h-[42px] flex-1 rounded-control border border-border-2 bg-surface text-[13px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
+            className={`h-[42px] flex-1 rounded-control border border-border-2 bg-surface text-body-s font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
           >
             그대로 두기
           </button>
@@ -89,7 +89,7 @@ export default function OfferWithdrawModal({
             type="button"
             onClick={() => void withdraw()}
             disabled={busy}
-            className={`h-[42px] flex-1 rounded-control bg-text-1 text-[13px] font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+            className={`h-[42px] flex-1 rounded-control bg-text-1 text-body-s font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
           >
             {busy ? "취소 중..." : "제안 취소"}
           </button>

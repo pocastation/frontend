@@ -149,7 +149,7 @@ export default function AuctionImageGallery({
                     <ChevronRight />
                   </button>
                 )}
-                <span className="pointer-events-none absolute bottom-2 right-2 z-10 rounded-control bg-text-1/60 px-2 py-0.5 text-[11px] font-semibold text-white tabular-nums">
+                <span className="pointer-events-none absolute bottom-2 right-2 z-10 rounded-control bg-text-1/60 px-2 py-0.5 text-caption font-semibold text-white tabular-nums">
                   {activeIndex + 1} / {images.length}
                 </span>
               </>

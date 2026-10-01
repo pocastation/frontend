@@ -126,7 +126,7 @@ export default function Header() {
     <header className={pathname === "/admin" || pathname.startsWith("/admin/") ? "hdr max-lg:hidden" : foldOnMobile ? "hdr max-sm:hidden" : "hdr"}>
       <div className="pg hdr-in">
         <Link href="/" onClick={closeMenu} className="logo" aria-label="포카스테이션 홈">
-          <Wordmark className="text-[19px] leading-none" />
+          <Wordmark className="text-title-s leading-none" />
         </Link>
 
         <form className="srch" role="search" onSubmit={handleSearchSubmit}>
@@ -164,7 +164,7 @@ export default function Header() {
           >
             <BellIcon />
             {member && unreadCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-extrabold leading-none text-white">
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-caption font-extrabold leading-none text-white">
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             )}
@@ -204,7 +204,7 @@ export default function Header() {
             >
               <BellIcon />
               {member && unreadCount > 0 && (
-                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-extrabold leading-none text-white">
+                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-caption font-extrabold leading-none text-white">
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}
@@ -262,7 +262,7 @@ export default function Header() {
               placeholder="스타, 멤버, 앨범 검색..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className={`w-full rounded-control border border-border bg-bg py-2 pl-9 pr-3.5 text-sm outline-none focus:border-primary ${FOCUS_RING}`}
+              className={`w-full rounded-control border border-border bg-bg py-2 pl-9 pr-3.5 text-body outline-none focus:border-primary ${FOCUS_RING}`}
             />
           </form>
 
@@ -272,7 +272,7 @@ export default function Header() {
                 key={link.label}
                 href={link.href}
                 onClick={closeMenu}
-                className={`rounded-control px-2 py-2.5 text-sm font-semibold text-text-2 transition-colors hover:bg-surface-2 hover:text-text-1 ${FOCUS_RING}`}
+                className={`rounded-control px-2 py-2.5 text-body font-semibold text-text-2 transition-colors hover:bg-surface-2 hover:text-text-1 ${FOCUS_RING}`}
               >
                 {link.label}
               </Link>
@@ -284,17 +284,17 @@ export default function Header() {
                 <Link
                   href="/auctions/new"
                   onClick={closeMenu}
-                  className={`flex h-11 items-center justify-center rounded-card bg-primary text-sm font-bold text-white ${FOCUS_RING}`}
+                  className={`flex h-11 items-center justify-center rounded-card bg-primary text-body font-bold text-white ${FOCUS_RING}`}
                 >
                   판매 등록
                 </Link>
                 <div className="flex items-center justify-between px-1">
-                  <Link href="/mypage" onClick={closeMenu} className={`text-sm font-semibold text-text-2 ${FOCUS_RING}`}>
+                  <Link href="/mypage" onClick={closeMenu} className={`text-body font-semibold text-text-2 ${FOCUS_RING}`}>
                     {member.nickname}님 마이페이지 →
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className={`rounded-control border border-border-2 bg-white px-4 py-1.5 text-sm font-bold text-text-2 ${FOCUS_RING}`}
+                    className={`rounded-control border border-border-2 bg-white px-4 py-1.5 text-body font-bold text-text-2 ${FOCUS_RING}`}
                   >
                     로그아웃
                   </button>
@@ -304,7 +304,7 @@ export default function Header() {
               <Link
                 href="/login"
                 onClick={closeMenu}
-                className={`flex h-11 items-center justify-center rounded-card bg-primary text-sm font-bold text-white ${FOCUS_RING}`}
+                className={`flex h-11 items-center justify-center rounded-card bg-primary text-body font-bold text-white ${FOCUS_RING}`}
               >
                 로그인
               </Link>

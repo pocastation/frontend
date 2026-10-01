@@ -50,7 +50,7 @@ type InitialState = {
 };
 const primary = `w-full min-h-12 px-4 ${PRIMARY_BUTTON_CLASS}`;
 const secondary = `w-full min-h-12 px-4 ${SECONDARY_BUTTON_CLASS}`;
-const quiet = `min-h-11 px-2 text-xs text-text-2 underline underline-offset-4 ${FOCUS_RING}`;
+const quiet = `min-h-11 px-2 text-label text-text-2 underline underline-offset-4 ${FOCUS_RING}`;
 
 export default function AdminTotpForm() {
   const router = useRouter();
@@ -351,18 +351,18 @@ export default function AdminTotpForm() {
               ? "보관한 복구 코드 중 사용하지 않은 코드 1개를 입력해 주세요."
               : "가입할 때 인증한 본인 명의로 PASS 인증을 진행해 주세요.";
   const errorView = error && (
-    <p role="alert" className="my-4 text-xs leading-relaxed text-danger">
+    <p role="alert" className="my-4 text-label leading-relaxed text-danger">
       {error}
     </p>
   );
   const otp = (
     <>
-      <label htmlFor="totp-code" className="mb-2 block text-[13px]">
+      <label htmlFor="totp-code" className="mb-2 block text-body-s">
         인증번호
       </label>
       <input
         id="totp-code"
-        className={`${INPUT_CLASS} h-[50px] text-center !text-2xl tracking-[0.4em] tabular-nums`}
+        className={`${INPUT_CLASS} h-[50px] text-center !text-title-l tracking-[0.4em] tabular-nums`}
         inputMode="numeric"
         autoComplete="one-time-code"
         maxLength={6}
@@ -373,7 +373,7 @@ export default function AdminTotpForm() {
         aria-invalid={!!error}
         aria-describedby="totp-help"
       />
-      <p id="totp-help" className="mb-5 mt-2 text-xs text-text-2">
+      <p id="totp-help" className="mb-5 mt-2 text-label text-text-2">
         인증 앱에 표시된 6자리 번호를 입력해 주세요.
       </p>
     </>
@@ -381,7 +381,7 @@ export default function AdminTotpForm() {
 
   if (screen === "loading")
     return (
-      <p className="py-24 text-center text-sm text-text-2">
+      <p className="py-24 text-center text-body text-text-2">
         인증 정보를 확인하고 있어요...
       </p>
     );
@@ -392,7 +392,7 @@ export default function AdminTotpForm() {
       aria-label="관리자 2차 인증"
     >
       <div className="mb-8 text-center">
-        <p className="mb-2 text-xs text-text-2">
+        <p className="mb-2 text-label text-text-2">
           {screen === "backup"
             ? "관리자 보안 설정 · 3 / 3"
             : screen === "enroll"
@@ -401,10 +401,10 @@ export default function AdminTotpForm() {
                 ? "관리자 보안 설정 · 1 / 3"
                 : "관리자 로그인"}
         </p>
-        <h1 className="mb-3 text-[22px] font-extrabold tracking-tight text-text-1">
+        <h1 className="mb-3 text-title font-extrabold text-text-1">
           {heading}
         </h1>
-        <p className="text-sm leading-7 text-text-2">{description}</p>
+        <p className="text-body leading-7 text-text-2">{description}</p>
       </div>
       {restart ? (
         <>
@@ -453,8 +453,8 @@ export default function AdminTotpForm() {
           {screen === "pass" && (
             <>
               <div className="mb-7 border-y border-border py-4">
-                <p className="mb-1 text-sm font-bold">PASS 본인인증</p>
-                <p className="text-xs leading-6 text-text-2">
+                <p className="mb-1 text-body font-bold">PASS 본인인증</p>
+                <p className="text-label leading-6 text-text-2">
                   관리자 계정에 등록된 본인 정보와 대조해요.
                 </p>
               </div>
@@ -491,7 +491,7 @@ export default function AdminTotpForm() {
                   title="인증 앱 등록 QR 코드"
                 />
               </div>
-              <details className="mb-6 text-xs">
+              <details className="mb-6 text-label">
                 <summary
                   className={`min-h-11 cursor-pointer py-3 text-text-2 ${FOCUS_RING}`}
                 >
@@ -500,7 +500,7 @@ export default function AdminTotpForm() {
                 <p className="my-2 leading-6 text-text-2">
                   설정 키를 복사해 인증 앱의 ‘설정 키 입력’으로 추가해 주세요.
                 </p>
-                <code className="block select-all break-all bg-surface-2 p-3 font-mono text-sm">
+                <code className="block select-all break-all bg-surface-2 p-3 font-mono text-body">
                   {enrollment.secret}
                 </code>
                 <button
@@ -522,17 +522,17 @@ export default function AdminTotpForm() {
           )}
           {screen === "backup" && completion && (
             <>
-              <p className="text-xs leading-6 text-text-2">
+              <p className="text-label leading-6 text-text-2">
                 이 화면에서 한 번만 보여드려요.
                 <br />각 코드는 한 번만 사용할 수 있어요.
               </p>
               <ol className="my-5 space-y-3 bg-surface-2 p-4">
                 {completion.recoveryCodes.map((value, index) => (
                   <li key={index} className="flex gap-3">
-                    <span className="w-4 shrink-0 text-xs text-text-2">
+                    <span className="w-4 shrink-0 text-label text-text-2">
                       {String(index + 1).padStart(2, "0")}
                     </span>
-                    <code className="min-w-0 select-all break-all font-mono text-xs leading-5">
+                    <code className="min-w-0 select-all break-all font-mono text-label leading-5">
                       {value}
                     </code>
                   </li>
@@ -544,7 +544,7 @@ export default function AdminTotpForm() {
               >
                 복구 코드 복사
               </button>
-              <label className="my-4 flex min-h-12 cursor-pointer items-center gap-3 text-[13px]">
+              <label className="my-4 flex min-h-12 cursor-pointer items-center gap-3 text-body-s">
                 <input
                   type="checkbox"
                   className="h-4 w-4 accent-primary"
@@ -592,14 +592,14 @@ export default function AdminTotpForm() {
             <>
               <form onSubmit={recover}>
                 <label
-                  className="mb-2 block text-[13px]"
+                  className="mb-2 block text-body-s"
                   htmlFor="recovery-code"
                 >
                   복구 코드
                 </label>
                 <input
                   id="recovery-code"
-                  className={`${INPUT_CLASS} h-12 !text-base`}
+                  className={`${INPUT_CLASS} h-12 !text-body-l`}
                   autoComplete="off"
                   spellCheck={false}
                   value={recoveryCode}
@@ -608,7 +608,7 @@ export default function AdminTotpForm() {
                   disabled={busy}
                   maxLength={100}
                 />
-                <p className="my-3 text-xs text-text-2">
+                <p className="my-3 text-label text-text-2">
                   코드 확인 후 새 인증 앱을 등록해요.
                 </p>
                 {errorView}
@@ -630,7 +630,7 @@ export default function AdminTotpForm() {
               </div>
             </>
           )}
-          <p className="mt-3 text-xs text-text-2" role="status">
+          <p className="mt-3 text-label text-text-2" role="status">
             {copyMessage}
           </p>
           {screen !== "backup" && (
@@ -651,7 +651,7 @@ export default function AdminTotpForm() {
 
 function RecoveryNotice() {
   return (
-    <p className="my-6 rounded-card bg-surface-2 px-3.5 py-3 text-xs leading-6 text-text-2">
+    <p className="my-6 rounded-card bg-surface-2 px-3.5 py-3 text-label leading-6 text-text-2">
       본인 확인을 완료하면 기존 인증 앱과 복구 코드가 해제되고, 모든 기기에서
       로그아웃돼요.
     </p>

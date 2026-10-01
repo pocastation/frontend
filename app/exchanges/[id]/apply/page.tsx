@@ -32,9 +32,9 @@ import type {
 
 const MAX_PHOTOS = 3;
 
-const LABEL = "mb-1.5 text-[12.5px] font-extrabold text-text-2";
+const LABEL = "mb-1.5 text-body-s font-extrabold text-text-2";
 const INPUT =
-  "h-12 w-full rounded-control border border-border-2 bg-white px-3 text-[15px] font-semibold text-text-1";
+  "h-12 w-full rounded-control border border-border-2 bg-white px-3 text-body-l font-semibold text-text-1";
 
 export default function ExchangeApplyPage() {
   const params = useParams<{ id: string }>();
@@ -139,7 +139,7 @@ export default function ExchangeApplyPage() {
 
       <div className={`mx-auto max-w-[640px] ${FORM_ACTION_BAR_PAD} sm:px-4 sm:py-8`}>
         {error && (
-          <p role="alert" className="mx-[14px] mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-[13px] font-semibold leading-[1.55] text-danger sm:mx-0">
+          <p role="alert" className="mx-[14px] mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
@@ -192,7 +192,7 @@ export default function ExchangeApplyPage() {
             {post?.slots.map((slot) => (
               <label
                 key={slot.id}
-                className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-control border px-3 text-[14px] font-bold transition-colors ${
+                className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-control border px-3 text-body font-bold transition-colors ${
                   slotId === slot.id ? "border-primary bg-white text-text-1" : "border-border bg-white text-text-2"
                 }`}
               >
@@ -236,7 +236,7 @@ export default function ExchangeApplyPage() {
             maxLength={200}
             rows={2}
             placeholder="예) 윈터 두 장 있어요. 종료 후에 뵐게요."
-            className={`w-full resize-none rounded-control border border-border-2 bg-white px-3 py-2.5 text-[15px] outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+            className={`w-full resize-none rounded-control border border-border-2 bg-white px-3 py-2.5 text-body-l outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
           />
           </div>
         </section>
@@ -246,7 +246,7 @@ export default function ExchangeApplyPage() {
             type="button"
             disabled={!ready || submitting}
             onClick={submit}
-            className={`h-12 w-full rounded-control bg-primary text-[15px] font-extrabold text-white disabled:opacity-40 ${PRESS_PRIMARY} ${FOCUS_RING}`}
+            className={`h-12 w-full rounded-control bg-primary text-body-l font-extrabold text-white disabled:opacity-40 ${PRESS_PRIMARY} ${FOCUS_RING}`}
           >
             {submitting ? "보내는 중..." : "신청 보내기"}
           </button>

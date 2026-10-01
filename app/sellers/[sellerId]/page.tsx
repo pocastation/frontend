@@ -85,12 +85,12 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
           「모든 섹션이 같은 골격이라 문서처럼 읽힌다」였다. **구분 장치는 블록마다 다르게 쓴다.**
         */}
         <div className="flex items-center gap-3">
-          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-surface-2 text-lg font-bold text-text-2">
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-surface-2 text-title-s font-bold text-text-2">
             {seller.nickname.slice(0, 1).toUpperCase()}
           </span>
           <div className="min-w-0">
-            <h1 className="truncate font-display text-lg font-extrabold text-text-1">{seller.nickname}</h1>
-            <p className="mt-0.5 text-xs text-text-3">
+            <h1 className="truncate font-display text-title-s font-extrabold text-text-1">{seller.nickname}</h1>
+            <p className="mt-0.5 text-label text-text-3">
               거래 {seller.tradeCount}회 · 후기 {seller.reviewCount}개
             </p>
           </div>
@@ -102,9 +102,9 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
           매물은 이 화면의 목적지다 — 선이나 띠 대신 **넓은 여백과 큰 제목**으로 무게를 준다.
           위의 후기가 헤어라인 하나로 조용히 붙는 것과 대비된다.
         */}
-        <h2 className="mt-9 font-display text-base font-extrabold text-text-1 sm:mt-10">
+        <h2 className="mt-9 font-display text-body-l font-extrabold text-text-1 sm:mt-10">
           판매 중인 상품{" "}
-          <span className="text-sm font-bold text-text-3">{auctions?.content.length ?? 0}</span>
+          <span className="text-body font-bold text-text-3">{auctions?.content.length ?? 0}</span>
         </h2>
         <div className="mt-3">
           <AuctionGrid

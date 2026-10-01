@@ -23,7 +23,7 @@ function Paragraphs({ items }: { items: string[] }) {
   return (
     <>
       {items.map((p, index) => (
-        <p key={index} className="mt-2 text-sm leading-relaxed text-text-2">
+        <p key={index} className="mt-2 text-body leading-relaxed text-text-2">
           {p}
         </p>
       ))}
@@ -35,7 +35,7 @@ function Bullets({ items }: { items: PrivacyBullet[] }) {
   return (
     <ul className="mt-3 space-y-1.5">
       {items.map((b, index) => (
-        <li key={index} className="flex gap-2 text-sm leading-relaxed text-text-2">
+        <li key={index} className="flex gap-2 text-body leading-relaxed text-text-2">
           <span aria-hidden="true" className="shrink-0 text-text-3">
             ·
           </span>
@@ -58,7 +58,7 @@ function Table({ table }: { table: PrivacyTable }) {
   return (
     <div className="mt-3 overflow-x-auto">
       <table
-        className="w-full border-collapse text-left text-[12.5px]"
+        className="w-full border-collapse text-left text-body-s"
         style={{ minWidth }}
       >
         <thead>
@@ -95,13 +95,13 @@ function Block({ block }: { block: PrivacyBlock }) {
   return (
     <div className="mt-6 first:mt-4">
       {block.heading && (
-        <h3 className="text-sm font-bold text-text-1">{block.heading}</h3>
+        <h3 className="text-body font-bold text-text-1">{block.heading}</h3>
       )}
 
       {/* 아직 시행되지 않은 내용은 정보주체가 오인하지 않도록 규칙선으로 떼어 놓는다.
           페이지 전체에서 이 강조를 쓰는 곳은 여기뿐이다. */}
       {block.note && (
-        <p className="mt-2 rounded-card bg-surface-2 px-3.5 py-3 text-[13px] leading-relaxed text-text-2">
+        <p className="mt-2 rounded-card bg-surface-2 px-3.5 py-3 text-body-s leading-relaxed text-text-2">
           {block.note}
         </p>
       )}
@@ -119,13 +119,13 @@ export default function PrivacyPage() {
       <header>
         {/* 법 §30② — "개인정보 처리방침"이라는 명칭을 쓰되 글자 크기·색상으로
             다른 고지사항과 구분해 정보주체가 쉽게 확인할 수 있어야 한다. */}
-        <h1 className="font-display text-2xl font-extrabold text-text-1 sm:text-3xl">
+        <h1 className="font-display text-title-l font-extrabold text-text-1 sm:text-display">
           개인정보 처리방침
         </h1>
-        <p className="mt-2 text-sm text-text-3">
+        <p className="mt-2 text-body text-text-3">
           {BUSINESS_INFO.companyName}(Poca Station) · K-POP 포토카드 중고거래 중개 플랫폼
         </p>
-        <dl className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-3">
+        <dl className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-label text-text-3">
           <div className="flex gap-1.5">
             <dt>개정 공고일</dt>
             <dd className="text-text-2">{PRIVACY_ANNOUNCED_DATE}</dd>
@@ -138,20 +138,20 @@ export default function PrivacyPage() {
       </header>
 
       {/* 전문 — 법 §30에 따른 방침 수립·공개 선언. 원본 문서 머리에 있는 문단 그대로. */}
-      <div className="mt-6 space-y-2 text-sm leading-relaxed text-text-2">
+      <div className="mt-6 space-y-2 text-body leading-relaxed text-text-2">
         {PRIVACY_PREAMBLE.map((p, index) => (
           <p key={index}>{p}</p>
         ))}
       </div>
 
       <nav aria-label="목차" className="mt-8 rounded-card border border-border p-4 sm:p-5">
-        <h2 className="text-sm font-bold text-text-1">목차</h2>
+        <h2 className="text-body font-bold text-text-1">목차</h2>
         <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5">
           {PRIVACY_ARTICLES.map((a) => (
             <li key={a.no}>
               <a
                 href={`#${anchorOf(a.no)}`}
-                className={`rounded-control text-xs text-text-2 transition-colors hover:text-primary ${FOCUS_RING}`}
+                className={`rounded-control text-label text-text-2 transition-colors hover:text-primary ${FOCUS_RING}`}
               >
                 {a.no} {a.title}
               </a>
@@ -163,7 +163,7 @@ export default function PrivacyPage() {
       <div className="mt-10 space-y-9">
         {PRIVACY_ARTICLES.map((article) => (
           <section key={article.no} id={anchorOf(article.no)} className="scroll-mt-24">
-            <h2 className="border-b border-border pb-2 font-display text-base font-extrabold text-text-1">
+            <h2 className="border-b border-border pb-2 font-display text-body-l font-extrabold text-text-1">
               {article.no} ({article.title})
             </h2>
 
@@ -179,7 +179,7 @@ export default function PrivacyPage() {
             {article.no === "제10조" && (
               <ul className="mt-3 space-y-1.5">
                 {PRIVACY_AGENCIES.map((a) => (
-                  <li key={a.name} className="flex flex-wrap gap-x-2 text-sm text-text-2">
+                  <li key={a.name} className="flex flex-wrap gap-x-2 text-body text-text-2">
                     <span className="font-bold text-text-1">{a.name}</span>
                     <span className="text-text-3">
                       {a.site} · ☎ {a.tel}
@@ -194,7 +194,7 @@ export default function PrivacyPage() {
             {article.no === "제11조" && PRIVACY_HISTORY.length > 0 && (
               <ul className="mt-3 space-y-1">
                 {PRIVACY_HISTORY.map((h) => (
-                  <li key={h.period} className="text-sm text-text-3">
+                  <li key={h.period} className="text-body text-text-3">
                     {h.period} 적용
                   </li>
                 ))}
@@ -204,7 +204,7 @@ export default function PrivacyPage() {
         ))}
       </div>
 
-      <p className="mt-10 border-t border-border pt-5 text-sm text-text-2">
+      <p className="mt-10 border-t border-border pt-5 text-body text-text-2">
         이 방침은 {PRIVACY_EFFECTIVE_DATE}부터 시행합니다. 문의는{" "}
         <a
           href={`mailto:${BUSINESS_INFO.email}`}

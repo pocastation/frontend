@@ -128,8 +128,8 @@ export default function AdminInquiriesPage() {
   return (
     <div>
       <header className="mb-5">
-        <h1 className="font-display text-xl font-extrabold text-text-1">문의 관리</h1>
-        <p className="mt-1 text-sm text-text-3">접수된 1:1 문의를 확인하고 답변을 등록해요.</p>
+        <h1 className="font-display text-title font-extrabold text-text-1">문의 관리</h1>
+        <p className="mt-1 text-body text-text-3">접수된 1:1 문의를 확인하고 답변을 등록해요.</p>
       </header>
 
       <div className="mb-4 flex flex-wrap items-center gap-1.5" role="group" aria-label="문의 상태 필터">
@@ -147,7 +147,7 @@ export default function AdminInquiriesPage() {
                 setFilter(item.value);
               }}
               className={
-                "rounded-control border px-3 py-1.5 text-xs font-semibold transition-colors " +
+                "rounded-control border px-3 py-1.5 text-label font-semibold transition-colors " +
                 FOCUS_RING +
                 (active
                   ? " border-primary bg-primary text-white"
@@ -158,7 +158,7 @@ export default function AdminInquiriesPage() {
             </button>
           );
         })}
-        <span className="ml-auto text-xs text-text-3">총 {totalElements}건</span>
+        <span className="ml-auto text-label text-text-3">총 {totalElements}건</span>
       </div>
 
       {notice && (
@@ -178,9 +178,9 @@ export default function AdminInquiriesPage() {
           aria-label="문의 목록"
         >
           {loading ? (
-            <p className="py-20 text-center text-sm text-text-3">불러오는 중...</p>
+            <p className="py-20 text-center text-body text-text-3">불러오는 중...</p>
           ) : items.length === 0 ? (
-            <p className="py-20 text-center text-sm text-text-3">해당 상태의 문의가 없어요.</p>
+            <p className="py-20 text-center text-body text-text-3">해당 상태의 문의가 없어요.</p>
           ) : (
             <>
               <ul className="max-h-[504px] overflow-y-auto">
@@ -198,13 +198,13 @@ export default function AdminInquiriesPage() {
                       }
                     >
                       <span className="flex items-center gap-2">
-                        <span className="text-[11px] font-extrabold text-primary">
+                        <span className="text-caption font-extrabold text-primary">
                           {INQUIRY_CATEGORY_LABEL[item.category]}
                         </span>
                         <InquiryStatusBadge status={item.status} />
                       </span>
-                      <span className="mt-2 block truncate text-sm font-bold text-text-1">{item.title}</span>
-                      <span className="mt-1 flex items-center justify-between gap-2 text-[11px] text-text-3">
+                      <span className="mt-2 block truncate text-body font-bold text-text-1">{item.title}</span>
+                      <span className="mt-1 flex items-center justify-between gap-2 text-caption text-text-3">
                         <span className="truncate">{item.memberNickname ?? "알 수 없는 회원"}</span>
                         <span className="shrink-0">{formatInquiryDate(item.createdAt)}</span>
                       </span>
@@ -228,13 +228,13 @@ export default function AdminInquiriesPage() {
                       setPage((current) => current - 1);
                     }}
                     className={
-                      "h-8 rounded-control px-2.5 text-xs font-bold text-text-2 hover:text-primary disabled:opacity-35 " +
+                      "h-8 rounded-control px-2.5 text-label font-bold text-text-2 hover:text-primary disabled:opacity-35 " +
                       FOCUS_RING
                     }
                   >
                     이전
                   </button>
-                  <span className="text-xs tabular-nums text-text-3">
+                  <span className="text-label tabular-nums text-text-3">
                     {page + 1} / {totalPages}
                   </span>
                   <button
@@ -247,7 +247,7 @@ export default function AdminInquiriesPage() {
                       setPage((current) => current + 1);
                     }}
                     className={
-                      "h-8 rounded-control px-2.5 text-xs font-bold text-text-2 hover:text-primary disabled:opacity-35 " +
+                      "h-8 rounded-control px-2.5 text-label font-bold text-text-2 hover:text-primary disabled:opacity-35 " +
                       FOCUS_RING
                     }
                   >
@@ -261,7 +261,7 @@ export default function AdminInquiriesPage() {
 
         <section className={(selected ? "block" : "hidden lg:block") + " min-w-0"} aria-label="문의 상세 및 답변">
           {!selected ? (
-            <div className="flex min-h-[360px] items-center justify-center px-6 text-center text-sm text-text-3">
+            <div className="flex min-h-[360px] items-center justify-center px-6 text-center text-body text-text-3">
               확인할 문의를 선택해 주세요.
             </div>
           ) : (
@@ -275,7 +275,7 @@ export default function AdminInquiriesPage() {
                     setNotice(null);
                   }}
                   className={
-                    "inline-flex h-9 items-center gap-1 text-sm font-bold text-text-2 hover:text-primary " + FOCUS_RING
+                    "inline-flex h-9 items-center gap-1 text-body font-bold text-text-2 hover:text-primary " + FOCUS_RING
                   }
                 >
                   <ArrowLeftIcon />
@@ -284,28 +284,28 @@ export default function AdminInquiriesPage() {
               </div>
               <div className="border-b border-border px-5 py-5 sm:px-6">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-extrabold text-primary">
+                  <span className="text-label font-extrabold text-primary">
                     {INQUIRY_CATEGORY_LABEL[selected.category]}
                   </span>
                   <InquiryStatusBadge status={selected.status} />
                 </div>
-                <h2 className="mt-3 break-words text-lg font-extrabold text-text-1">{selected.title}</h2>
-                <p className="mt-1 text-xs text-text-3">
+                <h2 className="mt-3 break-words text-title-s font-extrabold text-text-1">{selected.title}</h2>
+                <p className="mt-1 text-label text-text-3">
                   {selected.memberNickname ?? "알 수 없는 회원"} · {formatInquiryDate(selected.createdAt)}
                 </p>
               </div>
 
               <div className="border-b border-border px-5 py-6 sm:px-6">
-                <h3 className="text-xs font-extrabold text-text-3">문의 내용</h3>
-                <p className="mt-3 whitespace-pre-wrap break-words text-sm leading-7 text-text-2">{selected.content}</p>
+                <h3 className="text-label font-extrabold text-text-3">문의 내용</h3>
+                <p className="mt-3 whitespace-pre-wrap break-words text-body leading-7 text-text-2">{selected.content}</p>
               </div>
 
               <form className="px-5 py-6 sm:px-6" onSubmit={submitAnswer}>
                 <div className="mb-2 flex items-center justify-between gap-3">
-                  <label htmlFor="admin-inquiry-answer" className="text-sm font-extrabold text-text-1">
+                  <label htmlFor="admin-inquiry-answer" className="text-body font-extrabold text-text-1">
                     답변
                   </label>
-                  <span className="text-xs tabular-nums text-text-3">{answer.length}/3,000</span>
+                  <span className="text-label tabular-nums text-text-3">{answer.length}/3,000</span>
                 </div>
                 <textarea
                   id="admin-inquiry-answer"
@@ -315,7 +315,7 @@ export default function AdminInquiriesPage() {
                   onChange={(event) => setAnswer(event.target.value)}
                   placeholder="사용자에게 전달할 답변을 입력해 주세요."
                   className={
-                    "min-h-[180px] w-full resize-y rounded-control border border-border-2 p-3.5 text-sm leading-relaxed text-text-1 outline-none placeholder:text-text-3 focus:border-primary " +
+                    "min-h-[180px] w-full resize-y rounded-control border border-border-2 p-3.5 text-body leading-relaxed text-text-1 outline-none placeholder:text-text-3 focus:border-primary " +
                     FOCUS_RING
                   }
                 />
@@ -326,7 +326,7 @@ export default function AdminInquiriesPage() {
                       disabled={busy}
                       onClick={markChecking}
                       className={
-                        "h-10 rounded-control border border-border-2 bg-white px-4 text-sm font-bold text-text-2 hover:border-primary hover:text-primary disabled:opacity-50 " +
+                        "h-10 rounded-control border border-border-2 bg-white px-4 text-body font-bold text-text-2 hover:border-primary hover:text-primary disabled:opacity-50 " +
                         FOCUS_RING
                       }
                     >
@@ -337,7 +337,7 @@ export default function AdminInquiriesPage() {
                     type="submit"
                     disabled={busy || !answer.trim()}
                     className={
-                      "h-10 rounded-control bg-primary px-5 text-sm font-extrabold text-white hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-45 " +
+                      "h-10 rounded-control bg-primary px-5 text-body font-extrabold text-white hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-45 " +
                       FOCUS_RING
                     }
                   >

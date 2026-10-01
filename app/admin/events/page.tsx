@@ -378,7 +378,7 @@ export default function AdminEventsPage() {
               <button key={o.v} type="button" onClick={() => setRangeOffset(o.v)}
                 aria-pressed={rangeOffset === o.v}
                 className={`border-l border-border-2 px-2.5 py-1.5 text-label font-bold first:border-l-0 ${FOCUS_RING} ${
-                  rangeOffset === o.v ? "bg-primary text-white" : "text-text-2"
+                  rangeOffset === o.v ? "bg-text-1 text-white" : "text-text-2"
                 }`}>
                 {o.l}
               </button>

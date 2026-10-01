@@ -218,7 +218,7 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
     <Link
       href={item.href}
       aria-current={active ? "page" : undefined}
-      className={`${base} ${FOCUS_RING} ${active ? "bg-primary-soft text-primary" : "text-text-2 hover:bg-surface-2"}`}
+      className={`${base} ${FOCUS_RING} ${active ? "bg-surface-2 font-extrabold text-text-1" : "text-text-2 hover:bg-surface-2"}`}
     >
       {item.icon}
       {item.label}
@@ -261,7 +261,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   if (!admin) {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <p className="text-label font-extrabold tracking-wide text-accent">ACCESS DENIED</p>
+        <p className="text-label font-extrabold tracking-wide text-danger">ACCESS DENIED</p>
         <h1 className="mt-2 font-display text-title-l font-extrabold text-text-1">관리자 권한이 필요합니다</h1>
         <p className="mt-3 text-body leading-relaxed text-text-3">
           현재 계정은 {member?.role ?? "알 수 없음"} 권한입니다. 관리자 계정으로 로그인한 뒤 다시 접근해주세요.

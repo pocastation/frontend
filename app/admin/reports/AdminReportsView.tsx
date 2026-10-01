@@ -189,7 +189,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                 aria-pressed={statusFilter === f.key}
                 onClick={() => setStatusFilter(f.key)}
                 className={`h-10 rounded-control border px-3 text-label font-bold transition-colors ${FOCUS_RING} ${
-                  statusFilter === f.key ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+                  statusFilter === f.key ? "border-text-1 bg-text-1 text-white" : "border-border text-text-2 hover:border-text-3 hover:text-text-1"
                 }`}
               >
                 {f.label}
@@ -223,7 +223,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                       key={r.targetId}
                       onClick={() => openDetail(r.targetId)}
                       className={`cursor-pointer border-b border-border text-body-s transition-colors last:border-0 hover:bg-surface-2 ${
-                        selectedId === r.targetId ? "bg-primary-soft/50" : ""
+                        selectedId === r.targetId ? "bg-surface-2" : ""
                       }`}
                     >
                       {/*
@@ -253,7 +253,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                         </span>
                       </td>
                       <td data-label="신고자" className="px-4 py-3">
-                        <span className={`font-extrabold ${r.reporterCount > 1 ? "text-accent" : "text-text-2"}`}>{r.reporterCount}명</span>
+                        <span className={`font-extrabold ${r.reporterCount > 1 ? "text-danger" : "text-text-2"}`}>{r.reporterCount}명</span>
                       </td>
                       <td data-label="최근 신고" className="px-4 py-3 text-text-3">{formatRelativeTime(r.latestReportedAt)}</td>
                       <td data-label="상태" className="px-4 py-3">
@@ -362,7 +362,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                       <label
                         key={option}
                         className={`flex cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-body-s font-bold transition-colors ${
-                          action === option ? "border-primary bg-primary-soft text-primary" : "border-border-2 text-text-2"
+                          action === option ? "border-primary text-text-1" : "border-border-2 text-text-2"
                         }`}
                       >
                         <input

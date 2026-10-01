@@ -57,7 +57,7 @@ function AnalysisSection({
   const statusText = advisory
     ? analyzed ? "참고 지표" : "미분석"
     : passed === null ? "미분석" : passed ? "통과" : "미통과";
-  const statusColor = advisory || passed === null ? "text-text-3" : passed ? "text-ok" : "text-accent";
+  const statusColor = advisory || passed === null ? "text-text-3" : passed ? "text-ok" : "text-danger";
   return (
     <div className="border-b border-border py-3 last:border-0">
       <div className="flex items-center justify-between gap-3">
@@ -70,7 +70,7 @@ function AnalysisSection({
         {metrics.map((metric) => (
           <div key={metric.label} className="flex items-center justify-between gap-3">
             <dt className="text-text-3">{metric.label}</dt>
-            <dd className={`font-bold ${metric.passed == null ? "text-text-2" : metric.passed ? "text-ok" : "text-accent"}`}>
+            <dd className={`font-bold ${metric.passed == null ? "text-text-2" : metric.passed ? "text-ok" : "text-danger"}`}>
               {metric.value}
             </dd>
           </div>
@@ -287,7 +287,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
               <div>
                 <dt className="text-text-3">검수 결과</dt>
                 <dd className={`mt-1 font-extrabold ${
-                  auction.status === "REJECTED" ? "text-accent" : auction.reviewedAt ? "text-ok" : "text-text-3"
+                  auction.status === "REJECTED" ? "text-danger" : auction.reviewedAt ? "text-ok" : "text-text-3"
                 }`}>
                   {reviewResult}
                 </dd>
@@ -398,13 +398,13 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                         ? "border-border bg-surface-2"
                         : isTrocrV6
                           ? "border-border"
-                          : "border-accent bg-accent-soft"
+                          : "rounded-card border-transparent bg-surface-2 text-danger"
                     }`}
                     role={!modelVersionPending && !isTrocrV6 ? "alert" : undefined}
                   >
                     <div className="flex items-center justify-between gap-3">
                       <h3 className="text-label font-extrabold text-text-1">OCR 실행 구성</h3>
-                      <span className={`text-label font-extrabold ${modelVersionPending ? "text-text-3" : isTrocrV6 ? "text-ok" : "text-accent"}`}>
+                      <span className={`text-label font-extrabold ${modelVersionPending ? "text-text-3" : isTrocrV6 ? "text-ok" : "text-danger"}`}>
                         {modelVersionPending ? "분석 정보 대기" : isTrocrV6 ? "TrOCR v6 가중치" : "v6 아님"}
                       </span>
                     </div>
@@ -489,7 +489,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     <div className="mt-4 border border-border px-3 py-3">
                       <div className="flex items-center justify-between gap-3">
                         <h3 className="text-label font-extrabold text-text-1">최종 자동 판정</h3>
-                        <span className={`text-label font-extrabold ${!finalAnalyzed ? "text-text-3" : finalPassed ? "text-ok" : "text-accent"}`}>
+                        <span className={`text-label font-extrabold ${!finalAnalyzed ? "text-text-3" : finalPassed ? "text-ok" : "text-danger"}`}>
                           {!finalAnalyzed ? "미분석" : finalPassed ? "통과" : "미통과"}
                         </span>
                       </div>
@@ -498,7 +498,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                       </p>
                       <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-label">
                         <span className="text-text-3">발급 코드 일치 여부</span>
-                        <strong className={verification.codeExact === null ? "text-text-3" : verification.codeExact ? "text-ok" : "text-accent"}>
+                        <strong className={verification.codeExact === null ? "text-text-3" : verification.codeExact ? "text-ok" : "text-danger"}>
                           {verification.codeExact === null ? "미분석" : verification.codeExact ? "일치" : "불일치"}
                         </strong>
                       </div>
@@ -525,7 +525,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                       key={option.code}
                       className={`flex cursor-pointer items-center gap-2 rounded-control border px-3 py-2 text-body-s transition-colors ${
                         reasonCode === option.code
-                          ? "border-accent bg-accent-soft font-bold text-accent"
+                          ? "border-danger font-bold text-danger"
                           : "border-border text-text-2 hover:border-text-2"
                       }`}
                     >
@@ -538,7 +538,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                           setReasonCode(option.code);
                           setError(null);
                         }}
-                        className="h-3.5 w-3.5 shrink-0 accent-[var(--color-accent)]"
+                        className="h-3.5 w-3.5 shrink-0 accent-[var(--color-danger)]"
                       />
                       {option.label}
                     </label>
@@ -551,7 +551,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                   </p>
                 )}
                 {error && (
-                  <p className="mt-2 text-label text-accent" role="alert">{error}</p>
+                  <p className="mt-2 text-label text-danger" role="alert">{error}</p>
                 )}
                 <div className="mt-4 hidden gap-2 lg:flex lg:justify-end">
                   {/* 헤더 닫기까지 스크롤을 올려야 했던 문제 — 액션 줄에도 닫기를 둔다. */}
@@ -567,7 +567,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     type="button"
                     onClick={reject}
                     disabled={submitting}
-                    className={`h-11 border border-accent px-5 text-body font-extrabold text-accent hover:bg-accent-soft disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`h-11 rounded-control border border-danger bg-white px-5 text-body font-extrabold text-danger hover:bg-danger-soft disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     승인 거절
                   </button>
@@ -597,7 +597,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
           )}
         </div>
         <div className="verification-actions shrink-0 border-t border-border bg-surface p-4 lg:hidden">
-          {error && verification && !mobileRejectOpen && !readOnly && <p role="alert" className="mb-3 text-body text-accent">{error}</p>}
+          {error && verification && !mobileRejectOpen && !readOnly && <p role="alert" className="mb-3 text-body text-danger">{error}</p>}
           {readOnly || !verification ? (
             <button type="button" onClick={onClose} className={`min-h-12 w-full border border-border-2 text-body font-bold text-text-2 ${FOCUS_RING}`}>닫기</button>
           ) : mobileRejectOpen ? (
@@ -605,12 +605,12 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
               <button type="button" onClick={() => showRejection(false)} disabled={submitting}
                 className={`min-h-12 border border-border-2 text-body font-bold text-text-2 disabled:opacity-50 ${FOCUS_RING}`}>취소</button>
               <button type="button" onClick={reject} disabled={submitting}
-                className={`min-h-12 bg-accent text-body font-bold text-white disabled:opacity-50 ${FOCUS_RING}`}>{submitting ? "처리 중..." : "승인 거절"}</button>
+                className={`min-h-12 bg-danger text-body font-bold text-white disabled:opacity-50 ${FOCUS_RING}`}>{submitting ? "처리 중..." : "승인 거절"}</button>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-2">
               <button type="button" onClick={() => showRejection(true)} disabled={submitting || loading}
-                className={`min-h-12 border border-accent text-body font-bold text-accent disabled:opacity-50 ${FOCUS_RING}`}>승인 거절</button>
+                className={`min-h-12 border border-danger text-body font-bold text-danger disabled:opacity-50 ${FOCUS_RING}`}>승인 거절</button>
               <button type="button" onClick={approve} disabled={submitting || loading}
                 className={`min-h-12 bg-ok text-body font-bold text-white disabled:opacity-50 ${FOCUS_RING}`}>{submitting ? "처리 중..." : "승인하고 공개"}</button>
             </div>

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { MEMBER_ROLE_LABEL, MEMBER_STATUS_TONE, MEMBER_STATUS_LABEL, PROVIDER_LABEL } from "@/lib/labels";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, LABEL_NEUTRAL, LABEL_STRONG } from "@/lib/ui";
 import type {
   AdminMemberDetailResponse,
   AdminMemberListResponse,
@@ -257,7 +257,7 @@ export default function AdminMembersPage() {
                   onClick={() => setStatusFilter(f.key)}
                   disabled={unverifiedOnly}
                   className={`h-10 rounded-control border px-3 text-label font-bold transition-colors disabled:opacity-40 ${FOCUS_RING} ${
-                    statusFilter === f.key && !unverifiedOnly ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+                    statusFilter === f.key && !unverifiedOnly ? "border-text-1 bg-text-1 text-white" : "border-border text-text-2 hover:border-text-3 hover:text-text-1"
                   }`}
                 >
                   {f.label}
@@ -271,7 +271,7 @@ export default function AdminMembersPage() {
               aria-pressed={unverifiedOnly}
               onClick={() => setUnverifiedOnly((v) => !v)}
               className={`h-10 rounded-control border px-3 text-label font-bold transition-colors ${FOCUS_RING} ${
-                unverifiedOnly ? "border-primary bg-primary text-white" : "border-border text-text-2 hover:border-primary hover:text-primary"
+                unverifiedOnly ? "border-text-1 bg-text-1 text-white" : "border-border text-text-2 hover:border-text-3 hover:text-text-1"
               }`}
             >
               미인증만
@@ -309,17 +309,14 @@ export default function AdminMembersPage() {
                     <tr
                       key={m.id}
                       onClick={() => openDetail(m.id)}
-                      // 선택 상태(연보라)는 규칙상 허용되는 「선택」이라 남긴다. 정지 행만
-                      // 전체 배경 워시에서 좌측 규칙선으로 바꿨다(#294).
+                      // 선택한 줄은 회색(#771). 정지 여부는 상태 칸이 말하므로 행 왼쪽 세로줄은 걷었다.
                       className={`cursor-pointer border-b border-border text-body-s transition-colors last:border-0 hover:bg-surface-2 ${
-                        selectedId === m.id ? "bg-primary-soft/50" : ""
+                        selectedId === m.id ? "bg-surface-2" : ""
                       }`}
                     >
                       {/* 가입 방식을 이메일 칸에서 여기로 옮겼다(#291) — 이메일에 온전한 폭을 주기 위해서다. */}
                       <td
-                        className={`px-4 py-3 font-bold text-text-1 ${
-                          m.status === "SUSPENDED" ? "border-l-2 border-l-accent" : "border-l-2 border-l-transparent"
-                        }`}
+                        className="px-4 py-3 font-bold text-text-1"
                       ><button type="button" aria-label={`${m.nickname} 회원 상세`} onClick={(event) => { event.stopPropagation(); void openDetail(m.id); }} className={`text-left ${FOCUS_RING}`}>
                         <span className="block">{m.nickname}</span>
                         {/* 변하지 않는 짧은 식별자(UUID 앞 8자리) — 닉 변경·동명이인과 무관하게 특정용. */}
@@ -328,7 +325,7 @@ export default function AdminMembersPage() {
                           {PROVIDER_LABEL[m.provider] ?? m.provider}
                           {/* 소셜은 인증 개념이 없어 항상 null이다 — 이메일 가입자만 미인증으로 읽는다. */}
                           {m.provider === "EMAIL" && m.emailVerifiedAt === null && m.email !== null && (
-                            <span className="ml-1.5 font-bold text-accent">미인증</span>
+                            <span className="ml-1.5 font-bold text-danger">미인증</span>
                           )}
                         </span>
                       </button></td>
@@ -406,7 +403,7 @@ export default function AdminMembersPage() {
                 {detail.provider === "EMAIL" && detail.email !== null && (
                   <div className="flex justify-between gap-2">
                     <dt className="text-text-3">이메일 인증</dt>
-                    <dd className={`font-semibold ${detail.emailVerifiedAt ? "text-text-1" : "text-accent"}`}>
+                    <dd className={`font-semibold ${detail.emailVerifiedAt ? "text-text-1" : "text-danger"}`}>
                       {detail.emailVerifiedAt ? formatDate(detail.emailVerifiedAt) : "미인증"}
                     </dd>
                   </div>
@@ -460,7 +457,7 @@ export default function AdminMembersPage() {
                           type="button"
                           onClick={() => changeStatus("SUSPEND")}
                           disabled={submitting}
-                          className={`h-10 flex-1 rounded-control bg-accent text-body font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+                          className={`h-10 flex-1 rounded-control bg-danger text-body font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
                         >
                           정지 처리
                         </button>
@@ -505,7 +502,7 @@ export default function AdminMembersPage() {
               <div className="mt-4 border-t border-border pt-4">
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-caption font-extrabold text-text-3">권한</p>
-                  <span className={`rounded-control px-2 py-0.5 text-caption font-extrabold ${detail.role === "ADMIN" ? "bg-primary-soft text-primary" : "bg-surface-2 text-text-2"}`}>
+                  <span className={detail.role === "ADMIN" ? LABEL_STRONG : LABEL_NEUTRAL}>
                     {MEMBER_ROLE_LABEL[detail.role as MemberRole]}
                   </span>
                 </div>
@@ -558,7 +555,7 @@ export default function AdminMembersPage() {
                         setPurgeReason("");
                         setPurgeError(null);
                       }}
-                      className={`h-10 w-full rounded-control border border-accent bg-white text-body font-bold text-accent transition-colors hover:bg-accent hover:text-white ${FOCUS_RING}`}
+                      className={`h-10 w-full rounded-control border border-danger bg-white text-body font-bold text-danger transition-colors hover:bg-danger hover:text-white ${FOCUS_RING}`}
                     >
                       개인정보 파기
                     </button>
@@ -609,7 +606,7 @@ export default function AdminMembersPage() {
                 type="button"
                 onClick={purge}
                 disabled={purgeSubmitting}
-                className={`h-10 flex-1 rounded-control bg-accent text-body font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`h-10 flex-1 rounded-control bg-danger text-body font-bold text-white transition-opacity hover:opacity-90 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 {purgeSubmitting ? "파기 중..." : "파기"}
               </button>

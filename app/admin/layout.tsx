@@ -200,7 +200,7 @@ const NAV_GROUPS: NavGroup[] = [
 ];
 
 function NavLink({ item, active }: { item: NavItem; active: boolean }) {
-  const base = "flex items-center gap-2.5 rounded-control px-2.5 py-2 text-sm font-bold transition-colors";
+  const base = "flex items-center gap-2.5 rounded-control px-2.5 py-2 text-body font-bold transition-colors";
   if (!item.ready) {
     return (
       <span
@@ -210,7 +210,7 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
       >
         {item.icon}
         <span className="flex-1">{item.label}</span>
-        <span className="rounded-control bg-surface-2 px-1.5 py-0.5 text-[9.5px] font-extrabold text-text-3">준비 중</span>
+        <span className="rounded-control bg-surface-2 px-1.5 py-0.5 text-caption font-extrabold text-text-3">준비 중</span>
       </span>
     );
   }
@@ -252,7 +252,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   if (isLoading || !accessToken) {
     return (
-      <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">
+      <div className="mx-auto max-w-sm px-4 py-24 text-center text-body text-text-3">
         관리자 권한을 확인하는 중...
       </div>
     );
@@ -261,12 +261,12 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   if (!admin) {
     return (
       <div className="mx-auto max-w-lg px-4 py-16 text-center">
-        <p className="text-xs font-extrabold tracking-wide text-accent">ACCESS DENIED</p>
-        <h1 className="mt-2 font-display text-2xl font-extrabold text-text-1">관리자 권한이 필요합니다</h1>
-        <p className="mt-3 text-sm leading-relaxed text-text-3">
+        <p className="text-label font-extrabold tracking-wide text-accent">ACCESS DENIED</p>
+        <h1 className="mt-2 font-display text-title-l font-extrabold text-text-1">관리자 권한이 필요합니다</h1>
+        <p className="mt-3 text-body leading-relaxed text-text-3">
           현재 계정은 {member?.role ?? "알 수 없음"} 권한입니다. 관리자 계정으로 로그인한 뒤 다시 접근해주세요.
         </p>
-        <Link href="/" className={`mt-6 inline-flex h-11 items-center rounded-control border border-border-2 bg-white px-5 text-sm font-bold text-text-2 ${FOCUS_RING}`}>
+        <Link href="/" className={`mt-6 inline-flex h-11 items-center rounded-control border border-border-2 bg-white px-5 text-body font-bold text-text-2 ${FOCUS_RING}`}>
           홈으로 돌아가기
         </Link>
       </div>
@@ -290,11 +290,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
     <>
       <header className="admin-mobile-head sticky top-0 z-[300] flex h-13 items-center justify-between border-b border-border bg-white px-3 lg:hidden">
-        <Link href="/mypage" className={`flex min-h-11 items-center gap-1 text-[13px] font-bold text-text-2 ${FOCUS_RING}`}>
+        <Link href="/mypage" className={`flex min-h-11 items-center gap-1 text-body-s font-bold text-text-2 ${FOCUS_RING}`}>
           <span aria-hidden="true">‹</span> 마이
         </Link>
-        <span className="text-sm font-bold text-text-1">관리자</span>
-        <button type="button" aria-expanded={menuOpen} aria-controls="admin-mobile-menu" onClick={() => setMenuPath(pathname)} className={`min-h-11 px-1 text-[13px] font-bold text-text-2 ${FOCUS_RING}`}>
+        <span className="text-body font-bold text-text-1">관리자</span>
+        <button type="button" aria-expanded={menuOpen} aria-controls="admin-mobile-menu" onClick={() => setMenuPath(pathname)} className={`min-h-11 px-1 text-body-s font-bold text-text-2 ${FOCUS_RING}`}>
           전체 메뉴 <span aria-hidden="true">☰</span>
         </button>
       </header>
@@ -302,10 +302,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <div className="flex gap-6">
         <aside className="hidden w-[220px] shrink-0 lg:block">
           <div className="sticky top-20 rounded-card border border-border bg-surface p-2">
-            <p className="px-2.5 pb-1.5 pt-2 text-[11px] font-extrabold tracking-wide text-primary">POCASTATION ADMIN</p>
+            <p className="px-2.5 pb-1.5 pt-2 text-caption font-extrabold tracking-wide text-primary">POCASTATION ADMIN</p>
             {NAV_GROUPS.map((group) => (
               <div key={group.title}>
-                <p className="px-2.5 pb-1.5 pt-2.5 text-[11px] font-extrabold text-text-3">{group.title}</p>
+                <p className="px-2.5 pb-1.5 pt-2.5 text-caption font-extrabold text-text-3">{group.title}</p>
                 <nav aria-label={`${group.title} 메뉴`} className="flex flex-col">
                   {group.items.map((item) => (
                     <NavLink key={item.href} item={item} active={item.ready && isActive(item.href)} />
@@ -322,15 +322,15 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       {menuOpen && createPortal(
         <div ref={menuRef} id="admin-mobile-menu" role="dialog" aria-modal="true" aria-labelledby="admin-mobile-menu-title" tabIndex={-1} className="admin-mobile-menu fixed inset-0 z-[350] flex flex-col bg-white lg:hidden">
           <div className="flex h-13 shrink-0 items-center justify-between border-b border-border px-4">
-            <Link href="/mypage" onClick={() => setMenuPath(null)} className={`flex min-h-11 items-center text-[13px] font-bold text-text-2 ${FOCUS_RING}`}>‹ 마이</Link>
-            <span className="text-sm font-bold">관리자</span>
-            <button type="button" onClick={() => setMenuPath(null)} className={`min-h-11 px-2 text-[13px] font-bold ${FOCUS_RING}`} aria-label="관리자 메뉴 닫기">닫기 ×</button>
+            <Link href="/mypage" onClick={() => setMenuPath(null)} className={`flex min-h-11 items-center text-body-s font-bold text-text-2 ${FOCUS_RING}`}>‹ 마이</Link>
+            <span className="text-body font-bold">관리자</span>
+            <button type="button" onClick={() => setMenuPath(null)} className={`min-h-11 px-2 text-body-s font-bold ${FOCUS_RING}`} aria-label="관리자 메뉴 닫기">닫기 ×</button>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-[max(24px,env(safe-area-inset-bottom))] pt-5">
-            <h2 id="admin-mobile-menu-title" className="text-xl font-extrabold">전체 메뉴</h2>
+            <h2 id="admin-mobile-menu-title" className="text-title font-extrabold">전체 메뉴</h2>
             {NAV_GROUPS.map((group) => (
               <section key={group.title} className="mt-5">
-                <h3 className="mb-1 px-2.5 text-xs font-bold text-text-3">{group.title}</h3>
+                <h3 className="mb-1 px-2.5 text-label font-bold text-text-3">{group.title}</h3>
                 <nav aria-label={`${group.title} 메뉴`} onClick={(event) => { if ((event.target as HTMLElement).closest("a")) setMenuPath(null); }}>
                   {group.items.map((item) => <NavLink key={item.href} item={item} active={item.ready && isActive(item.href)} />)}
                 </nav>

@@ -51,7 +51,7 @@ export default function EventCalendar({
           {DOW.map((d, i) => (
             <span
               key={d}
-              className={`text-center text-[10.5px] font-bold ${
+              className={`text-center text-caption font-bold ${
                 i === 0 ? "text-accent" : "text-text-3"
               }`}
             >
@@ -75,7 +75,7 @@ export default function EventCalendar({
                 className={`rounded-control py-1.5 ${FOCUS_RING} ${on ? "bg-primary text-white" : ""}`}
               >
                 <span
-                  className={`block font-display text-[13.5px] ${
+                  className={`block font-display text-body ${
                     on
                       ? "font-bold"
                       : key === todayKey
@@ -102,7 +102,7 @@ export default function EventCalendar({
       <div className="hidden sm:mt-6 sm:block sm:border-t sm:border-border" />
 
       <div className="px-[14px] pt-3.5 sm:px-0">
-        <h2 className="text-base font-extrabold tracking-[-0.02em] text-text-1">
+        <h2 className="text-body-l font-extrabold text-text-1">
           {Number(selected.slice(5, 7))}월 {Number(selected.slice(8, 10))}일 {weekdayKo(selected)}요일
         </h2>
         <div className="pt-1">

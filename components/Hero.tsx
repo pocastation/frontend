@@ -196,18 +196,18 @@ export default function Hero({ featured }: { featured: AuctionResponse[] }) {
             ))}
           </h1>
 
-          <p className="mt-4 whitespace-pre-line text-base leading-relaxed text-white/60">{BRAND_SUBHEAD}</p>
+          <p className="mt-4 whitespace-pre-line text-body-l leading-relaxed text-white/60">{BRAND_SUBHEAD}</p>
 
           <div className="mt-8 flex justify-center gap-3 sm:justify-start">
             <Link
               href="#auctions"
-              className="inline-flex h-12 items-center justify-center rounded-control bg-primary px-7 text-sm font-bold text-white transition-colors hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace"
+              className="inline-flex h-12 items-center justify-center rounded-control bg-primary px-7 text-body font-bold text-white transition-colors hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace"
             >
               진행 중인 판매글 보기 →
             </Link>
             <Link
               href="/guide"
-              className="inline-flex h-12 items-center justify-center rounded-control border border-white/40 px-7 text-sm font-bold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace"
+              className="inline-flex h-12 items-center justify-center rounded-control border border-white/40 px-7 text-body font-bold text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace"
             >
               이용 방법
             </Link>
@@ -361,16 +361,16 @@ function HeroCard({
       />
 
       <div className="absolute inset-x-5 bottom-5 z-[2] text-white">
-        <p className="truncate text-sm font-bold">{auction.artistName ?? auction.title}</p>
-        <p className="mt-0.5 truncate text-xs text-white/60">{auction.title}</p>
+        <p className="truncate text-body font-bold">{auction.artistName ?? auction.title}</p>
+        <p className="mt-0.5 truncate text-label text-white/60">{auction.title}</p>
         <div className="mt-3 flex items-end justify-between border-t border-white/20 pt-3">
           <div>
-            <p className="text-[10px] text-white/60">현재 제안가</p>
-            <p className="font-display text-lg font-bold">{formatKRW(auction.startPrice)}</p>
+            <p className="text-caption text-white/60">현재 제안가</p>
+            <p className="font-display text-title-s font-bold">{formatKRW(auction.startPrice)}</p>
           </div>
           <div className="text-right">
-            <p className="text-[10px] text-white/60">제안</p>
-            <p className="font-display text-sm font-bold">{auction.bidCount}회</p>
+            <p className="text-caption text-white/60">제안</p>
+            <p className="font-display text-body font-bold">{auction.bidCount}회</p>
           </div>
         </div>
       </div>

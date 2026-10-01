@@ -389,7 +389,7 @@ export default function NewAuctionPage() {
 
   if (isAuthLoading || !accessToken || settlementReady === null) {
     return (
-      <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3" aria-live="polite">
+      <div className="mx-auto max-w-sm px-4 py-24 text-center text-body text-text-3" aria-live="polite">
         불러오는 중...
       </div>
     );
@@ -400,15 +400,15 @@ export default function NewAuctionPage() {
   if (!settlementReady) {
     return (
       <div className="mx-auto max-w-[520px] px-[14px] pt-16 pb-20 sm:px-5">
-        <p className="text-[11px] font-extrabold tracking-[0.08em] text-primary">등록 전 한 가지</p>
-        <h1 className="mt-2 font-display text-[24px] font-extrabold tracking-[-0.035em] text-text-1">
+        <p className="text-caption font-extrabold tracking-[0.08em] text-primary">등록 전 한 가지</p>
+        <h1 className="mt-2 font-display text-title-l font-extrabold text-text-1">
           정산계좌를 먼저 등록해 주세요
         </h1>
-        <p className="mt-3 text-[13.5px] leading-[1.8] text-text-2">
+        <p className="mt-3 text-body text-text-2">
           판매 대금은 구매확정 후 등록하신 계좌로 들어와요. 계좌 없이 거래가 성사되면 대금을 보내드릴 수 없어
           거래가 그대로 멈춥니다.
         </p>
-        <p className="mt-2 text-[12.5px] leading-relaxed text-text-3">1분이면 끝나고, 한 번만 등록하면 돼요.</p>
+        <p className="mt-2 text-body-s leading-relaxed text-text-3">1분이면 끝나고, 한 번만 등록하면 돼요.</p>
         <div className="mt-7 flex flex-wrap items-center gap-3">
           <Link
             href="/mypage?tab=settlement"
@@ -458,12 +458,12 @@ export default function NewAuctionPage() {
       <div className="sticky top-12 z-[260] border-b border-border bg-white px-[14px] pb-2.5 pt-3 sm:hidden">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
-            <h1 className="font-display text-[17px] font-extrabold text-text-1">판매 등록</h1>
+            <h1 className="font-display text-title-s font-extrabold text-text-1">판매 등록</h1>
           </div>
           <div className="flex flex-shrink-0 items-center gap-0.5">
             <Link
               href="/guide/sell"
-              className={`flex min-h-[30px] items-center whitespace-nowrap rounded-control border border-border-2 px-2.5 text-[11.5px] font-bold text-text-2 ${FOCUS_RING}`}
+              className={`flex min-h-[30px] items-center whitespace-nowrap rounded-control border border-border-2 px-2.5 text-label font-bold text-text-2 ${FOCUS_RING}`}
             >
               판매 가이드
             </Link>
@@ -480,8 +480,8 @@ export default function NewAuctionPage() {
           </div>
         </div>
         <div className="mt-2.5 flex items-baseline justify-between">
-          <span className="text-[13px] font-extrabold text-text-1">{stepTitle[stepKey]}</span>
-          <span className="font-display text-[11.5px] font-bold tabular-nums text-text-3">
+          <span className="text-body-s font-extrabold text-text-1">{stepTitle[stepKey]}</span>
+          <span className="font-display text-label font-bold tabular-nums text-text-3">
             {step + 1} / {TOTAL_STEPS}
           </span>
         </div>
@@ -492,12 +492,12 @@ export default function NewAuctionPage() {
 
       <div className="mb-5 flex items-start justify-between gap-4 max-sm:hidden">
         <div>
-          <h1 className="font-display text-xl font-extrabold text-text-1">판매 등록</h1>
-          <p className="mt-1 text-xs text-text-3">정확한 정보와 실물 사진일수록 거래 신뢰도가 올라가요.</p>
+          <h1 className="font-display text-title font-extrabold text-text-1">판매 등록</h1>
+          <p className="mt-1 text-label text-text-3">정확한 정보와 실물 사진일수록 거래 신뢰도가 올라가요.</p>
         </div>
         <Link
           href="/guide/sell"
-          className={`flex shrink-0 items-center gap-1 rounded-control border border-border-2 px-3 py-1.5 text-xs font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+          className={`flex shrink-0 items-center gap-1 rounded-control border border-border-2 px-3 py-1.5 text-label font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
         >
           판매 가이드
         </Link>
@@ -514,8 +514,8 @@ export default function NewAuctionPage() {
         {/* 진행 표시 — 모바일은 sticky 머리가 대신한다. */}
         <div className="mb-6 max-sm:hidden">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-sm font-extrabold text-text-1">{stepTitle[stepKey]}</h2>
-            <span className="text-xs font-bold text-text-3">
+            <h2 className="text-body font-extrabold text-text-1">{stepTitle[stepKey]}</h2>
+            <span className="text-label font-bold text-text-3">
               {step + 1} / {TOTAL_STEPS}
             </span>
           </div>
@@ -539,7 +539,7 @@ export default function NewAuctionPage() {
           {stepKey === "saleType" && (
             <div>
               {/* 머리에서 내려온 문장. 첫 단계에서 한 번만 읽히면 되는 안내다(#515). */}
-              <p className="text-[12.5px] leading-relaxed text-text-3 sm:hidden">
+              <p className="text-body-s leading-relaxed text-text-3 sm:hidden">
                 정확한 정보와 실물 사진일수록 거래 신뢰도가 올라가요.
               </p>
 
@@ -569,10 +569,10 @@ export default function NewAuctionPage() {
                         className={`mt-0.5 h-4 w-4 accent-primary ${FOCUS_RING}`}
                       />
                       <span className="min-w-0">
-                        <span className={`block text-sm font-extrabold ${selected ? "text-primary" : "text-text-1"}`}>
+                        <span className={`block text-body font-extrabold ${selected ? "text-primary" : "text-text-1"}`}>
                           {option.title}
                         </span>
-                        <span className="mt-0.5 block text-xs leading-relaxed text-text-3">{option.desc}</span>
+                        <span className="mt-0.5 block text-label leading-relaxed text-text-3">{option.desc}</span>
                       </span>
                     </label>
                   );
@@ -584,7 +584,7 @@ export default function NewAuctionPage() {
           {stepKey === "info" && (
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor={artistFieldId} className="text-xs font-bold text-text-2">
+                <label htmlFor={artistFieldId} className="text-label font-bold text-text-2">
                   스타 <span className="text-accent">*</span>
                 </label>
                 <ArtistCombobox id={artistFieldId} options={artists} value={artistId} onChange={setArtistId} />
@@ -592,7 +592,7 @@ export default function NewAuctionPage() {
 
               {idols.length > 0 && (
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor={idolFieldId} className="text-xs font-bold text-text-2">
+                  <label htmlFor={idolFieldId} className="text-label font-bold text-text-2">
                     멤버 (선택)
                   </label>
                   <select
@@ -613,7 +613,7 @@ export default function NewAuctionPage() {
               )}
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor={titleFieldId} className="text-xs font-bold text-text-2">
+                <label htmlFor={titleFieldId} className="text-label font-bold text-text-2">
                   제목 <span className="text-accent">*</span>
                 </label>
                 <input
@@ -628,7 +628,7 @@ export default function NewAuctionPage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor={descriptionFieldId} className="text-xs font-bold text-text-2">
+                <label htmlFor={descriptionFieldId} className="text-label font-bold text-text-2">
                   상세 설명 (선택)
                 </label>
                 <textarea
@@ -648,7 +648,7 @@ export default function NewAuctionPage() {
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor={sourceFieldId} className="text-xs font-bold text-text-2">
+                  <label htmlFor={sourceFieldId} className="text-label font-bold text-text-2">
                     출처
                   </label>
                   <select
@@ -665,7 +665,7 @@ export default function NewAuctionPage() {
                   </select>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor={gradeFieldId} className="text-xs font-bold text-text-2">
+                  <label htmlFor={gradeFieldId} className="text-label font-bold text-text-2">
                     상태 등급
                   </label>
                   <select
@@ -683,7 +683,7 @@ export default function NewAuctionPage() {
                 </div>
               </div>
 
-              <label htmlFor={unopenedFieldId} className="flex w-fit items-center gap-2 text-sm text-text-2">
+              <label htmlFor={unopenedFieldId} className="flex w-fit items-center gap-2 text-body text-text-2">
                 <input
                   id={unopenedFieldId}
                   type="checkbox"
@@ -699,7 +699,7 @@ export default function NewAuctionPage() {
           {stepKey === "price" && (
             <div className="flex flex-col gap-3">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor={startPriceFieldId} className="text-xs font-bold text-text-2">
+                <label htmlFor={startPriceFieldId} className="text-label font-bold text-text-2">
                   {saleType === "INSTANT" ? "즉시판매가(원)" : "최소 제안가(원)"} <span className="text-accent">*</span>
                 </label>
                 <input
@@ -713,11 +713,11 @@ export default function NewAuctionPage() {
                   onChange={(e) => setStartPrice(e.target.value)}
                   className={INPUT_CLASS}
                 />
-                <p className="text-[11px] text-text-3">
+                <p className="text-caption text-text-3">
                   최저 {MIN_LISTING_PRICE.toLocaleString("ko-KR")}원부터{" "}
                   {PRICE_UNIT.toLocaleString("ko-KR")}원 단위로 입력해요.
                 </p>
-                <p className="text-[11px] text-text-3">
+                <p className="text-caption text-text-3">
                   {saleType === "INSTANT"
                     ? "배송비는 판매자 부담이에요. 배송비를 감안해 판매가를 정해주세요."
                     : "배송비는 판매자 부담이에요. 배송비를 감안해 최소 제안가를 정해주세요."}
@@ -731,10 +731,10 @@ export default function NewAuctionPage() {
               {saleType === "AUCTION" && (
                 <div className="mt-1 border-t border-border">
                   <div className="flex items-baseline justify-between border-b border-border py-2.5">
-                    <span className="text-xs font-bold text-text-2">판매 기간</span>
-                    <span className="text-[13.5px] font-bold tabular-nums text-text-1">7일</span>
+                    <span className="text-label font-bold text-text-2">판매 기간</span>
+                    <span className="text-body font-bold tabular-nums text-text-1">7일</span>
                   </div>
-                  <p className="pt-2 text-[11px] leading-relaxed text-text-3">
+                  <p className="pt-2 text-caption leading-relaxed text-text-3">
                     등록한 때부터 7일 동안 제안을 받아요. 기간이 끝나면 자동으로 판매가 종료돼요.
                   </p>
                 </div>
@@ -755,13 +755,13 @@ export default function NewAuctionPage() {
               {AUCTION_VIDEO_ENABLED && (
                 <div className="mb-6 border-b border-border pb-5">
                   {unopened ? (
-                    <p className="mb-2 text-xs text-text-3">
+                    <p className="mb-2 text-label text-text-3">
                       <b className="font-bold text-text-2">검수영상 (미개봉 — 생략 가능)</b> — 포장을
                       뜯지 않는 물품이라 올리지 않아도 등록돼요. 올리면 포장 상태를 보여주는 참고
                       자료로 함께 저장돼요.
                     </p>
                   ) : (
-                    <p className="mb-2 text-xs text-text-3">
+                    <p className="mb-2 text-label text-text-3">
                       <b className="font-bold text-text-2">검수영상</b> — 포카를 손에 들고 앞뒤로
                       천천히 돌리는 틸팅 영상 1개를 올려주세요. 홀로그램·코팅 상태처럼 사진으로는
                       판단하기 어려운 부분이 영상에서 드러나요. 먼저 올려두면 처리되는 동안 나머지를
@@ -772,7 +772,7 @@ export default function NewAuctionPage() {
                 </div>
               )}
 
-              <p className="mb-2 text-xs text-text-3">
+              <p className="mb-2 text-label text-text-3">
                 {MIN_IMAGES}~{MAX_IMAGES}장, 첫 장이 대표사진으로 노출돼요.
               </p>
               <PhotoUploadGrid
@@ -784,7 +784,7 @@ export default function NewAuctionPage() {
               />
               {/* 슬리브 안내(#279) — 경고가 아니라 촬영 요령이라 규칙선 강조 없이 helper로 둔다.
                   사진·영상 양쪽에 걸리는 이야기라 사진 아래에 한 번만 쓴다. */}
-              <p className="mt-2 text-xs leading-5 text-text-3">
+              <p className="mt-2 text-label leading-5 text-text-3">
                 포토카드는 <b className="font-bold text-text-2">슬리브·탑로더에서 꺼내고 촬영</b>해 주세요.
                 비닐의 반사와 흠집이 카드 자체의 상태로 오해받아 문의와 분쟁이 생겨요.
               </p>
@@ -799,7 +799,7 @@ export default function NewAuctionPage() {
         </div>
 
         {error && (
-          <p role="alert" aria-live="polite" className="mt-4 text-xs text-accent">
+          <p role="alert" aria-live="polite" className="mt-4 text-label text-accent">
             {error}
           </p>
         )}

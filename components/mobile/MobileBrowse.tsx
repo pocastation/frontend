@@ -94,7 +94,7 @@ export default function MobileBrowse({
                 aria-current={on ? "page" : undefined}
                 role="tab"
                 aria-selected={on}
-                className={`flex-shrink-0 whitespace-nowrap border-b-2 px-3.5 py-2.5 text-sm transition-colors ${FOCUS_RING} ${
+                className={`flex-shrink-0 whitespace-nowrap border-b-2 px-3.5 py-2.5 text-body transition-colors ${FOCUS_RING} ${
                   on ? "border-primary font-extrabold text-text-1" : "border-transparent font-medium text-text-2"
                 }`}
               >
@@ -117,7 +117,7 @@ export default function MobileBrowse({
             placeholder="스타, 멤버, 앨범 검색"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            className="w-full border-0 bg-transparent text-[13px] text-text-1 outline-none placeholder:text-text-3"
+            className="w-full border-0 bg-transparent text-body-s text-text-1 outline-none placeholder:text-text-3"
           />
         </label>
       </div>
@@ -132,7 +132,7 @@ export default function MobileBrowse({
               type="button"
               aria-pressed={on}
               onClick={() => setSort(option.key)}
-              className={`min-h-9 flex-shrink-0 whitespace-nowrap rounded-control border px-3.5 text-[12.5px] font-bold transition-colors ${FOCUS_RING} ${
+              className={`min-h-9 flex-shrink-0 whitespace-nowrap rounded-control border px-3.5 text-body-s font-bold transition-colors ${FOCUS_RING} ${
                 on ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
               }`}
             >
@@ -142,7 +142,7 @@ export default function MobileBrowse({
         })}
       </div>
 
-      <p className="mt-2.5 px-[14px] text-[11.5px] tabular-nums text-text-3">
+      <p className="mt-2.5 px-[14px] text-label tabular-nums text-text-3">
         {totalElements.toLocaleString("ko-KR")}개
       </p>
 
@@ -181,12 +181,12 @@ export default function MobileBrowse({
 
       {hasMore && (
         <div className="mt-6 flex flex-col items-center gap-2 px-[14px]">
-          {moreError && <p className="text-[11.5px] font-bold text-danger">더 불러오지 못했어요.</p>}
+          {moreError && <p className="text-label font-bold text-danger">더 불러오지 못했어요.</p>}
           <button
             type="button"
             onClick={loadMore}
             disabled={loadingMore || loading}
-            className={`flex h-11 w-full items-center justify-center rounded-control border border-border-2 bg-white text-[13px] font-bold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+            className={`flex h-11 w-full items-center justify-center rounded-control border border-border-2 bg-white text-body-s font-bold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : moreError ? "다시 시도" : "더 보기"}
           </button>
@@ -200,7 +200,7 @@ export default function MobileBrowse({
       {!isInstant && (
         <Link
           href="/auctions/ended"
-          className={`mt-6 block border-t border-border px-[14px] py-4 text-center text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
+          className={`mt-6 block border-t border-border px-[14px] py-4 text-center text-body-s font-bold text-text-2 ${FOCUS_RING}`}
         >
           거래 완료된 상품 보기
         </Link>

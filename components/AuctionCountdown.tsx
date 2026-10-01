@@ -46,6 +46,7 @@ export default function AuctionCountdown({ endAt }: { endAt: string }) {
   const urgent = state.level === "soon" || state.level === "critical";
   return (
     <span
+      // eslint-disable-next-line no-restricted-syntax -- 사진 위 시간 칩은 9.5px를 유지한다(#769, 2026-10-01 결정)
       className="absolute left-1.5 top-1.5 z-[2] rounded-control bg-white/95 px-1.5 py-0.5 text-[9.5px] font-extrabold leading-[1.35] tabular-nums tracking-[-0.01em]"
       style={{ color: LEVEL_TEXT[state.level] }}
     >

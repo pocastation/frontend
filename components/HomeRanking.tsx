@@ -31,7 +31,7 @@ export default function HomeRanking({ auctions }: { auctions: AuctionResponse[] 
         auctions.length > 0 ? (
           auctions.slice(0, 3).map((auction, i) => <AuctionRow key={auction.id} auction={auction} index={i} />)
         ) : (
-          <p className="border-t border-border py-9 text-center text-[12.5px] text-text-3">
+          <p className="border-t border-border py-9 text-center text-body-s text-text-3">
             제안이 쌓이면 순위가 나와요.
           </p>
         ),
@@ -44,11 +44,11 @@ export default function HomeRanking({ auctions }: { auctions: AuctionResponse[] 
         {columns.map((c) => (
           <div key={c.key}>
             <div className="mb-1 flex items-center justify-between gap-2">
-              <h2 className="flex items-baseline gap-2 font-display text-xl font-extrabold tracking-[-0.02em] text-text-1">
+              <h2 className="flex items-baseline gap-2 font-display text-title font-extrabold text-text-1">
                 {c.key} 랭킹
-                <span className="text-[12px] font-semibold text-text-3">{c.note}</span>
+                <span className="text-label font-semibold text-text-3">{c.note}</span>
               </h2>
-              <Link href={c.href} className={`text-xs font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
+              <Link href={c.href} className={`text-label font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
                 더보기
               </Link>
             </div>

@@ -13,8 +13,8 @@ export default function GuidePhotoExamples({ shots }: { shots: GuidePhotoShot[] 
   return (
     <section className="mt-5 max-w-[520px]" aria-label="필수 4컷 예시">
       <div className="mb-[9px] flex items-baseline justify-between gap-3 text-text-2">
-        <p className="text-[12.5px]">필수 4컷</p>
-        <span className="text-[11px]">사진을 누르면 확대돼요</span>
+        <p className="text-body-s">필수 4컷</p>
+        <span className="text-caption">사진을 누르면 확대돼요</span>
       </div>
       <div className="grid grid-cols-4 gap-2 sm:gap-2.5">
         {shots.map((shot, index) => (
@@ -31,11 +31,11 @@ export default function GuidePhotoExamples({ shots }: { shots: GuidePhotoShot[] 
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M8 3H3v5M16 3h5v5M21 16v5h-5M3 16v5h5" /></svg>
               </span>
             </button>
-            <figcaption className="pt-[7px] text-[11px] font-bold text-text-2 sm:text-[11.5px]">{shot.label}</figcaption>
+            <figcaption className="pt-[7px] text-caption font-bold text-text-2 sm:text-label">{shot.label}</figcaption>
           </figure>
         ))}
       </div>
-      <p className="mt-[9px] text-[11px] leading-relaxed text-text-2">촬영 방법 설명을 위한 AI 생성 예시입니다.</p>
+      <p className="mt-[9px] text-caption leading-relaxed text-text-2">촬영 방법 설명을 위한 AI 생성 예시입니다.</p>
       {initialIndex !== null && (
         <GuidePhotoViewer shots={shots} initialIndex={initialIndex} onClose={() => setInitialIndex(null)} />
       )}

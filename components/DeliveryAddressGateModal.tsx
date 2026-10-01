@@ -112,11 +112,11 @@ export default function DeliveryAddressGateModal({
         aria-modal="true"
         aria-label={`${action} 전 배송지 등록`}
       >
-        <p className="text-[11px] font-extrabold tracking-[0.08em] text-primary">{action} 전 한 가지</p>
-        <p className="mt-1.5 font-display text-[17px] font-extrabold tracking-[-0.03em] text-text-1">
+        <p className="text-caption font-extrabold tracking-[0.08em] text-primary">{action} 전 한 가지</p>
+        <p className="mt-1.5 font-display text-title-s font-extrabold text-text-1">
           받을 주소를 먼저 등록해 주세요
         </p>
-        <p className="mt-2 text-[12.5px] leading-[1.7] text-text-3">
+        <p className="mt-2 text-body-s text-text-3">
           거래가 성사되면 판매자가 바로 보낼 수 있게 주소가 필요해요.{" "}
           <b className="font-bold text-text-2">한 번만 등록하면 다음부터는 물어보지 않아요.</b>
         </p>
@@ -141,7 +141,7 @@ export default function DeliveryAddressGateModal({
             <button
               type="button"
               onClick={openPostcode}
-              className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 text-xs font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+              className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 text-label font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
             >
               우편번호 찾기
             </button>
@@ -159,7 +159,7 @@ export default function DeliveryAddressGateModal({
         </div>
 
         {error && (
-          <p role="alert" className="mt-3 text-xs font-semibold text-accent">
+          <p role="alert" className="mt-3 text-label font-semibold text-accent">
             {error}
           </p>
         )}

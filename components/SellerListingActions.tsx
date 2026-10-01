@@ -99,14 +99,14 @@ export default function SellerListingActions({
 
   const height = viewport === "desktop" ? "h-12" : "h-11";
   const radius = viewport === "desktop" ? "rounded-control" : "rounded-control";
-  const subClass = `flex ${height} w-[96px] flex-shrink-0 items-center justify-center ${radius} border border-border-2 bg-surface text-[13px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-45 ${FOCUS_RING}`;
+  const subClass = `flex ${height} w-[96px] flex-shrink-0 items-center justify-center ${radius} border border-border-2 bg-surface text-body-s font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-45 ${FOCUS_RING}`;
   const subWideClass = subClass.replace("w-[96px] flex-shrink-0", "flex-1");
-  const mainClass = `flex ${height} flex-1 items-center justify-center ${radius} border-[1.5px] border-text-1 bg-surface ${viewport === "desktop" ? "text-sm" : "text-[13.5px]"} font-extrabold text-text-1 transition-colors hover:bg-surface-2 disabled:opacity-45 ${FOCUS_RING}`;
+  const mainClass = `flex ${height} flex-1 items-center justify-center ${radius} border-[1.5px] border-text-1 bg-surface ${viewport === "desktop" ? "text-body" : "text-body"} font-extrabold text-text-1 transition-colors hover:bg-surface-2 disabled:opacity-45 ${FOCUS_RING}`;
 
   return (
     <div className={viewport === "desktop" ? "mt-5 border-t border-border pt-5" : "mt-3.5 border-t border-border pt-3"}>
       {/* 지금 무엇을 할 수 있는지 한 줄로. 잠긴 이유를 말해 주지 않으면 버튼이 왜 없는지 알 수 없다. */}
-      <p className="mb-2.5 text-[11.5px] leading-relaxed text-text-3">
+      <p className="mb-2.5 text-label leading-relaxed text-text-3">
         {isInstant ? (
           <>내가 올린 판매글이에요 · 판매 중에는 언제든 가격을 바꿀 수 있어요</>
         ) : priceLocked ? (
@@ -158,7 +158,7 @@ export default function SellerListingActions({
         )}
       </div>
 
-      {error && <p className="mt-2 text-[11.5px] font-bold text-accent">{error}</p>}
+      {error && <p className="mt-2 text-label font-bold text-accent">{error}</p>}
 
       {editOpen && (
         <PriceEditDialog
@@ -235,39 +235,39 @@ function PriceEditDialog({
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
       <div className="relative w-full max-w-[400px] rounded-t-sheet bg-surface p-5 pb-[calc(20px+env(safe-area-inset-bottom))] sm:rounded-card sm:pb-5">
         <div className="flex items-baseline justify-between">
-          <p className="text-[15px] font-extrabold text-text-1">{label} 수정</p>
+          <p className="text-body-l font-extrabold text-text-1">{label} 수정</p>
           <button type="button" aria-label="닫기" onClick={onClose} className={`text-text-3 transition-colors hover:text-text-1 ${FOCUS_RING}`}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
               <path d="M18 6 6 18M6 6l12 12" />
             </svg>
           </button>
         </div>
-        <p className="mt-1 text-[11.5px] text-text-3">
+        <p className="mt-1 text-label text-text-3">
           지금 {label} <b className="font-display font-bold tabular-nums text-text-2">{formatKRW(current)}</b>
         </p>
 
         <label className="mt-4 block">
-          <span className="text-xs font-bold text-text-2">새 {label}</span>
+          <span className="text-label font-bold text-text-2">새 {label}</span>
           <input
             type="text"
             inputMode="numeric"
             autoFocus
             value={value}
             onChange={(e) => setValue(e.target.value.replace(/[^\d]/g, ""))}
-            className={`mt-1.5 h-12 w-full rounded-control border border-border px-3.5 font-display text-[17px] font-bold tabular-nums text-text-1 outline-none transition-colors focus:border-primary ${FOCUS_RING}`}
+            className={`mt-1.5 h-12 w-full rounded-control border border-border px-3.5 font-display text-title-s font-bold tabular-nums text-text-1 outline-none transition-colors focus:border-primary ${FOCUS_RING}`}
           />
         </label>
-        <p className="mt-1.5 text-[11px] text-text-3">
+        <p className="mt-1.5 text-caption text-text-3">
           {formatKRW(MIN_LISTING_PRICE)} 이상 · {PRICE_UNIT.toLocaleString()}원 단위
         </p>
 
-        {error && <p className="mt-2.5 text-[12px] font-bold text-accent">{error}</p>}
+        {error && <p className="mt-2.5 text-label font-bold text-accent">{error}</p>}
 
         <button
           type="button"
           onClick={() => void submit()}
           disabled={busy || !valid || parsed === current}
-          className={`mt-4 flex h-12 w-full items-center justify-center rounded-control bg-primary text-sm font-extrabold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-45 ${FOCUS_RING}`}
+          className={`mt-4 flex h-12 w-full items-center justify-center rounded-control bg-primary text-body font-extrabold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-45 ${FOCUS_RING}`}
         >
           {busy ? "바꾸는 중..." : valid ? `${formatKRW(parsed)}으로 바꾸기` : "금액을 확인해 주세요"}
         </button>

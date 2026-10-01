@@ -105,7 +105,8 @@
 - **카드는 실제로 분리돼야 하는 콘텐츠에만.** 한 페이지에 강조 패널은 하나면 충분하다
 - **정보 중요도에 따라 시각적 weight를 다르게.** 모든 섹션이 같은 패턴일 필요 없다 — **일관성과 반복을 구분한다**
 - **radius는 역할 토큰 3개만 쓴다**(#758). `rounded-control` 8px(버튼·입력·칩·배지) / `rounded-card` 12px(카드·이미지 타일·패널·모달·토스트) / `rounded-sheet` 16px(바텀시트 상단) / 배경띠 0. `rounded-[Npx]`·숫자 토큰·Tailwind 기본 radius는 lint 에러다
-- **글자 크기는 타입 토큰 9단계만 쓴다**(#761). `text-caption` 11 / `text-label` 12 / `text-body-s` 13 / `text-body` 14 / `text-body-l` 15 / `text-title-s` 18 / `text-title` 20 / `text-title-l` 24 / `text-display` 28. 줄간격·자간이 토큰에 붙어 있으니 `leading-*`·`tracking-*`를 따로 얹지 않는다. 새 코드에 `text-[Npx]`·`text-xs` 같은 값을 쓰지 않는다(기존 코드는 이관 예정)
+- **본문 글꼴은 Pretendard**(#769, OFL, npm `pretendard` 가변 다이나믹 서브셋을 자체 호스팅). 숫자·가격·워드마크는 `font-display`(Plus Jakarta Sans). Pretendard 영문은 Inter 기반이라, 영문을 크게 쓰는 자리(워드마크·숫자 강조)는 반드시 `font-display`로 둔다
+- **글자 크기는 타입 토큰 9단계만 쓴다**(#761, 이관 #769). `text-caption` 11 / `text-label` 12 / `text-body-s` 13 / `text-body` 14 / `text-body-l` 15 / `text-title-s` 18 / `text-title` 20 / `text-title-l` 24 / `text-display` 28. 줄간격·자간이 토큰에 붙어 있으니 `leading-*`·`tracking-*`를 따로 얹지 않는다. `text-[Npx]`·`text-xs` 같은 값은 lint 에러다. 예외는 사진 위 시간 칩 9.5px, 사전 신청 히어로 42px, 관리자 대시보드 큰 숫자 44px뿐
 - **상태·속성 표시는 네 갈래뿐이다**(#767). ① 상태 글자: 표·목록의 상태는 상자 없이 글자(`StatusBadge`) — 완료 잉크 굵게, 손댈 것만 `text-danger`, 대기 `text-2`, 종료 `text-3` ② 라벨: `LABEL_NEUTRAL`(회색 바탕)·`LABEL_STRONG`(잉크 바탕, 한 줄에 하나) — 상품 정보·종류·기본·마감 임박·새 소식 ③ 사진 위 라벨: 흰 칩, 마감임박은 글자색 ④ 알림 앞자리: 상품 사진, 없으면 색 없는 선 아이콘. 파스텔 채움 배지·색 테두리 칩·색 원 아이콘을 새로 만들지 않는다. 회원 배지·신뢰 레벨(자격 표시)은 예외
 - **폼에서는 입력 UI가 설명보다 앞선다** — 라벨 13px(`text-body-s`) → 입력칸 15px(`text-body-l`)·높이 48px → helper 12px(`text-label`)
 - **보라(`primary`)는 상태를 말하는 자리에만** — primary CTA, 선택된 상태, 활성 탭, 필수 표시, focus. 배경·아이콘·제목에는 쓰지 않는다

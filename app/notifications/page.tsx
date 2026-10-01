@@ -210,7 +210,7 @@ export default function NotificationsPage() {
 
   if (isLoading || !accessToken) {
     return (
-      <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">알림을 불러오는 중...</div>
+      <div className="mx-auto max-w-sm px-4 py-24 text-center text-body text-text-3">알림을 불러오는 중...</div>
     );
   }
 
@@ -226,7 +226,7 @@ export default function NotificationsPage() {
       type="button"
       onClick={handleMarkAllRead}
       disabled={!hasUnread}
-      className={`shrink-0 rounded-control bg-white px-3.5 py-1.5 text-xs font-bold transition-colors ${FOCUS_RING} ${
+      className={`shrink-0 rounded-control bg-white px-3.5 py-1.5 text-label font-bold transition-colors ${FOCUS_RING} ${
         hasUnread
           ? "border border-border-2 text-text-2 hover:border-primary hover:text-primary"
           : "cursor-not-allowed border border-border text-text-3"
@@ -243,25 +243,25 @@ export default function NotificationsPage() {
       <div className="mx-auto max-w-[720px] px-0 py-0 sm:px-4 sm:py-10">
         <div className="mb-6 hidden items-end justify-between gap-3 sm:flex">
           <div>
-            <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">알림</h1>
-            <p className="mt-1.5 text-sm text-text-3">거래 소식을 모아봐요.</p>
+            <h1 className="font-display text-title-l font-extrabold text-text-1">알림</h1>
+            <p className="mt-1.5 text-body text-text-3">거래 소식을 모아봐요.</p>
           </div>
           {markAllReadButton}
         </div>
 
         {error && (
-          <p role="alert" className="mx-4 mb-4 mt-4 rounded-card bg-surface-2 px-4 py-3 text-sm font-semibold text-danger sm:mx-0 sm:mt-0">
+          <p role="alert" className="mx-4 mb-4 mt-4 rounded-card bg-surface-2 px-4 py-3 text-body font-semibold text-danger sm:mx-0 sm:mt-0">
             {error}
           </p>
         )}
 
         {loading ? (
-          <p className="py-16 text-center text-sm text-text-3">불러오는 중...</p>
+          <p className="py-16 text-center text-body text-text-3">불러오는 중...</p>
         ) : notifications.length === 0 ? (
           <div className="mx-4 mt-4 flex flex-col items-center gap-2 rounded-card border border-dashed border-border-2 py-20 text-center text-text-3 sm:mx-0 sm:mt-0">
             <BellIcon />
-            <p className="text-sm font-bold text-text-2">아직 받은 알림이 없어요.</p>
-            <p className="text-xs">거래 성사·결제·발송 소식을 여기서 받아볼 수 있어요.</p>
+            <p className="text-body font-bold text-text-2">아직 받은 알림이 없어요.</p>
+            <p className="text-label">거래 성사·결제·발송 소식을 여기서 받아볼 수 있어요.</p>
           </div>
         ) : (
           // 앞자리 상품 사진(없으면 선 아이콘) + 안읽음은 우측 단일 닷(#767). 읽음 행은 배경·사진을 가라앉힌다.
@@ -295,7 +295,7 @@ export default function NotificationsPage() {
                       />
                     ) : (
                       <span
-                        className={`mt-px flex h-10 w-10 shrink-0 items-center justify-center text-[22px] text-text-3 ${unread ? "" : "opacity-70"}`}
+                        className={`mt-px flex h-10 w-10 shrink-0 items-center justify-center text-title text-text-3 ${unread ? "" : "opacity-70"}`}
                         aria-label={meta.label}
                       >
                         <StatusGlyph name={meta.icon} />
@@ -303,10 +303,10 @@ export default function NotificationsPage() {
                     )}
                     <span className="min-w-0 flex-1">
                       <span className="flex items-baseline gap-2">
-                        <span className={`min-w-0 flex-1 truncate text-sm ${unread ? "font-bold text-text-1" : "text-text-2"}`}>
+                        <span className={`min-w-0 flex-1 truncate text-body ${unread ? "font-bold text-text-1" : "text-text-2"}`}>
                           {notification.title}
                         </span>
-                        <span className="shrink-0 text-[11px] tabular-nums text-text-3">
+                        <span className="shrink-0 text-caption tabular-nums text-text-3">
                           {formatRelativeTime(notification.createdAt)}
                         </span>
                       </span>
@@ -318,7 +318,7 @@ export default function NotificationsPage() {
                         두 줄이 아닌 이유는 남는 셋이 하필 자동 구매확정 3일·자동 환불 3영업일·
                         미결제 제재 7일이어서다. 분쟁 소재가 되는 값이라 화면에서 빼지 않는다.
                       */}
-                      <span className={`mt-0.5 line-clamp-3 text-[13px] leading-relaxed ${unread ? "text-text-2" : "text-text-3"}`}>
+                      <span className={`mt-0.5 line-clamp-3 text-body-s leading-relaxed ${unread ? "text-text-2" : "text-text-3"}`}>
                         {notification.message}
                       </span>
                     </span>
@@ -336,14 +336,14 @@ export default function NotificationsPage() {
               type="button"
               onClick={handleLoadMore}
               disabled={loadingMore}
-              className={`rounded-control border border-border-2 bg-white px-5 py-2 text-sm font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-50 ${FOCUS_RING}`}
+              className={`rounded-control border border-border-2 bg-white px-5 py-2 text-body font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-50 ${FOCUS_RING}`}
             >
               {loadingMore ? "불러오는 중..." : "더 보기"}
             </button>
           </div>
         )}
 
-        <p className="mt-6 hidden text-center text-xs text-text-3 sm:block">
+        <p className="mt-6 hidden text-center text-label text-text-3 sm:block">
           <Link href="/mypage" className={`font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}>
             마이페이지로 돌아가기 →
           </Link>

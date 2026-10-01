@@ -29,5 +29,5 @@ export default function StatusBadge({
   children: ReactNode;
   className?: string;
 }) {
-  return <span className={`inline-flex whitespace-nowrap text-[12px] ${TEXT_CLASS[tone]} ${className}`}>{children}</span>;
+  return <span className={`inline-flex whitespace-nowrap text-label ${TEXT_CLASS[tone]} ${className}`}>{children}</span>;
 }

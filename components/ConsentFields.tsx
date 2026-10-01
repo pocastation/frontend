@@ -96,7 +96,7 @@ export default function ConsentFields({
 
       <label
         htmlFor={allId}
-        className="flex cursor-pointer items-center gap-2.5 border-b border-border px-3.5 py-3 text-sm font-bold text-text-1"
+        className="flex cursor-pointer items-center gap-2.5 border-b border-border px-3.5 py-3 text-body font-bold text-text-1"
       >
         <input
           id={allId}
@@ -110,7 +110,7 @@ export default function ConsentFields({
 
       <div className="px-3.5 py-2">
         {ITEMS.map((item) => (
-          <div key={item.key} className="flex items-center gap-2.5 py-1.5 text-sm">
+          <div key={item.key} className="flex items-center gap-2.5 py-1.5 text-body">
             <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5">
               <input
                 type="checkbox"
@@ -131,7 +131,7 @@ export default function ConsentFields({
                 href={item.href}
                 target="_blank"
                 rel="noreferrer"
-                className={`shrink-0 rounded-control text-xs font-semibold text-text-3 underline-offset-2 hover:text-primary hover:underline ${FOCUS_RING}`}
+                className={`shrink-0 rounded-control text-label font-semibold text-text-3 underline-offset-2 hover:text-primary hover:underline ${FOCUS_RING}`}
               >
                 보기
               </Link>
@@ -145,7 +145,7 @@ export default function ConsentFields({
 
           선택 항목을 거부해도 가입이 된다는 사실을 여기서 한 번 더 밝힌다 — 필수·선택이 같은
           목록에 나란히 있으면 전부 동의해야 하는 것처럼 읽힌다. */}
-      <p className="border-t border-border px-3.5 py-2.5 text-xs leading-[1.7] text-text-3">
+      <p className="border-t border-border px-3.5 py-2.5 text-label text-text-3">
         선택 항목에 동의하지 않아도 회원가입과 서비스 이용에 제한이 없어요. 처리 목적·항목·보유기간은{" "}
         <Link
           href="/privacy"

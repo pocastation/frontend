@@ -154,7 +154,7 @@ export default function MobileTabBar() {
                   <path d={iconPath} />
                 </svg>
               )}
-              <span className={`text-[10.5px] ${on ? "font-extrabold" : "font-semibold"}`}>{tab.label}</span>
+              <span className={`text-caption ${on ? "font-extrabold" : "font-semibold"}`}>{tab.label}</span>
             </Link>
           );
         })}

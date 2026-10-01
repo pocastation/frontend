@@ -172,7 +172,8 @@ export const AUCTION_STATUS_TONE: Record<AuctionStatus, StatusTone> = {
   ENDED_SOLD: "muted",
   ENDED_NO_BIDS: "muted",
   ENDED_NOT_SELECTED: "muted",
-  CANCELLED: "danger",
+  // 취소는 끝난 상태다 — 손댈 일이 아니라 흐린 회색(#769, 2026-10-01). 빨강은 「손댈 것」에만 남긴다.
+  CANCELLED: "muted",
 };
 
 export const AUCTION_SALE_TYPE_LABEL: Record<AuctionSaleType, string> = {

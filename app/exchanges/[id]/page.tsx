@@ -86,9 +86,9 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
         {/* 제목이 교환 방향을 말한다. 예전에는 「슬기」 + 「레드벨벳 · 공개방송 · A급」이었는데
             바로 아래 패널 왼쪽 칸과 글자까지 같았다(#718). 세부는 패널이 맡는다. */}
         <div className="flex items-start gap-2 px-[14px] pt-4 sm:px-0">
-          <h1 className="flex min-w-0 flex-1 items-center gap-1.5 text-xl font-extrabold tracking-[-0.028em] text-text-1">
+          <h1 className="flex min-w-0 flex-1 items-center gap-1.5 text-title font-extrabold text-text-1">
             <span className="truncate">{itemName(post.have)}</span>
-            <span aria-label="교환" className="shrink-0 text-sm font-semibold text-text-3">→</span>
+            <span aria-label="교환" className="shrink-0 text-body font-semibold text-text-3">→</span>
             <span className="truncate text-primary">{post.wants.map(itemName).join(" · ") || "—"}</span>
           </h1>
           {/* 데스크톱에는 앱바가 없다(sm:hidden) — 진입점이 사라지지 않게 제목 줄에 한 번 더 둔다. */}
@@ -101,8 +101,8 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
         <div className="px-[14px] pt-3 sm:px-0">
           <div className="flex overflow-hidden rounded-control border border-border-2">
             <div className="min-w-0 flex-1 px-3 py-2.5">
-              <p className="text-[10px] font-extrabold tracking-[0.04em] text-text-3">내가 줄 것</p>
-              <p className="mt-1 truncate text-[12.5px] font-bold text-text-2">{itemSource(post.have)}</p>
+              <p className="text-caption font-extrabold tracking-[0.04em] text-text-3">내가 줄 것</p>
+              <p className="mt-1 truncate text-body-s font-bold text-text-2">{itemSource(post.have)}</p>
               {post.have?.grade && (
                 <span className={`mt-1.5 ${LABEL_NEUTRAL}`}>
                   {post.have.grade}급
@@ -111,8 +111,8 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
             </div>
             <div aria-hidden="true" className="w-px bg-border-2" />
             <div className="min-w-0 flex-1 px-3 py-2.5">
-              <p className="text-[10px] font-extrabold tracking-[0.04em] text-text-3">받고 싶은 것</p>
-              <p className="mt-1 truncate text-[12.5px] font-bold text-text-2">
+              <p className="text-caption font-extrabold tracking-[0.04em] text-text-3">받고 싶은 것</p>
+              <p className="mt-1 truncate text-body-s font-bold text-text-2">
                 {post.wants.map(itemSource).join(" · ") || "—"}
               </p>
             </div>
@@ -124,16 +124,16 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
         <div className="mt-5 px-[14px] sm:px-0">
           <div className="border-t border-border pt-3.5">
             <div className="flex items-baseline gap-2">
-              <p className="w-[52px] shrink-0 text-[11.5px] font-extrabold text-text-3">만날 곳</p>
-              <p className="min-w-0 text-[15px] font-extrabold tracking-[-0.018em] text-text-1">{post.place}</p>
+              <p className="w-[52px] shrink-0 text-label font-extrabold text-text-3">만날 곳</p>
+              <p className="min-w-0 text-body-l font-extrabold text-text-1">{post.place}</p>
             </div>
             <div className="mt-2.5 flex items-baseline gap-2">
-              <p className="w-[52px] shrink-0 text-[11.5px] font-extrabold text-text-3">시간</p>
+              <p className="w-[52px] shrink-0 text-label font-extrabold text-text-3">시간</p>
               <div className="flex min-w-0 flex-wrap gap-1.5">
                 {post.slots.map((slot) => (
                   <span
                     key={slot.id}
-                    className="rounded-control border border-border-2 px-2.5 py-[5px] text-xs font-bold text-text-1"
+                    className="rounded-control border border-border-2 px-2.5 py-[5px] text-label font-bold text-text-1"
                   >
                     {slotLabel(slot)}
                   </span>

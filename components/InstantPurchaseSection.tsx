@@ -83,19 +83,19 @@ export default function InstantPurchaseSection({
   return (
     <div className="mt-6">
       <div className="rounded-card border border-border bg-surface p-4">
-        <div className="flex items-center justify-between text-xs font-semibold text-text-3">
+        <div className="flex items-center justify-between text-label font-semibold text-text-3">
           <span>판매가</span>
           <span>즉시판매</span>
         </div>
         <div className="mt-1 flex items-baseline justify-between gap-2">
-          <span className="font-display text-3xl font-extrabold text-text-1 tabular-nums">
+          <span className="font-display text-display font-extrabold text-text-1 tabular-nums">
             {formatKRW(price)}
           </span>
-          <span className={`shrink-0 text-right text-sm font-bold ${isLive ? "text-primary" : "text-text-3"}`}>
+          <span className={`shrink-0 text-right text-body font-bold ${isLive ? "text-primary" : "text-text-3"}`}>
             {isLive ? "구매 가능" : (STATUS_LABEL[currentStatus] ?? "종료")}
           </span>
         </div>
-        <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-[11px] text-text-3">
+        <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-caption text-text-3">
           <span>
             구매자 수수료 <span className="font-semibold text-text-2 tabular-nums">{formatKRW(buyerFee(price))}</span>
           </span>
@@ -103,9 +103,9 @@ export default function InstantPurchaseSection({
             조회 <span className="font-semibold text-text-2 tabular-nums">{viewCount.toLocaleString("ko-KR")}</span>
           </span>
         </div>
-        <div className="mt-2 flex items-center justify-between text-[11px] text-text-3">
+        <div className="mt-2 flex items-center justify-between text-caption text-text-3">
           <span className="font-semibold text-text-2">예상 결제 총액</span>
-          <span className="font-display text-sm font-extrabold text-text-1 tabular-nums">{formatKRW(total)}</span>
+          <span className="font-display text-body font-extrabold text-text-1 tabular-nums">{formatKRW(total)}</span>
         </div>
       </div>
 
@@ -147,7 +147,7 @@ export default function InstantPurchaseSection({
             </button>
             {/* 누르기 전에 알려준다(#283). 즉시구매는 누르는 즉시 계약이라 더 앞에서 말해야 한다. */}
             {needsAddress && (
-              <p className="mt-2 text-[11.5px] leading-[1.6] text-text-3">
+              <p className="mt-2 text-label text-text-3">
                 구매하면 바로 보내드릴 수 있게 받을 주소를 먼저 등록해요.{" "}
                 <b className="font-bold text-text-2">한 번만 하면 다음부터는 물어보지 않아요.</b>
               </p>
@@ -159,7 +159,7 @@ export default function InstantPurchaseSection({
         <p
           role="alert"
           aria-live="polite"
-          className={`mt-2 rounded-card bg-surface-2 px-3 py-2 text-xs font-semibold ${
+          className={`mt-2 rounded-card bg-surface-2 px-3 py-2 text-label font-semibold ${
             message.type === "ok" ? "text-text-1" : "text-danger"
           }`}
         >

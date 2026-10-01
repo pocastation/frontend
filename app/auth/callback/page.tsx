@@ -32,7 +32,7 @@ function AuthCallbackInner() {
   }, [refresh, router, searchParams]);
 
   return (
-    <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">
+    <div className="mx-auto max-w-sm px-4 py-24 text-center text-body text-text-3">
       {failed ? "로그인에 실패했습니다. 다시 시도해주세요." : "로그인 처리 중..."}
     </div>
   );
@@ -42,7 +42,7 @@ export default function AuthCallbackPage() {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">
+        <div className="mx-auto max-w-sm px-4 py-24 text-center text-body text-text-3">
           로그인 처리 중...
         </div>
       }

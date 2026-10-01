@@ -85,13 +85,13 @@ function ConsentsForm() {
   }
 
   if (status === "checking") {
-    return <p className="py-16 text-center text-sm text-text-3">확인하는 중...</p>;
+    return <p className="py-16 text-center text-body text-text-3">확인하는 중...</p>;
   }
 
   if (status === "done") {
     return (
       <div className="py-16 text-center">
-        <p className="mb-4 text-sm text-text-2">이미 동의를 마치셨어요.</p>
+        <p className="mb-4 text-body text-text-2">이미 동의를 마치셨어요.</p>
         <button
           type="button"
           onClick={() => router.replace(nextPath)}
@@ -107,7 +107,7 @@ function ConsentsForm() {
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
       <ConsentFields values={consents} onChange={setConsents} />
       {error && (
-        <p role="alert" aria-live="polite" className="text-xs text-accent">
+        <p role="alert" aria-live="polite" className="text-label text-accent">
           {error}
         </p>
       )}
@@ -125,15 +125,15 @@ function ConsentsForm() {
 export default function ConsentsPage() {
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="mb-2 text-center font-display text-xl font-extrabold text-text-1">
+      <h1 className="mb-2 text-center font-display text-title font-extrabold text-text-1">
         약관 동의가 필요해요
       </h1>
-      <p className="mb-6 text-center text-xs text-text-3">
+      <p className="mb-6 text-center text-label text-text-3">
         서비스 이용을 계속하려면 이용약관과 개인정보 처리방침에 동의해주세요. 동의 내역은 가입 시점과
         동일하게 기록됩니다.
       </p>
       {/* useSearchParams는 Suspense 경계가 필요하다(App Router). */}
-      <Suspense fallback={<p className="py-16 text-center text-sm text-text-3">확인하는 중...</p>}>
+      <Suspense fallback={<p className="py-16 text-center text-body text-text-3">확인하는 중...</p>}>
         <ConsentsForm />
       </Suspense>
     </div>

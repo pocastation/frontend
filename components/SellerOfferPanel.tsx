@@ -84,7 +84,7 @@ function OfferConfirmation({
 
         {/* 🔴 제목이 「누구와」를 말한다(#424) — 고르는 대상이 금액이 아니라 **사람**이라는 것이
             이 개편의 서사이고, 제목이 그걸 먼저 말해야 한다. */}
-        <h2 id="offer-confirm-title" className="pr-9 font-display text-[19px] font-extrabold leading-snug text-text-1">
+        <h2 id="offer-confirm-title" className="pr-9 font-display text-title-s font-extrabold leading-snug text-text-1">
           {offer.bidderNicknameMasked} 님의 제안을 선택할까요?
         </h2>
 
@@ -93,32 +93,32 @@ function OfferConfirmation({
             MATCHED로 가고 미결제면 다시 열린다(§1.4).
             강조 장치를 쓰지 않는다: 색 띠나 회색 상자는 알림 상자처럼 읽히고, 작은 팝업에서는
             그 자체가 장식이 된다. **읽는 순서**가 무게를 진다. */}
-        <p className="mt-2.5 text-[13.5px] font-bold leading-relaxed text-text-1">
+        <p className="mt-2.5 text-body font-bold leading-relaxed text-text-1">
           선택하면 매매계약이 성립하고 되돌릴 수 없어요.
         </p>
-        <p className="mt-1.5 text-[11.5px] leading-relaxed text-text-3">
+        <p className="mt-1.5 text-label leading-relaxed text-text-3">
           사정이 생기면 운영팀의 대금 처리를 거쳐야 하고, 제재가 적용될 수 있어요.
         </p>
 
         {/* 금액 블록 — 채운 상자 대신 헤어라인 분할. 결정 직전에 실수령액과 상대 이력을 한 번 더
             보여준다: 목록에서 봤더라도 되돌릴 수 없는 버튼을 누르기 직전이 확인할 자리다. */}
         <div className="mt-5 border-t border-border pt-4">
-          <p className="font-display text-3xl font-extrabold tabular-nums leading-none text-text-1">
+          <p className="font-display text-display font-extrabold tabular-nums leading-none text-text-1">
             {formatKRW(offer.amount)}
           </p>
-          <p className="mt-1.5 text-xs text-text-2">
+          <p className="mt-1.5 text-label text-text-2">
             정산 예상 <b className="font-bold tabular-nums text-text-1">{formatKRW(sellerPayout(offer.amount))}</b>
             {" · 수수료 3.5% 공제"}
           </p>
           <div className="mt-3 border-t border-border pt-2.5">
-            <p className="text-[12.5px] font-bold text-text-1">{offer.bidderNicknameMasked}</p>
-            <p className="mt-0.5 text-[11.5px] text-text-2">
+            <p className="text-body-s font-bold text-text-1">{offer.bidderNicknameMasked}</p>
+            <p className="mt-0.5 text-label text-text-2">
               Lv.{offer.trustLevel} · 거래 <span className="tabular-nums">{offer.tradeCount}회</span>
             </p>
           </div>
         </div>
 
-        <p className="mt-4 border-t border-border pt-3 text-[11.5px] leading-relaxed text-text-3">
+        <p className="mt-4 border-t border-border pt-3 text-label leading-relaxed text-text-3">
           선택하면 구매자에게{" "}
           <b className="font-bold text-text-2">{PAYMENT_WINDOW_TEXT} 안에 결제</b>하라는 안내가 갑니다.
           그동안 다른 제안은 받지 않고, 결제가 확인되면 발송을 준비하시면 돼요.
@@ -130,7 +130,7 @@ function OfferConfirmation({
             type="button"
             disabled={submitting}
             onClick={onCancel}
-            className={`h-[46px] w-[84px] shrink-0 rounded-control border border-border-2 bg-white text-[13.5px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
+            className={`h-[46px] w-[84px] shrink-0 rounded-control border border-border-2 bg-white text-body font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-50 ${FOCUS_RING}`}
           >
             취소
           </button>
@@ -139,7 +139,7 @@ function OfferConfirmation({
             autoFocus
             disabled={submitting}
             onClick={onConfirm}
-            className={`h-[46px] flex-1 rounded-control bg-primary text-[13.5px] font-extrabold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+            className={`h-[46px] flex-1 rounded-control bg-primary text-body font-extrabold text-white transition-colors hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
           >
             {submitting ? "처리 중..." : "이 제안 선택"}
           </button>
@@ -269,10 +269,10 @@ export default function SellerOfferPanel({
         className={`rounded-card border border-border bg-surface ${panelPadding}`}
       >
         <div className="flex items-center justify-between gap-4">
-          <p className="text-xs font-semibold text-text-3">{amountLabel}</p>
+          <p className="text-label font-semibold text-text-3">{amountLabel}</p>
           <OfferCounts offerCount={offerCount} wishlistCount={wishlistCount} size={viewport === "desktop" ? "md" : "sm"} />
         </div>
-        <p className={`${viewport === "desktop" ? "mt-1.5 text-3xl" : "mt-1 text-2xl"} font-display font-extrabold tabular-nums text-text-1`}>
+        <p className={`${viewport === "desktop" ? "mt-1.5 text-display" : "mt-1 text-title-l"} font-display font-extrabold tabular-nums text-text-1`}>
           {displayAmount == null ? "금액 확인 중" : formatKRW(displayAmount)}
         </p>
 
@@ -292,33 +292,33 @@ export default function SellerOfferPanel({
         {isMatched ? (
           <div className={`${viewport === "desktop" ? "mt-5 pt-5" : "mt-4 pt-3.5"} border-t border-border`}>
             <div className="flex items-center justify-between gap-3">
-              <h2 className={`${viewport === "desktop" ? "text-base" : "text-sm"} font-extrabold text-text-1`}>
+              <h2 className={`${viewport === "desktop" ? "text-body-l" : "text-body"} font-extrabold text-text-1`}>
                 선택한 가격 제안
               </h2>
               {/* 🔴 테두리 칩을 걷었다(#424). 마이페이지 목록에서 같은 모양(도트 배지·알약)을
                   이미 걷어냈는데 여기만 남아 있었다 — 상태는 텍스트가 말하고, 칩은 조작
                   가능한 것처럼 읽힌다. 오른쪽 끝 잉크색 굵은 글씨가 목록의 상태 열과 같은 규칙이다. */}
-              <span className="shrink-0 text-[11.5px] font-bold text-text-1">결제 대기</span>
+              <span className="shrink-0 text-label font-bold text-text-1">결제 대기</span>
             </div>
 
             {loading && !selectedOffer ? (
-              <p className="border-b border-border py-6 text-center text-sm text-text-3">선택한 제안을 불러오는 중...</p>
+              <p className="border-b border-border py-6 text-center text-body text-text-3">선택한 제안을 불러오는 중...</p>
             ) : loadError || !selectedOffer ? (
               <div className="border-b border-border py-5 text-center">
-                <p className="text-sm text-text-3">선택한 제안을 불러오지 못했어요.</p>
-                <button type="button" onClick={() => void loadSelectedOffer()} className={`mt-2 text-xs font-bold text-primary ${FOCUS_RING}`}>
+                <p className="text-body text-text-3">선택한 제안을 불러오지 못했어요.</p>
+                <button type="button" onClick={() => void loadSelectedOffer()} className={`mt-2 text-label font-bold text-primary ${FOCUS_RING}`}>
                   다시 시도
                 </button>
               </div>
             ) : (
-              <dl className="mt-3 divide-y divide-border border-y border-border text-sm">
+              <dl className="mt-3 divide-y divide-border border-y border-border text-body">
                 <div className="flex items-center justify-between gap-4 py-3">
                   <dt className="text-text-3">구매자</dt>
                   <dd className="font-bold text-text-1">{selectedOffer.buyerNicknameMasked}</dd>
                 </div>
                 <div className="flex items-center justify-between gap-4 py-3">
                   <dt className="text-text-3">거래 금액</dt>
-                  <dd className="font-display text-base font-extrabold tabular-nums text-text-1">
+                  <dd className="font-display text-body-l font-extrabold tabular-nums text-text-1">
                     {formatKRW(selectedOffer.amount)}
                   </dd>
                 </div>
@@ -334,33 +334,33 @@ export default function SellerOfferPanel({
               </dl>
             )}
 
-            <p className="mt-4 text-[12.5px] font-semibold leading-relaxed text-text-2">
+            <p className="mt-4 text-body-s font-semibold leading-relaxed text-text-2">
               구매자가 결제를 완료하면 발송 안내를 받을 수 있어요.
             </p>
-            <p className="mt-1 text-[11px] leading-relaxed text-text-3">
+            <p className="mt-1 text-caption leading-relaxed text-text-3">
               결제 기한 내 미결제 시 판매가 다시 진행 중 상태로 돌아가요.
             </p>
           </div>
         ) : (
           <div className={`${viewport === "desktop" ? "mt-5 pt-5" : "mt-4 pt-3.5"} border-t border-border`}>
             <div className="flex items-center justify-between gap-3 pb-3">
-              <h2 className={`${viewport === "desktop" ? "text-base" : "text-sm"} font-extrabold text-text-1`}>
+              <h2 className={`${viewport === "desktop" ? "text-body-l" : "text-body"} font-extrabold text-text-1`}>
                 받은 가격 제안 {displayedCount}건
               </h2>
-              <span className="text-[11px] text-text-3">최신순</span>
+              <span className="text-caption text-text-3">최신순</span>
             </div>
 
             {loading && offers.length === 0 ? (
-              <p className="border-y border-border py-6 text-center text-sm text-text-3">제안 목록을 불러오는 중...</p>
+              <p className="border-y border-border py-6 text-center text-body text-text-3">제안 목록을 불러오는 중...</p>
             ) : loadError ? (
               <div className="border-y border-border py-5 text-center">
-                <p className="text-sm text-text-3">제안 목록을 불러오지 못했어요.</p>
-                <button type="button" onClick={() => void loadOffers(page)} className={`mt-2 text-xs font-bold text-primary ${FOCUS_RING}`}>
+                <p className="text-body text-text-3">제안 목록을 불러오지 못했어요.</p>
+                <button type="button" onClick={() => void loadOffers(page)} className={`mt-2 text-label font-bold text-primary ${FOCUS_RING}`}>
                   다시 시도
                 </button>
               </div>
             ) : offers.length === 0 ? (
-              <p className="border-y border-border py-6 text-center text-sm font-semibold text-text-3">
+              <p className="border-y border-border py-6 text-center text-body font-semibold text-text-3">
                 아직 받은 가격 제안이 없어요.
               </p>
             ) : (
@@ -373,13 +373,13 @@ export default function SellerOfferPanel({
                   // 그 아래 한 줄이 **상대를 심사할 재료**다(§2.8 C1, BE #378). 칩이나 배지로
                   // 흩지 않고 가운뎃점으로 이어 숫자만 굵게 둔다 — 훑을 때 숫자가 걸린다.
                   <li key={offer.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 py-3">
-                    <span className="truncate text-[13.5px] font-bold text-text-1">
+                    <span className="truncate text-body font-bold text-text-1">
                       {offer.bidderNicknameMasked}
                     </span>
-                    <span className="text-right font-display text-[13.5px] font-bold tabular-nums text-text-1">
+                    <span className="text-right font-display text-body font-bold tabular-nums text-text-1">
                       {formatKRW(offer.amount)}
                     </span>
-                    <span className="col-start-1 truncate text-[11.5px] text-text-2">
+                    <span className="col-start-1 truncate text-label text-text-2">
                       Lv.{offer.trustLevel} · 거래{" "}
                       <b className="font-bold tabular-nums text-text-1">{offer.tradeCount}회</b>
                       {" · "}
@@ -388,7 +388,7 @@ export default function SellerOfferPanel({
                     <button
                       type="button"
                       onClick={() => setPendingOffer(offer)}
-                      className={`col-start-2 h-8 justify-self-end rounded-control border border-border-2 bg-white px-3 text-xs font-bold text-text-1 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+                      className={`col-start-2 h-8 justify-self-end rounded-control border border-border-2 bg-white px-3 text-label font-bold text-text-1 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
                     >
                       선택
                     </button>
@@ -398,7 +398,7 @@ export default function SellerOfferPanel({
             )}
 
             {totalPages > 1 && !loadError && (
-              <div className="mt-3 flex items-center justify-center gap-3 text-xs">
+              <div className="mt-3 flex items-center justify-center gap-3 text-label">
                 <button type="button" disabled={page === 0 || loading} onClick={() => void loadOffers(page - 1)} className={`font-bold text-text-2 disabled:opacity-30 ${FOCUS_RING}`}>
                   이전
                 </button>
@@ -409,7 +409,7 @@ export default function SellerOfferPanel({
               </div>
             )}
 
-            <p className="mt-4 text-[11px] leading-relaxed text-text-3">
+            <p className="mt-4 text-caption leading-relaxed text-text-3">
               제안을 선택하면 구매자에게 결제 안내가 발송되며, 되돌릴 수 없어요.
             </p>
           </div>

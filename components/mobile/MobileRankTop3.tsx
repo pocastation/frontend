@@ -36,7 +36,7 @@ export default function MobileRankTop3({ auctions }: { auctions: AuctionResponse
         ) : (
           /* 윗선을 두지 않는다(#741). 줄이 있을 때는 각 줄의 아랫선만 그어져 제목 밑에 선이
              생기지 않는데, 빈 상태에만 윗선이 있으면 같은 자리에서 선이 나타났다 사라진다. */
-          <p className="py-8 text-center text-[12.5px] text-text-3">제안이 쌓이면 순위가 나와요.</p>
+          <p className="py-8 text-center text-body-s text-text-3">제안이 쌓이면 순위가 나와요.</p>
         ),
     },
   ];
@@ -51,13 +51,13 @@ export default function MobileRankTop3({ auctions }: { auctions: AuctionResponse
         {pages.map((p) => (
           <div key={p.key} className="w-full min-w-full flex-[0_0_100%] snap-start px-[14px]">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="flex items-baseline gap-1.5 text-[17px] font-extrabold tracking-[-0.02em]">
+              <h2 className="flex items-baseline gap-1.5 text-title-s font-extrabold">
                 {p.key} 랭킹
-                <span className="text-[11px] font-semibold text-text-3">{p.note}</span>
+                <span className="text-caption font-semibold text-text-3">{p.note}</span>
               </h2>
               <Link
                 href={p.href}
-                className={`flex items-center gap-0.5 text-xs font-semibold text-text-3 ${FOCUS_RING}`}
+                className={`flex items-center gap-0.5 text-label font-semibold text-text-3 ${FOCUS_RING}`}
               >
                 더보기
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

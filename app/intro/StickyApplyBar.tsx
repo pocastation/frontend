@@ -54,7 +54,7 @@ export default function StickyApplyBar() {
         type="button"
         onClick={scrollToForm}
         tabIndex={visible ? 0 : -1}
-        className={`flex h-12 w-full items-center justify-center rounded-control bg-primary text-[15px] font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
+        className={`flex h-12 w-full items-center justify-center rounded-control bg-primary text-body-l font-bold text-white transition-colors hover:bg-primary-dark ${FOCUS_RING}`}
       >
         사전 신청하고 혜택 받기
       </button>

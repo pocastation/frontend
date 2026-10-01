@@ -56,7 +56,7 @@ export default async function EndedAuctionsPage({
       <div className="mx-auto max-w-[1160px] px-[14px] py-5 sm:px-4 sm:py-10">
         <div className="mb-4 sm:mb-7">
           {/* 모바일은 앱바가 제목이다 — 화면 안에서 h1을 반복하지 않는다(알림·스타·판매자와 같다). */}
-          <h1 className="hidden font-display text-2xl font-extrabold tracking-tight text-text-1 sm:block">
+          <h1 className="hidden font-display text-title-l font-extrabold text-text-1 sm:block">
             거래 완료
           </h1>
           {/* 🔴 문구를 두 번 고쳤다. 「최종 거래가를 확인해보세요」는 §1.7·§9.4로 성사가를 감추면서
@@ -65,7 +65,7 @@ export default async function EndedAuctionsPage({
 
               모바일에서도 이 문장은 남긴다 — 이 목록이 **성사분만 담는다**는 사실을 말해 주는
               유일한 자리라 지우면 오해가 생긴다. */}
-          <p className="text-[12.5px] text-text-3 sm:mt-1.5 sm:text-sm">거래가 성사된 상품을 확인해보세요.</p>
+          <p className="text-body-s text-text-3 sm:mt-1.5 sm:text-body">거래가 성사된 상품을 확인해보세요.</p>
         </div>
 
         <AuctionBrowser

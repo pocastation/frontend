@@ -82,7 +82,8 @@
   /* --shadow-primary(보라 글로우)는 #277에서 제거했다. 장식 그림자라 남겨두면 다시 쓰인다. */
   --shadow-modal: 0 24px 64px rgba(17, 17, 24, 0.16);
 
-  --font-sans: var(--font-noto-sans-kr), -apple-system, sans-serif;
+  /* 본문은 Pretendard(#769). 숫자·가격·워드마크는 아래 display(Plus Jakarta Sans)가 맡는다. */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --font-display: var(--font-plus-jakarta-sans), sans-serif;
 }
 

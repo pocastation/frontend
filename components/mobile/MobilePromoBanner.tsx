@@ -89,7 +89,7 @@ function BrandSlide() {
   return (
     <div className="relative">
       <Stars />
-      <h2 className="text-[27px] leading-[1.3] tracking-[-0.01em]">
+      <h2 className="text-display">
         {BRAND_HEADLINE_LINES.map((line, i) => (
           <span
             key={line}
@@ -103,16 +103,16 @@ function BrandSlide() {
           </span>
         ))}
       </h2>
-      <p className="mt-2.5 whitespace-pre-line text-[13px] leading-[1.65] text-white/60">{BRAND_SUBHEAD}</p>
+      <p className="mt-2.5 whitespace-pre-line text-body-s text-white/60">{BRAND_SUBHEAD}</p>
       <Link
         href="/auctions"
-        className={`mt-[18px] flex h-11 w-full items-center justify-center rounded-control bg-primary text-sm font-extrabold text-white ${FOCUS_RING}`}
+        className={`mt-[18px] flex h-11 w-full items-center justify-center rounded-control bg-primary text-body font-extrabold text-white ${FOCUS_RING}`}
       >
         진행 중인 판매글 보기 →
       </Link>
       <Link
         href="/guide"
-        className={`mt-3 inline-block border-b border-white/25 pb-px text-[12.5px] font-bold text-white/60 ${FOCUS_RING}`}
+        className={`mt-3 inline-block border-b border-white/25 pb-px text-body-s font-bold text-white/60 ${FOCUS_RING}`}
       >
         이용 방법 보기
       </Link>
@@ -127,29 +127,29 @@ function AuctionSlide({ auction }: { auction: AuctionResponse }) {
     <div className="relative flex items-center gap-3.5">
       <Stars />
       <div className="min-w-0 flex-1">
-        <span className="inline-flex items-center rounded-control border border-white/20 px-2.5 py-[3px] text-[11px] font-bold text-white/85">
+        <span className="inline-flex items-center rounded-control border border-white/20 px-2.5 py-[3px] text-caption font-bold text-white/85">
           {LEVEL_LABEL[level]}
         </span>
         {auction.artistName && (
-          <p className="mt-3 text-[11.5px] font-extrabold tracking-[0.02em] text-nebula">{auction.artistName}</p>
+          <p className="mt-3 text-label font-extrabold tracking-[0.02em] text-nebula">{auction.artistName}</p>
         )}
-        <h2 className="mt-1 line-clamp-2 text-[17px] font-extrabold leading-[1.4] tracking-[-0.01em] text-white">
+        <h2 className="mt-1 line-clamp-2 text-title-s font-extrabold text-white">
           {auction.title}
         </h2>
         <p className="mt-2.5 flex items-baseline gap-2">
-          <span className="text-[11px] font-semibold text-white/50">최소가</span>
-          <span className="font-display text-xl font-extrabold leading-tight tabular-nums text-white">
+          <span className="text-caption font-semibold text-white/50">최소가</span>
+          <span className="font-display text-title font-extrabold leading-tight tabular-nums text-white">
             {formatKRW(auction.startPrice)}
           </span>
         </p>
-        <p className="mt-1.5 flex items-center gap-2 whitespace-nowrap text-[11.5px] text-white/55">
+        <p className="mt-1.5 flex items-center gap-2 whitespace-nowrap text-label text-white/55">
           <span className="tabular-nums">제안 {auction.bidCount}회</span>
           {auction.endAt && <span aria-hidden="true" className="h-0.5 w-0.5 rounded-full bg-white/30" />}
           {auction.endAt && <DarkCountdown endAt={auction.endAt} />}
         </p>
         <Link
           href={`/auctions/${auction.id}`}
-          className={`mt-3.5 inline-flex h-11 items-center justify-center whitespace-nowrap rounded-control bg-primary px-4 text-[13.5px] font-extrabold text-white ${FOCUS_RING}`}
+          className={`mt-3.5 inline-flex h-11 items-center justify-center whitespace-nowrap rounded-control bg-primary px-4 text-body font-extrabold text-white ${FOCUS_RING}`}
         >
           제안하러 가기 →
         </Link>

@@ -91,13 +91,13 @@ export function ExploreEmpty({
           </svg>
         )}
       </div>
-      <p className="text-sm font-bold text-text-2">{title}</p>
-      {hint && <p className="text-[12.5px] text-text-3">{hint}</p>}
+      <p className="text-body font-bold text-text-2">{title}</p>
+      {hint && <p className="text-body-s text-text-3">{hint}</p>}
       {onClear && (
         <button
           type="button"
           onClick={onClear}
-          className={`mt-1 inline-flex h-[38px] items-center gap-1.5 rounded-control border border-border-2 bg-white px-[18px] text-[13px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+          className={`mt-1 inline-flex h-[38px] items-center gap-1.5 rounded-control border border-border-2 bg-white px-[18px] text-body-s font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
         >
           {clearLabel}
         </button>
@@ -127,13 +127,13 @@ export function ExploreError({
         </svg>
       </span>
       <span className="flex-1">
-        <span className="block text-[13.5px] font-extrabold text-text-1">{title}</span>
-        <span className="mt-0.5 block text-xs text-text-2">네트워크 상태를 확인한 뒤 다시 시도해 주세요.</span>
+        <span className="block text-body font-extrabold text-text-1">{title}</span>
+        <span className="mt-0.5 block text-label text-text-2">네트워크 상태를 확인한 뒤 다시 시도해 주세요.</span>
       </span>
       <button
         type="button"
         onClick={onRetry}
-        className={`inline-flex h-[34px] shrink-0 items-center gap-1.5 rounded-control bg-accent px-3.5 text-[12.5px] font-extrabold text-white transition hover:brightness-95 ${FOCUS_RING}`}
+        className={`inline-flex h-[34px] shrink-0 items-center gap-1.5 rounded-control bg-accent px-3.5 text-body-s font-extrabold text-white transition hover:brightness-95 ${FOCUS_RING}`}
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M23 4v6h-6" />

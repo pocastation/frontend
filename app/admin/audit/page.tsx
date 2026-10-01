@@ -12,7 +12,7 @@ import AdminNotice from "@/components/AdminNotice";
 
 const PAGE_SIZE = 20;
 const SELECT_CLASS =
-  `h-10 min-w-[160px] rounded-control border border-border-2 bg-white px-3 text-[12.5px] font-semibold text-text-2 outline-none transition-colors focus:border-primary ${FOCUS_RING}`;
+  `h-10 min-w-[160px] rounded-control border border-border-2 bg-white px-3 text-body-s font-semibold text-text-2 outline-none transition-colors focus:border-primary ${FOCUS_RING}`;
 
 function buildParams(action: AuditAction | "ALL", targetType: AuditTargetType | "ALL", page: number) {
   const params = new URLSearchParams({ size: String(PAGE_SIZE), page: String(page) });
@@ -83,8 +83,8 @@ export default function AdminAuditLogPage() {
 
   return (
     <div>
-      <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">감사 로그</h1>
-      <p className="mt-1.5 text-sm text-text-3">어드민이 수행한 중대 조치의 기록입니다. 누가·언제·무엇을·왜 했는지 확인할 수 있습니다.</p>
+      <h1 className="font-display text-title-l font-extrabold text-text-1">감사 로그</h1>
+      <p className="mt-1.5 text-body text-text-3">어드민이 수행한 중대 조치의 기록입니다. 누가·언제·무엇을·왜 했는지 확인할 수 있습니다.</p>
 
       {error && (
         <AdminNotice kind="error" className="mt-5">
@@ -118,12 +118,12 @@ export default function AdminAuditLogPage() {
         </select>
       </div>
 
-      <p className="mb-2 text-xs text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
+      <p className="mb-2 text-label text-text-3">총 {totalElements}건{loading && " · 불러오는 중..."}</p>
 
       <div className="admin-table-wrap overflow-x-auto rounded-card border border-border bg-surface">
         <table role="table" className="admin-table admin-table-audit w-full min-w-[720px] border-collapse">
           <thead>
-            <tr className="border-b border-border text-left text-[11px] font-bold text-text-3">
+            <tr className="border-b border-border text-left text-caption font-bold text-text-3">
               <th className="whitespace-nowrap px-4 py-2.5">시각</th>
               <th className="whitespace-nowrap px-4 py-2.5">관리자</th>
               <th className="whitespace-nowrap px-4 py-2.5">조치</th>
@@ -134,13 +134,13 @@ export default function AdminAuditLogPage() {
           <tbody>
             {logs.length === 0 && !loading ? (
               <tr>
-                <td colSpan={5} className="px-4 py-12 text-center text-sm text-text-3">
+                <td colSpan={5} className="px-4 py-12 text-center text-body text-text-3">
                   기록이 없습니다.
                 </td>
               </tr>
             ) : (
               logs.map((log) => (
-                <tr key={log.id} className="border-b border-border text-[13px] last:border-0">
+                <tr key={log.id} className="border-b border-border text-body-s last:border-0">
                   <td data-label="시각" className="whitespace-nowrap px-4 py-3 text-text-3">{formatRelativeTime(log.createdAt)}</td>
                   <td data-label="관리자" className="whitespace-nowrap px-4 py-3 font-semibold text-text-1">{log.actorNickname ?? "—"}</td>
                   <td data-label="조치" className="whitespace-nowrap px-4 py-3">
@@ -150,7 +150,7 @@ export default function AdminAuditLogPage() {
                   </td>
                   <td data-label="대상" className="px-4 py-3">
                     <span className="block max-w-[200px] truncate font-semibold text-text-1">{log.targetLabel ?? "—"}</span>
-                    <span className="text-[11px] text-text-3">{AUDIT_TARGET_TYPE_LABEL[log.targetType]}</span>
+                    <span className="text-caption text-text-3">{AUDIT_TARGET_TYPE_LABEL[log.targetType]}</span>
                   </td>
                   <td data-label="사유" className="max-w-[240px] px-4 py-3 text-text-2">
                     <span className="line-clamp-2">{log.reason ?? "—"}</span>
@@ -168,7 +168,7 @@ export default function AdminAuditLogPage() {
             type="button"
             onClick={loadMore}
             disabled={loadingMore}
-            className={`h-10 rounded-control border border-border-2 bg-white px-5 text-[13px] font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
+            className={`h-10 rounded-control border border-border-2 bg-white px-5 text-body-s font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:opacity-60 ${FOCUS_RING}`}
           >
             {loadingMore ? "불러오는 중..." : "더 보기"}
           </button>

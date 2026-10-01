@@ -77,7 +77,7 @@ function LoginForm() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">
+      <div className="mx-auto max-w-sm px-4 py-24 text-center text-body text-text-3">
         불러오는 중...
       </div>
     );
@@ -88,7 +88,7 @@ function LoginForm() {
 
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="mb-6 text-center font-display text-xl font-extrabold text-text-1">
+      <h1 className="mb-6 text-center font-display text-title font-extrabold text-text-1">
         로그인
       </h1>
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
@@ -125,19 +125,19 @@ function LoginForm() {
           />
         </div>
         {error && (
-          <p role="alert" aria-live="polite" className="text-xs text-accent">
+          <p role="alert" aria-live="polite" className="text-label text-accent">
             {error}
           </p>
         )}
         {needsVerification && (
           <div className="flex flex-col gap-2 rounded-card border border-border bg-surface-2 p-3">
             {resendState === "sent" ? (
-              <p aria-live="polite" className="text-xs leading-relaxed text-text-2">
+              <p aria-live="polite" className="text-label leading-relaxed text-text-2">
                 인증 메일을 다시 보냈어요. 메일함(스팸함 포함)을 확인해 주세요.
               </p>
             ) : (
               <>
-                <p className="text-xs leading-relaxed text-text-3">
+                <p className="text-label leading-relaxed text-text-3">
                   메일을 못 받으셨나요? 인증 메일을 다시 보내드려요.
                 </p>
                 <button
@@ -151,7 +151,7 @@ function LoginForm() {
               </>
             )}
             {resendError && (
-              <p role="alert" aria-live="polite" className="text-xs text-accent">
+              <p role="alert" aria-live="polite" className="text-label text-accent">
                 {resendError}
               </p>
             )}
@@ -168,7 +168,7 @@ function LoginForm() {
       <Link href="/signup" className={`mt-3 flex h-11 items-center justify-center ${SECONDARY_BUTTON_CLASS}`}>
         이메일 회원가입
       </Link>
-      <p className="mt-3 text-center text-xs text-text-3">
+      <p className="mt-3 text-center text-label text-text-3">
         <Link
           href="/auth/forgot-password"
           className={`rounded-control underline underline-offset-2 transition-colors hover:text-text-2 ${FOCUS_RING}`}
@@ -177,7 +177,7 @@ function LoginForm() {
         </Link>
       </p>
 
-      <div className="my-5 flex items-center gap-3 text-[11px] text-text-3">
+      <div className="my-5 flex items-center gap-3 text-caption text-text-3">
         <span className="h-px flex-1 bg-border" />
         또는
         <span className="h-px flex-1 bg-border" />
@@ -203,7 +203,7 @@ function LoginForm() {
               style={{ objectPosition: "0% 50%" }}
             />
           </span>
-          <span className="text-[11px] text-text-3">카카오</span>
+          <span className="text-caption text-text-3">카카오</span>
         </a>
         <a
           href={socialLoginUrl("naver")}
@@ -211,7 +211,7 @@ function LoginForm() {
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- 네이버 공식 아이콘형 에셋 그대로 사용 */}
           <img src="/oauth/naver-icon.png" alt="" className="h-11 w-11" />
-          <span className="text-[11px] text-text-3">네이버</span>
+          <span className="text-caption text-text-3">네이버</span>
         </a>
         <a
           href={socialLoginUrl("google")}
@@ -220,7 +220,7 @@ function LoginForm() {
           <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DADCE0] bg-white">
             <GoogleIcon />
           </span>
-          <span className="text-[11px] text-text-3">구글</span>
+          <span className="text-caption text-text-3">구글</span>
         </a>
       </div>
     </div>
@@ -232,7 +232,7 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">불러오는 중...</div>
+        <div className="mx-auto max-w-sm px-4 py-24 text-center text-body text-text-3">불러오는 중...</div>
       }
     >
       <LoginForm />

@@ -104,7 +104,7 @@ export default function ArtistCombobox({
           className="absolute z-10 mt-1 max-h-60 w-full overflow-y-auto rounded-card border border-border bg-surface py-1 shadow-modal"
         >
           {filtered.length === 0 ? (
-            <li className="px-3.5 py-2 text-sm text-text-3">검색 결과가 없어요</li>
+            <li className="px-3.5 py-2 text-body text-text-3">검색 결과가 없어요</li>
           ) : (
             filtered.map((option, index) => (
               <li
@@ -116,7 +116,7 @@ export default function ArtistCombobox({
                   selectOption(option);
                 }}
                 onMouseEnter={() => setHighlightedIndex(index)}
-                className={`cursor-pointer px-3.5 py-2 text-sm ${
+                className={`cursor-pointer px-3.5 py-2 text-body ${
                   index === highlightedIndex ? "bg-surface-2 text-text-1" : "text-text-1"
                 } ${option.id === value ? "font-bold" : ""}`}
               >

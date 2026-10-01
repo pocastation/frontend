@@ -89,14 +89,14 @@ export default function DeliveryAddressBook() {
     }
   }
 
-  if (loading) return <p className="text-sm text-text-3">배송지를 불러오는 중...</p>;
+  if (loading) return <p className="text-body text-text-3">배송지를 불러오는 중...</p>;
 
   const editingAddress = typeof editing === "number" ? addresses.find((a) => a.id === editing) : undefined;
 
   return (
     <div className="max-w-xl">
       {error && (
-        <p role="alert" className="mb-4 rounded-card bg-surface-2 px-4 py-3 text-sm font-semibold text-danger">
+        <p role="alert" className="mb-4 rounded-card bg-surface-2 px-4 py-3 text-body font-semibold text-danger">
           {error}
         </p>
       )}
@@ -149,8 +149,8 @@ export default function DeliveryAddressBook() {
         <>
           {addresses.length === 0 ? (
             <div className="flex flex-col items-center gap-2 rounded-card border border-dashed border-border-2 py-16 text-center">
-              <p className="text-sm font-bold text-text-2">등록된 배송지가 없어요.</p>
-              <p className="text-xs text-text-3">거래 성사 후 배송받을 주소를 미리 등록해두세요.</p>
+              <p className="text-body font-bold text-text-2">등록된 배송지가 없어요.</p>
+              <p className="text-label text-text-3">거래 성사 후 배송받을 주소를 미리 등록해두세요.</p>
             </div>
           ) : (
             <ul className="flex flex-col gap-3">
@@ -158,7 +158,7 @@ export default function DeliveryAddressBook() {
                 <li key={address.id} className="rounded-card border border-border bg-surface p-4">
                   <div className="flex items-center gap-2">
                     {address.label && (
-                      <span className="text-sm font-extrabold text-text-1">{address.label}</span>
+                      <span className="text-body font-extrabold text-text-1">{address.label}</span>
                     )}
                     {address.isDefault && (
                       <span className={LABEL_NEUTRAL}>
@@ -166,10 +166,10 @@ export default function DeliveryAddressBook() {
                       </span>
                     )}
                   </div>
-                  <p className="mt-1.5 text-sm font-bold text-text-1">
+                  <p className="mt-1.5 text-body font-bold text-text-1">
                     {address.recipientName} <span className="font-normal text-text-3">· {address.phone}</span>
                   </p>
-                  <p className="mt-0.5 text-sm text-text-2">
+                  <p className="mt-0.5 text-body text-text-2">
                     ({address.postalCode}) {address.address1}
                     {address.address2 ? ` ${address.address2}` : ""}
                   </p>
@@ -178,7 +178,7 @@ export default function DeliveryAddressBook() {
                       <button
                         type="button"
                         onClick={() => handleSetDefault(address)}
-                        className={`px-3 py-1.5 text-xs ${SECONDARY_BUTTON_CLASS}`}
+                        className={`px-3 py-1.5 text-label ${SECONDARY_BUTTON_CLASS}`}
                       >
                         기본으로 지정
                       </button>
@@ -186,14 +186,14 @@ export default function DeliveryAddressBook() {
                     <button
                       type="button"
                       onClick={() => setEditing(address.id)}
-                      className={`px-3 py-1.5 text-xs ${SECONDARY_BUTTON_CLASS}`}
+                      className={`px-3 py-1.5 text-label ${SECONDARY_BUTTON_CLASS}`}
                     >
                       수정
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDelete(address)}
-                      className={`px-3 py-1.5 text-xs font-bold text-text-3 hover:text-accent ${FOCUS_RING}`}
+                      className={`px-3 py-1.5 text-label font-bold text-text-3 hover:text-accent ${FOCUS_RING}`}
                     >
                       삭제
                     </button>
@@ -204,7 +204,7 @@ export default function DeliveryAddressBook() {
           )}
 
           <div className="mt-4 flex items-center justify-between">
-            <p className="text-xs text-text-3">
+            <p className="text-label text-text-3">
               {addresses.length}/{MAX_ADDRESSES}개 등록됨
             </p>
             <button
@@ -302,13 +302,13 @@ function AddressForm({
 
   return (
     <form onSubmit={handleSubmit} className="rounded-card border border-border bg-surface p-5">
-      <h2 className="font-display text-sm font-extrabold text-text-1">
+      <h2 className="font-display text-body font-extrabold text-text-1">
         {isEdit ? "배송지 수정" : "배송지 추가"}
       </h2>
 
       <div className="mt-4 flex flex-col gap-3.5">
         <div>
-          <label htmlFor={labelId} className="mb-1.5 block text-xs font-bold text-text-2">
+          <label htmlFor={labelId} className="mb-1.5 block text-label font-bold text-text-2">
             배송지명 <span className="font-normal text-text-3">(선택)</span>
           </label>
           <input
@@ -324,7 +324,7 @@ function AddressForm({
 
         <div className="grid gap-3.5 sm:grid-cols-2">
           <div>
-            <label htmlFor={nameId} className="mb-1.5 block text-xs font-bold text-text-2">
+            <label htmlFor={nameId} className="mb-1.5 block text-label font-bold text-text-2">
               받는 사람
             </label>
             <input
@@ -338,7 +338,7 @@ function AddressForm({
             />
           </div>
           <div>
-            <label htmlFor={phoneId} className="mb-1.5 block text-xs font-bold text-text-2">
+            <label htmlFor={phoneId} className="mb-1.5 block text-label font-bold text-text-2">
               연락처
             </label>
             <input
@@ -356,7 +356,7 @@ function AddressForm({
         </div>
 
         <div>
-          <label htmlFor={postalId} className="mb-1.5 block text-xs font-bold text-text-2">
+          <label htmlFor={postalId} className="mb-1.5 block text-label font-bold text-text-2">
             주소
           </label>
           <div className="flex gap-2">
@@ -380,7 +380,7 @@ function AddressForm({
               <button
                 type="button"
                 onClick={() => setPostcodeOpen(false)}
-                className={`block w-full border-t border-border py-2 text-xs font-bold text-text-3 hover:text-text-1 ${FOCUS_RING}`}
+                className={`block w-full border-t border-border py-2 text-label font-bold text-text-3 hover:text-text-1 ${FOCUS_RING}`}
               >
                 닫기
               </button>
@@ -409,7 +409,7 @@ function AddressForm({
           />
         </div>
 
-        <label htmlFor={defaultId} className="flex items-center gap-2 text-sm font-semibold text-text-2">
+        <label htmlFor={defaultId} className="flex items-center gap-2 text-body font-semibold text-text-2">
           <input
             id={defaultId}
             type="checkbox"
@@ -419,12 +419,12 @@ function AddressForm({
             className={`h-4 w-4 accent-[var(--color-primary)] ${FOCUS_RING}`}
           />
           기본 배송지로 지정
-          {isFirst && <span className="text-xs font-normal text-text-3">(첫 배송지는 자동으로 기본이 돼요)</span>}
+          {isFirst && <span className="text-label font-normal text-text-3">(첫 배송지는 자동으로 기본이 돼요)</span>}
         </label>
       </div>
 
       {error && (
-        <p role="alert" className="mt-3 text-xs font-semibold text-accent">
+        <p role="alert" className="mt-3 text-label font-semibold text-accent">
           {error}
         </p>
       )}

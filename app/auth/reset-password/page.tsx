@@ -57,8 +57,8 @@ function ResetPasswordForm() {
   if (!token) {
     return (
       <div className="mx-auto max-w-sm px-4 py-16 text-center">
-        <h1 className="mb-4 font-display text-xl font-extrabold text-text-1">비밀번호 재설정</h1>
-        <p role="alert" className="text-sm text-text-2">
+        <h1 className="mb-4 font-display text-title font-extrabold text-text-1">비밀번호 재설정</h1>
+        <p role="alert" className="text-body text-text-2">
           재설정 정보가 없는 주소예요. 메일의 버튼을 다시 눌러 주세요.
         </p>
         <Link
@@ -74,15 +74,15 @@ function ResetPasswordForm() {
   if (isDone) {
     return (
       <div className="mx-auto max-w-sm px-4 py-16 text-center">
-        <h1 className="mb-4 font-display text-xl font-extrabold text-text-1">
+        <h1 className="mb-4 font-display text-title font-extrabold text-text-1">
           비밀번호가 변경됐어요
         </h1>
         {/* 서버가 재설정 시점에 기존 리프레시 토큰을 전부 폐기한다 — 다른 기기에서 로그인돼
             있었다면 그쪽도 끊긴다는 걸 미리 알려야 "왜 로그아웃됐지?"가 안 생긴다. */}
-        <p aria-live="polite" className="text-sm leading-relaxed text-text-2">
+        <p aria-live="polite" className="text-body leading-relaxed text-text-2">
           새 비밀번호로 로그인해 주세요.
           <br />
-          <span className="text-xs text-text-3">
+          <span className="text-label text-text-3">
             보안을 위해 다른 기기의 로그인은 모두 해제됐어요.
           </span>
         </p>
@@ -99,10 +99,10 @@ function ResetPasswordForm() {
 
   return (
     <div className="mx-auto max-w-sm px-4 py-16">
-      <h1 className="mb-2 text-center font-display text-xl font-extrabold text-text-1">
+      <h1 className="mb-2 text-center font-display text-title font-extrabold text-text-1">
         새 비밀번호 설정
       </h1>
-      <p className="mb-6 text-center text-xs text-text-3">
+      <p className="mb-6 text-center text-label text-text-3">
         {MIN_LENGTH}자 이상 {MAX_LENGTH}자 이하로 입력해 주세요.
       </p>
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
@@ -137,17 +137,17 @@ function ResetPasswordForm() {
           className={INPUT_CLASS}
         />
         {tooShort && (
-          <p aria-live="polite" className="text-xs text-text-3">
+          <p aria-live="polite" className="text-label text-text-3">
             {MIN_LENGTH}자 이상 입력해 주세요.
           </p>
         )}
         {mismatch && (
-          <p aria-live="polite" className="text-xs text-accent">
+          <p aria-live="polite" className="text-label text-accent">
             비밀번호가 서로 달라요.
           </p>
         )}
         {error && (
-          <p role="alert" aria-live="polite" className="text-xs text-accent">
+          <p role="alert" aria-live="polite" className="text-label text-accent">
             {error}
           </p>
         )}
@@ -174,7 +174,7 @@ export default function ResetPasswordPage() {
   return (
     <Suspense
       fallback={
-        <div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">불러오는 중...</div>
+        <div className="mx-auto max-w-sm px-4 py-24 text-center text-body text-text-3">불러오는 중...</div>
       }
     >
       <ResetPasswordForm />

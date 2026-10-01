@@ -198,8 +198,8 @@ export default function InstallPrompt() {
           {/* eslint-disable-next-line @next/next/no-img-element, no-restricted-syntax -- 정적 아이콘, 최적화 대상이 아니다. radius는 홈 화면 앱 아이콘 모양을 따른다 */}
           <img src="/icons/icon-192.png" alt="" width={40} height={40} className="flex-shrink-0 rounded-[9px]" />
           <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-extrabold text-text-1">홈 화면에 추가하기</p>
-            <p className="mt-0.5 text-[11.5px] leading-relaxed text-text-3">
+            <p className="text-body-s font-extrabold text-text-1">홈 화면에 추가하기</p>
+            <p className="mt-0.5 text-label leading-relaxed text-text-3">
               {iosHint ? "공유 버튼 → «홈 화면에 추가»를 누르면 앱처럼 열려요" : "앱처럼 전체 화면으로 빠르게 열려요"}
             </p>
           </div>
@@ -222,7 +222,7 @@ export default function InstallPrompt() {
           <button
             type="button"
             onClick={snoozeToday}
-            className={`h-9 flex-1 rounded-control border border-border-2 text-[12.5px] font-bold text-text-2 ${FOCUS_RING}`}
+            className={`h-9 flex-1 rounded-control border border-border-2 text-body-s font-bold text-text-2 ${FOCUS_RING}`}
           >
             오늘 하루 보지 않기
           </button>
@@ -230,7 +230,7 @@ export default function InstallPrompt() {
             <button
               type="button"
               onClick={install}
-              className={`h-9 flex-1 rounded-control bg-primary text-[12.5px] font-extrabold text-white ${FOCUS_RING}`}
+              className={`h-9 flex-1 rounded-control bg-primary text-body-s font-extrabold text-white ${FOCUS_RING}`}
             >
               추가
             </button>

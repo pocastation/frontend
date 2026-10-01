@@ -46,6 +46,7 @@ export default function MobileShell({ children }: { children: ReactNode }) {
         <div className="flex h-12 items-center justify-between pl-[14px] pr-1">
           {/* 글자 높이는 19px이지만 탭 영역은 44px을 채운다(모바일 터치 타깃 최소치). */}
           <Link href="/" aria-label="포카스테이션 홈" className={`flex h-11 items-center rounded-control ${FOCUS_RING}`}>
+            {/* eslint-disable-next-line no-restricted-syntax -- 로고는 글자 크기 단계 밖이다(#769) */}
             <Wordmark className="text-[19px] leading-none" />
           </Link>
           <div className="flex items-center">
@@ -65,7 +66,7 @@ export default function MobileShell({ children }: { children: ReactNode }) {
             >
               <BellIcon />
               {member && unreadCount > 0 && (
-                <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 font-display text-[10px] font-extrabold leading-none tabular-nums text-white">
+                <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 font-display text-caption font-extrabold leading-none tabular-nums text-white">
                   {unreadCount > 99 ? "99+" : unreadCount}
                 </span>
               )}

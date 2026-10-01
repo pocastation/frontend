@@ -161,7 +161,7 @@ export default function MobileDetailGallery({
           {/* 🔴 분모가 `images.length`였다(#519) — 도트는 영상까지 세는데 숫자만 빼고 세서
               사진 3 + 영상 1이면 도트 4개 옆에 「1 / 3」이 떴다. 둘이 같은 수를 말하게 한다. */}
           {!onVideo && (
-            <span className="absolute bottom-3 right-3 z-[3] rounded-control bg-black/50 px-2 py-0.5 font-display text-[11px] text-white backdrop-blur-[2px]">
+            <span className="absolute bottom-3 right-3 z-[3] rounded-control bg-black/50 px-2 py-0.5 font-display text-caption text-white backdrop-blur-[2px]">
               {index + 1} / {slides.length}
             </span>
           )}

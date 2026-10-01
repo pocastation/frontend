@@ -28,7 +28,7 @@ export default function GuidePage() {
     <div className="mx-auto max-w-[880px] px-5 pt-10 pb-16 sm:pt-14">
       <header>
         <span aria-hidden="true" className="block h-[3px] w-7 bg-primary" />
-        <h1 className="mt-5 font-display text-[26px] font-extrabold leading-[1.2] tracking-[-0.04em] text-text-1 sm:text-[32px]">
+        <h1 className="mt-5 font-display text-title-l font-extrabold text-text-1 sm:text-display">
           이용 가이드
         </h1>
       </header>
@@ -37,7 +37,7 @@ export default function GuidePage() {
           세로로 쌓으면 문서 목록이 화면 밖으로 밀린다. */}
       <div className="mt-8 grid gap-8 sm:grid-cols-[1fr_260px] sm:gap-10">
         <section>
-          <h2 className="font-display text-[12px] font-extrabold tracking-[0.06em] text-text-3">
+          <h2 className="font-display text-label font-extrabold tracking-[0.06em] text-text-3">
             제안판매 거래 흐름
           </h2>
           <ol className="mt-3">
@@ -49,7 +49,7 @@ export default function GuidePage() {
                   {/* 번호와 세로선이 한 축이 되어 「순서」를 만든다 — 점만 찍으면 목록이지 흐름이 아니다. */}
                   <span aria-hidden="true" className="flex shrink-0 flex-col items-center self-stretch">
                     <span
-                      className={`flex h-5 w-5 items-center justify-center rounded-full font-display text-[10.5px] font-extrabold text-white ${
+                      className={`flex h-5 w-5 items-center justify-center rounded-full font-display text-caption font-extrabold text-white ${
                         isBuyer ? "bg-primary" : "bg-text-1"
                       }`}
                     >
@@ -60,15 +60,15 @@ export default function GuidePage() {
                   <span className={`min-w-0 flex-1 ${last ? "" : "pb-3"}`}>
                     <span className="flex flex-wrap items-baseline gap-1.5">
                       <span
-                        className={`text-[10.5px] font-extrabold ${isBuyer ? "text-primary" : "text-text-3"}`}
+                        className={`text-caption font-extrabold ${isBuyer ? "text-primary" : "text-text-3"}`}
                       >
                         {step.who}
                       </span>
-                      <span className="break-keep text-[15.5px] font-bold tracking-[-0.025em] text-text-1">
+                      <span className="break-keep text-body-l font-bold text-text-1">
                         {step.act}
                       </span>
                     </span>
-                    <span className="mt-0.5 block break-keep text-[13px] leading-relaxed text-text-3">
+                    <span className="mt-0.5 block break-keep text-body-s leading-relaxed text-text-3">
                       {step.note}
                     </span>
                   </span>
@@ -79,7 +79,7 @@ export default function GuidePage() {
         </section>
 
         <section className="self-start rounded-control bg-surface-2 px-3.5 pb-3.5 pt-3">
-          <h2 className="text-[12px] font-extrabold tracking-[0.04em] text-text-3">기한 한눈에</h2>
+          <h2 className="text-label font-extrabold tracking-[0.04em] text-text-3">기한 한눈에</h2>
           <dl className="mt-1.5">
             {GUIDE_DEADLINES.map(([k, v], i) => (
               <div
@@ -88,8 +88,8 @@ export default function GuidePage() {
                   i ? "border-t border-border-2" : ""
                 }`}
               >
-                <dt className="shrink-0 whitespace-nowrap text-[13.5px] text-text-2">{k}</dt>
-                <dd className="text-right font-display text-[14px] font-extrabold tracking-[-0.02em] tabular-nums text-text-1">
+                <dt className="shrink-0 whitespace-nowrap text-body text-text-2">{k}</dt>
+                <dd className="text-right font-display text-body font-extrabold tabular-nums text-text-1">
                   {v}
                 </dd>
               </div>
@@ -100,7 +100,7 @@ export default function GuidePage() {
 
       {GUIDE_GROUPS.map((group) => (
         <section key={group.title} className="mt-9">
-          <h2 className="font-display text-[12px] font-extrabold tracking-[0.06em] text-text-3">
+          <h2 className="font-display text-label font-extrabold tracking-[0.06em] text-text-3">
             {group.title}
           </h2>
           <ul className="mt-1.5 border-t border-border">
@@ -114,12 +114,12 @@ export default function GuidePage() {
                     className={`flex min-h-[60px] items-center justify-between gap-2.5 py-3 ${FOCUS_RING}`}
                   >
                     <span className="min-w-0 flex-1">
-                      <span className="block text-[16px] font-bold tracking-[-0.025em] text-text-1">
+                      <span className="block text-body-l font-bold text-text-1">
                         {doc.title}
                       </span>
-                      <span className="mt-0.5 block text-[12.5px] text-text-3">{doc.desc}</span>
+                      <span className="mt-0.5 block text-body-s text-text-3">{doc.desc}</span>
                     </span>
-                    <span aria-hidden="true" className="shrink-0 text-[16px] text-text-3">
+                    <span aria-hidden="true" className="shrink-0 text-body-l text-text-3">
                       ›
                     </span>
                   </Link>
@@ -132,17 +132,17 @@ export default function GuidePage() {
 
       {/* 문서로 해결되지 않는 경우의 출구 — 도움말 센터에는 반드시 있어야 한다. */}
       <section className="mt-10 border-t border-border pt-6">
-        <p className="text-[13px] text-text-3">이 문서로 해결되지 않았다면</p>
+        <p className="text-body-s text-text-3">이 문서로 해결되지 않았다면</p>
         <div className="mt-2.5 flex flex-wrap gap-2">
           <Link
             href="/faq"
-            className={`rounded-control border border-border-2 bg-surface px-3.5 py-2 text-[13px] font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+            className={`rounded-control border border-border-2 bg-surface px-3.5 py-2 text-body-s font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
           >
             자주 묻는 질문
           </Link>
           <Link
             href="/inquiries/new"
-            className={`rounded-control bg-text-1 px-3.5 py-2 text-[13px] font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+            className={`rounded-control bg-text-1 px-3.5 py-2 text-body-s font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
           >
             1:1 문의
           </Link>

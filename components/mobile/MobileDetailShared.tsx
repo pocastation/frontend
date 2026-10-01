@@ -45,13 +45,13 @@ export function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: 
       href={`/sellers/${sellerId}`}
       className={`mt-3.5 flex items-center gap-2.5 rounded-card border border-border p-3 ${FOCUS_RING}`}
     >
-      <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary-soft font-display text-sm font-extrabold text-primary">
+      <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary-soft font-display text-body font-extrabold text-primary">
         {nickname.slice(0, 1).toUpperCase()}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-[13.5px] font-extrabold text-text-1">{nickname}</span>
+        <span className="block truncate text-body font-extrabold text-text-1">{nickname}</span>
         {levelLabel && (
-          <TrustLevelBadge level={level} className="mt-0.5 block w-fit text-[11.5px] text-text-3">
+          <TrustLevelBadge level={level} className="mt-0.5 block w-fit text-label text-text-3">
             {levelLabel}
           </TrustLevelBadge>
         )}
@@ -89,7 +89,7 @@ export function MobileDetailTabs({
                 onClick={() => setPickedTab(name)}
                 role="tab"
                 aria-selected={on}
-                className={`-mb-px whitespace-nowrap border-b-2 px-3.5 py-3 text-sm transition-colors ${FOCUS_RING} ${
+                className={`-mb-px whitespace-nowrap border-b-2 px-3.5 py-3 text-body transition-colors ${FOCUS_RING} ${
                   on ? "border-primary font-extrabold text-text-1" : "border-transparent font-medium text-text-2"
                 }`}
               >
@@ -108,37 +108,37 @@ export function MobileDetailTabs({
             {/* 상단 선은 뺐다(#482) — 탭 밑줄 바로 아래라 겹선으로 읽혔다. 행 사이·하단만 긋는다. */}
             <dl className="divide-y divide-border border-b border-border">
               <div className="py-2.5">
-                <dt className="text-[12.5px] font-extrabold text-text-1">배송비</dt>
-                <dd className="mt-1 text-[13px] leading-relaxed text-text-2">
+                <dt className="text-body-s font-extrabold text-text-1">배송비</dt>
+                <dd className="mt-1 text-body-s leading-relaxed text-text-2">
                   판매자가 부담해요. 구매자가 따로 낼 배송비는 없어요.
                 </dd>
               </div>
               <div className="py-2.5">
-                <dt className="text-[12.5px] font-extrabold text-text-1">받는 주소</dt>
-                <dd className="mt-1 text-[13px] leading-relaxed text-text-2">
+                <dt className="text-body-s font-extrabold text-text-1">받는 주소</dt>
+                <dd className="mt-1 text-body-s leading-relaxed text-text-2">
                   가격 제안 전에 등록해요. 거래가 성사되면 등록한 주소로 판매자가 보내드려요.
                 </dd>
               </div>
               <div className="py-2.5">
-                <dt className="text-[12.5px] font-extrabold text-text-1">환불·분쟁</dt>
-                <dd className="mt-1 text-[13px] leading-relaxed text-text-2">
+                <dt className="text-body-s font-extrabold text-text-1">환불·분쟁</dt>
+                <dd className="mt-1 text-body-s leading-relaxed text-text-2">
                   기준과 절차는 운영정책을 따라요.
                 </dd>
               </div>
             </dl>
             <div className="mt-5 flex gap-3">
-              <Link href="/policy" className={`text-[12.5px] font-bold text-text-2 underline ${FOCUS_RING}`}>
+              <Link href="/policy" className={`text-body-s font-bold text-text-2 underline ${FOCUS_RING}`}>
                 운영정책 보기
               </Link>
-              <Link href="/guide" className={`text-[12.5px] font-bold text-text-2 underline ${FOCUS_RING}`}>
+              <Link href="/guide" className={`text-body-s font-bold text-text-2 underline ${FOCUS_RING}`}>
                 이용 방법
               </Link>
             </div>
-            <p className="mt-5 text-[11px] leading-relaxed text-text-3">{INTERMEDIARY_NOTICE}</p>
+            <p className="mt-5 text-caption leading-relaxed text-text-3">{INTERMEDIARY_NOTICE}</p>
             {/* 문의는 신고와 성격이 다르다 — 사진 위 아이콘으로 올리지 않고 여기 조용히 둔다. */}
             <Link
               href="/inquiries/new"
-              className={`mt-5 inline-block text-[12.5px] font-bold text-text-3 underline ${FOCUS_RING}`}
+              className={`mt-5 inline-block text-body-s font-bold text-text-3 underline ${FOCUS_RING}`}
             >
               이 상품 문의하기
             </Link>
@@ -146,13 +146,13 @@ export function MobileDetailTabs({
         ) : (
           <div className="pb-6 pt-5">
             {description && (
-              <p className="whitespace-pre-wrap text-sm leading-[1.75] text-text-2">{description}</p>
+              <p className="whitespace-pre-wrap text-body text-text-2">{description}</p>
             )}
             {/* 🔴 라벨 폭을 고정해 값이 모두 같은 자리에서 시작한다(#406). 양끝 정렬이던 시절엔
                 값이 오른쪽 끝에 붙어 라벨과 값 사이가 줄마다 다르게 벌어졌고, 「S급 (미개봉/신품급)」
                 처럼 긴 값은 두 줄로 접히며 정렬이 무너졌다. 줄마다 긋던 구분선은 행간이 대신한다. */}
             <dl
-              className={`${description ? "mt-5" : ""} grid grid-cols-[88px_1fr] gap-x-3 gap-y-3.5 text-[13px]`}
+              className={`${description ? "mt-5" : ""} grid grid-cols-[88px_1fr] gap-x-3 gap-y-3.5 text-body-s`}
             >
               {specRows.map((row) => (
                 <Fragment key={row.label}>

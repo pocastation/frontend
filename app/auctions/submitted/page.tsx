@@ -42,7 +42,7 @@ const STEPS: { no: string; title: string; note: string; state: "done" | "current
 
 export default function AuctionSubmittedPage() {
   return (
-    <Suspense fallback={<div className="mx-auto max-w-sm px-4 py-24 text-center text-sm text-text-3">불러오는 중...</div>}>
+    <Suspense fallback={<div className="mx-auto max-w-sm px-4 py-24 text-center text-body text-text-3">불러오는 중...</div>}>
       <AuctionSubmittedContent />
     </Suspense>
   );
@@ -63,11 +63,11 @@ function AuctionSubmittedContent() {
       {/* 레이아웃이 이미 <main>으로 감싼다 — 여기서 또 쓰면 main이 중첩된다(#515에서 발견). */}
       <div className="mx-auto w-full max-w-[560px] px-[14px] py-9 sm:px-5 sm:py-20">
         <span aria-hidden="true" className="block h-[3px] w-7 bg-primary" />
-        <p className="mt-4 text-[11.5px] font-bold tracking-[0.08em] text-text-3">판매 등록</p>
-        <h1 className="mt-2 font-display text-[24px] font-extrabold leading-[1.25] tracking-[-0.03em] text-text-1 sm:text-[26px]">
+        <p className="mt-4 text-label font-bold tracking-[0.08em] text-text-3">판매 등록</p>
+        <h1 className="mt-2 font-display text-title-l font-extrabold text-text-1 sm:text-title-l">
           등록 신청이 접수됐어요
         </h1>
-        <p className="mt-3 text-[13.5px] leading-relaxed text-text-2">
+        <p className="mt-3 text-body leading-relaxed text-text-2">
           관리자가 소유 인증을 확인한 뒤 게시돼요. 보통{" "}
           <strong className="font-bold text-text-1">1영업일 이내</strong>에 끝나요.
         </p>
@@ -81,19 +81,19 @@ function AuctionSubmittedContent() {
             >
               <span
                 aria-hidden="true"
-                className="font-display text-[10.5px] font-bold tabular-nums text-text-3"
+                className="font-display text-caption font-bold tabular-nums text-text-3"
               >
                 {step.no}
               </span>
               <span
-                className={`flex-1 text-[13px] sm:mt-0.5 sm:block ${
+                className={`flex-1 text-body-s sm:mt-0.5 sm:block ${
                   step.state === "todo" ? "font-bold text-text-2" : "font-extrabold text-text-1"
                 }`}
               >
                 {step.title}
               </span>
               <span
-                className={`text-[11.5px] sm:mt-px sm:block ${
+                className={`text-label sm:mt-px sm:block ${
                   step.state === "current" ? "font-bold text-warn" : "text-text-3"
                 }`}
               >
@@ -109,8 +109,8 @@ function AuctionSubmittedContent() {
         */}
         {auctionId && (
           <div className="mt-6 flex items-baseline justify-between border-y border-border py-3">
-            <span className="text-[11.5px] font-bold tracking-[0.04em] text-text-3">접수번호</span>
-            <span className="font-display text-[15px] font-extrabold tabular-nums text-text-1">#{auctionId}</span>
+            <span className="text-label font-bold tracking-[0.04em] text-text-3">접수번호</span>
+            <span className="font-display text-body-l font-extrabold tabular-nums text-text-1">#{auctionId}</span>
           </div>
         )}
 
@@ -131,7 +131,7 @@ function AuctionSubmittedContent() {
 
         {/* 예전에는 이 자리가 「10초 후 홈으로 이동합니다」 카운트다운이었다. 다음에 무슨 일이
             일어나는지를 말해 주는 자리로 바꾼다 — 사용자가 여기서 기다릴 필요가 없다는 뜻이다. */}
-        <p className="mt-4 text-xs text-text-3">검수가 끝나면 알림으로 알려드려요.</p>
+        <p className="mt-4 text-label text-text-3">검수가 끝나면 알림으로 알려드려요.</p>
       </div>
     </>
   );

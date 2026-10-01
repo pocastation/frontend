@@ -51,12 +51,12 @@ export default async function AuctionsPage({
       <div className="mx-auto hidden max-w-[1160px] px-4 py-8 sm:block sm:py-10">
       <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-1">제안판매</h1>
-          <p className="mt-1.5 text-sm text-text-3">판매 중인 K-pop 포토카드 상품을 확인하고 가격을 제안해보세요.</p>
+          <h1 className="font-display text-title-l font-extrabold text-text-1">제안판매</h1>
+          <p className="mt-1.5 text-body text-text-3">판매 중인 K-pop 포토카드 상품을 확인하고 가격을 제안해보세요.</p>
         </div>
         <Link
           href="/auctions/ended"
-          className={`shrink-0 text-sm font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}
+          className={`shrink-0 text-body font-bold text-text-3 hover:text-primary ${FOCUS_RING}`}
         >
           거래 완료 보기 →
         </Link>

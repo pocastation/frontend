@@ -159,19 +159,19 @@ export default function DeliveryAddressModal({
         aria-modal="true"
         aria-label="배송지 입력"
       >
-        <p className="text-sm font-bold text-text-1">배송지를 입력해 주세요</p>
-        <p className="mt-1 text-xs text-text-3">
+        <p className="text-body font-bold text-text-1">배송지를 입력해 주세요</p>
+        <p className="mt-1 text-label text-text-3">
           <b className="font-bold text-text-2">{auctionTitle}</b> 상품을 받을 주소예요. 판매자가 이 정보로 발송해요.
         </p>
 
         {addresses === null ? (
-          <p className="mt-4 text-xs text-text-3">불러오는 중...</p>
+          <p className="mt-4 text-label text-text-3">불러오는 중...</p>
         ) : (
           <div className="mt-4 flex flex-col gap-2">
             {addresses.map((a) => (
               <label
                 key={a.id}
-                className={`flex cursor-pointer items-start gap-2.5 rounded-card border p-3 text-xs transition-colors ${
+                className={`flex cursor-pointer items-start gap-2.5 rounded-card border p-3 text-label transition-colors ${
                   selectedId === a.id ? "border-primary" : "border-border-2 hover:border-text-3"
                 }`}
               >
@@ -202,7 +202,7 @@ export default function DeliveryAddressModal({
             ))}
 
             <label
-              className={`flex cursor-pointer items-center gap-2.5 rounded-card border border-dashed p-3 text-xs font-bold transition-colors ${
+              className={`flex cursor-pointer items-center gap-2.5 rounded-card border border-dashed p-3 text-label font-bold transition-colors ${
                 selectedId === "new" ? "border-primary text-text-1" : "border-border-2 text-text-2 hover:border-text-3"
               }`}
             >
@@ -237,7 +237,7 @@ export default function DeliveryAddressModal({
                   <button
                     type="button"
                     onClick={openPostcode}
-                    className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 text-xs font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+                    className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 text-label font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
                   >
                     우편번호 찾기
                   </button>
@@ -252,7 +252,7 @@ export default function DeliveryAddressModal({
                   value={address2}
                   onChange={(e) => setAddress2(e.target.value)}
                 />
-                <label className="flex items-center gap-2 text-[12.5px] text-text-2">
+                <label className="flex items-center gap-2 text-body-s text-text-2">
                   <input
                     type="checkbox"
                     checked={saveToBook}
@@ -267,7 +267,7 @@ export default function DeliveryAddressModal({
         )}
 
         {error && (
-          <p role="alert" className="mt-3 text-xs font-semibold text-accent">
+          <p role="alert" className="mt-3 text-label font-semibold text-accent">
             {error}
           </p>
         )}

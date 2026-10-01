@@ -59,7 +59,7 @@ export default function ProfileTab() {
   return (
     <div className="max-w-xl">
       <section className="rounded-card border border-border bg-surface p-5">
-        <h2 className="font-display text-sm font-extrabold text-text-1">닉네임</h2>
+        <h2 className="font-display text-body font-extrabold text-text-1">닉네임</h2>
         <form onSubmit={handleSubmit} className="mt-3 flex items-start gap-2">
           <div className="min-w-0 flex-1">
             <label htmlFor={nicknameId} className="sr-only">
@@ -79,12 +79,12 @@ export default function ProfileTab() {
               className={INPUT_CLASS}
             />
             {error && (
-              <p role="alert" className="mt-2 text-xs font-semibold text-accent">
+              <p role="alert" className="mt-2 text-label font-semibold text-accent">
                 {error}
               </p>
             )}
             {saved && (
-              <p role="status" className="mt-2 text-xs font-semibold text-ok">
+              <p role="status" className="mt-2 text-label font-semibold text-ok">
                 닉네임을 변경했어요.
               </p>
             )}
@@ -92,11 +92,11 @@ export default function ProfileTab() {
                 30일로 확대(2026-08-31, BE #405). 거래 상대를 닉네임으로 기억하는 서비스라
                 잦은 변경은 후기·신고·재거래의 연결을 끊는다. */}
             {locked ? (
-              <p className="mt-2 text-xs text-text-3">
+              <p className="mt-2 text-label text-text-3">
                 닉네임은 한 달(30일)에 한 번만 바꿀 수 있어요. 다음 변경 가능일: {changeableDate}
               </p>
             ) : (
-              <p className="mt-2 text-xs text-text-3">닉네임은 변경 후 30일간 다시 바꿀 수 없어요.</p>
+              <p className="mt-2 text-label text-text-3">닉네임은 변경 후 30일간 다시 바꿀 수 없어요.</p>
             )}
           </div>
           <button
@@ -110,17 +110,17 @@ export default function ProfileTab() {
       </section>
 
       <section className="mt-4 rounded-card border border-border bg-surface p-5">
-        <h2 className="font-display text-sm font-extrabold text-text-1">계정 정보</h2>
+        <h2 className="font-display text-body font-extrabold text-text-1">계정 정보</h2>
         <dl className="mt-3 flex flex-col divide-y divide-border">
           <div className="flex items-center justify-between gap-4 py-2.5">
-            <dt className="text-sm font-bold text-text-3">이메일</dt>
-            <dd className="min-w-0 truncate text-sm font-semibold text-text-1">
+            <dt className="text-body font-bold text-text-3">이메일</dt>
+            <dd className="min-w-0 truncate text-body font-semibold text-text-1">
               {member.email ?? <span className="font-normal text-text-3">소셜 로그인 계정이라 이메일이 없어요</span>}
             </dd>
           </div>
           <div className="flex items-center justify-between gap-4 py-2.5">
-            <dt className="text-sm font-bold text-text-3">가입 수단</dt>
-            <dd className="text-sm font-semibold text-text-1">
+            <dt className="text-body font-bold text-text-3">가입 수단</dt>
+            <dd className="text-body font-semibold text-text-1">
               {provider ? (
                 <span className={LABEL_NEUTRAL}>
                   {provider}
@@ -131,11 +131,11 @@ export default function ProfileTab() {
             </dd>
           </div>
           <div className="flex items-center justify-between gap-4 py-2.5">
-            <dt className="text-sm font-bold text-text-3">가입일</dt>
-            <dd className="text-sm font-semibold text-text-1">{joinedAt ?? "-"}</dd>
+            <dt className="text-body font-bold text-text-3">가입일</dt>
+            <dd className="text-body font-semibold text-text-1">{joinedAt ?? "-"}</dd>
           </div>
         </dl>
-        <p className="mt-3 text-xs text-text-3">
+        <p className="mt-3 text-label text-text-3">
           이메일·가입 수단은 변경할 수 없어요. 비밀번호 변경은 준비 중이고, 회원 탈퇴는 계정 설정에서 할 수 있어요.
         </p>
       </section>

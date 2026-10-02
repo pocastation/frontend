@@ -41,7 +41,7 @@ export default async function PopularSellersPage() {
     <>
       <MobilePageHead title="인기 판매자" />
 
-      <div className="mx-auto max-w-[1160px] px-[14px] py-5 sm:px-4 sm:py-10">
+      <div className="mx-auto max-w-[1160px] px-gutter py-5 sm:px-4 sm:py-10">
         <h1 className="hidden font-display text-title font-extrabold text-text-1 sm:block">인기 판매자</h1>
         <p className="text-body-s text-text-3 sm:mt-1 sm:text-body">
           거래 실적과 후기로 신뢰를 쌓은 판매자예요. 거래 5건 이상인 판매자만 보여드려요.

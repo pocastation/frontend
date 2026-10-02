@@ -275,7 +275,7 @@ export default function Hero({ featured }: { featured: AuctionResponse[] }) {
                     />
                   ))}
                 </div>
-                <div className="-mr-[7px] flex items-center gap-0.5">
+                <div className="-mr-2 flex items-center gap-0.5">
                   <ArrowButton label="이전 배너" direction="prev" onClick={() => goTo(index - 1)} />
                   <ArrowButton label="다음 배너" direction="next" onClick={() => goTo(index + 1)} />
                 </div>

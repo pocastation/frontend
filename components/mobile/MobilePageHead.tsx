@@ -50,7 +50,7 @@ export default function MobilePageHead({
 
   return (
     <header className="sticky top-0 z-[300] border-b border-border bg-white sm:hidden">
-      <div className={`flex min-h-12 items-center gap-1 pr-[14px] ${variant === "back" ? "pl-1" : "pl-[14px]"}`}>
+      <div className={`flex min-h-12 items-center gap-1 pr-gutter ${variant === "back" ? "pl-1" : "pl-gutter"}`}>
         {variant === "back" && (
           <button
             type="button"

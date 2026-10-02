@@ -87,13 +87,13 @@ export default async function EventFeedPage({
         </div>
 
         {event.status === "CANCELLED" && (
-          <p className="mx-[14px] mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s text-text-1 sm:mx-0">
+          <p className="mx-gutter mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s text-text-1 sm:mx-0">
             <b className="font-bold">휴방·취소된 회차예요.</b> 새 교환글은 올릴 수 없어요.
           </p>
         )}
 
         {feed && feed.artists.length > 0 && (
-          <nav aria-label="스타 필터" className="flex gap-1.5 overflow-x-auto border-b border-border px-[14px] py-2.5 sm:px-0">
+          <nav aria-label="스타 필터" className="flex gap-1.5 overflow-x-auto border-b border-border px-gutter py-2.5 sm:px-0">
             <FilterChip href={`/events/${id}`} on={selected === null}>
               전체 {feed.totalElements}
             </FilterChip>
@@ -109,7 +109,7 @@ export default async function EventFeedPage({
           </nav>
         )}
 
-        <div className="px-[14px] sm:px-0">
+        <div className="px-gutter sm:px-0">
           {feed === null ? (
             <p className="py-12 text-center text-body-s text-text-3">
               교환글을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.
@@ -159,7 +159,7 @@ function FilterChip({ href, on, children }: { href: string; on: boolean; childre
       href={href}
       aria-current={on ? "true" : undefined}
       /* 선택된 칩(보라)에는 눌림 배경을 주지 않는다 — 선택 결과와 눌림이 섞인다(#720). */
-      className={`shrink-0 rounded-control border px-2.5 py-[5px] text-label font-bold ${FOCUS_RING} ${
+      className={`shrink-0 rounded-control border px-2.5 py-1.5 text-label font-bold ${FOCUS_RING} ${
         on ? "border-primary bg-primary text-white" : `border-border-2 text-text-2 ${PRESS_CHIP}`
       }`}
     >

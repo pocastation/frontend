@@ -12,7 +12,7 @@ import type { AuctionResponse, AuctionSaleType } from "@/lib/types";
 const GRID_CLASS =
   // 모바일 간격은 홈·목록·검색과 같은 카드 리듬(가로 8 / 세로 18)이다(#513).
   // 데스크탑은 지금까지의 auto-fill 격자를 그대로 둔다.
-  "grid grid-cols-2 gap-x-2 gap-y-[18px] sm:gap-3.5 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
+  "grid grid-cols-2 gap-x-2 gap-y-5 sm:gap-3.5 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
 
 // 홈 화면 임베드(AuctionExplorer)와 달리 /auctions 전용 페이지 — 검색은 헤더 전역검색과
 // 별개의 로컬 입력(ArtistExplorer와 같은 이유: 헤더검색은 홈으로 리다이렉트하므로 이 페이지

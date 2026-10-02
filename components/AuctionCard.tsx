@@ -125,12 +125,12 @@ export default function AuctionCard({
 
       {compact ? (
         // 킷 리듬 — 스타명(11.5/800) → 상품명(12.5, 2줄) → 가격(현재/즉시 라벨 + 15.5/800) → 메타(11)
-        <div className="pt-[7px]">
+        <div className="pt-2">
           {auction.artistName && (
             <p className="truncate text-label font-extrabold text-text-1">{auction.artistName}</p>
           )}
           <p className="mt-0.5 line-clamp-2 text-body-s text-text-2">{auction.title}</p>
-          <p className="mt-[5px] flex items-baseline gap-1">
+          <p className="mt-1 flex items-baseline gap-1">
             <span className={`text-caption font-extrabold ${isInstantSale ? "text-text-3" : "text-primary"}`}>
               {isInstantSale ? "즉시" : "현재"}
             </span>
@@ -138,7 +138,7 @@ export default function AuctionCard({
               {formatKRW(displayPrice)}
             </span>
           </p>
-          <p className="mt-[3px] text-caption tabular-nums text-text-3">
+          <p className="mt-1 text-caption tabular-nums text-text-3">
             {isInstantSale
               ? "즉시구매"
               : auction.status === "ENDED_NO_BIDS"

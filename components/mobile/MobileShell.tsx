@@ -43,7 +43,7 @@ export default function MobileShell({ children }: { children: ReactNode }) {
   return (
     <>
       <header className="sticky top-0 z-[300] border-b border-border bg-white sm:hidden">
-        <div className="flex h-12 items-center justify-between pl-[14px] pr-1">
+        <div className="flex h-12 items-center justify-between pl-gutter pr-1">
           {/* 글자 높이는 19px이지만 탭 영역은 44px을 채운다(모바일 터치 타깃 최소치). */}
           <Link href="/" aria-label="포카스테이션 홈" className={`flex h-11 items-center rounded-control ${FOCUS_RING}`}>
             {/* eslint-disable-next-line no-restricted-syntax -- 로고는 글자 크기 단계 밖이다(#769) */}

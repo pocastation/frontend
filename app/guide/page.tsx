@@ -25,7 +25,7 @@ export const metadata: Metadata = {
  */
 export default function GuidePage() {
   return (
-    <div className="mx-auto max-w-[880px] px-5 pt-10 pb-16 sm:pt-14">
+    <div className="mx-auto max-w-[880px] px-gutter pt-page sm:px-5 sm:pt-14 sm:pb-16">
       <header>
         <span aria-hidden="true" className="block h-[3px] w-7 bg-primary" />
         <h1 className="mt-5 font-display text-title-l font-extrabold text-text-1 sm:text-display">
@@ -35,7 +35,7 @@ export default function GuidePage() {
 
       {/* 데스크탑에서는 흐름과 기한을 나란히 둔다 — 둘 다 「읽기」가 아니라 「훑기」용이라
           세로로 쌓으면 문서 목록이 화면 밖으로 밀린다. */}
-      <div className="mt-8 grid gap-8 sm:grid-cols-[1fr_260px] sm:gap-10">
+      <div className="mt-group grid gap-8 sm:mt-8 sm:grid-cols-[1fr_260px] sm:gap-10">
         <section>
           <h2 className="font-display text-label font-extrabold tracking-[0.06em] text-text-3">
             제안판매 거래 흐름
@@ -99,11 +99,11 @@ export default function GuidePage() {
       </div>
 
       {GUIDE_GROUPS.map((group) => (
-        <section key={group.title} className="mt-9">
+        <section key={group.title} className="mt-section sm:mt-9">
           <h2 className="font-display text-label font-extrabold tracking-[0.06em] text-text-3">
             {group.title}
           </h2>
-          <ul className="mt-1.5 border-t border-border">
+          <ul className="mt-head border-t border-border sm:mt-1.5">
             {group.ids.map((id) => {
               const doc = GUIDE_DOCS.find((d) => d.id === id);
               if (!doc) return null;

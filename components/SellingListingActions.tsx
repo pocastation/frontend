@@ -5,7 +5,7 @@ import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { formatKRW, hasPassed } from "@/lib/format";
 import { MIN_LISTING_PRICE, PRICE_UNIT } from "@/lib/fees";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, THUMB_INDENT } from "@/lib/ui";
 import type { MySellingAuctionResponse } from "@/lib/types";
 
 const OUTLINE = `shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-caption font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-45 disabled:hover:border-border-2 disabled:hover:text-text-2 ${FOCUS_RING}`;
@@ -58,7 +58,7 @@ export default function SellingListingActions({
   }
 
   return (
-    <div className="mt-2.5 pl-[56px]">
+    <div className={`mt-2.5 ${THUMB_INDENT}`}>
       <div className="flex flex-wrap items-center gap-2.5">
         <span className="min-w-0 flex-1 text-label leading-relaxed text-text-3">
           {isInstant ? (

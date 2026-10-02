@@ -28,7 +28,7 @@ import type { AuctionResponse, EventResponse } from "@/lib/types";
 
   대신 간격과 제목이 경계를 나눠 맡는다 — 그냥 지우기만 하면 섹션이 붙어 한 덩어리가 된다.
 */
-const SECTION_GAP = "pt-[38px]";
+const SECTION_GAP = "pt-section";
 
 function SectionHead({ title, href }: { title: string; href: string }) {
   return (
@@ -46,7 +46,7 @@ function SectionHead({ title, href }: { title: string; href: string }) {
 
 // 좌우 14px, 2열, column-gap 8 / row-gap 18 — 카드에 테두리·그림자를 두르지 않는다.
 function Grid({ children }: { children: ReactNode }) {
-  return <div className="mt-3 grid grid-cols-2 gap-x-2 gap-y-[18px]">{children}</div>;
+  return <div className="mt-3 grid grid-cols-2 gap-x-2 gap-y-5">{children}</div>;
 }
 
 function Empty({ message }: { message: string }) {
@@ -77,7 +77,7 @@ export default function MobileHome({
       {/* 히어로 바로 아래 한 줄(#659). 8px 띠로 끊는 기존 리듬을 그대로 쓴다. */}
       <EventStrip events={upcomingEvents} />
 
-      <section className={`px-[14px] ${SECTION_GAP}`}>
+      <section className={`px-gutter ${SECTION_GAP}`}>
         <SectionHead title="제안판매" href="/auctions?sort=ending_soon" />
         {endingSoon.length > 0 ? (
           <Grid>
@@ -96,7 +96,7 @@ export default function MobileHome({
         )}
       </section>
 
-      <section className={`px-[14px] ${SECTION_GAP}`}>
+      <section className={`px-gutter ${SECTION_GAP}`}>
         <SectionHead title="즉시판매" href="/instant-sales" />
         {instantSales.length > 0 ? (
           <Grid>

@@ -48,7 +48,7 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
   const maxPerDay = Math.max(1, ...days.map((day) => byDate.get(ymd(day))?.length ?? 0));
 
   return (
-    <section aria-label="다가오는 행사" className="px-[14px] pt-4 sm:mx-auto sm:max-w-[1160px] sm:px-4 sm:pt-10">
+    <section aria-label="다가오는 행사" className="px-gutter pt-4 sm:mx-auto sm:max-w-[1160px] sm:px-4 sm:pt-10">
       <div className="flex items-baseline justify-between gap-2">
         <h2 className="text-title-s font-extrabold text-text-1 sm:font-display sm:text-title sm:font-extrabold">
           다가오는 행사
@@ -101,7 +101,7 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
                 {day.getDate()}
               </span>
               {/* 행사가 있는 날은 날짜 밑 짧은 선 하나(EventCalendar와 같은 표시, #758). */}
-              <span className="mt-[3px] flex h-1 items-end justify-center" aria-hidden="true">
+              <span className="mt-1 flex h-1 items-end justify-center" aria-hidden="true">
                 {count > 0 && <i className={`h-[2px] w-3 ${on ? "bg-white/85" : "bg-text-3"}`} />}
               </span>
             </button>

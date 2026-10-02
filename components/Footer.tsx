@@ -88,11 +88,11 @@ export default function Footer() {
           </Link>
         </div>
         {FOOTER_COLUMNS.map((column) => (
-          <div key={column.title} className="border-b border-border py-[25px] sm:border-0 sm:py-0">
-            <h4 className="mb-[17px] text-body-s font-extrabold tracking-wide text-text-1 sm:mb-3 sm:text-caption">
+          <div key={column.title} className="border-b border-border py-6 sm:border-0 sm:py-0">
+            <h4 className="mb-4 text-body-s font-extrabold tracking-wide text-text-1 sm:mb-3 sm:text-caption">
               {column.title}
             </h4>
-            <div className="grid grid-cols-2 gap-x-5 gap-y-[6px] sm:block">
+            <div className="grid grid-cols-2 gap-x-5 gap-y-1.5 sm:block">
               {column.links.map((link) => (
                 <a
                   key={link.label}

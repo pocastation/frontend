@@ -74,27 +74,27 @@ export default function ExchangeBlocksPage() {
       <MobilePageHead title="교환 차단 목록" backHref="/mypage" />
 
       <div className="mx-auto max-w-[640px] pb-16 sm:px-4 sm:py-8">
-        <h1 className="hidden px-[14px] pt-2 text-title font-extrabold text-text-1 sm:block sm:px-0">
+        <h1 className="hidden px-gutter pt-2 text-title font-extrabold text-text-1 sm:block sm:px-0">
           교환 차단 목록
         </h1>
 
-        <p className="bg-surface-2 px-[14px] py-2.5 text-label leading-relaxed text-text-2 sm:mt-3 sm:rounded-control">
+        <p className="bg-surface-2 px-gutter py-2.5 text-label leading-relaxed text-text-2 sm:mt-3 sm:rounded-control">
           차단은 <b className="font-bold text-text-1">교환에서만</b> 적용돼요. 서로의 교환글이 목록에서 사라지고
           신청도 주고받을 수 없어요. 판매·구매는 막히지 않아요.
         </p>
 
         {error && (
-          <p role="alert" className="mx-[14px] mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
+          <p role="alert" className="mx-gutter mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
 
         {loading ? (
-          <p className="px-[14px] py-16 text-center text-body-s text-text-3">불러오는 중...</p>
+          <p className="px-gutter py-16 text-center text-body-s text-text-3">불러오는 중...</p>
         ) : blocks.length === 0 ? (
-          <p className="px-[14px] py-16 text-center text-body-s text-text-3">차단한 사람이 없어요.</p>
+          <p className="px-gutter py-16 text-center text-body-s text-text-3">차단한 사람이 없어요.</p>
         ) : (
-          <ul className="px-[14px] sm:px-0">
+          <ul className="px-gutter sm:px-0">
             {blocks.map((block) => (
               <li key={block.id} className="flex min-h-14 items-center gap-2.5 border-b border-border last:border-0">
                 <div className="min-w-0 flex-1 py-2.5">

@@ -46,7 +46,7 @@ export default function EventCalendar({
 
   return (
     <>
-      <div className="px-[14px] pt-3 sm:px-0">
+      <div className="px-gutter pt-3 sm:px-0">
         <div className="mb-1.5 grid grid-cols-7">
           {DOW.map((d, i) => (
             <span
@@ -89,7 +89,7 @@ export default function EventCalendar({
                 </span>
                 {/* 행사가 있는 날은 날짜 밑 짧은 선 하나로 표시한다. 건수 도트(최대 3개)는 걷었다(#758).
                     몇 건인지는 aria-label과 날짜를 누른 뒤 목록이 말한다. */}
-                <span className="mt-[3px] flex h-1 items-end justify-center" aria-hidden="true">
+                <span className="mt-1 flex h-1 items-end justify-center" aria-hidden="true">
                   {count > 0 && <i className={`h-[2px] w-3 ${on ? "bg-white/85" : "bg-text-3"}`} />}
                 </span>
               </button>
@@ -98,10 +98,10 @@ export default function EventCalendar({
         </div>
       </div>
 
-      <div aria-hidden="true" className="mt-4 h-2 bg-surface-2 sm:hidden" />
+      <div aria-hidden="true" className="mt-section-ruled h-2 bg-surface-2 sm:hidden" />
       <div className="hidden sm:mt-6 sm:block sm:border-t sm:border-border" />
 
-      <div className="px-[14px] pt-3.5 sm:px-0">
+      <div className="px-gutter pt-section-ruled sm:px-0">
         <h2 className="text-body-l font-extrabold text-text-1">
           {Number(selected.slice(5, 7))}월 {Number(selected.slice(8, 10))}일 {weekdayKo(selected)}요일
         </h2>

@@ -239,7 +239,7 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
     return (
       <>
         <MobilePageHead title="결제" backHref={BACK_HREF} />
-        <main className="mx-auto max-w-lg px-[14px] py-16 text-body text-text-3 sm:px-5">
+        <main className="mx-auto max-w-lg px-gutter py-16 text-body text-text-3 sm:px-5">
           결제 정보를 불러오는 중이에요.
         </main>
       </>
@@ -264,7 +264,7 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         푸터가 올라온다** — 돈을 내는 자리에 사업자 정보와 약관 링크가 함께 보이면 시선이 흩어진다.
         100dvh에서 앱바(48px)를 뺀 값이라 스크롤 없이도 화면이 꽉 찬다.
       */}
-      <main className="mx-auto max-w-lg px-[14px] pb-5 pt-4 max-sm:min-h-[calc(100dvh-48px)] max-sm:pb-[132px] sm:px-5 sm:py-10">
+      <main className="mx-auto max-w-lg px-gutter pt-page max-sm:min-h-[calc(100dvh-48px)] sm:px-5 sm:py-10">
         <h1 className="hidden font-display text-title font-extrabold text-text-1 sm:block">결제</h1>
 
         {/* 주문 요약 — 카드로 감싸지 않는다. 규칙선과 여백만으로 가른다. */}
@@ -316,7 +316,7 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         같이 보여야 한다 — 예전에는 스크롤해야 버튼에 닿았다. 매물 상세의 고정 바와 같은 지면이다.
       */}
       <div
-        className="fixed inset-x-0 bottom-0 z-[400] border-t border-border bg-white px-[14px] pt-2.5 pb-[calc(10px_+_env(safe-area-inset-bottom))] sm:hidden"
+        className="fixed inset-x-0 bottom-0 z-[400] border-t border-border bg-white px-gutter pt-2.5 pb-[calc(10px_+_env(safe-area-inset-bottom))] sm:hidden"
       >
         {paid || issued ? (
           <Link

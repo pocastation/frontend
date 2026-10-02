@@ -79,7 +79,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
   return (
     <div className="fixed inset-0 z-[500] sm:hidden" role="dialog" aria-label={isEditMode ? "제안 금액 바꾸기" : "가격 제안하기"} aria-modal="true">
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
-      <div className="absolute inset-x-0 bottom-0 rounded-t-sheet bg-white px-[14px] pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
+      <div className="absolute inset-x-0 bottom-0 rounded-t-sheet bg-white px-gutter pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
         <div className="flex items-baseline justify-between border-b border-border pb-3">
           <p className="text-body-l font-extrabold text-text-1">{isEditMode ? "제안 금액 바꾸기" : "가격 제안하기"}</p>
           <p className="text-label text-text-3">
@@ -229,7 +229,7 @@ export default function MobileAuctionDetail({
       화면으로 되돌리면서 바 여백의 책임이 푸터로 넘어갔는데 이 스페이서만 남아 있었다.
       32px은 즉시판매 상세가 바 없을 때 쓰던 기존 값이고, 탭 본문이 이미 `pb-6`로 끝난다.
     */
-    <div className="pb-8">
+    <div className="sm:pb-8">
       <MobileDetailGallery images={auction.images} video={auction.video} title={auction.title} actions={actions} />
 
       <div className="px-4 pt-4">
@@ -281,7 +281,7 @@ export default function MobileAuctionDetail({
             />
           </div>
         ) : (
-          <div className="mt-4 rounded-card border border-border p-3.5">
+          <div className="mt-4 rounded-card border border-border p-card">
             <div className="flex items-center justify-between gap-3">
               <p className="text-caption font-semibold text-text-3">판매자 최소 제안 금액</p>
               <span aria-live="polite">

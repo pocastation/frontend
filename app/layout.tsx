@@ -137,7 +137,7 @@ export default function RootLayout({
 
                     데스크탑에는 걸지 않는다. 세로가 넉넉하고 웹에서 푸터가 보이는 것은 이상한
                     일이 아니다. */}
-                <main className="flex-1 max-sm:min-h-lvh max-sm:pb-40">{children}</main>
+                <main className="flex-1 max-sm:min-h-lvh max-sm:pb-footer">{children}</main>
                 {/* 🔴 푸터는 모든 화면에 노출한다(#399). 모바일 이행 때 홈·목록·매물 상세에서
                     접었다가, 전자상거래법 §10 표시사항이 모바일 주요 화면에서 사라진 것을 발견해
                     되돌렸다. 조문은 「초기화면」이지만 실제 서비스는 전 화면에 둔다 — 무신사는

@@ -70,7 +70,7 @@ export default async function GuideDocPage({ params }: { params: Promise<{ topic
                       <Link
                         href={`/guide/${id}`}
                         aria-current={on ? "page" : undefined}
-                        className={`-ml-[11px] block border-l-2 py-1.5 pl-[9px] text-body-s transition-colors ${FOCUS_RING} ${
+                        className={`-ml-3 block border-l-2 py-1.5 pl-2.5 text-body-s transition-colors ${FOCUS_RING} ${
                           on
                             ? "border-primary font-bold text-text-1"
                             : "border-transparent text-text-2 hover:text-text-1"
@@ -131,7 +131,7 @@ export default async function GuideDocPage({ params }: { params: Promise<{ topic
           {doc.scale && (
             <div className="mt-5 max-w-[520px]">
               <div className="h-[5px]" style={{ background: GRADE_RAMP }} />
-              <div className="grid grid-cols-4 gap-[3px] pt-2">
+              <div className="grid grid-cols-4 gap-1 pt-2">
                 {GRADE_SCALE.map(([g, label]) => (
                   <span key={g}>
                     <span

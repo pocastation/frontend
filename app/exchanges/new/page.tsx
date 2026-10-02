@@ -171,7 +171,7 @@ function NewExchangeForm() {
     return (
       <>
         <MobilePageHead title="교환글 작성" variant="dismiss" backHref="/events" />
-        <p className="px-[14px] py-16 text-center text-body-s text-text-3">
+        <p className="px-gutter py-16 text-center text-body-s text-text-3">
           어느 행사의 교환글인지 알 수 없어요. 캘린더에서 행사를 골라 주세요.
         </p>
       </>
@@ -189,7 +189,7 @@ function NewExchangeForm() {
     return (
       <>
         <MobilePageHead title="교환글 작성" sub={event?.name} variant="dismiss" backHref={`/events/${eventId}`} />
-        <p className="px-[14px] py-16 text-center text-body-s leading-relaxed text-text-3">
+        <p className="px-gutter py-16 text-center text-body-s leading-relaxed text-text-3">
           {writeWindow === "tooEarly"
             ? "교환글은 행사 전날 낮 12시부터 올릴 수 있어요."
             : "교환글을 올릴 수 있는 시간이 지났어요."}
@@ -208,20 +208,20 @@ function NewExchangeForm() {
       />
 
       <div className={`mx-auto max-w-[640px] ${FORM_ACTION_BAR_PAD} sm:px-4 sm:py-8`}>
-        <div className="flex gap-1 px-[14px] pt-2.5 sm:px-0" aria-hidden="true">
+        <div className="flex gap-1 px-gutter pt-2.5 sm:px-0" aria-hidden="true">
           <i className="h-0.5 flex-1 rounded-full bg-primary" />
           <i className={`h-0.5 flex-1 rounded-full ${step === 2 ? "bg-primary" : "bg-border-2"}`} />
         </div>
 
         {error && (
-          <p role="alert" className="mx-[14px] mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
+          <p role="alert" className="mx-gutter mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
 
         {step === 1 ? (
           <>
-            <section className={`px-[14px] pt-4 sm:px-0 ${stepAnim}`}>
+            <section className={`px-gutter pt-4 sm:px-0 ${stepAnim}`}>
               <p className={LABEL}>
                 내가 가진 포카<span className="ml-0.5 text-primary">*</span>
               </p>
@@ -235,7 +235,7 @@ function NewExchangeForm() {
               <p className={HELP}>최대 {MAX_PHOTOS}장. 행사가 끝나고 30일 뒤 자동으로 지워져요.</p>
             </section>
 
-            <section className={`mt-6 px-[14px] sm:px-0 ${stepAnim}`}>
+            <section className={`mt-6 px-gutter sm:px-0 ${stepAnim}`}>
               <p className={LABEL}>
                 어떤 포카인가요<span className="ml-0.5 text-primary">*</span>
               </p>
@@ -313,7 +313,7 @@ function NewExchangeForm() {
           </>
         ) : (
           <>
-            <section className={`px-[14px] pt-4 sm:px-0 ${stepAnim}`}>
+            <section className={`px-gutter pt-4 sm:px-0 ${stepAnim}`}>
               <p className={LABEL}>
                 만날 곳<span className="ml-0.5 text-primary">*</span>
               </p>
@@ -327,7 +327,7 @@ function NewExchangeForm() {
               <p className={HELP}>행사장 안에서 서로 찾을 수 있는 지점으로 적어 주세요.</p>
             </section>
 
-            <section className={`mt-6 px-[14px] sm:px-0 ${stepAnim}`}>
+            <section className={`mt-6 px-gutter sm:px-0 ${stepAnim}`}>
               <p className={LABEL}>
                 만날 수 있는 시간<span className="ml-0.5 text-primary">*</span>
               </p>

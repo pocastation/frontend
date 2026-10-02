@@ -75,7 +75,7 @@ export default function GradeStandard() {
         {/* 🔴 셋 다 보라 좌측선을 달고 있었다(#437 리뷰). 규칙선이 세 번 반복되면 강조가
             아니라 무늬가 된다. 원칙 하나가 이미 「이름 → 규칙 → 예시」의 3단 무게 차를
             가지고 있으므로, 선을 걷고 간격만 벌려도 덩어리가 갈린다. */}
-        <div className="mt-3 flex flex-col gap-[22px]">
+        <div className="mt-3 flex flex-col gap-6">
           {GRADE_PRINCIPLES.map(([name, rule, example]) => (
             <div key={name}>
               <p className="text-body font-extrabold text-text-1">{name}</p>

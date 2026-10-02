@@ -36,7 +36,7 @@ import {
   WITHDRAWABLE_DISPUTE,
   plainLevelLabel,
 } from "@/lib/labels";
-import { FOCUS_RING } from "@/lib/ui";
+import { FOCUS_RING, THUMB_INDENT } from "@/lib/ui";
 import { markNav } from "@/lib/nav-transition";
 import type {
   AuctionListResponse,
@@ -276,7 +276,7 @@ function FilterChips<T extends string>({
     // 🔴 알약 칩에서 밑줄 탭으로(#419). 활성 칩이 보라로 **채워져** 있어 필터가 아니라 눌린
     // 버튼처럼 보였고, 알약이 같은 화면의 상태 표시와도 겹쳐 무엇이 조작 가능한지 흐려졌다.
     // 매물 상세 모바일이 이미 쓰는 방식이라 같은 서비스로 읽힌다.
-    <div className="mt-4 flex gap-5 border-b border-border" role="group" aria-label={label}>
+    <div className="flex gap-5 border-b border-border sm:mt-4" role="group" aria-label={label}>
       {options.map((option) => (
         <button
           key={option.key}
@@ -759,7 +759,7 @@ function MyPageBody() {
         ref={contentRef}
         // min-w-0: 그리드 칸은 기본 최소 너비가 내용 너비라, 긴 상품명이 말줄임 대신 칸을 밀어 375px 화면이
         // 가로로 넘쳤다(판매 중인 상품 탭 실측 419px). 칸을 화면 폭에 묶어 truncate가 걸리게 한다.
-        className={`min-w-0 scroll-mt-4 px-3.5 pb-8 pt-3.5 sm:px-0 sm:pb-0 sm:pt-0 ${tab === null ? "hidden sm:block" : ""}`}
+        className={`min-w-0 scroll-mt-4 px-gutter pt-page sm:px-0 sm:pt-0 ${tab === null ? "hidden sm:block" : ""}`}
       >
         {error && (
           <p role="alert" className="mb-4 rounded-card bg-surface-2 px-4 py-3 text-body font-semibold text-danger">
@@ -1013,7 +1013,7 @@ function MyPageBody() {
             </div>
             {/* 지면이 갈리는 자리라 트리를 둘로 둔다 — 모바일은 킷대로 2열 카드, 데스크탑은 줄 목록. */}
             {wishlist.length > 0 ? (
-              <div className="mt-3.5 grid grid-cols-2 gap-x-2 gap-y-[18px] sm:hidden">
+              <div className="mt-3.5 grid grid-cols-2 gap-x-2 gap-y-5 sm:hidden">
                 {wishlist.map((auction) => (
                   <AuctionCard
                     key={auction.id}
@@ -1272,7 +1272,7 @@ function SellingList({
                 // 🔴 검수 반려 사유 — 목록에서 유일하게 「읽어야 하는」 블록이다(#422).
                 // 회색 채움 대신 들여쓰기 + 헤어라인으로 지면을 나눈다. 카드가 사라진 자리에
                 // 전폭 회색 블록이 남으면 행에서 떨어져 나온 것처럼 보인다.
-                <div className="mt-2.5 border-t border-border pl-[56px] pt-2.5">
+                <div className={`mt-2.5 border-t border-border ${THUMB_INDENT} pt-2.5`}>
                   <p className="text-label font-extrabold text-text-1">{moderationReason.label}</p>
                   <p className="mt-1 whitespace-pre-wrap break-words text-label leading-5 text-text-2">
                     {moderationReason.text}
@@ -1484,7 +1484,7 @@ function OrderStatusFooter({
     // **토글처럼** 보였고(조작할 수 있는 것처럼), 카드마다 회색 띠가 붙어 모든 안내가 alert box가
     // 됐다. 상태는 위 행의 오른쪽 텍스트가 이미 말하므로 여기서는 **할 일과 버튼만** 남긴다 —
     // 그 행에서 유일하게 채워진 요소라 장치를 더 붙이지 않아도 눈에 걸린다.
-    <div className="mt-2.5 flex flex-wrap items-center gap-3 pl-[56px] text-label text-text-2">
+    <div className={`mt-2.5 flex flex-wrap items-center gap-3 ${THUMB_INDENT} text-label text-text-2`}>
       <span className="min-w-0 flex-1">{body.message}</span>
       {body.action &&
         // 결제창 경로는 별도 페이지라 링크로 나간다. 나머지(카드 등록·변경)는 기존처럼 탭 전환이다.
@@ -1582,7 +1582,7 @@ function BuyerFulfillmentFooter({
 
   return (
     // 결제 푸터와 같은 지면 규칙(#419) — 회색 띠 없이 썸네일 폭만큼 들여 쓴 행동 줄.
-    <div className="mt-2.5 pl-[56px] text-label text-text-2">
+    <div className={`mt-2.5 ${THUMB_INDENT} text-label text-text-2`}>
       {returnOpen && (
         <ReturnRequestModal
           auctionId={order.auctionId}
@@ -1821,7 +1821,7 @@ function BuyerDisputeFooter({
 
   return (
     // 회색 띠 없이 썸네일 폭만큼 들여 쓴 행동 줄(#422) — 목록 전체가 같은 지면 규칙을 쓴다.
-    <div className="mt-2.5 pl-[56px] text-label text-text-2">
+    <div className={`mt-2.5 ${THUMB_INDENT} text-label text-text-2`}>
       <div className="flex flex-wrap items-center gap-2.5">
         {body.pill}
         <span className="min-w-0 flex-1">{body.message}</span>
@@ -1992,7 +1992,7 @@ function SellerFulfillmentFooter({
   // 환불로 끝난 거래는 발송 UI를 띄우지 않는다(취소·미발송 자동취소 포함).
   if (soldOrder.orderStatus === "REFUNDING" || soldOrder.orderStatus === "REFUNDED") {
     return (
-      <div className="mt-2.5 flex flex-wrap items-center gap-3 pl-[56px] text-label text-text-2">
+      <div className={`mt-2.5 flex flex-wrap items-center gap-3 ${THUMB_INDENT} text-label text-text-2`}>
         {fulfillmentPill("xCircle", "neutral", "거래 취소")}
         <span className="min-w-0 flex-1">거래가 취소돼 구매자에게 환불됐어요 · 정산 대상이 아니에요.</span>
       </div>
@@ -2008,7 +2008,7 @@ function SellerFulfillmentFooter({
   if (!paid) {
     const waiting = sellerPaymentWaitCopy(soldOrder.orderStatus);
     return (
-      <div className="mt-2.5 flex flex-wrap items-center gap-3 pl-[56px] text-label text-text-2">
+      <div className={`mt-2.5 flex flex-wrap items-center gap-3 ${THUMB_INDENT} text-label text-text-2`}>
         {fulfillmentPill("clock", "neutral", waiting.label)}
         <span className="min-w-0 flex-1">{waiting.message}</span>
       </div>
@@ -2017,7 +2017,7 @@ function SellerFulfillmentFooter({
 
   return (
     // 회색 띠 없이 썸네일 폭만큼 들여 쓴 행동 줄(#422) — 목록 전체가 같은 지면 규칙을 쓴다.
-    <div className="mt-2.5 pl-[56px] text-label text-text-2">
+    <div className={`mt-2.5 ${THUMB_INDENT} text-label text-text-2`}>
       <div className="flex flex-wrap items-center gap-2.5">
         {fs === "CONFIRMED" ? (
           <>
@@ -2253,7 +2253,7 @@ function SellerDisputeFooter({
 
   return (
     // 회색 띠 없이 썸네일 폭만큼 들여 쓴 행동 줄(#422) — 목록 전체가 같은 지면 규칙을 쓴다.
-    <div className="mt-2.5 pl-[56px] text-label text-text-2">
+    <div className={`mt-2.5 ${THUMB_INDENT} text-label text-text-2`}>
       <div className="flex flex-wrap items-center gap-2.5">
         {body.pill}
         <span className="min-w-0 flex-1">{body.message}</span>
@@ -2381,7 +2381,7 @@ function MyBiddingList({
                                         길은 주문 취소다 — 아래 주문 푸터가 그 자리를 맡는다.
                   버튼을 「눌리지만 서버가 거절하는」 상태로 두지 않는다. 그건 잘못된 안내다. */}
               {canWithdraw && (
-                <div className="mt-2.5 flex items-center gap-2 pl-[56px]">
+                <div className={`mt-2.5 flex items-center gap-2 ${THUMB_INDENT}`}>
                   <span className="flex-1 text-label leading-relaxed text-text-3">
                     {isLive
                       ? "판매자가 선택하기 전까지 바꾸거나 거둬들일 수 있어요."

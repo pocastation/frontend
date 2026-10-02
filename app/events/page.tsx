@@ -55,7 +55,7 @@ export default async function EventsPage({
 
         <nav
           aria-label="달 이동"
-          className="flex items-center justify-between gap-2 border-b border-border px-[14px] py-2.5 sm:mt-5 sm:rounded-control sm:border sm:px-3"
+          className="flex items-center justify-between gap-2 border-b border-border px-gutter py-2.5 sm:mt-5 sm:rounded-control sm:border sm:px-3"
         >
           <Link
             href={`/events?month=${shiftMonth(month, -1)}`}
@@ -81,7 +81,7 @@ export default async function EventsPage({
         </nav>
 
         {events === null ? (
-          <p className="px-[14px] py-12 text-center text-body-s text-text-3 sm:px-0">
+          <p className="px-gutter py-12 text-center text-body-s text-text-3 sm:px-0">
             일정을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.
           </p>
         ) : (

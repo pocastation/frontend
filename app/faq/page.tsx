@@ -23,7 +23,7 @@ export const metadata = {
 export default function FaqPage() {
   return (
     <>
-      <div className="mx-auto max-w-[820px] px-5 pt-11 pb-16 sm:pt-14">
+      <div className="mx-auto max-w-[820px] px-gutter pt-page sm:px-5 sm:pt-14 sm:pb-16">
         <header>
           <p className="text-label font-bold text-text-3">고객지원</p>
           <h1 className="mt-2 font-display text-display font-extrabold text-text-1 sm:text-display">
@@ -46,7 +46,7 @@ export default function FaqPage() {
 
         {/* 목차 — 카테고리가 7개라 위에서부터 읽으면 원하는 데까지 한참 걸린다.
             알약 링크가 아니라 밑줄 항목으로 둔다(가이드와 같은 기조). */}
-        <nav aria-label="분류 바로가기" className="mt-7 grid grid-cols-2 sm:grid-cols-4">
+        <nav aria-label="분류 바로가기" className="mt-group grid grid-cols-2 sm:mt-7 sm:grid-cols-4">
           {FAQ_CATEGORIES.map((c, i) => (
             <a
               key={c.id}
@@ -122,7 +122,7 @@ export default function FaqPage() {
 
       {/* ── 못 찾았을 때 ── 본문과 성격이 다른 마무리라 지면을 바꿔 넘긴다. */}
       <section className="border-t border-border bg-surface-2" aria-labelledby="faq-more">
-        <div className="mx-auto max-w-[820px] px-5 py-12 sm:py-14">
+        <div className="mx-auto max-w-[820px] px-gutter py-section sm:px-5 sm:py-14">
           <h2
             id="faq-more"
             className="font-display text-title-s font-extrabold text-text-1"

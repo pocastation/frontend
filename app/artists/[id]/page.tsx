@@ -108,7 +108,7 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
           고정 복귀지가 사라졌고, 이제 판매글 상세가 사실상 유일한 진입로다. 판매자 상세와 같은 처리. */}
       <MobilePageHead title={artist.name} />
 
-      <div className="mx-auto max-w-[1160px] px-[14px] pb-10 pt-4 sm:px-4 sm:py-8">
+      <div className="mx-auto max-w-[1160px] px-gutter pt-page sm:px-4 sm:py-8">
         {/*
           프로필을 감싸던 그림자 카드를 걷어냈다(#499). 모바일에서 카드는 화면 폭을 거의 다
           쓰므로 감싸는 의미가 없고 여백만 먹는다. 지면은 헤어라인과 회색 띠로 나눈다.
@@ -194,7 +194,7 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
           <AuctionGrid
             auctions={auctions?.content ?? []}
             variant="compact"
-            gridClassName="grid grid-cols-2 gap-x-2 gap-y-[18px] sm:grid-cols-4 sm:gap-x-4"
+            gridClassName="grid grid-cols-2 gap-x-2 gap-y-5 sm:grid-cols-4 sm:gap-x-4"
           />
         </section>
       </div>

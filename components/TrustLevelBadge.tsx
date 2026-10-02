@@ -49,7 +49,7 @@ function LevelSheet({ currentLevel, onClose }: { currentLevel: number | null; on
             return (
               <li
                 key={row.level}
-                className={`grid grid-cols-[44px_1fr_auto] items-baseline gap-2.5 border-b border-border px-1 py-[7px] ${
+                className={`grid grid-cols-[44px_1fr_auto] items-baseline gap-2.5 border-b border-border px-1 py-2 ${
                   on ? "-mx-4 bg-surface-2 px-5 sm:-mx-5" : ""
                 }`}
               >

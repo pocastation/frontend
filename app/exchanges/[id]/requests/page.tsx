@@ -88,26 +88,26 @@ export default function ExchangeRequestsPage() {
 
       <div className="mx-auto max-w-[640px] pb-16 sm:px-4 sm:py-8">
         {pending.length > 0 && (
-          <p className="bg-surface-2 px-[14px] py-2.5 text-label leading-relaxed text-text-2 sm:rounded-control">
+          <p className="bg-surface-2 px-gutter py-2.5 text-label leading-relaxed text-text-2 sm:rounded-control">
             한 명을 고르면 교환이 확정되고 <b className="font-bold text-text-1">나머지 신청은 자동으로 마감</b>돼요.
             고른 분과는 대화가 열려요.
           </p>
         )}
 
         {error && (
-          <p role="alert" className="mx-[14px] mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
+          <p role="alert" className="mx-gutter mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
 
         {loading ? (
-          <p className="px-[14px] py-16 text-center text-body-s text-text-3">불러오는 중...</p>
+          <p className="px-gutter py-16 text-center text-body-s text-text-3">불러오는 중...</p>
         ) : requests.length === 0 ? (
-          <p className="px-[14px] py-16 text-center text-body-s text-text-3">아직 받은 신청이 없어요.</p>
+          <p className="px-gutter py-16 text-center text-body-s text-text-3">아직 받은 신청이 없어요.</p>
         ) : alreadySettled ? (
           // 「대화에서 이어가 주세요」라고만 적어 두면 뒤로 → 상세 → 「대화 열기」로 두 번 더
           // 움직여야 한다. 말한 곳으로 가는 길을 같은 자리에 둔다.
-          <div className="px-[14px] py-16 text-center">
+          <div className="px-gutter py-16 text-center">
             <p className="text-body-s text-text-3">이미 교환이 확정됐어요.</p>
             <Link
               href={`/exchanges/${postId}/thread`}
@@ -117,7 +117,7 @@ export default function ExchangeRequestsPage() {
             </Link>
           </div>
         ) : (
-          <div className="px-[14px] sm:px-0">
+          <div className="px-gutter sm:px-0">
             {pending.map((request, index) => (
               <article key={request.id} className="border-b border-border py-3.5 last:border-0">
                 <div className="flex items-start gap-2.5">

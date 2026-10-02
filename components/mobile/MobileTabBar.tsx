@@ -142,7 +142,7 @@ export default function MobileTabBar() {
               aria-current={on ? "page" : undefined}
               /* 눌림은 아이콘과 글자를 함께 흐린다(#720). 탭 바탕이 흰색이라 배경 변화는 보이지
                  않고, scale을 주면 옆 탭과 높이가 어긋나 보인다. */
-              className={`flex flex-1 flex-col items-center justify-center gap-1 pb-[7px] pt-2 ${PRESS_TAB} ${FOCUS_RING} ${
+              className={`flex flex-1 flex-col items-center justify-center gap-1 pb-2 pt-2 ${PRESS_TAB} ${FOCUS_RING} ${
                 on ? "text-text-1" : "text-text-3"
               }`}
             >

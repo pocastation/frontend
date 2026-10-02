@@ -139,12 +139,12 @@ export default function ExchangeApplyPage() {
 
       <div className={`mx-auto max-w-[640px] ${FORM_ACTION_BAR_PAD} sm:px-4 sm:py-8`}>
         {error && (
-          <p role="alert" className="mx-[14px] mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
+          <p role="alert" className="mx-gutter mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
 
-        <section className="px-[14px] pt-4 sm:px-0">
+        <section className="px-gutter pt-4 sm:px-0">
           <p className={LABEL}>
             내가 줄 포카<span className="ml-0.5 text-primary">*</span>
           </p>
@@ -183,7 +183,7 @@ export default function ExchangeApplyPage() {
         </section>
 
         {/* 회색 띠를 걷었다(#718). 세 묶음(포카·시간·사진)이 같은 지면 위에 서고 헤어라인으로 갈린다. */}
-        <section className="mt-5 px-[14px] sm:px-0">
+        <section className="mt-5 px-gutter sm:px-0">
           <div className="border-t border-border pt-4">
           <p className={LABEL}>
             만날 시간<span className="ml-0.5 text-primary">*</span>
@@ -210,7 +210,7 @@ export default function ExchangeApplyPage() {
           </div>
         </section>
 
-        <section className="mt-5 px-[14px] sm:px-0">
+        <section className="mt-5 px-gutter sm:px-0">
           <div className="border-t border-border pt-4">
           {/* 누가 보는지는 화면만 봐서는 알 수 없다 — 안내 문구 중 이 한 줄만 남긴다(#718). */}
           <p className={LABEL}>
@@ -227,7 +227,7 @@ export default function ExchangeApplyPage() {
           </div>
         </section>
 
-        <section className="mt-5 px-[14px] sm:px-0">
+        <section className="mt-5 px-gutter sm:px-0">
           <div className="border-t border-border pt-4">
           <p className={LABEL}>한마디 <span className="font-semibold text-text-3">(선택)</span></p>
           <textarea

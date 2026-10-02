@@ -97,7 +97,7 @@ export function ExploreEmpty({
         <button
           type="button"
           onClick={onClear}
-          className={`mt-1 inline-flex h-[38px] items-center gap-1.5 rounded-control border border-border-2 bg-white px-[18px] text-body-s font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+          className={`mt-1 inline-flex h-[38px] items-center gap-1.5 rounded-control border border-border-2 bg-white px-4 text-body-s font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
         >
           {clearLabel}
         </button>

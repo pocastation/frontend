@@ -400,7 +400,7 @@ export default function NewAuctionPage() {
   // 대금은 묶이고 구매자는 영문도 모른 채 기다린다.
   if (!settlementReady) {
     return (
-      <div className="mx-auto max-w-[520px] px-[14px] pt-16 pb-20 sm:px-5">
+      <div className="mx-auto max-w-[520px] px-gutter pt-page sm:px-5 sm:pt-16 sm:pb-20">
         <p className="text-caption font-extrabold tracking-[0.08em] text-primary">등록 전 한 가지</p>
         <h1 className="mt-2 font-display text-title-l font-extrabold text-text-1">
           정산계좌를 먼저 등록해 주세요
@@ -464,7 +464,7 @@ export default function NewAuctionPage() {
         **첫 단계에서 한 번 읽으면 끝**인 문장이라 6단계 내내 고정으로 붙어 있을 이유가 없다.
         첫 단계 본문 맨 위로 내렸다. 단계명·진행바는 남긴다 — 그게 머리를 고정한 이유다.
       */}
-      <div className="sticky top-12 z-[260] border-b border-border bg-white px-[14px] pb-2.5 pt-3 sm:hidden">
+      <div className="sticky top-12 z-[260] border-b border-border bg-white px-gutter pb-2.5 pt-3 sm:hidden">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h1 className="font-display text-title-s font-extrabold text-text-1">판매 등록</h1>
@@ -500,7 +500,7 @@ export default function NewAuctionPage() {
             {step + 1} / {TOTAL_STEPS}
           </span>
         </div>
-        <div className="mt-[7px] h-[5px] overflow-hidden rounded-full bg-surface-2">
+        <div className="mt-2 h-[5px] overflow-hidden rounded-full bg-surface-2">
           <div className="h-full rounded-full bg-primary transition-all duration-300" style={{ width: progress }} />
         </div>
       </div>
@@ -523,8 +523,9 @@ export default function NewAuctionPage() {
         noValidate
         // 모바일 우선 — 기본이 모바일 지면(전체폭)이고 `sm:`가 데스크탑 카드를 얹는다.
         // **임의값(px-[14px])을 쓰지 않는다**: Tailwind가 임의값 유틸리티를 `sm:` 변형보다 뒤에
-        // 배치해 데스크탑에서 모바일 패딩이 이겨버린다(양방향으로 실측해 확인). 표준 스케일만 쓴다.
-        className="bg-surface px-3.5 pt-4.5 sm:rounded-card sm:border sm:border-border sm:px-7 sm:py-7 sm:shadow-card"
+        // 배치해 데스크탑에서 모바일 패딩이 이겨버린다(양방향으로 실측해 확인). 여백 토큰(#776)은
+        // 테마 유틸리티라 순서 문제가 없다.
+        className="bg-surface px-gutter pt-page sm:rounded-card sm:border sm:border-border sm:px-7 sm:py-7 sm:shadow-card"
       >
         {/* 진행 표시 — 모바일은 sticky 머리가 대신한다. */}
         <div className="mb-6 max-sm:hidden">
@@ -820,7 +821,7 @@ export default function NewAuctionPage() {
         )}
 
         {/* 이동/등록 */}
-        <div className="mt-6 flex gap-2 max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:z-[400] max-sm:mt-0 max-sm:border-t max-sm:border-border max-sm:bg-white max-sm:px-[14px] max-sm:pt-2.5 max-sm:pb-[calc(10px_+_env(safe-area-inset-bottom))]">
+        <div className="mt-6 flex gap-2 max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:z-[400] max-sm:mt-0 max-sm:border-t max-sm:border-border max-sm:bg-white max-sm:px-gutter max-sm:pt-2.5 max-sm:pb-[calc(10px_+_env(safe-area-inset-bottom))]">
           {step > 0 && (
             <button type="button" onClick={goBack} className={`h-12 px-6 ${SECONDARY_BUTTON_CLASS}`}>
               이전

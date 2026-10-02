@@ -52,7 +52,7 @@ function ConfirmSheet({
   return (
     <div className="fixed inset-0 z-[500] sm:hidden" role="dialog" aria-label="즉시구매 확인" aria-modal="true">
       <button type="button" aria-label="닫기" onClick={onClose} className="absolute inset-0 bg-text-1/40" />
-      <div className="absolute inset-x-0 bottom-0 rounded-t-sheet bg-white px-[14px] pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
+      <div className="absolute inset-x-0 bottom-0 rounded-t-sheet bg-white px-gutter pb-[calc(16px_+_env(safe-area-inset-bottom))] pt-4">
         <p className="text-body-l font-extrabold text-text-1">이 가격으로 바로 구매할까요?</p>
         <p className="mt-1 text-label text-text-3">확정하면 거래가 성사되고 되돌릴 수 없어요.</p>
 
@@ -192,7 +192,7 @@ export default function MobileInstantDetail({
       바가 덮는 것은 페이지 맨 끝의 푸터고, 푸터가 자기 몫을 이미 비운다(제안판매 상세와 같은 판단).
       그래서 `showBar` 분기가 사라졌다 — 두 경우가 같은 값을 쓴다.
     */
-    <div className="pb-8">
+    <div className="sm:pb-8">
       <MobileDetailGallery images={auction.images} video={auction.video} title={auction.title} actions={actions} />
 
       <div className="px-4 pt-4">
@@ -230,7 +230,7 @@ export default function MobileInstantDetail({
         </div>
 
         {/* 가격 카드 — 제안 패널과 같은 골격, 라벨과 안내만 다르다. */}
-        <div className="mt-4 rounded-card border border-border p-3.5">
+        <div className="mt-4 rounded-card border border-border p-card">
           <div className="flex items-center justify-between gap-3">
             <p className="text-caption font-semibold text-text-3">즉시판매가</p>
             <p className="text-caption text-text-3">

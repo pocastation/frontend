@@ -189,7 +189,7 @@ export default function InstallPrompt() {
     <div
       role="dialog"
       aria-label="홈 화면에 추가"
-      className="fixed inset-x-0 z-[400] px-[14px] sm:hidden"
+      className="fixed inset-x-0 z-[400] px-gutter sm:hidden"
       // 하단탭 위에 얹는다. 셸이 없는 화면에서는 변수가 없어 화면 바닥에서 12px 뜬다.
       style={{ bottom: "calc(12px + var(--mobile-tabbar-h, 0px))" }}
     >

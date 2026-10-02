@@ -74,7 +74,7 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
       */}
       <MobilePageHead title={seller.nickname} />
 
-      <div className="mx-auto max-w-[1160px] px-[14px] pb-10 pt-4 sm:px-4 sm:py-8">
+      <div className="mx-auto max-w-[1160px] px-gutter pt-page sm:px-4 sm:py-8">
 
         {/*
           🔴 프로필을 감싸던 카드를 걷어냈다(#510). 모바일에서 카드는 화면 폭을 거의 다 쓰므로
@@ -110,7 +110,7 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
           <AuctionGrid
             auctions={auctions?.content ?? []}
             variant="compact"
-            gridClassName="grid grid-cols-2 gap-x-2 gap-y-[18px] sm:grid-cols-4 sm:gap-x-4"
+            gridClassName="grid grid-cols-2 gap-x-2 gap-y-5 sm:grid-cols-4 sm:gap-x-4"
             emptyTitle="판매 중인 상품이 없어요"
             emptyDescription="이 판매자가 상품을 등록하면 여기에 표시돼요."
           />

@@ -42,14 +42,14 @@ export default function MobileRankTop3({ auctions }: { auctions: AuctionResponse
   ];
 
   return (
-    <section className="pb-1 pt-[38px]" aria-label="랭킹">
+    <section className="pb-1 pt-section" aria-label="랭킹">
       <div
         ref={scrollerRef}
         className="flex snap-x snap-mandatory overflow-x-auto"
         onScroll={(e) => setPage(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
       >
         {pages.map((p) => (
-          <div key={p.key} className="w-full min-w-full flex-[0_0_100%] snap-start px-[14px]">
+          <div key={p.key} className="w-full min-w-full flex-[0_0_100%] snap-start px-gutter">
             <div className="flex items-center justify-between gap-2">
               <h2 className="flex items-baseline gap-1.5 text-title-s font-extrabold">
                 {p.key} 랭킹

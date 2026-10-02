@@ -106,7 +106,7 @@ function BrandSlide() {
       <p className="mt-2.5 whitespace-pre-line text-body-s text-white/60">{BRAND_SUBHEAD}</p>
       <Link
         href="/auctions"
-        className={`mt-[18px] flex h-11 w-full items-center justify-center rounded-control bg-primary text-body font-extrabold text-white ${FOCUS_RING}`}
+        className={`mt-cta flex h-11 w-full items-center justify-center rounded-control bg-primary text-body font-extrabold text-white ${FOCUS_RING}`}
       >
         진행 중인 판매글 보기 →
       </Link>
@@ -127,7 +127,7 @@ function AuctionSlide({ auction }: { auction: AuctionResponse }) {
     <div className="relative flex items-center gap-3.5">
       <Stars />
       <div className="min-w-0 flex-1">
-        <span className="inline-flex items-center rounded-control border border-white/20 px-2.5 py-[3px] text-caption font-bold text-white/85">
+        <span className="inline-flex items-center rounded-control border border-white/20 px-2.5 py-1 text-caption font-bold text-white/85">
           {LEVEL_LABEL[level]}
         </span>
         {auction.artistName && (
@@ -280,7 +280,7 @@ export default function MobilePromoBanner({ featured }: { featured: AuctionRespo
             role="group"
             aria-roledescription="slide"
             aria-label={`${i + 1} / ${total}`}
-            className="box-border w-full min-w-full flex-[0_0_100%] snap-center snap-always px-5 pb-11 pt-[26px]"
+            className="box-border w-full min-w-full flex-[0_0_100%] snap-center snap-always px-gutter pb-11 pt-6"
           >
             {i === 0 ? <BrandSlide /> : <AuctionSlide auction={promoted[i - 1]} />}
           </div>

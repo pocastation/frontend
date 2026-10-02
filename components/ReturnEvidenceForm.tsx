@@ -82,7 +82,7 @@ export default function ReturnEvidenceForm({
   }
 
   return (
-    <div className="mt-2.5 flex flex-col gap-2 rounded-card border border-border bg-surface p-3">
+    <div className="mt-3 flex flex-col gap-2 rounded-card border border-border bg-surface p-3">
       {remaining > 0 ? (
         <>
           <PhotoUploadGrid
@@ -116,11 +116,11 @@ export default function ReturnEvidenceForm({
           {error}
         </p>
       )}
-      <div className="flex justify-end gap-1.5">
+      <div className="flex justify-end gap-2">
         <button
           type="button"
           onClick={onClose}
-          className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-caption font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+          className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-2 text-caption font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
         >
           닫기
         </button>
@@ -128,7 +128,7 @@ export default function ReturnEvidenceForm({
           type="button"
           onClick={() => void submit()}
           disabled={saving}
-          className={`shrink-0 rounded-control bg-text-1 px-3 py-1.5 text-caption font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+          className={`shrink-0 rounded-control bg-text-1 px-3 py-2 text-caption font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-60 ${FOCUS_RING}`}
         >
           자료 제출
         </button>

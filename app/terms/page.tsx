@@ -82,7 +82,7 @@ export default function TermsPage() {
                   <h3 className="text-body font-bold text-text-1">
                     {article.no} ({article.title})
                   </h3>
-                  <ul className="mt-2 space-y-1.5">
+                  <ul className="mt-2 space-y-2">
                     {article.lines.map((line, index) => (
                       <TermsLineRow key={index} line={line} />
                     ))}
@@ -96,7 +96,7 @@ export default function TermsPage() {
 
       <section className="mt-10 border-t border-border pt-5">
         <h2 className="text-body font-bold text-text-1">부칙</h2>
-        <ul className="mt-2 space-y-1.5">
+        <ul className="mt-2 space-y-2">
           {TERMS_ADDENDUM.map((line, index) => (
             <li key={index} className="flex gap-2 text-body leading-relaxed text-text-2">
               <span className="shrink-0 font-semibold text-text-3">

@@ -88,14 +88,14 @@ export default function ExchangeRequestsPage() {
 
       <div className="mx-auto max-w-[640px] pb-16 sm:px-4 sm:py-8">
         {pending.length > 0 && (
-          <p className="bg-surface-2 px-gutter py-2.5 text-label leading-relaxed text-text-2 sm:rounded-control">
+          <p className="bg-surface-2 px-gutter py-3 text-label leading-relaxed text-text-2 sm:rounded-control">
             한 명을 고르면 교환이 확정되고 <b className="font-bold text-text-1">나머지 신청은 자동으로 마감</b>돼요.
             고른 분과는 대화가 열려요.
           </p>
         )}
 
         {error && (
-          <p role="alert" className="mx-gutter mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
+          <p role="alert" className="mx-gutter mt-3 rounded-card bg-surface-2 px-4 py-3 text-body-s font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
@@ -111,7 +111,7 @@ export default function ExchangeRequestsPage() {
             <p className="text-body-s text-text-3">이미 교환이 확정됐어요.</p>
             <Link
               href={`/exchanges/${postId}/thread`}
-              className={`mt-2.5 inline-flex h-11 items-center justify-center rounded-control bg-text-1 px-5 text-body font-extrabold text-white ${FOCUS_RING}`}
+              className={`mt-3 inline-flex h-11 items-center justify-center rounded-control bg-text-1 px-5 text-body font-extrabold text-white ${FOCUS_RING}`}
             >
               대화 열기
             </Link>
@@ -119,8 +119,8 @@ export default function ExchangeRequestsPage() {
         ) : (
           <div className="px-gutter sm:px-0">
             {pending.map((request, index) => (
-              <article key={request.id} className="border-b border-border py-3.5 last:border-0">
-                <div className="flex items-start gap-2.5">
+              <article key={request.id} className="border-b border-border py-4 last:border-0">
+                <div className="flex items-start gap-3">
                   {request.photos.length > 0 && (
                     <div className="flex flex-shrink-0 gap-1">
                       {request.photos.slice(0, 2).map((photo) => (
@@ -134,7 +134,7 @@ export default function ExchangeRequestsPage() {
                   <div className="min-w-0 flex-1">
                     <p className="text-body-l font-extrabold text-text-1">{itemName(request.offer)}</p>
                     <p className="mt-px text-label text-text-3">{itemDetail(request.offer)}</p>
-                    <p className="mt-1.5 text-label font-bold text-text-2">
+                    <p className="mt-2 text-label font-bold text-text-2">
                       {request.requesterNickname ?? "알 수 없음"}
                       {request.slot && ` · ${slotLabel(request.slot)}`}
                     </p>
@@ -145,7 +145,7 @@ export default function ExchangeRequestsPage() {
                   <p className="mt-2 text-body-s leading-relaxed text-text-2">{request.message}</p>
                 )}
 
-                <div className="mt-2.5 flex items-center justify-between gap-2">
+                <div className="mt-3 flex items-center justify-between gap-2">
                   <span className="text-caption text-text-3">{formatRelativeTime(request.createdAt)}</span>
                   <button
                     type="button"

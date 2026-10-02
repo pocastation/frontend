@@ -102,7 +102,7 @@ export default function ProfileTab() {
           <button
             type="submit"
             disabled={isSubmitting || !trimmed || unchanged || locked}
-            className={`shrink-0 px-4 py-2.5 ${PRIMARY_BUTTON_CLASS}`}
+            className={`shrink-0 px-4 py-3 ${PRIMARY_BUTTON_CLASS}`}
           >
             {isSubmitting ? "변경 중..." : "변경"}
           </button>
@@ -112,13 +112,13 @@ export default function ProfileTab() {
       <section className="mt-group rounded-card border border-border bg-surface p-card sm:mt-4 sm:p-5">
         <h2 className="font-display text-body font-extrabold text-text-1">계정 정보</h2>
         <dl className="mt-3 flex flex-col divide-y divide-border">
-          <div className="flex items-center justify-between gap-4 py-2.5">
+          <div className="flex items-center justify-between gap-4 py-3">
             <dt className="text-body font-bold text-text-3">이메일</dt>
             <dd className="min-w-0 truncate text-body font-semibold text-text-1">
               {member.email ?? <span className="font-normal text-text-3">소셜 로그인 계정이라 이메일이 없어요</span>}
             </dd>
           </div>
-          <div className="flex items-center justify-between gap-4 py-2.5">
+          <div className="flex items-center justify-between gap-4 py-3">
             <dt className="text-body font-bold text-text-3">가입 수단</dt>
             <dd className="text-body font-semibold text-text-1">
               {provider ? (
@@ -130,7 +130,7 @@ export default function ProfileTab() {
               )}
             </dd>
           </div>
-          <div className="flex items-center justify-between gap-4 py-2.5">
+          <div className="flex items-center justify-between gap-4 py-3">
             <dt className="text-body font-bold text-text-3">가입일</dt>
             <dd className="text-body font-semibold text-text-1">{joinedAt ?? "-"}</dd>
           </div>

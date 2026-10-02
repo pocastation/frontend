@@ -89,7 +89,7 @@ export default function IntroPage() {
               사전 신청 모집 중
             </p>
             {/* eslint-disable-next-line no-restricted-syntax -- 사전 신청 히어로는 데스크탑에서 스케일 밖 42px */}
-            <h1 className="mt-3.5 font-display text-display font-extrabold text-text-1 sm:text-[42px]">
+            <h1 className="mt-4 font-display text-display font-extrabold text-text-1 sm:text-[42px]">
               포카 한 장에도
               <br />
               확인이 필요하니까,
@@ -102,7 +102,7 @@ export default function IntroPage() {
               {CHIPS.map((c) => (
                 <li
                   key={c}
-                  className="inline-flex h-7 items-center rounded-control border border-border-2 bg-white px-2.5 text-label font-bold text-text-1"
+                  className="inline-flex h-7 items-center rounded-control border border-border-2 bg-white px-3 text-label font-bold text-text-1"
                 >
                   {c}
                 </li>

@@ -12,7 +12,7 @@ export default function AuctionGrid({
   emptyTitle = "아직 등록된 판매글이 없어요",
   emptyDescription = "이 스타의 상품이 등록되면 여기에 표시돼요.",
   variant = "default",
-  gridClassName = "grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-3.5",
+  gridClassName = "grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-4",
 }: {
   auctions: AuctionResponse[];
   emptyTitle?: string;

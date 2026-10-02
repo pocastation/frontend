@@ -260,8 +260,8 @@ export default function Hero({ featured }: { featured: AuctionResponse[] }) {
               당긴다. 쉬는 상태는 비활성 도트와 같은 흰 35%, 호버·포커스에 흰 100%. 카운터는 두지 않는다.
             */}
             {total > 1 && (
-              <div className="mt-3.5 flex items-center justify-between">
-                <div className="flex items-center gap-1.5" onKeyDown={onDotsKeyDown}>
+              <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center gap-2" onKeyDown={onDotsKeyDown}>
                   {slides.map((auction, i) => (
                     <button
                       key={auction.id}
@@ -275,7 +275,7 @@ export default function Hero({ featured }: { featured: AuctionResponse[] }) {
                     />
                   ))}
                 </div>
-                <div className="-mr-2 flex items-center gap-0.5">
+                <div className="-mr-2 flex items-center gap-1">
                   <ArrowButton label="이전 배너" direction="prev" onClick={() => goTo(index - 1)} />
                   <ArrowButton label="다음 배너" direction="next" onClick={() => goTo(index + 1)} />
                 </div>
@@ -362,7 +362,7 @@ function HeroCard({
 
       <div className="absolute inset-x-5 bottom-5 z-[2] text-white">
         <p className="truncate text-body font-bold">{auction.artistName ?? auction.title}</p>
-        <p className="mt-0.5 truncate text-label text-white/60">{auction.title}</p>
+        <p className="mt-1 truncate text-label text-white/60">{auction.title}</p>
         <div className="mt-3 flex items-end justify-between border-t border-white/20 pt-3">
           <div>
             <p className="text-caption text-white/60">현재 제안가</p>

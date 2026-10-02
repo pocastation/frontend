@@ -195,7 +195,7 @@ export default function ExchangeThreadPage() {
       <div className="mx-auto flex min-h-[calc(100dvh-48px)] max-w-[640px] flex-col">
         {/* 현장에서 열었을 때 장소를 찾아 스크롤하지 않게 머리에 붙박아 둔다. */}
         {thread && (
-          <div className="sticky top-12 z-[2] flex items-center gap-2.5 border-b border-border bg-surface-2 px-gutter py-2.5">
+          <div className="sticky top-12 z-[2] flex items-center gap-3 border-b border-border bg-surface-2 px-gutter py-3">
             <div className="min-w-0 flex-1">
               <p className="truncate text-body font-extrabold text-text-1">{thread.place}</p>
               {thread.slot && <p className="mt-px text-label text-text-2">{slotLabel(thread.slot)}</p>}
@@ -206,7 +206,7 @@ export default function ExchangeThreadPage() {
           </div>
         )}
 
-        <div className="flex-1 px-gutter py-3.5">
+        <div className="flex-1 px-gutter py-4">
           {messages.map((message, index) => {
             const showDay = index === 0 || dayLabel(messages[index - 1].createdAt) !== dayLabel(message.createdAt);
             return (
@@ -216,10 +216,10 @@ export default function ExchangeThreadPage() {
                 )}
                 <div className={`mb-2 flex ${message.mine ? "justify-end" : ""}`}>
                   {message.mine && (
-                    <span className="mr-1.5 self-end text-caption text-text-3">{hhmm(message.createdAt)}</span>
+                    <span className="mr-2 self-end text-caption text-text-3">{hhmm(message.createdAt)}</span>
                   )}
                   <p
-                    className={`max-w-[250px] whitespace-pre-wrap break-words px-3 py-2.5 text-body leading-normal ${
+                    className={`max-w-[250px] whitespace-pre-wrap break-words px-3 py-3 text-body leading-normal ${
                       // 말풍선 꼬리 모서리만 3px로 접는다. 카드 12px + 꼬리 조합이라 radius 토큰 예외다.
                       message.mine
                         ? // eslint-disable-next-line no-restricted-syntax
@@ -231,7 +231,7 @@ export default function ExchangeThreadPage() {
                     {message.body}
                   </p>
                   {!message.mine && (
-                    <span className="ml-1.5 self-end text-caption text-text-3">{hhmm(message.createdAt)}</span>
+                    <span className="ml-2 self-end text-caption text-text-3">{hhmm(message.createdAt)}</span>
                   )}
                 </div>
               </div>
@@ -241,14 +241,14 @@ export default function ExchangeThreadPage() {
         </div>
 
         {error && (
-          <p role="alert" className="mx-gutter mb-2 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger">
+          <p role="alert" className="mx-gutter mb-2 rounded-card bg-surface-2 px-4 py-3 text-body-s font-semibold text-danger">
             {error}
           </p>
         )}
 
         {/* 완료 확인 — 상태가 다섯이고 한 번에 하나만 보인다. */}
         {completion && (completion.confirmable || completion.confirmed || !thread?.writable) && (
-          <div className="border-t border-border px-gutter py-2.5">
+          <div className="border-t border-border px-gutter py-3">
             {completion.confirmed && completion.disputed ? (
               <p className="text-body-s leading-relaxed text-text-2">
                 교환이 이뤄지지 않은 것으로 정리됐어요. 기록은 남지 않아요.
@@ -282,7 +282,7 @@ export default function ExchangeThreadPage() {
                 >
                   교환 완료 확인
                 </button>
-                <p className="mt-1.5 text-caption leading-relaxed text-text-3">
+                <p className="mt-2 text-caption leading-relaxed text-text-3">
                   한 분만 눌러도 완료돼요. 상대는 24시간 안에 아니라고 알릴 수 있어요.
                 </p>
               </>

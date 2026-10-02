@@ -104,7 +104,7 @@ function PolicyTableStacked({ table }: { table: PolicyTable }) {
             row.length > 2 ? (
               <p
                 key={cellIndex}
-                className="mt-2 grid grid-cols-[4.5rem_minmax(0,1fr)] gap-2.5 text-body-s leading-relaxed"
+                className="mt-2 grid grid-cols-[4.5rem_minmax(0,1fr)] gap-3 text-body-s leading-relaxed"
               >
                 <span className="text-label font-bold text-text-3">
                   {table.head[cellIndex + 1]}
@@ -112,7 +112,7 @@ function PolicyTableStacked({ table }: { table: PolicyTable }) {
                 <span className="text-text-2">{cell}</span>
               </p>
             ) : (
-              <p key={cellIndex} className="mt-1.5 text-body-s leading-relaxed text-text-2">
+              <p key={cellIndex} className="mt-2 text-body-s leading-relaxed text-text-2">
                 {cell}
               </p>
             ),
@@ -190,7 +190,7 @@ export default function PolicyPage() {
                     {article.no} ({article.title})
                   </h3>
                   {article.lines && (
-                    <ul className="mt-2 space-y-1.5">
+                    <ul className="mt-2 space-y-2">
                       {article.lines.map((line, index) => (
                         <PolicyLineRow key={index} line={line} />
                       ))}
@@ -198,7 +198,7 @@ export default function PolicyPage() {
                   )}
                   {article.table && <PolicyTableBlock table={article.table} />}
                   {article.trailingLines && (
-                    <ul className="mt-3 space-y-1.5">
+                    <ul className="mt-3 space-y-2">
                       {article.trailingLines.map((line, index) => (
                         <PolicyLineRow key={index} line={line} />
                       ))}
@@ -213,7 +213,7 @@ export default function PolicyPage() {
 
       <section className="mt-10 border-t border-border pt-5">
         <h2 className="text-body font-bold text-text-1">부칙</h2>
-        <ul className="mt-2 space-y-1.5">
+        <ul className="mt-2 space-y-2">
           {POLICY_ADDENDUM.map((line, index) => (
             <li key={index} className="flex gap-2 text-body leading-relaxed text-text-2">
               <span className="shrink-0 font-semibold text-text-3">

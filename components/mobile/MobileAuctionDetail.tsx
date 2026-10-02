@@ -91,7 +91,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
           </p>
         </div>
 
-        <div className="mb-2.5 mt-3 flex items-baseline justify-between gap-3">
+        <div className="mb-3 mt-3 flex items-baseline justify-between gap-3">
           <label htmlFor="mobile-proposal-amount" className="text-body-s font-extrabold text-text-1">가격 제안</label>
           <span className={`text-caption ${isBelowMinimum || isNotUnit ? "font-semibold text-danger" : "text-text-3"}`}>
             {isBelowMinimum
@@ -121,20 +121,20 @@ function BidSheet({ onClose }: { onClose: () => void }) {
           />
         </div>
 
-        <div className="mt-3.5 rounded-card bg-surface-2 p-3 text-body-s">
-          <div className="flex items-center justify-between py-0.5 text-text-3">
+        <div className="mt-4 rounded-card bg-surface-2 p-3 text-body-s">
+          <div className="flex items-center justify-between py-1 text-text-3">
             <span>가격 제안</span>
             <span className="font-medium tabular-nums text-text-2">{formatKRW(amount)}</span>
           </div>
-          <div className="flex items-center justify-between py-0.5 text-text-3">
+          <div className="flex items-center justify-between py-1 text-text-3">
             <span>구매자 수수료</span>
             <span className="font-medium tabular-nums text-text-2">{formatKRW(buyerFee(amount))}</span>
           </div>
-          <div className="mt-1.5 flex items-baseline justify-between border-t border-border pt-2">
+          <div className="mt-2 flex items-baseline justify-between border-t border-border pt-2">
             <span className="font-bold text-text-1">예상 결제 총액</span>
             <span className="font-display text-body-l font-bold tabular-nums text-text-1">{formatKRW(total)}</span>
           </div>
-          <p className="mt-1.5 text-caption text-text-3">거래 성사 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
+          <p className="mt-2 text-caption text-text-3">거래 성사 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
         </div>
 
         {/* 🔴 제안 뒤에도 잠그지 않는다(#428) — 다시 제안하는 것이 곧 수정이다(§2.1).
@@ -173,7 +173,7 @@ function BidSheet({ onClose }: { onClose: () => void }) {
           </p>
         )}
         {isEditMode && (
-          <p className="mt-3 border-t border-border pt-2.5 text-label text-text-3">
+          <p className="mt-3 border-t border-border pt-3 text-label text-text-3">
             새 금액으로 보내면 이전 제안을 대신해요. 판매자에게는 바뀐 금액만 보여요.
           </p>
         )}
@@ -253,7 +253,7 @@ export default function MobileAuctionDetail({
           {auction.title}
         </h1>
 
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
+        <div className="mt-3 flex flex-wrap gap-2">
           <span className={LABEL_NEUTRAL}>
             {GRADE_LABEL[auction.grade] ?? auction.grade}
           </span>
@@ -293,7 +293,7 @@ export default function MobileAuctionDetail({
             </p>
             {/* 내 제안 행(#480) — 제안한 사람에게만. 보라는 상태를 말하는 자리에 쓴다(디자인 절). */}
             {myOffer && (
-              <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-body-s">
+              <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-body-s">
                 <span className="font-extrabold text-primary">
                   {myOffer.status === "ACCEPTED" ? "내 제안 · 선택됨" : "내 제안"}
                 </span>
@@ -304,7 +304,7 @@ export default function MobileAuctionDetail({
             )}
             {/* 0건일 때만 — 아이콘 줄에서 뺀 자리를 여기서 채운다(§2.9 D1). */}
             {offerCount === 0 && (
-              <p className="mt-3 border-t border-border pt-2.5 text-label font-bold text-text-2">
+              <p className="mt-3 border-t border-border pt-3 text-label font-bold text-text-2">
                 {OFFER_EMPTY_HINT}
               </p>
             )}
@@ -312,7 +312,7 @@ export default function MobileAuctionDetail({
                 마감을 표시하지 않기로 하면서 더 중요해졌다. */}
             <p
               className={`text-caption leading-relaxed text-text-3 ${
-                offerCount === 0 ? "mt-1.5" : "mt-3 border-t border-border pt-2.5"
+                offerCount === 0 ? "mt-2" : "mt-3 border-t border-border pt-3"
               }`}
             >
               판매자가 제안을 보고 거래 상대를 직접 선택해요. 다른 사람의 제안 금액은 공개되지 않아요.
@@ -332,7 +332,7 @@ export default function MobileAuctionDetail({
           매물에서 바가 통째로 사라져 관심(찜)을 누를 방법이 없었다. 관심은 언제나 살리고,
           제안 CTA만 상태 문구로 잠근다 — 왜 제안이 안 되는지도 그 자리에서 설명된다. */}
       <div
-        className="fixed inset-x-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 pb-2.5 sm:hidden"
+        className="fixed inset-x-0 z-[400] flex items-center gap-3 border-t border-border bg-white px-4 pt-3 pb-3 sm:hidden"
         // 하단 5탭 위에 쌓인다(#554). 탭이 없는 화면에서는 safe-area 위에 앉는다.
         style={{ bottom: "var(--mobile-tabbar-h, env(safe-area-inset-bottom))" }}
       >

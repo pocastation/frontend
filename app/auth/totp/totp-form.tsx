@@ -651,7 +651,7 @@ export default function AdminTotpForm() {
 
 function RecoveryNotice() {
   return (
-    <p className="my-6 rounded-card bg-surface-2 px-3.5 py-3 text-label leading-6 text-text-2">
+    <p className="my-6 rounded-card bg-surface-2 px-4 py-3 text-label leading-6 text-text-2">
       본인 확인을 완료하면 기존 인증 앱과 복구 코드가 해제되고, 모든 기기에서
       로그아웃돼요.
     </p>

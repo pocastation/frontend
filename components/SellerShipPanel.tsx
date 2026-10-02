@@ -40,16 +40,16 @@ export default function SellerShipPanel({ auctionId }: { auctionId: number }) {
     <div className="mt-4 rounded-card border border-border bg-surface-2/40 p-4">
       <p className="text-body font-bold text-text-1">판매자 · 배송 관리</p>
       {fs === "CONFIRMED" ? (
-        <p className="mt-1.5 flex items-center gap-2 text-body-s text-text-2">
+        <p className="mt-2 flex items-center gap-2 text-body-s text-text-2">
           구매가 확정됐어요. 정산 예정 {formatKRW(order.payoutAmount)} · 정산 준비 중
         </p>
       ) : fs === "SHIPPED" ? (
-        <p className="mt-1.5 flex items-center gap-2 text-body-s text-text-2">
+        <p className="mt-2 flex items-center gap-2 text-body-s text-text-2">
           발송 완료 · {order.carrier} {order.trackingNumber}
         </p>
       ) : addr ? (
         <>
-          <p className="mt-1.5 text-body-s text-text-2">
+          <p className="mt-2 text-body-s text-text-2">
             받는 분 <b className="font-bold text-text-1">{addr.recipientName}</b> · {addr.phone}
           </p>
           <p className="text-body-s text-text-2">
@@ -73,7 +73,7 @@ export default function SellerShipPanel({ auctionId }: { auctionId: number }) {
           )}
         </>
       ) : (
-        <p className="mt-1.5 flex items-center gap-2 text-body-s text-text-2">
+        <p className="mt-2 flex items-center gap-2 text-body-s text-text-2">
           구매자가 배송지를 입력하면 발송할 수 있어요.
         </p>
       )}

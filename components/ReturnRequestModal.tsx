@@ -100,7 +100,7 @@ export default function ReturnRequestModal({
             {RETURN_REASON_OPTIONS.map((code) => (
               <label
                 key={code}
-                className={`flex cursor-pointer items-center gap-2.5 px-3.5 py-2.5 text-body ${
+                className={`flex cursor-pointer items-center gap-3 px-4 py-3 text-body ${
                   reason === code ? "text-text-1" : "text-text-2"
                 }`}
               >
@@ -137,7 +137,7 @@ export default function ReturnRequestModal({
         {reason && (
           <div className="mt-4">
             <p className="text-label font-bold text-text-2">사진 ({needsPhoto ? "필수" : "선택"})</p>
-            <div className="mt-1.5">
+            <div className="mt-2">
               <PhotoUploadGrid
                 items={photos.items}
                 max={RETURN_PHOTO_MAX}
@@ -156,12 +156,12 @@ export default function ReturnRequestModal({
             onChange={(e) => setDetail(e.target.value.slice(0, 500))}
             rows={3}
             placeholder="어떤 점이 달랐는지 구체적으로 적어주시면 운영팀이 빠르게 검토할 수 있어요."
-            className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-body text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+            className={`mt-2 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-body text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
           />
           <span className="mt-1 block text-right text-caption text-text-3">{detail.length}/500</span>
         </label>
 
-        <div className="mt-3 rounded-card border border-border bg-surface-2 px-3.5 py-2.5 text-caption leading-relaxed text-text-2">
+        <div className="mt-3 rounded-card border border-border bg-surface-2 px-4 py-3 text-caption leading-relaxed text-text-2">
           요청은 <b className="font-bold text-text-1">운영팀에 접수</b>돼요. 3영업일 안에 검토해
           판매자에게 전달하고, 판매자 의견을 받아 대금 처리를 결정해요. 반품이 확정되면 물품을
           반송한 뒤 환불돼요.

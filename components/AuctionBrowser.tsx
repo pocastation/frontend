@@ -12,7 +12,7 @@ import type { AuctionResponse, AuctionSaleType } from "@/lib/types";
 const GRID_CLASS =
   // 모바일 간격은 홈·목록·검색과 같은 카드 리듬(가로 8 / 세로 18)이다(#513).
   // 데스크탑은 지금까지의 auto-fill 격자를 그대로 둔다.
-  "grid grid-cols-2 gap-x-2 gap-y-5 sm:gap-3.5 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
+  "grid grid-cols-2 gap-x-2 gap-y-5 sm:gap-4 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
 
 // 홈 화면 임베드(AuctionExplorer)와 달리 /auctions 전용 페이지 — 검색은 헤더 전역검색과
 // 별개의 로컬 입력(ArtistExplorer와 같은 이유: 헤더검색은 홈으로 리다이렉트하므로 이 페이지
@@ -81,7 +81,7 @@ export default function AuctionBrowser({
       {/* 진행 표시는 화면 최상단 막대 하나로 모은다(#752). 예전에는 스피너가 아래 건수 옆에
           있었는데, 그 자리에 들고 나면서 정렬 칩 행의 폭이 흔들렸다. */}
       <TopProgressBar active={loading} />
-      <label className="mb-4 flex h-9 max-w-[480px] items-center gap-2 rounded-control border border-border-2 px-3.5 focus-within:border-text-1 sm:mb-5 sm:h-11 sm:px-4">
+      <label className="mb-4 flex h-9 max-w-[480px] items-center gap-2 rounded-control border border-border-2 px-4 focus-within:border-text-1 sm:mb-5 sm:h-11 sm:px-4">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
@@ -102,7 +102,7 @@ export default function AuctionBrowser({
             총 <strong className="font-bold text-text-1">{totalElements}</strong>개
           </span>
         </span>
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="정렬 기준">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="정렬 기준">
           {sortOptions.map((option) => (
             <button
               key={option.key}
@@ -114,7 +114,7 @@ export default function AuctionBrowser({
                 전부 그렇게 하는데 이 컴포넌트만 보라였다 — 보라는 CTA·필수 표시·포커스처럼
                 **행동을 요구하는 자리**에 남겨 둔다. 정렬 선택은 상태 표시지 행동 요구가 아니다.
               */
-              className={`min-h-8 rounded-control border px-3 py-1.5 text-label font-semibold transition-colors ${FOCUS_RING} ${
+              className={`min-h-8 rounded-control border px-3 py-2 text-label font-semibold transition-colors ${FOCUS_RING} ${
                 sort === option.key
                   ? "border-text-1 bg-text-1 text-white"
                   : "border-border-2 bg-white text-text-2"

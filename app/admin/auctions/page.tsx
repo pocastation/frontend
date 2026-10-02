@@ -264,7 +264,7 @@ export default function AdminAuctionsPage() {
   return (
     <div>
       <h1 className="font-display text-title-l font-extrabold text-text-1">판매글 관리</h1>
-      <p className="mt-1.5 text-body text-text-3">인증사진을 검수해 판매글을 승인하거나 거절하고, 공개된 판매글을 관리합니다.</p>
+      <p className="mt-2 text-body text-text-3">인증사진을 검수해 판매글을 승인하거나 거절하고, 공개된 판매글을 관리합니다.</p>
 
       {notice && (
         <p
@@ -277,7 +277,7 @@ export default function AdminAuctionsPage() {
         </p>
       )}
 
-      <div className="mt-5 mb-3 flex flex-wrap items-center gap-2.5">
+      <div className="mt-5 mb-3 flex flex-wrap items-center gap-3">
         <label className="flex h-10 min-w-[200px] flex-1 items-center gap-2 rounded-control border border-border px-4">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
             <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
@@ -305,7 +305,7 @@ export default function AdminAuctionsPage() {
             </select>
           </label>
         </div>
-        <div className="hidden flex-wrap gap-1.5 lg:flex" role="group" aria-label="상태 필터">
+        <div className="hidden flex-wrap gap-2 lg:flex" role="group" aria-label="상태 필터">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.key}
@@ -320,7 +320,7 @@ export default function AdminAuctionsPage() {
             </button>
           ))}
         </div>
-        <div className="hidden flex-wrap gap-1.5 lg:flex" role="group" aria-label="판매 유형 필터">
+        <div className="hidden flex-wrap gap-2 lg:flex" role="group" aria-label="판매 유형 필터">
           {SALE_TYPE_FILTERS.map((f) => (
             <button
               key={f.key}
@@ -345,13 +345,13 @@ export default function AdminAuctionsPage() {
         <table role="table" className="admin-table admin-table-auctions w-full min-w-[900px] border-collapse">
           <thead>
             <tr className="border-b border-border text-left text-caption font-bold text-text-3">
-              <th className="whitespace-nowrap px-4 py-2.5">판매글</th>
-              <th className="whitespace-nowrap px-4 py-2.5">판매자</th>
-              <th className="whitespace-nowrap px-4 py-2.5">현재가</th>
-              <th className="whitespace-nowrap px-4 py-2.5">제안</th>
-              <th className="whitespace-nowrap px-4 py-2.5">상태</th>
-              <th className="whitespace-nowrap px-4 py-2.5">마감</th>
-              <th className="whitespace-nowrap px-4 py-2.5">관리</th>
+              <th className="whitespace-nowrap px-4 py-3">판매글</th>
+              <th className="whitespace-nowrap px-4 py-3">판매자</th>
+              <th className="whitespace-nowrap px-4 py-3">현재가</th>
+              <th className="whitespace-nowrap px-4 py-3">제안</th>
+              <th className="whitespace-nowrap px-4 py-3">상태</th>
+              <th className="whitespace-nowrap px-4 py-3">마감</th>
+              <th className="whitespace-nowrap px-4 py-3">관리</th>
             </tr>
           </thead>
           <tbody>
@@ -375,16 +375,16 @@ export default function AdminAuctionsPage() {
                           setReviewTarget(a);
                           setNotice(null);
                         }}
-                        className={`flex w-full items-center gap-2.5 text-left ${FOCUS_RING}`}
+                        className={`flex w-full items-center gap-3 text-left ${FOCUS_RING}`}
                       >
                         <AuctionIdentity auction={a} />
                       </button>
                     ) : PUBLIC_AUCTION_STATUSES.has(a.status) ? (
-                      <Link href={`/auctions/${a.id}`} className={`flex items-center gap-2.5 ${FOCUS_RING}`}>
+                      <Link href={`/auctions/${a.id}`} className={`flex items-center gap-3 ${FOCUS_RING}`}>
                         <AuctionIdentity auction={a} />
                       </Link>
                     ) : (
-                      <div className="flex items-center gap-2.5">
+                      <div className="flex items-center gap-3">
                         <AuctionIdentity auction={a} />
                       </div>
                     )}
@@ -405,7 +405,7 @@ export default function AdminAuctionsPage() {
                   </td>
                   <td data-label="마감" className="whitespace-nowrap px-4 py-3 text-text-3">{getEndLabel(a)}</td>
                   <td className="whitespace-nowrap px-4 py-3">
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-2">
                       <button
                         type="button"
                         onClick={() => {
@@ -486,13 +486,13 @@ export default function AdminAuctionsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
             <h2 className="font-display text-body-l font-extrabold text-text-1">판매글 취소</h2>
-            <p className="mt-1.5 text-body-s text-text-3">
+            <p className="mt-2 text-body-s text-text-3">
               &quot;{cancelTarget.title}&quot;을(를) 취소합니다. 이 작업은 되돌릴 수 없고, 선택한 사유가 판매자에게 알림으로 전달됩니다.
             </p>
             {/* 사유는 템플릿 선택 — 검수 거절과 같은 이유(문구 일관성·집계). */}
             <fieldset className="mt-3">
               <legend className="sr-only">취소 사유</legend>
-              <div className="grid gap-1.5">
+              <div className="grid gap-2">
                 {AUCTION_CANCELLATION_REASON_OPTIONS.map((option) => (
                   <label
                     key={option.code}

@@ -70,7 +70,7 @@ async function getArtistAuctions(artistName: string): Promise<AuctionListRespons
  */
 function MetaRow({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex gap-3 border-b border-border py-2.5 text-body-s">
+    <div className="flex gap-3 border-b border-border py-3 text-body-s">
       <span className="w-[62px] shrink-0 text-text-3">{label}</span>
       <span className="min-w-0 font-bold text-text-1">{value}</span>
     </div>
@@ -127,7 +127,7 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
           </span>
 
           <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <h1 className="font-display text-title font-extrabold text-text-1 sm:text-display">
                 {artist.name}
               </h1>
@@ -135,7 +135,7 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
             </div>
             {/* 타입·활동상태를 같은 무게의 뉴트럴 태그로 둔다 — 예전에는 타입만 연보라 알약이라
                 정보 중요도와 무관하게 그것만 튀었다. */}
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <div className="mt-2 flex flex-wrap gap-2">
               <span className={LABEL_NEUTRAL}>
                 {ARTIST_TYPE_LABEL[artist.type]}
               </span>
@@ -174,7 +174,7 @@ export default async function ArtistDetailPage({ params }: { params: Promise<{ i
                         member.stageName.slice(0, 2)
                       )}
                     </span>
-                    <p className={`mt-1.5 w-full truncate text-caption font-bold ${member.active ? "text-text-2" : "text-text-3"}`}>
+                    <p className={`mt-2 w-full truncate text-caption font-bold ${member.active ? "text-text-2" : "text-text-3"}`}>
                       {member.stageName}
                     </p>
                     {!member.active && <span className="text-caption font-bold text-text-3">탈퇴</span>}

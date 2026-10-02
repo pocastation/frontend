@@ -225,7 +225,7 @@ export default function AdminDisputesPage() {
                         </span>
                       </span>
                       <span className="mt-1 block truncate text-body font-bold text-text-1">{item.title}</span>
-                      <span className="mt-0.5 block truncate text-label text-text-3">
+                      <span className="mt-1 block truncate text-label text-text-3">
                         {item.returnReason ? RETURN_REASON_LABEL[item.returnReason] : "사유 미기재"}
                       </span>
                     </button>
@@ -241,7 +241,7 @@ export default function AdminDisputesPage() {
                 type="button"
                 disabled={page === 0}
                 onClick={() => setPage((p) => Math.max(p - 1, 0))}
-                className={`rounded-control border border-border px-2.5 py-1 text-label font-semibold text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
+                className={`rounded-control border border-border px-3 py-1 text-label font-semibold text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
               >
                 이전
               </button>
@@ -252,7 +252,7 @@ export default function AdminDisputesPage() {
                 type="button"
                 disabled={page >= totalPages - 1}
                 onClick={() => setPage((p) => p + 1)}
-                className={`rounded-control border border-border px-2.5 py-1 text-label font-semibold text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
+                className={`rounded-control border border-border px-3 py-1 text-label font-semibold text-text-2 disabled:opacity-40 ${FOCUS_RING}`}
               >
                 다음
               </button>
@@ -274,7 +274,7 @@ export default function AdminDisputesPage() {
               </button>
 
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-control border border-border px-2.5 py-1 text-label font-bold text-text-2">
+                <span className="rounded-control border border-border px-3 py-1 text-label font-bold text-text-2">
                   {DISPUTE_STATUS_LABEL[selected.disputeStatus]}
                 </span>
                 <Link
@@ -334,7 +334,7 @@ export default function AdminDisputesPage() {
                   ["구매자 ID", selected.buyerId],
                   ["판매자 ID", selected.sellerId],
                 ].map(([label, value]) => (
-                  <div key={label} className="flex gap-3 px-3.5 py-2.5">
+                  <div key={label} className="flex gap-3 px-4 py-3">
                     <dt className="w-24 shrink-0 text-text-3">{label}</dt>
                     <dd className="min-w-0 flex-1 break-words font-semibold text-text-1">{value}</dd>
                   </div>
@@ -352,7 +352,7 @@ export default function AdminDisputesPage() {
               {(selected.returnDetail || selected.sellerDefense || selected.disputeNote) && (
                 <div className="mt-4 space-y-2">
                   {selected.returnDetail && (
-                    <div className="rounded-card bg-surface-2 px-3.5 py-2.5">
+                    <div className="rounded-card bg-surface-2 px-4 py-3">
                       <span className="block text-caption font-bold uppercase tracking-wide text-text-3">
                         구매자 주장
                       </span>
@@ -362,7 +362,7 @@ export default function AdminDisputesPage() {
                     </div>
                   )}
                   {selected.sellerDefense && (
-                    <div className="rounded-card bg-surface-2 px-3.5 py-2.5">
+                    <div className="rounded-card bg-surface-2 px-4 py-3">
                       <span className="block text-caption font-bold uppercase tracking-wide text-text-3">
                         판매자 의견
                       </span>
@@ -372,7 +372,7 @@ export default function AdminDisputesPage() {
                     </div>
                   )}
                   {selected.disputeNote && (
-                    <div className="rounded-card border border-border px-3.5 py-2.5">
+                    <div className="rounded-card border border-border px-4 py-3">
                       <span className="block text-caption font-bold uppercase tracking-wide text-text-3">
                         운영팀 기록
                       </span>
@@ -395,7 +395,7 @@ export default function AdminDisputesPage() {
                       onChange={(e) => setNote(e.target.value.slice(0, 500))}
                       rows={3}
                       placeholder="무엇이 더 필요한지 구체적으로 적어주세요. 구매자에게 그대로 전달돼요."
-                      className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-body text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+                      className={`mt-2 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-body text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
                     />
                   </label>
                   <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -429,7 +429,7 @@ export default function AdminDisputesPage() {
                       onChange={(e) => setNote(e.target.value.slice(0, 500))}
                       rows={3}
                       placeholder="어떤 근거로 판단했는지 적어주세요. 감사로그에 남아요."
-                      className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-body text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+                      className={`mt-2 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-body text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
                     />
                   </label>
                   <label className="mt-3 block">
@@ -439,7 +439,7 @@ export default function AdminDisputesPage() {
                     </span>
                     {/* 좁은 폭에서는 범위 안내를 입력칸 아래로 내린다 — 나란히 두면 320px에서
                         「미/만」으로 접힌다. 범위는 읽어야 하는 값이라 접히면 안 된다. */}
-                    <span className="mt-1.5 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-2">
+                    <span className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-2">
                       <input
                         type="text"
                         inputMode="numeric"
@@ -495,7 +495,7 @@ export default function AdminDisputesPage() {
                       onChange={(e) => setNote(e.target.value.slice(0, 500))}
                       rows={3}
                       placeholder="왜 다시 열어야 하는지 적어주세요. 감사로그에 남아요."
-                      className={`mt-1.5 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-body text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
+                      className={`mt-2 w-full resize-none rounded-card border border-border bg-surface px-3 py-2 text-body text-text-1 placeholder:text-text-3 ${FOCUS_RING}`}
                     />
                   </label>
                   <button
@@ -511,7 +511,7 @@ export default function AdminDisputesPage() {
                   </p>
                 </div>
               ) : (
-                <p className="mt-5 rounded-card border border-border bg-surface-2 px-3.5 py-3 text-label leading-relaxed text-text-2">
+                <p className="mt-5 rounded-card border border-border bg-surface-2 px-4 py-3 text-label leading-relaxed text-text-2">
                   상대의 응답을 기다리는 단계예요.
                   {selected.disputeDueAt
                     ? ` ${formatDateTimeKST(selected.disputeDueAt)}까지 응답이 없으면 자동으로 다음 단계로 넘어가요.`

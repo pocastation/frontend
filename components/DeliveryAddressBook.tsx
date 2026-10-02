@@ -166,10 +166,10 @@ export default function DeliveryAddressBook() {
                       </span>
                     )}
                   </div>
-                  <p className="mt-1.5 text-body font-bold text-text-1">
+                  <p className="mt-2 text-body font-bold text-text-1">
                     {address.recipientName} <span className="font-normal text-text-3">· {address.phone}</span>
                   </p>
-                  <p className="mt-0.5 text-body text-text-2">
+                  <p className="mt-1 text-body text-text-2">
                     ({address.postalCode}) {address.address1}
                     {address.address2 ? ` ${address.address2}` : ""}
                   </p>
@@ -178,7 +178,7 @@ export default function DeliveryAddressBook() {
                       <button
                         type="button"
                         onClick={() => handleSetDefault(address)}
-                        className={`px-3 py-1.5 text-label ${SECONDARY_BUTTON_CLASS}`}
+                        className={`px-3 py-2 text-label ${SECONDARY_BUTTON_CLASS}`}
                       >
                         기본으로 지정
                       </button>
@@ -186,14 +186,14 @@ export default function DeliveryAddressBook() {
                     <button
                       type="button"
                       onClick={() => setEditing(address.id)}
-                      className={`px-3 py-1.5 text-label ${SECONDARY_BUTTON_CLASS}`}
+                      className={`px-3 py-2 text-label ${SECONDARY_BUTTON_CLASS}`}
                     >
                       수정
                     </button>
                     <button
                       type="button"
                       onClick={() => handleDelete(address)}
-                      className={`px-3 py-1.5 text-label font-bold text-text-3 hover:text-accent ${FOCUS_RING}`}
+                      className={`px-3 py-2 text-label font-bold text-text-3 hover:text-accent ${FOCUS_RING}`}
                     >
                       삭제
                     </button>
@@ -306,9 +306,9 @@ function AddressForm({
         {isEdit ? "배송지 수정" : "배송지 추가"}
       </h2>
 
-      <div className="mt-4 flex flex-col gap-3.5">
+      <div className="mt-4 flex flex-col gap-4">
         <div>
-          <label htmlFor={labelId} className="mb-1.5 block text-label font-bold text-text-2">
+          <label htmlFor={labelId} className="mb-2 block text-label font-bold text-text-2">
             배송지명 <span className="font-normal text-text-3">(선택)</span>
           </label>
           <input
@@ -322,9 +322,9 @@ function AddressForm({
           />
         </div>
 
-        <div className="grid gap-3.5 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label htmlFor={nameId} className="mb-1.5 block text-label font-bold text-text-2">
+            <label htmlFor={nameId} className="mb-2 block text-label font-bold text-text-2">
               받는 사람
             </label>
             <input
@@ -338,7 +338,7 @@ function AddressForm({
             />
           </div>
           <div>
-            <label htmlFor={phoneId} className="mb-1.5 block text-label font-bold text-text-2">
+            <label htmlFor={phoneId} className="mb-2 block text-label font-bold text-text-2">
               연락처
             </label>
             <input
@@ -356,7 +356,7 @@ function AddressForm({
         </div>
 
         <div>
-          <label htmlFor={postalId} className="mb-1.5 block text-label font-bold text-text-2">
+          <label htmlFor={postalId} className="mb-2 block text-label font-bold text-text-2">
             주소
           </label>
           <div className="flex gap-2">
@@ -370,7 +370,7 @@ function AddressForm({
               aria-label="우편번호"
               className={`${INPUT_CLASS} max-w-[120px] bg-surface-2`}
             />
-            <button type="button" onClick={openPostcode} className={`shrink-0 px-3.5 ${SECONDARY_BUTTON_CLASS}`}>
+            <button type="button" onClick={openPostcode} className={`shrink-0 px-4 ${SECONDARY_BUTTON_CLASS}`}>
               우편번호 찾기
             </button>
           </div>
@@ -430,10 +430,10 @@ function AddressForm({
       )}
 
       <div className="mt-5 flex gap-2">
-        <button type="submit" disabled={isSubmitting} className={`flex-1 py-2.5 ${PRIMARY_BUTTON_CLASS}`}>
+        <button type="submit" disabled={isSubmitting} className={`flex-1 py-3 ${PRIMARY_BUTTON_CLASS}`}>
           {isSubmitting ? "저장 중..." : isEdit ? "수정하기" : "등록하기"}
         </button>
-        <button type="button" onClick={onCancel} className={`px-5 py-2.5 ${SECONDARY_BUTTON_CLASS}`}>
+        <button type="button" onClick={onCancel} className={`px-5 py-3 ${SECONDARY_BUTTON_CLASS}`}>
           취소
         </button>
       </div>

@@ -226,7 +226,7 @@ export default function NotificationsPage() {
       type="button"
       onClick={handleMarkAllRead}
       disabled={!hasUnread}
-      className={`shrink-0 rounded-control bg-white px-3.5 py-1.5 text-label font-bold transition-colors ${FOCUS_RING} ${
+      className={`shrink-0 rounded-control bg-white px-4 py-2 text-label font-bold transition-colors ${FOCUS_RING} ${
         hasUnread
           ? "border border-border-2 text-text-2 hover:border-primary hover:text-primary"
           : "cursor-not-allowed border border-border text-text-3"
@@ -244,7 +244,7 @@ export default function NotificationsPage() {
         <div className="mb-6 hidden items-end justify-between gap-3 sm:flex">
           <div>
             <h1 className="font-display text-title-l font-extrabold text-text-1">알림</h1>
-            <p className="mt-1.5 text-body text-text-3">거래 소식을 모아봐요.</p>
+            <p className="mt-2 text-body text-text-3">거래 소식을 모아봐요.</p>
           </div>
           {markAllReadButton}
         </div>
@@ -318,7 +318,7 @@ export default function NotificationsPage() {
                         두 줄이 아닌 이유는 남는 셋이 하필 자동 구매확정 3일·자동 환불 3영업일·
                         미결제 제재 7일이어서다. 분쟁 소재가 되는 값이라 화면에서 빼지 않는다.
                       */}
-                      <span className={`mt-0.5 line-clamp-3 text-body-s leading-relaxed ${unread ? "text-text-2" : "text-text-3"}`}>
+                      <span className={`mt-1 line-clamp-3 text-body-s leading-relaxed ${unread ? "text-text-2" : "text-text-3"}`}>
                         {notification.message}
                       </span>
                     </span>

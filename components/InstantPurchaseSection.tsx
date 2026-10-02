@@ -95,7 +95,7 @@ export default function InstantPurchaseSection({
             {isLive ? "구매 가능" : (STATUS_LABEL[currentStatus] ?? "종료")}
           </span>
         </div>
-        <div className="mt-3 flex items-center justify-between border-t border-border pt-2.5 text-caption text-text-3">
+        <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-caption text-text-3">
           <span>
             구매자 수수료 <span className="font-semibold text-text-2 tabular-nums">{formatKRW(buyerFee(price))}</span>
           </span>

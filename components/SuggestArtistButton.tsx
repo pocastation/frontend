@@ -89,8 +89,8 @@ export default function SuggestArtistButton() {
             <p className="mt-1 text-label text-text-3">추가됐으면 하는 스타·기획사·멤버를 알려주세요.</p>
 
             <fieldset className="mt-4">
-              <legend className="mb-1.5 text-label font-bold text-text-2">종류</legend>
-              <div className="flex gap-1.5">
+              <legend className="mb-2 text-label font-bold text-text-2">종류</legend>
+              <div className="flex gap-2">
                 {SUGGESTION_KIND_OPTIONS.map((k) => (
                   <button
                     key={k}
@@ -109,7 +109,7 @@ export default function SuggestArtistButton() {
               </div>
             </fieldset>
 
-            <label htmlFor={nameId} className="mt-4 mb-1.5 block text-label font-bold text-text-2">
+            <label htmlFor={nameId} className="mt-4 mb-2 block text-label font-bold text-text-2">
               이름
             </label>
             <input
@@ -120,10 +120,10 @@ export default function SuggestArtistButton() {
               required
               maxLength={100}
               placeholder={kind === "MEMBER" ? "멤버 이름" : kind === "AGENCY" ? "기획사 이름" : "그룹/솔로 이름"}
-              className={`w-full rounded-control border border-border px-3.5 py-2.5 text-body text-text-1 outline-none focus:border-primary ${FOCUS_RING}`}
+              className={`w-full rounded-control border border-border px-4 py-3 text-body text-text-1 outline-none focus:border-primary ${FOCUS_RING}`}
             />
 
-            <label htmlFor={noteId} className="mt-3 mb-1.5 block text-label font-bold text-text-2">
+            <label htmlFor={noteId} className="mt-3 mb-2 block text-label font-bold text-text-2">
               비고 <span className="font-normal text-text-3">(선택)</span>
             </label>
             <textarea
@@ -133,7 +133,7 @@ export default function SuggestArtistButton() {
               maxLength={500}
               rows={3}
               placeholder="소속 그룹·기획사 등 참고할 내용을 적어주세요."
-              className={`w-full resize-none rounded-control border border-border px-3.5 py-2.5 text-body text-text-1 outline-none focus:border-primary ${FOCUS_RING}`}
+              className={`w-full resize-none rounded-control border border-border px-4 py-3 text-body text-text-1 outline-none focus:border-primary ${FOCUS_RING}`}
             />
 
             {error && (

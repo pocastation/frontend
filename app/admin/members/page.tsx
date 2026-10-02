@@ -228,13 +228,13 @@ export default function AdminMembersPage() {
   return (
     <div>
       <h1 className="font-display text-title-l font-extrabold text-text-1">회원 관리</h1>
-      <p className="mt-1.5 text-body text-text-3">회원 정보를 검색하고 계정 상태를 관리합니다.</p>
+      <p className="mt-2 text-body text-text-3">회원 정보를 검색하고 계정 상태를 관리합니다.</p>
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_320px]">
         {/* 목록 — min-w-0로 그리드 컬럼이 테이블(min-w) 너비만큼 늘어나 페이지가 넘치는 걸 막고,
             테이블은 내부(overflow-x-auto)에서만 가로 스크롤되게 한다. */}
         <div className={`min-w-0 ${selectedId !== null ? "max-lg:hidden" : ""}`}>
-          <div className="mb-3 flex flex-wrap items-center gap-2.5">
+          <div className="mb-3 flex flex-wrap items-center gap-3">
             <label className="flex h-10 min-w-[200px] flex-1 items-center gap-2 rounded-control border border-border px-4">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" /><path d="m21 21-4.35-4.35" />
@@ -248,7 +248,7 @@ export default function AdminMembersPage() {
                 className="w-full border-0 bg-transparent text-body text-text-1 outline-none placeholder:text-text-3"
               />
             </label>
-            <div className="flex gap-1.5" role="group" aria-label="상태 필터">
+            <div className="flex gap-2" role="group" aria-label="상태 필터">
               {STATUS_FILTERS.map((f) => (
                 <button
                   key={f.key}
@@ -280,7 +280,7 @@ export default function AdminMembersPage() {
 
           <p className="mb-2 text-label text-text-3">총 {totalElements}명{loading && " · 불러오는 중..."}</p>
           {unverifiedOnly && (
-            <p className="mb-3 rounded-card bg-surface-2 px-3.5 py-3 text-label leading-relaxed text-text-2">
+            <p className="mb-3 rounded-card bg-surface-2 px-4 py-3 text-label leading-relaxed text-text-2">
               인증 후 가입으로 바꾼 뒤로는 미인증 회원이 새로 생기지 않아요. 여기 남은 건 전환 이전
               가입자이고, <b className="font-bold text-text-2">이 수가 0이 되면 정리가 끝난 거예요.</b>
             </p>
@@ -290,11 +290,11 @@ export default function AdminMembersPage() {
             <table role="table" className="admin-table admin-table-members w-full min-w-[560px] border-collapse">
               <thead>
                 <tr className="border-b border-border text-left text-caption font-bold text-text-3">
-                  <th className="px-4 py-2.5">회원</th>
-                  <th className="px-4 py-2.5">이메일</th>
-                  <th className="whitespace-nowrap px-4 py-2.5">상태</th>
-                  <th className="whitespace-nowrap px-4 py-2.5">역할</th>
-                  <th className="whitespace-nowrap px-4 py-2.5">가입일</th>
+                  <th className="px-4 py-3">회원</th>
+                  <th className="px-4 py-3">이메일</th>
+                  <th className="whitespace-nowrap px-4 py-3">상태</th>
+                  <th className="whitespace-nowrap px-4 py-3">역할</th>
+                  <th className="whitespace-nowrap px-4 py-3">가입일</th>
                 </tr>
               </thead>
               <tbody>
@@ -325,7 +325,7 @@ export default function AdminMembersPage() {
                           {PROVIDER_LABEL[m.provider] ?? m.provider}
                           {/* 소셜은 인증 개념이 없어 항상 null이다 — 이메일 가입자만 미인증으로 읽는다. */}
                           {m.provider === "EMAIL" && m.emailVerifiedAt === null && m.email !== null && (
-                            <span className="ml-1.5 font-bold text-danger">미인증</span>
+                            <span className="ml-2 font-bold text-danger">미인증</span>
                           )}
                         </span>
                       </button></td>
@@ -383,7 +383,7 @@ export default function AdminMembersPage() {
                 </StatusBadge>
               </div>
 
-              <dl className="mt-3 flex flex-col gap-1.5 border-t border-border pt-3 text-body-s">
+              <dl className="mt-3 flex flex-col gap-2 border-t border-border pt-3 text-body-s">
                 <div className="flex justify-between gap-2">
                   <dt className="text-text-3">이메일</dt>
                   <dd className="truncate font-semibold text-text-1">{detail.email ?? "—"}</dd>
@@ -571,11 +571,11 @@ export default function AdminMembersPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
             <h2 className="font-display text-body-l font-extrabold text-text-1">개인정보 파기</h2>
-            <p className="mt-1.5 text-body-s leading-relaxed text-text-3">
+            <p className="mt-2 text-body-s leading-relaxed text-text-3">
               &quot;{detail.nickname}&quot;님의 이메일·비밀번호·배송지·결제수단·본인인증 결과를 지우고
               프로필을 가명화합니다. 그 주소의 발송 금지도 함께 풀립니다.
             </p>
-            <p className="mt-2 rounded-card bg-surface-2 px-3.5 py-3 text-body-s leading-relaxed text-text-2">
+            <p className="mt-2 rounded-card bg-surface-2 px-4 py-3 text-body-s leading-relaxed text-text-2">
               <b className="font-extrabold text-text-1">되돌릴 수 없습니다.</b> 진행 중인 거래가 있으면
               거절되니, 거래를 먼저 정리한 뒤 다시 시도하세요.
             </p>
@@ -621,7 +621,7 @@ export default function AdminMembersPage() {
             <h2 className="font-display text-body-l font-extrabold text-text-1">
               {roleTarget === "ADMIN" ? "관리자로 승격" : "관리자 권한 회수"}
             </h2>
-            <p className="mt-1.5 text-body-s leading-relaxed text-text-3">
+            <p className="mt-2 text-body-s leading-relaxed text-text-3">
               {roleTarget === "ADMIN"
                 ? <>&quot;{detail.nickname}&quot;님을 관리자로 승격합니다. 회원 정지·판매글 취소·신고 처리 권한이 부여됩니다.</>
                 : <>&quot;{detail.nickname}&quot;님의 관리자 권한을 회수합니다. 더 이상 관리 기능을 사용할 수 없습니다.</>}
@@ -666,8 +666,8 @@ export default function AdminMembersPage() {
       {roleToast && (
         // 떠 있는 토스트는 지면 위에 얹히므로 배경·그림자를 남긴다 — 인라인 알림과 성격이 다르다.
         // 하드코딩 테두리만 토큰으로 바꿨다(#294).
-        <div className="fixed bottom-6 left-1/2 z-50 flex max-w-sm -translate-x-1/2 items-start gap-2.5 rounded-card border border-ok/30 bg-ok-soft px-4 py-3 shadow-modal">
-          <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ok text-caption font-bold text-white">✓</span>
+        <div className="fixed bottom-6 left-1/2 z-50 flex max-w-sm -translate-x-1/2 items-start gap-3 rounded-card border border-ok/30 bg-ok-soft px-4 py-3 shadow-modal">
+          <span className="mt-1 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ok text-caption font-bold text-white">✓</span>
           <p className="text-body-s font-semibold leading-relaxed text-ok">{roleToast}</p>
         </div>
       )}

@@ -28,7 +28,7 @@ export default function NoticesPage() {
         <h1 className="mt-2 font-display text-display font-extrabold text-text-1 sm:text-display">
           공지사항
         </h1>
-        <p className="mt-3.5 max-w-[33rem] text-body text-text-2">
+        <p className="mt-4 max-w-[33rem] text-body text-text-2">
           약관·정책이 바뀌거나 서비스에 변화가 있을 때 여기에 먼저 알려드려요.
         </p>
       </header>
@@ -40,7 +40,7 @@ export default function NoticesPage() {
               href={`/notices/${notice.slug}`}
               className={`group block py-5 ${FOCUS_RING}`}
             >
-              <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-label">
+              <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-label">
                 {/* 고정은 알약이나 색 배지가 아니라 글자로 말한다 — 목록에 색이 늘어나면
                     분류·날짜와 뒤섞여 무엇이 중요한지가 흐려진다. */}
                 {notice.pinned && <span className="font-extrabold text-text-1">고정</span>}
@@ -49,7 +49,7 @@ export default function NoticesPage() {
                 </span>
                 <span className="tabular-nums text-text-3">{formatDate(notice.date)}</span>
               </span>
-              <span className="mt-1.5 block font-display text-body-l font-extrabold text-text-1 transition-colors group-hover:text-primary">
+              <span className="mt-2 block font-display text-body-l font-extrabold text-text-1 transition-colors group-hover:text-primary">
                 {notice.title}
               </span>
               <span className="mt-1 block text-body-s text-text-2">

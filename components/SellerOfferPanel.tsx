@@ -93,10 +93,10 @@ function OfferConfirmation({
             MATCHED로 가고 미결제면 다시 열린다(§1.4).
             강조 장치를 쓰지 않는다: 색 띠나 회색 상자는 알림 상자처럼 읽히고, 작은 팝업에서는
             그 자체가 장식이 된다. **읽는 순서**가 무게를 진다. */}
-        <p className="mt-2.5 text-body font-bold leading-relaxed text-text-1">
+        <p className="mt-3 text-body font-bold leading-relaxed text-text-1">
           선택하면 매매계약이 성립하고 되돌릴 수 없어요.
         </p>
-        <p className="mt-1.5 text-label leading-relaxed text-text-3">
+        <p className="mt-2 text-label leading-relaxed text-text-3">
           사정이 생기면 운영팀의 대금 처리를 거쳐야 하고, 제재가 적용될 수 있어요.
         </p>
 
@@ -106,13 +106,13 @@ function OfferConfirmation({
           <p className="font-display text-display font-extrabold tabular-nums leading-none text-text-1">
             {formatKRW(offer.amount)}
           </p>
-          <p className="mt-1.5 text-label text-text-2">
+          <p className="mt-2 text-label text-text-2">
             정산 예상 <b className="font-bold tabular-nums text-text-1">{formatKRW(sellerPayout(offer.amount))}</b>
             {" · 수수료 3.5% 공제"}
           </p>
-          <div className="mt-3 border-t border-border pt-2.5">
+          <div className="mt-3 border-t border-border pt-3">
             <p className="text-body-s font-bold text-text-1">{offer.bidderNicknameMasked}</p>
-            <p className="mt-0.5 text-label text-text-2">
+            <p className="mt-1 text-label text-text-2">
               Lv.{offer.trustLevel} · 거래 <span className="tabular-nums">{offer.tradeCount}회</span>
             </p>
           </div>
@@ -228,7 +228,7 @@ export default function SellerOfferPanel({
 
   const isMatched = status === "MATCHED" || selectedOffer != null;
   const displayedCount = loading && offers.length === 0 ? offerCount : totalElements;
-  const panelPadding = viewport === "desktop" ? "p-5" : "p-3.5";
+  const panelPadding = viewport === "desktop" ? "p-5" : "p-4";
   const amountLabel = isMatched ? "거래 성사 금액" : "판매자 최소 제안 금액";
   const displayAmount = isMatched ? selectedOffer?.amount : startPrice;
 
@@ -272,7 +272,7 @@ export default function SellerOfferPanel({
           <p className="text-label font-semibold text-text-3">{amountLabel}</p>
           <OfferCounts offerCount={offerCount} wishlistCount={wishlistCount} size={viewport === "desktop" ? "md" : "sm"} />
         </div>
-        <p className={`${viewport === "desktop" ? "mt-1.5 text-display" : "mt-1 text-title-l"} font-display font-extrabold tabular-nums text-text-1`}>
+        <p className={`${viewport === "desktop" ? "mt-2 text-display" : "mt-1 text-title-l"} font-display font-extrabold tabular-nums text-text-1`}>
           {displayAmount == null ? "금액 확인 중" : formatKRW(displayAmount)}
         </p>
 
@@ -290,7 +290,7 @@ export default function SellerOfferPanel({
         )}
 
         {isMatched ? (
-          <div className={`${viewport === "desktop" ? "mt-5 pt-5" : "mt-4 pt-3.5"} border-t border-border`}>
+          <div className={`${viewport === "desktop" ? "mt-5 pt-5" : "mt-4 pt-4"} border-t border-border`}>
             <div className="flex items-center justify-between gap-3">
               <h2 className={`${viewport === "desktop" ? "text-body-l" : "text-body"} font-extrabold text-text-1`}>
                 선택한 가격 제안
@@ -342,7 +342,7 @@ export default function SellerOfferPanel({
             </p>
           </div>
         ) : (
-          <div className={`${viewport === "desktop" ? "mt-5 pt-5" : "mt-4 pt-3.5"} border-t border-border`}>
+          <div className={`${viewport === "desktop" ? "mt-5 pt-5" : "mt-4 pt-4"} border-t border-border`}>
             <div className="flex items-center justify-between gap-3 pb-3">
               <h2 className={`${viewport === "desktop" ? "text-body-l" : "text-body"} font-extrabold text-text-1`}>
                 받은 가격 제안 {displayedCount}건

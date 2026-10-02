@@ -58,7 +58,7 @@ export default async function NoticeDetailPage({
       </Link>
 
       <header className="mt-4 border-b border-text-1/25 pb-5">
-        <p className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-label">
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-label">
           <span className="font-bold text-text-3">{NOTICE_CATEGORY_LABEL[notice.category]}</span>
           <span className="tabular-nums text-text-3">{formatDate(notice.date)}</span>
         </p>

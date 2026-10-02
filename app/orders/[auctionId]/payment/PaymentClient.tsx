@@ -271,7 +271,7 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         {result ? (
           <div className="border-b border-border pb-4 sm:mt-4 sm:border-t sm:pt-4">
             <p className="truncate text-body-s text-text-2">{result.orderName}</p>
-            <div className="mt-1.5 flex items-baseline justify-between gap-3">
+            <div className="mt-2 flex items-baseline justify-between gap-3">
               <span className="text-label text-text-3">{issued ? "입금할 금액" : "결제 금액"}</span>
               <span className="font-display text-title-l font-extrabold text-text-1 tabular-nums">
                 {formatKRW(result.amount)}
@@ -294,13 +294,13 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
 
         {error ? (
           // 진짜 오류만 강조한다 — 회색 안내 상자 + 빨간 글자(#765). 일반 안내는 helper text로 녹인다.
-          <p className="mt-5 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold leading-relaxed text-danger">{error}</p>
+          <p className="mt-5 rounded-card bg-surface-2 px-4 py-3 text-body-s font-semibold leading-relaxed text-danger">{error}</p>
         ) : null}
 
         {/* 데스크탑 액션 — 모바일은 아래 고정 바가 대신한다. */}
         <div className="mt-8 hidden border-t border-border pt-4 sm:block">
           {paid || issued ? (
-            <Link href={BACK_HREF} className={`inline-flex h-9 items-center px-3.5 ${SECONDARY_BUTTON_CLASS}`}>
+            <Link href={BACK_HREF} className={`inline-flex h-9 items-center px-4 ${SECONDARY_BUTTON_CLASS}`}>
               구매내역으로
             </Link>
           ) : (
@@ -316,7 +316,7 @@ export default function PaymentClient({ auctionId }: { auctionId: number }) {
         같이 보여야 한다 — 예전에는 스크롤해야 버튼에 닿았다. 매물 상세의 고정 바와 같은 지면이다.
       */}
       <div
-        className="fixed inset-x-0 bottom-0 z-[400] border-t border-border bg-white px-gutter pt-2.5 pb-[calc(10px_+_env(safe-area-inset-bottom))] sm:hidden"
+        className="fixed inset-x-0 bottom-0 z-[400] border-t border-border bg-white px-gutter pt-3 pb-[calc(10px_+_env(safe-area-inset-bottom))] sm:hidden"
       >
         {paid || issued ? (
           <Link
@@ -368,7 +368,7 @@ function MethodChooser({
           return (
             <label
               key={m.value}
-              className={`flex cursor-pointer items-start gap-3 px-4 py-3.5 ${
+              className={`flex cursor-pointer items-start gap-3 px-4 py-4 ${
                 i > 0 ? "border-t border-border" : ""
               }`}
             >
@@ -378,14 +378,14 @@ function MethodChooser({
                 value={m.value}
                 checked={selected}
                 onChange={() => onChange(m.value)}
-                className={`mt-0.5 h-4 w-4 accent-primary ${FOCUS_RING}`}
+                className={`mt-1 h-4 w-4 accent-primary ${FOCUS_RING}`}
               />
               <span className="min-w-0">
                 {/* 선택 상태에만 보라를 쓴다 — 제목·배경에는 쓰지 않는다. */}
                 <span className={`block text-body font-bold ${selected ? "text-primary" : "text-text-1"}`}>
                   {m.label}
                 </span>
-                <span className="mt-0.5 block text-label leading-relaxed text-text-3">{m.hint}</span>
+                <span className="mt-1 block text-label leading-relaxed text-text-3">{m.hint}</span>
               </span>
             </label>
           );
@@ -393,7 +393,7 @@ function MethodChooser({
       </fieldset>
 
       {previousAttemptFailed ? (
-        <p className="mt-4 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold leading-relaxed text-danger">
+        <p className="mt-4 rounded-card bg-surface-2 px-4 py-3 text-body-s font-semibold leading-relaxed text-danger">
           지난 결제가 완료되지 않았어요. 다시 시도해 주세요.
         </p>
       ) : null}
@@ -435,7 +435,7 @@ function CopyAccountButton({ value }: { value: string }) {
       <button
         type="button"
         onClick={copy}
-        className={`mt-3 inline-flex h-9 items-center gap-1.5 rounded-control border border-border-2 px-3 text-label font-bold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+        className={`mt-3 inline-flex h-9 items-center gap-2 rounded-control border border-border-2 px-3 text-label font-bold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
       >
         {copied ? (
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

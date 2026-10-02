@@ -29,7 +29,7 @@ export default function FaqPage() {
           <h1 className="mt-2 font-display text-display font-extrabold text-text-1 sm:text-display">
             자주 묻는 질문
           </h1>
-          <p className="mt-3.5 max-w-[33rem] text-body text-text-2">
+          <p className="mt-4 max-w-[33rem] text-body text-text-2">
             거래하다 자주 나오는 질문을 모았어요. 궁금한 항목을 눌러 펼쳐 보세요.
           </p>
           <p className="mt-3 text-label text-text-3">
@@ -51,7 +51,7 @@ export default function FaqPage() {
             <a
               key={c.id}
               href={`#${c.id}`}
-              className={`flex items-baseline gap-2 border-b border-border py-2.5 text-body-s text-text-2 transition-colors hover:text-primary ${FOCUS_RING}`}
+              className={`flex items-baseline gap-2 border-b border-border py-3 text-body-s text-text-2 transition-colors hover:text-primary ${FOCUS_RING}`}
             >
               <span
                 aria-hidden="true"
@@ -73,7 +73,7 @@ export default function FaqPage() {
               >
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <h2 className="mt-1.5 font-display text-title font-extrabold text-text-1">
+              <h2 className="mt-2 font-display text-title font-extrabold text-text-1">
                 {category.title}
               </h2>
               <p className="mt-2 text-body-s text-text-3">{category.lead}</p>
@@ -84,7 +84,7 @@ export default function FaqPage() {
               {category.items.map((item) => (
                 <details key={item.q} className="border-b border-border-2/60">
                   <summary
-                    className={`flex cursor-pointer list-none items-start gap-3 py-3.5 text-body font-bold text-text-1 transition-colors hover:text-primary ${FOCUS_RING} [&::-webkit-details-marker]:hidden`}
+                    className={`flex cursor-pointer list-none items-start gap-3 py-4 text-body font-bold text-text-1 transition-colors hover:text-primary ${FOCUS_RING} [&::-webkit-details-marker]:hidden`}
                   >
                     <span className="min-w-0 flex-1">{item.q}</span>
                     {/* 열림/닫힘은 방향으로만 말한다. +/− 기호는 버튼처럼 읽혀 오해를 준다. */}
@@ -107,7 +107,7 @@ export default function FaqPage() {
                     {item.a.map((paragraph) => (
                       <p
                         key={paragraph}
-                        className="mt-1.5 text-body text-text-2 first:mt-0"
+                        className="mt-2 text-body text-text-2 first:mt-0"
                       >
                         {paragraph}
                       </p>
@@ -129,7 +129,7 @@ export default function FaqPage() {
           >
             찾는 답이 없다면
           </h2>
-          <p className="mt-1.5 max-w-[34rem] text-body-s text-text-3">
+          <p className="mt-2 max-w-[34rem] text-body-s text-text-3">
             문의를 남겨 주시면 확인 후 답변드려요. 거래 중인 건이라면 어떤 상품인지 함께 적어 주시면
             훨씬 빠릅니다.
           </p>

@@ -30,7 +30,7 @@ export default function OrderInquiryLine({
     //
     // ⚠️ 이 줄을 `<p>`로 두면 안 된다. 모달이 이 안에서 렌더되고 모달 본문에는 `<p>`·`<div>`·
     // `<fieldset>`이 들어 있어, `<p>` 안에서는 브라우저가 태그를 강제로 닫아 하이드레이션이 깨진다.
-    <div className={`mt-1.5 ${THUMB_INDENT} text-label text-text-3`}>
+    <div className={`mt-2 ${THUMB_INDENT} text-label text-text-3`}>
       거래에 문제가 있나요?{" "}
       {/*
         의사요소로 히트 영역만 넓힌다. 11.5px 텍스트 링크라 기본 탭 타겟이 42×17px인데, 같은
@@ -40,7 +40,7 @@ export default function OrderInquiryLine({
         인라인 요소에 패딩을 주면 음수 마진으로 상쇄해도 baseline 반올림으로 줄이 미세하게
         자란다. 의사요소는 흐름에서 빠져 있어 영향이 0이다.
 
-        상하 6px만 넓히는 이유는 위 상태 줄과의 간격이 6px(mt-1.5)이어서다 — 더 넓히면 상태
+        상하 6px만 넓히는 이유는 위 상태 줄과의 간격이 6px(mt-2)이어서다 — 더 넓히면 상태
         줄 버튼 위로 히트 영역이 올라가 그 버튼이 눌리지 않는다.
       */}
       <button

@@ -171,19 +171,19 @@ export default function DeliveryAddressModal({
             {addresses.map((a) => (
               <label
                 key={a.id}
-                className={`flex cursor-pointer items-start gap-2.5 rounded-card border p-3 text-label transition-colors ${
+                className={`flex cursor-pointer items-start gap-3 rounded-card border p-3 text-label transition-colors ${
                   selectedId === a.id ? "border-primary" : "border-border-2 hover:border-text-3"
                 }`}
               >
                 <input
                   type="radio"
                   name="delivery-address"
-                  className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--color-primary)]"
+                  className="mt-1 h-4 w-4 shrink-0 accent-[var(--color-primary)]"
                   checked={selectedId === a.id}
                   onChange={() => setSelectedId(a.id)}
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-1.5 font-bold text-text-1">
+                  <span className="flex items-center gap-2 font-bold text-text-1">
                     {a.label && <span>{a.label}</span>}
                     {a.isDefault && (
                       <span className={LABEL_NEUTRAL}>
@@ -191,10 +191,10 @@ export default function DeliveryAddressModal({
                       </span>
                     )}
                   </span>
-                  <span className="mt-0.5 block text-text-2">
+                  <span className="mt-1 block text-text-2">
                     {a.recipientName} · {a.phone}
                   </span>
-                  <span className="mt-0.5 block text-text-3">
+                  <span className="mt-1 block text-text-3">
                     ({a.postalCode}) {a.address1} {a.address2 ?? ""}
                   </span>
                 </span>
@@ -202,7 +202,7 @@ export default function DeliveryAddressModal({
             ))}
 
             <label
-              className={`flex cursor-pointer items-center gap-2.5 rounded-card border border-dashed p-3 text-label font-bold transition-colors ${
+              className={`flex cursor-pointer items-center gap-3 rounded-card border border-dashed p-3 text-label font-bold transition-colors ${
                 selectedId === "new" ? "border-primary text-text-1" : "border-border-2 text-text-2 hover:border-text-3"
               }`}
             >
@@ -277,7 +277,7 @@ export default function DeliveryAddressModal({
             type="button"
             onClick={submit}
             disabled={saving || addresses === null}
-            className={`flex-1 py-2.5 disabled:opacity-50 ${PRIMARY_BUTTON_CLASS}`}
+            className={`flex-1 py-3 disabled:opacity-50 ${PRIMARY_BUTTON_CLASS}`}
           >
             {saving ? "저장 중..." : "이 배송지로 확정"}
           </button>
@@ -285,7 +285,7 @@ export default function DeliveryAddressModal({
             type="button"
             onClick={onClose}
             disabled={saving}
-            className={`px-5 py-2.5 disabled:opacity-50 ${SECONDARY_BUTTON_CLASS}`}
+            className={`px-5 py-3 disabled:opacity-50 ${SECONDARY_BUTTON_CLASS}`}
           >
             나중에
           </button>

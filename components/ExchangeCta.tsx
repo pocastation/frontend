@@ -131,11 +131,11 @@ export default function ExchangeCta({
     return (
       <Link
         href={`/exchanges/${postId}/requests`}
-        className={`${BUTTON} gap-1.5 border border-primary bg-white text-primary ${PRESS_ACCENT} ${FOCUS_RING}`}
+        className={`${BUTTON} gap-2 border border-primary bg-white text-primary ${PRESS_ACCENT} ${FOCUS_RING}`}
       >
         받은 신청
         {count > 0 && (
-          <span className="min-w-5 rounded-full bg-primary px-1.5 py-px text-label font-extrabold text-white">
+          <span className="min-w-5 rounded-full bg-primary px-2 py-px text-label font-extrabold text-white">
             {count}
           </span>
         )}
@@ -164,7 +164,7 @@ export default function ExchangeCta({
   // 차단은 버튼을 남겨 두지 않는다. 눌렀을 때 400을 보여주면 왜 안 되는지 알 수 없다.
   if (viewer?.blocked) {
     return (
-      <p className="rounded-card bg-surface-2 px-3 py-3.5 text-center text-body-s font-semibold text-text-2">
+      <p className="rounded-card bg-surface-2 px-3 py-4 text-center text-body-s font-semibold text-text-2">
         차단한 상대의 교환글이에요. 마이페이지에서 차단을 풀 수 있어요.
       </p>
     );
@@ -176,7 +176,7 @@ export default function ExchangeCta({
 
   if (status !== "OPEN") {
     return (
-      <p className="rounded-card bg-surface-2 px-3 py-3.5 text-center text-body-s font-semibold text-text-2">
+      <p className="rounded-card bg-surface-2 px-3 py-4 text-center text-body-s font-semibold text-text-2">
         지금은 신청을 받지 않는 교환글이에요.
       </p>
     );

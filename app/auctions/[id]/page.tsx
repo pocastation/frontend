@@ -73,7 +73,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 // v0 리톤 — 파스텔 필 제거. 해시태그는 헤어라인 칩 + 퍼플 텍스트, 배지는 헤어라인 + 뉴트럴 텍스트로 통일.
 const CHIP_CLASS =
-  `rounded-control border border-border px-2 py-0.5 text-label font-bold text-primary transition-colors hover:border-primary ${FOCUS_RING}`;
+  `rounded-control border border-border px-2 py-1 text-label font-bold text-primary transition-colors hover:border-primary ${FOCUS_RING}`;
 // 상품 정보는 라벨(#767). 회색 면에 글자만 둔다.
 const BADGE_CLASS = LABEL_NEUTRAL;
 
@@ -159,7 +159,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
                 src={mediaUrl(auction.video.url)}
                 className="aspect-video w-full rounded-card border border-border bg-black"
               />
-              <p className="mt-1.5 text-label text-text-3">판매자가 올린 검수영상</p>
+              <p className="mt-2 text-label text-text-3">판매자가 올린 검수영상</p>
             </section>
           )}
 
@@ -251,7 +251,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
           </p>
 
           {/* 좁은 오른쪽 열에서도 칩 테두리가 열 밖으로 잘리지 않도록 컨테이너 안에서 정렬한다. */}
-          <div className="mt-1.5 flex flex-wrap gap-1.5">
+          <div className="mt-2 flex flex-wrap gap-2">
             {auction.artistName && (
               <SearchLink query={auction.artistName} className={CHIP_CLASS}>
                 #{auction.artistName}
@@ -268,7 +268,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             {auction.title}
           </h1>
 
-          <div className="mt-3 flex flex-wrap gap-1.5">
+          <div className="mt-3 flex flex-wrap gap-2">
             <span className={BADGE_CLASS}>
               {isInstantSale ? "즉시판매" : "제안판매"}
             </span>
@@ -312,7 +312,7 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
             <p className="mt-2 font-bold text-text-2">안전한 거래를 위해 안내사항을 꼭 확인해주세요.</p>
             <Link
               href="/guide"
-              className={`mt-1.5 inline-block rounded-control font-bold text-primary hover:underline ${FOCUS_RING}`}
+              className={`mt-2 inline-block rounded-control font-bold text-primary hover:underline ${FOCUS_RING}`}
             >
               자세히 보기 →
             </Link>

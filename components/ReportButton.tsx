@@ -151,7 +151,7 @@ export default function ReportButton({
         <div className="fixed inset-0 z-[500] flex items-center justify-center bg-black/40 px-4" role="dialog" aria-modal="true">
           <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
             <h2 className="font-display text-body-l font-extrabold text-text-1">신고하기</h2>
-            <p className="mt-1.5 text-body-s leading-relaxed text-text-3">
+            <p className="mt-2 text-body-s leading-relaxed text-text-3">
               이 {TARGET_COPY[targetType].noun}의 어떤 점이 문제인지 알려주세요. 접수된 신고는 운영팀이 검토 후 필요한 조치를 취합니다.
             </p>
 
@@ -167,7 +167,7 @@ export default function ReportButton({
             {targetType === "AUCTION" ? (
               // 링크는 `/mypage`로 보낸다. 이 화면은 그 사람이 이 매물의 당사자인지 모르고,
               // 당사자가 아니면 거래 카드가 없으니 링크만으로도 갈림길이 맞다.
-              <p className="mt-2.5 text-label leading-relaxed text-text-2">
+              <p className="mt-3 text-label leading-relaxed text-text-2">
                 이미 결제한 거래에 문제가 있다면(물건이 오지 않음 · 파손 · 환불){" "}
                 <b className="font-bold text-text-1">신고가 아니라</b> 마이페이지 거래 내역의{" "}
                 <Link
@@ -181,15 +181,15 @@ export default function ReportButton({
             ) : (
               // 노쇼 신고는 백엔드에 아직 없다(P4). 여기서 받아 두면 운영팀이 처리할 수단이
               // 없는 신고만 쌓이므로, 지금은 대화로 먼저 확인하도록 안내한다.
-              <p className="mt-2.5 text-label leading-relaxed text-text-2">
+              <p className="mt-3 text-label leading-relaxed text-text-2">
                 약속 시간에 상대가 오지 않았다면 <b className="font-bold text-text-1">신고가 아니라</b>{" "}
                 교환 대화에서 먼저 확인해 주세요. 노쇼 신고는 준비 중이에요.
               </p>
             )}
 
-            <fieldset className="mt-3.5">
+            <fieldset className="mt-4">
               <legend className="mb-2 text-label font-bold text-text-2">신고 사유 선택 (필수)</legend>
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 {REPORT_REASON_OPTIONS[targetType].map((option) => (
                   <label
                     key={option}
@@ -211,7 +211,7 @@ export default function ReportButton({
               </div>
             </fieldset>
 
-            <label className="mt-3.5 mb-1.5 block text-label font-bold text-text-2" htmlFor="report-detail">
+            <label className="mt-4 mb-2 block text-label font-bold text-text-2" htmlFor="report-detail">
               상세 내용 (선택)
             </label>
             <textarea
@@ -233,7 +233,7 @@ export default function ReportButton({
               </p>
             )}
 
-            <div className="mt-3.5 flex gap-2">
+            <div className="mt-4 flex gap-2">
               <button
                 type="button"
                 onClick={() => setOpen(false)}

@@ -52,7 +52,7 @@ export default async function AuctionsPage({
       <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-display text-title-l font-extrabold text-text-1">제안판매</h1>
-          <p className="mt-1.5 text-body text-text-3">판매 중인 K-pop 포토카드 상품을 확인하고 가격을 제안해보세요.</p>
+          <p className="mt-2 text-body text-text-3">판매 중인 K-pop 포토카드 상품을 확인하고 가격을 제안해보세요.</p>
         </div>
         <Link
           href="/auctions/ended"

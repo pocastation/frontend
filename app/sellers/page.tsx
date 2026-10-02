@@ -86,11 +86,11 @@ export default async function PopularSellersPage() {
               </span>
 
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-1.5">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="truncate text-body font-bold text-text-1">{seller.nickname}</span>
                   <TrustLevelBadge
                     level={seller.trustLevel}
-                    className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-0.5 text-caption font-bold text-text-1 decoration-transparent hover:decoration-text-3"
+                    className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-1 text-caption font-bold text-text-1 decoration-transparent hover:decoration-text-3"
                   >
                     <span className="text-text-3">Lv.{seller.trustLevel}</span>
                     {plainLevelLabel(seller.trustLevelLabel)}

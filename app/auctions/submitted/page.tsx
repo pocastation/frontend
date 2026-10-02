@@ -77,7 +77,7 @@ function AuctionSubmittedContent() {
           {STEPS.map((step) => (
             <li
               key={step.no}
-              className="flex items-baseline gap-2.5 border-b border-border py-3 sm:block sm:border-b-0 sm:border-l sm:border-border sm:py-0 sm:pl-3.5 sm:first:border-l-0 sm:first:pl-0"
+              className="flex items-baseline gap-3 border-b border-border py-3 sm:block sm:border-b-0 sm:border-l sm:border-border sm:py-0 sm:pl-4 sm:first:border-l-0 sm:first:pl-0"
             >
               <span
                 aria-hidden="true"
@@ -86,7 +86,7 @@ function AuctionSubmittedContent() {
                 {step.no}
               </span>
               <span
-                className={`flex-1 text-body-s sm:mt-0.5 sm:block ${
+                className={`flex-1 text-body-s sm:mt-1 sm:block ${
                   step.state === "todo" ? "font-bold text-text-2" : "font-extrabold text-text-1"
                 }`}
               >

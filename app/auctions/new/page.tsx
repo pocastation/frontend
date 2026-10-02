@@ -464,15 +464,15 @@ export default function NewAuctionPage() {
         **첫 단계에서 한 번 읽으면 끝**인 문장이라 6단계 내내 고정으로 붙어 있을 이유가 없다.
         첫 단계 본문 맨 위로 내렸다. 단계명·진행바는 남긴다 — 그게 머리를 고정한 이유다.
       */}
-      <div className="sticky top-12 z-[260] border-b border-border bg-white px-gutter pb-2.5 pt-3 sm:hidden">
+      <div className="sticky top-12 z-[260] border-b border-border bg-white px-gutter pb-3 pt-3 sm:hidden">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h1 className="font-display text-title-s font-extrabold text-text-1">판매 등록</h1>
           </div>
-          <div className="flex flex-shrink-0 items-center gap-0.5">
+          <div className="flex flex-shrink-0 items-center gap-1">
             <Link
               href="/guide/sell"
-              className={`flex min-h-[30px] items-center whitespace-nowrap rounded-control border border-border-2 px-2.5 text-label font-bold text-text-2 ${FOCUS_RING}`}
+              className={`flex min-h-[30px] items-center whitespace-nowrap rounded-control border border-border-2 px-3 text-label font-bold text-text-2 ${FOCUS_RING}`}
             >
               판매 가이드
             </Link>
@@ -494,7 +494,7 @@ export default function NewAuctionPage() {
             </Link>
           </div>
         </div>
-        <div className="mt-2.5 flex items-baseline justify-between">
+        <div className="mt-3 flex items-baseline justify-between">
           <span className="text-body-s font-extrabold text-text-1">{stepTitle[stepKey]}</span>
           <span className="font-display text-label font-bold tabular-nums text-text-3">
             {step + 1} / {TOTAL_STEPS}
@@ -512,7 +512,7 @@ export default function NewAuctionPage() {
         </div>
         <Link
           href="/guide/sell"
-          className={`flex shrink-0 items-center gap-1 rounded-control border border-border-2 px-3 py-1.5 text-label font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+          className={`flex shrink-0 items-center gap-1 rounded-control border border-border-2 px-3 py-2 text-label font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
         >
           판매 가이드
         </Link>
@@ -574,7 +574,7 @@ export default function NewAuctionPage() {
                   return (
                     <label
                       key={option.type}
-                      className="flex cursor-pointer items-start gap-3 border-b border-border py-3.5"
+                      className="flex cursor-pointer items-start gap-3 border-b border-border py-4"
                     >
                       <input
                         type="radio"
@@ -582,13 +582,13 @@ export default function NewAuctionPage() {
                         value={option.type}
                         checked={selected}
                         onChange={() => setSaleType(option.type)}
-                        className={`mt-0.5 h-4 w-4 accent-primary ${FOCUS_RING}`}
+                        className={`mt-1 h-4 w-4 accent-primary ${FOCUS_RING}`}
                       />
                       <span className="min-w-0">
                         <span className={`block text-body font-extrabold ${selected ? "text-primary" : "text-text-1"}`}>
                           {option.title}
                         </span>
-                        <span className="mt-0.5 block text-label leading-relaxed text-text-3">{option.desc}</span>
+                        <span className="mt-1 block text-label leading-relaxed text-text-3">{option.desc}</span>
                       </span>
                     </label>
                   );
@@ -599,7 +599,7 @@ export default function NewAuctionPage() {
 
           {stepKey === "info" && (
             <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <label htmlFor={artistFieldId} className="text-label font-bold text-text-2">
                   스타 <span className="text-accent">*</span>
                 </label>
@@ -607,7 +607,7 @@ export default function NewAuctionPage() {
               </div>
 
               {idols.length > 0 && (
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2">
                   <label htmlFor={idolFieldId} className="text-label font-bold text-text-2">
                     멤버 (선택)
                   </label>
@@ -628,7 +628,7 @@ export default function NewAuctionPage() {
                 </div>
               )}
 
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <label htmlFor={titleFieldId} className="text-label font-bold text-text-2">
                   제목 <span className="text-accent">*</span>
                 </label>
@@ -643,7 +643,7 @@ export default function NewAuctionPage() {
                 />
               </div>
 
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <label htmlFor={descriptionFieldId} className="text-label font-bold text-text-2">
                   상세 설명 (선택)
                 </label>
@@ -663,7 +663,7 @@ export default function NewAuctionPage() {
           {stepKey === "product" && (
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2">
                   <label htmlFor={sourceFieldId} className="text-label font-bold text-text-2">
                     출처
                   </label>
@@ -680,7 +680,7 @@ export default function NewAuctionPage() {
                     ))}
                   </select>
                 </div>
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-2">
                   <label htmlFor={gradeFieldId} className="text-label font-bold text-text-2">
                     상태 등급
                   </label>
@@ -714,7 +714,7 @@ export default function NewAuctionPage() {
 
           {stepKey === "price" && (
             <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-1.5">
+              <div className="flex flex-col gap-2">
                 <label htmlFor={startPriceFieldId} className="text-label font-bold text-text-2">
                   {saleType === "INSTANT" ? "즉시판매가(원)" : "최소 제안가(원)"} <span className="text-accent">*</span>
                 </label>
@@ -746,7 +746,7 @@ export default function NewAuctionPage() {
                   상품 정보와 같은 어휘를 쓰고, 선택 상태가 아니므로 보라를 쓰지 않는다. */}
               {saleType === "AUCTION" && (
                 <div className="mt-1 border-t border-border">
-                  <div className="flex items-baseline justify-between border-b border-border py-2.5">
+                  <div className="flex items-baseline justify-between border-b border-border py-3">
                     <span className="text-label font-bold text-text-2">판매 기간</span>
                     <span className="text-body font-bold tabular-nums text-text-1">7일</span>
                   </div>
@@ -821,7 +821,7 @@ export default function NewAuctionPage() {
         )}
 
         {/* 이동/등록 */}
-        <div className="mt-6 flex gap-2 max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:z-[400] max-sm:mt-0 max-sm:border-t max-sm:border-border max-sm:bg-white max-sm:px-gutter max-sm:pt-2.5 max-sm:pb-[calc(10px_+_env(safe-area-inset-bottom))]">
+        <div className="mt-6 flex gap-2 max-sm:fixed max-sm:inset-x-0 max-sm:bottom-0 max-sm:z-[400] max-sm:mt-0 max-sm:border-t max-sm:border-border max-sm:bg-white max-sm:px-gutter max-sm:pt-3 max-sm:pb-[calc(10px_+_env(safe-area-inset-bottom))]">
           {step > 0 && (
             <button type="button" onClick={goBack} className={`h-12 px-6 ${SECONDARY_BUTTON_CLASS}`}>
               이전

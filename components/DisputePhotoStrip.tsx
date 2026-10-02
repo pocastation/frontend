@@ -39,7 +39,7 @@ export default function DisputePhotoStrip({ auctionId }: { auctionId: number }) 
   if (!photos || photos.length === 0) return null;
 
   return (
-    <div className="mt-2 flex flex-wrap gap-1.5">
+    <div className="mt-2 flex flex-wrap gap-2">
       {photos.map((photo, index) => (
         <a
           key={photo.id}

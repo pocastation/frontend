@@ -90,7 +90,7 @@ export default async function SellerProfilePage({ params }: { params: Promise<{ 
           </span>
           <div className="min-w-0">
             <h1 className="truncate font-display text-title-s font-extrabold text-text-1">{seller.nickname}</h1>
-            <p className="mt-0.5 text-label text-text-3">
+            <p className="mt-1 text-label text-text-3">
               거래 {seller.tradeCount}회 · 후기 {seller.reviewCount}개
             </p>
           </div>

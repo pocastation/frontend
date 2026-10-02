@@ -78,13 +78,13 @@ export default function ExchangeBlocksPage() {
           교환 차단 목록
         </h1>
 
-        <p className="bg-surface-2 px-gutter py-2.5 text-label leading-relaxed text-text-2 sm:mt-3 sm:rounded-control">
+        <p className="bg-surface-2 px-gutter py-3 text-label leading-relaxed text-text-2 sm:mt-3 sm:rounded-control">
           차단은 <b className="font-bold text-text-1">교환에서만</b> 적용돼요. 서로의 교환글이 목록에서 사라지고
           신청도 주고받을 수 없어요. 판매·구매는 막히지 않아요.
         </p>
 
         {error && (
-          <p role="alert" className="mx-gutter mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
+          <p role="alert" className="mx-gutter mt-3 rounded-card bg-surface-2 px-4 py-3 text-body-s font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
@@ -96,8 +96,8 @@ export default function ExchangeBlocksPage() {
         ) : (
           <ul className="px-gutter sm:px-0">
             {blocks.map((block) => (
-              <li key={block.id} className="flex min-h-14 items-center gap-2.5 border-b border-border last:border-0">
-                <div className="min-w-0 flex-1 py-2.5">
+              <li key={block.id} className="flex min-h-14 items-center gap-3 border-b border-border last:border-0">
+                <div className="min-w-0 flex-1 py-3">
                   <p className="text-body-l font-bold text-text-1">{block.nickname ?? "알 수 없음"}</p>
                   <p className="mt-px text-label text-text-3">{formatDay(block.blockedAt)} 차단</p>
                 </div>
@@ -105,7 +105,7 @@ export default function ExchangeBlocksPage() {
                   type="button"
                   onClick={() => unblock(block.id)}
                   disabled={unblocking !== null}
-                  className={`h-9 flex-shrink-0 rounded-control border border-border-2 bg-white px-3.5 text-body-s font-bold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
+                  className={`h-9 flex-shrink-0 rounded-control border border-border-2 bg-white px-4 text-body-s font-bold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
                 >
                   {unblocking === block.id ? "푸는 중..." : "차단 해제"}
                 </button>

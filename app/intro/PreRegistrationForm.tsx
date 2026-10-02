@@ -23,7 +23,7 @@ const GROUPS = [
 const OTHER = "기타";
 
 const INPUT_CLASS =
-  "h-12 w-full rounded-control border border-border-2 bg-white px-3.5 text-body-l text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary";
+  "h-12 w-full rounded-control border border-border-2 bg-white px-4 text-body-l text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary";
 
 /**
  * 입력 중에 하이픈을 끼워 넣는다.
@@ -115,7 +115,7 @@ export default function PreRegistrationForm() {
         <h2 className="mt-2 font-display text-title font-extrabold text-text-1">
           사전 신청이 접수됐어요
         </h2>
-        <p className="mt-2.5 text-body text-text-2">
+        <p className="mt-3 text-body text-text-2">
           정식 오픈 소식을 가장 먼저 알려드릴게요. 남겨주신 이메일로 안내가 나가고, 사전 신청 혜택도
           그때 함께 챙겨드려요.
         </p>
@@ -139,7 +139,7 @@ export default function PreRegistrationForm() {
       <h2 className="font-display text-title-s font-extrabold text-text-1">
         사전 신청하고 혜택 받기
       </h2>
-      <p className="mt-1.5 text-body-s text-text-3">
+      <p className="mt-2 text-body-s text-text-3">
         정식 오픈 소식을 가장 먼저 알려드리고, 사전 신청자에게만 드리는 얼리어답터 배지를 드려요.
       </p>
 
@@ -165,7 +165,7 @@ export default function PreRegistrationForm() {
         </div>
 
         <div>
-          <label htmlFor={`${uid}-email`} className="flex items-baseline gap-1.5">
+          <label htmlFor={`${uid}-email`} className="flex items-baseline gap-2">
             <span className="text-body-s font-extrabold text-text-1">이메일</span>
             <span className="text-caption font-bold text-text-3">선택</span>
           </label>
@@ -180,7 +180,7 @@ export default function PreRegistrationForm() {
             className={`mt-2 ${INPUT_CLASS} ${FOCUS_RING}`}
           />
           {/* 지금 실제로 알림이 나가는 유일한 수단이라, 선택 항목이어도 이유를 밝혀 적어둔다. */}
-          <p className="mt-1.5 text-label text-text-3">
+          <p className="mt-2 text-label text-text-3">
             오픈 안내는 이메일로 보내드려요. 남겨주시면 더 확실하게 받아보실 수 있어요.
           </p>
         </div>
@@ -232,12 +232,12 @@ export default function PreRegistrationForm() {
           13 × 1.2 = 15.6 → **16px**을 쓴다. 굵기·좌측 규칙선으로 한 번 더 구분한다.
           접이식(`openConsent`)에는 이 둘을 넣지 않는다 — 펼쳐야 보이면 "명확히 표시"가 아니다. */}
       <div className="mt-5 border-t border-border pt-4">
-        <label className="flex cursor-pointer items-start gap-2.5">
+        <label className="flex cursor-pointer items-start gap-3">
           <input
             type="checkbox"
             checked={agreed}
             onChange={(e) => setAgreed(e.target.checked)}
-            className={`mt-0.5 h-[18px] w-[18px] shrink-0 accent-primary ${FOCUS_RING}`}
+            className={`mt-1 h-[18px] w-[18px] shrink-0 accent-primary ${FOCUS_RING}`}
           />
           <span className="text-body-s text-text-1">
             <b className="font-extrabold text-primary">[필수]</b>{" "}
@@ -245,11 +245,11 @@ export default function PreRegistrationForm() {
           </span>
         </label>
 
-        <div className="mt-3 rounded-card bg-surface-2 px-4 py-3.5">
+        <div className="mt-3 rounded-card bg-surface-2 px-4 py-4">
           <p className="text-body-l font-extrabold text-text-1">
             보유·이용기간 — {PRE_REGISTRATION_CONSENT.retention}
           </p>
-          <p className="mt-1.5 text-body-l font-extrabold text-text-1">
+          <p className="mt-2 text-body-l font-extrabold text-text-1">
             {PRE_REGISTRATION_CONSENT.marketingNotice}
           </p>
         </div>
@@ -258,13 +258,13 @@ export default function PreRegistrationForm() {
           type="button"
           onClick={() => setOpenConsent((v) => !v)}
           aria-expanded={openConsent}
-          className={`mt-2.5 rounded-control text-label font-bold text-text-3 underline underline-offset-4 transition-colors hover:text-text-1 ${FOCUS_RING}`}
+          className={`mt-3 rounded-control text-label font-bold text-text-3 underline underline-offset-4 transition-colors hover:text-text-1 ${FOCUS_RING}`}
         >
           {openConsent ? "수집 항목 접기" : "수집 항목 보기"}
         </button>
 
         {openConsent && (
-          <dl className="mt-2.5 flex flex-col gap-1.5 text-label text-text-3">
+          <dl className="mt-3 flex flex-col gap-2 text-label text-text-3">
             <div className="flex gap-2">
               <dt className="w-[52px] shrink-0 font-bold text-text-2">필수 항목</dt>
               <dd>{PRE_REGISTRATION_CONSENT.itemsRequired}</dd>
@@ -284,7 +284,7 @@ export default function PreRegistrationForm() {
           </dl>
         )}
 
-        <p className="mt-2.5 text-label text-text-3">
+        <p className="mt-3 text-label text-text-3">
           동의를 거부하실 수 있으며, 이 경우 사전 신청이 제한돼요.{" "}
           <Link
             href="/privacy"

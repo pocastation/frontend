@@ -86,7 +86,7 @@ export default function AdminDashboardPage() {
   return (
     <div>
       <h1 className="font-display text-title-l font-extrabold text-text-1">대시보드</h1>
-      <p className="mt-1.5 text-body text-text-3">Pocastation 운영 현황을 한눈에 확인하세요.</p>
+      <p className="mt-2 text-body text-text-3">Pocastation 운영 현황을 한눈에 확인하세요.</p>
 
       {error && (
         <AdminNotice kind="error" className="mt-5">
@@ -128,7 +128,7 @@ export default function AdminDashboardPage() {
           ) : (
             <ul className="flex flex-col divide-y divide-border">
               {data.recentMembers.map((m) => (
-                <li key={m.id} className="flex items-center gap-3 py-2.5">
+                <li key={m.id} className="flex items-center gap-3 py-3">
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary-soft text-label font-bold text-primary">
                     {m.nickname.slice(0, 1).toUpperCase()}
                   </span>
@@ -161,7 +161,7 @@ export default function AdminDashboardPage() {
             <ul className="flex flex-col divide-y divide-border">
               {data.recentAuctions.map((a) => (
                 <li key={a.id}>
-                  <Link href={recentAuctionHref(a.status, a.id)} className={`flex items-center gap-3 py-2.5 ${FOCUS_RING}`}>
+                  <Link href={recentAuctionHref(a.status, a.id)} className={`flex items-center gap-3 py-3 ${FOCUS_RING}`}>
                     <span className="h-9 w-9 shrink-0 overflow-hidden rounded-control bg-surface-2">
                       {a.representativeThumbnailUrl && (
                         // eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일

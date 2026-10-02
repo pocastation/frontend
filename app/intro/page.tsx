@@ -98,7 +98,7 @@ export default function IntroPage() {
             <p className="mt-4 max-w-[32rem] text-body-l text-text-2 sm:text-body-l">
               사진만 퍼온 상품, 입금하고 잠수, 마감 직전 낚아채기. 이 세 가지를 시스템으로 막아요.
             </p>
-            <ul className="mt-[18px] flex flex-wrap gap-2">
+            <ul className="mt-4 flex flex-wrap gap-2">
               {CHIPS.map((c) => (
                 <li
                   key={c}
@@ -126,21 +126,21 @@ export default function IntroPage() {
         <h2 className="mt-2 font-display text-title-l font-extrabold text-text-1 sm:text-display">
           등록부터 정산까지, 네 걸음이에요
         </h2>
-        <ol className="mt-[18px] border-t border-border sm:grid sm:grid-cols-4 sm:gap-x-7">
+        <ol className="mt-4 border-t border-border sm:grid sm:grid-cols-4 sm:gap-x-7">
           {STEPS.map((st, i) => (
             <li
               key={st.title}
-              className="grid grid-cols-[34px_1fr] gap-3 border-b border-border py-4 sm:block sm:py-[18px]"
+              className="grid grid-cols-[34px_1fr] gap-3 border-b border-border py-4 sm:block sm:py-4"
             >
               <span
                 aria-hidden="true"
-                className="pt-[3px] font-display text-label font-extrabold tabular-nums text-text-3 sm:mb-2 sm:block sm:pt-0"
+                className="pt-1 font-display text-label font-extrabold tabular-nums text-text-3 sm:mb-2 sm:block sm:pt-0"
               >
                 {String(i + 1).padStart(2, "0")}
               </span>
               <div>
                 <p className="text-caption font-extrabold tracking-[0.02em] text-primary">{st.who}</p>
-                <h3 className="mt-[3px] text-body-l font-extrabold text-text-1">{st.title}</h3>
+                <h3 className="mt-1 text-body-l font-extrabold text-text-1">{st.title}</h3>
                 <p className="mt-1 text-body-s text-text-2">{st.body}</p>
               </div>
             </li>
@@ -155,7 +155,7 @@ export default function IntroPage() {
           거래가 무서웠던 이유를
           <br className="sm:hidden" /> 하나씩 없앴어요
         </h2>
-        <ul className="mt-[18px] border-t border-border sm:grid sm:grid-cols-2 sm:gap-x-12">
+        <ul className="mt-4 border-t border-border sm:grid sm:grid-cols-2 sm:gap-x-12">
           {FEATURES.map((f) => (
             <li key={f.title} className="border-b border-border py-4">
               <p className="text-label font-extrabold text-text-3 line-through decoration-border-2">{f.problem}</p>
@@ -173,7 +173,7 @@ export default function IntroPage() {
           지금 신청하면 드리는 것
         </h2>
 
-        <ul className="mt-[18px] flex flex-col border-t border-border sm:max-w-[640px]">
+        <ul className="mt-4 flex flex-col border-t border-border sm:max-w-[640px]">
           {BENEFITS.map((b) => (
             <li key={b.title} className="border-b border-border py-4">
               <h3 className="text-body font-extrabold text-text-1">{b.title}</h3>

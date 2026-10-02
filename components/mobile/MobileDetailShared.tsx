@@ -45,7 +45,7 @@ export function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: 
     <Link
       href={`/sellers/${sellerId}`}
       onNavigate={markNavForward}
-      className={`mt-3.5 flex items-center gap-2.5 rounded-card border border-border p-3 ${FOCUS_RING}`}
+      className={`mt-3.5 flex items-center gap-2.5 rounded-card border border-border p-card ${FOCUS_RING}`}
     >
       <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary-soft font-display text-body font-extrabold text-primary">
         {nickname.slice(0, 1).toUpperCase()}
@@ -105,7 +105,7 @@ export function MobileDetailTabs({
             꼬리 헤어라인은 뺐다: 마지막 행 아래 선이 하나 더 있으면 「더 있는데 잘렸다」로 읽힌다.
             푸터와의 경계는 여백이 맡는다. 두 탭이 같은 값을 쓴다. */}
         {tab === TAB_DELIVERY ? (
-          <div className="pb-6 pt-5">
+          <div className="pt-5 sm:pb-6">
             {/* 확정된 사실만 적는다 — 기간·조건 같은 숫자는 운영정책이 정본이라 여기서 새로 만들지 않는다. */}
             {/* 상단 선은 뺐다(#482) — 탭 밑줄 바로 아래라 겹선으로 읽혔다. 행 사이·하단만 긋는다. */}
             <dl className="divide-y divide-border border-b border-border">
@@ -146,7 +146,7 @@ export function MobileDetailTabs({
             </Link>
           </div>
         ) : (
-          <div className="pb-6 pt-5">
+          <div className="pt-5 sm:pb-6">
             {description && (
               <p className="whitespace-pre-wrap text-body text-text-2">{description}</p>
             )}
@@ -154,7 +154,7 @@ export function MobileDetailTabs({
                 값이 오른쪽 끝에 붙어 라벨과 값 사이가 줄마다 다르게 벌어졌고, 「S급 (미개봉/신품급)」
                 처럼 긴 값은 두 줄로 접히며 정렬이 무너졌다. 줄마다 긋던 구분선은 행간이 대신한다. */}
             <dl
-              className={`${description ? "mt-5" : ""} grid grid-cols-[88px_1fr] gap-x-3 gap-y-3.5 text-body-s`}
+              className={`${description ? "mt-row" : ""} grid grid-cols-[88px_1fr] gap-x-3 gap-y-3.5 text-body-s`}
             >
               {specRows.map((row) => (
                 <Fragment key={row.label}>

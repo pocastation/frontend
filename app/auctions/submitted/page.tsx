@@ -61,7 +61,7 @@ function AuctionSubmittedContent() {
       <MobilePageHead title="등록 완료" variant="close" backHref="/" />
 
       {/* 레이아웃이 이미 <main>으로 감싼다 — 여기서 또 쓰면 main이 중첩된다(#515에서 발견). */}
-      <div className="mx-auto w-full max-w-[560px] px-[14px] py-9 sm:px-5 sm:py-20">
+      <div className="mx-auto w-full max-w-[560px] px-gutter py-9 sm:px-5 sm:py-20">
         <span aria-hidden="true" className="block h-[3px] w-7 bg-primary" />
         <p className="mt-4 text-label font-bold tracking-[0.08em] text-text-3">판매 등록</p>
         <h1 className="mt-2 font-display text-title-l font-extrabold text-text-1 sm:text-title-l">

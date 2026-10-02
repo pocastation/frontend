@@ -22,7 +22,7 @@ function formatDate(iso: string) {
  */
 export default function NoticesPage() {
   return (
-    <div className="mx-auto max-w-[820px] px-5 pt-11 pb-20 sm:pt-14">
+    <div className="mx-auto max-w-[820px] px-gutter pt-page sm:px-5 sm:pt-14 sm:pb-20">
       <header>
         <p className="text-label font-bold text-text-3">고객지원</p>
         <h1 className="mt-2 font-display text-display font-extrabold text-text-1 sm:text-display">

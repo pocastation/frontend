@@ -137,7 +137,7 @@ export default function MobileDetailGallery({
         <>
           {/* 도트 인디케이터(#478) — 사진은 ●, 영상은 ▶. 「3 / 3」 카운터만으로는 마지막 사진이
               끝처럼 읽혀 그 뒤의 영상을 아무도 발견하지 못했다. 영상 존재가 첫 화면부터 보여야 한다. */}
-          <div className="absolute bottom-3.5 left-1/2 z-[3] flex -translate-x-1/2 items-center gap-[5px]">
+          <div className="absolute bottom-3.5 left-1/2 z-[3] flex -translate-x-1/2 items-center gap-1.5">
             {slides.map((slide, i) =>
               slide.kind === "image" ? (
                 <span

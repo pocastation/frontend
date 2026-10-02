@@ -177,7 +177,7 @@ export default function ExchangeThreadPage() {
     return (
       <>
         <MobilePageHead title="교환 대화" backHref={`/exchanges/${postId}`} />
-        <p className="px-[14px] py-16 text-center text-body-s text-text-3">{loadError}</p>
+        <p className="px-gutter py-16 text-center text-body-s text-text-3">{loadError}</p>
       </>
     );
   }
@@ -195,7 +195,7 @@ export default function ExchangeThreadPage() {
       <div className="mx-auto flex min-h-[calc(100dvh-48px)] max-w-[640px] flex-col">
         {/* 현장에서 열었을 때 장소를 찾아 스크롤하지 않게 머리에 붙박아 둔다. */}
         {thread && (
-          <div className="sticky top-12 z-[2] flex items-center gap-2.5 border-b border-border bg-surface-2 px-[14px] py-2.5">
+          <div className="sticky top-12 z-[2] flex items-center gap-2.5 border-b border-border bg-surface-2 px-gutter py-2.5">
             <div className="min-w-0 flex-1">
               <p className="truncate text-body font-extrabold text-text-1">{thread.place}</p>
               {thread.slot && <p className="mt-px text-label text-text-2">{slotLabel(thread.slot)}</p>}
@@ -206,7 +206,7 @@ export default function ExchangeThreadPage() {
           </div>
         )}
 
-        <div className="flex-1 px-[14px] py-3.5">
+        <div className="flex-1 px-gutter py-3.5">
           {messages.map((message, index) => {
             const showDay = index === 0 || dayLabel(messages[index - 1].createdAt) !== dayLabel(message.createdAt);
             return (
@@ -241,14 +241,14 @@ export default function ExchangeThreadPage() {
         </div>
 
         {error && (
-          <p role="alert" className="mx-[14px] mb-2 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger">
+          <p role="alert" className="mx-gutter mb-2 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger">
             {error}
           </p>
         )}
 
         {/* 완료 확인 — 상태가 다섯이고 한 번에 하나만 보인다. */}
         {completion && (completion.confirmable || completion.confirmed || !thread?.writable) && (
-          <div className="border-t border-border px-[14px] py-2.5">
+          <div className="border-t border-border px-gutter py-2.5">
             {completion.confirmed && completion.disputed ? (
               <p className="text-body-s leading-relaxed text-text-2">
                 교환이 이뤄지지 않은 것으로 정리됐어요. 기록은 남지 않아요.
@@ -295,7 +295,7 @@ export default function ExchangeThreadPage() {
         )}
 
         {thread?.writable && (
-          <div className="sticky bottom-0 flex items-end gap-2 border-t border-border bg-white px-[14px] py-2 pb-[max(8px,env(safe-area-inset-bottom))]">
+          <div className="sticky bottom-0 flex items-end gap-2 border-t border-border bg-white px-gutter py-2 pb-[max(8px,env(safe-area-inset-bottom))]">
             <input
               type="text"
               value={draft}

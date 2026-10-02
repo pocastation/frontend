@@ -48,9 +48,9 @@ function RowShell({
   unit?: string;
 }) {
   return (
-    <span className="flex min-h-[49px] w-full items-center justify-between gap-[9px] text-left">
+    <span className="flex min-h-[49px] w-full items-center justify-between gap-2 text-left">
       <span className="text-body-l font-medium text-text-1">{label}</span>
-      <span className="inline-flex shrink-0 items-center gap-[9px]">
+      <span className="inline-flex shrink-0 items-center gap-2">
         {badge ? (
           <span aria-label={`확인이 필요한 항목 ${badge}건`} className={`${LABEL_STRONG} tabular-nums`}>새 소식 {badge}</span>
         ) : null}
@@ -92,11 +92,11 @@ function LinkRow({ label, href }: { label: string; href: string }) {
 }
 
 function GroupHead({ children }: { children: ReactNode }) {
-  return <h2 className="pb-[9px] pt-6 text-body-s font-semibold text-text-2">{children}</h2>;
+  return <h2 className="pb-2 pt-section-ruled text-body-s font-semibold text-text-2">{children}</h2>;
 }
 
 function Group({ children }: { children: ReactNode }) {
-  return <div className="border-b border-border pb-[13px]">{children}</div>;
+  return <div className="border-b border-border pb-section-ruled">{children}</div>;
 }
 
 export default function MobileMypageMenu({
@@ -138,7 +138,7 @@ export default function MobileMypageMenu({
   ];
 
   return (
-    <div className="px-6 pb-6 pt-7 max-[360px]:px-[18px] max-[360px]:pt-[22px] sm:hidden">
+    <div className="px-gutter pb-6 pt-page sm:hidden">
       {/*
         button이 아니라 role="button"인 div다(#566). 이 행 안에 거래 레벨 배지(TrustLevelBadge)가
         있고 그 배지는 시트를 여는 button이라, 행까지 button이면 button 안에 button이 된다 —
@@ -159,14 +159,14 @@ export default function MobileMypageMenu({
             onSelectTab("profile");
           }
         }}
-        className={`flex w-full cursor-pointer items-center gap-[13px] text-left ${PRESS_FADE} ${FOCUS_RING}`}
+        className={`flex w-full cursor-pointer items-center gap-3 text-left ${PRESS_FADE} ${FOCUS_RING}`}
       >
         <span className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-full bg-primary-soft text-title font-semibold text-primary">
           {nickname.slice(0, 1).toUpperCase()}
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-title-s font-semibold text-text-1">{nickname}</span>
-          <span className="mt-[3px] flex flex-wrap items-center gap-1.5 text-label text-text-2">
+          <span className="mt-1 flex flex-wrap items-center gap-1.5 text-label text-text-2">
             {trustLevel != null && (
               <TrustLevelBadge
                 level={trustLevel}
@@ -184,13 +184,13 @@ export default function MobileMypageMenu({
         </span>
       </div>
 
-      <nav aria-label="내 활동" className="mt-[25px] grid grid-cols-4 border-y border-border py-5">
+      <nav aria-label="내 활동" className="mt-group grid grid-cols-4 border-y border-border py-5">
         {quick.map(({ label, value, tab }, i) => (
           <button
             key={label}
             type="button"
             onClick={() => onSelectTab(tab)}
-            className={`relative flex min-w-0 flex-col items-center justify-center gap-[3px] rounded-control ${i ? "before:absolute before:bottom-[5px] before:left-0 before:top-2 before:w-px before:bg-border" : ""} ${PRESS_ROW} ${FOCUS_RING}`}
+            className={`relative flex min-w-0 flex-col items-center justify-center gap-1 rounded-control ${i ? "before:absolute before:bottom-[5px] before:left-0 before:top-2 before:w-px before:bg-border" : ""} ${PRESS_ROW} ${FOCUS_RING}`}
           >
             <span className="text-title-l font-semibold tabular-nums text-text-1">{value}</span>
             <span className="text-label text-text-2">{label}</span>
@@ -237,7 +237,7 @@ export default function MobileMypageMenu({
         {/* 교환에서만 적용되는 차단이라 「계정」에 둔다 — 거래 그룹에 넣으면 판매까지 막는 것으로 읽힌다. */}
         <LinkRow label="교환 차단 목록" href="/mypage/exchange-blocks" />
         {isAdmin && (
-          <Link href="/admin" className={`mt-2 flex min-h-[49px] items-center gap-[9px] rounded-control border-t border-border pt-[9px] text-body-l font-medium text-primary ${PRESS_ROW} ${FOCUS_RING}`}>
+          <Link href="/admin" className={`mt-2 flex min-h-[49px] items-center gap-2 rounded-control border-t border-border pt-2 text-body-l font-medium text-primary ${PRESS_ROW} ${FOCUS_RING}`}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M12 3 20 6v7c0 4-4 7-8 9-4-2-8-5-8-9V6z" />
               <path d="m9 12 2 2 4-4" />
@@ -248,7 +248,7 @@ export default function MobileMypageMenu({
         )}
       </Group>
 
-      <div className="flex justify-end pt-[18px]">
+      <div className="flex justify-end pt-row">
         <button
           type="button"
           onClick={onLogout}

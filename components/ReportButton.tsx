@@ -109,7 +109,7 @@ export default function ReportButton({
         <button
           type="button"
           onClick={openModal}
-          className={`flex min-h-[52px] w-full items-center gap-3 px-[18px] text-left text-body-l font-bold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+          className={`flex min-h-[52px] w-full items-center gap-3 px-gutter text-left text-body-l font-bold text-text-1 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
         >
           <span className="text-text-2">{siren}</span>
           신고하기

@@ -53,7 +53,7 @@ export default async function EndedAuctionsPage({
       */}
       <MobilePageHead title="거래 완료" />
 
-      <div className="mx-auto max-w-[1160px] px-[14px] py-5 sm:px-4 sm:py-10">
+      <div className="mx-auto max-w-[1160px] px-gutter py-5 sm:px-4 sm:py-10">
         <div className="mb-4 sm:mb-7">
           {/* 모바일은 앱바가 제목이다 — 화면 안에서 h1을 반복하지 않는다(알림·스타·판매자와 같다). */}
           <h1 className="hidden font-display text-title-l font-extrabold text-text-1 sm:block">

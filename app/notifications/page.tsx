@@ -322,7 +322,7 @@ export default function NotificationsPage() {
                         {notification.message}
                       </span>
                     </span>
-                    {unread && <span className="mt-[7px] h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />}
+                    {unread && <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-primary" aria-hidden="true" />}
                   </button>
                 </li>
               );

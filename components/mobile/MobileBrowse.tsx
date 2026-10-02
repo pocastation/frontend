@@ -106,7 +106,7 @@ export default function MobileBrowse({
         </div>
       </div>
 
-      <div className="px-[14px] pt-3">
+      <div className="px-gutter pt-3">
         <label className="flex h-10 items-center gap-2 rounded-control border border-border px-3.5">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
             <circle cx="11" cy="11" r="8" />
@@ -124,7 +124,7 @@ export default function MobileBrowse({
       </div>
 
       {/* 정렬 칩 — 화면폭을 넘으면 가로로 흘린다(줄바꿈해서 두 줄이 되면 목록이 그만큼 밀린다). */}
-      <div className="mt-2.5 flex gap-1.5 overflow-x-auto px-[14px] pb-0.5" role="group" aria-label="정렬 기준">
+      <div className="mt-2.5 flex gap-1.5 overflow-x-auto px-gutter pb-0.5" role="group" aria-label="정렬 기준">
         {sortOptions.map((option) => {
           const on = sort === option.key;
           return (
@@ -143,12 +143,12 @@ export default function MobileBrowse({
         })}
       </div>
 
-      <p className="mt-2.5 px-[14px] text-label tabular-nums text-text-3">
+      <p className="mt-2.5 px-gutter text-label tabular-nums text-text-3">
         {totalElements.toLocaleString("ko-KR")}개
       </p>
 
       {error && (
-        <div className="px-[14px] pt-3">
+        <div className="px-gutter pt-3">
           <ExploreError onRetry={retry} />
         </div>
       )}
@@ -156,7 +156,7 @@ export default function MobileBrowse({
       {auctions.length > 0 ? (
         // 재정렬·재검색 중에도 기존 카드를 유지하고 dim만 준다(스켈레톤으로 통째 교체 X).
         <div
-          className={`mt-2 grid grid-cols-2 gap-x-2 gap-y-[18px] px-[14px] transition-opacity ${
+          className={`mt-2 grid grid-cols-2 gap-x-2 gap-y-5 px-gutter transition-opacity ${
             error ? "opacity-45" : ""
           }`}
         >
@@ -171,7 +171,7 @@ export default function MobileBrowse({
           ))}
         </div>
       ) : error ? null : (
-        <div className={`px-[14px] ${RESULT_FLOOR}`}>
+        <div className={`px-gutter ${RESULT_FLOOR}`}>
           <ExploreEmpty
             title={query ? `"${query}" 검색 결과가 없어요` : isInstant ? "등록된 즉시판매가 아직 없어요" : "판매 중인 상품이 아직 없어요"}
             hint={query ? "다른 키워드로 검색하거나 정렬을 바꿔보세요." : undefined}
@@ -181,7 +181,7 @@ export default function MobileBrowse({
       )}
 
       {hasMore && (
-        <div className="mt-6 flex flex-col items-center gap-2 px-[14px]">
+        <div className="mt-6 flex flex-col items-center gap-2 px-gutter">
           {moreError && <p className="text-label font-bold text-danger">더 불러오지 못했어요.</p>}
           <button
             type="button"
@@ -202,7 +202,7 @@ export default function MobileBrowse({
         <Link
           href="/auctions/ended"
           onNavigate={markNavForward}
-          className={`mt-6 block border-t border-border px-[14px] py-4 text-center text-body-s font-bold text-text-2 ${FOCUS_RING}`}
+          className={`mt-6 block border-t border-border px-gutter py-4 text-center text-body-s font-bold text-text-2 ${FOCUS_RING}`}
         >
           거래 완료된 상품 보기
         </Link>

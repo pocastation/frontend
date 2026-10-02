@@ -49,7 +49,7 @@ export const PRESS_TAB = `${PRESS_BASE} active:opacity-50`;
  * 누르는 칩(정렬·필터)이 아니라 붙어 있는 표시라 테두리 없이 면으로 그린다.
  */
 const LABEL_BASE =
-  "inline-flex h-5 shrink-0 items-center whitespace-nowrap rounded-control px-[7px] text-caption font-bold leading-none";
+  "inline-flex h-5 shrink-0 items-center whitespace-nowrap rounded-control px-2 text-caption font-bold leading-none";
 export const LABEL_NEUTRAL = `${LABEL_BASE} bg-surface-2 text-text-2`;
 export const LABEL_STRONG = `${LABEL_BASE} bg-text-1 text-white`;
 
@@ -106,7 +106,7 @@ export const ACTION_ICON_BUTTON =
  * 넓은 화면 아래에 띠가 하나 걸리면 그게 더 눈에 띈다.
  */
 export const FORM_ACTION_BAR =
-  "fixed inset-x-0 z-[400] border-t border-border bg-white px-[14px] py-2.5 " +
+  "fixed inset-x-0 z-[400] border-t border-border bg-white px-gutter py-2.5 " +
   "sm:static sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:pt-5";
 
 export const FORM_ACTION_BAR_STYLE = { bottom: "var(--mobile-tabbar-h, env(safe-area-inset-bottom))" } as const;
@@ -118,8 +118,18 @@ export const FORM_ACTION_BAR_STYLE = { bottom: "var(--mobile-tabbar-h, env(safe-
  * 앉으므로 둘을 더해야 한다 — 바 높이만 보고 96px을 뒀다가 마지막 입력칸이 가려졌다.
  *
  * <p>데스크탑에서는 바가 흐름으로 돌아가 여백이 필요 없다.
+ *
+ * <p>모바일은 #776부터 0이다. 본문 뒤에 푸터 앞 여백(64)과 푸터가 항상 따라와 끝까지 굴리면 마지막
+ * 입력칸이 바 위로 올라온다. 136을 두면 푸터 앞 거리만 화면마다 200px씩 벌어졌다.
  */
-export const FORM_ACTION_BAR_PAD = "pb-[136px] sm:pb-10";
+export const FORM_ACTION_BAR_PAD = "sm:pb-10";
+
+/**
+ * 목록 행에서 썸네일(44px) + 간격(12px) 뒤 글자 축에 맞추는 들여쓰기(#776). 여백 단계가 아니라
+ * 썸네일 폭에서 나온 정렬값이라 상수 하나로 묶고 lint 예외를 여기에만 둔다.
+ */
+// eslint-disable-next-line no-restricted-syntax
+export const THUMB_INDENT = "pl-[56px]";
 
 /**
  * 결과가 0건일 때도 잡아 두는 바닥 높이(#755).

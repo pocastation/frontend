@@ -57,7 +57,7 @@ export default function EventList({
     <ul>
       {events.map((event) => (
         <li key={event.id} className="border-b border-border last:border-b-0">
-          <NavLink nav="forward" href={`/events/${event.id}`} className={`flex items-center gap-2.5 py-[11px] ${FOCUS_RING}`}>
+          <NavLink nav="forward" href={`/events/${event.id}`} className={`flex items-center gap-2.5 py-3 ${FOCUS_RING}`}>
             <span
               className={LABEL_NEUTRAL}
             >
@@ -88,7 +88,7 @@ export default function EventList({
 function FillerRow({ "aria-hidden": ariaHidden }: { "aria-hidden"?: boolean } = {}) {
   return (
     <li aria-hidden={ariaHidden} className={ariaHidden ? "invisible" : undefined}>
-      <span className="flex items-center gap-2.5 py-[11px]">
+      <span className="flex items-center gap-2.5 py-3">
         <span className={LABEL_NEUTRAL}>행사</span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-body font-bold">&nbsp;</span>

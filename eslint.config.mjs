@@ -30,6 +30,16 @@ const eslintConfig = defineConfig([
           selector: "TemplateElement[value.raw=/(^|[\\s:])text-(\\[[0-9.]+px\\]|(xs|sm|base|lg|xl|2xl|3xl|4xl|5xl)\\b)/]",
           message: "글자 크기는 text-caption·label·body-s·body·body-l·title-s·title·title-l·display만 씁니다.",
         },
+        // 여백은 역할 토큰(px-gutter·mt-section 등)이나 표준 단계를 쓴다(#776). 임의 px 여백이 화면마다
+        // 3·5·7·9·11·13·17·18·25px처럼 새 값을 만들었다. 안전영역(env)·calc 식은 기기 값이라 허용한다.
+        {
+          selector: "Literal[value=/(^|[\\s:])-?(p|px|py|pt|pb|pl|pr|ps|pe|m|mx|my|mt|mb|ml|mr|ms|me|gap|gap-x|gap-y|space-x|space-y)-\\[[0-9.]+px\\]/]",
+          message: "여백은 역할 토큰(gutter·page·tight·head·row·card·cta·group·section·footer·empty)이나 표준 단계를 씁니다. 임의 px 금지.",
+        },
+        {
+          selector: "TemplateElement[value.raw=/(^|[\\s:])-?(p|px|py|pt|pb|pl|pr|ps|pe|m|mx|my|mt|mb|ml|mr|ms|me|gap|gap-x|gap-y|space-x|space-y)-\\[[0-9.]+px\\]/]",
+          message: "여백은 역할 토큰(gutter·page·tight·head·row·card·cta·group·section·footer·empty)이나 표준 단계를 씁니다. 임의 px 금지.",
+        },
       ],
     },
   },

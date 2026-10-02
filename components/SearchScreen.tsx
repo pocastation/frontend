@@ -257,7 +257,7 @@ export default function SearchScreen({
         데스크탑은 전역 헤더 아래 놓이는 평범한 블록(뒤로 버튼은 감춘다).
       */}
       <header className="sticky top-0 z-[300] border-b border-border bg-white sm:static sm:mx-auto sm:w-full sm:max-w-[720px] sm:border-0 sm:px-4 sm:pt-8">
-        <div className="flex h-12 items-center gap-1 pl-1 pr-[14px] sm:h-auto sm:p-0">
+        <div className="flex h-12 items-center gap-1 pl-1 pr-gutter sm:h-auto sm:p-0">
           <button
             type="button"
             aria-label="뒤로"
@@ -277,7 +277,7 @@ export default function SearchScreen({
           <>
             {recent.length > 0 && (
               <>
-                <section className="px-[14px] sm:px-0">
+                <section className="px-gutter sm:px-0">
                   <div className="flex items-center justify-between pt-3.5 sm:pt-0">
                     <h2 className="text-body font-extrabold text-text-1">최근 검색어</h2>
                     <button
@@ -321,7 +321,7 @@ export default function SearchScreen({
 
             {/* 「더보기」(→ /artists)는 #653에서 걷었다. 칩은 스타 목록으로 가지 않고 그 이름으로
                 검색을 제출하므로 섹션 자체는 그대로 쓴다. */}
-            <section className="px-[14px] sm:mt-8 sm:px-0">
+            <section className="px-gutter sm:mt-8 sm:px-0">
               <div className="flex items-center pt-3.5 sm:pt-0">
                 <h2 className="text-body font-extrabold text-text-1">인기 스타</h2>
               </div>
@@ -348,7 +348,7 @@ export default function SearchScreen({
             </section>
           </>
         ) : (
-          <div className="px-[14px] sm:px-0">
+          <div className="px-gutter sm:px-0">
             {showArtistChips && (
               <div className="flex gap-1.5 overflow-x-auto pt-3 pb-0.5" role="group" aria-label="스타로 좁히기">
                 <button
@@ -439,7 +439,7 @@ export default function SearchScreen({
                 <p className="pt-3 text-label tabular-nums text-text-3">
                   상품 <b className="font-bold text-text-2">{totalElements.toLocaleString()}</b>
                 </p>
-                <div className="grid grid-cols-2 gap-x-2 gap-y-[18px] pt-2.5 sm:grid-cols-3">
+                <div className="grid grid-cols-2 gap-x-2 gap-y-5 pt-2.5 sm:grid-cols-3">
                   {auctions.map((auction) => (
                     <AuctionCard
                       key={auction.id}

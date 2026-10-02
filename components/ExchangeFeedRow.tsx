@@ -54,7 +54,7 @@ export default function ExchangeFeedRow({ item }: { item: ExchangeFeedItem }) {
             )}
           </span>
           {item.photoCount > 1 && (
-            <span className="absolute -bottom-0.5 -right-0.5 rounded-control bg-text-1 px-[3.5px] font-display text-caption font-extrabold text-white">
+            <span className="absolute -bottom-0.5 -right-0.5 rounded-control bg-text-1 px-1 font-display text-caption font-extrabold text-white">
               {item.photoCount}
             </span>
           )}

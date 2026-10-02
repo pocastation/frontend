@@ -78,6 +78,22 @@
   --text-display--line-height: 1.25;
   --text-display--letter-spacing: -0.03em;
 
+  /* 여백 역할(#776). 값이 아니라 역할로 고른다 — 모바일 22개 화면 실측에서 같은 역할의 여백이
+     4~11종으로 갈려 있었다(좌우 14·16·20·24, 제목→내용 8~29, 섹션 사이 35~65).
+     안쪽(묶음 안)이 바깥(묶음 사이)보다 항상 좁아야 묶음이 읽힌다. 클래스는 `px-gutter`·`mt-section` 식이다. */
+  --spacing-gutter: 16px; /* 화면 좌우 */
+  --spacing-page: 16px; /* 화면 위 끝(앱바 아래 → 첫 내용) */
+  --spacing-tight: 8px; /* 붙은 줄: 작은 제목 → 제목, 입력 → 도움말 */
+  --spacing-head: 12px; /* 섹션 제목 → 내용 */
+  --spacing-row: 16px; /* 목록·정보표의 줄 사이 */
+  --spacing-card: 16px; /* 테두리 상자 안쪽 */
+  --spacing-cta: 20px; /* 안내 문장 → 주 버튼 */
+  --spacing-group: 24px; /* 카드와 카드, 블록과 블록 */
+  --spacing-section: 40px; /* 섹션 사이 */
+  --spacing-section-ruled: 16px; /* 구분선·회색 띠로 섹션을 나눌 때 선 위·아래 각각(합 32) */
+  --spacing-footer: 64px; /* 본문 끝 → 푸터 */
+  --spacing-empty: 64px; /* 「아직 없어요」 빈 상태 위아래 */
+
   --shadow-card: 0 1px 3px rgba(17, 17, 24, 0.06), 0 4px 16px rgba(17, 17, 24, 0.04);
   /* --shadow-primary(보라 글로우)는 #277에서 제거했다. 장식 그림자라 남겨두면 다시 쓰인다. */
   --shadow-modal: 0 24px 64px rgba(17, 17, 24, 0.16);

@@ -84,7 +84,7 @@ export default function AdminAuditLogPage() {
   return (
     <div>
       <h1 className="font-display text-title-l font-extrabold text-text-1">감사 로그</h1>
-      <p className="mt-1.5 text-body text-text-3">어드민이 수행한 중대 조치의 기록입니다. 누가·언제·무엇을·왜 했는지 확인할 수 있습니다.</p>
+      <p className="mt-2 text-body text-text-3">어드민이 수행한 중대 조치의 기록입니다. 누가·언제·무엇을·왜 했는지 확인할 수 있습니다.</p>
 
       {error && (
         <AdminNotice kind="error" className="mt-5">
@@ -92,7 +92,7 @@ export default function AdminAuditLogPage() {
         </AdminNotice>
       )}
 
-      <div className="mt-5 mb-3 flex flex-wrap gap-2.5">
+      <div className="mt-5 mb-3 flex flex-wrap gap-3">
         <select
           value={actionFilter}
           onChange={(e) => setActionFilter(e.target.value as AuditAction | "ALL")}
@@ -124,11 +124,11 @@ export default function AdminAuditLogPage() {
         <table role="table" className="admin-table admin-table-audit w-full min-w-[720px] border-collapse">
           <thead>
             <tr className="border-b border-border text-left text-caption font-bold text-text-3">
-              <th className="whitespace-nowrap px-4 py-2.5">시각</th>
-              <th className="whitespace-nowrap px-4 py-2.5">관리자</th>
-              <th className="whitespace-nowrap px-4 py-2.5">조치</th>
-              <th className="px-4 py-2.5">대상</th>
-              <th className="px-4 py-2.5">사유</th>
+              <th className="whitespace-nowrap px-4 py-3">시각</th>
+              <th className="whitespace-nowrap px-4 py-3">관리자</th>
+              <th className="whitespace-nowrap px-4 py-3">조치</th>
+              <th className="px-4 py-3">대상</th>
+              <th className="px-4 py-3">사유</th>
             </tr>
           </thead>
           <tbody>

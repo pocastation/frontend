@@ -99,14 +99,14 @@ export default function AdminEmailSuppressionsPage() {
   return (
     <div>
       <h1 className="font-display text-title-l font-extrabold text-text-1">발송 금지 목록</h1>
-      <p className="mt-1.5 max-w-[46rem] text-body leading-relaxed text-text-3">
+      <p className="mt-2 max-w-[46rem] text-body leading-relaxed text-text-3">
         하드 바운스·스팸 신고가 확인된 주소예요. 이 목록에 있으면 인증 메일도 비밀번호 재설정 메일도
         나가지 않아, 그 계정으로 들어갈 방법이 사라집니다.
       </p>
 
       {/* 해제의 무게를 화면에서도 드러낸다 — 이건 "다시 보내겠다"는 결정이고,
           근거 없이 반복하면 발신 도메인 평판 관리가 무력해진다. */}
-      <p className="mt-4 rounded-card bg-surface-2 px-4 py-3.5 text-body-s leading-relaxed text-text-2">
+      <p className="mt-4 rounded-card bg-surface-2 px-4 py-4 text-body-s leading-relaxed text-text-2">
         <b className="font-extrabold text-text-1">해제는 본인 확인 후에만 하세요.</b> 신고당한 주소로
         계속 보내면 발신 도메인 평판이 깎여 <b className="font-bold text-text-1">다른 회원의 메일까지
         스팸함으로</b> 갑니다.
@@ -140,7 +140,7 @@ export default function AdminEmailSuppressionsPage() {
           {rows.map((row) => (
             <li key={row.id} className="border-b border-border py-4 sm:flex sm:items-start sm:gap-6">
               <div className="min-w-0 sm:flex-1">
-                <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1">
+                <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <span className="text-body font-extrabold break-all text-text-1">{row.email}</span>
                   <span className="text-label font-bold text-text-3">
                     {REASON_LABEL[row.reason]}
@@ -178,7 +178,7 @@ export default function AdminEmailSuppressionsPage() {
         >
           <div className="w-full max-w-sm rounded-card bg-surface p-5 shadow-modal">
             <h2 className="font-display text-body-l font-extrabold text-text-1">발송 금지 해제</h2>
-            <p className="mt-1.5 text-body-s leading-relaxed text-text-3">
+            <p className="mt-2 text-body-s leading-relaxed text-text-3">
               <b className="font-bold break-all text-text-1">{target.email}</b> 로 다시 메일을 보낼 수
               있게 됩니다. {REASON_LABEL[target.reason]}으로 등록된 주소예요.
             </p>

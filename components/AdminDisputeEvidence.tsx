@@ -95,9 +95,9 @@ function Group({
     <div>
       <p className="text-label font-bold text-text-2">{label}</p>
       {photos.length === 0 && !videoUrl ? (
-        <p className="mt-1.5 text-caption text-text-3">{empty}</p>
+        <p className="mt-2 text-caption text-text-3">{empty}</p>
       ) : (
-        <div className="mt-1.5 grid grid-cols-4 gap-2 sm:grid-cols-5">
+        <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-5">
           {photos.map((photo) => (
             <a
               key={photo.key}

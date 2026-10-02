@@ -32,7 +32,7 @@ import type {
 
 const MAX_PHOTOS = 3;
 
-const LABEL = "mb-1.5 text-body-s font-extrabold text-text-2";
+const LABEL = "mb-2 text-body-s font-extrabold text-text-2";
 const INPUT =
   "h-12 w-full rounded-control border border-border-2 bg-white px-3 text-body-l font-semibold text-text-1";
 
@@ -139,14 +139,14 @@ export default function ExchangeApplyPage() {
 
       <div className={`mx-auto max-w-[640px] ${FORM_ACTION_BAR_PAD} sm:px-4 sm:py-8`}>
         {error && (
-          <p role="alert" className="mx-gutter mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
+          <p role="alert" className="mx-gutter mt-3 rounded-card bg-surface-2 px-4 py-3 text-body-s font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
 
         <section className="px-gutter pt-4 sm:px-0">
           <p className={LABEL}>
-            내가 줄 포카<span className="ml-0.5 text-primary">*</span>
+            내가 줄 포카<span className="ml-1 text-primary">*</span>
           </p>
           <select value={artistId} onChange={(e) => setArtistId(e.target.value)} className={INPUT} aria-label="스타">
             <option value="">스타를 선택하세요</option>
@@ -186,9 +186,9 @@ export default function ExchangeApplyPage() {
         <section className="mt-5 px-gutter sm:px-0">
           <div className="border-t border-border pt-4">
           <p className={LABEL}>
-            만날 시간<span className="ml-0.5 text-primary">*</span>
+            만날 시간<span className="ml-1 text-primary">*</span>
           </p>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             {post?.slots.map((slot) => (
               <label
                 key={slot.id}
@@ -214,8 +214,8 @@ export default function ExchangeApplyPage() {
           <div className="border-t border-border pt-4">
           {/* 누가 보는지는 화면만 봐서는 알 수 없다 — 안내 문구 중 이 한 줄만 남긴다(#718). */}
           <p className={LABEL}>
-            포카 사진<span className="ml-0.5 text-primary">*</span>
-            <span className="ml-1.5 font-semibold text-text-3">글쓴이에게만 보여요</span>
+            포카 사진<span className="ml-1 text-primary">*</span>
+            <span className="ml-2 font-semibold text-text-3">글쓴이에게만 보여요</span>
           </p>
           <PhotoUploadGrid
             items={photos.items}
@@ -236,7 +236,7 @@ export default function ExchangeApplyPage() {
             maxLength={200}
             rows={2}
             placeholder="예) 윈터 두 장 있어요. 종료 후에 뵐게요."
-            className={`w-full resize-none rounded-control border border-border-2 bg-white px-3 py-2.5 text-body-l outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+            className={`w-full resize-none rounded-control border border-border-2 bg-white px-3 py-3 text-body-l outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
           />
           </div>
         </section>

@@ -129,7 +129,7 @@ export default function AdminBannerPage() {
         ) : (
           <ul className="divide-y divide-border">
             {items.map((item, i) => (
-              <li key={item.id} className="admin-banner-row flex items-center gap-3.5 px-4 py-3.5">
+              <li key={item.id} className="admin-banner-row flex items-center gap-4 px-4 py-4">
                 {/* 1번만 보라다. 순위가 아니라 「지금 첫 화면인 것」을 가리키므로 하나면 충분하다. */}
                 <span
                   className={`w-[22px] flex-shrink-0 text-center font-display text-body-l font-extrabold tabular-nums ${
@@ -163,7 +163,7 @@ export default function AdminBannerPage() {
                     제안 {item.bidCount}회{item.endAt && ` · 마감 ${formatTimeLeft(item.endAt)}`}
                   </span>
                 </span>
-                <div className="admin-banner-actions flex items-center gap-3.5">
+                <div className="admin-banner-actions flex items-center gap-4">
                 <span className="flex-shrink-0 text-right text-body-s">
                   <b className="block font-display font-extrabold tabular-nums">{formatKRW(item.currentPrice)}</b>
                   <span className="block text-caption font-medium text-text-3">최소가</span>
@@ -197,7 +197,7 @@ export default function AdminBannerPage() {
       </p>
 
       {items.length >= MAX_FEATURED && (
-        <p className="mt-4 rounded-card bg-surface-2 px-3.5 py-3 text-body-s text-text-2">
+        <p className="mt-4 rounded-card bg-surface-2 px-4 py-3 text-body-s text-text-2">
           자리가 다 찼어요. 판매글 관리에서 「배너」를 켜려 하면 막히고, 먼저 여기서 한 건을 내려야 해요.
         </p>
       )}

@@ -28,7 +28,7 @@ export default function AdminNotice({
   return (
     <p
       role={kind === "error" ? "alert" : "status"}
-      className={`rounded-card bg-surface-2 px-3.5 py-2.5 text-body-s font-semibold ${tone} ${className}`}
+      className={`rounded-card bg-surface-2 px-4 py-3 text-body-s font-semibold ${tone} ${className}`}
     >
       {children}
     </p>

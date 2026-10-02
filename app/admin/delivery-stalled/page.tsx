@@ -122,19 +122,19 @@ export default function AdminDeliveryStalledPage() {
                   >
                     {item.title}
                   </Link>
-                  <p className="mt-0.5 text-label text-text-3">
+                  <p className="mt-1 text-label text-text-3">
                     주문 #{item.orderId} · 발송 {formatDateTimeKST(item.shippedAt)}
                   </p>
                 </div>
                 <div className="shrink-0 text-right text-label">
                   <p className="font-bold text-text-2">{item.carrier ?? "택배사 미상"}</p>
-                  <p className="mt-0.5 tabular-nums text-text-3">{item.trackingNumber ?? "운송장 없음"}</p>
+                  <p className="mt-1 tabular-nums text-text-3">{item.trackingNumber ?? "운송장 없음"}</p>
                 </div>
                 <button
                   type="button"
                   disabled={busyId !== null}
                   onClick={() => void markDelivered(item)}
-                  className={`h-9 shrink-0 rounded-control bg-text-1 px-3.5 text-label font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-50 ${FOCUS_RING}`}
+                  className={`h-9 shrink-0 rounded-control bg-text-1 px-4 text-label font-bold text-white transition-colors hover:bg-text-2 disabled:opacity-50 ${FOCUS_RING}`}
                 >
                   {busyId === item.orderId ? "기록 중..." : "배송완료 기록"}
                 </button>

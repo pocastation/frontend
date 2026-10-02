@@ -62,7 +62,7 @@ export default function AdminReviewsPage() {
   return (
     <div>
       <h1 className="font-display text-title-l font-extrabold text-text-1">신고 관리</h1>
-      <p className="mt-1.5 text-body text-text-3">신고된 거래 후기를 검토하고 블라인드하거나 신고를 반려해요.</p>
+      <p className="mt-2 text-body text-text-3">신고된 거래 후기를 검토하고 블라인드하거나 신고를 반려해요.</p>
       <ReportScopeTabs />
 
       {error && (
@@ -102,11 +102,11 @@ export default function AdminReviewsPage() {
                 <p className="mt-2 text-label italic text-text-3">본문 없음 (별점·태그만)</p>
               )}
 
-              <div className="mt-2 flex flex-wrap gap-1.5">
+              <div className="mt-2 flex flex-wrap gap-2">
                 {item.reports.map((rep, i) => (
                   <div
                     key={i}
-                    className="rounded-control border border-border px-2 py-0.5 text-caption font-semibold text-text-2 max-lg:w-full max-lg:rounded-control max-lg:py-1"
+                    className="rounded-control border border-border px-2 py-1 text-caption font-semibold text-text-2 max-lg:w-full max-lg:rounded-control max-lg:py-1"
                     title={rep.detail ?? undefined}
                   >
                     {REVIEW_REPORT_REASON_LABEL[rep.reasonCode]}
@@ -121,7 +121,7 @@ export default function AdminReviewsPage() {
                     type="button"
                     disabled={busyId === item.reviewId}
                     onClick={() => act(item.reviewId, "unblind")}
-                    className={`rounded-control border border-border-2 bg-surface px-3 py-1.5 text-label font-bold text-text-2 transition-colors hover:border-text-3 disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`rounded-control border border-border-2 bg-surface px-3 py-2 text-label font-bold text-text-2 transition-colors hover:border-text-3 disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     블라인드 해제
                   </button>
@@ -131,7 +131,7 @@ export default function AdminReviewsPage() {
                       type="button"
                       disabled={busyId === item.reviewId}
                       onClick={() => act(item.reviewId, "blind", { reason: "신고 검토 후 블라인드" })}
-                      className={`rounded-control bg-danger px-3 py-1.5 text-label font-bold text-white transition-colors hover:opacity-90 disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`rounded-control bg-danger px-3 py-2 text-label font-bold text-white transition-colors hover:opacity-90 disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       블라인드
                     </button>
@@ -139,7 +139,7 @@ export default function AdminReviewsPage() {
                       type="button"
                       disabled={busyId === item.reviewId}
                       onClick={() => act(item.reviewId, "dismiss-reports")}
-                      className={`rounded-control border border-border-2 bg-surface px-3 py-1.5 text-label font-bold text-text-2 transition-colors hover:border-text-3 disabled:opacity-50 ${FOCUS_RING}`}
+                      className={`rounded-control border border-border-2 bg-surface px-3 py-2 text-label font-bold text-text-2 transition-colors hover:border-text-3 disabled:opacity-50 ${FOCUS_RING}`}
                     >
                       반려 (정상 리뷰)
                     </button>

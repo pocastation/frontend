@@ -87,16 +87,16 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
   }
 
   if (!rating) {
-    return <p className="mt-1.5 text-caption text-text-3">후기를 불러오는 중...</p>;
+    return <p className="mt-2 text-caption text-text-3">후기를 불러오는 중...</p>;
   }
 
   return (
     <div className="mt-2">
       {/* 신뢰 레벨(덕력 등급, §12.7) — 거래 경험 기반이라 리뷰가 0건이어도 표시한다. */}
-      <div className="flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-2">
         <TrustLevelBadge
           level={rating.trustLevel}
-          className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-0.5 text-caption font-bold text-text-1 decoration-transparent hover:decoration-text-3"
+          className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-1 text-caption font-bold text-text-1 decoration-transparent hover:decoration-text-3"
         >
           <span className="text-text-3">Lv.{rating.trustLevel}</span>
           {plainLevelLabel(rating.trustLevelLabel)}
@@ -123,12 +123,12 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
       </div>
 
       {/* 별점 + 후기 보기 + 매너 태그를 한 줄에(시안). 후기 0건이면 안내 문구만. */}
-      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1.5">
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-2">
         {rating.reviewCount === 0 ? (
           <span className="text-caption text-text-3">아직 받은 거래 후기가 없어요.</span>
         ) : (
           <>
-            <span className="flex items-center gap-1.5">
+            <span className="flex items-center gap-2">
               <Stars value={rating.averageRating ?? 0} className="text-body" />
               <span className="text-body font-bold text-text-1">{(rating.averageRating ?? 0).toFixed(1)}</span>
             </span>
@@ -147,7 +147,7 @@ export default function SellerReviewSummary({ sellerId }: { sellerId: string }) 
             {rating.tags.map((t) => (
               <span
                 key={t.code}
-                className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-0.5 text-caption font-semibold text-text-2"
+                className="inline-flex items-center gap-1 rounded-control border border-border px-2 py-1 text-caption font-semibold text-text-2"
               >
                 {t.label}
                 <span className="text-text-3">{t.count}</span>
@@ -209,7 +209,7 @@ function ReviewRow({
   return (
     <div className="py-3">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2">
           <Stars value={review.rating} className="text-label" />
           <span className="text-label font-bold text-text-1">{review.reviewerNickname ?? "구매자"}</span>
         </div>
@@ -217,7 +217,7 @@ function ReviewRow({
       </div>
 
       {review.tags.length > 0 && (
-        <div className="mt-1.5 flex flex-wrap gap-1">
+        <div className="mt-2 flex flex-wrap gap-1">
           {review.tags.map((t) => (
             <span key={t.code} className={LABEL_NEUTRAL}>
               {t.label}
@@ -226,12 +226,12 @@ function ReviewRow({
         </div>
       )}
 
-      {review.body && <p className="mt-1.5 whitespace-pre-wrap text-label text-text-2">{review.body}</p>}
+      {review.body && <p className="mt-2 whitespace-pre-wrap text-label text-text-2">{review.body}</p>}
 
       {canReport && !done && (
         <div className="mt-2">
           {reporting ? (
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-2">
               <select
                 value={reason}
                 onChange={(e) => setReason(e.target.value as ReviewReportReason)}
@@ -253,7 +253,7 @@ function ReviewRow({
               <button
                 type="button"
                 onClick={() => setReporting(false)}
-                className={`rounded-control px-1.5 py-1 text-caption font-semibold text-text-3 ${FOCUS_RING}`}
+                className={`rounded-control px-2 py-1 text-caption font-semibold text-text-3 ${FOCUS_RING}`}
               >
                 취소
               </button>

@@ -205,7 +205,7 @@ export default function SearchScreen({
         e.preventDefault();
         submit(query);
       }}
-      className="flex h-9 flex-1 items-center gap-2 rounded-control border border-border-2 px-3.5 text-text-3 focus-within:border-text-1"
+      className="flex h-9 flex-1 items-center gap-2 rounded-control border border-border-2 px-4 text-text-3 focus-within:border-text-1"
     >
       <SearchIcon />
       <label htmlFor="search-field" className="sr-only">
@@ -278,7 +278,7 @@ export default function SearchScreen({
             {recent.length > 0 && (
               <>
                 <section className="px-gutter sm:px-0">
-                  <div className="flex items-center justify-between pt-3.5 sm:pt-0">
+                  <div className="flex items-center justify-between pt-4 sm:pt-0">
                     <h2 className="text-body font-extrabold text-text-1">최근 검색어</h2>
                     <button
                       type="button"
@@ -288,11 +288,11 @@ export default function SearchScreen({
                       전체 삭제
                     </button>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 pt-2.5">
+                  <div className="flex flex-wrap gap-2 pt-3">
                     {recent.map((item) => (
                       <span
                         key={item}
-                        className="inline-flex h-8 items-center gap-1.5 rounded-control border border-border-2 pl-3 pr-2 text-body-s font-bold text-text-2"
+                        className="inline-flex h-8 items-center gap-2 rounded-control border border-border-2 pl-3 pr-2 text-body-s font-bold text-text-2"
                       >
                         <button
                           type="button"
@@ -322,7 +322,7 @@ export default function SearchScreen({
             {/* 「더보기」(→ /artists)는 #653에서 걷었다. 칩은 스타 목록으로 가지 않고 그 이름으로
                 검색을 제출하므로 섹션 자체는 그대로 쓴다. */}
             <section className="px-gutter sm:mt-8 sm:px-0">
-              <div className="flex items-center pt-3.5 sm:pt-0">
+              <div className="flex items-center pt-4 sm:pt-0">
                 <h2 className="text-body font-extrabold text-text-1">인기 스타</h2>
               </div>
               {popularArtists.length === 0 ? (
@@ -337,7 +337,7 @@ export default function SearchScreen({
                         className={`flex w-full flex-col items-center rounded-control ${FOCUS_RING}`}
                       >
                         <Avatar artist={artist} size={56} />
-                        <span className="mt-1.5 w-full truncate text-center text-caption font-bold text-text-2">
+                        <span className="mt-2 w-full truncate text-center text-caption font-bold text-text-2">
                           {artist.name}
                         </span>
                       </button>
@@ -350,12 +350,12 @@ export default function SearchScreen({
         ) : (
           <div className="px-gutter sm:px-0">
             {showArtistChips && (
-              <div className="flex gap-1.5 overflow-x-auto pt-3 pb-0.5" role="group" aria-label="스타로 좁히기">
+              <div className="flex gap-2 overflow-x-auto pt-3 pb-1" role="group" aria-label="스타로 좁히기">
                 <button
                   type="button"
                   aria-pressed={!narrowed}
                   onClick={() => setQuery(baseQuery)}
-                  className={`inline-flex h-8 shrink-0 items-center rounded-control border px-3.5 text-body-s font-bold transition-colors ${FOCUS_RING} ${
+                  className={`inline-flex h-8 shrink-0 items-center rounded-control border px-3 text-body-s font-bold transition-colors ${FOCUS_RING} ${
                     narrowed ? "border-border-2 bg-white text-text-2" : "border-text-1 bg-text-1 text-white"
                   }`}
                 >
@@ -369,7 +369,7 @@ export default function SearchScreen({
                       type="button"
                       aria-pressed={on}
                       onClick={() => narrowTo(artist.name)}
-                      className={`inline-flex h-8 shrink-0 items-center gap-1.5 rounded-control border py-0 pl-1 pr-3 text-label font-bold transition-colors ${FOCUS_RING} ${
+                      className={`inline-flex h-8 shrink-0 items-center gap-2 rounded-control border py-0 pl-1 pr-3 text-label font-bold transition-colors ${FOCUS_RING} ${
                         on ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
                       }`}
                     >
@@ -381,7 +381,7 @@ export default function SearchScreen({
               </div>
             )}
 
-            <div className="flex gap-1.5 pt-2.5" role="group" aria-label="판매 유형">
+            <div className="flex gap-2 pt-3" role="group" aria-label="판매 유형">
               {SALE_TYPE_TABS.map((tab) => {
                 const on = saleType === tab.key;
                 return (
@@ -390,7 +390,7 @@ export default function SearchScreen({
                     type="button"
                     aria-pressed={on}
                     onClick={() => setSaleType(tab.key)}
-                    className={`min-h-8 shrink-0 rounded-control border px-3.5 text-body-s font-bold transition-colors ${FOCUS_RING} ${
+                    className={`min-h-8 shrink-0 rounded-control border px-3 text-body-s font-bold transition-colors ${FOCUS_RING} ${
                       on ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
                     }`}
                   >
@@ -439,7 +439,7 @@ export default function SearchScreen({
                 <p className="pt-3 text-label tabular-nums text-text-3">
                   상품 <b className="font-bold text-text-2">{totalElements.toLocaleString()}</b>
                 </p>
-                <div className="grid grid-cols-2 gap-x-2 gap-y-5 pt-2.5 sm:grid-cols-3">
+                <div className="grid grid-cols-2 gap-x-2 gap-y-5 pt-3 sm:grid-cols-3">
                   {auctions.map((auction) => (
                     <AuctionCard
                       key={auction.id}

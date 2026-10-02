@@ -132,7 +132,7 @@ export default function AdminInquiriesPage() {
         <p className="mt-1 text-body text-text-3">접수된 1:1 문의를 확인하고 답변을 등록해요.</p>
       </header>
 
-      <div className="mb-4 flex flex-wrap items-center gap-1.5" role="group" aria-label="문의 상태 필터">
+      <div className="mb-4 flex flex-wrap items-center gap-2" role="group" aria-label="문의 상태 필터">
         {FILTERS.map((item) => {
           const active = filter === item.value;
           return (
@@ -147,7 +147,7 @@ export default function AdminInquiriesPage() {
                 setFilter(item.value);
               }}
               className={
-                "rounded-control border px-3 py-1.5 text-label font-semibold transition-colors " +
+                "rounded-control border px-3 py-2 text-label font-semibold transition-colors " +
                 FOCUS_RING +
                 (active
                   ? " border-text-1 bg-text-1 text-white"
@@ -228,7 +228,7 @@ export default function AdminInquiriesPage() {
                       setPage((current) => current - 1);
                     }}
                     className={
-                      "h-8 rounded-control px-2.5 text-label font-bold text-text-2 hover:text-primary disabled:opacity-35 " +
+                      "h-8 rounded-control px-3 text-label font-bold text-text-2 hover:text-primary disabled:opacity-35 " +
                       FOCUS_RING
                     }
                   >
@@ -247,7 +247,7 @@ export default function AdminInquiriesPage() {
                       setPage((current) => current + 1);
                     }}
                     className={
-                      "h-8 rounded-control px-2.5 text-label font-bold text-text-2 hover:text-primary disabled:opacity-35 " +
+                      "h-8 rounded-control px-3 text-label font-bold text-text-2 hover:text-primary disabled:opacity-35 " +
                       FOCUS_RING
                     }
                   >
@@ -315,7 +315,7 @@ export default function AdminInquiriesPage() {
                   onChange={(event) => setAnswer(event.target.value)}
                   placeholder="사용자에게 전달할 답변을 입력해 주세요."
                   className={
-                    "min-h-[180px] w-full resize-y rounded-control border border-border-2 p-3.5 text-body leading-relaxed text-text-1 outline-none placeholder:text-text-3 focus:border-primary " +
+                    "min-h-[180px] w-full resize-y rounded-control border border-border-2 p-4 text-body leading-relaxed text-text-1 outline-none placeholder:text-text-3 focus:border-primary " +
                     FOCUS_RING
                   }
                 />

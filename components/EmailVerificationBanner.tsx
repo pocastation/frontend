@@ -47,7 +47,7 @@ export default function EmailVerificationBanner() {
 
   return (
     <div className="border-b border-border bg-surface-2">
-      <div className="mx-auto flex max-w-[1160px] items-center gap-3 px-4 py-2.5">
+      <div className="mx-auto flex max-w-[1160px] items-center gap-3 px-4 py-3">
         <p className="flex-1 text-label leading-relaxed text-text-2">
           이메일 인증이 아직이에요.{" "}
           <span className="text-text-3">
@@ -64,7 +64,7 @@ export default function EmailVerificationBanner() {
           type="button"
           onClick={handleResend}
           disabled={isSending}
-          className={`shrink-0 rounded-control border border-border-2 bg-white px-3 py-1.5 text-caption font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
+          className={`shrink-0 rounded-control border border-border-2 bg-white px-3 py-2 text-caption font-bold text-text-2 transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`}
         >
           {isSending ? "보내는 중..." : "메일 다시 받기"}
         </button>

@@ -60,7 +60,7 @@ export default async function GuideDocPage({ params }: { params: Promise<{ topic
               <p className="font-display text-caption font-extrabold tracking-[0.08em] text-text-3">
                 {g.title}
               </p>
-              <ul className="mt-1.5">
+              <ul className="mt-2">
                 {g.ids.map((id) => {
                   const d = findGuideDoc(id);
                   if (!d) return null;
@@ -70,7 +70,7 @@ export default async function GuideDocPage({ params }: { params: Promise<{ topic
                       <Link
                         href={`/guide/${id}`}
                         aria-current={on ? "page" : undefined}
-                        className={`-ml-3 block border-l-2 py-1.5 pl-2.5 text-body-s transition-colors ${FOCUS_RING} ${
+                        className={`-ml-3 block border-l-2 py-2 pl-3 text-body-s transition-colors ${FOCUS_RING} ${
                           on
                             ? "border-primary font-bold text-text-1"
                             : "border-transparent text-text-2 hover:text-text-1"
@@ -104,7 +104,7 @@ export default async function GuideDocPage({ params }: { params: Promise<{ topic
               {doc.title}
             </h1>
             {doc.lead && (
-              <p className="mt-2.5 max-w-[30rem] break-keep text-body-l text-text-2">
+              <p className="mt-3 max-w-[30rem] break-keep text-body-l text-text-2">
                 {doc.lead}
               </p>
             )}
@@ -116,7 +116,7 @@ export default async function GuideDocPage({ params }: { params: Promise<{ topic
               {doc.facts.map(([k, v]) => (
                 <div
                   key={k}
-                  className="flex items-baseline justify-between gap-3.5 border-b border-border py-2.5"
+                  className="flex items-baseline justify-between gap-4 border-b border-border py-3"
                 >
                   <dt className="shrink-0 whitespace-nowrap text-body-s text-text-3">{k}</dt>
                   <dd className="break-keep text-right font-display text-body font-extrabold tabular-nums text-text-1">
@@ -188,7 +188,7 @@ export default async function GuideDocPage({ params }: { params: Promise<{ topic
                       <li key={id} className={i ? "border-t border-border-2" : ""}>
                         <Link
                           href={`/guide/${id}`}
-                          className={`flex min-h-[52px] items-center justify-between gap-2.5 py-2.5 text-body-l font-bold text-text-1 ${FOCUS_RING}`}
+                          className={`flex min-h-[52px] items-center justify-between gap-3 py-3 text-body-l font-bold text-text-1 ${FOCUS_RING}`}
                         >
                           <span className="min-w-0 flex-1">{d.title}</span>
                           <span aria-hidden="true" className="shrink-0 text-text-3">
@@ -204,16 +204,16 @@ export default async function GuideDocPage({ params }: { params: Promise<{ topic
 
           <section className="mt-8 border-t border-border pt-6">
             <p className="text-body-s text-text-3">이 문서로 해결되지 않았다면</p>
-            <div className="mt-2.5 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-2">
               <Link
                 href="/faq"
-                className={`rounded-control border border-border-2 bg-surface px-3.5 py-2 text-body-s font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+                className={`rounded-control border border-border-2 bg-surface px-4 py-2 text-body-s font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
               >
                 자주 묻는 질문
               </Link>
               <Link
                 href="/inquiries/new"
-                className={`rounded-control bg-text-1 px-3.5 py-2 text-body-s font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+                className={`rounded-control bg-text-1 px-4 py-2 text-body-s font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
               >
                 1:1 문의
               </Link>

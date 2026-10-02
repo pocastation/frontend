@@ -51,7 +51,7 @@ export default function NotFound() {
             <Link
               key={route.href}
               href={route.href}
-              className={`flex items-baseline gap-2.5 border-b border-border py-3 ${FOCUS_RING}`}
+              className={`flex items-baseline gap-3 border-b border-border py-3 ${FOCUS_RING}`}
             >
               <span className="w-[74px] shrink-0 text-body-s font-extrabold text-text-1 sm:w-[96px]">
                 {route.label}
@@ -61,7 +61,7 @@ export default function NotFound() {
           ))}
         </nav>
 
-        <div className="mt-7 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-4">
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           <Link
             href="/"
             className={`inline-flex h-12 items-center justify-center px-5 sm:w-[200px] ${PRIMARY_BUTTON_CLASS}`}

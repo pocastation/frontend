@@ -105,8 +105,8 @@ export default function ArtistExplorer({
       {/* 진행 표시는 화면 최상단 막대 하나로 모은다(#752). */}
       <TopProgressBar active={loading} />
 
-      <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-6 sm:gap-2.5">
-        <label className="flex h-9 min-w-[200px] flex-1 items-center gap-2 rounded-control border border-border-2 px-3.5 focus-within:border-text-1 sm:h-[42px] sm:px-4">
+      <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-6 sm:gap-3">
+        <label className="flex h-9 min-w-[200px] flex-1 items-center gap-2 rounded-control border border-border-2 px-4 focus-within:border-text-1 sm:h-[42px] sm:px-4">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
@@ -123,12 +123,12 @@ export default function ArtistExplorer({
 
         {/* 선택된 칩은 잉크(text-1)로 채운다 — 거래 목록·검색 화면의 칩과 같은 관례다.
             보라(primary)는 CTA·필수 표시·포커스처럼 «행동을 요구하는» 자리에만 쓴다. */}
-        <div className="flex shrink-0 gap-1.5" role="group" aria-label="스타 타입 필터">
+        <div className="flex shrink-0 gap-2" role="group" aria-label="스타 타입 필터">
           <button
             type="button"
             aria-pressed={type === null}
             onClick={() => setType(null)}
-            className={`min-h-9 rounded-control border px-3.5 text-body-s font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-body-s ${FOCUS_RING} ${
+            className={`min-h-9 rounded-control border px-3 text-body-s font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-body-s ${FOCUS_RING} ${
               type === null ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
             }`}
           >
@@ -140,7 +140,7 @@ export default function ArtistExplorer({
               type="button"
               aria-pressed={type === option}
               onClick={() => setType(option)}
-              className={`min-h-9 rounded-control border px-3.5 text-body-s font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-body-s ${FOCUS_RING} ${
+              className={`min-h-9 rounded-control border px-3 text-body-s font-bold transition-colors sm:h-[42px] sm:px-4 sm:text-body-s ${FOCUS_RING} ${
                 type === option ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
               }`}
             >

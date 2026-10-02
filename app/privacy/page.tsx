@@ -33,7 +33,7 @@ function Paragraphs({ items }: { items: string[] }) {
 
 function Bullets({ items }: { items: PrivacyBullet[] }) {
   return (
-    <ul className="mt-3 space-y-1.5">
+    <ul className="mt-3 space-y-2">
       {items.map((b, index) => (
         <li key={index} className="flex gap-2 text-body leading-relaxed text-text-2">
           <span aria-hidden="true" className="shrink-0 text-text-3">
@@ -76,7 +76,7 @@ function Table({ table }: { table: PrivacyTable }) {
               {row.map((cell, i) => (
                 <td
                   key={i}
-                  className={`px-3 py-2.5 leading-relaxed ${
+                  className={`px-3 py-3 leading-relaxed ${
                     i === 0 ? "font-bold text-text-1" : "text-text-2"
                   }`}
                 >
@@ -101,7 +101,7 @@ function Block({ block }: { block: PrivacyBlock }) {
       {/* 아직 시행되지 않은 내용은 정보주체가 오인하지 않도록 규칙선으로 떼어 놓는다.
           페이지 전체에서 이 강조를 쓰는 곳은 여기뿐이다. */}
       {block.note && (
-        <p className="mt-2 rounded-card bg-surface-2 px-3.5 py-3 text-body-s leading-relaxed text-text-2">
+        <p className="mt-2 rounded-card bg-surface-2 px-4 py-3 text-body-s leading-relaxed text-text-2">
           {block.note}
         </p>
       )}
@@ -126,11 +126,11 @@ export default function PrivacyPage() {
           {BUSINESS_INFO.companyName}(Poca Station) · K-POP 포토카드 중고거래 중개 플랫폼
         </p>
         <dl className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-label text-text-3">
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             <dt>개정 공고일</dt>
             <dd className="text-text-2">{PRIVACY_ANNOUNCED_DATE}</dd>
           </div>
-          <div className="flex gap-1.5">
+          <div className="flex gap-2">
             <dt>시행일</dt>
             <dd className="font-bold text-text-1">{PRIVACY_EFFECTIVE_DATE}</dd>
           </div>
@@ -146,7 +146,7 @@ export default function PrivacyPage() {
 
       <nav aria-label="목차" className="mt-8 rounded-card border border-border p-4 sm:p-5">
         <h2 className="text-body font-bold text-text-1">목차</h2>
-        <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-1.5">
+        <ul className="mt-3 flex flex-wrap gap-x-3 gap-y-2">
           {PRIVACY_ARTICLES.map((a) => (
             <li key={a.no}>
               <a
@@ -177,7 +177,7 @@ export default function PrivacyPage() {
             {/* 권익침해 구제방법은 보호책임자 조항에 딸린 정보다 — 별도 조문으로 세우면
                 실제 방침의 조문 수와 어긋난다. */}
             {article.no === "제10조" && (
-              <ul className="mt-3 space-y-1.5">
+              <ul className="mt-3 space-y-2">
                 {PRIVACY_AGENCIES.map((a) => (
                   <li key={a.name} className="flex flex-wrap gap-x-2 text-body text-text-2">
                     <span className="font-bold text-text-1">{a.name}</span>

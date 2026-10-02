@@ -51,13 +51,13 @@ export default function MobileRankTop3({ auctions }: { auctions: AuctionResponse
         {pages.map((p) => (
           <div key={p.key} className="w-full min-w-full flex-[0_0_100%] snap-start px-gutter">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="flex items-baseline gap-1.5 text-title-s font-extrabold">
+              <h2 className="flex items-baseline gap-2 text-title-s font-extrabold">
                 {p.key} 랭킹
                 <span className="text-caption font-semibold text-text-3">{p.note}</span>
               </h2>
               <Link
                 href={p.href}
-                className={`flex items-center gap-0.5 text-label font-semibold text-text-3 ${FOCUS_RING}`}
+                className={`flex items-center gap-1 text-label font-semibold text-text-3 ${FOCUS_RING}`}
               >
                 더보기
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -65,13 +65,13 @@ export default function MobileRankTop3({ auctions }: { auctions: AuctionResponse
                 </svg>
               </Link>
             </div>
-            <div className="mt-1.5">{p.body}</div>
+            <div className="mt-2">{p.body}</div>
           </div>
         ))}
       </div>
 
       {pages.length > 1 && (
-        <div className="mt-3 flex justify-center gap-1.5" aria-hidden="true">
+        <div className="mt-3 flex justify-center gap-2" aria-hidden="true">
           {pages.map((p, i) => (
             <span
               key={p.key}

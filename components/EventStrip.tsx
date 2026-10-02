@@ -53,7 +53,7 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
         <h2 className="text-title-s font-extrabold text-text-1 sm:font-display sm:text-title sm:font-extrabold">
           다가오는 행사
         </h2>
-        <Link href="/events" onNavigate={markNavForward} className={`flex items-center gap-0.5 text-label font-semibold text-text-3 ${FOCUS_RING}`}>
+        <Link href="/events" onNavigate={markNavForward} className={`flex items-center gap-1 text-label font-semibold text-text-3 ${FOCUS_RING}`}>
           캘린더
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <polyline points="9 18 15 12 9 6" />
@@ -61,7 +61,7 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
         </Link>
       </div>
 
-      <div className="mt-2.5 grid grid-cols-7 gap-1" aria-hidden="true">
+      <div className="mt-3 grid grid-cols-7 gap-1" aria-hidden="true">
         {DOW.map((label, i) => (
           <span
             key={label}
@@ -89,7 +89,7 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
               /* 칸 테두리를 걷는다(#741, #744). 14칸의 테두리가 화면에서 선을 가장 많이 만드는데,
                  고른 날만 칠해도 점이 남아 행사 있는 날은 그대로 읽힌다. 테두리 폭은 남겨 둔다 —
                  빼면 고른 날만 1px씩 커져 격자가 흔들린다. */
-              className={`rounded-control border py-1.5 ${PRESS_CHIP} ${FOCUS_RING} ${
+              className={`rounded-control border py-2 ${PRESS_CHIP} ${FOCUS_RING} ${
                 on ? "border-primary bg-primary text-white" : "border-transparent bg-white"
               }`}
             >
@@ -111,7 +111,7 @@ export default function EventStrip({ events }: { events: EventResponse[] }) {
 
       {/* 날짜를 옮겨도 아래 섹션이 움직이지 않게 가장 붐비는 날만큼 자리를 잡아 둔다(#736).
           고정값을 박으면 행사가 둘 이상인 날에 다시 밀리고, 크게 잡으면 빈 여백만 남는다. */}
-      <div className="pt-1.5">
+      <div className="pt-2">
         <EventList events={selectedEvents} reserveRows={maxPerDay} />
       </div>
     </section>

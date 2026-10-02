@@ -137,7 +137,7 @@ export default function PaymentMethodManager() {
             type="button"
             onClick={handleRegister}
             disabled={busy}
-            className={`px-5 py-2.5 disabled:opacity-50 ${PRIMARY_BUTTON_CLASS}`}
+            className={`px-5 py-3 disabled:opacity-50 ${PRIMARY_BUTTON_CLASS}`}
           >
             {busy ? "진행 중..." : "카드 등록하기"}
           </button>
@@ -148,13 +148,13 @@ export default function PaymentMethodManager() {
             {methods.map((method) => (
               <li key={method.id}>
                 <CardVisual method={method} />
-                <div className="mt-2.5 flex items-center gap-2">
+                <div className="mt-3 flex items-center gap-2">
                   {!method.isDefault && (
                     <button
                       type="button"
                       onClick={() => handleSetDefault(method)}
                       disabled={busy}
-                      className={`px-3 py-1.5 text-label disabled:opacity-50 ${SECONDARY_BUTTON_CLASS}`}
+                      className={`px-3 py-2 text-label disabled:opacity-50 ${SECONDARY_BUTTON_CLASS}`}
                     >
                       기본으로 설정
                     </button>
@@ -163,7 +163,7 @@ export default function PaymentMethodManager() {
                     type="button"
                     onClick={() => handleDelete(method)}
                     disabled={busy}
-                    className={`px-3 py-1.5 text-label font-bold text-text-3 transition-colors hover:text-accent disabled:opacity-50 ${FOCUS_RING}`}
+                    className={`px-3 py-2 text-label font-bold text-text-3 transition-colors hover:text-accent disabled:opacity-50 ${FOCUS_RING}`}
                   >
                     삭제
                   </button>
@@ -205,7 +205,7 @@ function CardVisual({ method }: { method: PaymentMethod }) {
           {method.cardName ?? "등록된 카드"}
         </span>
         {method.isDefault && (
-          <span className="flex items-center gap-1.5 text-caption font-bold" style={{ color: style.text }}>
+          <span className="flex items-center gap-2 text-caption font-bold" style={{ color: style.text }}>
             기본
           </span>
         )}

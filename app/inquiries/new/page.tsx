@@ -102,7 +102,7 @@ function NewInquiryForm() {
             value={category}
             onChange={(event) => setCategory(event.target.value as InquiryCategory)}
             className={
-              "h-12 w-full rounded-control border border-border-2 bg-white px-3.5 text-body font-medium text-text-1 outline-none transition-colors hover:border-primary focus:border-primary " +
+              "h-12 w-full rounded-control border border-border-2 bg-white px-4 text-body font-medium text-text-1 outline-none transition-colors hover:border-primary focus:border-primary " +
               FOCUS_RING
             }
           >
@@ -130,7 +130,7 @@ function NewInquiryForm() {
             onChange={(event) => setTitle(event.target.value)}
             placeholder="문의 제목을 입력해 주세요"
             className={
-              "h-12 w-full rounded-control border border-border-2 bg-white px-3.5 text-body text-text-1 outline-none placeholder:text-text-3 transition-colors hover:border-primary focus:border-primary " +
+              "h-12 w-full rounded-control border border-border-2 bg-white px-4 text-body text-text-1 outline-none placeholder:text-text-3 transition-colors hover:border-primary focus:border-primary " +
               FOCUS_RING
             }
           />
@@ -152,7 +152,7 @@ function NewInquiryForm() {
             onChange={(event) => setContent(event.target.value)}
             placeholder={"문의 상황과 궁금한 점을 자세히 적어주세요.\n판매글 관련 문의라면 상품명이나 판매글 번호를 함께 남겨주세요."}
             className={
-              "min-h-[240px] w-full resize-y rounded-control border border-border-2 bg-white p-3.5 text-body leading-relaxed text-text-1 outline-none placeholder:text-text-3 transition-colors hover:border-primary focus:border-primary " +
+              "min-h-[240px] w-full resize-y rounded-control border border-border-2 bg-white p-4 text-body leading-relaxed text-text-1 outline-none placeholder:text-text-3 transition-colors hover:border-primary focus:border-primary " +
               FOCUS_RING
             }
           />

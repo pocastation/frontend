@@ -30,7 +30,7 @@ export default function GradeStandard() {
       {/* 검수·보증 안내. 이 페이지에서 유일한 강조 블록이라 형태를 따로 준다 —
           다만 좌측 규칙선은 쓰지 않는다(#437 리뷰). 위아래 헤어라인으로 띠를 만들면
           같은 「본문과 다른 성격」을 말하면서도 반복되는 세로 띠 모양이 되지 않는다. */}
-      <p className="border-y border-border py-3.5 text-body-s text-text-2">
+      <p className="border-y border-border py-4 text-body-s text-text-2">
         {GRADE_NOTE}
       </p>
 
@@ -43,18 +43,18 @@ export default function GradeStandard() {
           {GRADE_STEPS.map(([title, how, catches], i) => {
             const last = i === GRADE_STEPS.length - 1;
             return (
-              <li key={title} className="flex items-start gap-2.5">
+              <li key={title} className="flex items-start gap-3">
                 <span aria-hidden="true" className="flex shrink-0 flex-col items-center self-stretch">
                   <span className="flex h-5 w-5 items-center justify-center rounded-full bg-text-1 font-display text-caption font-extrabold text-white">
                     {i + 1}
                   </span>
                   {!last && <span className="min-h-[14px] w-px flex-1 bg-border-2" />}
                 </span>
-                <span className={`min-w-0 flex-1 ${last ? "" : "pb-3.5"}`}>
+                <span className={`min-w-0 flex-1 ${last ? "" : "pb-4"}`}>
                   <span className="block text-body-l font-bold text-text-1">
                     {title}
                   </span>
-                  <span className="mt-0.5 block break-keep text-body leading-relaxed text-text-2">
+                  <span className="mt-1 block break-keep text-body leading-relaxed text-text-2">
                     {how}
                   </span>
                   {catches && (
@@ -93,7 +93,7 @@ export default function GradeStandard() {
         </h2>
         <dl className="mt-3 border-t border-border">
           {GRADE_DEFS.map(([g, label, summary, detail]) => (
-            <div key={g} className="border-b border-border py-3.5">
+            <div key={g} className="border-b border-border py-4">
               <dt className="flex items-baseline gap-2">
                 <span
                   className="font-display text-body-l font-extrabold"
@@ -106,7 +106,7 @@ export default function GradeStandard() {
                   {summary}
                 </span>
               </dt>
-              <dd className="mt-1.5 break-keep text-body text-text-2">{detail}</dd>
+              <dd className="mt-2 break-keep text-body text-text-2">{detail}</dd>
             </div>
           ))}
         </dl>
@@ -117,7 +117,7 @@ export default function GradeStandard() {
         <h2 className="font-display text-label font-extrabold tracking-[0.06em] text-text-3">
           하자 유형별 허용 기준
         </h2>
-        <p className="mt-1.5 text-body-s text-text-3">
+        <p className="mt-2 text-body-s text-text-3">
           그 하자가 있으면 <b className="font-bold text-text-2">고를 수 있는 등급</b>이에요.
         </p>
         {/* 표는 좁은 화면에서 가로로 스크롤한다 — 줄바꿈으로 뭉개면 대조가 안 된다. */}
@@ -133,13 +133,13 @@ export default function GradeStandard() {
             <tbody>
               {GRADE_MATRIX.map(([defect, how, grades]) => (
                 <tr key={defect} className="border-b border-border">
-                  <td className="whitespace-nowrap py-2.5 pr-3 text-body font-bold text-text-1">
+                  <td className="whitespace-nowrap py-3 pr-3 text-body font-bold text-text-1">
                     {defect}
                   </td>
-                  <td className="break-keep py-2.5 pr-3 text-body-s leading-relaxed text-text-3">
+                  <td className="break-keep py-3 pr-3 text-body-s leading-relaxed text-text-3">
                     {how ?? "—"}
                   </td>
-                  <td className="whitespace-nowrap py-2.5 text-right">
+                  <td className="whitespace-nowrap py-3 text-right">
                     {[...grades].map((g) => (
                       <span
                         key={g}
@@ -162,11 +162,11 @@ export default function GradeStandard() {
         <h2 className="font-display text-label font-extrabold tracking-[0.06em] text-text-3">
           하자 용어
         </h2>
-        <dl className="mt-3 flex flex-col gap-3.5">
+        <dl className="mt-3 flex flex-col gap-4">
           {GRADE_TERMS.map(([term, meaning]) => (
             <div key={term}>
               <dt className="text-body font-extrabold text-text-1">{term}</dt>
-              <dd className="mt-0.5 break-keep text-body text-text-2">{meaning}</dd>
+              <dd className="mt-1 break-keep text-body text-text-2">{meaning}</dd>
             </div>
           ))}
         </dl>
@@ -177,11 +177,11 @@ export default function GradeStandard() {
         <h2 className="font-display text-label font-extrabold tracking-[0.06em] text-text-3">
           자주 묻는 판정 기준
         </h2>
-        <dl className="mt-2.5">
+        <dl className="mt-3">
           {GRADE_CASES.map(([q, a], i) => (
-            <div key={q} className={i ? "border-t border-border-2 pt-3.5" : ""}>
+            <div key={q} className={i ? "border-t border-border-2 pt-4" : ""}>
               <dt className="break-keep text-body font-bold text-text-1">{q}</dt>
-              <dd className="mb-3.5 mt-1 break-keep text-body-s text-text-2">{a}</dd>
+              <dd className="mb-4 mt-1 break-keep text-body-s text-text-2">{a}</dd>
             </div>
           ))}
         </dl>
@@ -202,7 +202,7 @@ export default function GradeStandard() {
         <h2 className="font-display text-label font-extrabold tracking-[0.06em] text-text-3">
           기준과 다르게 적으면
         </h2>
-        <div className="mt-2.5 flex flex-col gap-2.5">
+        <div className="mt-3 flex flex-col gap-3">
           {GRADE_EFFECT.map((line) => (
             <p key={line} className="max-w-[36rem] break-keep text-body text-text-2">
               {line}

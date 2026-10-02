@@ -54,7 +54,7 @@ function RowShell({
         {badge ? (
           <span aria-label={`확인이 필요한 항목 ${badge}건`} className={`${LABEL_STRONG} tabular-nums`}>새 소식 {badge}</span>
         ) : null}
-        {value != null && <span className="text-body font-semibold tabular-nums text-text-1">{value}<span className="ml-0.5 text-label font-normal text-text-2">{unit}</span></span>}
+        {value != null && <span className="text-body font-semibold tabular-nums text-text-1">{value}<span className="ml-1 text-label font-normal text-text-2">{unit}</span></span>}
         <span className="inline-flex text-text-3">
           <Chevron />
         </span>
@@ -166,11 +166,11 @@ export default function MobileMypageMenu({
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-title-s font-semibold text-text-1">{nickname}</span>
-          <span className="mt-1 flex flex-wrap items-center gap-1.5 text-label text-text-2">
+          <span className="mt-1 flex flex-wrap items-center gap-2 text-label text-text-2">
             {trustLevel != null && (
               <TrustLevelBadge
                 level={trustLevel}
-                className="shrink-0 whitespace-nowrap rounded-control border border-border-2 px-1.5 py-px text-caption font-bold text-text-2 no-underline"
+                className="shrink-0 whitespace-nowrap rounded-control border border-border-2 px-2 py-px text-caption font-bold text-text-2 no-underline"
               >
                 {trustLevelLabel ?? `신뢰 ${trustLevel}`}
               </TrustLevelBadge>
@@ -204,13 +204,13 @@ export default function MobileMypageMenu({
           <button
             type="button"
             onClick={() => onOpenAddress(pendingAddress.auctionId, pendingAddress.title)}
-            className={`flex w-full items-center gap-2.5 rounded-card bg-surface-2 px-3.5 py-3 text-left ${FOCUS_RING}`}
+            className={`flex w-full items-center gap-3 rounded-card bg-surface-2 px-4 py-3 text-left ${FOCUS_RING}`}
           >
             <span className="min-w-0 flex-1">
               <span className="block text-body-s font-extrabold text-danger">배송지를 입력해 주세요</span>
-              <span className="mt-0.5 block truncate text-label text-text-2">{pendingAddress.title} · 결제 완료</span>
+              <span className="mt-1 block truncate text-label text-text-2">{pendingAddress.title} · 결제 완료</span>
             </span>
-            <span className="flex-shrink-0 rounded-control bg-primary px-2.5 py-1.5 text-label font-extrabold text-white">입력</span>
+            <span className="flex-shrink-0 rounded-control bg-primary px-3 py-2 text-label font-extrabold text-white">입력</span>
           </button>
         </div>
       )}

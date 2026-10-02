@@ -109,14 +109,14 @@ export default function AdminSuggestionsPage() {
         </p>
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-1.5" role="group" aria-label="상태 필터">
+      <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="상태 필터">
         {STATUS_FILTERS.map((f) => (
           <button
             key={f.value}
             type="button"
             aria-pressed={filter === f.value}
             onClick={() => setFilter(f.value)}
-            className={`rounded-control border px-3 py-1.5 text-label font-semibold transition-colors ${FOCUS_RING} ${
+            className={`rounded-control border px-3 py-2 text-label font-semibold transition-colors ${FOCUS_RING} ${
               filter === f.value
                 ? "border-text-1 bg-text-1 text-white"
                 : "border-border text-text-2 hover:border-text-3 hover:text-text-1"
@@ -150,7 +150,7 @@ export default function AdminSuggestionsPage() {
           {items.map((s) => (
             <li key={s.id} className="py-4">
               <div className="flex items-center gap-2">
-                <span className="rounded-control bg-surface-3 px-2 py-0.5 text-caption font-bold text-text-2">
+                <span className="rounded-control bg-surface-3 px-2 py-1 text-caption font-bold text-text-2">
                   {SUGGESTION_KIND_LABEL[s.kind]}
                 </span>
                 <StatusBadge tone={SUGGESTION_STATUS_TONE[s.status]}>
@@ -159,8 +159,8 @@ export default function AdminSuggestionsPage() {
                 <span className="ml-auto text-caption text-text-3">{formatRelativeTime(s.createdAt)}</span>
               </div>
               <p className="mt-2 text-body font-bold text-text-1">{s.name}</p>
-              {s.note && <p className="mt-0.5 text-body text-text-2">{s.note}</p>}
-              <p className="mt-1.5 text-caption text-text-3">제출: {s.submitterNickname ?? "-"}</p>
+              {s.note && <p className="mt-1 text-body text-text-2">{s.note}</p>}
+              <p className="mt-2 text-caption text-text-3">제출: {s.submitterNickname ?? "-"}</p>
 
               {s.status === "RECEIVED" && (
                 <div className="mt-3 flex gap-2">
@@ -168,7 +168,7 @@ export default function AdminSuggestionsPage() {
                     type="button"
                     disabled={busyId === s.id}
                     onClick={() => resolve(s.id, "ACCEPTED")}
-                    className={`rounded-control bg-primary px-3.5 py-1.5 text-label font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
+                    className={`rounded-control bg-primary px-4 py-2 text-label font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
                   >
                     반영
                   </button>
@@ -176,7 +176,7 @@ export default function AdminSuggestionsPage() {
                     type="button"
                     disabled={busyId === s.id}
                     onClick={() => resolve(s.id, "REJECTED")}
-                    className={`rounded-control border border-border-2 bg-white px-3.5 py-1.5 text-label font-bold text-text-2 transition-colors hover:border-danger hover:text-danger disabled:opacity-60 ${FOCUS_RING}`}
+                    className={`rounded-control border border-border-2 bg-white px-4 py-2 text-label font-bold text-text-2 transition-colors hover:border-danger hover:text-danger disabled:opacity-60 ${FOCUS_RING}`}
                   >
                     반려
                   </button>
@@ -192,7 +192,7 @@ export default function AdminSuggestionsPage() {
           <button
             type="button"
             onClick={loadMore}
-            className={`rounded-control border border-border-2 bg-white px-6 py-2.5 text-body font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+            className={`rounded-control border border-border-2 bg-white px-6 py-3 text-body font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
           >
             더 보기
           </button>

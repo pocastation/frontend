@@ -34,7 +34,7 @@ export default async function ArtistsPage() {
       <div className="mx-auto max-w-[1160px] px-gutter py-5 sm:px-4 sm:py-10">
         <div className="mb-7 hidden sm:block">
           <h1 className="font-display text-title-l font-extrabold text-text-1">스타</h1>
-          <p className="mt-1.5 text-body text-text-3">좋아하는 스타의 포토카드를 찾아보세요.</p>
+          <p className="mt-2 text-body text-text-3">좋아하는 스타의 포토카드를 찾아보세요.</p>
         </div>
 
         <ArtistExplorer

@@ -116,7 +116,7 @@ export default function InquiryDetailPage() {
                 */}
                 <Link
                   href={`/auctions/${inquiry.order.auctionId}`}
-                  className={`-mx-1.5 -my-1.5 min-w-0 truncate px-1.5 py-1.5 font-bold text-text-2 underline decoration-border-2 underline-offset-[3px] transition-colors hover:text-text-1 ${FOCUS_RING}`}
+                  className={`-mx-2 -my-2 min-w-0 truncate px-2 py-2 font-bold text-text-2 underline decoration-border-2 underline-offset-[3px] transition-colors hover:text-text-1 ${FOCUS_RING}`}
                 >
                   {inquiry.order.auctionTitle}
                 </Link>

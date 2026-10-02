@@ -2,7 +2,7 @@
 
 import { FOCUS_RING } from "@/lib/ui";
 
-// 공용 on/off 스위치. 컨테이너 h-6 w-11(24×44) · 노브 h-5 w-5(20) · 양쪽 여백 px-0.5(2px).
+// 공용 on/off 스위치. 컨테이너 h-6 w-11(24×44) · 노브 h-5 w-5(20) · 양쪽 여백 px-1(2px).
 //
 // 노브 위치를 absolute+left나 translate로 잡지 않고 flex 정렬(justify-start/end)로 잡는다(#117).
 // 이 프로젝트 설정에서 노브에 준 inline left·transform이 실제 레이아웃(offsetLeft)에 반영되지 않아
@@ -27,7 +27,7 @@ export default function ToggleSwitch({
       aria-label={label}
       disabled={disabled}
       onClick={() => onChange(!checked)}
-      className={`flex h-6 w-11 shrink-0 items-center rounded-full px-0.5 transition-colors disabled:opacity-60 ${FOCUS_RING} ${
+      className={`flex h-6 w-11 shrink-0 items-center rounded-full px-1 transition-colors disabled:opacity-60 ${FOCUS_RING} ${
         checked ? "justify-end bg-primary" : "justify-start bg-border-2"
       }`}
     >

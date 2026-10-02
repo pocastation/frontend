@@ -66,7 +66,7 @@ function AnalysisSection({
           {statusText}
         </span>
       </div>
-      <dl className="mt-2 grid gap-1.5 text-label">
+      <dl className="mt-2 grid gap-2 text-label">
         {metrics.map((metric) => (
           <div key={metric.label} className="flex items-center justify-between gap-3">
             <dt className="text-text-3">{metric.label}</dt>
@@ -243,7 +243,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                 </span>
               )}
             </div>
-            <p className="mt-0.5 truncate text-label text-text-3">{auction.title} · {auction.sellerNickname ?? "판매자 미상"}</p>
+            <p className="mt-1 truncate text-label text-text-3">{auction.title} · {auction.sellerNickname ?? "판매자 미상"}</p>
           </div>
           {/* 닫기는 얇은 '×' 글리프였을 때 배경과 구분이 안 돼 "버튼이 없다"고 읽혔다.
               테두리 있는 원형 + Lucide 계열 X SVG로 교체한다(글리프는 폰트에 따라 광학 중심도 어긋난다). */}
@@ -311,7 +311,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
           ) : verification ? (
             <>
               {readOnly && error && (
-                <p className="mb-4 rounded-card bg-surface-2 px-3.5 py-3 text-body font-semibold text-danger" role="alert">{error}</p>
+                <p className="mb-4 rounded-card bg-surface-2 px-4 py-3 text-body font-semibold text-danger" role="alert">{error}</p>
               )}
               <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(260px,0.62fr)]">
                 <section id="verification-panel-media" role="tabpanel" aria-labelledby="verification-tab-media" className={mobileRejectOpen || mobileTab !== "media" ? "hidden lg:block" : ""}>
@@ -409,7 +409,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                       </span>
                     </div>
                     {isTrocrV6 ? (
-                      <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5 text-caption">
+                      <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 text-caption">
                         <dt className="text-text-3">입력 처리</dt>
                         <dd className="text-right font-bold text-text-2">원근 보정 · 명암 보정 없음</dd>
                         <dt className="text-text-3">디코딩</dt>
@@ -451,7 +451,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                             : "모델이 반환한 토큰 단위 참고 점수입니다."}
                         </p>
                         {verification.ocrTokenConfidences?.length ? (
-                          <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1.5">
+                          <div className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2">
                             {verification.ocrTokenConfidences.map((item, index) => (
                               <div key={`${item.token}-${index}`} className="flex items-center justify-between gap-2 text-label">
                                 <span className="font-mono font-bold text-text-2">{item.token}</span>
@@ -519,7 +519,7 @@ export default function AuctionVerificationReviewDialog({ auction, onClose, onRe
                     아래에 미리보기를 노출한다. */
                 <fieldset ref={reasonRef} className={`verification-reasons mt-6 border-t border-border pt-5 ${mobileRejectOpen ? "" : "hidden lg:block"}`}>
                 <legend className="text-label font-extrabold text-text-2">승인 거절 사유</legend>
-                <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
                   {AUCTION_REJECTION_REASON_OPTIONS.map((option) => (
                     <label
                       key={option.code}

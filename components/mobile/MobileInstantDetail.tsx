@@ -56,16 +56,16 @@ function ConfirmSheet({
         <p className="text-body-l font-extrabold text-text-1">이 가격으로 바로 구매할까요?</p>
         <p className="mt-1 text-label text-text-3">확정하면 거래가 성사되고 되돌릴 수 없어요.</p>
 
-        <div className="mt-3.5 border-t border-border pt-3 text-body-s">
+        <div className="mt-4 border-t border-border pt-3 text-body-s">
           <div className="flex items-center justify-between">
             <span className="text-text-2">즉시판매가</span>
             <b className="font-bold tabular-nums text-text-1">{formatKRW(price)}</b>
           </div>
-          <div className="mt-1.5 flex items-center justify-between">
+          <div className="mt-2 flex items-center justify-between">
             <span className="text-text-2">구매자 수수료</span>
             <b className="font-bold tabular-nums text-text-1">{formatKRW(buyerFee(price))}</b>
           </div>
-          <div className="mt-2.5 flex items-center justify-between border-t border-border pt-2.5">
+          <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
             <b className="font-bold text-text-1">예상 결제 총액</b>
             <b className="font-bold tabular-nums text-body-l text-text-1">{formatKRW(estimatedTotal(price))}</b>
           </div>
@@ -75,7 +75,7 @@ function ConfirmSheet({
           type="button"
           onClick={onConfirm}
           disabled={submitting}
-          className={`mt-3.5 flex h-12 w-full items-center justify-center rounded-control bg-primary text-body font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
+          className={`mt-4 flex h-12 w-full items-center justify-center rounded-control bg-primary text-body font-extrabold text-white disabled:opacity-60 ${FOCUS_RING}`}
         >
           {submitting ? "처리 중..." : "즉시구매 확정"}
         </button>
@@ -215,7 +215,7 @@ export default function MobileInstantDetail({
           {auction.title}
         </h1>
 
-        <div className="mt-2.5 flex flex-wrap gap-1.5">
+        <div className="mt-3 flex flex-wrap gap-2">
           <span className={LABEL_NEUTRAL}>
             {GRADE_LABEL[auction.grade] ?? auction.grade}
           </span>
@@ -240,7 +240,7 @@ export default function MobileInstantDetail({
             </p>
           </div>
           <p className="mt-1 font-display text-title-l font-extrabold tabular-nums text-text-1">{formatKRW(price)}</p>
-          <p className="mt-3 border-t border-border pt-2.5 text-caption leading-relaxed text-text-3">
+          <p className="mt-3 border-t border-border pt-3 text-caption leading-relaxed text-text-3">
             구매를 확정하면 그 순간 거래가 성사돼요. 예상 결제 총액{" "}
             <b className="font-bold text-text-2 tabular-nums">{formatKRW(estimatedTotal(price))}</b>
             (수수료 포함).
@@ -261,7 +261,7 @@ export default function MobileInstantDetail({
       */}
       {showBar && isOwnSale && isLive && (
         <div
-          className="fixed inset-x-0 z-[400] border-t border-border bg-white px-4 pb-2.5 sm:hidden"
+          className="fixed inset-x-0 z-[400] border-t border-border bg-white px-4 pb-3 sm:hidden"
           style={{ bottom: "var(--mobile-tabbar-h, env(safe-area-inset-bottom))" }}
         >
           <SellerListingActions
@@ -277,7 +277,7 @@ export default function MobileInstantDetail({
 
       {showBar && !(isOwnSale && isLive) && (
         <div
-          className="fixed inset-x-0 z-[400] flex items-center gap-2.5 border-t border-border bg-white px-4 pt-2.5 pb-2.5 sm:hidden"
+          className="fixed inset-x-0 z-[400] flex items-center gap-3 border-t border-border bg-white px-4 pt-3 pb-3 sm:hidden"
           style={{ bottom: "var(--mobile-tabbar-h, env(safe-area-inset-bottom))" }}
         >
           <AuctionWishlistButton

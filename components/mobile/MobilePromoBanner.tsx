@@ -103,7 +103,7 @@ function BrandSlide() {
           </span>
         ))}
       </h2>
-      <p className="mt-2.5 whitespace-pre-line text-body-s text-white/60">{BRAND_SUBHEAD}</p>
+      <p className="mt-3 whitespace-pre-line text-body-s text-white/60">{BRAND_SUBHEAD}</p>
       <Link
         href="/auctions"
         className={`mt-cta flex h-11 w-full items-center justify-center rounded-control bg-primary text-body font-extrabold text-white ${FOCUS_RING}`}
@@ -124,10 +124,10 @@ function AuctionSlide({ auction }: { auction: AuctionResponse }) {
   const level = countdownLevelAt(auction.endAt);
 
   return (
-    <div className="relative flex items-center gap-3.5">
+    <div className="relative flex items-center gap-4">
       <Stars />
       <div className="min-w-0 flex-1">
-        <span className="inline-flex items-center rounded-control border border-white/20 px-2.5 py-1 text-caption font-bold text-white/85">
+        <span className="inline-flex items-center rounded-control border border-white/20 px-3 py-1 text-caption font-bold text-white/85">
           {LEVEL_LABEL[level]}
         </span>
         {auction.artistName && (
@@ -136,20 +136,20 @@ function AuctionSlide({ auction }: { auction: AuctionResponse }) {
         <h2 className="mt-1 line-clamp-2 text-title-s font-extrabold text-white">
           {auction.title}
         </h2>
-        <p className="mt-2.5 flex items-baseline gap-2">
+        <p className="mt-3 flex items-baseline gap-2">
           <span className="text-caption font-semibold text-white/50">최소가</span>
           <span className="font-display text-title font-extrabold leading-tight tabular-nums text-white">
             {formatKRW(auction.startPrice)}
           </span>
         </p>
-        <p className="mt-1.5 flex items-center gap-2 whitespace-nowrap text-label text-white/55">
+        <p className="mt-2 flex items-center gap-2 whitespace-nowrap text-label text-white/55">
           <span className="tabular-nums">제안 {auction.bidCount}회</span>
           {auction.endAt && <span aria-hidden="true" className="h-0.5 w-0.5 rounded-full bg-white/30" />}
           {auction.endAt && <DarkCountdown endAt={auction.endAt} />}
         </p>
         <Link
           href={`/auctions/${auction.id}`}
-          className={`mt-3.5 inline-flex h-11 items-center justify-center whitespace-nowrap rounded-control bg-primary px-4 text-body font-extrabold text-white ${FOCUS_RING}`}
+          className={`mt-4 inline-flex h-11 items-center justify-center whitespace-nowrap rounded-control bg-primary px-4 text-body font-extrabold text-white ${FOCUS_RING}`}
         >
           제안하러 가기 →
         </Link>
@@ -288,7 +288,7 @@ export default function MobilePromoBanner({ featured }: { featured: AuctionRespo
       </div>
 
       {total > 1 && (
-        <div className="absolute bottom-3.5 left-1/2 flex -translate-x-1/2 gap-1.5">
+        <div className="absolute bottom-3.5 left-1/2 flex -translate-x-1/2 gap-2">
           {Array.from({ length: total }, (_, i) => (
             <button
               key={i}

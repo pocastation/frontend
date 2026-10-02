@@ -54,7 +54,7 @@ export const LABEL_NEUTRAL = `${LABEL_BASE} bg-surface-2 text-text-2`;
 export const LABEL_STRONG = `${LABEL_BASE} bg-text-1 text-white`;
 
 export const INPUT_CLASS =
-  `w-full rounded-control border border-border px-3.5 py-2.5 text-body text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`;
+  `w-full rounded-control border border-border px-4 py-3 text-body text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`;
 
 export const PRIMARY_BUTTON_CLASS =
   `rounded-control bg-primary text-body font-bold text-white transition-all hover:bg-primary-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 disabled:active:scale-100 ${FOCUS_RING}`;
@@ -106,7 +106,7 @@ export const ACTION_ICON_BUTTON =
  * 넓은 화면 아래에 띠가 하나 걸리면 그게 더 눈에 띈다.
  */
 export const FORM_ACTION_BAR =
-  "fixed inset-x-0 z-[400] border-t border-border bg-white px-gutter py-2.5 " +
+  "fixed inset-x-0 z-[400] border-t border-border bg-white px-gutter py-3 " +
   "sm:static sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:pt-5";
 
 export const FORM_ACTION_BAR_STYLE = { bottom: "var(--mobile-tabbar-h, env(safe-area-inset-bottom))" } as const;

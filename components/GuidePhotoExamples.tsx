@@ -16,7 +16,7 @@ export default function GuidePhotoExamples({ shots }: { shots: GuidePhotoShot[] 
         <p className="text-body-s">필수 4컷</p>
         <span className="text-caption">사진을 누르면 확대돼요</span>
       </div>
-      <div className="grid grid-cols-4 gap-2 sm:gap-2.5">
+      <div className="grid grid-cols-4 gap-2 sm:gap-3">
         {shots.map((shot, index) => (
           <figure key={shot.src} className="min-w-0">
             <button

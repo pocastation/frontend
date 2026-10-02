@@ -19,10 +19,10 @@ export function AuctionCardSkeleton() {
   return (
     <div className="overflow-hidden rounded-card border border-border bg-surface shadow-card">
       <div className="sk-shimmer aspect-[2/3] w-full" />
-      <div className="px-3.5 py-3">
+      <div className="px-4 py-3">
         <div className="sk-shimmer h-2.5 w-2/5 rounded" />
         <div className="sk-shimmer mt-2 h-3 w-4/5 rounded" />
-        <div className="my-2.5 h-px bg-border" />
+        <div className="my-3 h-px bg-border" />
         <div className="flex items-baseline justify-between">
           <div className="sk-shimmer h-4 w-1/2 rounded" />
           <div className="sk-shimmer h-2.5 w-1/5 rounded" />
@@ -36,10 +36,10 @@ export function AuctionCardSkeleton() {
 export function ArtistCardSkeleton() {
   return (
     <div className="flex flex-col items-center rounded-card border border-border bg-surface p-4 pt-5 shadow-card">
-      <div className="sk-shimmer mb-2.5 h-[76px] w-[76px] rounded-full" />
-      <div className="sk-shimmer mb-1.5 h-4 w-14 rounded-full" />
+      <div className="sk-shimmer mb-3 h-[76px] w-[76px] rounded-full" />
+      <div className="sk-shimmer mb-2 h-4 w-14 rounded-full" />
       <div className="sk-shimmer h-3.5 w-20 rounded" />
-      <div className="sk-shimmer mt-1.5 h-2.5 w-12 rounded" />
+      <div className="sk-shimmer mt-2 h-2.5 w-12 rounded" />
     </div>
   );
 }
@@ -97,7 +97,7 @@ export function ExploreEmpty({
         <button
           type="button"
           onClick={onClear}
-          className={`mt-1 inline-flex h-[38px] items-center gap-1.5 rounded-control border border-border-2 bg-white px-4 text-body-s font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+          className={`mt-1 inline-flex h-[38px] items-center gap-2 rounded-control border border-border-2 bg-white px-4 text-body-s font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
         >
           {clearLabel}
         </button>
@@ -117,7 +117,7 @@ export function ExploreError({
   return (
     <div
       role="alert"
-      className="flex items-center gap-3 rounded-card bg-surface-2 px-4 py-3.5"
+      className="flex items-center gap-3 rounded-card bg-surface-2 px-4 py-4"
     >
       <span className="shrink-0 text-danger" aria-hidden="true">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -128,12 +128,12 @@ export function ExploreError({
       </span>
       <span className="flex-1">
         <span className="block text-body font-extrabold text-text-1">{title}</span>
-        <span className="mt-0.5 block text-label text-text-2">네트워크 상태를 확인한 뒤 다시 시도해 주세요.</span>
+        <span className="mt-1 block text-label text-text-2">네트워크 상태를 확인한 뒤 다시 시도해 주세요.</span>
       </span>
       <button
         type="button"
         onClick={onRetry}
-        className={`inline-flex h-[34px] shrink-0 items-center gap-1.5 rounded-control bg-accent px-3.5 text-body-s font-extrabold text-white transition hover:brightness-95 ${FOCUS_RING}`}
+        className={`inline-flex h-[34px] shrink-0 items-center gap-2 rounded-control bg-accent px-4 text-body-s font-extrabold text-white transition hover:brightness-95 ${FOCUS_RING}`}
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M23 4v6h-6" />

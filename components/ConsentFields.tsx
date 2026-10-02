@@ -96,7 +96,7 @@ export default function ConsentFields({
 
       <label
         htmlFor={allId}
-        className="flex cursor-pointer items-center gap-2.5 border-b border-border px-3.5 py-3 text-body font-bold text-text-1"
+        className="flex cursor-pointer items-center gap-3 border-b border-border px-4 py-3 text-body font-bold text-text-1"
       >
         <input
           id={allId}
@@ -108,10 +108,10 @@ export default function ConsentFields({
         전체 동의
       </label>
 
-      <div className="px-3.5 py-2">
+      <div className="px-4 py-2">
         {ITEMS.map((item) => (
-          <div key={item.key} className="flex items-center gap-2.5 py-1.5 text-body">
-            <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2.5">
+          <div key={item.key} className="flex items-center gap-3 py-2 text-body">
+            <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
               <input
                 type="checkbox"
                 checked={values[item.key]}
@@ -145,7 +145,7 @@ export default function ConsentFields({
 
           선택 항목을 거부해도 가입이 된다는 사실을 여기서 한 번 더 밝힌다 — 필수·선택이 같은
           목록에 나란히 있으면 전부 동의해야 하는 것처럼 읽힌다. */}
-      <p className="border-t border-border px-3.5 py-2.5 text-label text-text-3">
+      <p className="border-t border-border px-4 py-3 text-label text-text-3">
         선택 항목에 동의하지 않아도 회원가입과 서비스 이용에 제한이 없어요. 처리 목적·항목·보유기간은{" "}
         <Link
           href="/privacy"

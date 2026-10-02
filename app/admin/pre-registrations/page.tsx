@@ -219,7 +219,7 @@ export default function AdminPreRegistrationsPage() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5 text-label font-bold text-text-2">
+          <span className="flex items-center gap-2 text-label font-bold text-text-2">
             {updatedAt ? `${formatRelativeTime(updatedAt)} 갱신` : "불러오는 중..."}
           </span>
           <button
@@ -276,7 +276,7 @@ export default function AdminPreRegistrationsPage() {
                 </span>
               </div>
 
-              <div className="mt-3 flex h-[120px] items-end gap-1.5 border-b border-border pt-1">
+              <div className="mt-3 flex h-[120px] items-end gap-2 border-b border-border pt-1">
                 {bars.map((b) => (
                   <div key={b.hour} className="flex h-full flex-1 flex-col items-center justify-end gap-1">
                     <span className="text-caption font-bold tabular-nums text-text-3">{b.count || ""}</span>
@@ -290,7 +290,7 @@ export default function AdminPreRegistrationsPage() {
                   </div>
                 ))}
               </div>
-              <div className="flex gap-1.5 pt-1.5">
+              <div className="flex gap-2 pt-2">
                 {bars.map((b) => (
                   <span key={b.hour} className="flex-1 text-center text-caption tabular-nums text-text-3">
                     {String(b.hour).padStart(2, "0")}
@@ -315,7 +315,7 @@ export default function AdminPreRegistrationsPage() {
                     {stats.topGroups.map((g, i) => (
                       <li
                         key={g.idolGroup}
-                        className="grid grid-cols-[20px_1fr_auto] items-center gap-2.5 border-b border-border py-2 text-body"
+                        className="grid grid-cols-[20px_1fr_auto] items-center gap-3 border-b border-border py-2 text-body"
                       >
                         <span className="font-display text-caption font-extrabold tabular-nums text-text-3">
                           {String(i + 1).padStart(2, "0")}
@@ -342,7 +342,7 @@ export default function AdminPreRegistrationsPage() {
               </button>
             </div>
 
-            <p className="mt-1.5 text-label text-text-3">
+            <p className="mt-2 text-label text-text-3">
               번호는 기본으로 가려요. 화면을 띄워둔 채 자리를 비우면 지나가는 사람에게 보일 수 있어요.
             </p>
 
@@ -362,14 +362,14 @@ export default function AdminPreRegistrationsPage() {
                   <tbody>
                     {recent.map((a) => (
                       <tr key={a.id} className="border-b border-border text-body">
-                        <td className="whitespace-nowrap py-2.5 pr-4 tabular-nums text-text-3">
+                        <td className="whitespace-nowrap py-3 pr-4 tabular-nums text-text-3">
                           {formatRelativeTime(a.createdAt)}
                         </td>
-                        <td className="whitespace-nowrap py-2.5 pr-4 font-mono text-body-s tabular-nums text-text-1">
+                        <td className="whitespace-nowrap py-3 pr-4 font-mono text-body-s tabular-nums text-text-1">
                           {revealed ? formatPhone(a.phone) : maskPhone(a.phone)}
                         </td>
-                        <td className="whitespace-nowrap py-2.5 pr-4 text-text-1">{a.idolGroup}</td>
-                        <td className="whitespace-nowrap py-2.5 text-label text-text-3">{a.email ? "남김" : "—"}</td>
+                        <td className="whitespace-nowrap py-3 pr-4 text-text-1">{a.idolGroup}</td>
+                        <td className="whitespace-nowrap py-3 text-label text-text-3">{a.email ? "남김" : "—"}</td>
                       </tr>
                     ))}
                   </tbody>

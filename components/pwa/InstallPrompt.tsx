@@ -199,7 +199,7 @@ export default function InstallPrompt() {
           <img src="/icons/icon-192.png" alt="" width={40} height={40} className="flex-shrink-0 rounded-[9px]" />
           <div className="min-w-0 flex-1">
             <p className="text-body-s font-extrabold text-text-1">홈 화면에 추가하기</p>
-            <p className="mt-0.5 text-label leading-relaxed text-text-3">
+            <p className="mt-1 text-label leading-relaxed text-text-3">
               {iosHint ? "공유 버튼 → «홈 화면에 추가»를 누르면 앱처럼 열려요" : "앱처럼 전체 화면으로 빠르게 열려요"}
             </p>
           </div>
@@ -218,7 +218,7 @@ export default function InstallPrompt() {
 
         {/* 물러나는 길을 버튼으로 세운다. iOS는 설치 버튼이 없어 이 줄이 «오늘 하루» 하나뿐이다 —
             안내문만 있는 배너를 매번 다시 보게 하지 않으려는 것이 이 줄의 목적이다. */}
-        <div className="mt-2.5 flex gap-2">
+        <div className="mt-3 flex gap-2">
           <button
             type="button"
             onClick={snoozeToday}

@@ -46,7 +46,7 @@ export default async function InstantSalesPage() {
       <div className="mx-auto hidden max-w-[1160px] px-4 py-8 sm:block sm:py-10">
       <div className="mb-7">
         <h1 className="font-display text-title-l font-extrabold text-text-1">즉시판매</h1>
-        <p className="mt-1.5 text-body text-text-3">마감까지 기다리지 않고 바로 구매할 수 있는 포토카드를 확인해보세요.</p>
+        <p className="mt-2 text-body text-text-3">마감까지 기다리지 않고 바로 구매할 수 있는 포토카드를 확인해보세요.</p>
       </div>
 
       <AuctionBrowser

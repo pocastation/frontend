@@ -40,6 +40,15 @@ const eslintConfig = defineConfig([
           selector: "TemplateElement[value.raw=/(^|[\\s:])-?(p|px|py|pt|pb|pl|pr|ps|pe|m|mx|my|mt|mb|ml|mr|ms|me|gap|gap-x|gap-y|space-x|space-y)-\\[[0-9.]+px\\]/]",
           message: "여백은 역할 토큰(gutter·page·tight·head·row·card·cta·group·section·footer·empty)이나 표준 단계를 씁니다. 임의 px 금지.",
         },
+        // 안쪽 여백도 4의 배수만 쓴다(#779). `.5` 단계(2·6·10·14px)가 832곳 섞여 있었다.
+        {
+          selector: "Literal[value=/(^|[\\s:])-?(p|px|py|pt|pb|pl|pr|ps|pe|m|mx|my|mt|mb|ml|mr|ms|me|gap|gap-x|gap-y|space-x|space-y)-[0-9]+\\.5\\b/]",
+          message: "여백은 4의 배수 단계만 씁니다(0.5·1.5·2.5·3.5 금지). 2→4, 6→8, 10→12, 14→16.",
+        },
+        {
+          selector: "TemplateElement[value.raw=/(^|[\\s:])-?(p|px|py|pt|pb|pl|pr|ps|pe|m|mx|my|mt|mb|ml|mr|ms|me|gap|gap-x|gap-y|space-x|space-y)-[0-9]+\\.5\\b/]",
+          message: "여백은 4의 배수 단계만 씁니다(0.5·1.5·2.5·3.5 금지). 2→4, 6→8, 10→12, 14→16.",
+        },
       ],
     },
   },

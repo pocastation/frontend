@@ -307,7 +307,7 @@ export default function AdminCatalogPage() {
       <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="font-display text-title-l font-extrabold text-text-1">카탈로그 관리</h1>
-          <p className="mt-1.5 text-body text-text-3">스타·멤버 마스터데이터를 등록하고 관리합니다.</p>
+          <p className="mt-2 text-body text-text-3">스타·멤버 마스터데이터를 등록하고 관리합니다.</p>
         </div>
         <button
           type="button"
@@ -362,11 +362,11 @@ export default function AdminCatalogPage() {
           </div>
         </div>
 
-        <div className="mt-4 grid gap-x-4 gap-y-0.5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-4 grid gap-x-4 gap-y-1 sm:grid-cols-2 lg:grid-cols-3">
           {artists.map((artist) => (
               <div
                 key={artist.id}
-                className="flex items-center justify-between gap-2 border-b border-border py-2.5"
+                className="flex items-center justify-between gap-2 border-b border-border py-3"
               >
                 <button
                   type="button"
@@ -393,7 +393,7 @@ export default function AdminCatalogPage() {
                 <button
                   type="button"
                   onClick={() => openEdit(artist)}
-                  className={`shrink-0 rounded-control border border-border-2 px-2.5 py-1 text-label font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
+                  className={`shrink-0 rounded-control border border-border-2 px-3 py-1 text-label font-bold text-text-2 transition-colors hover:border-primary hover:text-primary ${FOCUS_RING}`}
                 >
                   편집
                 </button>

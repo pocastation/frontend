@@ -60,7 +60,7 @@ export default function OrderShipForm({
   }
 
   return (
-    <div className="mt-2.5 flex flex-col gap-2 rounded-card border border-border bg-surface p-3">
+    <div className="mt-3 flex flex-col gap-2 rounded-card border border-border bg-surface p-3">
       <div className="flex gap-2">
         <select
           className={`${INPUT_CLASS} w-32`}

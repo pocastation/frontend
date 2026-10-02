@@ -186,7 +186,7 @@ function SortableTile({
         </div>
       )}
       {isCover && (
-        <span className="absolute left-1 top-1 rounded-control bg-black/60 px-1 py-0.5 text-caption font-semibold text-white">
+        <span className="absolute left-1 top-1 rounded-control bg-black/60 px-1 py-1 text-caption font-semibold text-white">
           대표
         </span>
       )}

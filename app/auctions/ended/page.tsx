@@ -65,7 +65,7 @@ export default async function EndedAuctionsPage({
 
               모바일에서도 이 문장은 남긴다 — 이 목록이 **성사분만 담는다**는 사실을 말해 주는
               유일한 자리라 지우면 오해가 생긴다. */}
-          <p className="text-body-s text-text-3 sm:mt-1.5 sm:text-body">거래가 성사된 상품을 확인해보세요.</p>
+          <p className="text-body-s text-text-3 sm:mt-2 sm:text-body">거래가 성사된 상품을 확인해보세요.</p>
         </div>
 
         <AuctionBrowser

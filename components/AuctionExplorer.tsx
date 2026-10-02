@@ -42,7 +42,7 @@ const INSTANT_SORT_OPTIONS = SORT_OPTIONS.filter(
 const DEFAULT_SORT: Record<AuctionSaleType, SortKey> = { AUCTION: "recommended", INSTANT: "latest" };
 // 모바일은 2열(카드가 화면폭을 꽉 채우지 않게), sm 이상은 auto-fill로 데스크탑 밀도 유지.
 const GRID_CLASS =
-  "grid grid-cols-2 gap-3 sm:gap-3.5 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
+  "grid grid-cols-2 gap-3 sm:gap-4 sm:grid-cols-[repeat(auto-fill,minmax(min(210px,100%),1fr))]";
 
 // 검색·정렬을 서버가 처리한다(§B1) — 목록 전체를 한 번에 받아 클라이언트에서 거르던 이전
 // 방식은 매물이 늘면 안 맞아 폐기. 초기 진입은 서버컴포넌트(page.tsx)가 이미 기본값(검색어
@@ -133,7 +133,7 @@ export default function AuctionExplorer({
       {subcopy && <p className="mt-1 text-body-s text-text-3">{subcopy}</p>}
 
       <div
-        className="mt-4 mb-6 flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="mt-4 mb-6 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         role="group"
         aria-label="정렬 기준"
       >
@@ -143,7 +143,7 @@ export default function AuctionExplorer({
             type="button"
             aria-pressed={sortBy === option.key}
             onClick={() => setSortBy(option.key)}
-            className={`shrink-0 rounded-control border px-3 py-1.5 text-label font-semibold transition-colors ${FOCUS_RING} ${
+            className={`shrink-0 rounded-control border px-3 py-2 text-label font-semibold transition-colors ${FOCUS_RING} ${
               sortBy === option.key
                 ? "border-primary bg-primary text-white"
                 : "border-border text-text-2 hover:border-primary hover:text-primary"

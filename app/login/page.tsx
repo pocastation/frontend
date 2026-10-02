@@ -92,7 +92,7 @@ function LoginForm() {
         로그인
       </h1>
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <label htmlFor={emailId} className="sr-only">
             이메일
           </label>
@@ -108,7 +108,7 @@ function LoginForm() {
             className={INPUT_CLASS}
           />
         </div>
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-2">
           <label htmlFor={passwordId} className="sr-only">
             비밀번호
           </label>
@@ -192,7 +192,7 @@ function LoginForm() {
             에셋을 제공하면 교체 권장. */}
         <a
           href={socialLoginUrl("kakao")}
-          className={`flex flex-col items-center gap-1.5 rounded-control p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
+          className={`flex flex-col items-center gap-2 rounded-control p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
         >
           <span className="block h-11 w-11 overflow-hidden rounded-full">
             {/* eslint-disable-next-line @next/next/no-img-element -- 공식 배포 에셋의 심볼 영역만 노출(파일 수정 없음) */}
@@ -207,7 +207,7 @@ function LoginForm() {
         </a>
         <a
           href={socialLoginUrl("naver")}
-          className={`flex flex-col items-center gap-1.5 rounded-control p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
+          className={`flex flex-col items-center gap-2 rounded-control p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- 네이버 공식 아이콘형 에셋 그대로 사용 */}
           <img src="/oauth/naver-icon.png" alt="" className="h-11 w-11" />
@@ -215,7 +215,7 @@ function LoginForm() {
         </a>
         <a
           href={socialLoginUrl("google")}
-          className={`flex flex-col items-center gap-1.5 rounded-control p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
+          className={`flex flex-col items-center gap-2 rounded-control p-1 transition-transform hover:scale-105 active:scale-95 ${FOCUS_RING}`}
         >
           <span className="flex h-11 w-11 items-center justify-center rounded-full border border-[#DADCE0] bg-white">
             <GoogleIcon />

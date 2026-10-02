@@ -125,12 +125,12 @@ function OfferForm({
           placeholder="금액을 입력해주세요"
         />
       </div>
-      <div className="mt-5 bg-surface-2 px-4 py-3.5 text-body-s">
+      <div className="mt-5 bg-surface-2 px-4 py-4 text-body-s">
         <div className="flex items-center justify-between text-text-3">
           <span>가격 제안</span>
           <span className="font-medium tabular-nums text-text-2">{formatKRW(amount)}</span>
         </div>
-        <div className="mt-1.5 flex items-center justify-between text-text-3">
+        <div className="mt-2 flex items-center justify-between text-text-3">
           <span>구매자 수수료</span>
           <span className="font-medium tabular-nums text-text-2">{formatKRW(buyerFee(amount))}</span>
         </div>
@@ -138,7 +138,7 @@ function OfferForm({
           <span className="font-bold text-text-1">예상 결제 총액</span>
           <span className="font-display text-title-s font-bold tabular-nums text-text-1">{formatKRW(total)}</span>
         </div>
-        <p className="mt-1.5 text-caption text-text-3">거래 성사 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
+        <p className="mt-2 text-caption text-text-3">거래 성사 시 예상 금액이며 실제 청구액과 다를 수 있습니다.</p>
       </div>
 
       <button
@@ -163,7 +163,7 @@ function OfferForm({
                 : `${formatKRW(typedAmount)}으로 제안하기`}
       </button>
       {editMode && (
-        <p className="mt-2.5 text-caption leading-relaxed text-text-3">
+        <p className="mt-3 text-caption leading-relaxed text-text-3">
           새 금액으로 보내면 이전 제안을 대신해요. 판매자에게는 바뀐 금액만 보여요.
         </p>
       )}
@@ -227,12 +227,12 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
           <p className="text-label font-semibold text-text-3">판매자 최소 제안 금액</p>
           <OfferCounts offerCount={offerCount} wishlistCount={wishlistCount} size="md" />
         </div>
-        <p className="mt-1.5 font-display text-display font-extrabold tabular-nums text-text-1">
+        <p className="mt-2 font-display text-display font-extrabold tabular-nums text-text-1">
           {formatKRW(minimumProposalAmount)}
         </p>
         {/* 내 제안 행(#484) — 제안한 사람에게만. 보라는 상태를 말하는 자리에 쓴다(디자인 절). */}
         {myOffer && (
-          <div className="mt-3.5 flex items-center justify-between border-t border-border pt-3 text-body-s">
+          <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-body-s">
             <span className="font-extrabold text-primary">
               {myOffer.status === "ACCEPTED" ? "내 제안 · 선택됨" : "내 제안"}
             </span>
@@ -243,14 +243,14 @@ export default function BidSection({ startPrice, auctionTitle }: Props) {
         )}
         {/* 0건일 때만 — 아이콘 줄에서 뺀 자리를 여기서 채운다(§2.9 D1). */}
         {offerCount === 0 && (
-          <p className="mt-3.5 border-t border-border pt-3 text-body-s font-bold text-text-2">
+          <p className="mt-4 border-t border-border pt-3 text-body-s font-bold text-text-2">
             {OFFER_EMPTY_HINT}
           </p>
         )}
         {/* 구매자가 처음 보는 메커니즘이라 「왜 최고가가 안 보이지」에 여기서 답한다. */}
         <p
           className={`text-caption leading-relaxed text-text-3 ${
-            offerCount === 0 ? "mt-1.5" : "mt-3.5 border-t border-border pt-3"
+            offerCount === 0 ? "mt-2" : "mt-4 border-t border-border pt-3"
           }`}
         >
           판매자가 제안을 보고 거래 상대를 직접 선택해요. 다른 사람의 제안 금액은 공개되지 않아요.

@@ -48,7 +48,7 @@ const COPY = {
 
 // 라벨보다 입력칸이 커야 눈이 입력할 곳으로 먼저 간다(CLAUDE.md 「디자인」).
 const FIELD =
-  `h-12 w-full rounded-control border border-border px-3.5 text-body-l text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`;
+  `h-12 w-full rounded-control border border-border px-4 text-body-l text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`;
 
 type Step = "view" | "form" | "confirm";
 
@@ -224,7 +224,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
               오타 하나가 남에게 송금되는 결과라, 옮기는 편이 안전하기도 하다. 정산계좌가
               없으면 줄 자체를 그리지 않는다 — 누를 수 없는 버튼을 보여줄 이유가 없다. */}
           {purpose === "refund" && settlementAccount && (
-            <div className="mb-4 flex items-center gap-2.5 border-b border-border pb-3">
+            <div className="mb-4 flex items-center gap-3 border-b border-border pb-3">
               <span className="flex-1 text-body-s leading-relaxed text-text-2">
                 정산계좌로{" "}
                 <b className="font-bold text-text-1">
@@ -236,7 +236,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
                 type="button"
                 onClick={() => void copyFromSettlement()}
                 disabled={busy}
-                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-1.5 text-caption font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
+                className={`shrink-0 rounded-control border border-border-2 bg-surface px-3 py-2 text-caption font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
               >
                 동일하게 사용
               </button>
@@ -244,7 +244,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
           )}
           <div className="flex flex-col gap-4">
             <div>
-              <label htmlFor="bank" className="mb-1.5 block text-body-s font-bold text-text-2">
+              <label htmlFor="bank" className="mb-2 block text-body-s font-bold text-text-2">
                 은행
               </label>
               <select
@@ -263,7 +263,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
             </div>
 
             <div>
-              <label htmlFor="accountNumber" className="mb-1.5 block text-body-s font-bold text-text-2">
+              <label htmlFor="accountNumber" className="mb-2 block text-body-s font-bold text-text-2">
                 계좌번호
               </label>
               <input
@@ -275,11 +275,11 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
                 placeholder="계좌번호 입력"
                 className={FIELD}
               />
-              <p className="mt-1.5 text-label text-text-3">- 없이 입력해도 되고, 있어도 괜찮아요.</p>
+              <p className="mt-2 text-label text-text-3">- 없이 입력해도 되고, 있어도 괜찮아요.</p>
             </div>
 
             <div>
-              <label htmlFor="holderName" className="mb-1.5 block text-body-s font-bold text-text-2">
+              <label htmlFor="holderName" className="mb-2 block text-body-s font-bold text-text-2">
                 예금주
               </label>
               <input
@@ -290,7 +290,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
                 placeholder="예금주 입력"
                 className={FIELD}
               />
-              <p className="mt-1.5 text-label text-text-3">본인 명의 계좌만 등록할 수 있어요.</p>
+              <p className="mt-2 text-label text-text-3">본인 명의 계좌만 등록할 수 있어요.</p>
             </div>
           </div>
 
@@ -305,12 +305,12 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
               <button
                 type="button"
                 onClick={() => setStep("view")}
-                className={`px-5 py-2.5 ${SECONDARY_BUTTON_CLASS}`}
+                className={`px-5 py-3 ${SECONDARY_BUTTON_CLASS}`}
               >
                 취소
               </button>
             )}
-            <button type="button" onClick={goConfirm} className={`px-5 py-2.5 ${PRIMARY_BUTTON_CLASS}`}>
+            <button type="button" onClick={goConfirm} className={`px-5 py-3 ${PRIMARY_BUTTON_CLASS}`}>
               다음
             </button>
           </div>
@@ -352,7 +352,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
               type="button"
               onClick={() => setStep("form")}
               disabled={busy}
-              className={`px-5 py-2.5 ${SECONDARY_BUTTON_CLASS}`}
+              className={`px-5 py-3 ${SECONDARY_BUTTON_CLASS}`}
             >
               고치기
             </button>
@@ -360,7 +360,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
               type="button"
               onClick={submit}
               disabled={busy}
-              className={`px-5 py-2.5 ${PRIMARY_BUTTON_CLASS}`}
+              className={`px-5 py-3 ${PRIMARY_BUTTON_CLASS}`}
             >
               {busy ? "등록 중..." : "이 계좌로 등록"}
             </button>
@@ -374,11 +374,11 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
     return (
       <div>
         <p className="text-body font-bold text-text-2">{copy.emptyTitle}</p>
-        <p className="mt-1.5 text-body-s leading-relaxed text-text-3">{copy.emptyDesc}</p>
+        <p className="mt-2 text-body-s leading-relaxed text-text-3">{copy.emptyDesc}</p>
         <button
           type="button"
           onClick={startEditing}
-          className={`mt-4 px-5 py-2.5 ${PRIMARY_BUTTON_CLASS}`}
+          className={`mt-4 px-5 py-3 ${PRIMARY_BUTTON_CLASS}`}
         >
           {copy.emptyCta}
         </button>
@@ -406,7 +406,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
         </dl>
 
         {/* 보안상 뒤 4자리만 돌려받는다 — "왜 다 안 보이나"를 묻기 전에 먼저 말해 준다. */}
-        <p className="mt-2.5 text-label leading-relaxed text-text-3">
+        <p className="mt-3 text-label leading-relaxed text-text-3">
           계좌번호는 안전하게 암호화해 보관하고 있어 뒤 4자리만 보여드려요.
         </p>
 
@@ -415,7 +415,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
             type="button"
             onClick={startEditing}
             disabled={busy}
-            className={`px-5 py-2.5 ${SECONDARY_BUTTON_CLASS}`}
+            className={`px-5 py-3 ${SECONDARY_BUTTON_CLASS}`}
           >
             계좌 변경
           </button>
@@ -423,7 +423,7 @@ export default function BankAccountManager({ purpose }: { purpose: Purpose }) {
             type="button"
             onClick={remove}
             disabled={busy}
-            className={`px-3 py-2.5 text-body font-bold text-text-3 transition-colors hover:text-accent disabled:opacity-50 ${FOCUS_RING}`}
+            className={`px-3 py-3 text-body font-bold text-text-3 transition-colors hover:text-accent disabled:opacity-50 ${FOCUS_RING}`}
           >
             삭제
           </button>

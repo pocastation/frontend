@@ -97,11 +97,11 @@ function dayLabel(eventDate: string): string {
 }
 
 const PANEL = "mt-6 rounded-card border border-border bg-white p-4";
-const LABEL = "mb-1.5 text-label font-bold text-text-2";
+const LABEL = "mb-2 text-label font-bold text-text-2";
 const INPUT =
-  "h-9 w-full rounded-control border border-border-2 bg-white px-2.5 text-body-s font-semibold text-text-1";
-const BTN = `inline-flex h-9 items-center justify-center rounded-control bg-primary px-3.5 text-body-s font-extrabold text-white ${FOCUS_RING}`;
-const BTN_GHOST = `inline-flex h-9 items-center justify-center rounded-control border border-border-2 bg-white px-3.5 text-body-s font-extrabold text-text-2 ${FOCUS_RING}`;
+  "h-9 w-full rounded-control border border-border-2 bg-white px-3 text-body-s font-semibold text-text-1";
+const BTN = `inline-flex h-9 items-center justify-center rounded-control bg-primary px-4 text-body-s font-extrabold text-white ${FOCUS_RING}`;
+const BTN_GHOST = `inline-flex h-9 items-center justify-center rounded-control border border-border-2 bg-white px-4 text-body-s font-extrabold text-text-2 ${FOCUS_RING}`;
 const LINK = `text-label font-bold text-text-2 underline decoration-border-2 underline-offset-2 ${FOCUS_RING}`;
 const LINK_D = `text-label font-bold text-danger underline decoration-danger/30 underline-offset-2 ${FOCUS_RING}`;
 
@@ -302,12 +302,12 @@ export default function AdminEventsPage() {
       </div>
 
       {error && (
-        <p role="alert" className="mt-4 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger">
+        <p role="alert" className="mt-4 rounded-card bg-surface-2 px-4 py-3 text-body-s font-semibold text-danger">
           {error}
         </p>
       )}
       {notice && (
-        <p role="status" className="mt-4 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-text-2">
+        <p role="status" className="mt-4 rounded-card bg-surface-2 px-4 py-3 text-body-s font-semibold text-text-2">
           {notice}
         </p>
       )}
@@ -317,7 +317,7 @@ export default function AdminEventsPage() {
           <h2 className="font-display text-body-l font-extrabold text-text-1">
             {editingEventId === null ? "행사 등록" : "행사 수정"}
           </h2>
-          <form onSubmit={submitEvent} className="mt-3 grid gap-3.5 lg:grid-cols-3">
+          <form onSubmit={submitEvent} className="mt-3 grid gap-4 lg:grid-cols-3">
             <div>
               <p className={LABEL}>유형</p>
               <select
@@ -331,7 +331,7 @@ export default function AdminEventsPage() {
                 ))}
               </select>
               {editingEventId !== null && (
-                <p className="mt-1.5 text-caption text-text-3">유형은 바꿀 수 없어요.</p>
+                <p className="mt-2 text-caption text-text-3">유형은 바꿀 수 없어요.</p>
               )}
             </div>
             <div>
@@ -357,7 +357,7 @@ export default function AdminEventsPage() {
               <input required type="datetime-local" value={eventForm.endsAt}
                 onChange={(e) => setEventForm({ ...eventForm, endsAt: e.target.value })}
                 className={INPUT} />
-              <p className="mt-1.5 text-caption text-text-3">
+              <p className="mt-2 text-caption text-text-3">
                 교환글 마감과 사진 파기가 이 시각을 기준으로 계산돼요.
               </p>
             </div>
@@ -377,7 +377,7 @@ export default function AdminEventsPage() {
             {[{ v: -1, l: "지난달" }, { v: 0, l: "이번 달" }, { v: 1, l: "다음 달" }].map((o) => (
               <button key={o.v} type="button" onClick={() => setRangeOffset(o.v)}
                 aria-pressed={rangeOffset === o.v}
-                className={`border-l border-border-2 px-2.5 py-1.5 text-label font-bold first:border-l-0 ${FOCUS_RING} ${
+                className={`border-l border-border-2 px-3 py-2 text-label font-bold first:border-l-0 ${FOCUS_RING} ${
                   rangeOffset === o.v ? "bg-text-1 text-white" : "text-text-2"
                 }`}>
                 {o.l}
@@ -401,7 +401,7 @@ export default function AdminEventsPage() {
           </select>
           {recurrenceFilter && (
             <button type="button" onClick={() => setRecurrenceFilter(null)}
-              className={`rounded-control border border-primary px-2.5 py-1 text-label font-bold text-primary ${FOCUS_RING}`}>
+              className={`rounded-control border border-primary px-3 py-1 text-label font-bold text-primary ${FOCUS_RING}`}>
               {recurrenceFilter.name} 회차만 · 해제 ×
             </button>
           )}
@@ -414,13 +414,13 @@ export default function AdminEventsPage() {
         <table className="admin-table mt-3 w-full">
           <thead>
             <tr className="border-b border-border-2 text-left text-caption font-bold text-text-3">
-              <th className="whitespace-nowrap px-2.5 py-2">날짜</th>
-              <th className="whitespace-nowrap px-2.5 py-2">유형</th>
-              <th className="px-2.5 py-2">이름 · 장소</th>
-              <th className="whitespace-nowrap px-2.5 py-2">시각</th>
-              <th className="whitespace-nowrap px-2.5 py-2">출처</th>
-              <th className="whitespace-nowrap px-2.5 py-2">상태</th>
-              <th className="px-2.5 py-2" />
+              <th className="whitespace-nowrap px-3 py-2">날짜</th>
+              <th className="whitespace-nowrap px-3 py-2">유형</th>
+              <th className="px-3 py-2">이름 · 장소</th>
+              <th className="whitespace-nowrap px-3 py-2">시각</th>
+              <th className="whitespace-nowrap px-3 py-2">출처</th>
+              <th className="whitespace-nowrap px-3 py-2">상태</th>
+              <th className="px-3 py-2" />
             </tr>
           </thead>
           <tbody>
@@ -434,32 +434,32 @@ export default function AdminEventsPage() {
               const cancelled = event.status === "CANCELLED";
               return (
                 <tr key={event.id} className={`border-b border-border ${cancelled ? "bg-surface-2" : ""}`}>
-                  <td data-label="날짜" className="whitespace-nowrap px-2.5 py-2.5">
+                  <td data-label="날짜" className="whitespace-nowrap px-3 py-3">
                     <span className="font-display text-body font-bold">{event.eventDate.slice(5)}</span>
                     <span className="ml-1 text-caption font-semibold text-text-3">{dayLabel(event.eventDate)}</span>
                   </td>
-                  <td data-label="유형" className="px-2.5 py-2.5">
+                  <td data-label="유형" className="px-3 py-3">
                     <span className={LABEL_NEUTRAL}>
                       {TYPE_LABEL[event.type]}
                     </span>
                   </td>
-                  <td data-label="이름" className="px-2.5 py-2.5">
+                  <td data-label="이름" className="px-3 py-3">
                     <span className="text-body-s font-bold">{event.name}</span>
                     <span className="block text-caption text-text-3">{event.venue}</span>
                   </td>
-                  <td data-label="시각" className="whitespace-nowrap px-2.5 py-2.5 font-display text-body-s font-semibold text-text-2">
+                  <td data-label="시각" className="whitespace-nowrap px-3 py-3 font-display text-body-s font-semibold text-text-2">
                     {kstTime(event.startsAt)}–{kstTime(event.endsAt)}
                   </td>
-                  <td data-label="출처" className="px-2.5 py-2.5 text-label text-text-3">
+                  <td data-label="출처" className="px-3 py-3 text-label text-text-3">
                     {recurrenceFilter ? recurrenceFilter.name : "—"}
                   </td>
-                  <td data-label="상태" className="whitespace-nowrap px-2.5 py-2.5">
+                  <td data-label="상태" className="whitespace-nowrap px-3 py-3">
                     <span className={`text-label font-bold ${cancelled ? "text-danger" : "text-text-2"}`}>
                       {cancelled ? "취소" : "예정"}
                     </span>
                   </td>
-                  <td className="px-2.5 py-2.5">
-                    <div className="flex justify-end gap-2.5">
+                  <td className="px-3 py-3">
+                    <div className="flex justify-end gap-3">
                       <button type="button" onClick={() => openEditEvent(event)} className={LINK}>수정</button>
                       {cancelled ? (
                         <button type="button" disabled={busy}
@@ -491,13 +491,13 @@ export default function AdminEventsPage() {
         <table className="admin-table mt-3 w-full">
           <thead>
             <tr className="border-b border-border-2 text-left text-caption font-bold text-text-3">
-              <th className="whitespace-nowrap px-2.5 py-2">요일</th>
-              <th className="px-2.5 py-2">이름 · 장소</th>
-              <th className="whitespace-nowrap px-2.5 py-2">시각</th>
-              <th className="whitespace-nowrap px-2.5 py-2">활성 구간</th>
-              <th className="whitespace-nowrap px-2.5 py-2">앞으로 회차</th>
-              <th className="whitespace-nowrap px-2.5 py-2">상태</th>
-              <th className="px-2.5 py-2" />
+              <th className="whitespace-nowrap px-3 py-2">요일</th>
+              <th className="px-3 py-2">이름 · 장소</th>
+              <th className="whitespace-nowrap px-3 py-2">시각</th>
+              <th className="whitespace-nowrap px-3 py-2">활성 구간</th>
+              <th className="whitespace-nowrap px-3 py-2">앞으로 회차</th>
+              <th className="whitespace-nowrap px-3 py-2">상태</th>
+              <th className="px-3 py-2" />
             </tr>
           </thead>
           <tbody>
@@ -506,20 +506,20 @@ export default function AdminEventsPage() {
             )}
             {recurrences.map((rule) => (
               <tr key={rule.id} className={`border-b border-border ${rule.active ? "" : "bg-surface-2"}`}>
-                <td data-label="요일" className="whitespace-nowrap px-2.5 py-2.5 font-display text-body font-bold">
+                <td data-label="요일" className="whitespace-nowrap px-3 py-3 font-display text-body font-bold">
                   {WEEKDAY_LABEL[rule.weekday]}
                 </td>
-                <td data-label="이름" className="px-2.5 py-2.5">
+                <td data-label="이름" className="px-3 py-3">
                   <span className="text-body-s font-bold">{rule.name}</span>
                   <span className="block text-caption text-text-3">{rule.venue}</span>
                 </td>
-                <td data-label="시각" className="whitespace-nowrap px-2.5 py-2.5 font-display text-body-s font-semibold text-text-2">
+                <td data-label="시각" className="whitespace-nowrap px-3 py-3 font-display text-body-s font-semibold text-text-2">
                   {rule.startsAtTime.slice(0, 5)}–{rule.endsAtTime.slice(0, 5)}
                 </td>
-                <td data-label="활성 구간" className="whitespace-nowrap px-2.5 py-2.5 text-label text-text-3">
+                <td data-label="활성 구간" className="whitespace-nowrap px-3 py-3 text-label text-text-3">
                   {rule.activeFrom} ~ {rule.activeUntil ?? "무기한"}
                 </td>
-                <td data-label="앞으로 회차" className="whitespace-nowrap px-2.5 py-2.5">
+                <td data-label="앞으로 회차" className="whitespace-nowrap px-3 py-3">
                   {rule.affectedFutureEvents > 0 ? (
                     <button type="button" onClick={() => { setRecurrenceFilter(rule); setRangeOffset(0); }} className={LINK}>
                       {rule.affectedFutureEvents}건
@@ -528,13 +528,13 @@ export default function AdminEventsPage() {
                     <span className="text-label text-text-3">0건</span>
                   )}
                 </td>
-                <td data-label="상태" className="whitespace-nowrap px-2.5 py-2.5">
+                <td data-label="상태" className="whitespace-nowrap px-3 py-3">
                   <span className={`text-label font-bold ${rule.active ? "text-text-2" : "text-danger"}`}>
                     {rule.active ? "활성" : "중단"}
                   </span>
                 </td>
-                <td className="px-2.5 py-2.5">
-                  <div className="flex justify-end gap-2.5">
+                <td className="px-3 py-3">
+                  <div className="flex justify-end gap-3">
                     <button type="button" onClick={() => openEditRecurrence(rule)} className={LINK}>수정</button>
                     {rule.active && (
                       <button type="button" disabled={busy}
@@ -556,11 +556,11 @@ export default function AdminEventsPage() {
           </h2>
 
           {editingRecurrence !== null && editingRecurrence.affectedFutureEvents > 0 && (
-            <div className="mt-3 rounded-card bg-surface-2 px-3.5 py-3">
+            <div className="mt-3 rounded-card bg-surface-2 px-4 py-3">
               <p className="text-body-s font-extrabold text-text-1">
                 고친 값은 앞으로 만들어질 회차부터 적용돼요
               </p>
-              <p className="mt-0.5 text-label leading-relaxed text-text-2">
+              <p className="mt-1 text-label leading-relaxed text-text-2">
                 이미 만들어진 앞으로의 회차{" "}
                 <button type="button" onClick={() => { setRecurrenceFilter(editingRecurrence); setRangeOffset(0); }}
                   className="font-extrabold underline underline-offset-2">
@@ -571,7 +571,7 @@ export default function AdminEventsPage() {
             </div>
           )}
 
-          <form onSubmit={submitRecurrence} className="mt-3 grid gap-3.5 lg:grid-cols-3">
+          <form onSubmit={submitRecurrence} className="mt-3 grid gap-4 lg:grid-cols-3">
             <div>
               <p className={LABEL}>요일</p>
               <select
@@ -583,7 +583,7 @@ export default function AdminEventsPage() {
                 {WEEKDAYS.map((d) => <option key={d} value={d}>{WEEKDAY_LABEL[d]}요일</option>)}
               </select>
               {editingRecurrence !== null && (
-                <p className="mt-1.5 text-caption font-semibold text-warn">
+                <p className="mt-2 text-caption font-semibold text-warn">
                   요일은 바꿀 수 없어요. 편성이 바뀌면 이 규칙을 중단하고 새 규칙을 만들어 주세요.
                 </p>
               )}
@@ -624,7 +624,7 @@ export default function AdminEventsPage() {
               <input required type="time" value={recurrenceForm.endsAtTime}
                 onChange={(e) => setRecurrenceForm({ ...recurrenceForm, endsAtTime: e.target.value })}
                 className={INPUT} />
-              <p className="mt-1.5 text-caption text-text-3">
+              <p className="mt-2 text-caption text-text-3">
                 교환글 마감과 사진 파기가 이 시각을 기준으로 계산돼요.
               </p>
             </div>
@@ -639,7 +639,7 @@ export default function AdminEventsPage() {
               <input type="date" value={recurrenceForm.activeUntil}
                 onChange={(e) => setRecurrenceForm({ ...recurrenceForm, activeUntil: e.target.value })}
                 className={INPUT} />
-              <p className="mt-1.5 text-caption text-text-3">비워 두면 무기한이에요.</p>
+              <p className="mt-2 text-caption text-text-3">비워 두면 무기한이에요.</p>
             </div>
             <div className="flex items-end justify-end gap-2 lg:col-span-3">
               <button type="button" onClick={() => { setRecurrenceForm(null); setEditingRecurrence(null); }} className={BTN_GHOST}>

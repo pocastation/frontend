@@ -24,7 +24,7 @@ import { AUCTION_STATUS_LABEL } from "@/lib/labels";
 // 칩 지면은 흰색 하나로 통일한다 — 카운트다운 칩과 언어가 갈리면 같은 카드에서 두 말을 하게 된다.
 const OVERLAY_CHIP =
   // eslint-disable-next-line no-restricted-syntax -- 사진 위 시간 칩은 9.5px를 유지한다(#769, 2026-10-01 결정)
-  "absolute left-1.5 top-1.5 z-[2] rounded-control bg-white/95 px-1.5 py-0.5 text-[9.5px] font-extrabold leading-[1.35] text-text-1";
+  "absolute left-1.5 top-1.5 z-[2] rounded-control bg-white/95 px-2 py-1 text-[9.5px] font-extrabold leading-[1.35] text-text-1";
 
 export default function AuctionCard({
   auction,
@@ -129,7 +129,7 @@ export default function AuctionCard({
           {auction.artistName && (
             <p className="truncate text-label font-extrabold text-text-1">{auction.artistName}</p>
           )}
-          <p className="mt-0.5 line-clamp-2 text-body-s text-text-2">{auction.title}</p>
+          <p className="mt-1 line-clamp-2 text-body-s text-text-2">{auction.title}</p>
           <p className="mt-1 flex items-baseline gap-1">
             <span className={`text-caption font-extrabold ${isInstantSale ? "text-text-3" : "text-primary"}`}>
               {isInstantSale ? "즉시" : "현재"}
@@ -149,11 +149,11 @@ export default function AuctionCard({
       ) : (
         // 기본형(데스크탑) — 가격이 첫 줄이다. 제안판매에서 가장 먼저 읽는 수치가 카드 바닥에서
         // 제안 횟수와 같은 크기로 눌려 있었다(#277). 이 순서는 그대로 둔다.
-        <div className="px-0.5 pt-2.5">
+        <div className="px-1 pt-3">
         <p className={`font-display text-title-s font-extrabold tabular-nums ${isEnded ? "text-text-3" : "text-text-1"}`}>
           {formatKRW(displayPrice)}
         </p>
-        <h3 className="mt-0.5 truncate text-body-s text-text-2">
+        <h3 className="mt-1 truncate text-body-s text-text-2">
           {auction.artistName ? `${auction.artistName} ${auction.title}` : auction.title}
         </h3>
         <p className="mt-1 text-caption text-text-3">

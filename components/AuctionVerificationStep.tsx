@@ -199,7 +199,7 @@ export default function AuctionVerificationStep({ verificationId, onVerified }: 
             바꾸고, 강조는 값 자체(큰 monospace 숫자)가 지게 둔다. 이 단계에서 정말 경고인 것은
             아래 「곧 만료」 문장 하나뿐이고 그건 이미 accent색으로 말하고 있다.
           */}
-          <div className="bg-surface-2 px-4 py-3.5">
+          <div className="bg-surface-2 px-4 py-4">
             <div className="flex items-center justify-between gap-3">
               <span className="text-caption font-extrabold uppercase tracking-[0.06em] text-text-3">Verification code</span>
               <span className={`text-label font-bold ${expired && !processing ? "text-accent" : "text-text-2"}`}>

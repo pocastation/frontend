@@ -45,7 +45,7 @@ export default function GuidePage() {
               const isBuyer = step.who === "구매자";
               const last = i === GUIDE_FLOW.length - 1;
               return (
-                <li key={step.act} className="flex items-start gap-2.5">
+                <li key={step.act} className="flex items-start gap-3">
                   {/* 번호와 세로선이 한 축이 되어 「순서」를 만든다 — 점만 찍으면 목록이지 흐름이 아니다. */}
                   <span aria-hidden="true" className="flex shrink-0 flex-col items-center self-stretch">
                     <span
@@ -58,7 +58,7 @@ export default function GuidePage() {
                     {!last && <span className="min-h-[14px] w-px flex-1 bg-border-2" />}
                   </span>
                   <span className={`min-w-0 flex-1 ${last ? "" : "pb-3"}`}>
-                    <span className="flex flex-wrap items-baseline gap-1.5">
+                    <span className="flex flex-wrap items-baseline gap-2">
                       <span
                         className={`text-caption font-extrabold ${isBuyer ? "text-primary" : "text-text-3"}`}
                       >
@@ -68,7 +68,7 @@ export default function GuidePage() {
                         {step.act}
                       </span>
                     </span>
-                    <span className="mt-0.5 block break-keep text-body-s leading-relaxed text-text-3">
+                    <span className="mt-1 block break-keep text-body-s leading-relaxed text-text-3">
                       {step.note}
                     </span>
                   </span>
@@ -78,9 +78,9 @@ export default function GuidePage() {
           </ol>
         </section>
 
-        <section className="self-start rounded-control bg-surface-2 px-3.5 pb-3.5 pt-3">
+        <section className="self-start rounded-control bg-surface-2 px-4 pb-4 pt-3">
           <h2 className="text-label font-extrabold tracking-[0.04em] text-text-3">기한 한눈에</h2>
-          <dl className="mt-1.5">
+          <dl className="mt-2">
             {GUIDE_DEADLINES.map(([k, v], i) => (
               <div
                 key={k}
@@ -103,7 +103,7 @@ export default function GuidePage() {
           <h2 className="font-display text-label font-extrabold tracking-[0.06em] text-text-3">
             {group.title}
           </h2>
-          <ul className="mt-head border-t border-border sm:mt-1.5">
+          <ul className="mt-head border-t border-border sm:mt-2">
             {group.ids.map((id) => {
               const doc = GUIDE_DOCS.find((d) => d.id === id);
               if (!doc) return null;
@@ -111,13 +111,13 @@ export default function GuidePage() {
                 <li key={id} className="border-b border-border">
                   <Link
                     href={`/guide/${id}`}
-                    className={`flex min-h-[60px] items-center justify-between gap-2.5 py-3 ${FOCUS_RING}`}
+                    className={`flex min-h-[60px] items-center justify-between gap-3 py-3 ${FOCUS_RING}`}
                   >
                     <span className="min-w-0 flex-1">
                       <span className="block text-body-l font-bold text-text-1">
                         {doc.title}
                       </span>
-                      <span className="mt-0.5 block text-body-s text-text-3">{doc.desc}</span>
+                      <span className="mt-1 block text-body-s text-text-3">{doc.desc}</span>
                     </span>
                     <span aria-hidden="true" className="shrink-0 text-body-l text-text-3">
                       ›
@@ -133,16 +133,16 @@ export default function GuidePage() {
       {/* 문서로 해결되지 않는 경우의 출구 — 도움말 센터에는 반드시 있어야 한다. */}
       <section className="mt-10 border-t border-border pt-6">
         <p className="text-body-s text-text-3">이 문서로 해결되지 않았다면</p>
-        <div className="mt-2.5 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-2">
           <Link
             href="/faq"
-            className={`rounded-control border border-border-2 bg-surface px-3.5 py-2 text-body-s font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
+            className={`rounded-control border border-border-2 bg-surface px-4 py-2 text-body-s font-bold text-text-2 transition-colors hover:border-text-3 hover:text-text-1 ${FOCUS_RING}`}
           >
             자주 묻는 질문
           </Link>
           <Link
             href="/inquiries/new"
-            className={`rounded-control bg-text-1 px-3.5 py-2 text-body-s font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
+            className={`rounded-control bg-text-1 px-4 py-2 text-body-s font-bold text-white transition-colors hover:bg-text-2 ${FOCUS_RING}`}
           >
             1:1 문의
           </Link>

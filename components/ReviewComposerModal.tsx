@@ -96,7 +96,7 @@ export default function ReviewComposerModal({
         </p>
 
         {/* 별점 */}
-        <div className="mt-4 flex flex-col items-center gap-1.5">
+        <div className="mt-4 flex flex-col items-center gap-2">
           <div className="flex items-center gap-1" onMouseLeave={() => setHover(0)}>
             {[1, 2, 3, 4, 5].map((n) => (
               <button
@@ -105,7 +105,7 @@ export default function ReviewComposerModal({
                 aria-label={`별점 ${n}점`}
                 onMouseEnter={() => setHover(n)}
                 onClick={() => setRating(n)}
-                className={`rounded-control p-0.5 text-display leading-none transition-colors ${FOCUS_RING} ${
+                className={`rounded-control p-1 text-display leading-none transition-colors ${FOCUS_RING} ${
                   n <= activeStars ? "text-star" : "text-border-2"
                 }`}
               >
@@ -119,7 +119,7 @@ export default function ReviewComposerModal({
         {/* 매너 태그 칩 */}
         <div className="mt-4">
           <p className="text-label font-bold text-text-2">이런 점이 좋았어요 (선택)</p>
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="mt-2 flex flex-wrap gap-2">
             {REVIEW_MANNER_TAGS.map((t) => {
               const on = tags.includes(t.code);
               return (
@@ -128,7 +128,7 @@ export default function ReviewComposerModal({
                   type="button"
                   aria-pressed={on}
                   onClick={() => toggleTag(t.code)}
-                  className={`rounded-control border px-2.5 py-1 text-label font-semibold transition-colors ${FOCUS_RING} ${
+                  className={`rounded-control border px-3 py-1 text-label font-semibold transition-colors ${FOCUS_RING} ${
                     on
                       ? "border-text-1 bg-text-1 text-white"
                       : "border-border-2 text-text-2 hover:border-text-3"
@@ -148,9 +148,9 @@ export default function ReviewComposerModal({
             onChange={(e) => setBody(e.target.value.slice(0, 500))}
             rows={3}
             placeholder="거래하며 느낀 점을 남겨주세요. (선택, 최대 500자)"
-            className={`w-full resize-none rounded-control border border-border px-3 py-2.5 text-body text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+            className={`w-full resize-none rounded-control border border-border px-3 py-3 text-body text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
           />
-          <p className="mt-0.5 text-right text-caption text-text-3">{body.length}/500</p>
+          <p className="mt-1 text-right text-caption text-text-3">{body.length}/500</p>
         </div>
 
         {error && (
@@ -164,7 +164,7 @@ export default function ReviewComposerModal({
             type="button"
             onClick={submit}
             disabled={saving}
-            className={`flex-1 py-2.5 ${PRIMARY_BUTTON_CLASS}`}
+            className={`flex-1 py-3 ${PRIMARY_BUTTON_CLASS}`}
           >
             {saving ? "저장 중..." : isEdit ? "후기 수정" : "후기 등록"}
           </button>
@@ -172,7 +172,7 @@ export default function ReviewComposerModal({
             type="button"
             onClick={onClose}
             disabled={saving}
-            className={`px-5 py-2.5 disabled:opacity-50 ${SECONDARY_BUTTON_CLASS}`}
+            className={`px-5 py-3 disabled:opacity-50 ${SECONDARY_BUTTON_CLASS}`}
           >
             {isEdit ? "취소" : "다음에"}
           </button>

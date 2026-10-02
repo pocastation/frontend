@@ -62,7 +62,7 @@ export default function WithdrawnPage() {
           ))}
         </dl>
 
-        <div className="mt-7 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:gap-4">
+        <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
           <Link
             href="/"
             className={`inline-flex h-12 items-center justify-center px-5 sm:w-[200px] ${PRIMARY_BUTTON_CLASS}`}

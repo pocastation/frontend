@@ -92,7 +92,7 @@ export default function Footer() {
             <h4 className="mb-4 text-body-s font-extrabold tracking-wide text-text-1 sm:mb-3 sm:text-caption">
               {column.title}
             </h4>
-            <div className="grid grid-cols-2 gap-x-5 gap-y-1.5 sm:block">
+            <div className="grid grid-cols-2 gap-x-5 gap-y-2 sm:block">
               {column.links.map((link) => (
                 <a
                   key={link.label}
@@ -120,7 +120,7 @@ export default function Footer() {
       <address className="mx-auto mt-6 max-w-[1160px] text-caption not-italic leading-relaxed sm:mt-10 sm:border-t sm:border-border sm:pt-5">
         <dl className="flex flex-wrap gap-x-3 gap-y-1">
           {rows.map((row) => (
-            <div key={row.label} className="flex gap-1.5">
+            <div key={row.label} className="flex gap-2">
               <dt className="text-text-2">{row.label}</dt>
               <dd className="font-medium text-text-1">{row.value}</dd>
             </div>

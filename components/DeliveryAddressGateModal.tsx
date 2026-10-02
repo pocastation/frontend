@@ -113,7 +113,7 @@ export default function DeliveryAddressGateModal({
         aria-label={`${action} 전 배송지 등록`}
       >
         <p className="text-caption font-extrabold tracking-[0.08em] text-primary">{action} 전 한 가지</p>
-        <p className="mt-1.5 font-display text-title-s font-extrabold text-text-1">
+        <p className="mt-2 font-display text-title-s font-extrabold text-text-1">
           받을 주소를 먼저 등록해 주세요
         </p>
         <p className="mt-2 text-body-s text-text-3">
@@ -168,7 +168,7 @@ export default function DeliveryAddressGateModal({
           <button
             type="button"
             onClick={onClose}
-            className={`px-4 py-2.5 ${SECONDARY_BUTTON_CLASS}`}
+            className={`px-4 py-3 ${SECONDARY_BUTTON_CLASS}`}
           >
             나중에 하기
           </button>
@@ -176,7 +176,7 @@ export default function DeliveryAddressGateModal({
             type="button"
             onClick={submit}
             disabled={saving}
-            className={`flex-1 py-2.5 disabled:opacity-50 ${PRIMARY_BUTTON_CLASS}`}
+            className={`flex-1 py-3 disabled:opacity-50 ${PRIMARY_BUTTON_CLASS}`}
           >
             {saving ? "저장 중..." : "저장하고 계속"}
           </button>

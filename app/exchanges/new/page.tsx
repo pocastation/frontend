@@ -34,10 +34,10 @@ const MAX_WANTS = 5;
 type Want = { artistId: string; idolId: string; source: PhotocardSource };
 type Slot = { fromMinuteOfDay: number; toMinuteOfDay: number };
 
-const LABEL = "mb-1.5 text-body-s font-extrabold text-text-2";
+const LABEL = "mb-2 text-body-s font-extrabold text-text-2";
 const INPUT =
   "h-12 w-full rounded-control border border-border-2 bg-white px-3 text-body-l font-semibold text-text-1";
-const HELP = "mt-1.5 text-label leading-relaxed text-text-3";
+const HELP = "mt-2 text-label leading-relaxed text-text-3";
 
 export default function NewExchangePage() {
   return (
@@ -208,13 +208,13 @@ function NewExchangeForm() {
       />
 
       <div className={`mx-auto max-w-[640px] ${FORM_ACTION_BAR_PAD} sm:px-4 sm:py-8`}>
-        <div className="flex gap-1 px-gutter pt-2.5 sm:px-0" aria-hidden="true">
+        <div className="flex gap-1 px-gutter pt-3 sm:px-0" aria-hidden="true">
           <i className="h-0.5 flex-1 rounded-full bg-primary" />
           <i className={`h-0.5 flex-1 rounded-full ${step === 2 ? "bg-primary" : "bg-border-2"}`} />
         </div>
 
         {error && (
-          <p role="alert" className="mx-gutter mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s font-semibold text-danger sm:mx-0">
+          <p role="alert" className="mx-gutter mt-3 rounded-card bg-surface-2 px-4 py-3 text-body-s font-semibold text-danger sm:mx-0">
             {error}
           </p>
         )}
@@ -223,7 +223,7 @@ function NewExchangeForm() {
           <>
             <section className={`px-gutter pt-4 sm:px-0 ${stepAnim}`}>
               <p className={LABEL}>
-                내가 가진 포카<span className="ml-0.5 text-primary">*</span>
+                내가 가진 포카<span className="ml-1 text-primary">*</span>
               </p>
               <PhotoUploadGrid
                 items={photos.items}
@@ -237,7 +237,7 @@ function NewExchangeForm() {
 
             <section className={`mt-6 px-gutter sm:px-0 ${stepAnim}`}>
               <p className={LABEL}>
-                어떤 포카인가요<span className="ml-0.5 text-primary">*</span>
+                어떤 포카인가요<span className="ml-1 text-primary">*</span>
               </p>
               <select value={artistId} onChange={(e) => setArtistId(e.target.value)} className={INPUT} aria-label="스타">
                 <option value="">스타를 선택하세요</option>
@@ -274,7 +274,7 @@ function NewExchangeForm() {
               </div>
 
               <p className={`${LABEL} mt-5`}>
-                받고 싶은 포카<span className="ml-0.5 text-primary">*</span>
+                받고 싶은 포카<span className="ml-1 text-primary">*</span>
               </p>
               {wants.map((want, index) => (
                 <WantRow
@@ -315,7 +315,7 @@ function NewExchangeForm() {
           <>
             <section className={`px-gutter pt-4 sm:px-0 ${stepAnim}`}>
               <p className={LABEL}>
-                만날 곳<span className="ml-0.5 text-primary">*</span>
+                만날 곳<span className="ml-1 text-primary">*</span>
               </p>
               <input
                 value={place}
@@ -329,7 +329,7 @@ function NewExchangeForm() {
 
             <section className={`mt-6 px-gutter sm:px-0 ${stepAnim}`}>
               <p className={LABEL}>
-                만날 수 있는 시간<span className="ml-0.5 text-primary">*</span>
+                만날 수 있는 시간<span className="ml-1 text-primary">*</span>
               </p>
               {slots.map((slot, index) => (
                 <SlotRow
@@ -464,7 +464,7 @@ function SlotRow({
   };
 
   return (
-    <div className="mt-2 flex items-center gap-1.5">
+    <div className="mt-2 flex items-center gap-2">
       <TimePicker
         label="시작"
         value={slot.fromMinuteOfDay}

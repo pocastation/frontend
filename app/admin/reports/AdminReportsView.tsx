@@ -175,13 +175,13 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
   return (
     <div>
       <h1 className="font-display text-title-l font-extrabold text-text-1">신고 관리</h1>
-      <p className="mt-1.5 text-body text-text-3">접수된 신고 내역을 확인하고 필요한 조치를 취할 수 있습니다.</p>
+      <p className="mt-2 text-body text-text-3">접수된 신고 내역을 확인하고 필요한 조치를 취할 수 있습니다.</p>
       <ReportScopeTabs />
 
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_340px]">
         {/* 목록 — min-w-0로 테이블(min-w)이 그리드 컬럼을 늘려 페이지가 넘치는 걸 막는다. */}
         <div className={`min-w-0 ${selectedId !== null ? "max-lg:hidden" : ""}`}>
-          <div className="mb-3 flex flex-wrap gap-1.5" role="group" aria-label="상태 필터">
+          <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label="상태 필터">
             {STATUS_FILTERS.map((f) => (
               <button
                 key={f.key}
@@ -203,11 +203,11 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
             <table role="table" className="admin-table admin-table-reports w-full min-w-[640px] border-collapse">
               <thead>
                 <tr className="border-b border-border text-left text-caption font-bold text-text-3">
-                  <th className="px-4 py-2.5">대상</th>
-                  <th className="px-4 py-2.5">사유</th>
-                  <th className="px-4 py-2.5">신고자</th>
-                  <th className="px-4 py-2.5">최근 신고</th>
-                  <th className="px-4 py-2.5">상태</th>
+                  <th className="px-4 py-3">대상</th>
+                  <th className="px-4 py-3">사유</th>
+                  <th className="px-4 py-3">신고자</th>
+                  <th className="px-4 py-3">최근 신고</th>
+                  <th className="px-4 py-3">상태</th>
                 </tr>
               </thead>
               <tbody>
@@ -234,7 +234,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                         사진이 필요한 도용 신고는 아래 「바로가기」로 글을 연다.
                       */}
                       <td className="px-4 py-3"><button type="button" aria-label={`${r.targetTitle ?? copy.noun} 신고 상세`} onClick={(event) => { event.stopPropagation(); void openDetail(r.targetId); }} className={`text-left ${FOCUS_RING}`}>
-                        <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-3">
                           {r.representativeThumbnailUrl !== null && (
                             <span className="h-9 w-9 shrink-0 overflow-hidden rounded-control bg-surface-2">
                               {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일 */}
@@ -248,7 +248,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                         </div>
                       </button></td>
                       <td data-label="사유" className="px-4 py-3">
-                        <span className="rounded-control bg-surface-2 px-2 py-0.5 text-caption font-extrabold text-text-2">
+                        <span className="rounded-control bg-surface-2 px-2 py-1 text-caption font-extrabold text-text-2">
                           {REPORT_REASON_LABEL[r.representativeReason]}
                         </span>
                       </td>
@@ -301,7 +301,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                 </StatusBadge>
               </div>
 
-              <dl className="mt-3 flex flex-col gap-1.5 border-t border-border pt-3 text-body-s">
+              <dl className="mt-3 flex flex-col gap-2 border-t border-border pt-3 text-body-s">
                 <div className="flex justify-between gap-2">
                   <dt className="text-text-3">{copy.owner}</dt>
                   <dd className="font-semibold text-text-1">{detail.ownerNickname ?? "-"}</dd>
@@ -325,13 +325,13 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
               <p className="mt-3 mb-2 border-t border-border pt-3 text-caption font-extrabold text-text-3">
                 신고 내역 ({detail.reports.length}건)
               </p>
-              <div className="admin-report-items flex max-h-[220px] flex-col gap-1.5 overflow-y-auto pr-1">
+              <div className="admin-report-items flex max-h-[220px] flex-col gap-2 overflow-y-auto pr-1">
                 {detail.reports.map((item) => (
-                  <div key={item.reportId} className="rounded-control border border-border p-2.5">
+                  <div key={item.reportId} className="rounded-control border border-border p-3">
                     <div className="flex items-center justify-between gap-2 text-caption font-bold">
-                      <span className="flex items-center gap-1.5 text-text-2">
+                      <span className="flex items-center gap-2 text-text-2">
                         {item.reporterNickname}
-                        <span className="rounded-control bg-surface-2 px-1.5 py-0.5 text-caption font-extrabold text-text-2">
+                        <span className="rounded-control bg-surface-2 px-2 py-1 text-caption font-extrabold text-text-2">
                           {REPORT_REASON_LABEL[item.reasonCode]}
                         </span>
                       </span>
@@ -356,7 +356,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
               {detail.actionable ? (
                 <div className="mt-4 border-t border-border pt-4">
                   <p className="mb-2 text-caption font-extrabold text-text-3">처리 방법 (접수 상태에서만 선택 가능)</p>
-                  <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-col gap-2">
                     {/* 내리기의 이름과 값은 서버가 준 removalAction 그대로다. 화면이 대상 종류로 추측하지 않는다. */}
                     {([detail.removalAction, "NONE"] as ResolutionAction[]).map((option) => (
                       <label
@@ -385,13 +385,13 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="처리 사유를 입력하세요."
                     rows={2}
-                    className={`mt-2.5 w-full resize-none rounded-control border border-border px-3 py-2 text-body-s outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
+                    className={`mt-3 w-full resize-none rounded-control border border-border px-3 py-2 text-body-s outline-none placeholder:text-text-3 focus:border-primary ${FOCUS_RING}`}
                   />
                   <button
                     type="button"
                     onClick={confirmResolve}
                     disabled={submitting}
-                    className={`mt-2.5 h-10 w-full rounded-control bg-primary text-body font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
+                    className={`mt-3 h-10 w-full rounded-control bg-primary text-body font-bold text-white transition-colors hover:bg-primary-dark disabled:opacity-60 ${FOCUS_RING}`}
                   >
                     {submitting ? "처리 중..." : "처리 확정"}
                   </button>
@@ -402,7 +402,7 @@ export default function AdminReportsView({ targetType }: { targetType: ReportTar
                   )}
                 </div>
               ) : (
-                <div className="mt-4 flex flex-col gap-1.5 border-t border-border pt-4 text-body-s">
+                <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4 text-body-s">
                   <p className="text-caption font-extrabold text-text-3">처리 결과</p>
                   <div className="flex justify-between gap-2">
                     <span className="text-text-3">처리 상태</span>

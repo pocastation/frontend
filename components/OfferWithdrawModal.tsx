@@ -65,12 +65,12 @@ export default function OfferWithdrawModal({
         aria-label="제안 취소 확인"
       >
         <h3 className="text-body-l font-bold text-text-1">이 제안을 거둬들일까요?</h3>
-        <p className="mt-1.5 truncate text-label text-text-3">{title}</p>
+        <p className="mt-2 truncate text-label text-text-3">{title}</p>
 
         <p className="mt-3 text-body-s leading-relaxed text-text-2">
           제안이 판매자의 목록에서 사라지고, <b className="font-bold text-text-1">다시 되돌릴 수 없어요.</b>
         </p>
-        <p className="mt-1.5 text-label leading-relaxed text-text-3">
+        <p className="mt-2 text-label leading-relaxed text-text-3">
           같은 상품에 새로 제안하는 건 언제든 가능해요.
         </p>
 

@@ -27,7 +27,7 @@ export default function ExchangeFeedRow({ item }: { item: ExchangeFeedItem }) {
     <li className="border-b border-border">
       <Link
         href={`/exchanges/${item.id}`}
-        className={`-mx-2 flex gap-2.5 rounded-control px-2 py-3 ${PRESS_ROW} ${FOCUS_RING}`}
+        className={`-mx-2 flex gap-3 rounded-control px-2 py-3 ${PRESS_ROW} ${FOCUS_RING}`}
       >
         <span className="relative block h-[62px] w-[52px] shrink-0">
           {item.photoCount > 1 && (
@@ -62,15 +62,15 @@ export default function ExchangeFeedRow({ item }: { item: ExchangeFeedItem }) {
 
         <span className="min-w-0 flex-1">
           {/* 마감된 줄은 제목까지 흐리게 — 「지나간 것」으로 읽혀야 한다(#767). */}
-          <span className={`flex items-center gap-1.5 text-body-l font-extrabold ${closed ? "text-text-3" : "text-text-1"}`}>
+          <span className={`flex items-center gap-2 text-body-l font-extrabold ${closed ? "text-text-3" : "text-text-1"}`}>
             <span className="truncate">{itemName(item.have)}</span>
             <span aria-label="교환" className="shrink-0 text-label font-semibold text-text-3">→</span>
             <span className={`truncate ${closed ? "" : "text-primary"}`}>
               {item.wants.map(itemName).join(" · ") || "—"}
             </span>
           </span>
-          <span className="mt-0.5 block truncate text-label text-text-3">{itemDetail(item.have)}</span>
-          <span className="mt-1.5 flex items-center gap-1.5 text-label text-text-2">
+          <span className="mt-1 block truncate text-label text-text-3">{itemDetail(item.have)}</span>
+          <span className="mt-2 flex items-center gap-2 text-label text-text-2">
             {closed ? (
               <span className={LABEL_NEUTRAL}>마감</span>
             ) : soon ? (

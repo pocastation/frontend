@@ -128,7 +128,7 @@ export default function MobileDetailGallery({
         // 갤러리 위에 아이콘만 얹으면 밝은 미디어에서 묻힌다(연회색 아이콘 + 배경 없음). 공유·찜·신고
         // 컴포넌트를 고치지 않고 여기서만 흰 반투명 원을 깐다 — 데스크탑 액션 줄은 흰 지면 위라
         // 지금 그대로다. `>*>button`은 공유·신고의 트리거만 잡는다(펼친 메뉴는 한 단계 더 깊다).
-        <div className="absolute right-3 top-3 z-[3] flex gap-1.5 [&>*>button]:!rounded-full [&>*>button]:!bg-white/90 [&>*>button]:!text-text-1 [&>*>button]:backdrop-blur-[4px] [&>button]:!rounded-full [&>button]:!bg-white/90 [&>button]:!text-text-1 [&>button]:backdrop-blur-[4px]">
+        <div className="absolute right-3 top-3 z-[3] flex gap-2 [&>*>button]:!rounded-full [&>*>button]:!bg-white/90 [&>*>button]:!text-text-1 [&>*>button]:backdrop-blur-[4px] [&>button]:!rounded-full [&>button]:!bg-white/90 [&>button]:!text-text-1 [&>button]:backdrop-blur-[4px]">
           {actions}
         </div>
       )}
@@ -137,7 +137,7 @@ export default function MobileDetailGallery({
         <>
           {/* 도트 인디케이터(#478) — 사진은 ●, 영상은 ▶. 「3 / 3」 카운터만으로는 마지막 사진이
               끝처럼 읽혀 그 뒤의 영상을 아무도 발견하지 못했다. 영상 존재가 첫 화면부터 보여야 한다. */}
-          <div className="absolute bottom-3.5 left-1/2 z-[3] flex -translate-x-1/2 items-center gap-1.5">
+          <div className="absolute bottom-3.5 left-1/2 z-[3] flex -translate-x-1/2 items-center gap-2">
             {slides.map((slide, i) =>
               slide.kind === "image" ? (
                 <span
@@ -161,7 +161,7 @@ export default function MobileDetailGallery({
           {/* 🔴 분모가 `images.length`였다(#519) — 도트는 영상까지 세는데 숫자만 빼고 세서
               사진 3 + 영상 1이면 도트 4개 옆에 「1 / 3」이 떴다. 둘이 같은 수를 말하게 한다. */}
           {!onVideo && (
-            <span className="absolute bottom-3 right-3 z-[3] rounded-control bg-black/50 px-2 py-0.5 font-display text-caption text-white backdrop-blur-[2px]">
+            <span className="absolute bottom-3 right-3 z-[3] rounded-control bg-black/50 px-2 py-1 font-display text-caption text-white backdrop-blur-[2px]">
               {index + 1} / {slides.length}
             </span>
           )}

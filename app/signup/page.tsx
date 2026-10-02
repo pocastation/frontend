@@ -27,7 +27,7 @@ import {
 // 입력칸 — 라벨(13px)보다 크고(15px·높이 48px) helper(12px)보다 확실히 앞선다.
 // 가입 폼에서 시각적으로 가장 앞에 있어야 하는 건 설명이 아니라 실제로 조작하는 칸이다.
 const FIELD =
-  "h-12 w-full rounded-control border border-border-2 bg-white px-3.5 text-body-l text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary";
+  "h-12 w-full rounded-control border border-border-2 bg-white px-4 text-body-l text-text-1 outline-none transition-colors placeholder:text-text-3 focus:border-primary";
 
 function Label({ children, required }: { children: React.ReactNode; required?: boolean }) {
   return (
@@ -191,7 +191,7 @@ export default function SignupPage() {
             onChange={(e) => setEmail(e.target.value)}
             className={`mt-2 ${FIELD} ${FOCUS_RING}`}
           />
-          <p className="mt-1.5 text-label text-text-3">
+          <p className="mt-2 text-label text-text-3">
             이 주소로 인증 링크가 가요. 오타가 있으면 메일을 받을 수 없어요.
           </p>
         </div>
@@ -242,7 +242,7 @@ export default function SignupPage() {
             className={`mt-2 ${FIELD} ${FOCUS_RING} ${confirmMismatch ? "border-danger" : ""}`}
           />
           {/* 제출까지 기다리지 않고 치는 중에 알려준다 — 그래야 다시 치는 수고가 줄어든다. */}
-          <p aria-live="polite" className="mt-1.5 min-h-[16px] text-label text-danger">
+          <p aria-live="polite" className="mt-2 min-h-[16px] text-label text-danger">
             {confirmMismatch ? "비밀번호가 서로 달라요." : ""}
           </p>
         </div>
@@ -329,7 +329,7 @@ function PasswordRules({
   return (
     <div
       // 떠 있는 층이라 그림자를 쓴다 — 장식이 아니라 아래 내용과 겹친다는 신호다.
-      className="absolute inset-x-0 top-full z-20 mt-1.5 rounded-card border border-border-2 bg-white p-3.5 shadow-card"
+      className="absolute inset-x-0 top-full z-20 mt-2 rounded-card border border-border-2 bg-white p-4 shadow-card"
     >
       <div className="h-[3px] w-full overflow-hidden rounded-full bg-surface-2">
         <div
@@ -338,7 +338,7 @@ function PasswordRules({
         />
       </div>
 
-      <ul className="mt-3 flex flex-col gap-1.5">
+      <ul className="mt-3 flex flex-col gap-2">
         {checks.map((c) => (
           <li key={c.label} className="flex items-center gap-2 text-body-s">
             <span

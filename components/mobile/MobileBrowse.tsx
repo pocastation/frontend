@@ -85,7 +85,7 @@ export default function MobileBrowse({
 
       {/* 상단바 48px 바로 아래에 붙어 함께 고정된다 — 스크롤해도 어느 목록인지 놓치지 않게. */}
       <div className="sticky top-12 z-[250] border-b border-border bg-white">
-        <div role="tablist" className="flex gap-1 px-2.5">
+        <div role="tablist" className="flex gap-1 px-3">
           {TABS.map((tab) => {
             const on = tab.saleType === saleType;
             return (
@@ -95,7 +95,7 @@ export default function MobileBrowse({
                 aria-current={on ? "page" : undefined}
                 role="tab"
                 aria-selected={on}
-                className={`flex-shrink-0 whitespace-nowrap border-b-2 px-3.5 py-2.5 text-body transition-colors ${FOCUS_RING} ${
+                className={`flex-shrink-0 whitespace-nowrap border-b-2 px-4 py-3 text-body transition-colors ${FOCUS_RING} ${
                   on ? "border-primary font-extrabold text-text-1" : "border-transparent font-medium text-text-2"
                 }`}
               >
@@ -107,7 +107,7 @@ export default function MobileBrowse({
       </div>
 
       <div className="px-gutter pt-3">
-        <label className="flex h-10 items-center gap-2 rounded-control border border-border px-3.5">
+        <label className="flex h-10 items-center gap-2 rounded-control border border-border px-4">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 text-text-3" aria-hidden="true">
             <circle cx="11" cy="11" r="8" />
             <path d="m21 21-4.35-4.35" />
@@ -124,7 +124,7 @@ export default function MobileBrowse({
       </div>
 
       {/* 정렬 칩 — 화면폭을 넘으면 가로로 흘린다(줄바꿈해서 두 줄이 되면 목록이 그만큼 밀린다). */}
-      <div className="mt-2.5 flex gap-1.5 overflow-x-auto px-gutter pb-0.5" role="group" aria-label="정렬 기준">
+      <div className="mt-3 flex gap-2 overflow-x-auto px-gutter pb-1" role="group" aria-label="정렬 기준">
         {sortOptions.map((option) => {
           const on = sort === option.key;
           return (
@@ -133,7 +133,7 @@ export default function MobileBrowse({
               type="button"
               aria-pressed={on}
               onClick={() => setSort(option.key)}
-              className={`min-h-9 flex-shrink-0 whitespace-nowrap rounded-control border px-3.5 text-body-s font-bold transition-colors ${FOCUS_RING} ${
+              className={`min-h-9 flex-shrink-0 whitespace-nowrap rounded-control border px-3 text-body-s font-bold transition-colors ${FOCUS_RING} ${
                 on ? "border-text-1 bg-text-1 text-white" : "border-border-2 bg-white text-text-2"
               }`}
             >
@@ -143,7 +143,7 @@ export default function MobileBrowse({
         })}
       </div>
 
-      <p className="mt-2.5 px-gutter text-label tabular-nums text-text-3">
+      <p className="mt-3 px-gutter text-label tabular-nums text-text-3">
         {totalElements.toLocaleString("ko-KR")}개
       </p>
 

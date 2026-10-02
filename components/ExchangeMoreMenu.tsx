@@ -68,7 +68,7 @@ export default function ExchangeMoreMenu({
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen(true)}
-        className={`-mr-2.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-text-2 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+        className={`-mr-3 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-text-2 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
       >
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
           <circle cx="12" cy="5" r="1.7" />
@@ -90,7 +90,7 @@ export default function ExchangeMoreMenu({
             onClick={() => setOpen(false)}
             className="absolute inset-0 bg-black/40"
           />
-          <div className="relative rounded-t-sheet bg-surface pb-[max(10px,env(safe-area-inset-bottom))] pt-2.5">
+          <div className="relative rounded-t-sheet bg-surface pb-[max(10px,env(safe-area-inset-bottom))] pt-3">
             <span aria-hidden="true" className="mx-auto mb-2 block h-1 w-9 rounded-full bg-border-2" />
             <ReportButton targetType="EXCHANGE_POST" targetId={postId} trigger="menu" onDone={() => setOpen(false)} />
             <button
@@ -113,11 +113,11 @@ export default function ExchangeMoreMenu({
               </span>
               {authorNickname ? `${authorNickname}님 차단하기` : "이 사용자 차단하기"}
             </button>
-            <div className="mx-3.5 my-1.5 h-px bg-border" />
+            <div className="mx-4 my-2 h-px bg-border" />
             <button
               type="button"
               onClick={() => setOpen(false)}
-              className={`mx-3.5 flex min-h-12 w-[calc(100%-28px)] items-center justify-center rounded-control border border-border-2 bg-white text-body-l font-extrabold text-text-2 ${PRESS_OUTLINE} ${FOCUS_RING}`}
+              className={`mx-4 flex min-h-12 w-[calc(100%-28px)] items-center justify-center rounded-control border border-border-2 bg-white text-body-l font-extrabold text-text-2 ${PRESS_OUTLINE} ${FOCUS_RING}`}
             >
               닫기
             </button>
@@ -150,7 +150,7 @@ export default function ExchangeMoreMenu({
               </p>
             )}
 
-            <div className="mt-3.5 flex gap-2">
+            <div className="mt-4 flex gap-2">
               <button
                 type="button"
                 onClick={() => setConfirmingBlock(false)}

@@ -45,7 +45,7 @@ export function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: 
     <Link
       href={`/sellers/${sellerId}`}
       onNavigate={markNavForward}
-      className={`mt-3.5 flex items-center gap-2.5 rounded-card border border-border p-card ${FOCUS_RING}`}
+      className={`mt-4 flex items-center gap-3 rounded-card border border-border p-card ${FOCUS_RING}`}
     >
       <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary-soft font-display text-body font-extrabold text-primary">
         {nickname.slice(0, 1).toUpperCase()}
@@ -53,7 +53,7 @@ export function SellerRow({ sellerId, nickname }: { sellerId: string; nickname: 
       <span className="min-w-0 flex-1">
         <span className="block truncate text-body font-extrabold text-text-1">{nickname}</span>
         {levelLabel && (
-          <TrustLevelBadge level={level} className="mt-0.5 block w-fit text-label text-text-3">
+          <TrustLevelBadge level={level} className="mt-1 block w-fit text-label text-text-3">
             {levelLabel}
           </TrustLevelBadge>
         )}
@@ -91,7 +91,7 @@ export function MobileDetailTabs({
                 onClick={() => setPickedTab(name)}
                 role="tab"
                 aria-selected={on}
-                className={`-mb-px whitespace-nowrap border-b-2 px-3.5 py-3 text-body transition-colors ${FOCUS_RING} ${
+                className={`-mb-px whitespace-nowrap border-b-2 px-4 py-3 text-body transition-colors ${FOCUS_RING} ${
                   on ? "border-primary font-extrabold text-text-1" : "border-transparent font-medium text-text-2"
                 }`}
               >
@@ -109,19 +109,19 @@ export function MobileDetailTabs({
             {/* 확정된 사실만 적는다 — 기간·조건 같은 숫자는 운영정책이 정본이라 여기서 새로 만들지 않는다. */}
             {/* 상단 선은 뺐다(#482) — 탭 밑줄 바로 아래라 겹선으로 읽혔다. 행 사이·하단만 긋는다. */}
             <dl className="divide-y divide-border border-b border-border">
-              <div className="py-2.5">
+              <div className="py-3">
                 <dt className="text-body-s font-extrabold text-text-1">배송비</dt>
                 <dd className="mt-1 text-body-s leading-relaxed text-text-2">
                   판매자가 부담해요. 구매자가 따로 낼 배송비는 없어요.
                 </dd>
               </div>
-              <div className="py-2.5">
+              <div className="py-3">
                 <dt className="text-body-s font-extrabold text-text-1">받는 주소</dt>
                 <dd className="mt-1 text-body-s leading-relaxed text-text-2">
                   가격 제안 전에 등록해요. 거래가 성사되면 등록한 주소로 판매자가 보내드려요.
                 </dd>
               </div>
-              <div className="py-2.5">
+              <div className="py-3">
                 <dt className="text-body-s font-extrabold text-text-1">환불·분쟁</dt>
                 <dd className="mt-1 text-body-s leading-relaxed text-text-2">
                   기준과 절차는 운영정책을 따라요.
@@ -154,7 +154,7 @@ export function MobileDetailTabs({
                 값이 오른쪽 끝에 붙어 라벨과 값 사이가 줄마다 다르게 벌어졌고, 「S급 (미개봉/신품급)」
                 처럼 긴 값은 두 줄로 접히며 정렬이 무너졌다. 줄마다 긋던 구분선은 행간이 대신한다. */}
             <dl
-              className={`${description ? "mt-row" : ""} grid grid-cols-[88px_1fr] gap-x-3 gap-y-3.5 text-body-s`}
+              className={`${description ? "mt-row" : ""} grid grid-cols-[88px_1fr] gap-x-3 gap-y-4 text-body-s`}
             >
               {specRows.map((row) => (
                 <Fragment key={row.label}>

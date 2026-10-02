@@ -31,14 +31,14 @@ export default function OfferCounts({
   const icon = size === "md" ? 15 : 14;
 
   return (
-    <span className="flex shrink-0 items-center gap-3.5 text-text-2">
+    <span className="flex shrink-0 items-center gap-4 text-text-2">
       {offerCount > 0 && (
-        <span className="inline-flex items-center gap-1.5 text-label font-bold tabular-nums">
+        <span className="inline-flex items-center gap-2 text-label font-bold tabular-nums">
           <PeopleIcon size={icon} />
           {offerCount}명
         </span>
       )}
-      <span className="inline-flex items-center gap-1.5 text-label font-bold tabular-nums">
+      <span className="inline-flex items-center gap-2 text-label font-bold tabular-nums">
         <HeartIcon size={icon} />
         {wishlistCount}
       </span>

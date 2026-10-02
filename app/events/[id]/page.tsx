@@ -87,13 +87,13 @@ export default async function EventFeedPage({
         </div>
 
         {event.status === "CANCELLED" && (
-          <p className="mx-gutter mt-3 rounded-card bg-surface-2 px-3.5 py-3 text-body-s text-text-1 sm:mx-0">
+          <p className="mx-gutter mt-3 rounded-card bg-surface-2 px-4 py-3 text-body-s text-text-1 sm:mx-0">
             <b className="font-bold">휴방·취소된 회차예요.</b> 새 교환글은 올릴 수 없어요.
           </p>
         )}
 
         {feed && feed.artists.length > 0 && (
-          <nav aria-label="스타 필터" className="flex gap-1.5 overflow-x-auto border-b border-border px-gutter py-2.5 sm:px-0">
+          <nav aria-label="스타 필터" className="flex gap-2 overflow-x-auto border-b border-border px-gutter py-3 sm:px-0">
             <FilterChip href={`/events/${id}`} on={selected === null}>
               전체 {feed.totalElements}
             </FilterChip>
@@ -140,7 +140,7 @@ export default async function EventFeedPage({
                 교환글 등록
               </NavLink>
             ) : (
-              <p className="rounded-card bg-surface-2 px-3 py-3.5 text-center text-body-s font-semibold text-text-2">
+              <p className="rounded-card bg-surface-2 px-3 py-4 text-center text-body-s font-semibold text-text-2">
                 {writeWindow === "tooEarly"
                   ? "교환글은 행사 전날 낮 12시부터 올릴 수 있어요."
                   : "교환글을 올릴 수 있는 시간이 지났어요."}
@@ -159,7 +159,7 @@ function FilterChip({ href, on, children }: { href: string; on: boolean; childre
       href={href}
       aria-current={on ? "true" : undefined}
       /* 선택된 칩(보라)에는 눌림 배경을 주지 않는다 — 선택 결과와 눌림이 섞인다(#720). */
-      className={`shrink-0 rounded-control border px-2.5 py-1.5 text-label font-bold ${FOCUS_RING} ${
+      className={`shrink-0 rounded-control border px-3 py-2 text-label font-bold ${FOCUS_RING} ${
         on ? "border-primary bg-primary text-white" : `border-border-2 text-text-2 ${PRESS_CHIP}`
       }`}
     >

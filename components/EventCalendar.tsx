@@ -47,7 +47,7 @@ export default function EventCalendar({
   return (
     <>
       <div className="px-gutter pt-3 sm:px-0">
-        <div className="mb-1.5 grid grid-cols-7">
+        <div className="mb-2 grid grid-cols-7">
           {DOW.map((d, i) => (
             <span
               key={d}
@@ -72,7 +72,7 @@ export default function EventCalendar({
                 onClick={() => setSelected(key)}
                 aria-pressed={on}
                 aria-label={`${day.getMonth() + 1}월 ${day.getDate()}일${count > 0 ? ` 행사 ${count}건` : ""}`}
-                className={`rounded-control py-1.5 ${FOCUS_RING} ${on ? "bg-primary text-white" : ""}`}
+                className={`rounded-control py-2 ${FOCUS_RING} ${on ? "bg-primary text-white" : ""}`}
               >
                 <span
                   className={`block font-display text-body ${

@@ -104,9 +104,9 @@ export default function SellerListingActions({
   const mainClass = `flex ${height} flex-1 items-center justify-center ${radius} border-[1.5px] border-text-1 bg-surface ${viewport === "desktop" ? "text-body" : "text-body"} font-extrabold text-text-1 transition-colors hover:bg-surface-2 disabled:opacity-45 ${FOCUS_RING}`;
 
   return (
-    <div className={viewport === "desktop" ? "mt-5 border-t border-border pt-5" : "mt-3.5 border-t border-border pt-3"}>
+    <div className={viewport === "desktop" ? "mt-5 border-t border-border pt-5" : "mt-4 border-t border-border pt-3"}>
       {/* 지금 무엇을 할 수 있는지 한 줄로. 잠긴 이유를 말해 주지 않으면 버튼이 왜 없는지 알 수 없다. */}
-      <p className="mb-2.5 text-label leading-relaxed text-text-3">
+      <p className="mb-3 text-label leading-relaxed text-text-3">
         {isInstant ? (
           <>내가 올린 판매글이에요 · 판매 중에는 언제든 가격을 바꿀 수 있어요</>
         ) : priceLocked ? (
@@ -254,14 +254,14 @@ function PriceEditDialog({
             autoFocus
             value={value}
             onChange={(e) => setValue(e.target.value.replace(/[^\d]/g, ""))}
-            className={`mt-1.5 h-12 w-full rounded-control border border-border px-3.5 font-display text-title-s font-bold tabular-nums text-text-1 outline-none transition-colors focus:border-primary ${FOCUS_RING}`}
+            className={`mt-2 h-12 w-full rounded-control border border-border px-4 font-display text-title-s font-bold tabular-nums text-text-1 outline-none transition-colors focus:border-primary ${FOCUS_RING}`}
           />
         </label>
-        <p className="mt-1.5 text-caption text-text-3">
+        <p className="mt-2 text-caption text-text-3">
           {formatKRW(MIN_LISTING_PRICE)} 이상 · {PRICE_UNIT.toLocaleString()}원 단위
         </p>
 
-        {error && <p className="mt-2.5 text-label font-bold text-accent">{error}</p>}
+        {error && <p className="mt-3 text-label font-bold text-accent">{error}</p>}
 
         <button
           type="button"

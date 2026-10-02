@@ -263,7 +263,7 @@ export default function Header() {
               placeholder="스타, 멤버, 앨범 검색..."
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              className={`w-full rounded-control border border-border bg-bg py-2 pl-9 pr-3.5 text-body outline-none focus:border-primary ${FOCUS_RING}`}
+              className={`w-full rounded-control border border-border bg-bg py-2 pl-9 pr-4 text-body outline-none focus:border-primary ${FOCUS_RING}`}
             />
           </form>
 
@@ -273,7 +273,7 @@ export default function Header() {
                 key={link.label}
                 href={link.href}
                 onClick={closeMenu}
-                className={`rounded-control px-2 py-2.5 text-body font-semibold text-text-2 transition-colors hover:bg-surface-2 hover:text-text-1 ${FOCUS_RING}`}
+                className={`rounded-control px-2 py-3 text-body font-semibold text-text-2 transition-colors hover:bg-surface-2 hover:text-text-1 ${FOCUS_RING}`}
               >
                 {link.label}
               </Link>
@@ -295,7 +295,7 @@ export default function Header() {
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className={`rounded-control border border-border-2 bg-white px-4 py-1.5 text-body font-bold text-text-2 ${FOCUS_RING}`}
+                    className={`rounded-control border border-border-2 bg-white px-4 py-2 text-body font-bold text-text-2 ${FOCUS_RING}`}
                   >
                     로그아웃
                   </button>

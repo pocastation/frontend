@@ -31,7 +31,7 @@ export function RankNumber({ index }: { index: number }) {
   );
 }
 
-export const ROW_CLASS = "flex w-full items-center gap-2.5 border-b border-border py-2.5 text-left";
+export const ROW_CLASS = "flex w-full items-center gap-3 border-b border-border py-3 text-left";
 
 export function AuctionRow({ auction, index }: { auction: AuctionResponse; index: number }) {
   return (

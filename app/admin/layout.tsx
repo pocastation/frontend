@@ -200,7 +200,7 @@ const NAV_GROUPS: NavGroup[] = [
 ];
 
 function NavLink({ item, active }: { item: NavItem; active: boolean }) {
-  const base = "flex items-center gap-2.5 rounded-control px-2.5 py-2 text-body font-bold transition-colors";
+  const base = "flex items-center gap-3 rounded-control px-3 py-2 text-body font-bold transition-colors";
   if (!item.ready) {
     return (
       <span
@@ -210,7 +210,7 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
       >
         {item.icon}
         <span className="flex-1">{item.label}</span>
-        <span className="rounded-control bg-surface-2 px-1.5 py-0.5 text-caption font-extrabold text-text-3">준비 중</span>
+        <span className="rounded-control bg-surface-2 px-2 py-1 text-caption font-extrabold text-text-3">준비 중</span>
       </span>
     );
   }
@@ -302,10 +302,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <div className="flex gap-6">
         <aside className="hidden w-[220px] shrink-0 lg:block">
           <div className="sticky top-20 rounded-card border border-border bg-surface p-2">
-            <p className="px-2.5 pb-1.5 pt-2 text-caption font-extrabold tracking-wide text-primary">POCASTATION ADMIN</p>
+            <p className="px-3 pb-2 pt-2 text-caption font-extrabold tracking-wide text-primary">POCASTATION ADMIN</p>
             {NAV_GROUPS.map((group) => (
               <div key={group.title}>
-                <p className="px-2.5 pb-1.5 pt-2.5 text-caption font-extrabold text-text-3">{group.title}</p>
+                <p className="px-3 pb-2 pt-3 text-caption font-extrabold text-text-3">{group.title}</p>
                 <nav aria-label={`${group.title} 메뉴`} className="flex flex-col">
                   {group.items.map((item) => (
                     <NavLink key={item.href} item={item} active={item.ready && isActive(item.href)} />
@@ -330,7 +330,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <h2 id="admin-mobile-menu-title" className="text-title font-extrabold">전체 메뉴</h2>
             {NAV_GROUPS.map((group) => (
               <section key={group.title} className="mt-5">
-                <h3 className="mb-1 px-2.5 text-label font-bold text-text-3">{group.title}</h3>
+                <h3 className="mb-1 px-3 text-label font-bold text-text-3">{group.title}</h3>
                 <nav aria-label={`${group.title} 메뉴`} onClick={(event) => { if ((event.target as HTMLElement).closest("a")) setMenuPath(null); }}>
                   {group.items.map((item) => <NavLink key={item.href} item={item} active={item.ready && isActive(item.href)} />)}
                 </nav>

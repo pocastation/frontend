@@ -41,11 +41,13 @@ function RowShell({
   label,
   value,
   badge,
+  badgeLabel = "새 소식",
   unit = "건",
 }: {
   label: string;
   value?: number;
   badge?: number;
+  badgeLabel?: string;
   unit?: string;
 }) {
   return (
@@ -53,7 +55,7 @@ function RowShell({
       <span className="text-body-l font-medium text-text-1">{label}</span>
       <span className="inline-flex shrink-0 items-center gap-2">
         {badge ? (
-          <span aria-label={`확인이 필요한 항목 ${badge}건`} className={`${LABEL_STRONG} tabular-nums`}>새 소식 {badge}</span>
+          <span aria-label={`확인이 필요한 항목 ${badge}건`} className={`${LABEL_STRONG} tabular-nums`}>{badgeLabel} {badge}</span>
         ) : null}
         {value != null && <span className="text-body font-semibold tabular-nums text-text-1">{value}<span className="ml-1 text-label font-normal text-text-2">{unit}</span></span>}
         <span className="inline-flex text-text-3">
@@ -68,18 +70,20 @@ function TabRow({
   label,
   value,
   badge,
+  badgeLabel,
   unit,
   onClick,
 }: {
   label: string;
   value?: number;
   badge?: number;
+  badgeLabel?: string;
   unit?: string;
   onClick: () => void;
 }) {
   return (
     <button type="button" onClick={onClick} className={`block w-full rounded-control ${PRESS_ROW} ${FOCUS_RING}`}>
-      <RowShell label={label} value={value} badge={badge} unit={unit} />
+      <RowShell label={label} value={value} badge={badge} badgeLabel={badgeLabel} unit={unit} />
     </button>
   );
 }
@@ -109,6 +113,7 @@ export default function MobileMypageMenu({
   counts,
   purchaseActionCount,
   shipmentActionCount,
+  exchangePendingCount = 0,
   pendingAddress,
   onSelectTab,
   onOpenAddress,
@@ -124,6 +129,7 @@ export default function MobileMypageMenu({
   purchaseActionCount: number;
   /** 판매 건 중 발송이 필요한 수. */
   shipmentActionCount: number;
+  exchangePendingCount?: number;
   /** 배송지가 비어 있는 결제완료 주문 — 있으면 목록보다 먼저 세운다. */
   pendingAddress: { auctionId: number; title: string } | null;
   onSelectTab: (tab: MypageTab) => void;
@@ -229,6 +235,13 @@ export default function MobileMypageMenu({
         <TabRow label="판매 내역" value={counts.sellHistory} badge={shipmentActionCount} onClick={() => onSelectTab("sellHistory")} />
       </Group>
 
+      {/* 교환(#784). 차단은 교환에서만 적용돼 이 묶음에 둔다 — 판매·계정 쪽에 두면 거래까지 막는 것으로 읽힌다. */}
+      <GroupHead>교환</GroupHead>
+      <Group>
+        <TabRow label="교환 내역" badge={exchangePendingCount} badgeLabel="새 신청" onClick={() => onSelectTab("exchanges")} />
+        <LinkRow label="교환 차단 목록" href="/mypage/exchange-blocks" />
+      </Group>
+
       <GroupHead>계정 관리</GroupHead>
       <Group>
         {/* 내 정보는 맨 위 프로필 줄이 맡는다 — 같은 화면으로 가는 줄을 두 번 두지 않는다(#782).
@@ -237,8 +250,8 @@ export default function MobileMypageMenu({
         <TabRow label="배송지 관리" onClick={() => onSelectTab("shipping")} />
         <TabRow label="정산계좌" onClick={() => onSelectTab("settlement")} />
         <TabRow label="환불계좌" onClick={() => onSelectTab("refund")} />
-        {/* 교환에서만 적용되는 차단이라 「계정」에 둔다 — 거래 그룹에 넣으면 판매까지 막는 것으로 읽힌다. */}
-        <LinkRow label="교환 차단 목록" href="/mypage/exchange-blocks" />
+        {/* 선택 동의 확인·철회(#784). 한 줄짜리 「설정」 묶음을 따로 만들지 않고 계정 관리 맨 아래에 둔다. */}
+        <TabRow label="수신 동의" onClick={() => onSelectTab("consents")} />
         {isAdmin && (
           <Link href="/admin" className={`mt-2 flex min-h-[49px] items-center gap-2 rounded-control border-t border-border pt-2 text-body-l font-medium text-primary ${PRESS_ROW} ${FOCUS_RING}`}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

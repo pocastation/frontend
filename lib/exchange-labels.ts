@@ -1,5 +1,6 @@
 import { SOURCE_LABEL } from "@/lib/labels";
-import type { ExchangeItemView, ExchangeSlotView } from "@/lib/types";
+import type { StatusTone } from "@/components/StatusBadge";
+import type { ExchangeItemView, ExchangeRequestStatus, ExchangeSlotView, ExchangeStatus } from "@/lib/types";
 
 /**
  * 교환글 문구 조립. 서버는 값만 내리고 사람이 읽는 문장은 화면이 만든다.
@@ -105,4 +106,33 @@ export function isClosingSoon(expiresAt: string, now: number = Date.now()): bool
  */
 export function isClosed(expiresAt: string, now: number = Date.now()): boolean {
   return new Date(expiresAt).getTime() <= now;
+}
+
+/**
+ * 교환글·교환 신청 상태를 마이 「교환 내역」에서 부르는 말(#784). 상태는 상자 없이 글자로 말한다(#767) —
+ * 진행 중인 것은 잉크 굵게, 끝난 것은 연한 회색.
+ *
+ * <p>제재(SUSPENDED)를 빨강으로 두지 않는다. 빨강은 「지금 손댈 것」인데, 제재된 글은 작성자가 할 수 있는
+ * 일이 없다.
+ */
+export const EXCHANGE_STATUS_TEXT: Record<ExchangeStatus, { label: string; tone: StatusTone }> = {
+  OPEN: { label: "모집 중", tone: "ok" },
+  MATCHED: { label: "교환 확정", tone: "ok" },
+  COMPLETED: { label: "교환 완료", tone: "muted" },
+  EXPIRED: { label: "기간 끝남", tone: "muted" },
+  CANCELLED: { label: "내린 글", tone: "muted" },
+  SUSPENDED: { label: "운영 정책으로 내려감", tone: "muted" },
+};
+
+export const EXCHANGE_REQUEST_STATUS_TEXT: Record<ExchangeRequestStatus, { label: string; tone: StatusTone }> = {
+  PENDING: { label: "답을 기다리는 중", tone: "neutral" },
+  ACCEPTED: { label: "수락됨", tone: "ok" },
+  REJECTED: { label: "거절됨", tone: "muted" },
+  WITHDRAWN: { label: "철회함", tone: "muted" },
+};
+
+/** 「원빈 → 소희 외 1」. 받고 싶은 포카가 여럿이면 첫 하나만 이름으로 부른다. */
+export function tradeLine(have: ExchangeItemView | null, wants: ExchangeItemView[]): { have: string; wants: string } {
+  const first = wants[0] ?? null;
+  return { have: itemName(have), wants: wants.length > 1 ? `${itemName(first)} 외 ${wants.length - 1}` : itemName(first) };
 }

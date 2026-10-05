@@ -1458,3 +1458,44 @@ export type ExchangeBlock = {
 export type ExchangeBlockListResponse = {
   content: ExchangeBlock[];
 };
+
+// 마이 「교환 내역」(#784). 백엔드 #557 `GET /api/members/me/exchange-posts`·`exchange-requests`.
+export type MyExchangePost = {
+  postId: number;
+  eventId: number;
+  eventName: string;
+  eventDate: string; // YYYY-MM-DD
+  status: ExchangeStatus;
+  thumbnailUrl: string | null;
+  have: ExchangeItemView | null;
+  wants: ExchangeItemView[];
+  pendingRequestCount: number;
+  expiresAt: string;
+  createdAt: string;
+};
+
+export type MyExchangeRequest = {
+  requestId: number;
+  status: ExchangeRequestStatus;
+  createdAt: string;
+  // 수락됐고 대화가 남아 있을 때만 true. 대화는 post.postId로 들어간다.
+  threadAvailable: boolean;
+  // 대상 글 행이 없으면 null(지금은 글을 지우는 경로가 없어 방어용). 제재된 글은 썸네일만 null.
+  post: {
+    postId: number;
+    eventId: number;
+    eventName: string;
+    eventDate: string;
+    status: ExchangeStatus;
+    thumbnailUrl: string | null;
+    have: ExchangeItemView | null;
+    wants: ExchangeItemView[];
+    authorNickname: string | null;
+  } | null;
+};
+
+export type MyExchangePage<T> = { content: T[]; page: number; size: number; totalElements: number; totalPages: number };
+
+// 마이 「수신 동의」(#784). 백엔드 #558 `GET`·`PUT /api/members/me/consent-preferences`.
+export type OptionalConsentType = "PERSONAL_INFO_OPTIONAL" | "MARKETING";
+export type ConsentPreference = { type: OptionalConsentType; agreed: boolean; changedAt: string | null };

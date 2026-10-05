@@ -14,6 +14,8 @@ import PaymentMethodManager from "@/components/PaymentMethodManager";
 import BankAccountManager from "@/components/BankAccountManager";
 import ProfileTab from "@/components/ProfileTab";
 import SettingsTab from "@/components/SettingsTab";
+import MyExchangesTab, { type ExchangeListMode } from "@/components/MyExchangesTab";
+import ConsentPreferencesTab from "@/components/ConsentPreferencesTab";
 import BadgeChips from "@/components/BadgeChips";
 import DeliveryAddressModal from "@/components/DeliveryAddressModal";
 import ReviewComposerModal from "@/components/ReviewComposerModal";
@@ -48,8 +50,7 @@ import type {
   OrderStatus,
   ReviewableOrderResponse,
   SoldOrderResponse,
-  WishlistListResponse,
-} from "@/lib/types";
+  WishlistListResponse, MyExchangePage, MyExchangePost } from "@/lib/types";
 // 값이라 type import와 나눈다 — 「아직 발송 전인가」는 서버와 같은 이름의 판정이다.
 import { isBeforeShipment } from "@/lib/types";
 import IdentityVerificationPanel from "@/components/IdentityVerificationPanel";
@@ -228,6 +229,8 @@ const ACCOUNT_NAV: { key: Tab; label: string; icon: () => ReactNode; hidden?: bo
   // 환불계좌를 정산계좌 바로 아래 둔다 — 둘은 「돈이 오가는 계좌」로 같은 묶음이고, 나란히
   // 있어야 「왜 둘이지?」에 화면이 스스로 답한다(#431).
   { key: "refund", label: "환불계좌", icon: BankIcon },
+  // 선택 동의 확인·철회(#784). 계정 관리 맨 아래 — 한 줄짜리 「설정」 묶음을 따로 두지 않는다.
+  { key: "consents", label: "수신 동의", icon: BadgeCheckIcon },
 ];
 
 // 아직 준비 중인 탭만 안내를 보여준다 — 현재 남은 스텁 없음(계정 설정은 회원 탈퇴로 실구현됨).
@@ -305,6 +308,25 @@ function MyPageBody() {
   const activeTab: Tab = tab ?? "dashboard";
   const [biddingFilter, setBiddingFilter] = useState<BiddingFilter>("live");
   const [purchaseFilter, setPurchaseFilter] = useState<PurchaseFilter>("auction");
+  // 교환 내역(#784) 위 탭과 건수. 건수는 목록 컴포넌트가 처음 읽을 때 올려준다.
+  const [exchangeMode, setExchangeMode] = useState<ExchangeListMode>("posts");
+  const [exchangeCounts, setExchangeCounts] = useState({ posts: 0, requests: 0 });
+  // 모바일 메뉴 「교환 내역」의 강조 라벨 — 모집 중인 내 글에 들어온 대기 신청 수(#784).
+  const [exchangePending, setExchangePending] = useState(0);
+  useEffect(() => {
+    if (!member) return;
+    let cancelled = false;
+    fetchWithAuth<MyExchangePage<MyExchangePost>>("/api/members/me/exchange-posts?page=0&size=100")
+      .then((page) => {
+        if (cancelled) return;
+        setExchangePending(page.content.filter((p) => p.status === "OPEN").reduce((sum, p) => sum + p.pendingRequestCount, 0));
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [member, fetchWithAuth]);
+
 
   // 탭 전환은 쿼리를 바꾸는 것으로 통일한다 — 그래야 모바일 앱바 뒤로·브라우저 뒤로가 살아 있고,
   // 지금 보고 있는 화면을 그대로 공유·북마크할 수 있다.
@@ -650,6 +672,7 @@ function MyPageBody() {
           }}
           purchaseActionCount={purchaseActionCount}
           shipmentActionCount={shipmentActionCount}
+          exchangePendingCount={exchangePending}
           pendingAddress={pendingAddress}
           onSelectTab={selectTab}
           onOpenAddress={openAddressModal}
@@ -717,10 +740,20 @@ function MyPageBody() {
           </nav>
 
           {/*
-            교환 차단 목록은 탭이 아니라 별도 라우트(`/mypage/exchange-blocks`)라 ACCOUNT_NAV에
-            넣을 수 없다. 모바일 메뉴에만 있어서 데스크탑에서는 주소를 직접 쳐야 닿았는데,
-            차단된 상대의 교환글이 「마이페이지에서 차단을 풀 수 있어요」라고 안내한다.
+            교환(#784). 교환 내역은 탭이고, 교환 차단 목록은 별도 라우트(`/mypage/exchange-blocks`)라 링크다.
+            차단된 상대의 교환글이 「마이페이지에서 차단을 풀 수 있어요」라고 안내하므로 데스크탑에도 둔다.
           */}
+          <p className="mt-2 px-3 pb-2 pt-2 text-caption font-extrabold text-text-3">교환</p>
+          <button
+            type="button"
+            onClick={() => selectTab("exchanges")}
+            className={`flex items-center gap-3 rounded-control px-3 py-2 text-left text-body font-bold transition-colors ${FOCUS_RING} ${
+              activeTab === "exchanges" ? "bg-surface-2 font-extrabold text-text-1" : "text-text-2 hover:bg-surface-2"
+            }`}
+          >
+            <ArchiveIcon />
+            교환 내역
+          </button>
           <Link
             href="/mypage/exchange-blocks"
             className={`mt-1 flex items-center gap-3 rounded-control px-3 py-2 text-body font-bold text-text-2 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
@@ -1007,6 +1040,29 @@ function MyPageBody() {
             <TabHead title="환불계좌" sub={<>거래가 취소되면 이 계좌로 돌려드려요.</>} />
             <div className="mt-5">
               <BankAccountManager purpose="refund" />
+            </div>
+          </>
+        ) : activeTab === "exchanges" ? (
+          <>
+            <TabHead title="교환 내역" sub={<>내가 쓴 교환글과 보낸 신청을 한곳에서 봐요.</>} />
+            <FilterChips
+              label="교환 내역 필터"
+              value={exchangeMode}
+              onChange={setExchangeMode}
+              options={[
+                { key: "posts", label: "내 교환글", count: exchangeCounts.posts },
+                { key: "requests", label: "보낸 신청", count: exchangeCounts.requests },
+              ]}
+            />
+            <div className="mt-2">
+              <MyExchangesTab mode={exchangeMode} onCounts={setExchangeCounts} />
+            </div>
+          </>
+        ) : activeTab === "consents" ? (
+          <>
+            <TabHead title="수신 동의" sub={<>가입 때 고른 선택 동의를 확인하고 바꿔요.</>} />
+            <div className="mt-5">
+              <ConsentPreferencesTab />
             </div>
           </>
         ) : activeTab === "settings" ? (

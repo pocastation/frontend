@@ -6,6 +6,7 @@ import TrustLevelBadge from "@/components/TrustLevelBadge";
 import type { ReactNode } from "react";
 import { FOCUS_RING, PRESS_ROW, PRESS_FADE, LABEL_STRONG } from "@/lib/ui";
 import type { MypageTab } from "@/lib/mypage-tabs";
+import { SUPPORT_LINKS } from "@/lib/mypage-tabs";
 
 /**
  * 모바일 마이 — 메뉴 목록 화면(디자인 시스템 킷 `MyPage`).
@@ -226,14 +227,16 @@ export default function MobileMypageMenu({
       <Group>
         <TabRow label="판매 중인 상품" value={counts.selling} onClick={() => onSelectTab("selling")} />
         <TabRow label="판매 내역" value={counts.sellHistory} badge={shipmentActionCount} onClick={() => onSelectTab("sellHistory")} />
-        <TabRow label="정산 계좌" onClick={() => onSelectTab("settlement")} />
       </Group>
 
       <GroupHead>계정 관리</GroupHead>
       <Group>
-        <TabRow label="내 정보" onClick={() => onSelectTab("profile")} />
+        {/* 내 정보는 맨 위 프로필 줄이 맡는다 — 같은 화면으로 가는 줄을 두 번 두지 않는다(#782).
+            정산·환불 계좌는 「돈이 오가는 계좌」 한 묶음으로 나란히 둔다(데스크탑 #431과 같은 순서).
+            회원 탈퇴는 메뉴가 아니라 내 정보 맨 아래 링크다. */}
         <TabRow label="배송지 관리" onClick={() => onSelectTab("shipping")} />
-        <TabRow label="계정 설정" onClick={() => onSelectTab("settings")} />
+        <TabRow label="정산계좌" onClick={() => onSelectTab("settlement")} />
+        <TabRow label="환불계좌" onClick={() => onSelectTab("refund")} />
         {/* 교환에서만 적용되는 차단이라 「계정」에 둔다 — 거래 그룹에 넣으면 판매까지 막는 것으로 읽힌다. */}
         <LinkRow label="교환 차단 목록" href="/mypage/exchange-blocks" />
         {isAdmin && (
@@ -246,6 +249,13 @@ export default function MobileMypageMenu({
             <span className="inline-flex text-text-3"><Chevron /></span>
           </Link>
         )}
+      </Group>
+
+      <GroupHead>고객지원</GroupHead>
+      <Group>
+        {SUPPORT_LINKS.map(({ href, label }) => (
+          <LinkRow key={href} label={label} href={href} />
+        ))}
       </Group>
 
       <div className="flex justify-end pt-row">

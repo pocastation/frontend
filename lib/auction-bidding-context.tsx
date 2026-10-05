@@ -141,24 +141,26 @@ export function AuctionBiddingProvider({
 
   // 내 제안 조회(#480) — 로그인했고 남의 매물일 때만. 실패해도 제안 흐름은 막지 않는다
   // (모르면 「제안하기」로 보일 뿐이고, 서버가 어차피 수정으로 처리한다 §2.1).
-  const refreshMyOffer = useCallback(async () => {
-    try {
-      setMyOffer(await fetchWithAuth<MyOfferResponse | null>(`/api/auctions/${auctionId}/bids/me`));
-    } catch {
-      // 조회 실패는 조용히 — 틀린 상태를 보여주느니 안 보여준다.
-    }
-  }, [auctionId, fetchWithAuth]);
+  const refreshMyOffer = useCallback(
+    () =>
+      fetchWithAuth<MyOfferResponse | null>(`/api/auctions/${auctionId}/bids/me`)
+        .then((offer) => {
+          setMyOffer(offer);
+          // 내 제안을 알게 되면, 아직 손대지 않은 입력값을 그 금액으로 맞춘다 — 「바꾸기」 시트가
+          // 최소가가 아니라 지금 제안에서 출발해야 수정이라는 사실이 몸으로 읽힌다.
+          // effect로 myOffer를 지켜보다 setAmount하면 렌더가 한 번 더 돈다. 값이 들어오는 곳이 여기뿐이라 여기서 맞춘다.
+          if (offer && !amountTouchedRef.current) setAmount(offer.amount);
+        })
+        .catch(() => {
+          // 조회 실패는 조용히 — 틀린 상태를 보여주느니 안 보여준다.
+        }),
+    [auctionId, fetchWithAuth],
+  );
 
   useEffect(() => {
     if (!member || isOwnAuction) return;
     void refreshMyOffer();
   }, [member, isOwnAuction, refreshMyOffer]);
-
-  // 내 제안을 알게 되면, 아직 손대지 않은 입력값을 그 금액으로 맞춘다 — 「바꾸기」 시트가
-  // 최소가가 아니라 지금 제안에서 출발해야 수정이라는 사실이 몸으로 읽힌다.
-  useEffect(() => {
-    if (myOffer && !amountTouchedRef.current) setAmount(myOffer.amount);
-  }, [myOffer]);
 
   // 취소 모달이 철회를 끝냈을 때 — 내 제안이 사라지고, 인원수도 하나 줄어든다(§2.9).
   const onOfferWithdrawn = useCallback(() => {

@@ -26,7 +26,6 @@ import { type StatusTone } from "@/components/StatusIcon";
 import { formatDateTimeKST, formatKRW, formatTimeLeft } from "@/lib/format";
 import { cancellationLocksAt } from "@/lib/fees";
 import {
-  AUCTION_STATUS_TONE,
   AUCTION_STATUS_LABEL,
   SELLER_AUCTION_STATUS_LABEL,
   REFUND_REASON_LABEL,
@@ -66,8 +65,7 @@ import {
   resolveTabQuery,
   type BiddingFilter,
   type MypageTab,
-  type PurchaseFilter,
-} from "@/lib/mypage-tabs";
+  type PurchaseFilter, SUPPORT_LINKS } from "@/lib/mypage-tabs";
 
 const SELLING_TAB_STATUSES = new Set<AuctionResponse["status"]>([
   "PENDING_REVIEW",
@@ -195,15 +193,6 @@ function BankIcon() {
     </svg>
   );
 }
-
-function GearIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
-    </svg>
-  );
-}
 function LogoutIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -239,7 +228,6 @@ const ACCOUNT_NAV: { key: Tab; label: string; icon: () => ReactNode; hidden?: bo
   // 환불계좌를 정산계좌 바로 아래 둔다 — 둘은 「돈이 오가는 계좌」로 같은 묶음이고, 나란히
   // 있어야 「왜 둘이지?」에 화면이 스스로 답한다(#431).
   { key: "refund", label: "환불계좌", icon: BankIcon },
-  { key: "settings", label: "계정 설정", icon: GearIcon },
 ];
 
 // 아직 준비 중인 탭만 안내를 보여준다 — 현재 남은 스텁 없음(계정 설정은 회원 탈퇴로 실구현됨).
@@ -719,7 +707,7 @@ function MyPageBody() {
                 type="button"
                 onClick={() => selectTab(key)}
                 className={`flex items-center gap-3 rounded-control px-3 py-2 text-left text-body font-bold transition-colors ${FOCUS_RING} ${
-                  activeTab === key ? "bg-surface-2 font-extrabold text-text-1" : "text-text-2 hover:bg-surface-2"
+                  (activeTab === key || (key === "profile" && activeTab === "settings")) ? "bg-surface-2 font-extrabold text-text-1" : "text-text-2 hover:bg-surface-2"
                 }`}
               >
                 <Icon />
@@ -740,6 +728,20 @@ function MyPageBody() {
             <BlockIcon />
             교환 차단 목록
           </Link>
+
+          {/* 고객지원(#782). 모바일 마이 메뉴와 같은 묶음을 둔다 — 문의 내역은 푸터에만 있었다. */}
+          <p className="mt-2 px-3 pb-2 pt-2 text-caption font-extrabold text-text-3">고객지원</p>
+          <nav aria-label="고객지원 메뉴" className="flex flex-col">
+            {SUPPORT_LINKS.map(({ href, label }) => (
+              <Link
+                key={href}
+                href={href}
+                className={`rounded-control px-3 py-2 text-body font-bold text-text-2 transition-colors hover:bg-surface-2 ${FOCUS_RING}`}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
         </div>
 
         <button
@@ -967,6 +969,17 @@ function MyPageBody() {
               <h2 className="text-body font-bold text-text-1">본인인증</h2>
               <IdentityVerificationPanel className="mt-3" />
             </div>
+            {/* 탈퇴는 메뉴 한 줄이 아니라 계정 화면 맨 아래 작은 링크로 둔다(#782). 되돌릴 수 없는 동작을
+                눈에 띄는 자리에 두지 않는다. 누르면 안내·확인을 거치는 탈퇴 화면이 열린다. */}
+            <div className="mt-section">
+              <button
+                type="button"
+                onClick={() => selectTab("settings")}
+                className={`min-h-11 text-label text-text-3 underline underline-offset-2 ${FOCUS_RING}`}
+              >
+                회원 탈퇴
+              </button>
+            </div>
           </>
         ) : activeTab === "shipping" ? (
           <>
@@ -998,7 +1011,7 @@ function MyPageBody() {
           </>
         ) : activeTab === "settings" ? (
           <>
-            <TabHead title="계정 설정" sub={<>계정을 관리해요.</>} />
+            <TabHead title="회원 탈퇴" sub={<>탈퇴하기 전에 아래 내용을 확인해 주세요.</>} />
             <div className="mt-5">
               <SettingsTab />
             </div>
@@ -1069,7 +1082,7 @@ function MyPageBody() {
     <>
       {/* 뒤로는 히스토리가 아니라 목록 고정이다 — 알림·배너 딥링크로 곧장 들어온 경우에도
           나가는 길이 사이트 밖이 아니라 마이 목록이어야 한다. */}
-      <MobilePageHead title={TAB_TITLE[activeTab]} backHref="/mypage" />
+      <MobilePageHead title={TAB_TITLE[activeTab]} backHref={activeTab === "settings" ? "/mypage?tab=profile" : "/mypage"} />
       {body}
     </>
   );

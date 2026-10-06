@@ -35,9 +35,9 @@ export default function SettingsTab() {
 
   return (
     <div className="max-w-xl">
-      <section className="rounded-card border border-accent/30 bg-surface p-card sm:p-5">
-        <h2 className="font-display text-body font-extrabold text-accent">회원 탈퇴</h2>
-        <div className="mt-3 space-y-2 text-body text-text-2">
+      {/* 제목은 앱바(모바일)와 탭 머리(데스크탑)가 맡는다 — 화면 안에서 같은 말을 반복하지 않는다. */}
+      <section aria-label="회원 탈퇴">
+        <div className="space-y-2 text-body text-text-2">
           <p>탈퇴하면 계정을 다시 사용할 수 없고, 되돌릴 수 없어요.</p>
           <ul className="ml-4 list-disc space-y-1 text-body-s text-text-3">
             <li>닉네임·이메일 등 개인정보는 파기돼요.</li>
@@ -47,7 +47,7 @@ export default function SettingsTab() {
         </div>
 
         <label htmlFor="withdraw-confirm" className="mt-4 block text-body-s font-bold text-text-2">
-          계속하려면 <span className="text-accent">탈퇴</span>라고 입력해 주세요.
+          계속하려면 <span className="font-extrabold text-text-1">탈퇴</span>라고 입력해 주세요.
         </label>
         <input
           id="withdraw-confirm"
@@ -62,7 +62,7 @@ export default function SettingsTab() {
           className={`mt-2 ${INPUT_CLASS}`}
         />
         {error && (
-          <p role="alert" className="mt-2 text-label font-semibold text-accent">
+          <p role="alert" className="mt-2 text-label font-semibold text-danger">
             {error}
           </p>
         )}
@@ -70,7 +70,7 @@ export default function SettingsTab() {
           type="button"
           onClick={handleWithdraw}
           disabled={!armed || isSubmitting}
-          className="mt-4 w-full rounded-control bg-accent px-4 py-3 text-body font-bold text-white transition-colors hover:bg-accent/90 disabled:cursor-not-allowed disabled:opacity-40"
+          className="mt-4 h-12 w-full rounded-control border border-danger bg-white px-4 text-body font-bold text-danger transition-colors active:bg-danger-soft disabled:cursor-not-allowed disabled:border-border-2 disabled:text-text-3"
         >
           {isSubmitting ? "처리 중..." : "회원 탈퇴"}
         </button>

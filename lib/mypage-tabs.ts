@@ -18,7 +18,9 @@ export type MypageTab =
   | "payment"
   | "settlement"
   | "refund"
-  | "settings";
+  | "settings"
+  | "exchanges"
+  | "consents";
 
 // 합쳐진 탭 안에서 어느 묶음을 보고 있는지.
 export type BiddingFilter = "live" | "all";
@@ -37,8 +39,19 @@ export const TAB_TITLE: Record<MypageTab, string> = {
   payment: "결제수단",
   settlement: "정산계좌",
   refund: "환불계좌",
-  settings: "계정 설정",
+  // 메뉴에서는 빠지고 내 정보 맨 아래 링크로만 들어온다(#782). 키는 기존 딥링크 호환으로 둔다.
+  settings: "회원 탈퇴",
+  exchanges: "교환 내역",
+  consents: "수신 동의",
 };
+
+/** 마이의 고객지원 묶음(#782). 모바일 메뉴와 데스크탑 사이드바가 같은 목록을 쓴다. */
+export const SUPPORT_LINKS: { href: string; label: string }[] = [
+  { href: "/inquiries", label: "1:1 문의 내역" },
+  { href: "/notices", label: "공지사항" },
+  { href: "/faq", label: "자주 묻는 질문" },
+  { href: "/guide", label: "이용 가이드" },
+];
 
 // /mypage?tab= 쿼리 검증용 — 존재하는 탭 키만 허용.
 //

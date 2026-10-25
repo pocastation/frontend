@@ -7,6 +7,7 @@ import PreProductionBar from "@/components/PreProductionBar";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import SiteTelemetry from "@/components/SiteTelemetry";
 import MetaPixel from "@/components/MetaPixel";
+import PageViewRecorder from "@/components/PageViewRecorder";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 import ServiceWorkerRegistrar from "@/components/pwa/ServiceWorkerRegistrar";
 import { AuthProvider } from "@/lib/auth-context";
@@ -164,6 +165,7 @@ export default function RootLayout({
         <InstallPrompt />
         <SiteTelemetry />
         <MetaPixel />
+        <PageViewRecorder />
       </body>
     </html>
   );

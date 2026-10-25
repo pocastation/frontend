@@ -1499,3 +1499,20 @@ export type MyExchangePage<T> = { content: T[]; page: number; size: number; tota
 // 마이 「수신 동의」(#784). 백엔드 #558 `GET`·`PUT /api/members/me/consent-preferences`.
 export type OptionalConsentType = "PERSONAL_INFO_OPTIONAL" | "MARKETING";
 export type ConsentPreference = { type: OptionalConsentType; agreed: boolean; changedAt: string | null };
+
+// 관리자 방문 통계(#795, BE #568).
+//
+// ⚠️ 두 숫자의 뜻이 다르다. `daily.visitors`는 그날 들어온 **서로 다른 사람 수**로 정확하다
+// (유입 장부가 사람·날짜당 한 줄). 반면 `paths`·`sources`의 합계는 **일별 수를 기간만큼 더한
+// 것**이라 같은 사람이 사흘 왔으면 셋으로 센다. 경로별 합계를 더해 「총 방문자」를 만들면
+// 한 사람이 세 화면을 봤을 때 셋이 되므로 `daily`와 어긋난다.
+export type AdminDailyVisitors = { date: string; visitors: number };
+export type AdminPathCount = { path: string; label: string; viewers: number };
+export type AdminSourceCount = { source: string; label: string; viewers: number };
+export type AdminPageViewStats = {
+  from: string;
+  to: string;
+  daily: AdminDailyVisitors[];
+  paths: AdminPathCount[];
+  sources: AdminSourceCount[];
+};

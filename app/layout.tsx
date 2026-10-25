@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import PreProductionBar from "@/components/PreProductionBar";
 import EmailVerificationBanner from "@/components/EmailVerificationBanner";
 import SiteTelemetry from "@/components/SiteTelemetry";
+import MetaPixel from "@/components/MetaPixel";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 import ServiceWorkerRegistrar from "@/components/pwa/ServiceWorkerRegistrar";
 import { AuthProvider } from "@/lib/auth-context";
@@ -16,6 +17,7 @@ import MobileTabBar from "@/components/mobile/MobileTabBar";
 import IdentityGateRedirect from "@/components/IdentityGateRedirect";
 import NavTransition from "@/components/NavTransition";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_TITLE, SITE_URL, X_HANDLE } from "@/lib/site";
+import { META_DOMAIN_VERIFICATION } from "@/lib/meta-pixel";
 // 본문 글꼴 Pretendard(OFL, #769). 가변 다이나믹 서브셋 CSS를 번들해 글꼴 조각을 우리 도메인에서
 // 내려준다 — 외부 CDN을 쓰지 않고, 페이지에 쓰인 글자의 조각만 받는다. 라이선스: /licenses/pretendard-OFL.txt
 import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
@@ -64,6 +66,10 @@ export const metadata: Metadata = {
     // 애플 접두어 메타만 읽기 때문에, 이게 없으면 홈 화면에서 열어도 주소창이 남는 기기가 생긴다.
     // 최신 iOS는 매니페스트의 display를 보므로 둘을 같이 두면 전 구간이 덮인다.
     "apple-mobile-web-app-capable": "yes",
+    // 페이스북 도메인 인증. 이게 없으면 애플의 앱 추적 제한 때문에 아이폰 이용자의 전환이
+    // 집계되지 않아 픽셀이 반쪽이 된다. 토큰이 없으면 태그를 넣지 않는다 — 빈 값을 내보내면
+    // Meta가 인증 실패로 읽는다.
+    ...(META_DOMAIN_VERIFICATION ? { "facebook-domain-verification": META_DOMAIN_VERIFICATION } : {}),
   },
 };
 
@@ -157,6 +163,7 @@ export default function RootLayout({
         <ServiceWorkerRegistrar />
         <InstallPrompt />
         <SiteTelemetry />
+        <MetaPixel />
       </body>
     </html>
   );

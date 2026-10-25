@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
-import ReportButton from "@/components/ReportButton";
+import ReportModal, { ReportSirenIcon } from "@/components/ReportModal";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useToast } from "@/lib/toast-context";
 import { FOCUS_RING, PRESS_OUTLINE, PRESS_ROW } from "@/lib/ui";
 
 /**
@@ -29,7 +30,12 @@ export default function ExchangeMoreMenu({
   const router = useRouter();
   const pathname = usePathname();
 
+  const toast = useToast();
+
   const [open, setOpen] = useState(false);
+  // 신고 모달은 시트 밖에서 이 컴포넌트가 쥔다(#787). 시트 안의 자식이 쥐고 있으면 시트가
+  // 닫히며 그 자식과 함께 언마운트돼, 「신고하기」를 눌러도 모달이 뜨지 않는다.
+  const [reporting, setReporting] = useState(false);
   const [confirmingBlock, setConfirmingBlock] = useState(false);
   const [blocking, setBlocking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,7 +98,23 @@ export default function ExchangeMoreMenu({
           />
           <div className="relative rounded-t-sheet bg-surface pb-[max(10px,env(safe-area-inset-bottom))] pt-3">
             <span aria-hidden="true" className="mx-auto mb-2 block h-1 w-9 rounded-full bg-border-2" />
-            <ReportButton targetType="EXCHANGE_POST" targetId={postId} trigger="menu" onDone={() => setOpen(false)} />
+            <button
+              type="button"
+              onClick={() => {
+                if (!accessToken) {
+                  router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+                  return;
+                }
+                setOpen(false);
+                setReporting(true);
+              }}
+              className={`flex min-h-[52px] w-full items-center gap-3 px-gutter text-left text-body-l font-bold text-text-1 hover:bg-surface-2 ${PRESS_ROW} ${FOCUS_RING}`}
+            >
+              <span className="text-text-2">
+                <ReportSirenIcon />
+              </span>
+              신고하기
+            </button>
             <button
               type="button"
               onClick={() => {
@@ -125,6 +147,17 @@ export default function ExchangeMoreMenu({
         </div>,
         document.body,
       )}
+
+      <ReportModal
+        targetType="EXCHANGE_POST"
+        targetId={postId}
+        open={reporting}
+        onClose={() => setReporting(false)}
+        onSubmitted={() =>
+          // 시트 줄에는 판매글 아이콘처럼 체크로 바꿔 보여줄 자리가 없다. 접수 사실은 토스트로 알린다.
+          toast.show({ variant: "success", text: "신고가 접수됐어요", sub: "운영팀이 검토한 뒤 필요한 조치를 해요." })
+        }
+      />
 
       {/*
         차단은 한 번만 묻는다. 확인 문구가 실제 효과를 말하고, 마지막 줄이 되돌릴 수 있다는 것을

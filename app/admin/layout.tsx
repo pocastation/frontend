@@ -162,6 +162,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/admin/auctions", label: "판매글 관리", icon: <ListingIcon />, ready: true },
       { href: "/admin/banner", label: "홈 배너", icon: <BannerIcon />, ready: true },
       { href: "/admin/pre-registrations", label: "사전예약 현황", icon: <ChartIcon />, ready: true },
+      { href: "/admin/analytics", label: "방문 통계", icon: <ChartIcon />, ready: true },
     ],
   },
   {

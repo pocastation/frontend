@@ -1516,16 +1516,3 @@ export type AdminPageViewStats = {
   paths: AdminPathCount[];
   sources: AdminSourceCount[];
 };
-
-// 홈에 띄우는 최근 교환글(#798, BE #570). 여러 행사가 섞여 내려오므로 행사 이름·날짜가 함께 온다.
-export type RecentExchangeItem = {
-  id: number;
-  eventId: number;
-  eventName: string | null;
-  eventDate: string | null;
-  thumbnailUrl: string | null;
-  have: ExchangeItemView | null;
-  wants: ExchangeItemView[];
-  createdAt: string;
-};
-export type RecentExchangeResponse = { content: RecentExchangeItem[] };

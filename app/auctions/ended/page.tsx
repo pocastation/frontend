@@ -1,8 +1,6 @@
 import AuctionBrowser from "@/components/AuctionBrowser";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import type { SortKey } from "@/components/AuctionExplorer";
-import ComingSoon from "@/components/ComingSoon";
-import { SALE_ENABLED } from "@/lib/preopen";
 import { apiFetch } from "@/lib/api";
 import type { AuctionListResponse } from "@/lib/types";
 
@@ -44,10 +42,6 @@ export default async function EndedAuctionsPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
-  // 가오픈 — 교환만 연다(#798). 서버도 같은 게이트로 막는다(BE #570).
-  if (!SALE_ENABLED) {
-    return <ComingSoon action={{ href: "/events", label: "교환 보러 가기" }} />;
-  }
   const query = (q ?? "").trim();
   const auctions = await getEndedAuctions(query);
 

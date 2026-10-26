@@ -4,11 +4,14 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import AuctionCard from "@/components/AuctionCard";
 import EventStrip from "@/components/EventStrip";
+import HomeExchangeGuide from "@/components/HomeExchangeGuide";
+import HomeRecentExchanges from "@/components/HomeRecentExchanges";
 import MobilePromoBanner from "@/components/mobile/MobilePromoBanner";
 import MobileRankTop3 from "@/components/mobile/MobileRankTop3";
+import { SALE_ENABLED } from "@/lib/preopen";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import { FOCUS_RING } from "@/lib/ui";
-import type { AuctionResponse, EventResponse } from "@/lib/types";
+import type { AuctionResponse, EventResponse, RecentExchangeItem } from "@/lib/types";
 
 /**
  * 모바일 홈 — 국내 커머스 앱 문법으로 짠 별도 화면.
@@ -59,16 +62,31 @@ export default function MobileHome({
   instantSales,
   popularAuctions,
   upcomingEvents,
+  recentExchanges,
 }: {
   featured: AuctionResponse[];
   endingSoon: AuctionResponse[];
   instantSales: AuctionResponse[];
   popularAuctions: AuctionResponse[];
   upcomingEvents: EventResponse[];
+  recentExchanges: RecentExchangeItem[];
 }) {
   // 화면에 깔린 매물의 찜 상태는 한 번에 확인한다(데스크탑 그리드와 같은 훅·같은 캐시).
   const shown = [...endingSoon, ...instantSales];
   const { wishlisted, toggle } = useWishlistStatus(shown.map((a) => a.id));
+
+  // 가오픈 홈(#804). 배너와 행사 띠는 그대로 두고 그 아래 세 섹션만 교환으로 바꾼다 —
+  // 위쪽을 같이 손대면 가오픈이 끝났을 때 되돌릴 것이 늘어난다.
+  if (!SALE_ENABLED) {
+    return (
+      <>
+        <MobilePromoBanner featured={featured} />
+        <EventStrip events={upcomingEvents} />
+        <HomeRecentExchanges posts={recentExchanges} />
+        <HomeExchangeGuide />
+      </>
+    );
+  }
 
   return (
     <>

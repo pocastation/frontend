@@ -7,6 +7,7 @@ import { countdownLevel, countdownLevelAt, formatRemaining, type CountdownLevel 
 import { formatKRW } from "@/lib/format";
 import { BRAND_HEADLINE_LINES, BRAND_SUBHEAD } from "@/lib/site";
 import { FOCUS_RING } from "@/lib/ui";
+import { SALE_ENABLED } from "@/lib/preopen";
 import type { AuctionResponse } from "@/lib/types";
 
 /**
@@ -104,11 +105,12 @@ function BrandSlide() {
         ))}
       </h2>
       <p className="mt-3 whitespace-pre-line text-body-s text-white/60">{BRAND_SUBHEAD}</p>
+      {/* 데스크탑 히어로와 같은 이유로 목적지만 바꾼다(#804). */}
       <Link
-        href="/auctions"
+        href={SALE_ENABLED ? "/auctions" : "/events"}
         className={`mt-cta flex h-11 w-full items-center justify-center rounded-control bg-primary text-body font-extrabold text-white ${FOCUS_RING}`}
       >
-        진행 중인 판매글 보기 →
+        {SALE_ENABLED ? "진행 중인 판매글 보기 →" : "행사 일정 보기 →"}
       </Link>
       <Link
         href="/guide"

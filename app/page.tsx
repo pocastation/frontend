@@ -4,9 +4,12 @@ import Hero from "@/components/Hero";
 import HomeRanking from "@/components/HomeRanking";
 import MobileHome from "@/components/mobile/MobileHome";
 import MobileShell from "@/components/mobile/MobileShell";
+import HomeExchangeGuide from "@/components/HomeExchangeGuide";
+import HomeRecentExchanges from "@/components/HomeRecentExchanges";
 import { apiFetch } from "@/lib/api";
+import { SALE_ENABLED } from "@/lib/preopen";
 import { addDays, todayInKst, ymd } from "@/lib/event-dates";
-import type { AuctionListResponse, EventListResponse } from "@/lib/types";
+import type { AuctionListResponse, EventListResponse, RecentExchangeResponse } from "@/lib/types";
 
 // 모바일 홈이 한 화면에 올리는 개수. 2열 그리드라 짝수로 둔다.
 const MOBILE_SECTION_SIZE = 4;
@@ -80,15 +83,29 @@ async function getUpcomingEvents(): Promise<EventListResponse | null> {
 // 판매자 랭킹 집계(`/api/sellers/popular`)는 #653에서 걷었다. 홈의 두 랭킹 블록이 유일한 소비처였고
 // 인기 판매자를 일반 사용자에게 노출하지 않기로 하면서 화면에서 함께 빠졌다. API는 그대로 살아 있다.
 
+// 홈의 최근 교환글(#804). 가오픈에는 이게 홈의 주인공이다. 실패하면 null이고, 화면은 빈
+// 상태 문구를 둔다 — 블록을 통째로 지우면 홈이 캘린더와 안내문만 남는다.
+async function getRecentExchanges(): Promise<RecentExchangeResponse | null> {
+  try {
+    return await apiFetch<RecentExchangeResponse>("/api/exchanges/recent?size=6", { cache: "no-store" });
+  } catch {
+    return null;
+  }
+}
+
 export default async function Home() {
-  const [auctions, featured, popular, instantSales, endingSoon, upcomingEvents] = await Promise.all([
-    getAuctions(),
-    getFeaturedAuctions(),
-    getPopularAuctions(),
-    getInstantSales(),
-    getEndingSoonAuctions(),
-    getUpcomingEvents(),
-  ]);
+  // 가오픈에는 판매 블록을 아예 두지 않는다(#804). 「준비 중」을 홈에 둘씩 띄우면 덜 만든
+  // 서비스로 읽히고, 보여줄 수 없는 것을 부르는 질의도 낭비다 — 가릴 때는 조회부터 건너뛴다.
+  const [auctions, featured, popular, instantSales, endingSoon, upcomingEvents, recentExchanges] =
+    await Promise.all([
+      SALE_ENABLED ? getAuctions() : null,
+      SALE_ENABLED ? getFeaturedAuctions() : null,
+      SALE_ENABLED ? getPopularAuctions() : null,
+      SALE_ENABLED ? getInstantSales() : null,
+      SALE_ENABLED ? getEndingSoonAuctions() : null,
+      getUpcomingEvents(),
+      SALE_ENABLED ? null : getRecentExchanges(),
+    ]);
   const content = auctions?.content ?? [];
   const instantContent = instantSales?.content ?? [];
   // 데스크탑 배너 — 관리자 지정(featured) 목록 전체(최대 5, #573)를 넘긴다. 지정이 없을 때만
@@ -113,24 +130,35 @@ export default async function Home() {
           instantSales={instantContent.slice(0, MOBILE_SECTION_SIZE)}
           popularAuctions={popular?.content ?? []}
           upcomingEvents={upcomingEvents?.content ?? []}
+          recentExchanges={recentExchanges?.content ?? []}
         />
       </div>
 
       <div className="hidden sm:block">
+        {/* 히어로는 가오픈에도 그대로다. 안에서 버튼 하나의 목적지만 갈린다(#804). */}
         <Hero featured={heroFeatured} />
         {/* 데스크탑은 지면이 넓어 2주 14칸을 한 줄에 편다(#659). */}
         <EventStrip events={upcomingEvents?.content ?? []} />
-        <AuctionExplorer initialAuctions={content} />
-        <AuctionExplorer
-          initialAuctions={instantContent}
-          saleType="INSTANT"
-          sectionId="instant-sales"
-          title="즉시판매"
-          description="마감까지 기다리지 않고 바로 구매할 수 있는 포토카드"
-          viewAllHref="/instant-sales"
-        />
-        {/* 랭킹은 모바일 홈에만 있었다(#548). 데스크탑에서도 볼 수 있게 같은 집계로 블록을 둔다. */}
-        <HomeRanking auctions={popular?.content ?? []} />
+        {SALE_ENABLED ? (
+          <>
+            <AuctionExplorer initialAuctions={content} />
+            <AuctionExplorer
+              initialAuctions={instantContent}
+              saleType="INSTANT"
+              sectionId="instant-sales"
+              title="즉시판매"
+              description="마감까지 기다리지 않고 바로 구매할 수 있는 포토카드"
+              viewAllHref="/instant-sales"
+            />
+            {/* 랭킹은 모바일 홈에만 있었다(#548). 데스크탑에서도 볼 수 있게 같은 집계로 블록을 둔다. */}
+            <HomeRanking auctions={popular?.content ?? []} />
+          </>
+        ) : (
+          <>
+            <HomeRecentExchanges posts={recentExchanges?.content ?? []} />
+            <HomeExchangeGuide />
+          </>
+        )}
       </div>
     </MobileShell>
   );

@@ -6,12 +6,9 @@ import AuctionCard from "@/components/AuctionCard";
 import EventStrip from "@/components/EventStrip";
 import MobilePromoBanner from "@/components/mobile/MobilePromoBanner";
 import MobileRankTop3 from "@/components/mobile/MobileRankTop3";
-import HomeExchangeGuide from "@/components/HomeExchangeGuide";
-import HomeRecentExchanges from "@/components/HomeRecentExchanges";
-import { SALE_ENABLED } from "@/lib/preopen";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
 import { FOCUS_RING } from "@/lib/ui";
-import type { AuctionResponse, EventResponse, RecentExchangeItem } from "@/lib/types";
+import type { AuctionResponse, EventResponse } from "@/lib/types";
 
 /**
  * 모바일 홈 — 국내 커머스 앱 문법으로 짠 별도 화면.
@@ -62,31 +59,16 @@ export default function MobileHome({
   instantSales,
   popularAuctions,
   upcomingEvents,
-  recentExchanges,
 }: {
   featured: AuctionResponse[];
   endingSoon: AuctionResponse[];
   instantSales: AuctionResponse[];
   popularAuctions: AuctionResponse[];
   upcomingEvents: EventResponse[];
-  recentExchanges: RecentExchangeItem[];
 }) {
   // 화면에 깔린 매물의 찜 상태는 한 번에 확인한다(데스크탑 그리드와 같은 훅·같은 캐시).
   const shown = [...endingSoon, ...instantSales];
   const { wishlisted, toggle } = useWishlistStatus(shown.map((a) => a.id));
-
-  if (!SALE_ENABLED) {
-    // 가오픈 — 교환만 연다(#798). 판매 섹션에 「준비 중」을 둘씩 띄우면 덜 만든 서비스로
-    // 읽혀서 아예 뺐다. 히어로도 판매글을 띄우는 자리라 브랜드 면으로 바꾼다.
-    return (
-      <>
-        <ExchangeHero />
-        <EventStrip events={upcomingEvents} />
-        <HomeRecentExchanges posts={recentExchanges} variant="mobile" />
-        <HomeExchangeGuide variant="mobile" />
-      </>
-    );
-  }
 
   return (
     <>
@@ -137,21 +119,5 @@ export default function MobileHome({
           진입로는 남고, 홈 맨 아래에서는 순위 다음에 붙은 꼬리로 읽혔다. */}
       <MobileRankTop3 auctions={popularAuctions} />
     </>
-  );
-}
-
-/** 가오픈 히어로. 기존 배너는 판매글을 띄우는 자리라 판매를 가리면 같이 빠진다. */
-function ExchangeHero() {
-  return (
-    <div className="px-gutter pt-page">
-      <div className="rounded-card bg-deepspace px-5 py-8">
-        <p className="text-label font-semibold text-nebula">공개방송 현장 교환</p>
-        <p className="mt-tight font-display text-title-l font-extrabold text-white">
-          현장에서
-          <br />
-          포카를 바꿔요
-        </p>
-      </div>
-    </div>
   );
 }

@@ -14,8 +14,6 @@ import SearchLink from "@/components/SearchLink";
 import SellerReviewSummary from "@/components/SellerReviewSummary";
 import SellerShipPanel from "@/components/SellerShipPanel";
 import ShareButton from "@/components/ShareButton";
-import ComingSoon from "@/components/ComingSoon";
-import { SALE_ENABLED } from "@/lib/preopen";
 import { AuctionBiddingProvider } from "@/lib/auction-bidding-context";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { INTERMEDIARY_NOTICE } from "@/lib/business";
@@ -80,10 +78,6 @@ const CHIP_CLASS =
 const BADGE_CLASS = LABEL_NEUTRAL;
 
 export default async function AuctionDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  // 가오픈 — 교환만 연다(#798). 서버도 같은 게이트로 막는다(BE #570).
-  if (!SALE_ENABLED) {
-    return <ComingSoon action={{ href: "/events", label: "교환 보러 가기" }} />;
-  }
   const { id } = await params;
   const auction = await getAuction(id);
   if (!auction) {

@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
-import ComingSoon from "@/components/ComingSoon";
-import { SALE_ENABLED } from "@/lib/preopen";
 import { envFlag } from "@/lib/env";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -87,21 +85,7 @@ function uploadErrorMessage(err: unknown, what: string): string {
   return `${what} 업로드에 실패했어요. 잠시 후 다시 시도해 주세요.`;
 }
 
-/**
- * 가오픈 — 교환만 연다(#798). 판매하러 온 사람을 빈손으로 돌려보내지 않고 지금 할 수 있는
- * 일로 보낸다.
- *
- * <p>폼을 따로 둔 이유. 이 값은 빌드 타임 상수라 렌더 간에 변하지 않지만, 훅보다 앞서 끊으면
- * 훅 규칙 lint가 막는다 — 규칙이 맞다. 조건부로 끊을 자리와 훅이 사는 자리를 나눈다.
- */
 export default function NewAuctionPage() {
-  if (!SALE_ENABLED) {
-    return <ComingSoon action={{ href: "/events", label: "교환글 쓰기" }} />;
-  }
-  return <NewAuctionForm />;
-}
-
-function NewAuctionForm() {
   const router = useRouter();
   const { accessToken, isLoading: isAuthLoading, fetchWithAuth } = useAuth();
 

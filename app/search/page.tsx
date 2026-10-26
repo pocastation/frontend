@@ -1,4 +1,6 @@
 import SearchScreen from "@/components/SearchScreen";
+import ComingSoon from "@/components/ComingSoon";
+import { SALE_ENABLED } from "@/lib/preopen";
 import { apiFetch } from "@/lib/api";
 import type { ArtistListResponse, AuctionListResponse } from "@/lib/types";
 
@@ -52,6 +54,10 @@ export default async function SearchPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
+  // 가오픈 — 교환만 연다(#798). 서버도 같은 게이트로 막는다(BE #570).
+  if (!SALE_ENABLED) {
+    return <ComingSoon action={{ href: "/events", label: "교환 보러 가기" }} />;
+  }
   const query = (q ?? "").trim();
 
   // 검색어가 있을 때만 매물·매칭 스타를 미리 부른다. 없으면 인기 스타만 있으면 된다.

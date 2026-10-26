@@ -8,6 +8,7 @@ import { formatKRW } from "@/lib/format";
 import { BRAND_HEADLINE_LINES, BRAND_SUBHEAD } from "@/lib/site";
 import { FOCUS_RING } from "@/lib/ui";
 import { useWishlistStatus } from "@/lib/use-wishlist-status";
+import { SALE_ENABLED } from "@/lib/preopen";
 import type { AuctionResponse } from "@/lib/types";
 import WishlistHeart from "@/components/WishlistHeart";
 
@@ -199,11 +200,13 @@ export default function Hero({ featured }: { featured: AuctionResponse[] }) {
           <p className="mt-4 whitespace-pre-line text-body-l leading-relaxed text-white/60">{BRAND_SUBHEAD}</p>
 
           <div className="mt-8 flex justify-center gap-3 sm:justify-start">
+            {/* 가오픈에는 볼 판매글이 없다. 히어로는 그대로 두고 이 버튼만 지금 할 수 있는
+                일로 보낸다 — 누를 곳이 준비 중 화면이면 첫 화면부터 막힌 서비스로 읽힌다. */}
             <Link
-              href="#auctions"
+              href={SALE_ENABLED ? "#auctions" : "/events"}
               className="inline-flex h-12 items-center justify-center rounded-control bg-primary px-7 text-body font-bold text-white transition-colors hover:bg-primary-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-deepspace"
             >
-              진행 중인 판매글 보기 →
+              {SALE_ENABLED ? "진행 중인 판매글 보기 →" : "행사 일정 보기 →"}
             </Link>
             <Link
               href="/guide"

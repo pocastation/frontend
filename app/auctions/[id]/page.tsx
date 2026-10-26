@@ -14,6 +14,8 @@ import SearchLink from "@/components/SearchLink";
 import SellerReviewSummary from "@/components/SellerReviewSummary";
 import SellerShipPanel from "@/components/SellerShipPanel";
 import ShareButton from "@/components/ShareButton";
+import ComingSoon from "@/components/ComingSoon";
+import { SALE_ENABLED } from "@/lib/preopen";
 import { AuctionBiddingProvider } from "@/lib/auction-bidding-context";
 import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
 import { INTERMEDIARY_NOTICE } from "@/lib/business";
@@ -35,6 +37,11 @@ const getAuction = cache(async (id: string): Promise<AuctionDetailResponse | nul
 
 // 링크 미리보기 — 제목·대표사진·설명(스타·유형·현재가). 사진 없으면 기본 OG 이미지(app/opengraph-image) 상속.
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  // 가오픈에는 본문이 준비 중 화면이다. 여기서 끊지 않으면 상품을 찾지 못해 탭 제목만
+  // 「판매글을 찾을 수 없어요」가 되어, 화면이 말하는 것과 어긋난다(#804).
+  if (!SALE_ENABLED) {
+    return { title: "준비 중 — Pocastation" };
+  }
   const { id } = await params;
   const auction = await getAuction(id);
   if (!auction) {
@@ -78,6 +85,10 @@ const CHIP_CLASS =
 const BADGE_CLASS = LABEL_NEUTRAL;
 
 export default async function AuctionDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  // 가오픈 — 교환만 연다(#798). 서버도 같은 게이트로 막는다(BE #570).
+  if (!SALE_ENABLED) {
+    return <ComingSoon action={{ href: "/events", label: "교환 보러 가기" }} />;
+  }
   const { id } = await params;
   const auction = await getAuction(id);
   if (!auction) {

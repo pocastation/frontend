@@ -11,8 +11,9 @@ import {
 } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { apiFetch, apiFetchBlob, apiFetchMultipart, ApiError, type ApiFetchOptions } from "./api";
-import type { MemberResponse, TokenResponse } from "./types";
+import type { MemberResponse } from "./types";
 import type { LoginResponse } from "./admin-totp";
+import { announceSessionChange, coordinatedRefresh, onSessionChange, sessionRequest, withSessionLock } from "./session-coordination";
 
 type AuthContextValue = {
   accessToken: string | null;
@@ -121,14 +122,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const authEpoch = useRef(0);
 
   const fetchMe = useCallback(async (token: string) => {
+    const epoch = authEpoch.current;
     const me = await apiFetch<MemberResponse>("/api/members/me", { accessToken: token });
-    setMember(me);
+    if (epoch === authEpoch.current) setMember(me);
   }, []);
 
-  // 동시에 여러 요청이 401을 맞아도 refresh는 실제로 한 번만 나가야 한다 — 백엔드가
-  // 리프레시 토큰 회전에 락을 걸어 두 번째 동시 refresh는 거부하므로(pocastation/backend#21),
-  // 각자 독립적으로 refresh를 호출하면 세션이 멀쩡해도 한쪽은 실패로 보인다. 진행 중인
-  // refresh promise를 공유해서 그 결과를 함께 기다린다.
+  useEffect(() => onSessionChange(() => {
+    authEpoch.current += 1;
+    setAccessToken(null);
+    setMember(null);
+  }), []);
+
+  // 같은 탭은 promise 공유, 다른 탭은 session-coordination의 Web Lock으로 직렬화한다.
   const refreshPromiseRef = useRef<Promise<string | null> | null>(null);
 
   const refresh = useCallback((): Promise<string | null> => {
@@ -139,14 +144,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const promise = (async () => {
       const epoch = authEpoch.current;
       try {
-        const tokens = await apiFetch<TokenResponse>("/api/auth/refresh", { method: "POST" });
+        const tokens = await coordinatedRefresh();
+        if (!tokens || epoch !== authEpoch.current) return null;
         const me = await apiFetch<MemberResponse>("/api/members/me", { accessToken: tokens.accessToken });
         if (epoch !== authEpoch.current) return null;
         setAccessToken(tokens.accessToken);
         setMember(me);
         return tokens.accessToken;
-      } catch {
-        if (epoch === authEpoch.current) {
+      } catch (error) {
+        // 통신 실패는 서버 세션 회수의 증거가 아니다. 인증 실패만 로컬 상태를 비운다.
+        if (epoch === authEpoch.current && error instanceof ApiError && (error.status === 401 || error.status === 403)) {
           setAccessToken(null);
           setMember(null);
         }
@@ -177,10 +184,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(
     async (email: string, password: string) => {
       authEpoch.current += 1;
-      const tokens = await apiFetch<LoginResponse>("/api/auth/login", {
-        method: "POST",
-        body: { email, password },
+      const epoch = authEpoch.current;
+      const tokens = await withSessionLock(async () => {
+        const result = await sessionRequest<LoginResponse>("/api/auth/login", { email, password });
+        announceSessionChange();
+        return result;
       });
+      if (epoch !== authEpoch.current) throw new Error("인증 상태가 변경됐어요.");
       if ("challenge" in tokens) {
         setAccessToken(null);
         setMember(null);
@@ -198,6 +208,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const epoch = ++authEpoch.current;
     const me = await apiFetch<MemberResponse>("/api/members/me", { accessToken: token, cache: "no-store" });
     if (epoch !== authEpoch.current) throw new Error("인증 상태가 변경됐어요.");
+    announceSessionChange();
     setMember(me);
     setAccessToken(token);
     setIsWithdrawing(false);
@@ -205,7 +216,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     authEpoch.current += 1;
-    await apiFetch<void>("/api/auth/logout", { method: "POST" });
+    await withSessionLock(async () => {
+      await sessionRequest<void>("/api/auth/logout");
+      announceSessionChange();
+    });
     setAccessToken(null);
     setMember(null);
   }, []);
@@ -341,10 +355,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 세션 쿠키는 서버만 지울 수 있어 로그아웃을 best-effort로 호출(토큰은 이미 폐기됨)한 뒤
     // 클라 상태를 정리한다.
     try {
-      await apiFetch<void>("/api/auth/logout", { method: "POST" });
+      await withSessionLock(() => sessionRequest<void>("/api/auth/logout"));
     } catch {
       // 리프레시 토큰이 이미 없어 실패해도 무방 — 상태만 정리하면 로그아웃된 것과 동일.
     }
+    authEpoch.current += 1;
+    announceSessionChange();
     setAccessToken(null);
     setMember(null);
   }, [fetchWithAuth]);

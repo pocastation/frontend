@@ -190,10 +190,14 @@ test("PASS 최초 등록·로컬 QR·복구 코드 보관까지 연결", async (
     local: { ...localStorage },
     session: { ...sessionStorage },
   }));
-  // Next 개발 서버 자체 RSC 디버그 캐시와 제품의 인증 정보 저장을 구분한다.
+  // Next 디버그 캐시와 기존 화면 전환 기록을 인증 정보 저장과 구분한다.
+  expect(["", "/auth/totp?next=%2Ffaq"]).toContain(
+    storage.session["ps:entered-from:/auth/totp?next=%2Ffaq"],
+  );
   expect(
     Object.keys(storage.session).filter(
-      (key) => !key.startsWith("__next_debug_channel:"),
+      (key) => !key.startsWith("__next_debug_channel:") &&
+        key !== "ps:entered-from:/auth/totp?next=%2Ffaq",
     ),
   ).toEqual([]);
   expect(storage.local).toEqual({});

@@ -2,8 +2,6 @@ import Link from "next/link";
 import AuctionBrowser from "@/components/AuctionBrowser";
 import MobileBrowse from "@/components/mobile/MobileBrowse";
 import MobileShell from "@/components/mobile/MobileShell";
-import ComingSoon from "@/components/ComingSoon";
-import { SALE_ENABLED } from "@/lib/preopen";
 import { apiFetch } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
 import type { AuctionListResponse } from "@/lib/types";
@@ -28,14 +26,6 @@ export default async function AuctionsPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
-  // 가오픈 — 교환만 연다(#798). 서버도 같은 게이트로 막는다(BE #570).
-  if (!SALE_ENABLED) {
-    return (
-      <MobileShell>
-        <ComingSoon action={{ href: "/events", label: "교환 보러 가기" }} />
-      </MobileShell>
-    );
-  }
   const query = (q ?? "").trim();
   const auctions = await getAuctions(query);
 

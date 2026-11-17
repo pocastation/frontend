@@ -212,7 +212,7 @@ export default function ExchangeThreadPage() {
 
       <div className="mx-auto max-w-[640px]">
         {thread && (
-          <div className="sticky top-12 z-[2] flex items-center gap-3 border-b border-border bg-surface-2 px-gutter py-3">
+          <div className="sticky top-12 z-[2] sm:top-15 flex items-center gap-3 border-b border-border bg-surface-2 px-gutter py-3">
             <div className="min-w-0 flex-1">
               <p className="truncate text-body font-extrabold text-text-1">{thread.place}</p>
               {thread.slot && <p className="mt-px font-display text-label text-text-2">{slotLabel(thread.slot)}</p>}

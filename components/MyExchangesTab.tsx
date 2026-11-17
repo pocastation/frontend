@@ -200,7 +200,7 @@ function PostRow({ post }: { post: MyExchangePost }) {
         <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
         {pending > 0 && <span className={`${LABEL_STRONG} tabular-nums`}>새 신청 {pending}</span>}
         {pending > 0 && <ActionLink href={`/exchanges/${post.postId}/requests`}>신청 보기</ActionLink>}
-        {post.status === "MATCHED" && <ActionLink href={`/exchanges/${post.postId}/thread`}>대화 열기</ActionLink>}
+        {post.status === "MATCHED" && <ActionLink href={`/exchanges/${post.postId}/thread`}>매칭 정보 보기</ActionLink>}
       </div>
     </li>
   );
@@ -225,7 +225,7 @@ function RequestRow({ request }: { request: MyExchangeRequest }) {
       )}
       <div className="mt-tight flex items-center gap-2 pl-14">
         <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
-        {post && request.threadAvailable && <ActionLink href={`/exchanges/${post.postId}/thread`}>대화 열기</ActionLink>}
+        {post && request.threadAvailable && <ActionLink href={`/exchanges/${post.postId}/thread`}>매칭 정보 보기</ActionLink>}
       </div>
     </li>
   );

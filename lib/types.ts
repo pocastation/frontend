@@ -1441,7 +1441,57 @@ export type ExchangeThreadResponse = {
   /** 잠긴 뒤에도 내려온다 — 입력창이 사라진 이유를 화면이 말해야 한다. */
   lockedAt: string;
   completion: ExchangeCompletion;
+  appearance: ExchangeAppearance;
+  /** 만남 확인(backend#598). 약속 시각이 안 잡힌 옛 교환이면 null. */
+  meetup: ExchangeMeetup | null;
   messages: ExchangeMessage[];
+};
+
+/**
+ * 만남 확인 상태(backend#598). 코드는 작성자 화면에만 나오고 입력은 신청자만 한다.
+ * 교환 완료와는 별개다. 노쇼를 판단할 때 근거로 쓴다.
+ */
+export type ExchangeMeetup = {
+  /** 내가 코드를 보여 주는 쪽(작성자)인가. 아니면 입력하는 쪽이다. */
+  codeHolder: boolean;
+  /** 버튼이 켜지는 시각(약속 10분 전). */
+  opensAt: string;
+  /** 버튼이 꺼지는 시각(대화 잠금). */
+  closesAt: string;
+  /** 지금 확인할 수 있는가. */
+  open: boolean;
+  confirmed: boolean;
+  confirmedAt: string | null;
+  /** 오입력으로 막혀 있으면 풀리는 시각. */
+  lockedUntil: string | null;
+};
+
+/** 작성자 화면의 코드. {@code expiresAt}에 바뀌므로 그때 다시 부른다. */
+export type ExchangeMeetupCode = {
+  code: string;
+  expiresAt: string;
+};
+
+/** 코드 입력 결과. 틀려도 200이고 {@code confirmed=false}로 구분한다. */
+export type ExchangeMeetupConfirmResult = {
+  confirmed: boolean;
+  confirmedAt: string | null;
+  remainingAttempts: number;
+  lockedUntil: string | null;
+};
+
+/** 인상착의 한 줄(backend#612). 당사자마다 한 행을 덮어쓴다. */
+export type ExchangeAppearanceEntry = {
+  body: string;
+  updatedAt: string;
+};
+
+export type ExchangeAppearance = {
+  /** 지금 내 인상착의를 고칠 수 있는가(대화 잠금 전). */
+  writable: boolean;
+  /** 아직 올리지 않았으면 null. */
+  mine: ExchangeAppearanceEntry | null;
+  counterpart: ExchangeAppearanceEntry | null;
 };
 
 export type ExchangeMessageListResponse = {

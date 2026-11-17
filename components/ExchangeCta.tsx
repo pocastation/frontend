@@ -122,7 +122,7 @@ export default function ExchangeCta({
     // 먹색이다. 나머지는 이 글에 무언가를 거는 일이고, 대화는 이미 정해진 약속으로 들어가는 일이다.
     return (
       <Link href={`/exchanges/${postId}/thread`} className={`${BUTTON} bg-text-1 text-white ${PRESS_INK} ${FOCUS_RING}`}>
-        대화 열기
+        매칭 정보 보기
       </Link>
     );
   }

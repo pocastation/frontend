@@ -99,33 +99,35 @@ export default function ExchangeThreadPage() {
   }, [thread, refreshThread]);
 
   /**
-   * 교환할 포카. 대화 응답에는 품목이 없어 교환글에서 가져온다.
+   * 교환할 포카. 줄 포카가 먼저, 받을 포카가 다음이다.
    *
-   * <p>작성자는 받은 신청 중 확정된 것의 제시 품목을 받을 포카로 쓴다. 신청자는 자기 신청의 제시 품목을
-   * 받을 API가 아직 없어 받을 포카 한 줄만 보인다(#819 후속).
+   * <p>교환글의 가진 포카와 확정된 신청의 제시 포카(대화 응답의 `offer`, backend#618) 두 개다. 작성자에게는
+   * 가진 포카가 줄 것, 신청자에게는 제시 포카가 줄 것이다.
+   *
+   * <p>`offer`가 없는 응답(backend#618 배포 전)이면 작성자는 받은 신청 목록에서 찾는다. 신청자는 그 목록을
+   * 볼 수 없어 받을 포카 한 줄만 남는다.
    */
-  const loadCards = useCallback(async () => {
+  const loadCards = useCallback(async (t: ExchangeThreadResponse) => {
     const post = await fetchWithAuth<ExchangePostDetail>(`/api/exchanges/${postId}`);
-    const havePhoto = post.photos[0]?.thumbnailUrl ?? null;
-    if (!post.viewer?.author) {
-      setCards([{ key: "receive", title: "받을 포카", item: post.have, photoUrl: havePhoto }]);
-      return;
-    }
-    const rows: CardRow[] = [{ key: "give", title: "내가 줄 포카", item: post.have, photoUrl: havePhoto }];
-    try {
-      const requests = await fetchWithAuth<ExchangeRequestListResponse>(`/api/exchanges/${postId}/requests`);
-      const accepted = requests.content.find((r) => r.status === "ACCEPTED");
-      if (accepted) {
-        rows.push({
-          key: "receive",
-          title: "받을 포카",
-          item: accepted.offer,
-          photoUrl: accepted.photos[0]?.thumbnailUrl ?? null,
-        });
+    const author = Boolean(post.viewer?.author);
+    const have = { item: post.have, photoUrl: post.photos[0]?.thumbnailUrl ?? null };
+    let offer: { item: ExchangeItemView; photoUrl: string | null } | null = t.offer
+      ? { item: t.offer, photoUrl: t.offerPhotoUrl ?? null }
+      : null;
+    if (!offer && author) {
+      try {
+        const requests = await fetchWithAuth<ExchangeRequestListResponse>(`/api/exchanges/${postId}/requests`);
+        const accepted = requests.content.find((r) => r.status === "ACCEPTED");
+        if (accepted) offer = { item: accepted.offer, photoUrl: accepted.photos[0]?.thumbnailUrl ?? null };
+      } catch {
+        // 받을 포카를 못 불러와도 인상착의·완료 확인은 써야 한다. 줄 포카만 남긴다.
       }
-    } catch {
-      // 받을 포카를 못 불러와도 인상착의·완료 확인은 써야 한다. 줄 포카만 남긴다.
     }
+    const give = author ? have : offer;
+    const receive = author ? offer : have;
+    const rows: CardRow[] = [];
+    if (give) rows.push({ key: "give", title: "내가 줄 포카", ...give });
+    if (receive) rows.push({ key: "receive", title: "받을 포카", ...receive });
     setCards(rows);
   }, [fetchWithAuth, postId]);
 
@@ -133,15 +135,16 @@ export default function ExchangeThreadPage() {
     if (authLoading || !member) return;
     let cancelled = false;
     (async () => {
+      let res: ExchangeThreadResponse;
       try {
-        const res = await loadThread();
+        res = await loadThread();
         if (!cancelled) setDraft(res.appearance?.mine?.body ?? "");
       } catch (err) {
         if (!cancelled) setLoadError(err instanceof ApiError ? err.message : "교환 정보를 불러오지 못했어요.");
         return;
       }
       try {
-        await loadCards();
+        await loadCards(res);
       } catch {
         // 품목은 보조 정보다. 실패해도 화면은 남긴다.
       }
@@ -210,7 +213,8 @@ export default function ExchangeThreadPage() {
         backHref={`/exchanges/${postId}`}
       />
 
-      <div className="mx-auto max-w-[640px]">
+      {/* 레이아웃은 모바일에만 푸터 앞 여백을 준다. PC는 마지막 섹션(만남·완료 확인)이 푸터에 붙지 않게 여기서 준다. */}
+      <div className="mx-auto max-w-[640px] sm:pb-footer">
         {thread && (
           <div className="sticky top-12 z-[2] sm:top-15 flex items-center gap-3 border-b border-border bg-surface-2 px-gutter py-3">
             <div className="min-w-0 flex-1">

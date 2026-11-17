@@ -1440,6 +1440,12 @@ export type ExchangeThreadResponse = {
   writable: boolean;
   /** 잠긴 뒤에도 내려온다 — 입력창이 사라진 이유를 화면이 말해야 한다. */
   lockedAt: string;
+  /**
+   * 확정된 신청의 제시 포카(backend#618). 신청자에게는 줄 포카, 작성자에게는 받을 포카다.
+   * 그 배포 전 응답에는 없다. 사진은 행사 뒤 파기되면 null.
+   */
+  offer?: ExchangeItemView | null;
+  offerPhotoUrl?: string | null;
   completion: ExchangeCompletion;
   appearance: ExchangeAppearance;
   /** 만남 확인(backend#598). 약속 시각이 안 잡힌 옛 교환이면 null. */
@@ -1530,6 +1536,8 @@ export type MyExchangeRequest = {
   createdAt: string;
   // 수락됐고 대화가 남아 있을 때만 true. 대화는 post.postId로 들어간다.
   threadAvailable: boolean;
+  // 내가 제시한 포카(줄 것). 받을 것은 post.have다(backend#616). 그 배포 전 응답에는 없다.
+  offer?: ExchangeItemView | null;
   // 대상 글 행이 없으면 null(지금은 글을 지우는 경로가 없어 방어용). 제재된 글은 썸네일만 null.
   post: {
     postId: number;

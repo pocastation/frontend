@@ -6,8 +6,8 @@ import StatusBadge from "@/components/StatusBadge";
 import { mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { weekdayKo } from "@/lib/event-dates";
-import { EXCHANGE_REQUEST_STATUS_TEXT, EXCHANGE_STATUS_TEXT, tradeLine } from "@/lib/exchange-labels";
-import type { ExchangeItemView, MyExchangePage, MyExchangePost, MyExchangeRequest } from "@/lib/types";
+import { EXCHANGE_REQUEST_STATUS_TEXT, EXCHANGE_STATUS_TEXT, itemName, tradeLine } from "@/lib/exchange-labels";
+import type { MyExchangePage, MyExchangePost, MyExchangeRequest } from "@/lib/types";
 import { FOCUS_RING, LABEL_STRONG } from "@/lib/ui";
 
 /**
@@ -134,23 +134,25 @@ function eventLine(eventName: string, eventDate: string): string {
   return `${eventName} · ${m}월 ${d}일(${weekdayKo(eventDate)})`;
 }
 
-/** 썸네일 + 행사 줄 + 「가진 포카 → 받고 싶은 포카」. 행 전체를 링크로 두지 않는다 — 아래 바로가기와 겹친다. */
+/**
+ * 썸네일 + 행사 줄 + 「줄 포카 → 받을 포카」. 행 전체를 링크로 두지 않는다 — 아래 바로가기와 겹친다.
+ *
+ * <p>화살표 방향은 두 목록 모두 「내가 주는 것 → 받는 것」이다. 내 글은 가진 포카 → 받고 싶은 포카,
+ * 보낸 신청은 내가 제시한 포카 → 그 글의 가진 포카(#821).
+ */
 function RowBody({
   postId,
   linkable,
   thumbnailUrl,
   meta,
-  have,
-  wants,
+  trade,
 }: {
   postId: number;
   linkable: boolean;
   thumbnailUrl: string | null;
   meta: string;
-  have: ExchangeItemView | null;
-  wants: ExchangeItemView[];
+  trade: { have: string; wants: string };
 }) {
-  const trade = tradeLine(have, wants);
   const title = (
     <span className="block text-body font-bold text-text-1">
       {trade.have}
@@ -199,8 +201,7 @@ function PostRow({ post }: { post: MyExchangePost }) {
         linkable={post.status !== "SUSPENDED"}
         thumbnailUrl={post.thumbnailUrl}
         meta={eventLine(post.eventName, post.eventDate)}
-        have={post.have}
-        wants={post.wants}
+        trade={tradeLine(post.have, post.wants)}
       />
       <div className="mt-tight flex items-center gap-2 pl-14">
         <StatusBadge tone={status.tone}>{status.label}</StatusBadge>
@@ -223,8 +224,8 @@ function RequestRow({ request }: { request: MyExchangeRequest }) {
           linkable={post.status !== "SUSPENDED"}
           thumbnailUrl={post.thumbnailUrl}
           meta={`${eventLine(post.eventName, post.eventDate)}${post.authorNickname ? ` · ${post.authorNickname}` : ""}`}
-          have={post.have}
-          wants={post.wants}
+          // offer가 없는 응답(backend#616 배포 전)은 글의 「가진 → 받고 싶은」으로 둔다.
+          trade={request.offer ? { have: itemName(request.offer), wants: itemName(post.have) } : tradeLine(post.have, post.wants)}
         />
       ) : (
         <p className="text-body-s text-text-3">사라진 교환글이에요.</p>

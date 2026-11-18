@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import ExchangeRestrictedNotice from "@/components/ExchangeRestrictedNotice";
+import { useExchangeRestriction } from "@/lib/use-exchange-restriction";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import PhotoUploadGrid from "@/components/PhotoUploadGrid";
 import { apiFetch } from "@/lib/api";
@@ -49,6 +51,8 @@ export default function ExchangeApplyPage() {
   const [idols, setIdols] = useState<ArtistMemberResponse[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // 노쇼 반복으로 막힌 사람은 폼을 채우기 전에 해제일을 본다(#824).
+  const restriction = useExchangeRestriction();
 
   const [artistId, setArtistId] = useState("");
   const [idolId, setIdolId] = useState("");
@@ -130,6 +134,15 @@ export default function ExchangeApplyPage() {
   }
 
   const wanted = post?.wants.map(itemName).join(" · ");
+
+  if (restriction?.restricted) {
+    return (
+      <>
+        <MobilePageHead title="교환 신청" variant="dismiss" backHref={`/exchanges/${postId}`} />
+        <ExchangeRestrictedNotice restriction={restriction} />
+      </>
+    );
+  }
 
   return (
     <>

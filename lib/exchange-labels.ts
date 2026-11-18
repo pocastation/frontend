@@ -1,6 +1,12 @@
 import { SOURCE_LABEL } from "@/lib/labels";
 import type { StatusTone } from "@/components/StatusBadge";
-import type { ExchangeItemView, ExchangeRequestStatus, ExchangeSlotView, ExchangeStatus } from "@/lib/types";
+import type {
+  ExchangeItemView,
+  ExchangeNoShowStatus,
+  ExchangeRequestStatus,
+  ExchangeSlotView,
+  ExchangeStatus,
+} from "@/lib/types";
 
 /**
  * 교환글 문구 조립. 서버는 값만 내리고 사람이 읽는 문장은 화면이 만든다.
@@ -135,4 +141,24 @@ export const EXCHANGE_REQUEST_STATUS_TEXT: Record<ExchangeRequestStatus, { label
 export function tradeLine(have: ExchangeItemView | null, wants: ExchangeItemView[]): { have: string; wants: string } {
   const first = wants[0] ?? null;
   return { have: itemName(have), wants: wants.length > 1 ? `${itemName(first)} 외 ${wants.length - 1}` : itemName(first) };
+}
+
+/**
+ * 노쇼 신고 상태(backend#612). 관리자 표·회원 이력에서 쓴다. 해명 대기·검토 대기처럼 손이 가야 하는
+ * 것만 danger다. 관리자가 지금 판단해야 하는 건이 DISPUTED뿐이라서다.
+ */
+export const NO_SHOW_STATUS_TEXT: Record<ExchangeNoShowStatus, { label: string; tone: StatusTone }> = {
+  PENDING: { label: "해명 대기", tone: "neutral" },
+  DISPUTED: { label: "판단 필요", tone: "danger" },
+  CONFIRMED: { label: "노쇼 기록", tone: "ok" },
+  DISMISSED: { label: "기각", tone: "muted" },
+  WITHDRAWN: { label: "철회", tone: "muted" },
+};
+
+/** 「11월 18일 오후 3:05」. 노쇼 기한·해제일처럼 날짜가 함께 있어야 뜻이 서는 시각에 쓴다. */
+export function dateTimeLabel(iso: string): string {
+  const d = new Date(iso);
+  const h = d.getHours();
+  const m = String(d.getMinutes()).padStart(2, "0");
+  return `${d.getMonth() + 1}월 ${d.getDate()}일 ${h < 12 ? "오전" : "오후"} ${h % 12 === 0 ? 12 : h % 12}:${m}`;
 }

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import ExchangeMeetupSection from "@/components/ExchangeMeetupSection";
+import ExchangeNoShowSection, { ExchangeNoShowNotice, explainable } from "@/components/ExchangeNoShowSection";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -25,6 +26,9 @@ import type {
  *
  * <p>만남 확인 코드(backend#598)는 교환할 포카 다음, 완료 확인 앞에 둔다. 서로를 알아보고 포카를
  * 확인한 뒤에 누르는 버튼이다.
+ *
+ * <p>노쇼 신고(backend#612)는 만남 확인 다음에 둔다. 만남이 확인되지 않은 교환만 신고할 수 있어서다.
+ * 나를 대상으로 한 신고가 해명 기한 안에 있으면 그것만 맨 위로 올린다.
  *
  * <p>약속 장소는 머리에 붙박아 둔다. 현장에서 열었을 때 장소를 찾아 스크롤하지 않게 한다.
  */
@@ -229,6 +233,16 @@ export default function ExchangeThreadPage() {
 
         {thread && (
           <>
+            {thread.noShow?.againstMe && explainable(thread.noShow.againstMe) && (
+              <ExchangeNoShowNotice
+                postId={postId}
+                report={thread.noShow.againstMe}
+                nickname={nickname}
+                fetchWithAuth={fetchWithAuth}
+                onChanged={loadThread}
+              />
+            )}
+
             {/* 인상착의 */}
             <section className="px-gutter pt-page" aria-labelledby="appearance-title">
               <div className="flex items-baseline justify-between gap-3">
@@ -347,6 +361,17 @@ export default function ExchangeThreadPage() {
               <ExchangeMeetupSection
                 postId={postId}
                 meetup={thread.meetup}
+                fetchWithAuth={fetchWithAuth}
+                onChanged={loadThread}
+              />
+            )}
+
+            {thread.noShow && (
+              <ExchangeNoShowSection
+                postId={postId}
+                noShow={thread.noShow}
+                meetup={thread.meetup}
+                nickname={nickname}
                 fetchWithAuth={fetchWithAuth}
                 onChanged={loadThread}
               />

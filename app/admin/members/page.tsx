@@ -16,6 +16,7 @@ import type {
 } from "@/lib/types";
 import StatusBadge from "@/components/StatusBadge";
 import AdminNotice from "@/components/AdminNotice";
+import AdminMemberNoShows from "@/components/admin/AdminMemberNoShows";
 
 const PAGE_SIZE = 20;
 const DEBOUNCE_MS = 300;
@@ -420,6 +421,8 @@ export default function AdminMembersPage() {
                   <p className="font-display text-body font-extrabold text-text-1">{detail.biddingCount}건</p>
                 </div>
               </div>
+
+              <AdminMemberNoShows key={detail.id} memberId={detail.id} />
 
               {detail.status === "SUSPENDED" && detail.suspensionReason && (
                 <p className="mt-3 rounded-card bg-surface-2 px-3 py-2 text-label font-semibold text-danger">

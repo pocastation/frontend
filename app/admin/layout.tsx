@@ -83,6 +83,14 @@ function ScaleIcon() {
     </svg>
   );
 }
+function ClockIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
 function TruckIcon() {
   return (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
@@ -170,6 +178,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/admin/reports", label: "신고 관리", icon: <FlagIcon />, ready: true },
       { href: "/admin/disputes", label: "반품 처리", icon: <ScaleIcon />, ready: true },
+      { href: "/admin/exchange-no-shows", label: "노쇼 판단", icon: <ClockIcon />, ready: true },
       { href: "/admin/delivery-stalled", label: "배송 확인", icon: <TruckIcon />, ready: true },
     ],
   },

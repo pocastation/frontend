@@ -41,10 +41,10 @@ async function mockApi(context: BrowserContext) {
   return { calls: () => calls };
 }
 
-async function simulatePushDevice(context: BrowserContext, standalone: boolean, result: NotificationPermission) {
-  await context.addInitScript(({ standalone, result }) => {
+async function simulatePushDevice(context: BrowserContext, standalone: boolean, result: NotificationPermission, initial: NotificationPermission = "default") {
+  await context.addInitScript(({ standalone, result, initial }) => {
     Object.defineProperty(navigator, "standalone", { value: standalone });
-    let permission = (localStorage.getItem("test.permission") ?? "default") as NotificationPermission;
+    let permission = (localStorage.getItem("test.permission") ?? initial) as NotificationPermission;
     let requests = 0;
     Object.defineProperty(Notification, "permission", { get: () => permission });
     Notification.requestPermission = async () => {
@@ -73,7 +73,7 @@ async function simulatePushDevice(context: BrowserContext, standalone: boolean, 
       },
     };
     Object.defineProperty(navigator.serviceWorker, "getRegistration", { value: async () => registration });
-  }, { standalone, result });
+  }, { standalone, result, initial });
 }
 
 function permissionRequests() {
@@ -216,7 +216,7 @@ test("PWA의 계정 메뉴에서만 설정을 열고 일시 중지 후 선택을
   await simulatePushDevice(context, true, "granted");
   await page.goto("/mypage");
   await page.getByRole("link", { name: "푸시 알림", exact: true }).filter({ visible: true }).click();
-  const master = page.getByRole("switch", { name: "푸시 알림 끄기" });
+  const master = page.getByRole("switch", { name: "푸시 알림 받기" });
   await expect(page.getByRole("heading", { name: "푸시 알림", exact: true })).toBeInViewport();
   const chat = page.getByRole("switch", { name: "교환 채팅" });
   const inquiry = page.getByRole("switch", { name: "1:1 문의 답변" });
@@ -225,15 +225,14 @@ test("PWA의 계정 메뉴에서만 설정을 열고 일시 중지 후 선택을
   await expect(chat).toBeDisabled();
   expect(await page.evaluate(permissionRequests)).toBe(0);
 
-  await master.click();
-  await expect(master).not.toBeChecked();
-  await expect(page.getByRole("switch", { checked: true })).toHaveCount(17);
+  await expect(page.getByRole("switch", { checked: true })).toHaveCount(18);
+  await page.getByRole("button", { name: "기기 알림 허용" }).click();
   await expect(chat).toBeChecked();
   await chat.click();
   await expect(chat).not.toBeChecked();
 
   await master.click();
-  await expect(master).toBeChecked();
+  await expect(master).not.toBeChecked();
   await expect(inquiry).toBeDisabled();
   await master.click();
   await expect(inquiry).toBeChecked();
@@ -246,14 +245,14 @@ test("PWA의 계정 메뉴에서만 설정을 열고 일시 중지 후 선택을
   await expect.poll(() => page.evaluate(() => localStorage.getItem("pocastation.push.owner"))).toBeNull();
   // Next authenticated load represents the same member with a new session and no bound endpoint.
   await page.goto(path);
-  await expect(master).not.toBeChecked();
+  await expect(master).toBeChecked();
   await expect(chat).toBeEnabled();
   await expect(chat).not.toBeChecked();
   await expect(inquiry).toBeChecked();
   expect(await page.evaluate(permissionRequests)).toBe(0);
   await master.click();
   await page.reload();
-  await expect(master).toBeChecked();
+  await expect(master).not.toBeChecked();
   await expect(chat).toBeDisabled();
   await expect(inquiry).toBeChecked();
 });
@@ -262,12 +261,22 @@ test("권한 거부 시 실제로 푸시를 켜거나 기기에 저장하지 않
   const api = await mockApi(context);
   await simulatePushDevice(context, true, "denied");
   await page.goto(path);
-  const master = page.getByRole("switch", { name: "푸시 알림 끄기" });
+  const master = page.getByRole("switch", { name: "푸시 알림 받기" });
   await expect(master).toBeEnabled();
   const callsBeforeClick = api.calls();
-  await master.click();
+  await page.getByRole("button", { name: "기기 알림 허용" }).click();
   await expect(master).toBeChecked();
-  await expect(master).toBeDisabled();
   await expect(page.getByText("기기 설정에서 포카스테이션 알림을 허용해 주세요.", { exact: true })).toBeVisible();
   expect(api.calls()).toBe(callsBeforeClick);
+});
+
+test("기기 권한을 이미 허용한 신규 PWA는 설정 방문 없이 17종을 구독한다", async ({ context, page }) => {
+  await mockApi(context);
+  await simulatePushDevice(context, true, "granted", "granted");
+  const firstSave = page.waitForRequest((req) => req.method() === "PUT" && req.url().includes("/web-push/"));
+  await page.goto("/mypage");
+  const data = (await firstSave).postDataJSON();
+  expect(new Set(data.categories).size).toBe(17);
+  expect(data.subscription.endpoint).toBeTruthy();
+  expect(await page.evaluate(permissionRequests)).toBe(0);
 });

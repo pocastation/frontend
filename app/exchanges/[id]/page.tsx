@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ExchangeCta from "@/components/ExchangeCta";
 import ExchangeMoreMenu from "@/components/ExchangeMoreMenu";
+import ExchangePhotoGallery from "@/components/ExchangePhotoGallery";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
-import { apiFetch, ApiError, mediaUrl } from "@/lib/api";
+import { apiFetch, ApiError } from "@/lib/api";
 import { itemName, itemSource, slotLabel } from "@/lib/exchange-labels";
 import { FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE, LABEL_NEUTRAL } from "@/lib/ui";
 import type { ExchangePostDetail } from "@/lib/types";
@@ -47,8 +48,6 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
     notFound();
   }
 
-  const [cover, ...rest] = post.photos;
-
   return (
     <>
       <MobilePageHead
@@ -58,28 +57,9 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
       />
 
       <div className={`mx-auto max-w-[760px] ${FORM_ACTION_BAR_PAD} sm:px-4 sm:py-8`}>
-        {/* 모바일에서 높이를 묶는다. 예전에는 비율만 줘서 사진이 첫 화면의 절반을 넘었고(421/812),
-            정작 「어디서 언제」가 고정 바에 가려 첫 화면에 들어오지 않았다(#718). */}
-        {cover && (
-          <div className="flex gap-2 px-gutter pt-3 max-sm:h-[268px] sm:px-0">
-            <div className="relative flex-[1.8] overflow-hidden rounded-control border border-border bg-surface-2">
-              {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일 */}
-              <img
-                src={mediaUrl(cover.url)}
-                alt=""
-                className="h-full w-full object-cover sm:aspect-[1/1.18] sm:h-auto"
-              />
-            </div>
-            {rest.length > 0 && (
-              <div className="flex flex-1 flex-col gap-2">
-                {rest.map((photo) => (
-                  <div key={photo.url} className="flex-1 overflow-hidden rounded-control border border-border bg-surface-2">
-                    {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일 */}
-                    <img src={mediaUrl(photo.url)} alt="" className="h-full w-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
+        {post.photos.length > 0 && (
+          <div className="px-gutter pt-3 sm:px-0">
+            <ExchangePhotoGallery photos={post.photos} title="교환글" />
           </div>
         )}
 

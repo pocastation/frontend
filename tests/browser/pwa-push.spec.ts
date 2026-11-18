@@ -90,6 +90,7 @@ test("PWA의 계정 메뉴에서만 설정을 열고 일시 중지 후 선택을
   await page.goto("/mypage");
   await page.getByRole("link", { name: "푸시 알림", exact: true }).filter({ visible: true }).click();
   const master = page.getByRole("switch", { name: "푸시 알림 끄기" });
+  await expect(page.getByRole("heading", { name: "푸시 알림", exact: true })).toBeInViewport();
   const chat = page.getByRole("switch", { name: "교환 채팅" });
   const inquiry = page.getByRole("switch", { name: "1:1 문의 답변" });
   await expect(page.getByRole("switch")).toHaveCount(18);

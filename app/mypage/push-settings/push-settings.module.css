@@ -120,6 +120,10 @@
   .row { gap: 16px; }
 }
 
+@media (min-width: 640px) {
+  .header { top: 60px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .row, .switch, .switch::before { transition: none; }
 }

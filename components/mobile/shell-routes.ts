@@ -53,7 +53,7 @@ const MOBILE_EXCHANGE_DETAIL_PATTERN = /^\/exchanges\/\d+$/;
 //
 // 스타·인기 판매자 목록(`/artists`·`/sellers`)은 #653에서 뺐다. next.config의 redirects가 홈으로
 // 보내 이 목록이 볼 일이 없다. 상세는 아래 두 패턴이 계속 잡는다.
-const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/auctions/submitted", "/notifications", "/search", "/events", "/exchanges/new", "/auctions/ended", "/withdrawn"];
+const MOBILE_FULLSCREEN_ROUTES: readonly string[] = ["/auctions/new", "/auctions/submitted", "/notifications", "/search", "/events", "/exchanges/new", "/auctions/ended", "/withdrawn", "/mypage/push-settings"];
 
 export function isMobileChromeHiddenRoute(pathname: string): boolean {
   return (

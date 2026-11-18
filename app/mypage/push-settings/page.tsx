@@ -59,7 +59,7 @@ export default function PushSettingsPage() {
 }
 
 function Settings({ memberId }: { memberId: string }) {
-  const { state, active, saving, error, canEnable, unavailable, toggleMaster, toggleCategory } =
+  const { state, active, optedIn, saving, error, canEnable, unavailable, connectDevice, toggleMaster, toggleCategory } =
     useWebPush(true, memberId);
 
   return (
@@ -73,18 +73,23 @@ function Settings({ memberId }: { memberId: string }) {
         <h1>푸시 알림</h1>
       </header>
       <div className={styles.master}>
-        <span id="push-master-label">푸시 알림 끄기</span>
+        <span id="push-master-label">푸시 알림 받기</span>
         <button
           type="button"
           role="switch"
-          aria-checked={!active}
+          aria-checked={optedIn}
           aria-labelledby="push-master-label"
           aria-controls="push-categories"
           className={styles.switch}
-          disabled={saving || (!active && !canEnable)}
+          disabled={saving || !state}
           onClick={() => void toggleMaster()}
         />
       </div>
+      {optedIn && !active && canEnable && (
+        <button type="button" className={styles.feedback} disabled={saving} onClick={() => void connectDevice()}>
+          {state?.permission === "default" ? "기기 알림 허용" : "기기 알림 연결"}
+        </button>
+      )}
       <div id="push-categories" aria-busy={!state && !error || saving}>
         {groups.map(({ title, items }, index) => (
           <section className={styles.group} key={title} aria-labelledby={`push-group-${index}`}>
@@ -100,7 +105,7 @@ function Settings({ memberId }: { memberId: string }) {
                   role="switch"
                   aria-labelledby={`push-${key}`}
                   aria-describedby={`push-${key}-description`}
-                  aria-checked={state?.settings.categories.includes(key) ?? false}
+                  aria-checked={state?.settings.categories.includes(key) ?? true}
                   className={styles.switch}
                   disabled={!active || saving}
                   onClick={() => void toggleCategory(key)}

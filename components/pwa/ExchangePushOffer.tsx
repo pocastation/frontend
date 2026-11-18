@@ -31,14 +31,14 @@ export default function ExchangePushOffer({ memberId, requestId }: { memberId: s
 }
 
 function EnableExchangePush({ memberId, dismiss }: { memberId: string; dismiss: () => void }) {
-  const { state, canEnable, error, saving, toggleMaster } = useWebPush(true, memberId);
+  const { state, optedIn, canEnable, error, saving, connectDevice } = useWebPush(true, memberId);
   const [activated, setActivated] = useState(false);
 
   if (activated) return <p role="status" className="text-body-s font-semibold text-primary">푸시 알림을 켰어요.</p>;
-  if (!state || state.settings.configured || (!canEnable && !error)) return null;
+  if (!state || !optedIn || state.settings.configured || (!canEnable && !error)) return null;
 
   async function enable() {
-    if (await toggleMaster()) {
+    if (await connectDevice()) {
       dismissExchangePushOffer();
       setActivated(true);
     }

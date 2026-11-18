@@ -16,6 +16,12 @@ export async function withPushLock(work: () => Promise<void>): Promise<void> {
 export function rememberPushEnabled(memberId: string, enabled: boolean) {
   localStorage.setItem(enabledKey(memberId), String(enabled));
 }
+
+export function wantsPush(memberId: string, settings: PushSettings) {
+  const choice = localStorage.getItem(enabledKey(memberId));
+  if (choice !== null) return choice === "true";
+  return !settings.configured || Boolean(settings.endpoint) || localStorage.getItem(OWNER_KEY) === memberId;
+}
 const EXCHANGE_OFFER_KEY = "pocastation.push.exchange-offer";
 
 export function noteExchangeRequestForPush(requestId: number) {
@@ -158,11 +164,9 @@ export async function restorePushOnLogin(
     await clearLocalPush(memberId, true);
     if (Notification.permission !== "granted" || !isCurrent()) return;
     const owner = localStorage.getItem(OWNER_KEY);
-    const preference = localStorage.getItem(enabledKey(memberId));
-    if (preference !== "true" && !(preference === null && owner === memberId)) return;
     const path = pushSettingsApi();
     const settings = await fetchSettings<PushSettings>(path, { cache: "no-store" });
-    if (!settings.configured || !settings.publicKey || !isCurrent()) return;
+    if (!wantsPush(memberId, settings) || !settings.publicKey || !isCurrent()) return;
     const registration = await waitForRegistration();
     if (!registration || !isCurrent()) return;
     let subscription = await registration.pushManager.getSubscription();

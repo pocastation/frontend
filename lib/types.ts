@@ -792,7 +792,12 @@ export type NotificationType =
   | "EXCHANGE_COMPLETED" // 상대가 완료를 확인 — 24시간 이의 창 안내
   | "EXCHANGE_COMPLETION_DISPUTED" // 완료에 이의 — 확인한 쪽에게
   | "EXCHANGE_POST_REMOVED" // 신고 처리로 교환글이 내려감 — 작성자에게
-  | "EXCHANGE_EXPIRED"; // 행사가 지나 교환글이 마감됨 — 대기 중이던 신청자에게
+  | "EXCHANGE_EXPIRED" // 행사가 지나 교환글이 마감됨 — 대기 중이던 신청자에게
+  // ── 노쇼(BE #612, 인앱 전용) ──
+  | "EXCHANGE_NO_SHOW_REPORTED" // 상대가 노쇼로 신고 — 신고당한 쪽에게. 24시간 해명 기한
+  | "EXCHANGE_NO_SHOW_CONFIRMED" // 노쇼로 기록됨 — 양쪽에게
+  | "EXCHANGE_NO_SHOW_DISMISSED" // 관리자가 노쇼 아님으로 판단 — 양쪽에게
+  | "EXCHANGE_RESTRICTED"; // 노쇼 반복으로 교환 제한 — 해제일 안내
 
 // ─── 주문/결제 상태 ───
 
@@ -1440,8 +1445,145 @@ export type ExchangeThreadResponse = {
   writable: boolean;
   /** 잠긴 뒤에도 내려온다 — 입력창이 사라진 이유를 화면이 말해야 한다. */
   lockedAt: string;
+  /**
+   * 확정된 신청의 제시 포카(backend#618). 신청자에게는 줄 포카, 작성자에게는 받을 포카다.
+   * 그 배포 전 응답에는 없다. 사진은 행사 뒤 파기되면 null.
+   */
+  offer?: ExchangeItemView | null;
+  offerPhotoUrl?: string | null;
   completion: ExchangeCompletion;
+  appearance: ExchangeAppearance;
+  /** 만남 확인(backend#598). 약속 시각이 안 잡힌 옛 교환이면 null. */
+  meetup: ExchangeMeetup | null;
+  /** 노쇼 신고 상태(backend#612). */
+  noShow: ExchangeNoShowView | null;
   messages: ExchangeMessage[];
+};
+
+/**
+ * 노쇼 신고의 상태(backend#612).
+ * PENDING 해명 대기 → (해명 없이 24시간) CONFIRMED, (해명 있음) DISPUTED → 관리자가 CONFIRMED·DISMISSED.
+ */
+export type ExchangeNoShowStatus = "PENDING" | "DISPUTED" | "CONFIRMED" | "DISMISSED" | "WITHDRAWN";
+
+export type ExchangeNoShowReport = {
+  id: number;
+  status: ExchangeNoShowStatus;
+  reportedAt: string;
+  /** 신고당한 사람이 해명할 수 있는 마감 시각(신고 + 24시간). */
+  explainUntil: string;
+  explanation: string | null;
+  resolvedAt: string | null;
+};
+
+export type ExchangeNoShowView = {
+  /** 지금 「상대가 안 왔어요」를 누를 수 있는가. 약속 시각 이후, 완료·만남 확인 전, 아직 신고 안 함. */
+  reportable: boolean;
+  filedByMe: ExchangeNoShowReport | null;
+  againstMe: ExchangeNoShowReport | null;
+};
+
+/** 내 교환 제한 상태(backend#612). 노쇼가 windowDays일 안에 threshold번이면 걸린다. */
+export type MyExchangeRestriction = {
+  restricted: boolean;
+  endsAt: string | null;
+  noShowCount: number;
+  threshold: number;
+  windowDays: number;
+};
+
+/** 관리자 화면의 노쇼 신고 1건. 만남 확인 시각은 양쪽 말이 갈릴 때 판단 근거다. */
+export type AdminExchangeNoShow = {
+  id: number;
+  postId: number;
+  place: string | null;
+  reporterId: string;
+  reporterNickname: string | null;
+  reportedId: string;
+  reportedNickname: string | null;
+  status: ExchangeNoShowStatus;
+  reportedAt: string;
+  explainUntil: string;
+  explanation: string | null;
+  explainedAt: string | null;
+  meetAt: string | null;
+  meetupConfirmedAt: string | null;
+  resolvedAt: string | null;
+  resolvedBy: string | null;
+  resolutionReason: string | null;
+};
+
+export type AdminExchangeNoShowListResponse = {
+  content: AdminExchangeNoShow[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+};
+
+export type ExchangeRestrictionView = {
+  id: number;
+  startsAt: string;
+  endsAt: string;
+  active: boolean;
+  liftedAt: string | null;
+  liftReason: string | null;
+};
+
+export type AdminMemberNoShowHistory = {
+  memberId: string;
+  /** 최근 windowDays일 동안 기록된 노쇼 수. 제한 판단과 같은 값이다. */
+  noShowCount: number;
+  windowDays: number;
+  restrictions: ExchangeRestrictionView[];
+  reports: AdminExchangeNoShow[];
+};
+
+/**
+ * 만남 확인 상태(backend#598). 코드는 작성자 화면에만 나오고 입력은 신청자만 한다.
+ * 교환 완료와는 별개다. 노쇼를 판단할 때 근거로 쓴다.
+ */
+export type ExchangeMeetup = {
+  /** 내가 코드를 보여 주는 쪽(작성자)인가. 아니면 입력하는 쪽이다. */
+  codeHolder: boolean;
+  /** 버튼이 켜지는 시각(약속 10분 전). */
+  opensAt: string;
+  /** 버튼이 꺼지는 시각(대화 잠금). */
+  closesAt: string;
+  /** 지금 확인할 수 있는가. */
+  open: boolean;
+  confirmed: boolean;
+  confirmedAt: string | null;
+  /** 오입력으로 막혀 있으면 풀리는 시각. */
+  lockedUntil: string | null;
+};
+
+/** 작성자 화면의 코드. {@code expiresAt}에 바뀌므로 그때 다시 부른다. */
+export type ExchangeMeetupCode = {
+  code: string;
+  expiresAt: string;
+};
+
+/** 코드 입력 결과. 틀려도 200이고 {@code confirmed=false}로 구분한다. */
+export type ExchangeMeetupConfirmResult = {
+  confirmed: boolean;
+  confirmedAt: string | null;
+  remainingAttempts: number;
+  lockedUntil: string | null;
+};
+
+/** 인상착의 한 줄(backend#612). 당사자마다 한 행을 덮어쓴다. */
+export type ExchangeAppearanceEntry = {
+  body: string;
+  updatedAt: string;
+};
+
+export type ExchangeAppearance = {
+  /** 지금 내 인상착의를 고칠 수 있는가(대화 잠금 전). */
+  writable: boolean;
+  /** 아직 올리지 않았으면 null. */
+  mine: ExchangeAppearanceEntry | null;
+  counterpart: ExchangeAppearanceEntry | null;
 };
 
 export type ExchangeMessageListResponse = {
@@ -1480,6 +1622,8 @@ export type MyExchangeRequest = {
   createdAt: string;
   // 수락됐고 대화가 남아 있을 때만 true. 대화는 post.postId로 들어간다.
   threadAvailable: boolean;
+  // 내가 제시한 포카(줄 것). 받을 것은 post.have다(backend#616). 그 배포 전 응답에는 없다.
+  offer?: ExchangeItemView | null;
   // 대상 글 행이 없으면 null(지금은 글을 지우는 경로가 없어 방어용). 제재된 글은 썸네일만 null.
   post: {
     postId: number;

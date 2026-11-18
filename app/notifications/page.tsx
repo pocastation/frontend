@@ -72,6 +72,11 @@ const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; ico
   EXCHANGE_COMPLETION_DISPUTED: { label: "완료 이의", tone: "neutral", icon: "xCircle" },
   EXCHANGE_POST_REMOVED: { label: "교환글 내림", tone: "accent", icon: "xCircle" },
   EXCHANGE_EXPIRED: { label: "교환 마감", tone: "neutral", icon: "clock" },
+  // 노쇼(BE #612). 신고는 24시간 안에 해명하지 않으면 그대로 기록되므로 accent다.
+  EXCHANGE_NO_SHOW_REPORTED: { label: "노쇼 신고", tone: "accent", icon: "alertCircle" },
+  EXCHANGE_NO_SHOW_CONFIRMED: { label: "노쇼 기록", tone: "neutral", icon: "xCircle" },
+  EXCHANGE_NO_SHOW_DISMISSED: { label: "노쇼 기각", tone: "neutral", icon: "checkCircle" },
+  EXCHANGE_RESTRICTED: { label: "교환 제한", tone: "accent", icon: "alertCircle" },
 };
 
 /**
@@ -86,6 +91,9 @@ const EXCHANGE_DESTINATION: Partial<Record<NotificationType, (postId: number) =>
   EXCHANGE_MESSAGE: (id) => `/exchanges/${id}/thread`,
   EXCHANGE_COMPLETED: (id) => `/exchanges/${id}/thread`,
   EXCHANGE_COMPLETION_DISPUTED: (id) => `/exchanges/${id}/thread`,
+  EXCHANGE_NO_SHOW_REPORTED: (id) => `/exchanges/${id}/thread`,
+  EXCHANGE_NO_SHOW_CONFIRMED: (id) => `/exchanges/${id}/thread`,
+  EXCHANGE_NO_SHOW_DISMISSED: (id) => `/exchanges/${id}/thread`,
 };
 
 // 배포 시점 차이로 프론트가 모르는 타입이 와도 렌더가 깨지지 않게 폴백.

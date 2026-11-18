@@ -2,6 +2,8 @@
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import ExchangeRestrictedNotice from "@/components/ExchangeRestrictedNotice";
+import { useExchangeRestriction } from "@/lib/use-exchange-restriction";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import PhotoUploadGrid from "@/components/PhotoUploadGrid";
 import { apiFetch } from "@/lib/api";
@@ -67,6 +69,8 @@ function NewExchangeForm() {
   const [idols, setIdols] = useState<ArtistMemberResponse[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // 노쇼 반복으로 막힌 사람은 폼을 채우기 전에 해제일을 본다(#824).
+  const restriction = useExchangeRestriction();
 
   const [artistId, setArtistId] = useState("");
   const [idolId, setIdolId] = useState("");
@@ -184,6 +188,15 @@ function NewExchangeForm() {
 
     행사를 아직 못 읽었으면 막지 않는다 — 읽는 중에 가로막으면 정상 진입이 깜빡인다.
   */
+  if (restriction?.restricted) {
+    return (
+      <>
+        <MobilePageHead title="교환글 작성" sub={event?.name} variant="dismiss" backHref={`/events/${eventId}`} />
+        <ExchangeRestrictedNotice restriction={restriction} />
+      </>
+    );
+  }
+
   const writeWindow = event ? exchangeWindow(event.eventDate) : "open";
   if (writeWindow !== "open") {
     return (

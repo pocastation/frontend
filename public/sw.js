@@ -15,7 +15,7 @@
  */
 
 // 캐시 이름의 버전. **이 파일을 고칠 때마다 올린다** — 올려야 옛 캐시가 정리된다.
-const VERSION = "v3";
+const VERSION = "v4";
 const STATIC_CACHE = `pocastation-static-${VERSION}`;
 const OFFLINE_URL = "/offline.html";
 
@@ -50,11 +50,13 @@ self.addEventListener("push", (event) => {
   const title = typeof payload.title === "string" && payload.title.trim()
     ? payload.title
     : "포카스테이션";
+  const destination = pushDestination(typeof payload.url === "string" ? payload.url : "/notifications").href;
   event.waitUntil(self.registration.showNotification(title, {
     body: typeof payload.body === "string" ? payload.body : "새 알림이 도착했어요.",
     icon: "/icons/icon-192.png",
     tag: typeof payload.tag === "string" ? payload.tag : undefined,
-    data: { url: pushDestination(typeof payload.url === "string" ? payload.url : "/notifications").href },
+    navigate: destination,
+    data: { url: destination },
   }));
 });
 
@@ -73,12 +75,13 @@ self.addEventListener("notificationclick", (event) => {
       }
     }
     const existing = windows.find((client) =>
-      client !== matching && new URL(client.url).origin === target.origin
+      client !== matching && client.url.startsWith(target.origin + "/")
     );
     if (existing) {
       try {
         const navigated = await existing.navigate(target.href);
         if (navigated) {
+          await recoverHomeLaunch(navigated, target);
           await navigated.focus();
           return;
         }
@@ -86,9 +89,17 @@ self.addEventListener("notificationclick", (event) => {
         // Open the destination if this client can no longer be navigated.
       }
     }
-    await self.clients.openWindow(target.href);
+    const opened = await self.clients.openWindow(target.href);
+    await recoverHomeLaunch(opened, target);
   })());
 });
+
+// Some installed PWAs launch at the manifest start URL despite openWindow's argument.
+async function recoverHomeLaunch(client, target) {
+  if (client?.url === target.origin + "/" && client.url !== target.href) {
+    await client.navigate(target.href);
+  }
+}
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(

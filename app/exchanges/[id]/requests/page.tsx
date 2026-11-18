@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import ExchangePhotoGallery from "@/components/ExchangePhotoGallery";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
-import { ApiError, apiFetch, mediaUrl } from "@/lib/api";
+import { ApiError, apiFetch } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { itemDetail, itemName, slotLabel } from "@/lib/exchange-labels";
 import { formatRelativeTime } from "@/lib/format";
@@ -121,16 +122,11 @@ export default function ExchangeRequestsPage() {
             {pending.map((request, index) => (
               <article key={request.id} className="border-b border-border py-4 last:border-0">
                 <div className="flex items-start gap-3">
-                  {request.photos.length > 0 && (
-                    <div className="flex flex-shrink-0 gap-1">
-                      {request.photos.slice(0, 2).map((photo) => (
-                        <span key={photo.url} className="block h-16 w-[54px] overflow-hidden rounded-control border border-border bg-surface-2">
-                          {/* eslint-disable-next-line @next/next/no-img-element -- 백엔드가 직접 서빙하는 원본 파일 */}
-                          <img src={mediaUrl(photo.thumbnailUrl)} alt="" className="h-full w-full object-cover" />
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                  <ExchangePhotoGallery
+                    photos={request.photos}
+                    title={request.requesterNickname ? `${request.requesterNickname}님 신청` : "받은 신청"}
+                    compact
+                  />
                   <div className="min-w-0 flex-1">
                     <p className="text-body-l font-extrabold text-text-1">{itemName(request.offer)}</p>
                     <p className="mt-px text-label text-text-3">{itemDetail(request.offer)}</p>

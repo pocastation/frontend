@@ -26,9 +26,11 @@ const EMPTY = { items: [], total: 0, page: 0, totalPages: 0 };
 
 export default function MyExchangesTab({
   mode,
+  focusedPostId,
   onCounts,
 }: {
   mode: ExchangeListMode;
+  focusedPostId?: number | null;
   onCounts?: (counts: { posts: number; requests: number }) => void;
 }) {
   const { fetchWithAuth } = useAuth();
@@ -86,6 +88,8 @@ export default function MyExchangesTab({
 
   const list = mode === "posts" ? posts : requests;
   const hasMore = list.page + 1 < list.totalPages;
+  const focusedPost = posts.items.find((post) => post.postId === focusedPostId);
+  const focusedRequest = requests.items.find((request) => request.post?.postId === focusedPostId);
 
   return (
     <div>
@@ -105,8 +109,10 @@ export default function MyExchangesTab({
       ) : (
         <ul>
           {mode === "posts"
-            ? posts.items.map((post) => <PostRow key={post.postId} post={post} />)
-            : requests.items.map((request) => <RequestRow key={request.requestId} request={request} />)}
+            ? (focusedPost ? [focusedPost, ...posts.items.filter((post) => post !== focusedPost)] : posts.items)
+              .map((post) => <PostRow key={post.postId} post={post} />)
+            : (focusedRequest ? [focusedRequest, ...requests.items.filter((request) => request !== focusedRequest)] : requests.items)
+              .map((request) => <RequestRow key={request.requestId} request={request} />)}
         </ul>
       )}
       {hasMore && (

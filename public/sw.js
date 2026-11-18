@@ -15,7 +15,7 @@
  */
 
 // 캐시 이름의 버전. **이 파일을 고칠 때마다 올린다** — 올려야 옛 캐시가 정리된다.
-const VERSION = "v2";
+const VERSION = "v3";
 const STATIC_CACHE = `pocastation-static-${VERSION}`;
 const OFFLINE_URL = "/offline.html";
 
@@ -47,7 +47,10 @@ self.addEventListener("push", (event) => {
   } catch {
     // Older payloads still open the in-app inbox.
   }
-  event.waitUntil(self.registration.showNotification("포카스테이션", {
+  const title = typeof payload.title === "string" && payload.title.trim()
+    ? payload.title
+    : "포카스테이션";
+  event.waitUntil(self.registration.showNotification(title, {
     body: typeof payload.body === "string" ? payload.body : "새 알림이 도착했어요.",
     icon: "/icons/icon-192.png",
     tag: typeof payload.tag === "string" ? payload.tag : undefined,
@@ -67,6 +70,20 @@ self.addEventListener("notificationclick", (event) => {
         return;
       } catch {
         // The matching window may have closed since matchAll.
+      }
+    }
+    const existing = windows.find((client) =>
+      client !== matching && new URL(client.url).origin === target.origin
+    );
+    if (existing) {
+      try {
+        const navigated = await existing.navigate(target.href);
+        if (navigated) {
+          await navigated.focus();
+          return;
+        }
+      } catch {
+        // Open the destination if this client can no longer be navigated.
       }
     }
     await self.clients.openWindow(target.href);

@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import ExchangeFeedRow from "@/components/ExchangeFeedRow";
+import EventExchangeFeed from "@/components/EventExchangeFeed";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import NavLink from "@/components/NavLink";
 import { apiFetch, ApiError } from "@/lib/api";
 import { kstHm, weekdayKo } from "@/lib/event-dates";
 import { exchangeWindow } from "@/lib/exchange-labels";
+import { feedApiQuery, parseTagQuery, type ExchangeTagQuery } from "@/lib/exchange-tags";
 import {
   FOCUS_RING,
   FORM_ACTION_BAR,
   FORM_ACTION_BAR_PAD,
   FORM_ACTION_BAR_STYLE,
-  PRESS_CHIP,
   PRESS_PRIMARY,
 } from "@/lib/ui";
 import type { EventResponse, ExchangeFeedResponse } from "@/lib/types";
@@ -36,10 +35,11 @@ async function getEvent(id: string): Promise<EventResponse | null> {
   }
 }
 
-async function getFeed(id: string, artistId?: string): Promise<ExchangeFeedResponse | null> {
-  const query = artistId ? `?artistId=${artistId}` : "";
+async function getFeed(id: string, tags: ExchangeTagQuery): Promise<ExchangeFeedResponse | null> {
   try {
-    return await apiFetch<ExchangeFeedResponse>(`/api/events/${id}/exchanges${query}`, { cache: "no-store" });
+    return await apiFetch<ExchangeFeedResponse>(`/api/events/${id}/exchanges${feedApiQuery(tags)}`, {
+      cache: "no-store",
+    });
   } catch {
     return null;
   }
@@ -60,18 +60,17 @@ export default async function EventFeedPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ artistId?: string }>;
+  searchParams: Promise<{ side?: string; artistIds?: string; idols?: string; artistId?: string }>;
 }) {
   const { id } = await params;
-  const { artistId } = await searchParams;
+  const tags = parseTagQuery(await searchParams);
   const event = await getEvent(id);
   if (!event) {
     notFound();
   }
 
-  const feed = await getFeed(id, artistId);
+  const feed = await getFeed(id, tags);
   const dateLabel = `${Number(event.eventDate.slice(5, 7))}월 ${Number(event.eventDate.slice(8, 10))}일 ${weekdayKo(event.eventDate)}요일`;
-  const selected = artistId ? Number(artistId) : null;
   const writeWindow = exchangeWindow(event.eventDate);
 
   return (
@@ -92,40 +91,7 @@ export default async function EventFeedPage({
           </p>
         )}
 
-        {feed && feed.artists.length > 0 && (
-          <nav aria-label="스타 필터" className="flex gap-2 overflow-x-auto border-b border-border px-gutter py-3 sm:px-0">
-            <FilterChip href={`/events/${id}`} on={selected === null}>
-              전체 {feed.totalElements}
-            </FilterChip>
-            {feed.artists.map((a) => (
-              <FilterChip
-                key={a.artistId}
-                href={`/events/${id}?artistId=${a.artistId}`}
-                on={selected === a.artistId}
-              >
-                {a.artistName ?? "알 수 없음"} {a.count}
-              </FilterChip>
-            ))}
-          </nav>
-        )}
-
-        <div className="px-gutter sm:px-0">
-          {feed === null ? (
-            <p className="py-12 text-center text-body-s text-text-3">
-              교환글을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.
-            </p>
-          ) : feed.content.length === 0 ? (
-            <p className="py-12 text-center text-body-s text-text-3">
-              {selected ? "이 스타의 교환글이 아직 없어요." : "이 행사의 교환글이 아직 없어요."}
-            </p>
-          ) : (
-            <ul className="pt-1">
-              {feed.content.map((item) => (
-                <ExchangeFeedRow key={item.id} item={item} />
-              ))}
-            </ul>
-          )}
-        </div>
+        <EventExchangeFeed eventId={id} tags={tags} initialFeed={feed} />
 
         {/* 창 밖이면 버튼을 남기지 않는다(#722). 서버가 막는 것을 화면이 안 막으면 폼을 다 채운
             뒤에 400을 받는다 — #690과 같은 모양이다. 아직인지 이미 닫혔는지는 갈라서 말한다. */}
@@ -150,20 +116,5 @@ export default async function EventFeedPage({
         )}
       </div>
     </>
-  );
-}
-
-function FilterChip({ href, on, children }: { href: string; on: boolean; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      aria-current={on ? "true" : undefined}
-      /* 선택된 칩(보라)에는 눌림 배경을 주지 않는다 — 선택 결과와 눌림이 섞인다(#720). */
-      className={`shrink-0 rounded-control border px-3 py-2 text-label font-bold ${FOCUS_RING} ${
-        on ? "border-primary bg-primary text-white" : `border-border-2 text-text-2 ${PRESS_CHIP}`
-      }`}
-    >
-      {children}
-    </Link>
   );
 }

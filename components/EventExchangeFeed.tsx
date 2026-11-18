@@ -5,7 +5,11 @@ import ExchangeFeedRow from "@/components/ExchangeFeedRow";
 import ExchangeTagFilter from "@/components/ExchangeTagFilter";
 import { useAuth } from "@/lib/auth-context";
 import { feedApiQuery, tagCount, type ExchangeTagQuery } from "@/lib/exchange-tags";
-import type { ExchangeFeedResponse } from "@/lib/types";
+import type { ExchangeFeedResponse, MyExchangePage, MyExchangePost } from "@/lib/types";
+
+/** 내 글 대조에 받는 건수. 서버 상한(Pagination.DEFAULT_MAX_SIZE)과 같다. 최신순이라 피드에 걸리는
+ *  열린 글은 이 안에 든다. */
+const MY_POSTS_SIZE = 100;
 
 /**
  * 행사 피드의 검색 줄과 목록(#826).
@@ -45,6 +49,24 @@ export default function EventExchangeFeed({
     };
   }, [isLoading, memberId, path, fetchWithAuth]);
 
+  // 내가 올린 글(#832). 피드 응답에 작성자가 없어 내 교환글 목록의 id와 대조한다. 행사와 무관하게
+  // 한 번만 받는다 — 태그를 바꿀 때마다 다시 받을 이유가 없다.
+  const [mine, setMine] = useState<{ memberId: string; ids: Set<number> } | null>(null);
+  useEffect(() => {
+    if (isLoading || !memberId) return;
+    let cancelled = false;
+    fetchWithAuth<MyExchangePage<MyExchangePost>>(`/api/members/me/exchange-posts?page=0&size=${MY_POSTS_SIZE}`)
+      .then((res) => {
+        if (!cancelled) setMine({ memberId, ids: new Set(res.content.map((p) => p.postId)) });
+      })
+      // 실패하면 표시만 빠진다. 목록은 그대로 쓸 수 있다.
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoading, memberId, fetchWithAuth]);
+  const myIds = mine && mine.memberId === memberId ? mine.ids : null;
+
   const feed = memberId && authed?.path === path ? authed.feed : initialFeed;
   const tagged = tagCount(tags) > 0;
 
@@ -77,7 +99,7 @@ export default function EventExchangeFeed({
         ) : (
           <ul className="pt-1">
             {feed.content.map((item) => (
-              <ExchangeFeedRow key={item.id} item={item} />
+              <ExchangeFeedRow key={item.id} item={item} mine={myIds?.has(item.id) ?? false} />
             ))}
           </ul>
         )}

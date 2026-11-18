@@ -95,6 +95,11 @@ const PUBLIC_DETAIL_STATUSES = new Set<AuctionResponse["status"]>([
 
 type SellingListItem = AuctionResponse | MySellingAuctionResponse;
 
+function prioritizeAuction<T extends { id: number }>(items: T[], id: number | null): T[] {
+  const index = id == null ? -1 : items.findIndex((item) => item.id === id);
+  return index <= 0 ? items : [items[index], ...items.slice(0, index), ...items.slice(index + 1)];
+}
+
 // 제안 철회 줄의 버튼(#428). 판매 관리의 아웃라인 버튼과 같은 무게로 둔다 — 취소는 예외적인
 // 행동이 아니라 §1.2가 보장한 권리라, 눈에 띄게 만들 이유도 숨길 이유도 없다.
 const OFFER_ACTION_CLASS =
@@ -309,6 +314,14 @@ function MyPageBody() {
   const requested = resolveTabQuery(searchParams.get("tab"));
   const tab = requested?.tab ?? null;
   const activeTab: Tab = tab ?? "dashboard";
+  const auctionId = Number(searchParams.get("auctionId"));
+  const focusedAuctionId = Number.isSafeInteger(auctionId) && auctionId > 0 ? auctionId : null;
+  const focusedPurchaseId = tab === "purchases" ? focusedAuctionId : null;
+  const addressRequested = tab === "purchases" && searchParams.get("address") === "1";
+  const postId = Number(searchParams.get("postId"));
+  const focusedExchangeId = tab === "exchanges" && Number.isSafeInteger(postId) && postId > 0 ? postId : null;
+  const requestedExchangeMode = searchParams.get("exchangeMode");
+  const mypageUrl = searchParams.size ? `/mypage?${searchParams.toString()}` : "/mypage";
   const [biddingFilter, setBiddingFilter] = useState<BiddingFilter>("live");
   const [purchaseFilter, setPurchaseFilter] = useState<PurchaseFilter>("auction");
   // 교환 내역(#784) 위 탭과 건수. 건수는 목록 컴포넌트가 처음 읽을 때 올려준다.
@@ -386,6 +399,21 @@ function MyPageBody() {
   }, [aliasBidding, aliasPurchase]);
 
   useEffect(() => {
+    if (requestedExchangeMode === "posts" || requestedExchangeMode === "requests") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- 알림이 지정한 교환 내역 필터로 진입한다.
+      setExchangeMode(requestedExchangeMode);
+    }
+  }, [requestedExchangeMode, focusedExchangeId]);
+
+  const focusedPurchaseFilter = focusedPurchaseId != null
+    ? instantPurchases.some((item) => item.id === focusedPurchaseId) ? "instant" : "auction"
+    : null;
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- 알림의 구매 유형을 알아낸 뒤 해당 필터를 연다.
+    if (focusedPurchaseFilter) setPurchaseFilter(focusedPurchaseFilter);
+  }, [focusedPurchaseFilter, focusedPurchaseId]);
+
+  useEffect(() => {
     if (firstTabRender.current) {
       firstTabRender.current = false;
       return;
@@ -425,16 +453,17 @@ function MyPageBody() {
       // MATCHED로 바뀌었는데(BE #368) 여기가 ENDED_SOLD만 보고 있었다 — 결제해야 할 주문을
       // **조회조차 하지 않아** 선택된 구매자가 결제 화면에 닿을 수 없었다. 알림은 「48시간 안에
       // 결제해 주세요」라고 하는데 그 화면이 없는 상태였다.
-      const purchasedIds = [
+      const purchasedIds = new Set([
         ...biddingRes.content
           .filter((b) => b.status === "MATCHED" || b.status === "ENDED_SOLD")
           .map((b) => b.id),
         ...instantPurchasesRes.content.map((a) => a.id),
-      ];
+      ]);
+      if (focusedPurchaseId != null) purchasedIds.add(focusedPurchaseId);
       try {
-        if (purchasedIds.length > 0) {
+        if (purchasedIds.size > 0) {
           const orderRes = await fetchWithAuth<MyOrderStatusResponse[]>(
-            `/api/members/me/orders/status?auctionIds=${purchasedIds.join(",")}`,
+            `/api/members/me/orders/status?auctionIds=${[...purchasedIds].join(",")}`,
           );
           setOrders(Object.fromEntries(orderRes.map((o) => [o.auctionId, o])));
         } else {
@@ -470,14 +499,16 @@ function MyPageBody() {
     } finally {
       setLoading(false);
     }
-  }, [fetchWithAuth]);
+  }, [fetchWithAuth, focusedPurchaseId]);
 
   // 배송지 미확정(기본배송지 없이 거래 성사) 주문이 있으면 진입 즉시 팝업 — 이미 열려있거나 이번
   // 세션에 "나중에"로 닫은 주문은 다시 띄우지 않는다.
   useEffect(() => {
     if (addressModalOrder) return;
+    if (focusedExchangeId != null || (focusedAuctionId != null && !addressRequested)) return;
     const pending = Object.values(orders).find(
       (o) =>
+        (focusedAuctionId == null || o.auctionId === focusedAuctionId) &&
         o.status === "PAID" &&
         // 준비 중이어도 주소가 없으면 여전히 입력해야 한다 — 주소가 없으면 판매자는 애초에
         // 보낼 수 없다. 「발송 전 전체」로 보는 이유가 서버 쪽 T2와 같다.
@@ -488,7 +519,7 @@ function MyPageBody() {
     if (!pending) return;
     const auction = [...bidding, ...instantPurchases].find((a) => a.id === pending.auctionId);
     setAddressModalOrder({ auctionId: pending.auctionId, title: auction?.title ?? "구매 상품" });
-  }, [orders, bidding, instantPurchases, addressModalOrder]);
+  }, [orders, bidding, instantPurchases, addressModalOrder, focusedAuctionId, focusedExchangeId, addressRequested]);
 
   function openAddressModal(auctionId: number, title: string) {
     setAddressModalOrder({ auctionId, title });
@@ -572,12 +603,12 @@ function MyPageBody() {
       // 탈퇴가 끝나 로그인 상태가 풀리는 중이면 물러선다(#567) — 여기서 /login으로 보내면 설정 탭이
       // 보내는 완료 화면(/withdrawn)을 덮어 방금 탈퇴한 사람이 로그인 폼을 본다.
       if (isWithdrawing) return;
-      router.replace("/login?redirect=/mypage");
+      router.replace(`/login?redirect=${encodeURIComponent(mypageUrl)}`);
       return;
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect -- 인증 상태 확정 후 서버 데이터를 동기화한다.
     void loadMyActivity();
-  }, [accessToken, isLoading, isWithdrawing, loadMyActivity, router]);
+  }, [accessToken, isLoading, isWithdrawing, loadMyActivity, mypageUrl, router]);
 
   async function handleLogout() {
     await logout();
@@ -603,8 +634,14 @@ function MyPageBody() {
   // 있다는 것은 내가 구매자라는 사실 그 자체다. 상태로 가르면 결제 대기(MATCHED)가 빠져
   // **결제하기 버튼에 닿을 수 없다** — 실제로 그렇게 끊겨 있었다.
   const wonBidding = bidding.filter(
-    (b) => (b.status === "MATCHED" || b.status === "ENDED_SOLD") && orders[b.id] != null,
+    (b) => (b.status === "MATCHED" || b.status === "ENDED_SOLD" || b.id === focusedPurchaseId)
+      && orders[b.id] != null,
   );
+  const linkedSale = focusedAuctionId == null ? undefined : selling.find((item) => item.id === focusedAuctionId);
+  const visibleSelling = linkedSale && !SELLING_TAB_STATUSES.has(linkedSale.status)
+    ? [linkedSale, ...activeSelling] : prioritizeAuction(activeSelling, focusedAuctionId);
+  const visibleSellHistory = linkedSale && SELLING_TAB_STATUSES.has(linkedSale.status)
+    ? [linkedSale, ...sellingHistory] : prioritizeAuction(sellingHistory, focusedAuctionId);
 
   // 모바일 메뉴의 빨간 배지 = "지금 내가 손봐야 하는 건수". 단순 개수(회색 값)와 구분한다.
   const needsAddress = (o: MyOrderStatusResponse) =>
@@ -928,7 +965,7 @@ function MyPageBody() {
             />
             <div className="mt-5">
               <MyBiddingList
-                items={biddingFilter === "live" ? liveBidding : bidding}
+                items={prioritizeAuction(biddingFilter === "live" ? liveBidding : bidding, focusedAuctionId)}
                 loading={loading}
                 emptyText={biddingFilter === "live" ? "참여 중인 거래가 없습니다." : "아직 제안한 상품이 없어요."}
                 orders={orders}
@@ -951,10 +988,10 @@ function MyPageBody() {
             />
             <div className="mt-5">
               {purchaseFilter === "auction" ? (
-                <MyBiddingList items={wonBidding} loading={loading} emptyText="거래가 성사된 판매글이 없습니다." orders={orders} onGoPayment={() => selectTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
+                <MyBiddingList items={prioritizeAuction(wonBidding, focusedAuctionId)} loading={loading} emptyText="거래가 성사된 판매글이 없습니다." orders={orders} onGoPayment={() => selectTab("payment")} onRefresh={loadMyActivity} onOpenAddressModal={openAddressModal} onConfirmed={handleConfirmed} />
               ) : (
                 <SellingList
-                  items={instantPurchases}
+                  items={prioritizeAuction(instantPurchases, focusedAuctionId)}
                   loading={loading}
                   emptyText="구매한 즉시판매가 없습니다."
                   endedLabel="구매 완료"
@@ -972,7 +1009,7 @@ function MyPageBody() {
             <TabHead title="판매 중인 상품" sub={<>등록한 판매글과 검수 상태 {activeSelling.length}건</>} />
             {loading ? (
               <p className="mt-6 text-body text-text-3">불러오는 중...</p>
-            ) : activeSelling.length === 0 ? (
+            ) : visibleSelling.length === 0 ? (
               <p className="mt-6 text-body text-text-3">
                 아직 등록한 판매글이 없어요.{" "}
                 <Link href="/auctions/new" className={`font-bold text-primary hover:underline ${FOCUS_RING}`}>
@@ -982,7 +1019,7 @@ function MyPageBody() {
             ) : (
               <div className="mt-5">
                 <SellingList
-                  items={activeSelling}
+                  items={visibleSelling}
                   loading={loading}
                   emptyText="등록한 판매글이 없습니다."
                   showReviewStatus
@@ -1063,7 +1100,7 @@ function MyPageBody() {
               ]}
             />
             <div className="mt-2">
-              <MyExchangesTab mode={exchangeMode} onCounts={setExchangeCounts} />
+              <MyExchangesTab mode={exchangeMode} focusedPostId={focusedExchangeId} onCounts={setExchangeCounts} />
             </div>
           </>
         ) : activeTab === "consents" ? (
@@ -1122,7 +1159,7 @@ function MyPageBody() {
             <TabHead title="판매 내역" sub={<>종료되거나 취소된 판매글 {sellingHistory.length}건</>} />
             <div className="mt-5">
               <SellingList
-                items={sellingHistory}
+                items={visibleSellHistory}
                 loading={loading}
                 emptyText="판매 내역이 없습니다."
                 showReviewStatus

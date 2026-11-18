@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { FOCUS_RING, PRESS_ICON } from "@/lib/ui";
-import { dismiss, markNav } from "@/lib/nav-transition";
+import { dismiss, enteredFromApp, markNav } from "@/lib/nav-transition";
 
 /**
  * 모바일 서브 화면 앱바 — 뒤로 44px + 제목 17px + 우측 액션 슬롯.
@@ -20,6 +20,7 @@ export default function MobilePageHead({
   sub,
   action,
   backHref,
+  backMode = "push",
   variant = "back",
 }: {
   title: string;
@@ -37,6 +38,13 @@ export default function MobilePageHead({
    * 닫은 위저드가 다시 열린다.
    */
   variant?: "back" | "close" | "dismiss";
+  /**
+   * 뒤로(`variant="back"`)에 `backHref`가 있을 때의 이동. `"push"`는 그 경로로 새로 간다(상위 화면이
+   * 고정인 곳). `"return"`은 앱 안에서 들어왔으면 들어온 길을 되짚고, 주소로 바로 들어왔으면 `backHref`로
+   * 갈아 끼운다. 상세에서 연 하위 화면이 push로 상세에 돌아가면 히스토리가 「상세 → 하위 → 상세」로
+   * 쌓여, 상세에서 뒤로를 누를 때 하위 화면이 다시 열린다(#832).
+   */
+  backMode?: "push" | "return";
 }) {
   const router = useRouter();
   // 뒤로(variant="back")로 정해진 경로에 갈 때만 화면을 뒤로 민다. 히스토리 뒤로는 NavTransition이
@@ -44,7 +52,9 @@ export default function MobilePageHead({
   const leave = () => {
     if (variant === "dismiss") return backHref ? dismiss(router, backHref) : router.back();
     if (!backHref) return router.back();
+    if (variant === "back" && backMode === "return" && enteredFromApp()) return router.back();
     if (variant === "back") markNav("back");
+    if (backMode === "return") return router.replace(backHref);
     router.push(backHref);
   };
 

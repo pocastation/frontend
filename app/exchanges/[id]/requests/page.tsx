@@ -84,7 +84,7 @@ export default function ExchangeRequestsPage() {
       <MobilePageHead
         title="받은 신청"
         sub={post ? `${pending.length}건 · ${post.place}` : undefined}
-        backHref={`/exchanges/${postId}`}
+        backHref={`/exchanges/${postId}`} backMode="return"
       />
 
       <div className="mx-auto max-w-[640px] pb-16 sm:px-4 sm:py-8">

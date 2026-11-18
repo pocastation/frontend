@@ -93,7 +93,9 @@ function captureBeforeCommit(key: string): Promise<void> | null {
 }
 
 function commitKey(key: string) {
-  if (!nav.popped) rememberEntry(key, nav.committed);
+  // 같은 주소로 다시 커밋되면(개발 모드의 효과 재실행, Suspense 재마운트) 기록하지 않는다. 덮어쓰면
+  // 주소로 바로 들어온 화면이 「자기 자신에서 들어왔다」가 되어 앱 안에서 들어온 것으로 읽힌다(#832).
+  if (!nav.popped && key !== nav.committed) rememberEntry(key, nav.committed);
   nav.popped = false;
   nav.committed = key;
   nav.inflight?.finish();

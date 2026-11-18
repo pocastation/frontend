@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import InquiryStatusBadge from "@/components/InquiryStatusBadge";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
@@ -45,8 +45,10 @@ export default function AdminInquiriesPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const answerConfirmation = useRef<HTMLDialogElement>(null);
 
   const selected = items.find((item) => item.id === selectedId) ?? null;
+  const isEditingAnswer = selected?.status === "ANSWERED";
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -106,9 +108,15 @@ export default function AdminInquiriesPage() {
     }
   }
 
-  async function submitAnswer(event: React.FormEvent<HTMLFormElement>) {
+  function confirmAnswer(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!selected || !answer.trim()) return;
+    if (!selected || !answer.trim() || busy) return;
+    answerConfirmation.current?.showModal();
+  }
+
+  async function saveAnswer() {
+    answerConfirmation.current?.close();
+    if (!selected || !answer.trim() || busy) return;
     setBusy(true);
     setNotice(null);
     try {
@@ -116,7 +124,7 @@ export default function AdminInquiriesPage() {
         method: "PUT",
         body: { answer: answer.trim() },
       });
-      setNotice(selected.status === "ANSWERED" ? "답변을 수정했습니다." : "답변을 등록했습니다.");
+      setNotice(isEditingAnswer ? "답변을 수정했습니다." : "답변을 등록했습니다.");
       await load();
     } catch (err) {
       setError(err instanceof ApiError ? err.message : "답변을 저장하지 못했습니다.");
@@ -300,7 +308,7 @@ export default function AdminInquiriesPage() {
                 <p className="mt-3 whitespace-pre-wrap break-words text-body leading-7 text-text-2">{selected.content}</p>
               </div>
 
-              <form className="px-5 py-6 sm:px-6" onSubmit={submitAnswer}>
+              <form className="px-5 py-6 sm:px-6" onSubmit={confirmAnswer}>
                 <div className="mb-2 flex items-center justify-between gap-3">
                   <label htmlFor="admin-inquiry-answer" className="text-body font-extrabold text-text-1">
                     답변
@@ -341,10 +349,35 @@ export default function AdminInquiriesPage() {
                       FOCUS_RING
                     }
                   >
-                    {busy ? "저장 중..." : selected.status === "ANSWERED" ? "답변 수정" : "답변 등록"}
+                    {busy ? "저장 중..." : isEditingAnswer ? "답변 수정" : "답변 등록"}
                   </button>
                 </div>
               </form>
+              <dialog
+                ref={answerConfirmation}
+                aria-labelledby="answer-confirmation-title"
+                className="fixed inset-0 m-auto w-[calc(100%-2rem)] max-w-sm rounded-control border border-border bg-white p-5 text-text-1 shadow-lg backdrop:bg-black/50"
+              >
+                <h3 id="answer-confirmation-title" className="text-body font-extrabold">
+                  {isEditingAnswer ? "수정하시겠습니까?" : "등록하시겠습니까?"}
+                </h3>
+                <div className="mt-5 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => answerConfirmation.current?.close()}
+                    className={"h-10 rounded-control border border-border-2 px-4 text-body font-bold " + FOCUS_RING}
+                  >
+                    아니오
+                  </button>
+                  <button
+                    type="button"
+                    onClick={saveAnswer}
+                    className={"h-10 rounded-control bg-primary px-4 text-body font-extrabold text-white hover:bg-primary-dark " + FOCUS_RING}
+                  >
+                    예
+                  </button>
+                </div>
+              </dialog>
             </div>
           )}
         </section>

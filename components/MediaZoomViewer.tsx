@@ -37,7 +37,7 @@ export default function MediaZoomViewer({
   onClose,
 }: {
   open: boolean;
-  images: AuctionImageResponse[];
+  images: readonly Pick<AuctionImageResponse, "url">[];
   /** 마지막 장으로 붙는 검수영상. 사진 인덱스는 그대로이고 영상은 `images.length`번째 장이다. */
   video?: AuctionVideoResponse | null;
   title: string;

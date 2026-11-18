@@ -14,7 +14,10 @@ import type { ExchangeFeedItem } from "@/lib/types";
  * <p>썸네일은 여러 장일 때 겹쳐 쌓아 장수를 함께 알린다 — 숫자만 적으면 사진이 더 있다는 것이
  * 눈에 안 들어온다.
  */
-export default function ExchangeFeedRow({ item }: { item: ExchangeFeedItem }) {
+/**
+ * @param mine 내가 올린 글(#832). 피드 응답에는 작성자가 없어 호출부가 내 글 목록과 대조해 넘긴다.
+ */
+export default function ExchangeFeedRow({ item, mine = false }: { item: ExchangeFeedItem; mine?: boolean }) {
   // 마감된 글은 목록에서 빠지지 않는다(스위퍼가 한 시간에 한 번 돈다). 아무 표시가 없으면
   // 정상 글과 구분되지 않아 눌러 들어가 신청까지 쓰게 된다 — 배지 하나가 그걸 막는다.
   const closed = isClosed(item.expiresAt);
@@ -68,6 +71,8 @@ export default function ExchangeFeedRow({ item }: { item: ExchangeFeedItem }) {
             <span className={`truncate ${closed ? "" : "text-primary"}`}>
               {item.wants.map(itemName).join(" · ") || "—"}
             </span>
+            {/* 내 글 표시는 제목 줄 오른쪽 끝에 둔다. 아랫줄의 마감 라벨과 섞이면 상태처럼 읽힌다. */}
+            {mine && <span className={`ml-auto ${LABEL_NEUTRAL}`}>내 글</span>}
           </span>
           <span className="mt-1 block truncate text-label text-text-3">{itemDetail(item.have)}</span>
           <span className="mt-2 flex items-center gap-2 text-label text-text-2">

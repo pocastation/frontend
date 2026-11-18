@@ -7,6 +7,8 @@ import type { ReactNode } from "react";
 import { FOCUS_RING, PRESS_ROW, PRESS_FADE, LABEL_STRONG } from "@/lib/ui";
 import type { MypageTab } from "@/lib/mypage-tabs";
 import { SUPPORT_LINKS } from "@/lib/mypage-tabs";
+import { useStandalonePwa } from "@/lib/standalone-pwa";
+import { PUSH_SETTINGS_PATH } from "@/lib/web-push";
 
 /**
  * 모바일 마이 — 메뉴 목록 화면(디자인 시스템 킷 `MyPage`).
@@ -94,6 +96,11 @@ function LinkRow({ label, href }: { label: string; href: string }) {
       <RowShell label={label} />
     </Link>
   );
+}
+
+function PushSettingsRow() {
+  const standalone = useStandalonePwa();
+  return standalone ? <LinkRow label="푸시 알림" href={PUSH_SETTINGS_PATH} /> : null;
 }
 
 function GroupHead({ children }: { children: ReactNode }) {
@@ -250,6 +257,7 @@ export default function MobileMypageMenu({
         <TabRow label="배송지 관리" onClick={() => onSelectTab("shipping")} />
         <TabRow label="정산계좌" onClick={() => onSelectTab("settlement")} />
         <TabRow label="환불계좌" onClick={() => onSelectTab("refund")} />
+        <PushSettingsRow />
         {/* 선택 동의 확인·철회(#784). 한 줄짜리 「설정」 묶음을 따로 만들지 않고 계정 관리 맨 아래에 둔다. */}
         <TabRow label="수신 동의" onClick={() => onSelectTab("consents")} />
         {isAdmin && (

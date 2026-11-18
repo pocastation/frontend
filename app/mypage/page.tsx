@@ -6,6 +6,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { PAYMENT_FEE_KRW } from "@/lib/fees";
 import { ApiError, mediaUrl } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
+import { useStandalonePwa } from "@/lib/standalone-pwa";
+import { PUSH_SETTINGS_PATH } from "@/lib/web-push";
 import { useWishlist } from "@/lib/wishlist-context";
 import DeliveryAddressBook from "@/components/DeliveryAddressBook";
 import DisputePhotoStrip from "@/components/DisputePhotoStrip";
@@ -300,6 +302,7 @@ function MyPageBody() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { accessToken, member, isLoading, isWithdrawing, fetchWithAuth, logout } = useAuth();
+  const standalone = useStandalonePwa();
   const { toggle: toggleWishlistCache } = useWishlist();
 
   // null = 쿼리 없음. 모바일은 메뉴 목록, 데스크탑은 대시보드다(한 화면이라 늘 무언가를 보여준다).
@@ -737,6 +740,11 @@ function MyPageBody() {
                 {label}
               </button>
             ))}
+            {standalone && (
+              <Link href={PUSH_SETTINGS_PATH} className={`rounded-control px-3 py-2 text-body font-bold text-text-2 hover:bg-surface-2 ${FOCUS_RING}`}>
+                푸시 알림
+              </Link>
+            )}
           </nav>
 
           {/*

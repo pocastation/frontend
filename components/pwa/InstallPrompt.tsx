@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { FOCUS_RING } from "@/lib/ui";
+import { canShowIosInstallGuide, IOS_INSTALL_GUIDE_EVENT, isStandalonePwa } from "@/lib/standalone-pwa";
 
 /**
  * 홈 화면 설치 유도 — 모바일 폭에서만.
@@ -85,28 +86,30 @@ function isInAppBrowser(ua: string) {
   return /KAKAOTALK|NAVER\(inapp|Instagram|FBAN|FBAV|Line\//i.test(ua);
 }
 
-function isIosSafari(ua: string) {
-  const isIos = /iPad|iPhone|iPod/.test(ua);
-  // iOS의 크롬·파이어폭스는 홈 화면 추가 메뉴가 없다 — 사파리에서만 안내한다.
-  return isIos && !/CriOS|FxiOS|EdgiOS/.test(ua);
-}
-
 export default function InstallPrompt() {
   const [deferred, setDeferred] = useState<InstallPromptEvent | null>(null);
   const [iosHint, setIosHint] = useState(false);
   const [visible, setVisible] = useState(false);
+  const [showPushGuide, setShowPushGuide] = useState(false);
   const pathname = usePathname();
   const suppressed = SUPPRESSED_ROUTES.includes(pathname);
+
+  useEffect(() => {
+    function showGuide() {
+      if (!canShowIosInstallGuide()) return;
+      setIosHint(true);
+      setShowPushGuide(true);
+      setVisible(true);
+    }
+    window.addEventListener(IOS_INSTALL_GUIDE_EVENT, showGuide);
+    return () => window.removeEventListener(IOS_INSTALL_GUIDE_EVENT, showGuide);
+  }, []);
 
   useEffect(() => {
     // 억제 경로에서는 리스너도 타이머도 걸지 않는다. 경로가 바뀌면 효과가 다시 돌아 정상 무장한다.
     if (suppressed) return;
 
-    const standalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      // iOS 사파리는 표준 미디어쿼리 대신 이 비표준 플래그로 설치 실행 여부를 알린다.
-      (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
-    if (standalone) return;
+    if (isStandalonePwa()) return;
 
     const ua = window.navigator.userAgent;
     if (isInAppBrowser(ua)) return;
@@ -139,7 +142,7 @@ export default function InstallPrompt() {
 
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
 
-    if (isIosSafari(ua)) {
+    if (canShowIosInstallGuide()) {
       // 상태 갱신은 타이머 안에서 한다 — 효과 본문에서 동기적으로 setState하면 렌더가 한 번 더 돈다.
       timer = setTimeout(() => {
         setIosHint(true);
@@ -160,6 +163,7 @@ export default function InstallPrompt() {
   // 닫기(X) — 이번 방문만. 지금 화면을 가려서 치운 것이지 «앞으로 보지 않겠다»가 아니다.
   function closeForNow() {
     setVisible(false);
+    setShowPushGuide(false);
     try {
       sessionStorage.setItem(SESSION_KEY, "1");
     } catch {
@@ -170,6 +174,7 @@ export default function InstallPrompt() {
   // 오늘 하루 보지 않기 — 24시간.
   function snoozeToday() {
     setVisible(false);
+    setShowPushGuide(false);
     writeState({ ...readState(), until: Date.now() + SNOOZE_MS });
   }
 
@@ -183,7 +188,7 @@ export default function InstallPrompt() {
     setDeferred(null);
   }
 
-  if (!visible || suppressed) return null;
+  if (!visible || (suppressed && !showPushGuide)) return null;
 
   return (
     <div
@@ -200,7 +205,9 @@ export default function InstallPrompt() {
           <div className="min-w-0 flex-1">
             <p className="text-body-s font-extrabold text-text-1">홈 화면에 추가하기</p>
             <p className="mt-1 text-label leading-relaxed text-text-3">
-              {iosHint ? "공유 버튼 → «홈 화면에 추가»를 누르면 앱처럼 열려요" : "앱처럼 전체 화면으로 빠르게 열려요"}
+              {showPushGuide
+                ? "Safari의 공유 버튼에서 «홈 화면에 추가»를 누르세요. 홈 화면에서 앱을 연 뒤 마이페이지 › 계정 관리에서 푸시 알림을 켤 수 있어요."
+                : iosHint ? "공유 버튼 → «홈 화면에 추가»를 누르면 앱처럼 열려요" : "앱처럼 전체 화면으로 빠르게 열려요"}
             </p>
           </div>
           <button

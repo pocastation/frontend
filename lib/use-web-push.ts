@@ -4,6 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./auth-context";
 import {
   clearLocalPush,
+  PUSH_RESTORED_EVENT,
+  rememberPushEnabled,
+  wantsPush,
+  requestPushPermission,
+  waitForRegistration,
+  withPushLock,
   pushRegistration,
   pushSettingsApi,
   subscribeToPush,
@@ -19,20 +25,6 @@ type DeviceState = {
   permission: NotificationPermission;
   active: boolean;
 };
-
-async function waitForRegistration() {
-  const existing = await navigator.serviceWorker.getRegistration("/");
-  if (existing?.active) return existing;
-  let timer: number | undefined;
-  try {
-    return await Promise.race([
-      navigator.serviceWorker.ready,
-      new Promise<undefined>((resolve) => { timer = window.setTimeout(resolve, 5000); }),
-    ]);
-  } finally {
-    window.clearTimeout(timer);
-  }
-}
 
 export function useWebPush(enabled: boolean, memberId: string) {
   const { fetchWithAuth } = useAuth();
@@ -79,10 +71,12 @@ export function useWebPush(enabled: boolean, memberId: string) {
       if (document.visibilityState === "visible") void load();
     };
     window.addEventListener("focus", load);
+    window.addEventListener(PUSH_RESTORED_EVENT, load);
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       disposed = true;
       window.removeEventListener("focus", load);
+      window.removeEventListener(PUSH_RESTORED_EVENT, load);
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, [enabled, memberId]);
@@ -115,18 +109,35 @@ export function useWebPush(enabled: boolean, memberId: string) {
     }
   }
 
-  function toggleMaster(initialCategories?: string[]) {
+  function connectDevice() {
     return change(async (base) => {
       const { settings, registration } = base;
-      if (base.active) {
-        await save(null, settings.categories, base);
-        await clearLocalPush(memberId);
-      } else if (registration && settings.publicKey) {
-        const subscription = await subscribeToPush(registration, settings.publicKey, memberId);
-        await save(pushRegistration(subscription), settings.configured ? settings.categories :
-          initialCategories ?? settings.categories, base);
+      if (!base.active && registration && settings.publicKey) {
+        const key = settings.publicKey;
+        await requestPushPermission();
+        await withPushLock(async () => {
+          const subscription = await subscribeToPush(registration, key, memberId);
+          await save(pushRegistration(subscription), settings.categories, base);
+          rememberPushEnabled(memberId, true);
+        });
       }
     });
+  }
+
+  function toggleMaster() {
+    if (state && !wantsPush(memberId, state.settings) && state.permission === "granted" && state.registration && state.settings.publicKey) {
+      return connectDevice();
+    }
+    return change((base) => withPushLock(async () => {
+      const next = !wantsPush(memberId, base.settings);
+      if (!next) {
+        const current = await fetchSettings.current<PushSettings>(pushSettingsApi(), { cache: "no-store" });
+        if (current.endpoint) await save(null, current.categories, { ...base, settings: current, active: true });
+        await clearLocalPush(memberId);
+      }
+      rememberPushEnabled(memberId, next);
+      setState((previous) => previous && { ...previous, active: false });
+    }));
   }
 
   function toggleCategory(key: string) {
@@ -150,5 +161,6 @@ export function useWebPush(enabled: boolean, memberId: string) {
   else if (state && !state.registration) unavailable = "이 기기에서 푸시 알림을 사용할 수 없어요.";
   else if (state?.permission === "denied") unavailable = "기기 설정에서 포카스테이션 알림을 허용해 주세요.";
 
-  return { state, active, saving, error, canEnable, unavailable, toggleMaster, toggleCategory };
+  const optedIn = state ? wantsPush(memberId, state.settings) : true;
+  return { state, active, optedIn, saving, error, canEnable, unavailable, connectDevice, toggleMaster, toggleCategory };
 }

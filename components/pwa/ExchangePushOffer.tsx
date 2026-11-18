@@ -31,15 +31,14 @@ export default function ExchangePushOffer({ memberId, requestId }: { memberId: s
 }
 
 function EnableExchangePush({ memberId, dismiss }: { memberId: string; dismiss: () => void }) {
-  const { state, canEnable, error, saving, toggleMaster } = useWebPush(true, memberId);
+  const { state, optedIn, canEnable, error, saving, connectDevice } = useWebPush(true, memberId);
   const [activated, setActivated] = useState(false);
 
-  if (activated) return <p role="status" className="text-body-s font-semibold text-primary">교환 푸시 알림을 켰어요.</p>;
-  if (!state || state.settings.configured || (!canEnable && !error)) return null;
+  if (activated) return <p role="status" className="text-body-s font-semibold text-primary">푸시 알림을 켰어요.</p>;
+  if (!state || !optedIn || state.settings.configured || (!canEnable && !error)) return null;
 
   async function enable() {
-    const categories = state?.settings.categories.filter((key) => key.startsWith("EXCHANGE_"));
-    if (await toggleMaster(categories)) {
+    if (await connectDevice()) {
       dismissExchangePushOffer();
       setActivated(true);
     }
@@ -47,8 +46,8 @@ function EnableExchangePush({ memberId, dismiss }: { memberId: string; dismiss: 
 
   return (
     <Offer
-      action="교환 알림 켜기"
-      description="신청이 수락되거나 새 메시지가 오면 휴대폰으로 알려드려요."
+      action="푸시 알림 켜기"
+      description="교환·판매·구매·문의 알림을 휴대폰으로 받아요. 받을 항목은 마이페이지에서 바꿀 수 있어요."
       dismiss={dismiss}
       disabled={saving || !canEnable}
       error={error}

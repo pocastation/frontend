@@ -14,7 +14,7 @@ import { apiFetch, apiFetchBlob, apiFetchMultipart, ApiError, type ApiFetchOptio
 import type { MemberResponse } from "./types";
 import type { LoginResponse } from "./admin-totp";
 import { announceSessionChange, coordinatedRefresh, onSessionChange, sessionRequest, withSessionLock } from "./session-coordination";
-import { clearLocalPush } from "./web-push";
+import { clearLocalPush, restorePushOnLogin, withPushLock } from "./web-push";
 
 type AuthContextValue = {
   accessToken: string | null;
@@ -123,10 +123,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const authEpoch = useRef(0);
   const memberId = member?.id;
 
-  useEffect(() => {
-    if (memberId) void clearLocalPush(memberId, true);
-  }, [memberId]);
-
   const fetchMe = useCallback(async (token: string) => {
     const epoch = authEpoch.current;
     const me = await apiFetch<MemberResponse>("/api/members/me", { accessToken: token });
@@ -226,7 +222,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await sessionRequest<void>("/api/auth/logout");
       announceSessionChange();
     });
-    if (memberId) await clearLocalPush(memberId);
+    if (memberId) await withPushLock(() => clearLocalPush(memberId, false, true));
     setAccessToken(null);
     setMember(null);
   }, [memberId]);
@@ -271,6 +267,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     [accessToken, refresh, redirectOnConsentRequired],
   );
+
+  const pushFetch = useRef(fetchWithAuth);
+  useEffect(() => { pushFetch.current = fetchWithAuth; }, [fetchWithAuth]);
+  useEffect(() => {
+    if (!memberId) return;
+    let cancelled = false;
+    const epoch = authEpoch.current;
+    void restorePushOnLogin(memberId, (path, options) => pushFetch.current(path, options),
+      () => !cancelled && epoch === authEpoch.current).catch(() => {
+      // Push availability must not prevent login. The settings screen also supports manual activation.
+    });
+    return () => { cancelled = true; };
+  }, [memberId]);
 
   const fetchMultipartWithAuth = useCallback(
     async <T,>(path: string, formData: FormData): Promise<T> => {

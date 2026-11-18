@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import ExchangeCta from "@/components/ExchangeCta";
 import ExchangeMoreMenu from "@/components/ExchangeMoreMenu";
@@ -6,8 +7,12 @@ import ExchangePhotoGallery from "@/components/ExchangePhotoGallery";
 import MobilePageHead from "@/components/mobile/MobilePageHead";
 import { apiFetch, ApiError } from "@/lib/api";
 import { itemName, itemSource, slotLabel } from "@/lib/exchange-labels";
-import { FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE, LABEL_NEUTRAL } from "@/lib/ui";
+import { tagQueryString } from "@/lib/exchange-tags";
+import { FOCUS_RING, FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE, LABEL_NEUTRAL } from "@/lib/ui";
 import type { ExchangePostDetail } from "@/lib/types";
+
+// 판매글 상세(app/auctions/[id])의 해시태그 칩과 같은 모양. 헤어라인에 보라 글자다.
+const HASHTAG_CLASS = `rounded-control border border-border px-2 py-1 text-label font-bold text-primary transition-colors hover:border-primary ${FOCUS_RING}`;
 
 /**
  * 교환글 상세(#662).
@@ -65,7 +70,32 @@ export default async function ExchangeDetailPage({ params }: { params: Promise<{
 
         {/* 제목이 교환 방향을 말한다. 예전에는 「슬기」 + 「레드벨벳 · 공개방송 · A급」이었는데
             바로 아래 패널 왼쪽 칸과 글자까지 같았다(#718). 세부는 패널이 맡는다. */}
-        <div className="flex items-start gap-2 px-gutter pt-4 sm:px-0">
+        {/* 해시태그(#826). 판매글 상세와 같은 헤어라인 칩이고, 누르면 이 행사에서 같은 포카를 내놓은
+            글을 태그로 찾는다. 태그는 이 글이 건네는 포카다 — 판매글의 태그가 파는 상품인 것과 같다. */}
+        {post.have && (
+          <div className="flex flex-wrap gap-2 px-gutter pt-4 sm:px-0">
+            <Link
+              href={`/events/${post.eventId}${tagQueryString({ side: "HAVE", artistIds: [post.have.artistId], idols: [] })}`}
+              className={HASHTAG_CLASS}
+            >
+              #{post.have.artistName ?? "알 수 없음"}
+            </Link>
+            {post.have.idolId !== null && post.have.idolName && (
+              <Link
+                href={`/events/${post.eventId}${tagQueryString({
+                  side: "HAVE",
+                  artistIds: [],
+                  idols: [{ artistId: post.have.artistId, idolId: post.have.idolId }],
+                })}`}
+                className={HASHTAG_CLASS}
+              >
+                #{post.have.idolName}
+              </Link>
+            )}
+          </div>
+        )}
+
+        <div className={`flex items-start gap-2 px-gutter sm:px-0 ${post.have ? "pt-2" : "pt-4"}`}>
           <h1 className="flex min-w-0 flex-1 items-center gap-2 text-title font-extrabold text-text-1">
             <span className="truncate">{itemName(post.have)}</span>
             <span aria-label="교환" className="shrink-0 text-body font-semibold text-text-3">→</span>

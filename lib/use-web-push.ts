@@ -4,6 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./auth-context";
 import {
   clearLocalPush,
+  PUSH_RESTORED_EVENT,
+  rememberPushEnabled,
+  requestPushPermission,
+  waitForRegistration,
+  withPushLock,
   pushRegistration,
   pushSettingsApi,
   subscribeToPush,
@@ -19,20 +24,6 @@ type DeviceState = {
   permission: NotificationPermission;
   active: boolean;
 };
-
-async function waitForRegistration() {
-  const existing = await navigator.serviceWorker.getRegistration("/");
-  if (existing?.active) return existing;
-  let timer: number | undefined;
-  try {
-    return await Promise.race([
-      navigator.serviceWorker.ready,
-      new Promise<undefined>((resolve) => { timer = window.setTimeout(resolve, 5000); }),
-    ]);
-  } finally {
-    window.clearTimeout(timer);
-  }
-}
 
 export function useWebPush(enabled: boolean, memberId: string) {
   const { fetchWithAuth } = useAuth();
@@ -79,10 +70,12 @@ export function useWebPush(enabled: boolean, memberId: string) {
       if (document.visibilityState === "visible") void load();
     };
     window.addEventListener("focus", load);
+    window.addEventListener(PUSH_RESTORED_EVENT, load);
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       disposed = true;
       window.removeEventListener("focus", load);
+      window.removeEventListener(PUSH_RESTORED_EVENT, load);
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, [enabled, memberId]);
@@ -115,16 +108,23 @@ export function useWebPush(enabled: boolean, memberId: string) {
     }
   }
 
-  function toggleMaster(initialCategories?: string[]) {
+  function toggleMaster() {
     return change(async (base) => {
       const { settings, registration } = base;
       if (base.active) {
-        await save(null, settings.categories, base);
-        await clearLocalPush(memberId);
+        await withPushLock(async () => {
+          await save(null, settings.categories, base);
+          rememberPushEnabled(memberId, false);
+          await clearLocalPush(memberId);
+        });
       } else if (registration && settings.publicKey) {
-        const subscription = await subscribeToPush(registration, settings.publicKey, memberId);
-        await save(pushRegistration(subscription), settings.configured ? settings.categories :
-          initialCategories ?? settings.categories, base);
+        const key = settings.publicKey;
+        await requestPushPermission();
+        await withPushLock(async () => {
+          const subscription = await subscribeToPush(registration, key, memberId);
+          await save(pushRegistration(subscription), settings.categories, base);
+          rememberPushEnabled(memberId, true);
+        });
       }
     });
   }

@@ -11,13 +11,16 @@ async function mockApi(context: BrowserContext) {
     publicKey: "BA",
     endpoint: null as string | null,
     configured: false,
-    categories: ["EXCHANGE_REQUEST", "EXCHANGE_MATCH", "EXCHANGE_CHAT", "INQUIRY"],
+    categories: ["EXCHANGE_REQUEST", "EXCHANGE_MATCH", "EXCHANGE_CHAT", "EXCHANGE_COMPLETION",
+      "EXCHANGE_CLOSURE", "EXCHANGE_MODERATION", "NEW_OFFER", "LISTING_REVIEW", "LISTING_CLOSURE",
+      "OFFER_RESULT", "LISTING_CHANGE", "PAYMENT", "SHIPPING", "CONFIRMATION", "REFUND", "RETURN_DISPUTE", "INQUIRY"],
   };
   await context.route("**/api/**", async (route) => {
     const request = route.request();
     const pathname = new URL(request.url()).pathname;
     let data: unknown = { content: [], totalElements: 0 };
     if (pathname === "/api/auth/refresh") data = { accessToken: "test-access", expiresInSeconds: 900 };
+    if (pathname === "/api/auth/logout") settings.endpoint = null;
     if (pathname === "/api/members/me") data = { id: memberId, nickname: "테스트", role: "USER", email: null };
     if (pathname.endsWith("/unread-count")) data = { count: 0 };
     if (pathname.startsWith("/api/members/me/web-push/")) {
@@ -41,12 +44,13 @@ async function mockApi(context: BrowserContext) {
 async function simulatePushDevice(context: BrowserContext, standalone: boolean, result: NotificationPermission) {
   await context.addInitScript(({ standalone, result }) => {
     Object.defineProperty(navigator, "standalone", { value: standalone });
-    let permission: NotificationPermission = "default";
+    let permission = (localStorage.getItem("test.permission") ?? "default") as NotificationPermission;
     let requests = 0;
     Object.defineProperty(Notification, "permission", { get: () => permission });
     Notification.requestPermission = async () => {
       requests++;
       permission = result;
+      localStorage.setItem("test.permission", result);
       return permission;
     };
     Object.defineProperty(window, "pushPermissionRequests", { get: () => requests });
@@ -223,6 +227,7 @@ test("PWA의 계정 메뉴에서만 설정을 열고 일시 중지 후 선택을
 
   await master.click();
   await expect(master).not.toBeChecked();
+  await expect(page.getByRole("switch", { checked: true })).toHaveCount(17);
   await expect(chat).toBeChecked();
   await chat.click();
   await expect(chat).not.toBeChecked();
@@ -235,6 +240,22 @@ test("PWA의 계정 메뉴에서만 설정을 열고 일시 중지 후 선택을
   await expect(chat).toBeEnabled();
   await expect(chat).not.toBeChecked();
   expect(await page.evaluate(permissionRequests)).toBe(1);
+
+  await page.getByRole("link", { name: "마이페이지로 돌아가기" }).click();
+  await page.getByRole("button", { name: "로그아웃", exact: true }).filter({ visible: true }).click();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("pocastation.push.owner"))).toBeNull();
+  // Next authenticated load represents the same member with a new session and no bound endpoint.
+  await page.goto(path);
+  await expect(master).not.toBeChecked();
+  await expect(chat).toBeEnabled();
+  await expect(chat).not.toBeChecked();
+  await expect(inquiry).toBeChecked();
+  expect(await page.evaluate(permissionRequests)).toBe(0);
+  await master.click();
+  await page.reload();
+  await expect(master).toBeChecked();
+  await expect(chat).toBeDisabled();
+  await expect(inquiry).toBeChecked();
 });
 
 test("권한 거부 시 실제로 푸시를 켜거나 기기에 저장하지 않는다", async ({ context, page }) => {

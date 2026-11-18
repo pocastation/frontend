@@ -194,7 +194,7 @@ export default function ExchangeThreadPage() {
   if (loadError) {
     return (
       <>
-        <MobilePageHead title="교환 매칭 완료" backHref={`/exchanges/${postId}`} />
+        <MobilePageHead title="교환 매칭 완료" backHref={`/exchanges/${postId}`} backMode="return" />
         <p className="px-gutter py-empty text-center text-body-s text-text-3">{loadError}</p>
       </>
     );
@@ -214,7 +214,7 @@ export default function ExchangeThreadPage() {
       <MobilePageHead
         title="교환 매칭 완료"
         sub={thread ? `${nickname}님과 교환이 확정됐어요` : undefined}
-        backHref={`/exchanges/${postId}`}
+        backHref={`/exchanges/${postId}`} backMode="return"
       />
 
       {/* 레이아웃은 모바일에만 푸터 앞 여백을 준다. PC는 마지막 섹션(만남·완료 확인)이 푸터에 붙지 않게 여기서 준다. */}

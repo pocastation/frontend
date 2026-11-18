@@ -14,6 +14,7 @@ import { apiFetch, apiFetchBlob, apiFetchMultipart, ApiError, type ApiFetchOptio
 import type { MemberResponse } from "./types";
 import type { LoginResponse } from "./admin-totp";
 import { announceSessionChange, coordinatedRefresh, onSessionChange, sessionRequest, withSessionLock } from "./session-coordination";
+import { clearLocalPush } from "./web-push";
 
 type AuthContextValue = {
   accessToken: string | null;
@@ -120,6 +121,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(pathname !== "/auth/totp");
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const authEpoch = useRef(0);
+  const memberId = member?.id;
+
+  useEffect(() => {
+    if (memberId) void clearLocalPush(memberId, true);
+  }, [memberId]);
 
   const fetchMe = useCallback(async (token: string) => {
     const epoch = authEpoch.current;
@@ -220,9 +226,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await sessionRequest<void>("/api/auth/logout");
       announceSessionChange();
     });
+    if (memberId) await clearLocalPush(memberId);
     setAccessToken(null);
     setMember(null);
-  }, []);
+  }, [memberId]);
 
   // 동의 게이트(BE #198)에 막히면 재동의 화면으로 보낸다.
   //

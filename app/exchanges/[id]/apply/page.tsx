@@ -9,6 +9,8 @@ import { useAuth } from "@/lib/auth-context";
 import { itemName, slotLabel } from "@/lib/exchange-labels";
 import { GRADE_LABEL, GRADE_OPTIONS, SOURCE_LABEL, SOURCE_OPTIONS } from "@/lib/labels";
 import { usePhotoUpload, photoUploadErrorMessage } from "@/lib/use-photo-upload";
+import { canShowIosInstallGuide, isStandalonePwa } from "@/lib/standalone-pwa";
+import { noteExchangeRequestForPush } from "@/lib/web-push";
 import { FOCUS_RING, FORM_ACTION_BAR, FORM_ACTION_BAR_PAD, FORM_ACTION_BAR_STYLE, PRESS_PRIMARY } from "@/lib/ui";
 import type {
   ArtistListResponse,
@@ -107,7 +109,7 @@ export default function ExchangeApplyPage() {
     setSubmitting(true);
     setError(null);
     try {
-      await fetchWithAuth<{ id: number }>(`/api/exchanges/${postId}/requests`, {
+      const request = await fetchWithAuth<{ id: number }>(`/api/exchanges/${postId}/requests`, {
         method: "POST",
         body: {
           slotId,
@@ -119,6 +121,7 @@ export default function ExchangeApplyPage() {
           photos: photos.uploadedUrls,
         },
       });
+      if (isStandalonePwa() || canShowIosInstallGuide()) noteExchangeRequestForPush(request.id);
       router.replace(`/exchanges/${postId}`);
     } catch (err) {
       setError(photoUploadErrorMessage(err));

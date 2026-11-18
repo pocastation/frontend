@@ -242,7 +242,7 @@ export default function ExchangeNoShowSection({
               type="button"
               disabled={acting}
               onClick={() => post(`/api/exchanges/${postId}/no-show/withdraw`, "신고를 철회하지 못했어요.")}
-              className={`-mx-2 mt-tight h-10 rounded-control px-2 text-label font-bold text-text-2 underline underline-offset-2 disabled:opacity-60 ${FOCUS_RING}`}
+              className={`-mx-2 mt-tight h-12 rounded-control px-2 text-label font-bold text-text-2 underline underline-offset-2 disabled:opacity-60 ${FOCUS_RING}`}
             >
               신고 철회
             </button>
@@ -290,7 +290,7 @@ export default function ExchangeNoShowSection({
                   setConfirming(true);
                   setError(null);
                 }}
-                className={`h-10 shrink-0 rounded-control border border-border-2 bg-white px-3 text-body-s font-bold text-text-1 ${FOCUS_RING}`}
+                className={`h-12 shrink-0 rounded-control border border-border-2 bg-white px-3 text-body-s font-bold text-text-1 ${FOCUS_RING}`}
               >
                 상대가 안 왔어요
               </button>

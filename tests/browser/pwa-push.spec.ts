@@ -83,6 +83,7 @@ test("서비스 워커가 푸시 제목을 전달하고 열린 창이나 새 창
   let shownTitle = "";
   let shownOptions: { body: string; data: { url: string } } | undefined;
   let openedUrl = "";
+  let openedClient: object | null = null;
   let windows: object[] = [];
   const self = {
     location: { origin },
@@ -97,7 +98,7 @@ test("서비스 워커가 푸시 제목을 전달하고 열린 창이나 새 창
     },
     clients: {
       async matchAll() { return windows; },
-      async openWindow(url: string) { openedUrl = url; },
+      async openWindow(url: string) { openedUrl = url; return openedClient; },
     },
   };
   runInNewContext(readFileSync("public/sw.js", "utf8"), { self, URL });
@@ -112,7 +113,7 @@ test("서비스 워커가 푸시 제목을 전달하고 열린 창이나 새 창
   const body = "교환 대화에 새 메시지가 왔어요.";
   await dispatch("push", { data: { json: () => ({ title: "새 채팅", body, url: destination }) } });
   expect(shownTitle).toBe("새 채팅");
-  expect(shownOptions).toMatchObject({ body, data: { url: destination } });
+  expect(shownOptions).toMatchObject({ body, navigate: destination, data: { url: destination } });
 
   let closed = false;
   const notification = { data: shownOptions?.data, close() { closed = true; } };
@@ -135,9 +136,21 @@ test("서비스 워커가 푸시 제목을 전달하고 열린 창이나 새 창
   expect(focused).toBe(true);
   expect(openedUrl).toBe("");
 
+  const requests = origin + "/exchanges/31/requests";
+  windows = [{ url: "" }];
+  openedClient = {
+    url: origin + "/",
+    async navigate(url: string) { navigatedTo = url; },
+  };
+  await dispatch("push", { data: { json: () => ({ title: "교환 신청", url: "/exchanges/31/requests" }) } });
+  expect(shownOptions).toMatchObject({ navigate: requests, data: { url: requests } });
+  await dispatch("notificationclick", { notification: { ...notification, data: shownOptions?.data } });
+  expect(openedUrl).toBe(requests);
+  expect(navigatedTo).toBe(requests);
+
   await dispatch("push", { data: { json: () => ({ body, url: "https://example.com/outside" }) } });
   expect(shownTitle).toBe("포카스테이션");
-  expect(shownOptions).toMatchObject({ body, data: { url: origin + "/notifications" } });
+  expect(shownOptions).toMatchObject({ body, navigate: origin + "/notifications", data: { url: origin + "/notifications" } });
 });
 
 test("채팅 푸시 상세 페이지는 가장 최근 메시지부터 보여 주고 해당 알림을 읽음 처리한다", async ({ context, page }) => {

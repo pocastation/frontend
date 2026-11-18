@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { isClosed } from "@/lib/exchange-labels";
+import ExchangePushOffer from "@/components/pwa/ExchangePushOffer";
 import { FOCUS_RING, PRESS_ACCENT, PRESS_FADE, PRESS_INK, PRESS_OUTLINE, PRESS_PRIMARY } from "@/lib/ui";
 import type { ExchangePostDetail, ExchangeStatus, ExchangeViewer } from "@/lib/types";
 
@@ -32,7 +33,7 @@ export default function ExchangeCta({
   eventId: number;
   expiresAt: string;
 }) {
-  const { accessToken, fetchWithAuth, isLoading: authLoading } = useAuth();
+  const { accessToken, fetchWithAuth, member, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -146,6 +147,9 @@ export default function ExchangeCta({
   if (viewer?.myRequestStatus === "PENDING") {
     return (
       <>
+        {member && viewer.myRequestId != null && (
+          <ExchangePushOffer key={`${member.id}:${viewer.myRequestId}`} memberId={member.id} requestId={viewer.myRequestId} />
+        )}
         <button
           type="button"
           onClick={withdraw}

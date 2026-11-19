@@ -35,6 +35,7 @@ const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; ico
   SHIPPING_OVERDUE: { label: "발송 지연", tone: "accent", icon: "clock" },
   SETTLEMENT_COMPLETED: { label: "정산 완료", tone: "ok", icon: "card" },
   INQUIRY_ANSWERED: { label: "문의 답변", tone: "ok", icon: "checkCircle" },
+  CAMPAIGN: { label: "운영 알림", tone: "neutral", icon: "bell" },
   // ── 상용 BE가 이미 보내는데 여기 없어 UNKNOWN_META(무색 「알림」)로 뜨던 8종(#451).
   //    특히 ORDER_PREPARING은 B3 **필수 고지**인데 회색 폴백으로 묻히고 있었다 —
   //    「이제 취소할 수 없다」는 통지가 시각적으로 가장 조용한 알림이었던 셈이다. ──
@@ -184,6 +185,10 @@ export default function NotificationsPage() {
 
   // 알림 클릭 — 읽음 처리 후 연결된 매물로 이동. 읽음 API 실패는 이동을 막지 않는다(뱃지만 지연 반영).
   async function handleClick(notification: NotificationResponse) {
+    if (notification.campaignId) {
+      router.push("/notifications/campaigns/" + notification.campaignId);
+      return;
+    }
     if (!notification.isRead) {
       setNotifications((prev) => prev.map((n) => (n.id === notification.id ? { ...n, isRead: true } : n)));
       try {

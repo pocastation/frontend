@@ -204,7 +204,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/admin/notices", label: "공지사항", icon: <MegaphoneIcon />, ready: false },
       { href: "/admin/settlement", label: "결제·정산", icon: <TagIcon />, ready: false },
-      { href: "/admin/notifications", label: "알림 발송", icon: <BellIcon />, ready: false },
+      { href: "/admin/notifications", label: "알림 발송", icon: <BellIcon />, ready: true },
     ],
   },
 ];

@@ -1,6 +1,26 @@
 "use client";
 
 import { useEffect } from "react";
+import { isStandalonePwa } from "@/lib/standalone-pwa";
+
+// An installed app can resume at its previous URL even after the worker requests a navigation.
+async function resumeCampaignClick() {
+  if (!isStandalonePwa() || document.visibilityState !== "visible" || !("caches" in window)) return;
+  const consume = async () => {
+    if (!await caches.has("pocastation-campaign-click")) return;
+    const cache = await caches.open("pocastation-campaign-click");
+    const response = await cache.match("/__campaign-click");
+    if (!response) return;
+    const click = await response.json();
+    if (document.visibilityState !== "visible" || !await cache.delete("/__campaign-click")) return;
+    if (click.expiresAt <= Date.now() || !/^\/notifications\/campaigns\/[1-9]\d*$/.test(click.path)) return;
+    if (location.pathname === click.path) return;
+    if (location.pathname === "/login" && new URLSearchParams(location.search).get("redirect") === click.path) return;
+    location.assign(click.path);
+  };
+  if (navigator.locks) await navigator.locks.request("pocastation-campaign-click", consume);
+  else await consume();
+}
 
 /**
  * 서비스워커 등록. 렌더하는 것은 없다.
@@ -13,6 +33,25 @@ import { useEffect } from "react";
  * HTML·JS를 캐시하지 않아 새로고침 없이도 낡은 화면이 남지 않는다.
  */
 export default function ServiceWorkerRegistrar() {
+  useEffect(() => {
+    if (!("serviceWorker" in navigator) || !isStandalonePwa()) return;
+    const resume = () => { void resumeCampaignClick().catch(() => {}); };
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin === location.origin && event.data?.type === "campaign-click") resume();
+    };
+    navigator.serviceWorker.addEventListener("message", onMessage);
+    window.addEventListener("pageshow", resume);
+    window.addEventListener("focus", resume);
+    document.addEventListener("visibilitychange", resume);
+    resume();
+    return () => {
+      navigator.serviceWorker.removeEventListener("message", onMessage);
+      window.removeEventListener("pageshow", resume);
+      window.removeEventListener("focus", resume);
+      document.removeEventListener("visibilitychange", resume);
+    };
+  }, []);
+
   useEffect(() => {
     if (process.env.NODE_ENV !== "production") return;
     if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) return;

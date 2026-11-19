@@ -15,7 +15,7 @@
  */
 
 // 캐시 이름의 버전. **이 파일을 고칠 때마다 올린다** — 올려야 옛 캐시가 정리된다.
-const VERSION = "v4";
+const VERSION = "v6";
 const STATIC_CACHE = `pocastation-static-${VERSION}`;
 const OFFLINE_URL = "/offline.html";
 
@@ -54,8 +54,10 @@ self.addEventListener("push", (event) => {
   event.waitUntil(self.registration.showNotification(title, {
     body: typeof payload.body === "string" ? payload.body : "새 알림이 도착했어요.",
     icon: "/icons/icon-192.png",
+    ...(typeof payload.image === "string" && payload.image ? { image: payload.image } : {}),
     tag: typeof payload.tag === "string" ? payload.tag : undefined,
-    navigate: destination,
+    // For campaigns the click handler records the exact tap before the OS resumes the app.
+    ...(isCampaign(new URL(destination)) ? {} : { navigate: destination }),
     data: { url: destination },
   }));
 });
@@ -64,9 +66,22 @@ self.addEventListener("notificationclick", (event) => {
   const target = pushDestination(event.notification.data?.url ?? "/notifications");
   event.notification.close();
   event.waitUntil((async () => {
+    const campaign = isCampaign(target);
+    if (campaign) {
+      try {
+        const cache = await caches.open("pocastation-campaign-click");
+        const write = () => cache.put("/__campaign-click", Response.json({
+          path: target.pathname, expiresAt: Date.now() + 60_000,
+        }));
+        if (self.navigator.locks) await self.navigator.locks.request("pocastation-campaign-click", write);
+        else await write();
+      } catch {
+        // Normal URL navigation remains available if storage is unavailable.
+      }
+    }
     const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
     const matching = windows.find((client) => client.url === target.href);
-    if (matching) {
+    if (matching && !campaign) {
       try {
         await matching.focus();
         return;
@@ -74,7 +89,7 @@ self.addEventListener("notificationclick", (event) => {
         // The matching window may have closed since matchAll.
       }
     }
-    const existing = windows.find((client) =>
+    const existing = (campaign && matching) || windows.find((client) =>
       client !== matching && client.url.startsWith(target.origin + "/")
     );
     if (existing) {
@@ -82,7 +97,8 @@ self.addEventListener("notificationclick", (event) => {
         const navigated = await existing.navigate(target.href);
         if (navigated) {
           await recoverHomeLaunch(navigated, target);
-          await navigated.focus();
+          const focused = await navigated.focus();
+          if (campaign) focused?.postMessage({ type: "campaign-click" });
           return;
         }
       } catch {
@@ -91,8 +107,18 @@ self.addEventListener("notificationclick", (event) => {
     }
     const opened = await self.clients.openWindow(target.href);
     await recoverHomeLaunch(opened, target);
+    if (campaign) {
+      // Some installed apps resume a window but resolve openWindow() with null.
+      const resumed = opened ?? (await self.clients.matchAll({ type: "window" }))
+        .find(client => client.visibilityState === "visible" && client.focused);
+      resumed?.postMessage({ type: "campaign-click" });
+    }
   })());
 });
+
+function isCampaign(target) {
+  return /^\/notifications\/campaigns\/[1-9]\d*$/.test(target.pathname);
+}
 
 // Some installed PWAs launch at the manifest start URL despite openWindow's argument.
 async function recoverHomeLaunch(client, target) {
@@ -105,7 +131,8 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys();
-      await Promise.all(keys.filter((key) => key !== STATIC_CACHE).map((key) => caches.delete(key)));
+      await Promise.all(keys.filter((key) => key.startsWith("pocastation-static-") && key !== STATIC_CACHE)
+        .map((key) => caches.delete(key)));
       // 이미 열려 있는 탭도 새 워커가 바로 맡는다.
       await self.clients.claim();
     })(),

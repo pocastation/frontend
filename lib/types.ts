@@ -665,6 +665,7 @@ export type ArtistDetailResponse = {
 };
 
 export type ArtistMemberResponse = {
+  membershipId?: number;
   idolId: number;
   stageName: string;
   stageNameEn: string | null;
@@ -763,6 +764,7 @@ export type NotificationType =
   | "SHIPPING_OVERDUE" // 발송기한 초과 — 판매자에게 발송 독촉
   | "SETTLEMENT_COMPLETED" // 정산 완료 — 판매자에게 실입금 예정 안내(실입금은 PG 사이클 시차)
   | "INQUIRY_ANSWERED" // 1:1 문의 답변 완료
+  | "CAMPAIGN"
   // ── 상용 BE가 이미 보내는데 union에 빠져 있던 8종(#451) — UNKNOWN_META 폴백으로만 떴다 ──
   | "AUCTION_EXTENDED" // 판매 기간 연장 — 기존 제안자에게 「제안이 아직 유효하다」
   | "ORDER_PREPARING" // 물품 준비 진입 — 구매자에게 「이제 취소할 수 없어요」(B3 필수 고지)
@@ -944,6 +946,7 @@ export type SoldOrderResponse = {
 };
 
 export type NotificationResponse = {
+  campaignId?: number | null;
   id: number;
   type: NotificationType;
   auctionId: number | null;

@@ -13,7 +13,7 @@ async function mockApi(context: BrowserContext) {
     configured: false,
     categories: ["EXCHANGE_REQUEST", "EXCHANGE_MATCH", "EXCHANGE_CHAT", "EXCHANGE_COMPLETION",
       "EXCHANGE_CLOSURE", "EXCHANGE_MODERATION", "NEW_OFFER", "LISTING_REVIEW", "LISTING_CLOSURE",
-      "OFFER_RESULT", "LISTING_CHANGE", "PAYMENT", "SHIPPING", "CONFIRMATION", "REFUND", "RETURN_DISPUTE", "INQUIRY"],
+      "OFFER_RESULT", "LISTING_CHANGE", "PAYMENT", "SHIPPING", "CONFIRMATION", "REFUND", "RETURN_DISPUTE", "INQUIRY", "CAMPAIGN"],
   };
   await context.route("**/api/**", async (route) => {
     const request = route.request();
@@ -89,8 +89,10 @@ test("서비스 워커가 푸시 제목을 전달하고 열린 창이나 새 창
   let openedUrl = "";
   let openedClient: object | null = null;
   let windows: object[] = [];
+  const clicks = new Map<string, Response>();
   const self = {
     location: { origin },
+    navigator: {},
     addEventListener(name: string, handler: (event: Record<string, unknown>) => void) {
       handlers.set(name, handler);
     },
@@ -105,7 +107,8 @@ test("서비스 워커가 푸시 제목을 전달하고 열린 창이나 새 창
       async openWindow(url: string) { openedUrl = url; return openedClient; },
     },
   };
-  runInNewContext(readFileSync("public/sw.js", "utf8"), { self, URL });
+  const caches = { open: async () => ({ put: (key: string, response: Response) => clicks.set(key, response) }) };
+  runInNewContext(readFileSync("public/sw.js", "utf8"), { self, URL, Response, caches });
 
   async function dispatch(name: string, event: Record<string, unknown>) {
     let done: Promise<unknown> | undefined;
@@ -118,6 +121,9 @@ test("서비스 워커가 푸시 제목을 전달하고 열린 창이나 새 창
   await dispatch("push", { data: { json: () => ({ title: "새 채팅", body, url: destination }) } });
   expect(shownTitle).toBe("새 채팅");
   expect(shownOptions).toMatchObject({ body, navigate: destination, data: { url: destination } });
+  const image = "/media/photos/example_display.jpg";
+  await dispatch("push", { data: { json: () => ({ title: "행사 소식", body, image, url: destination }) } });
+  expect(shownOptions).toMatchObject({ image });
 
   let closed = false;
   const notification = { data: shownOptions?.data, close() { closed = true; } };
@@ -155,7 +161,40 @@ test("서비스 워커가 푸시 제목을 전달하고 열린 창이나 새 창
   await dispatch("push", { data: { json: () => ({ body, url: "https://example.com/outside" }) } });
   expect(shownTitle).toBe("포카스테이션");
   expect(shownOptions).toMatchObject({ body, navigate: origin + "/notifications", data: { url: origin + "/notifications" } });
+
+  const campaign = "/notifications/campaigns/37";
+  await dispatch("push", { data: { json: () => ({ title: "행사", url: campaign }) } });
+  expect(shownOptions).not.toHaveProperty("navigate");
+  expect(clicks.size).toBe(0);
+  windows = [];
+  openedClient = null;
+  await dispatch("notificationclick", { notification: { ...notification, data: shownOptions?.data } });
+  expect(openedUrl).toBe(origin + campaign);
+  expect(await clicks.get("/__campaign-click")?.json()).toMatchObject({ path: campaign });
 });
+
+for (const launch of ["cold", "resume"]) {
+  test(`관리자 푸시를 누른 후 앱이 이전 화면으로 열려도 본문을 한 번만 연다 (${launch})`, async ({ context, page }) => {
+    await mockApi(context);
+    await simulatePushDevice(context, true, "granted");
+    const detail = "/notifications/campaigns/37";
+    await context.route("**/api/notification-campaigns/37/open", route => route.fulfill({
+      json: { success: true, data: { title: "클릭한 행사 소식", message: "행사 본문" } },
+    }));
+    await page.goto("/mypage");
+    await page.evaluate(async path => {
+      const cache = await caches.open("pocastation-campaign-click");
+      await cache.put("/__campaign-click", Response.json({ path, expiresAt: Date.now() + 60_000 }));
+    }, detail);
+    if (launch === "cold") await page.goto("/");
+    else await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await expect(page).toHaveURL(new RegExp(detail + "$"), { timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: "클릭한 행사 소식" })).toBeVisible({ timeout: 20_000 });
+    expect(await page.evaluate(async () => Boolean(await caches.match("/__campaign-click")))).toBe(false);
+    await page.goto("/mypage");
+    await expect(page).toHaveURL(/\/mypage$/);
+  });
+}
 
 test("채팅 푸시 상세 페이지는 가장 최근 메시지부터 보여 주고 해당 알림을 읽음 처리한다", async ({ context, page }) => {
   await mockApi(context);
@@ -220,12 +259,12 @@ test("PWA의 계정 메뉴에서만 설정을 열고 일시 중지 후 선택을
   await expect(page.getByRole("heading", { name: "푸시 알림", exact: true })).toBeInViewport();
   const chat = page.getByRole("switch", { name: "교환 채팅" });
   const inquiry = page.getByRole("switch", { name: "1:1 문의 답변" });
-  await expect(page.getByRole("switch")).toHaveCount(18);
+  await expect(page.getByRole("switch")).toHaveCount(19);
   await expect(master).toBeEnabled();
   await expect(chat).toBeDisabled();
   expect(await page.evaluate(permissionRequests)).toBe(0);
 
-  await expect(page.getByRole("switch", { checked: true })).toHaveCount(18);
+  await expect(page.getByRole("switch", { checked: true })).toHaveCount(19);
   await page.getByRole("button", { name: "기기 알림 허용" }).click();
   await expect(chat).toBeChecked();
   await chat.click();
@@ -241,7 +280,7 @@ test("PWA의 계정 메뉴에서만 설정을 열고 일시 중지 후 선택을
   expect(await page.evaluate(permissionRequests)).toBe(1);
 
   await page.getByRole("link", { name: "마이페이지로 돌아가기" }).click();
-  await page.getByRole("button", { name: "로그아웃", exact: true }).filter({ visible: true }).click();
+  await page.getByRole("banner").getByRole("button", { name: "로그아웃", exact: true }).click();
   await expect.poll(() => page.evaluate(() => localStorage.getItem("pocastation.push.owner"))).toBeNull();
   // Next authenticated load represents the same member with a new session and no bound endpoint.
   await page.goto(path);
@@ -251,6 +290,7 @@ test("PWA의 계정 메뉴에서만 설정을 열고 일시 중지 후 선택을
   await expect(inquiry).toBeChecked();
   expect(await page.evaluate(permissionRequests)).toBe(0);
   await master.click();
+  await expect(master).not.toBeChecked();
   await page.reload();
   await expect(master).not.toBeChecked();
   await expect(chat).toBeDisabled();
@@ -270,13 +310,14 @@ test("권한 거부 시 실제로 푸시를 켜거나 기기에 저장하지 않
   expect(api.calls()).toBe(callsBeforeClick);
 });
 
-test("기기 권한을 이미 허용한 신규 PWA는 설정 방문 없이 17종을 구독한다", async ({ context, page }) => {
+test("기기 권한을 이미 허용한 신규 PWA는 설정 방문 없이 운영 알림을 포함해 구독한다", async ({ context, page }) => {
   await mockApi(context);
   await simulatePushDevice(context, true, "granted", "granted");
   const firstSave = page.waitForRequest((req) => req.method() === "PUT" && req.url().includes("/web-push/"));
   await page.goto("/mypage");
   const data = (await firstSave).postDataJSON();
-  expect(new Set(data.categories).size).toBe(17);
+  expect(new Set(data.categories).size).toBe(18);
+  expect(data.categories).toContain("CAMPAIGN");
   expect(data.subscription.endpoint).toBeTruthy();
   expect(await page.evaluate(permissionRequests)).toBe(0);
 });

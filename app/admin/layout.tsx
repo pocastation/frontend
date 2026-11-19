@@ -186,6 +186,8 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: "고객 지원",
     items: [
+      { href: "/admin/notices", label: "공지사항", icon: <MegaphoneIcon />, ready: true },
+      { href: "/admin/faq", label: "자주 묻는 질문", icon: <MessageIcon />, ready: true },
       { href: "/admin/inquiries", label: "문의 관리", icon: <MessageIcon />, ready: true },
       { href: "/admin/suggestions", label: "건의 관리", icon: <LightbulbIcon />, ready: true },
     ],
@@ -203,7 +205,6 @@ const NAV_GROUPS: NavGroup[] = [
   {
     title: "준비 중",
     items: [
-      { href: "/admin/notices", label: "공지사항", icon: <MegaphoneIcon />, ready: false },
       { href: "/admin/notifications", label: "알림 발송", icon: <BellIcon />, ready: true },
     ],
   },

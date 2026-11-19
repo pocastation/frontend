@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { FAQ_CATEGORIES, FAQ_TOTAL } from "@/lib/faq-content";
+import { apiFetch } from "@/lib/api";
+import type { Faq } from "@/lib/support";
 import { FOCUS_RING } from "@/lib/ui";
 
 export const metadata = {
@@ -8,19 +9,10 @@ export const metadata = {
     "가격 제안·판매 등록·배송·수수료까지 — 포카스테이션 이용 중 자주 나오는 질문과 답을 모았습니다.",
 };
 
-/**
- * 자주 묻는 질문(#298).
- *
- * <p><b>서버 컴포넌트로 둔다.</b> 아코디언을 네이티브 `<details>`로 만들면 JS 없이 접히므로
- * `"use client"`가 필요 없다 — 콘텐츠가 HTML에 그대로 실려 검색 노출에도 유리하다.
- *
- * <p><b>검색창은 두지 않는다.</b> 29개는 눈으로 훑는 편이 빠르고, 검색창이 있으면 오히려
- * "찾아야 하는 양"으로 보인다.
- *
- * <p>`/guide`와 역할이 다르다 — 가이드는 거래 흐름을 <b>순서대로</b> 설명하고, 여기는
- * <b>개별 질문에 답한다</b>. 서로 링크만 걸어 둔다.
- */
-export default function FaqPage() {
+
+export default async function FaqPage() {
+  const { categories } = await apiFetch<Faq>("/api/support/faq", { cache: "no-store" });
+  const total = categories.reduce((sum, c) => sum + c.items.length, 0);
   return (
     <>
       <div className="mx-auto max-w-[820px] px-gutter pt-page sm:px-5 sm:pt-14 sm:pb-16">
@@ -33,7 +25,7 @@ export default function FaqPage() {
             거래하다 자주 나오는 질문을 모았어요. 궁금한 항목을 눌러 펼쳐 보세요.
           </p>
           <p className="mt-3 text-label text-text-3">
-            총 {FAQ_TOTAL}개 · 거래 흐름 전체가 궁금하다면{" "}
+            총 {total}개 · 거래 흐름 전체가 궁금하다면{" "}
             <Link
               href="/guide"
               className={`font-bold text-text-2 underline decoration-border-2 underline-offset-4 transition-colors hover:text-primary hover:decoration-primary ${FOCUS_RING}`}
@@ -47,7 +39,7 @@ export default function FaqPage() {
         {/* 목차 — 카테고리가 7개라 위에서부터 읽으면 원하는 데까지 한참 걸린다.
             알약 링크가 아니라 밑줄 항목으로 둔다(가이드와 같은 기조). */}
         <nav aria-label="분류 바로가기" className="mt-group grid grid-cols-2 sm:mt-7 sm:grid-cols-4">
-          {FAQ_CATEGORIES.map((c, i) => (
+          {categories.map((c, i) => (
             <a
               key={c.id}
               href={`#${c.id}`}
@@ -64,7 +56,7 @@ export default function FaqPage() {
           ))}
         </nav>
 
-        {FAQ_CATEGORIES.map((category, i) => (
+        {categories.map((category, i) => (
           <section key={category.id} id={category.id} className="mt-12 scroll-mt-24 first:mt-14">
             <div className="border-t border-text-1/25 pt-4">
               <span
@@ -82,7 +74,7 @@ export default function FaqPage() {
             <div className="mt-4">
               {/* 열림 상태를 배경색으로 칠하지 않는다 — 화살표 방향만으로 말한다. */}
               {category.items.map((item) => (
-                <details key={item.q} className="border-b border-border-2/60">
+                <details key={item.id} className="border-b border-border-2/60">
                   <summary
                     className={`flex cursor-pointer list-none items-start gap-3 py-4 text-body font-bold text-text-1 transition-colors hover:text-primary ${FOCUS_RING} [&::-webkit-details-marker]:hidden`}
                   >
@@ -104,10 +96,10 @@ export default function FaqPage() {
                     </svg>
                   </summary>
                   <div className="pb-4 pr-7">
-                    {item.a.map((paragraph) => (
+                    {item.a.map((paragraph, i) => (
                       <p
-                        key={paragraph}
-                        className="mt-2 text-body text-text-2 first:mt-0"
+                        key={i}
+                        className="mt-2 whitespace-pre-line text-body text-text-2 first:mt-0"
                       >
                         {paragraph}
                       </p>

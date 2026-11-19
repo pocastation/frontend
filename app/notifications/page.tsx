@@ -69,7 +69,7 @@ const TYPE_META: Record<NotificationType, { label: string; tone: StatusTone; ico
   EXCHANGE_MATCHED: { label: "교환 확정", tone: "ok", icon: "checkCircle" },
   EXCHANGE_DECLINED: { label: "신청 마감", tone: "neutral", icon: "minus" },
   EXCHANGE_MESSAGE: { label: "새 메시지", tone: "primary", icon: "tag" },
-  EXCHANGE_COMPLETED: { label: "완료 확인", tone: "accent", icon: "alertCircle" },
+  EXCHANGE_COMPLETED: { label: "교환 완료", tone: "ok", icon: "checkCircle" },
   EXCHANGE_COMPLETION_DISPUTED: { label: "완료 이의", tone: "neutral", icon: "xCircle" },
   EXCHANGE_POST_REMOVED: { label: "교환글 내림", tone: "accent", icon: "xCircle" },
   EXCHANGE_EXPIRED: { label: "교환 마감", tone: "neutral", icon: "clock" },

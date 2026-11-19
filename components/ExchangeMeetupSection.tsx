@@ -3,15 +3,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiError, type ApiFetchOptions } from "@/lib/api";
 import { FOCUS_RING } from "@/lib/ui";
-import type { ExchangeMeetup, ExchangeMeetupCode, ExchangeMeetupConfirmResult } from "@/lib/types";
+import type { ExchangeCompletion, ExchangeMeetup, ExchangeMeetupCode, ExchangeMeetupConfirmResult } from "@/lib/types";
 
 /**
- * 만남 확인(#819, backend#598).
+ * 교환 완료 확인(#819, #862, backend#598·#639).
  *
  * <p>작성자 화면에는 4자리 코드가 나오고, 신청자는 현장에서 그 코드를 받아 자기 화면에 입력한다.
  * 역할을 서버가 {@code codeHolder}로 정해 주므로 화면은 판정하지 않는다.
  *
- * <p>교환 완료와는 별개다. 맞으면 양쪽 모두 「만남 확인됨」으로 바뀌고, 노쇼를 판단할 때 근거로 쓰인다.
+ * <p>코드가 맞는 순간 교환이 완료된다. 완료를 따로 누르는 버튼은 없다. 서로 만나야 코드를 주고받을
+ * 수 있어서, 현장에 없던 사람이 완료를 남기는 길을 막는다.
  */
 
 const MAX_TIMER_MS = 24 * 60 * 60 * 1000;
@@ -23,6 +24,14 @@ function clock(iso: string) {
   const h = d.getHours();
   const m = String(d.getMinutes()).padStart(2, "0");
   return `${h < 12 ? "오전" : "오후"} ${h % 12 === 0 ? 12 : h % 12}:${m}`;
+}
+
+/** 오늘이 아니면 날짜를 붙인다. 지난 완료를 오늘 일처럼 읽지 않게 한다. */
+function stamp(iso: string) {
+  const d = new Date(iso);
+  const t = new Date();
+  const today = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+  return today ? clock(iso) : `${d.getMonth() + 1}월 ${d.getDate()}일 ${clock(iso)}`;
 }
 
 function remaining(ms: number) {
@@ -44,11 +53,13 @@ function useAt(iso: string | null, callback: () => void) {
 export default function ExchangeMeetupSection({
   postId,
   meetup,
+  completion,
   fetchWithAuth,
   onChanged,
 }: {
   postId: string;
   meetup: ExchangeMeetup;
+  completion: ExchangeCompletion;
   fetchWithAuth: <T>(path: string, options?: ApiFetchOptions) => Promise<T>;
   /** 대화 응답을 다시 불러온다. 만남 상태의 출처는 그쪽 하나다. */
   onChanged: () => Promise<unknown>;
@@ -138,57 +149,69 @@ export default function ExchangeMeetupSection({
 
   const locked = lockedUntil !== null && new Date(lockedUntil).getTime() > now;
   const beforeOpen = !meetup.open && !meetup.confirmed && new Date(meetup.opensAt).getTime() > now;
+  // backend#639 전에 버튼으로 완료한 교환은 코드 없이도 완료다. 코드 입력을 다시 띄우지 않는다.
+  const completed = completion.confirmed && !completion.disputed;
+  const completedAt = completion.confirmedAt ?? meetup.confirmedAt;
 
   return (
-    <section className="mt-section-ruled border-t border-border px-gutter pt-section-ruled" aria-labelledby="meetup-title">
+    <section className="mt-section-ruled border-t border-border px-gutter pt-section-ruled" aria-labelledby="completion-title">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 id="meetup-title" className="text-body-l font-extrabold text-text-1">
-          만남 확인
+        <h2 id="completion-title" className="text-body-l font-extrabold text-text-1">
+          교환 완료 확인
         </h2>
-        {meetup.confirmed && <span className="shrink-0 text-body-s font-extrabold text-text-1">만남 확인됨</span>}
+        {completed && <span className="shrink-0 text-body-s font-extrabold text-text-1">교환 완료</span>}
       </div>
 
-      {meetup.confirmed ? (
+      {completed ? (
+        <p className="mt-tight text-body-s text-text-2">
+          {completedAt ? `${stamp(completedAt)}에 ` : ""}
+          {meetup.confirmed ? "코드가 확인돼 교환이 완료됐어요." : "교환 완료로 기록됐어요."}
+        </p>
+      ) : completion.disputed ? (
+        <p className="mt-tight text-body-s text-text-2">교환이 이뤄지지 않은 것으로 정리됐어요. 기록은 남지 않아요.</p>
+      ) : meetup.confirmed ? (
         <p className="mt-tight text-body-s text-text-2">
           {meetup.confirmedAt ? `${clock(meetup.confirmedAt)}에 ` : ""}두 사람이 만난 것으로 기록됐어요.
         </p>
       ) : beforeOpen ? (
         <>
           <p className="mt-tight text-body-s text-text-2">
-            현장에서 {meetup.codeHolder ? "내 화면의 코드를 상대에게 보여주면" : "상대 화면의 코드를 입력하면"} 만남이
-            기록돼요.
+            현장에서 {meetup.codeHolder ? "내 화면의 코드를 상대가 입력하면" : "상대 화면의 코드를 입력하면"} 교환이
+            완료돼요.
           </p>
           <button
             type="button"
             disabled
             className="mt-cta h-12 w-full rounded-control bg-surface-2 text-body-l font-extrabold text-text-3"
           >
-            만남 확인
+            교환 완료 확인
           </button>
           <p className="mt-tight text-label text-text-3">약속 10분 전({clock(meetup.opensAt)})부터 누를 수 있어요.</p>
         </>
       ) : !meetup.open ? (
-        <p className="mt-tight text-body-s text-text-3">만남을 확인할 수 있는 기간이 지났어요.</p>
+        <p className="mt-tight text-body-s text-text-3">
+          코드를 확인할 수 있는 기간이 지나 교환 완료로 기록되지 않았어요.
+        </p>
       ) : !revealed ? (
         <>
           <p className="mt-tight text-body-s text-text-2">
             {meetup.codeHolder
-              ? "상대를 만나면 버튼을 눌러 나오는 코드 4자리를 보여주세요."
-              : "상대를 만나면 버튼을 누르고 상대 화면의 코드 4자리를 입력하세요."}
+              ? "상대를 만나 포카를 확인했으면 버튼을 눌러 나오는 코드 4자리를 보여주세요. 상대가 입력하면 교환이 완료돼요."
+              : "상대를 만나 포카를 확인했으면 버튼을 누르고 상대 화면의 코드 4자리를 입력하세요. 맞으면 교환이 완료돼요."}
           </p>
           <button
             type="button"
             onClick={reveal}
             className={`mt-cta h-12 w-full rounded-control bg-primary text-body-l font-extrabold text-white ${FOCUS_RING}`}
           >
-            만남 확인
+            교환 완료 확인
           </button>
         </>
       ) : meetup.codeHolder ? (
         <div className="mt-head">
           {code ? (
             <>
-              <p className="text-body-s text-text-2">신청자에게 이 코드를 보여주세요.</p>
+              <p className="text-body-s text-text-2">신청자가 이 코드를 입력하면 교환이 완료돼요.</p>
               <p
                 aria-label={`확인 코드 ${code.code.split("").join(" ")}`}
                 className="mt-head flex justify-center gap-2"

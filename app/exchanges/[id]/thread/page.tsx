@@ -24,10 +24,10 @@ import type {
  * <p>확정 뒤 화면은 대화가 아니라 현장에서 서로를 알아볼 한 줄을 주고받는 곳이다(backend#612).
  * 채팅으로 두면 지금 모습을 말한 줄이 다른 메시지 사이에 묻힌다.
  *
- * <p>만남 확인 코드(backend#598)는 교환할 포카 다음, 완료 확인 앞에 둔다. 서로를 알아보고 포카를
- * 확인한 뒤에 누르는 버튼이다.
+ * <p>교환 완료는 만남 확인 코드(backend#598·#639)로만 한다. 코드가 맞으면 그 자리에서 완료다.
+ * 교환할 포카 다음에 둔다. 서로를 알아보고 포카를 확인한 뒤에 누르는 버튼이다.
  *
- * <p>노쇼 신고(backend#612)는 만남 확인 다음에 둔다. 만남이 확인되지 않은 교환만 신고할 수 있어서다.
+ * <p>노쇼 신고(backend#612)는 완료 확인 다음에 둔다. 코드가 확인되지 않은 교환만 신고할 수 있어서다.
  * 나를 대상으로 한 신고가 해명 기한 안에 있으면 그것만 맨 위로 올린다.
  *
  * <p>약속 장소는 머리에 붙박아 둔다. 현장에서 열었을 때 장소를 찾아 스크롤하지 않게 한다.
@@ -59,7 +59,6 @@ export default function ExchangeThreadPage() {
   const [cards, setCards] = useState<CardRow[]>([]);
   const [draft, setDraft] = useState("");
   const [saving, setSaving] = useState(false);
-  const [acting, setActing] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -177,20 +176,6 @@ export default function ExchangeThreadPage() {
     }
   }
 
-  async function act(path: string, failure: string) {
-    if (acting) return;
-    setActing(true);
-    setError(null);
-    try {
-      await fetchWithAuth<void>(path, { method: "POST" });
-      await loadThread();
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : failure);
-    } finally {
-      setActing(false);
-    }
-  }
-
   if (loadError) {
     return (
       <>
@@ -217,7 +202,7 @@ export default function ExchangeThreadPage() {
         backHref={`/exchanges/${postId}`} backMode="return"
       />
 
-      {/* 레이아웃은 모바일에만 푸터 앞 여백을 준다. PC는 마지막 섹션(만남·완료 확인)이 푸터에 붙지 않게 여기서 준다. */}
+      {/* 레이아웃은 모바일에만 푸터 앞 여백을 준다. PC는 마지막 섹션이 푸터에 붙지 않게 여기서 준다. */}
       <div className="mx-auto max-w-[640px] sm:pb-footer">
         {thread && (
           <div className="sticky top-12 z-[2] sm:top-15 flex items-center gap-3 border-b border-border bg-surface-2 px-gutter py-3">
@@ -320,9 +305,12 @@ export default function ExchangeThreadPage() {
                     </div>
                   </>
                 ) : (
-                  <p className="mt-tight whitespace-pre-wrap break-words text-body text-text-1">
-                    {mine?.body ?? <span className="text-text-3">적지 않았어요.</span>}
-                  </p>
+                  <>
+                    <p className="mt-tight whitespace-pre-wrap break-words text-body text-text-1">
+                      {mine?.body ?? <span className="text-text-3">적지 않았어요.</span>}
+                    </p>
+                    <p className="mt-tight text-label text-text-3">행사가 끝나고 3일이 지나 고칠 수 없어요.</p>
+                  </>
                 )}
               </div>
             </section>
@@ -361,6 +349,7 @@ export default function ExchangeThreadPage() {
               <ExchangeMeetupSection
                 postId={postId}
                 meetup={thread.meetup}
+                completion={thread.completion}
                 fetchWithAuth={fetchWithAuth}
                 onChanged={loadThread}
               />
@@ -383,50 +372,13 @@ export default function ExchangeThreadPage() {
               </p>
             )}
 
-            {/* 완료 확인. 상태가 다섯이고 한 번에 하나만 보인다. */}
-            {completion && (completion.confirmable || completion.confirmed || !thread.writable) && (
-              <section className="mt-section-ruled border-t border-border px-gutter pt-section-ruled">
-                {completion.confirmed && completion.disputed ? (
-                  <p className="text-body-s text-text-2">교환이 이뤄지지 않은 것으로 정리됐어요. 기록은 남지 않아요.</p>
-                ) : completion.confirmed && completion.confirmedByMe ? (
-                  <p className="text-body-s text-text-2">
-                    교환 완료로 확인했어요. 상대가 이의 없이 24시간이 지나면 기록에 남아요.
-                  </p>
-                ) : completion.confirmed ? (
-                  <>
-                    <p className="text-body-s text-text-2">
-                      {nickname}님이 <b className="font-bold text-text-1">교환 완료를 확인</b>했어요. 사실과 다르면
-                      알려주세요.
-                    </p>
-                    <button
-                      type="button"
-                      disabled={acting}
-                      onClick={() => act(`/api/exchanges/${postId}/completion/dispute`, "이의를 보내지 못했어요.")}
-                      className={`mt-cta h-12 w-full rounded-control border border-border-2 bg-white text-body font-extrabold text-text-2 disabled:opacity-60 ${FOCUS_RING}`}
-                    >
-                      교환이 이뤄지지 않았어요
-                    </button>
-                  </>
-                ) : completion.confirmable ? (
-                  <>
-                    <button
-                      type="button"
-                      disabled={acting}
-                      onClick={() => act(`/api/exchanges/${postId}/completion`, "완료 확인에 실패했어요.")}
-                      className={`h-12 w-full rounded-control border border-text-1 bg-white text-body-l font-extrabold text-text-1 disabled:opacity-60 ${FOCUS_RING}`}
-                    >
-                      교환 완료 확인
-                    </button>
-                    <p className="mt-tight text-label text-text-3">
-                      한 분만 눌러도 완료돼요. 상대는 24시간 안에 아니라고 알릴 수 있어요.
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-body-s text-text-3">
-                    행사가 끝나고 3일이 지나 인상착의를 고칠 수 없어요. 적어 둔 내용은 계속 볼 수 있어요.
-                  </p>
-                )}
-              </section>
+            {/* 약속 시각이 안 잡힌 옛 교환은 코드가 없다. 완료 기록만 보여 준다. */}
+            {!thread.meetup && completion?.confirmed && (
+              <p className="mt-section-ruled border-t border-border px-gutter pt-section-ruled text-body-s text-text-2">
+                {completion.disputed
+                  ? "교환이 이뤄지지 않은 것으로 정리됐어요. 기록은 남지 않아요."
+                  : "교환 완료로 기록됐어요."}
+              </p>
             )}
           </>
         )}

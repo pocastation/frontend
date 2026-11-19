@@ -89,8 +89,10 @@ test("서비스 워커가 푸시 제목을 전달하고 열린 창이나 새 창
   let openedUrl = "";
   let openedClient: object | null = null;
   let windows: object[] = [];
+  const clicks = new Map<string, Response>();
   const self = {
     location: { origin },
+    navigator: {},
     addEventListener(name: string, handler: (event: Record<string, unknown>) => void) {
       handlers.set(name, handler);
     },
@@ -105,7 +107,8 @@ test("서비스 워커가 푸시 제목을 전달하고 열린 창이나 새 창
       async openWindow(url: string) { openedUrl = url; return openedClient; },
     },
   };
-  runInNewContext(readFileSync("public/sw.js", "utf8"), { self, URL });
+  const caches = { open: async () => ({ put: (key: string, response: Response) => clicks.set(key, response) }) };
+  runInNewContext(readFileSync("public/sw.js", "utf8"), { self, URL, Response, caches });
 
   async function dispatch(name: string, event: Record<string, unknown>) {
     let done: Promise<unknown> | undefined;
@@ -158,7 +161,40 @@ test("서비스 워커가 푸시 제목을 전달하고 열린 창이나 새 창
   await dispatch("push", { data: { json: () => ({ body, url: "https://example.com/outside" }) } });
   expect(shownTitle).toBe("포카스테이션");
   expect(shownOptions).toMatchObject({ body, navigate: origin + "/notifications", data: { url: origin + "/notifications" } });
+
+  const campaign = "/notifications/campaigns/37";
+  await dispatch("push", { data: { json: () => ({ title: "행사", url: campaign }) } });
+  expect(shownOptions).not.toHaveProperty("navigate");
+  expect(clicks.size).toBe(0);
+  windows = [];
+  openedClient = null;
+  await dispatch("notificationclick", { notification: { ...notification, data: shownOptions?.data } });
+  expect(openedUrl).toBe(origin + campaign);
+  expect(await clicks.get("/__campaign-click")?.json()).toMatchObject({ path: campaign });
 });
+
+for (const launch of ["cold", "resume"]) {
+  test(`관리자 푸시를 누른 후 앱이 이전 화면으로 열려도 본문을 한 번만 연다 (${launch})`, async ({ context, page }) => {
+    await mockApi(context);
+    await simulatePushDevice(context, true, "granted");
+    const detail = "/notifications/campaigns/37";
+    await context.route("**/api/notification-campaigns/37/open", route => route.fulfill({
+      json: { success: true, data: { title: "클릭한 행사 소식", message: "행사 본문" } },
+    }));
+    await page.goto("/mypage");
+    await page.evaluate(async path => {
+      const cache = await caches.open("pocastation-campaign-click");
+      await cache.put("/__campaign-click", Response.json({ path, expiresAt: Date.now() + 60_000 }));
+    }, detail);
+    if (launch === "cold") await page.goto("/");
+    else await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await expect(page).toHaveURL(new RegExp(detail + "$"), { timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: "클릭한 행사 소식" })).toBeVisible({ timeout: 20_000 });
+    expect(await page.evaluate(async () => Boolean(await caches.match("/__campaign-click")))).toBe(false);
+    await page.goto("/mypage");
+    await expect(page).toHaveURL(/\/mypage$/);
+  });
+}
 
 test("채팅 푸시 상세 페이지는 가장 최근 메시지부터 보여 주고 해당 알림을 읽음 처리한다", async ({ context, page }) => {
   await mockApi(context);

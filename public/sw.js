@@ -15,7 +15,7 @@
  */
 
 // 캐시 이름의 버전. **이 파일을 고칠 때마다 올린다** — 올려야 옛 캐시가 정리된다.
-const VERSION = "v4";
+const VERSION = "v5";
 const STATIC_CACHE = `pocastation-static-${VERSION}`;
 const OFFLINE_URL = "/offline.html";
 
@@ -54,6 +54,7 @@ self.addEventListener("push", (event) => {
   event.waitUntil(self.registration.showNotification(title, {
     body: typeof payload.body === "string" ? payload.body : "새 알림이 도착했어요.",
     icon: "/icons/icon-192.png",
+    ...(typeof payload.image === "string" && payload.image ? { image: payload.image } : {}),
     tag: typeof payload.tag === "string" ? payload.tag : undefined,
     navigate: destination,
     data: { url: destination },

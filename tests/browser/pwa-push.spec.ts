@@ -13,7 +13,7 @@ async function mockApi(context: BrowserContext) {
     configured: false,
     categories: ["EXCHANGE_REQUEST", "EXCHANGE_MATCH", "EXCHANGE_CHAT", "EXCHANGE_COMPLETION",
       "EXCHANGE_CLOSURE", "EXCHANGE_MODERATION", "NEW_OFFER", "LISTING_REVIEW", "LISTING_CLOSURE",
-      "OFFER_RESULT", "LISTING_CHANGE", "PAYMENT", "SHIPPING", "CONFIRMATION", "REFUND", "RETURN_DISPUTE", "INQUIRY"],
+      "OFFER_RESULT", "LISTING_CHANGE", "PAYMENT", "SHIPPING", "CONFIRMATION", "REFUND", "RETURN_DISPUTE", "INQUIRY", "CAMPAIGN"],
   };
   await context.route("**/api/**", async (route) => {
     const request = route.request();
@@ -118,6 +118,9 @@ test("서비스 워커가 푸시 제목을 전달하고 열린 창이나 새 창
   await dispatch("push", { data: { json: () => ({ title: "새 채팅", body, url: destination }) } });
   expect(shownTitle).toBe("새 채팅");
   expect(shownOptions).toMatchObject({ body, navigate: destination, data: { url: destination } });
+  const image = "/media/photos/example_display.jpg";
+  await dispatch("push", { data: { json: () => ({ title: "행사 소식", body, image, url: destination }) } });
+  expect(shownOptions).toMatchObject({ image });
 
   let closed = false;
   const notification = { data: shownOptions?.data, close() { closed = true; } };
@@ -220,12 +223,12 @@ test("PWA의 계정 메뉴에서만 설정을 열고 일시 중지 후 선택을
   await expect(page.getByRole("heading", { name: "푸시 알림", exact: true })).toBeInViewport();
   const chat = page.getByRole("switch", { name: "교환 채팅" });
   const inquiry = page.getByRole("switch", { name: "1:1 문의 답변" });
-  await expect(page.getByRole("switch")).toHaveCount(18);
+  await expect(page.getByRole("switch")).toHaveCount(19);
   await expect(master).toBeEnabled();
   await expect(chat).toBeDisabled();
   expect(await page.evaluate(permissionRequests)).toBe(0);
 
-  await expect(page.getByRole("switch", { checked: true })).toHaveCount(18);
+  await expect(page.getByRole("switch", { checked: true })).toHaveCount(19);
   await page.getByRole("button", { name: "기기 알림 허용" }).click();
   await expect(chat).toBeChecked();
   await chat.click();
@@ -241,7 +244,7 @@ test("PWA의 계정 메뉴에서만 설정을 열고 일시 중지 후 선택을
   expect(await page.evaluate(permissionRequests)).toBe(1);
 
   await page.getByRole("link", { name: "마이페이지로 돌아가기" }).click();
-  await page.getByRole("button", { name: "로그아웃", exact: true }).filter({ visible: true }).click();
+  await page.getByRole("banner").getByRole("button", { name: "로그아웃", exact: true }).click();
   await expect.poll(() => page.evaluate(() => localStorage.getItem("pocastation.push.owner"))).toBeNull();
   // Next authenticated load represents the same member with a new session and no bound endpoint.
   await page.goto(path);
@@ -251,6 +254,7 @@ test("PWA의 계정 메뉴에서만 설정을 열고 일시 중지 후 선택을
   await expect(inquiry).toBeChecked();
   expect(await page.evaluate(permissionRequests)).toBe(0);
   await master.click();
+  await expect(master).not.toBeChecked();
   await page.reload();
   await expect(master).not.toBeChecked();
   await expect(chat).toBeDisabled();
@@ -270,13 +274,14 @@ test("권한 거부 시 실제로 푸시를 켜거나 기기에 저장하지 않
   expect(api.calls()).toBe(callsBeforeClick);
 });
 
-test("기기 권한을 이미 허용한 신규 PWA는 설정 방문 없이 17종을 구독한다", async ({ context, page }) => {
+test("기기 권한을 이미 허용한 신규 PWA는 설정 방문 없이 운영 알림을 포함해 구독한다", async ({ context, page }) => {
   await mockApi(context);
   await simulatePushDevice(context, true, "granted", "granted");
   const firstSave = page.waitForRequest((req) => req.method() === "PUT" && req.url().includes("/web-push/"));
   await page.goto("/mypage");
   const data = (await firstSave).postDataJSON();
-  expect(new Set(data.categories).size).toBe(17);
+  expect(new Set(data.categories).size).toBe(18);
+  expect(data.categories).toContain("CAMPAIGN");
   expect(data.subscription.endpoint).toBeTruthy();
   expect(await page.evaluate(permissionRequests)).toBe(0);
 });

@@ -10,7 +10,7 @@ type Kind = "ALL" | "EVENT" | "ARTIST";
 type Target = { id: number; name: string };
 type History = {
   id: number; title: string; targetName: string; marketing: boolean; scheduledAt: string; sentAt: string | null;
-  recipients: number; opened: number; cancelledAt?: string | null;
+  recipients: number; opened: number; cancelledAt?: string | null; scheduledByAdmin?: boolean | null;
 };
 const api = "/api/admin/notification-campaigns";
 const date = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", dateStyle: "medium", timeStyle: "short" });
@@ -217,7 +217,7 @@ export default function AdminNotifications() {
       <ul className="divide-y divide-border">{history?.map(row => <li key={row.id} className="py-row">
         <strong className="break-words">{row.title}</strong><p className="mt-tight text-body-s">{row.targetName}{row.marketing && " 중 마케팅 동의자"} · {row.sentAt ? "발송" : row.cancelledAt ? "기존 예약" : "발송 예정"} {date.format(new Date(row.sentAt ?? row.scheduledAt))}</p>
         {row.cancelledAt && <p className="mt-tight text-body-s">예약 취소됨 · {date.format(new Date(row.cancelledAt))}</p>}
-        {!row.sentAt && row.cancelledAt === null && <button type="button" className={button + " mt-tight"}
+        {!row.sentAt && row.cancelledAt === null && row.scheduledByAdmin !== false && <button type="button" className={button + " mt-tight"}
           disabled={pending} onClick={() => cancelReservation(row)}>예약 취소</button>}
         {row.sentAt && <p className="text-body-s text-text-2">인앱 발송 {row.recipients.toLocaleString()}명 · 유입 {row.opened.toLocaleString()}명</p>}
       </li>)}</ul>

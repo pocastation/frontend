@@ -10,7 +10,7 @@ type Kind = "ALL" | "EVENT" | "ARTIST";
 type Target = { id: number; name: string };
 type History = {
   id: number; title: string; targetName: string; marketing: boolean; scheduledAt: string; sentAt: string | null;
-  recipients: number; opened: number;
+  recipients: number; opened: number; cancelledAt?: string | null;
 };
 const api = "/api/admin/notification-campaigns";
 const date = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", dateStyle: "medium", timeStyle: "short" });
@@ -42,6 +42,7 @@ export default function AdminNotifications() {
   const busy = useRef(false);
   const [notice, setNotice] = useState("");
   const [historyError, setHistoryError] = useState("");
+  const [cancelNotice, setCancelNotice] = useState("");
   const [reload, setReload] = useState(0);
   const photos = usePhotoUpload(5, setNotice);
   const photoUrls = photos.uploadedUrls.map(photo => photo.url);
@@ -109,6 +110,24 @@ export default function AdminNotifications() {
       }
     } catch (err) { setNotice(errorText(err)); }
     finally { busy.current = false; setPending(false); }
+  }
+
+  async function cancelReservation(row: History) {
+    if (busy.current || !window.confirm(`‘${row.title}’ 알림의 발송 예약을 취소할까요?`)) return;
+    busy.current = true;
+    setPending(true);
+    setCancelNotice("");
+    try {
+      const result = await fetchWithAuth<{ cancelledAt: string }>(`${api}/${row.id}/cancel`, { method: "POST" });
+      setHistory(rows => rows?.map(item => item.id === row.id ? { ...item, cancelledAt: result.cancelledAt } : item) ?? null);
+      setCancelNotice(`‘${row.title}’ 발송 예약을 취소했어요.`);
+    } catch (err) {
+      setCancelNotice(errorText(err));
+      setReload(value => value + 1);
+    } finally {
+      busy.current = false;
+      setPending(false);
+    }
   }
 
   async function loadMore() {
@@ -193,9 +212,13 @@ export default function AdminNotifications() {
       <div className="flex items-center justify-between"><h2 className="text-title font-bold">발송 기록</h2>
         <button type="button" className={button} disabled={pending} onClick={() => setReload(v => v + 1)}>새로고침</button></div>
       {historyError && <p role="alert">{historyError}</p>}
+      {cancelNotice && <p role="status" className="mt-row">{cancelNotice}</p>}
       {!historyError && !history?.length && <p className="py-group text-text-2">{history ? "등록된 발송이 없어요." : "발송 기록을 불러오는 중이에요."}</p>}
       <ul className="divide-y divide-border">{history?.map(row => <li key={row.id} className="py-row">
-        <strong className="break-words">{row.title}</strong><p className="mt-tight text-body-s">{row.targetName}{row.marketing && " 중 마케팅 동의자"} · {row.sentAt ? "발송" : "발송 예정"} {date.format(new Date(row.sentAt ?? row.scheduledAt))}</p>
+        <strong className="break-words">{row.title}</strong><p className="mt-tight text-body-s">{row.targetName}{row.marketing && " 중 마케팅 동의자"} · {row.sentAt ? "발송" : row.cancelledAt ? "기존 예약" : "발송 예정"} {date.format(new Date(row.sentAt ?? row.scheduledAt))}</p>
+        {row.cancelledAt && <p className="mt-tight text-body-s">예약 취소됨 · {date.format(new Date(row.cancelledAt))}</p>}
+        {!row.sentAt && row.cancelledAt === null && <button type="button" className={button + " mt-tight"}
+          disabled={pending} onClick={() => cancelReservation(row)}>예약 취소</button>}
         {row.sentAt && <p className="text-body-s text-text-2">인앱 발송 {row.recipients.toLocaleString()}명 · 유입 {row.opened.toLocaleString()}명</p>}
       </li>)}</ul>
       {more && <button className={button} disabled={pending} onClick={loadMore}>더 보기</button>}

@@ -1,15 +1,14 @@
 import type { MetadataRoute } from "next";
 import { apiFetch } from "@/lib/api";
-import { NOTICES } from "@/lib/notices-content";
+import type { Notice } from "@/lib/support";
 import { SITE_URL } from "@/lib/site";
 import type { ArtistListResponse, AuctionListResponse } from "@/lib/types";
 
 // sitemap.xml이 없어(404) 크롤러가 링크를 타고 발견하기만을 기다리고 있었다.
 // 홍보를 시작하는 시점이라 공개 페이지를 직접 건네 색인을 앞당긴다.
 //
-// 요청 시 생성하되 1시간 캐시한다 — 매 크롤마다 백엔드를 두 번씩 때릴 이유가 없고,
-// 경매 목록이 1시간 늦게 반영되는 건 색인 관점에서 무의미한 차이다.
-export const revalidate = 3600;
+// 비공개 전환과 예약 시각을 사이트맵에도 반영한다.
+export const dynamic = "force-dynamic";
 
 // 백엔드가 죽어도 sitemap 자체는 나가야 한다. 동적 항목만 비고 정적 목록은 유지한다
 // — 여기서 예외가 나면 sitemap.xml이 통째로 500이 되어 크롤러가 아무것도 못 받는다.
@@ -50,12 +49,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // 공지 상세(#300) — 약관 개정 고지처럼 링크로 공유되는 문서라 개별 주소도 색인 대상이다.
-  // 콘텐츠가 정적이라 API 호출 없이 그대로 넣는다. lastModified는 게시일을 쓴다 — 지금 시각을
-  // 넣으면 바뀌지 않은 공지가 매번 갱신된 것으로 보인다.
-  for (const notice of NOTICES) {
+  const notices = await safeFetch<Notice[]>("/api/support/notices");
+  for (const notice of notices ?? []) {
     entries.push({
       url: `${SITE_URL}/notices/${notice.slug}`,
-      lastModified: new Date(notice.date),
+      lastModified: new Date(notice.publishAt),
       changeFrequency: "yearly",
       priority: 0.3,
     });

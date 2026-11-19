@@ -41,7 +41,7 @@ export default async function NoticeDetailPage({
   }
 
   return (
-    <div className="mx-auto max-w-[720px] px-5 pt-9 pb-20 sm:pt-12">
+    <div className="mx-auto w-full min-w-0 max-w-[720px] wrap-anywhere px-5 pt-9 pb-20 sm:pt-12">
       <Link
         href="/notices"
         className={`inline-flex items-center gap-1 rounded-control px-1 py-1 text-label font-semibold text-text-3 transition-colors hover:text-primary ${FOCUS_RING}`}

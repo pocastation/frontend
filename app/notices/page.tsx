@@ -22,7 +22,7 @@ export default async function NoticesPage() {
         </p>
       </header>
 
-      <ul className="mt-8 border-t border-border">
+      <ul className="mt-8 wrap-anywhere border-t border-border">
         {notices.map((notice) => (
           <li key={notice.slug} className="border-b border-border">
             <Link

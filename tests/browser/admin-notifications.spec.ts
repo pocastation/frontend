@@ -3,8 +3,9 @@ import { expect, test } from "@playwright/test";
 test("발송 대기 중인 예약만 확인 후 취소하고 새로고침해도 취소 기록을 유지한다", async ({ page }) => {
   const api = "/api/admin/notification-campaigns";
   const scheduledAt = "2099-12-31T00:00:00Z";
-  const history = [1, 2, 3].map(id => ({
+  const history = [1, 2, 3, 4].map(id => ({
     id, title: `행사 ${id}`, targetName: "전체 회원", marketing: true, scheduledAt,
+    scheduledByAdmin: id === 2 ? null : id !== 4,
     sentAt: id === 3 ? scheduledAt : null, cancelledAt: null as string | null, recipients: 0, opened: 0,
   }));
   let cancelRequests = 0;
@@ -29,6 +30,7 @@ test("발송 대기 중인 예약만 확인 후 취소하고 새로고침해도 
   const row = (title: string) => page.getByRole("listitem").filter({ hasText: title });
   const cancel = row("행사 1").getByRole("button", { name: "예약 취소" });
   await expect(page.getByRole("button", { name: "예약 취소" })).toHaveCount(2);
+  await expect(row("행사 4").getByRole("button", { name: "예약 취소" })).toHaveCount(0);
   page.once("dialog", dialog => dialog.dismiss());
   await cancel.click();
   expect(cancelRequests).toBe(0);

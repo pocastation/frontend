@@ -16,7 +16,7 @@ const groups = [
       ["EXCHANGE_REQUEST", "교환 신청", "내 교환글에 새 신청이 들어오면 알려요."],
       ["EXCHANGE_MATCH", "교환 확정", "내가 보낸 신청이 수락되면 알려요."],
       ["EXCHANGE_CHAT", "교환 채팅", "상대가 새 메시지를 보내면 알려요."],
-      ["EXCHANGE_COMPLETION", "교환 완료·이의", "상대의 완료 확인과 이의 제기를 알려요."],
+      ["EXCHANGE_COMPLETION", "교환 완료", "만남 확인 코드가 맞아 교환이 완료되면 알려요."],
       ["EXCHANGE_CLOSURE", "교환 신청 마감", "다른 신청이 수락되거나 행사가 끝나면 알려요."],
       ["EXCHANGE_MODERATION", "교환글 조치", "교환글 내림과 신청 무효를 알려요."],
     ],

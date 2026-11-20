@@ -791,8 +791,8 @@ export type NotificationType =
   | "EXCHANGE_MATCHED" // 신청 수락 — 신청자에게. 대화가 열린다
   | "EXCHANGE_DECLINED" // 다른 건이 수락되거나 글이 내려감 — 나머지 신청자에게
   | "EXCHANGE_MESSAGE" // 새 대화 메시지 — 상대에게. 안 읽은 것이 있으면 묶여서 오지 않는다
-  | "EXCHANGE_COMPLETED" // 상대가 완료를 확인 — 24시간 이의 창 안내
-  | "EXCHANGE_COMPLETION_DISPUTED" // 완료에 이의 — 확인한 쪽에게
+  | "EXCHANGE_COMPLETED" // 만남 확인 코드가 맞아 교환 완료 — 작성자에게(backend#639)
+  | "EXCHANGE_COMPLETION_DISPUTED" // 완료 이의. backend#639로 새로 오지 않고 저장된 알림만 남음
   | "EXCHANGE_POST_REMOVED" // 신고 처리로 교환글이 내려감 — 작성자에게
   | "EXCHANGE_EXPIRED" // 행사가 지나 교환글이 마감됨 — 대기 중이던 신청자에게
   // ── 노쇼(BE #612, 인앱 전용) ──
@@ -1428,15 +1428,14 @@ export type ExchangeMessage = {
  * 완료 확인 상태. 대화 응답에 실려 온다 — 완료를 누르는 곳이 대화 화면이라
  * 따로 불러오면 두 값이 어긋난 순간이 생긴다.
  */
+/** 교환 완료(backend#639). 만남 확인 코드가 맞을 때 생긴다. 따로 누르는 완료·이의는 없다. */
 export type ExchangeCompletion = {
-  /** 지금 내가 누를 수 있는가(행사가 끝났고 아직 아무도 안 눌렀다). */
-  confirmable: boolean;
   confirmed: boolean;
+  /** 코드를 입력한 쪽이 나인가. */
   confirmedByMe: boolean;
+  /** backend#639 전 수동 완료에 이의가 걸린 건. 새로 생기지 않는다. */
   disputed: boolean;
   confirmedAt: string | null;
-  /** 상대가 아니라고 말할 수 있는 시각. */
-  disputableUntil: string | null;
 };
 
 export type ExchangeThreadResponse = {

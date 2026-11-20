@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { mediaUrl } from "@/lib/api";
 import PhotoUploadGrid from "@/components/PhotoUploadGrid";
 import { usePhotoUpload } from "@/lib/use-photo-upload";
 import type { ArtistMemberResponse } from "@/lib/types";
@@ -11,6 +12,7 @@ type Target = { id: number; name: string };
 type History = {
   id: number; title: string; targetName: string; marketing: boolean; scheduledAt: string; sentAt: string | null;
   recipients: number; opened: number; cancelledAt?: string | null; scheduledByAdmin?: boolean | null;
+  message: string; photoUrls: string[];
 };
 const api = "/api/admin/notification-campaigns";
 const date = new Intl.DateTimeFormat("ko-KR", { timeZone: "Asia/Seoul", dateStyle: "medium", timeStyle: "short" });
@@ -215,11 +217,26 @@ export default function AdminNotifications() {
       {cancelNotice && <p role="status" className="mt-row">{cancelNotice}</p>}
       {!historyError && !history?.length && <p className="py-group text-text-2">{history ? "등록된 발송이 없어요." : "발송 기록을 불러오는 중이에요."}</p>}
       <ul className="divide-y divide-border">{history?.map(row => <li key={row.id} className="py-row">
-        <strong className="break-words">{row.title}</strong><p className="mt-tight text-body-s">{row.targetName}{row.marketing && " 중 마케팅 동의자"} · {row.sentAt ? "발송" : row.cancelledAt ? "기존 예약" : "발송 예정"} {date.format(new Date(row.sentAt ?? row.scheduledAt))}</p>
-        {row.cancelledAt && <p className="mt-tight text-body-s">예약 취소됨 · {date.format(new Date(row.cancelledAt))}</p>}
+        <details className="group">
+          <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-control text-left focus-visible:outline-primary [&::-webkit-details-marker]:hidden">
+            <span className="min-w-0 wrap-anywhere">
+              <strong>{row.title}</strong>
+              <span className="mt-tight block text-body-s">{row.targetName}{row.marketing && " 중 마케팅 동의자"} · {row.sentAt ? "발송" : row.cancelledAt ? "기존 예약" : "발송 예정"} {date.format(new Date(row.sentAt ?? row.scheduledAt))}</span>
+              {row.cancelledAt && <span className="mt-tight block text-body-s">예약 취소됨 · {date.format(new Date(row.cancelledAt))}</span>}
+              {row.sentAt && <span className="block text-body-s text-text-2">인앱 발송 {row.recipients.toLocaleString()}명 · 유입 {row.opened.toLocaleString()}명</span>}
+            </span>
+            <svg aria-hidden="true" viewBox="0 0 20 20" className="h-5 w-5 shrink-0 text-text-3 group-open:rotate-180" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="m5 8 5 5 5-5" />
+            </svg>
+          </summary>
+          <p className="mt-row whitespace-pre-wrap wrap-anywhere text-body">{row.message}</p>
+          {row.photoUrls?.map((url, i) =>
+            // eslint-disable-next-line @next/next/no-img-element -- 이미 크기를 조정한 알림 사진.
+            <img key={url} src={mediaUrl(url)} alt={`알림 첨부 사진 ${i + 1}`} loading="lazy" className="mt-tight h-auto max-w-full rounded-card" />
+          )}
+        </details>
         {!row.sentAt && row.cancelledAt === null && row.scheduledByAdmin !== false && <button type="button" className={button + " mt-tight"}
           disabled={pending} onClick={() => cancelReservation(row)}>예약 취소</button>}
-        {row.sentAt && <p className="text-body-s text-text-2">인앱 발송 {row.recipients.toLocaleString()}명 · 유입 {row.opened.toLocaleString()}명</p>}
       </li>)}</ul>
       {more && <button className={button} disabled={pending} onClick={loadMore}>더 보기</button>}
     </section>

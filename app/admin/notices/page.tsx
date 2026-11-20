@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { CATEGORY_LABEL, noticeDate, type Notice } from "@/lib/support";
 import { compressImage } from "@/lib/image-compress";
 import { button, field, primary, useSupportConfirmation, useSupportList } from "@/components/admin/SupportEditor";
 
 const api = "/api/admin/support/notices";
+const photoTypes = ["image/jpeg", "image/png", "image/webp"];
+const maxPhotos = 5;
 type Ask = ReturnType<typeof useSupportConfirmation>["ask"];
 
 function PhotoPreview({ path, file }: { path?: string; file?: File }) {
@@ -39,6 +41,21 @@ function NoticeForm({ notice, ask, done, cancel }: {
   const [keep, setKeep] = useState(notice?.photoIds ?? []);
   const [scheduled, setScheduled] = useState(() => !!notice && Date.parse(notice.publishAt) > Date.now());
   const [error, setError] = useState("");
+  const picker = useRef<HTMLInputElement>(null);
+  const photoCount = keep.length + files.length;
+
+  function addPhotos(selection: FileList) {
+    const picked = Array.from(selection);
+    if (!picked.length) return;
+    const valid = picked.filter(file => photoTypes.includes(file.type) && file.size <= 5 * 1024 * 1024);
+    const available = maxPhotos - photoCount;
+    const accepted = valid.slice(0, available);
+    setFiles(current => [...current, ...accepted]);
+    const messages = [];
+    if (valid.length < picked.length) messages.push("5MB 이하의 JPG, PNG, WebP 사진만 첨부할 수 있어요.");
+    if (valid.length > available) messages.push("사진은 총 5장까지 첨부할 수 있어요.");
+    setError(messages.join(" "));
+  }
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -72,21 +89,25 @@ function NoticeForm({ notice, ask, done, cancel }: {
     <label>제목<input name="title" required maxLength={200} defaultValue={notice?.title} className={field} /></label>
     <label>목록 요약<input name="summary" maxLength={500} defaultValue={notice?.summary} className={field} /></label>
     <label>본문<textarea name="body" required rows={8} maxLength={50000} defaultValue={notice?.body} className={field} /></label>
-    <fieldset><legend className="mb-2">첨부 사진 (최대 5장, 장당 5MB)</legend>
-      <div className="mb-2 flex flex-wrap gap-3">
-        {keep.map(id => <div key={id}><PhotoPreview path={api + "/" + notice!.slug + "/photos/" + id} />
-          <button type="button" className={button} onClick={() => setKeep(keep.filter(x => x !== id))}>사진 제거</button></div>)}
-        {files.map((file, i) => <div key={file.name + "-" + file.lastModified + "-" + i}><PhotoPreview file={file} />
-          <button type="button" className={button} onClick={() => setFiles(files.filter((_, n) => n !== i))}>사진 제거</button></div>)}
+    <fieldset className="min-w-0" onDragOver={e => e.preventDefault()} onDrop={e => {
+      e.preventDefault();
+      addPhotos(e.dataTransfer.files);
+    }}><legend className="mb-2">첨부 사진 (최대 5장, 장당 5MB)</legend>
+      <div className="flex flex-wrap items-center gap-3">
+        <button type="button" className={button} disabled={photoCount >= maxPhotos} onClick={() => picker.current?.click()}>파일 선택</button>
+        <span role="status" className="text-body-s text-text-2">{photoCount} / {maxPhotos}장</span>
+        <input ref={picker} type="file" hidden aria-label="사진 추가" multiple accept={photoTypes.join(",")} onChange={e => {
+          if (e.currentTarget.files) addPhotos(e.currentTarget.files);
+          e.currentTarget.value = "";
+        }} />
       </div>
-      <input type="file" aria-label="사진 추가" multiple accept="image/jpeg,image/png,image/webp" disabled={keep.length + files.length >= 5} onChange={e => {
-        const picked = Array.from(e.target.files ?? []);
-        e.target.value = "";
-        if (picked.length + files.length + keep.length > 5 || picked.some(p => p.size > 5 * 1024 * 1024)) {
-          setError("사진은 장당 5MB 이하, 총 5장까지 첨부할 수 있어요."); return;
-        }
-        setFiles([...files, ...picked]); setError("");
-      }} />
+      <p className="mt-1 text-label text-text-3">사진을 여러 장 선택하거나 여기에 끌어다 놓으세요.</p>
+      {photoCount > 0 && <div className="mt-3 flex flex-wrap gap-3">
+        {keep.map(id => <div key={id} className="flex flex-col items-center gap-1"><PhotoPreview path={api + "/" + notice!.slug + "/photos/" + id} />
+          <button type="button" className={button} onClick={() => setKeep(keep.filter(x => x !== id))}>사진 제거</button></div>)}
+        {files.map((file, i) => <div key={file.name + "-" + file.lastModified + "-" + i} className="flex flex-col items-center gap-1"><PhotoPreview file={file} />
+          <button type="button" className={button} onClick={() => setFiles(files.filter((_, n) => n !== i))}>사진 제거</button></div>)}
+      </div>}
     </fieldset>
     <div className="flex flex-wrap gap-5">
       <label><input name="pinned" type="checkbox" defaultChecked={notice?.pinned} /> 상단 고정</label>

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { NOTICE_CATEGORY_LABEL, ORDERED_NOTICES } from "@/lib/notices-content";
+import { apiFetch } from "@/lib/api";
+import { CATEGORY_LABEL, noticeDate, type Notice } from "@/lib/support";
 import { FOCUS_RING } from "@/lib/ui";
 
 export const metadata = {
@@ -7,20 +8,8 @@ export const metadata = {
   description: "약관·정책 변경과 서비스 소식을 안내합니다.",
 };
 
-function formatDate(iso: string) {
-  return iso.replace(/-/g, ". ");
-}
-
-/**
- * 공지사항 목록(#300).
- *
- * <p>서버 컴포넌트다 — 콘텐츠가 정적이라 클라이언트 상태가 필요 없고, HTML 에 그대로 실려
- * 검색 노출에도 유리하다.
- *
- * <p>목록을 <b>카드로 감싸지 않는다.</b> 공지는 같은 성격의 항목이 반복되는 목록이라
- * 구분은 헤어라인이 하면 충분하고, 카드로 감싸면 어느 것이 중요한지를 화면이 말해주지 못한다.
- */
-export default function NoticesPage() {
+export default async function NoticesPage() {
+  const notices = await apiFetch<Notice[]>("/api/support/notices", { cache: "no-store" });
   return (
     <div className="mx-auto max-w-[820px] px-gutter pt-page sm:px-5 sm:pt-14 sm:pb-20">
       <header>
@@ -33,8 +22,8 @@ export default function NoticesPage() {
         </p>
       </header>
 
-      <ul className="mt-8 border-t border-border">
-        {ORDERED_NOTICES.map((notice) => (
+      <ul className="mt-8 wrap-anywhere border-t border-border">
+        {notices.map((notice) => (
           <li key={notice.slug} className="border-b border-border">
             <Link
               href={`/notices/${notice.slug}`}
@@ -45,9 +34,9 @@ export default function NoticesPage() {
                     분류·날짜와 뒤섞여 무엇이 중요한지가 흐려진다. */}
                 {notice.pinned && <span className="font-extrabold text-text-1">고정</span>}
                 <span className="font-bold text-text-3">
-                  {NOTICE_CATEGORY_LABEL[notice.category]}
+                  {CATEGORY_LABEL[notice.category]}
                 </span>
-                <span className="tabular-nums text-text-3">{formatDate(notice.date)}</span>
+                <span className="tabular-nums text-text-3">{noticeDate(notice.publishAt)}</span>
               </span>
               <span className="mt-2 block font-display text-body-l font-extrabold text-text-1 transition-colors group-hover:text-primary">
                 {notice.title}
@@ -59,6 +48,7 @@ export default function NoticesPage() {
           </li>
         ))}
       </ul>
+      {!notices.length && <p className="py-5 text-text-3">게시된 공지사항이 없습니다.</p>}
 
       <p className="mt-8 text-body-s text-text-3">
         문의가 있으시면{" "}

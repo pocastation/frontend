@@ -86,10 +86,25 @@ test("공지 사진과 예약 설정은 확인 후 전송된다", async ({ page 
   await page.getByLabel("비공개").check();
   await page.getByLabel("예약 게시").check();
   await page.getByLabel("게시 일시").fill("2099-12-31T09:30");
-  await page.getByLabel("사진 추가").setInputFiles({
-    name: "notice.png", mimeType: "image/png",
-    buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/T42/JwAAAABJRU5ErkJggg==", "base64"),
-  });
+  const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/T42/JwAAAABJRU5ErkJggg==", "base64");
+  const photos = ["first.png", "second.png", "third.png"].map(name => ({ name, mimeType: "image/png", buffer: png }));
+  const chooserEvent = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "파일 선택" }).click();
+  const chooser = await chooserEvent;
+  expect(chooser.isMultiple()).toBe(true);
+  await chooser.setFiles([...photos, { name: "large.png", mimeType: "image/png", buffer: Buffer.alloc(5 * 1024 * 1024 + 1) }]);
+  const previews = page.getByAltText("첨부 사진 미리보기");
+  await expect(previews).toHaveCount(3);
+  await expect(page.getByRole("alert").filter({ hasText: "5MB" })).toBeVisible();
+  const remove = page.getByRole("button", { name: "사진 제거" });
+  const imageBox = (await previews.first().boundingBox())!;
+  const buttonBox = (await remove.first().boundingBox())!;
+  expect(Math.abs(imageBox.x + imageBox.width / 2 - buttonBox.x - buttonBox.width / 2)).toBeLessThan(1);
+  await remove.nth(1).click();
+  await expect(previews).toHaveCount(2);
+  await page.getByLabel("사진 추가").setInputFiles(photos[1]);
+  await expect(previews).toHaveCount(3);
+  await expect(page.getByRole("group", { name: /첨부 사진/ }).getByRole("status")).toHaveText("3 / 5장");
   const submit = page.getByRole("button", { name: "공지 등록" });
   await submit.click();
   await page.getByRole("button", { name: "아니오" }).click();
@@ -98,6 +113,8 @@ test("공지 사진과 예약 설정은 확인 후 전송된다", async ({ page 
   await page.getByRole("button", { name: "예", exact: true }).click();
   await expect(page.getByRole("heading", { name: notice.title })).toBeVisible();
   expect(requests).toHaveLength(1);
+  expect(requests[0].match(/name="photos"/g)).toHaveLength(3);
+  for (const photo of photos) expect(requests[0]).toContain(`filename="${photo.name}"`);
   for (const part of ['"hidden":true', '"pinned":true', '2099-12-31T00:30:00.000Z', 'name="photos"']) {
     expect(requests[0]).toContain(part);
   }

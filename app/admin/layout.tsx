@@ -170,6 +170,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/admin/auctions", label: "판매글 관리", icon: <ListingIcon />, ready: true },
       { href: "/admin/settlement", label: "결제·정산", icon: <TagIcon />, ready: true },
       { href: "/admin/banner", label: "홈 배너", icon: <BannerIcon />, ready: true },
+      { href: "/admin/notifications", label: "알림 발송", icon: <BellIcon />, ready: true },
       { href: "/admin/pre-registrations", label: "사전예약 현황", icon: <ChartIcon />, ready: true },
       { href: "/admin/analytics", label: "방문 통계", icon: <ChartIcon />, ready: true },
     ],
@@ -200,12 +201,6 @@ const NAV_GROUPS: NavGroup[] = [
     title: "메일",
     items: [
       { href: "/admin/email-suppressions", label: "발송 금지 목록", icon: <MailBanIcon />, ready: true },
-    ],
-  },
-  {
-    title: "준비 중",
-    items: [
-      { href: "/admin/notifications", label: "알림 발송", icon: <BellIcon />, ready: true },
     ],
   },
 ];

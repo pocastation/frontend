@@ -4,13 +4,16 @@ test("발송 대기 중인 예약만 확인 후 취소하고 새로고침해도 
   const api = "/api/admin/notification-campaigns";
   const scheduledAt = "2099-12-31T00:00:00Z";
   const history = [1, 2, 3, 4].map(id => ({
-    id, title: `행사 ${id}`, targetName: "전체 회원", marketing: true, scheduledAt,
+    id, title: `행사 ${id}`, message: `발송 본문 ${id}\n두 번째 줄`, photoUrls: id === 3 ? ["/media/photos/three.jpg"] : [],
+    targetName: "전체 회원", marketing: true, scheduledAt,
     scheduledByAdmin: id === 2 ? null : id !== 4,
     sentAt: id === 3 ? scheduledAt : null, cancelledAt: null as string | null, recipients: 0, opened: 0,
   }));
   let cancelRequests = 0;
+  let recipientOpens = 0;
   await page.route("**/api/**", async route => {
     const path = new URL(route.request().url()).pathname;
+    if (path.endsWith("/open")) recipientOpens++;
     let data: unknown = {};
     if (path === "/api/auth/refresh") data = { accessToken: "staff-test", expiresInSeconds: 900 };
     if (path === "/api/members/me") data = { id: "staff", nickname: "담당자", role: "ADMIN", emailVerified: true };
@@ -28,6 +31,15 @@ test("발송 대기 중인 예약만 확인 후 취소하고 새로고침해도 
   });
   await page.goto("/admin/notifications");
   const row = (title: string) => page.getByRole("listitem").filter({ hasText: title });
+  const sent = row("행사 3");
+  await expect(page.getByRole("navigation", { name: "운영 메뉴", exact: true }).getByRole("link", { name: "알림 발송" })).toBeVisible();
+  await expect(sent.getByText("발송 본문 3", { exact: false })).toBeHidden();
+  await sent.getByText("행사 3", { exact: true }).click();
+  await expect(sent.getByText("발송 본문 3", { exact: false })).toBeVisible();
+  await expect(sent.getByRole("img", { name: "알림 첨부 사진 1" })).toHaveAttribute("src", /three\.jpg$/);
+  await sent.locator("summary").press("Enter");
+  await expect(sent.getByText("발송 본문 3", { exact: false })).toBeHidden();
+  expect(recipientOpens).toBe(0);
   const cancel = row("행사 1").getByRole("button", { name: "예약 취소" });
   await expect(page.getByRole("button", { name: "예약 취소" })).toHaveCount(2);
   await expect(row("행사 4").getByRole("button", { name: "예약 취소" })).toHaveCount(0);

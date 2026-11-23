@@ -173,6 +173,7 @@ const NAV_GROUPS: NavGroup[] = [
       { href: "/admin/notifications", label: "알림 발송", icon: <BellIcon />, ready: true },
       { href: "/admin/pre-registrations", label: "사전예약 현황", icon: <ChartIcon />, ready: true },
       { href: "/admin/analytics", label: "방문 통계", icon: <ChartIcon />, ready: true },
+      { href: "/admin/exchange-statistics", label: "교환 통계", icon: <ChartIcon />, ready: true },
     ],
   },
   {

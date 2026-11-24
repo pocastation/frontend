@@ -6,7 +6,7 @@ import { FOCUS_RING } from "@/lib/ui";
 import type { ExchangeCompletion, ExchangeMeetup, ExchangeMeetupCode, ExchangeMeetupConfirmResult } from "@/lib/types";
 
 /**
- * 교환 완료 확인(#819, #862, backend#598·#639).
+ * 교환 완료 확인(#819, #862, backend#598·#639·#649).
  *
  * <p>작성자 화면에는 4자리 코드가 나오고, 신청자는 현장에서 그 코드를 받아 자기 화면에 입력한다.
  * 역할을 서버가 {@code codeHolder}로 정해 주므로 화면은 판정하지 않는다.
@@ -32,6 +32,11 @@ function stamp(iso: string) {
   const t = new Date();
   const today = d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
   return today ? clock(iso) : `${d.getMonth() + 1}월 ${d.getDate()}일 ${clock(iso)}`;
+}
+
+/** 행사 종료까지 확인이 없으면 양쪽에 노쇼 신고가 걸린다(backend#649). 마감을 미리 알린다. */
+function closingNotice(closesAt: string) {
+  return `행사가 끝나는 ${stamp(closesAt)}까지 확인하지 않으면 두 사람 모두에게 노쇼 신고가 접수돼요.`;
 }
 
 function remaining(ms: number) {
@@ -84,6 +89,8 @@ export default function ExchangeMeetupSection({
 
   // 약속 10분 전이 되면 버튼이 켜져야 한다. open은 서버가 판정하므로 그 시각에 다시 묻는다.
   useAt(!meetup.open && !meetup.confirmed ? meetup.opensAt : null, refresh);
+  // 행사가 끝나면 버튼을 거둬야 한다(backend#649). 켜 둔 채 넘기면 입력해도 거절된다.
+  useAt(meetup.open && !meetup.confirmed ? meetup.closesAt : null, refresh);
   useAt(lockedUntil, refresh);
 
   const loadCode = useCallback(async () => {
@@ -186,11 +193,13 @@ export default function ExchangeMeetupSection({
           >
             교환 완료 확인
           </button>
-          <p className="mt-tight text-label text-text-3">약속 10분 전({clock(meetup.opensAt)})부터 누를 수 있어요.</p>
+          <p className="mt-tight text-label text-text-3">
+            약속 10분 전({clock(meetup.opensAt)})부터 누를 수 있어요. {closingNotice(meetup.closesAt)}
+          </p>
         </>
       ) : !meetup.open ? (
         <p className="mt-tight text-body-s text-text-3">
-          코드를 확인할 수 있는 기간이 지나 교환 완료로 기록되지 않았어요.
+          행사가 끝날 때까지 코드가 확인되지 않아 교환 완료로 기록되지 않았어요. 두 사람 모두에게 노쇼 신고가 접수돼요.
         </p>
       ) : !revealed ? (
         <>
@@ -206,6 +215,7 @@ export default function ExchangeMeetupSection({
           >
             교환 완료 확인
           </button>
+          <p className="mt-tight text-label text-text-3">{closingNotice(meetup.closesAt)}</p>
         </>
       ) : meetup.codeHolder ? (
         <div className="mt-head">

@@ -169,7 +169,8 @@ export default function AdminMemberNoShows({ memberId }: { memberId: string }) {
                 <li key={report.id} className="flex items-baseline justify-between gap-2 py-2 text-label">
                   <span className="min-w-0">
                     <span className="block truncate text-text-1">
-                      {report.place ?? "장소 없음"} · {report.reporterNickname ?? "알 수 없음"}님 신고
+                      {report.place ?? "장소 없음"} ·{" "}
+                      {report.autoFiled ? "만남 미확인 자동 신고" : `${report.reporterNickname ?? "알 수 없음"}님 신고`}
                     </span>
                     <span className="tabular-nums text-text-3">{dateTimeLabel(report.reportedAt)}</span>
                   </span>

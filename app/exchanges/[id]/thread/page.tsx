@@ -356,14 +356,7 @@ export default function ExchangeThreadPage() {
             )}
 
             {thread.noShow && (
-              <ExchangeNoShowSection
-                postId={postId}
-                noShow={thread.noShow}
-                meetup={thread.meetup}
-                nickname={nickname}
-                fetchWithAuth={fetchWithAuth}
-                onChanged={loadThread}
-              />
+              <ExchangeNoShowSection noShow={thread.noShow} nickname={nickname} />
             )}
 
             {error && (

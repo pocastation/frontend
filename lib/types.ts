@@ -1457,13 +1457,14 @@ export type ExchangeThreadResponse = {
   appearance: ExchangeAppearance;
   /** 만남 확인(backend#598). 약속 시각이 안 잡힌 옛 교환이면 null. */
   meetup: ExchangeMeetup | null;
-  /** 노쇼 신고 상태(backend#612). */
+  /** 노쇼 신고 상태(backend#612, backend#649). */
   noShow: ExchangeNoShowView | null;
   messages: ExchangeMessage[];
 };
 
 /**
  * 노쇼 신고의 상태(backend#612).
+ * WITHDRAWN은 backend#649 전에 직접 건 신고에만 남는다.
  * PENDING 해명 대기 → (해명 없이 24시간) CONFIRMED, (해명 있음) DISPUTED → 관리자가 CONFIRMED·DISMISSED.
  */
 export type ExchangeNoShowStatus = "PENDING" | "DISPUTED" | "CONFIRMED" | "DISMISSED" | "WITHDRAWN";
@@ -1476,13 +1477,19 @@ export type ExchangeNoShowReport = {
   explainUntil: string;
   explanation: string | null;
   resolvedAt: string | null;
+  /** 행사 종료까지 만남 확인이 없어 양쪽에 자동으로 걸린 신고인가(backend#649). false면 그 전에 직접 건 신고. */
+  autoFiled: boolean;
 };
 
+/**
+ * 확정 교환의 노쇼 상태(backend#649). 신고는 행사 종료까지 만남 확인이 없으면 양쪽에 자동으로 걸린다.
+ * 사용자가 직접 거는 길은 없다.
+ */
 export type ExchangeNoShowView = {
-  /** 지금 「상대가 안 왔어요」를 누를 수 있는가. 약속 시각 이후, 완료·만남 확인 전, 아직 신고 안 함. */
-  reportable: boolean;
-  filedByMe: ExchangeNoShowReport | null;
+  /** 나를 대상으로 한 신고. PENDING이고 기한 안이면 해명 입력을 띄운다. */
   againstMe: ExchangeNoShowReport | null;
+  /** 상대를 대상으로 한 신고. 상대의 해명 여부를 보여 준다. */
+  againstCounterpart: ExchangeNoShowReport | null;
 };
 
 /** 내 교환 제한 상태(backend#612). 노쇼가 windowDays일 안에 threshold번이면 걸린다. */
@@ -1513,6 +1520,8 @@ export type AdminExchangeNoShow = {
   resolvedAt: string | null;
   resolvedBy: string | null;
   resolutionReason: string | null;
+  /** 시스템이 건 신고(backend#649). 이때 reporter는 신고하지 않은 상대방이다. */
+  autoFiled: boolean;
 };
 
 export type AdminExchangeNoShowListResponse = {
@@ -1550,7 +1559,7 @@ export type ExchangeMeetup = {
   codeHolder: boolean;
   /** 버튼이 켜지는 시각(약속 10분 전). */
   opensAt: string;
-  /** 버튼이 꺼지는 시각(대화 잠금). */
+  /** 버튼이 꺼지는 시각(행사 종료, backend#649). 이때까지 확인이 없으면 양쪽에 노쇼 신고가 걸린다. */
   closesAt: string;
   /** 지금 확인할 수 있는가. */
   open: boolean;

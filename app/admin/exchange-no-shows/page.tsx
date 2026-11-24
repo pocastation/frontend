@@ -205,7 +205,9 @@ export default function AdminExchangeNoShowsPage() {
                           className={`text-left ${FOCUS_RING}`}
                         >
                           <span className="block font-bold text-text-1">
-                            {item.reporterNickname ?? "알 수 없음"} → {item.reportedNickname ?? "알 수 없음"}
+                            {item.autoFiled
+                              ? `${item.reportedNickname ?? "알 수 없음"} · 만남 미확인`
+                              : `${item.reporterNickname ?? "알 수 없음"} → ${item.reportedNickname ?? "알 수 없음"}`}
                           </span>
                           <span className="font-mono text-caption text-text-3">#{item.id}</span>
                         </button>
@@ -293,7 +295,7 @@ function NoShowDetail({
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <h2 className="font-display text-body-l font-extrabold text-text-1">
-            {reporter} → {reported}
+            {item.autoFiled ? `${reported} · 만남 미확인 자동 신고` : `${reporter} → ${reported}`}
           </h2>
           <Link
             href={`/exchanges/${item.postId}`}

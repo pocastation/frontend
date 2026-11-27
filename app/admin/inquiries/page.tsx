@@ -1,5 +1,7 @@
 "use client";
 
+import InquiryAttachmentGallery from "@/components/InquiryAttachmentGallery";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import InquiryStatusBadge from "@/components/InquiryStatusBadge";
 import { ApiError } from "@/lib/api";
@@ -306,6 +308,7 @@ export default function AdminInquiriesPage() {
               <div className="border-b border-border px-5 py-6 sm:px-6">
                 <h3 className="text-label font-extrabold text-text-3">문의 내용</h3>
                 <p className="mt-3 whitespace-pre-wrap break-words text-body leading-7 text-text-2">{selected.content}</p>
+                <InquiryAttachmentGallery key={selected.id} inquiryId={selected.id} admin />
               </div>
 
               <form className="px-5 py-6 sm:px-6" onSubmit={confirmAnswer}>

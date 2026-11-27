@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import InquiryAttachmentField from "@/components/InquiryAttachmentField";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { ORDER_INQUIRY_TOPIC_LABEL, ORDER_INQUIRY_TOPICS } from "@/lib/inquiries";
 import { FOCUS_RING, PRIMARY_BUTTON_CLASS, SECONDARY_BUTTON_CLASS } from "@/lib/ui";
+import { useInquiryAttachments } from "@/lib/use-inquiry-attachments";
 import type { OrderInquiryTopic } from "@/lib/types";
 
 /**
@@ -34,11 +36,12 @@ export default function OrderInquiryModal({
   const [content, setContent] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const attachments = useInquiryAttachments();
   // 접수 후에는 폼을 접고 확인 화면만 남긴다 — 같은 문의를 두 번 넣는 일이 흔하다.
   const [doneId, setDoneId] = useState<number | null>(null);
 
   async function submit() {
-    if (saving) return;
+    if (saving || attachments.uploading || attachments.hasFailed) return;
     if (!topic) {
       setError("무엇을 문의하시는지 골라 주세요.");
       return;
@@ -52,7 +55,7 @@ export default function OrderInquiryModal({
     try {
       const created = await fetchWithAuth<{ id: number }>(`/api/auctions/${auctionId}/order/inquiry`, {
         method: "POST",
-        body: { topic, title: subject.trim(), content: content.trim() },
+        body: { topic, title: subject.trim(), content: content.trim(), attachmentIds: attachments.ids },
       });
       setDoneId(created.id);
     } catch (err) {
@@ -160,6 +163,8 @@ export default function OrderInquiryModal({
               <span className="mt-1 block text-right text-caption text-text-3">{content.length}/3000</span>
             </label>
 
+            <div className="mt-4"><InquiryAttachmentField attachments={attachments} disabled={saving} /></div>
+
             <div className="mt-3 rounded-card border border-border bg-surface-2 px-4 py-3 text-caption leading-relaxed text-text-2">
               운영팀이 <b className="font-bold text-text-1">이 거래의 결제·배송 기록을 함께 보고</b>{" "}
               답변해요. 답변은 알림과 <b className="font-bold text-text-1">문의 내역</b>에서 확인할 수
@@ -175,7 +180,7 @@ export default function OrderInquiryModal({
               <button
                 type="button"
                 onClick={submit}
-                disabled={saving}
+                disabled={saving || attachments.uploading || attachments.hasFailed}
                 className={`h-10 flex-1 disabled:opacity-60 ${PRIMARY_BUTTON_CLASS}`}
               >
                 {saving ? "접수 중…" : "문의 접수"}

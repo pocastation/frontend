@@ -1,5 +1,7 @@
 "use client";
 
+import InquiryAttachmentGallery from "@/components/InquiryAttachmentGallery";
+
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -155,6 +157,7 @@ export default function InquiryDetailPage() {
           <article className="py-7" aria-labelledby="inquiry-content-title">
             <h2 id="inquiry-content-title" className="text-body font-extrabold text-text-1">문의 내용</h2>
             <p className="mt-4 whitespace-pre-wrap break-words text-body leading-7 text-text-2">{inquiry.content}</p>
+            <InquiryAttachmentGallery key={inquiry.id} inquiryId={inquiry.id} />
           </article>
 
           <section

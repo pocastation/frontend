@@ -3,10 +3,12 @@
 import { Suspense, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import InquiryAttachmentField from "@/components/InquiryAttachmentField";
 import { ApiError } from "@/lib/api";
 import { useAuth } from "@/lib/auth-context";
 import { INQUIRY_CATEGORIES } from "@/lib/inquiries";
 import { FOCUS_RING } from "@/lib/ui";
+import { useInquiryAttachments } from "@/lib/use-inquiry-attachments";
 import type { InquiryCategory, InquiryResponse } from "@/lib/types";
 
 function ArrowLeft() {
@@ -39,6 +41,7 @@ function NewInquiryForm() {
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const attachments = useInquiryAttachments();
 
   useEffect(() => {
     if (!isLoading && !accessToken) {
@@ -46,7 +49,8 @@ function NewInquiryForm() {
     }
   }, [accessToken, isLoading, router]);
 
-  const canSubmit = title.trim().length > 0 && content.trim().length > 0 && !submitting;
+  const canSubmit = title.trim().length > 0 && content.trim().length > 0 && !submitting
+    && !attachments.uploading && !attachments.hasFailed;
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -60,6 +64,7 @@ function NewInquiryForm() {
           category,
           title: title.trim(),
           content: content.trim(),
+          attachmentIds: attachments.ids,
         },
       });
       router.push("/inquiries/" + created.id);
@@ -160,6 +165,8 @@ function NewInquiryForm() {
             주민등록번호, 카드 비밀번호 등 민감한 개인정보는 입력하지 마세요.
           </p>
         </div>
+
+        <InquiryAttachmentField attachments={attachments} disabled={submitting} />
 
         {error && (
           <p role="alert" className="rounded-card bg-surface-2 px-4 py-3 text-body font-semibold text-danger">
